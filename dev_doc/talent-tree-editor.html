@@ -478,146 +478,287 @@ const NODE_LABEL_MAP = {
   stat_minor: 'Stat',
 };
 
-// Default swordsman talent tree data
-// Topology: hourglass shape — wide top, two convergence points, widens again, funnels to advancement
-// Shortest path to advancement = 10 nodes (start + 8 intermediate + advancement) = 9 talent points
-// Total nodes = 16 (forces path choices, cannot unlock all)
-function getDefaultData() {
-  return {
-    class_id: 'swordsman',
-    class_name: '剑士 Swordsman',
+// ============================================================
+// All Swordsman Variant Trees
+// Rule: min path = 10 nodes (Start free + 8 mid + Adv = 9 pts)
+// ============================================================
+const TREES = {
+
+  // ── A: Hourglass (双菱形) ─ 16 nodes ─ wide→converge×2 ────────
+  sw_a: {
+    class_id: 'sw_a', class_name: '剑士 A · 双菱形',
     nodes: [
-      // ── Layer 0: Start (free) ──────────────────────────────────────
-      { id: 'sw_start', name: '剑道入门', type: 'trait', cost: 0,
-        level: 1, x: 400, y: 60,
-        desc: '解锁初始技能「斩击」（melee / physical，power 90%，hit +5）。角色认定为剑士，激活剑类武器专精。',
-        notes: '免费起始节点，1级自动点亮。两个转职方向共同基础。', tags: 'sword,start', exclusive: '', requires: '' },
-
-      // ── Layer 1: First fork (2 nodes) ─────────────────────────────
-      { id: 'sw_sharp_edge', name: '锐刃', type: 'passive', cost: 1,
-        level: 2, x: 270, y: 160,
-        desc: '被动：「斩击」命中后，对目标附加「锐伤」（物防 -1，持续2回合，最多叠3层）。',
-        notes: '穿防路线入口。降低目标物防，对暴击流和混合伤害流均有价值。', tags: 'sword,debuff,physical', exclusive: '', requires: '' },
-
-      { id: 'sw_instinct', name: '敏锐', type: 'passive', cost: 1,
-        level: 2, x: 530, y: 160,
-        desc: '被动：每回合开始时，若本单位速度高于场上所有存活敌方单位，本回合暴击率 +8%。',
-        notes: '速度优势路线入口。速度差转化为暴击奖励，契合剑士高速度定位。', tags: 'sword,speed,crit', exclusive: '', requires: '' },
-
-      // ── Layer 2: Widening (2 nodes) ───────────────────────────────
-      { id: 'sw_chain_strike', name: '连环', type: 'passive', cost: 1,
-        level: 3, x: 170, y: 270,
-        desc: '被动：本回合内发出第二次攻击时（含反击），命中率 +10，暴击率 +5%。',
-        notes: '鼓励打出"先攻+反击"或双动节奏。对两个转职方向均有价值。', tags: 'sword,crit,counter', exclusive: '', requires: '' },
-
-      { id: 'sw_phantom_step', name: '虚实', type: 'trait', cost: 1,
-        level: 3, x: 450, y: 270,
-        desc: '特质：成功闪避敌方攻击后，下一次攻击必定命中（「洞察」状态，每回合最多触发1次）。',
-        notes: '闪避→进攻转化。闪避不再只是防守，而是进攻机会。两个转职通用。', tags: 'sword,evasion,hit', exclusive: '', requires: '' },
-
-      // ── Layer 3: Widening (2 nodes) ───────────────────────────────
-      { id: 'sw_sword_dance', name: '剑舞', type: 'active_skill', cost: 1,
-        level: 4, x: 110, y: 380,
-        desc: '主动技能：攻击后可立即追加移动1格（不触发额外反击机会）。melee / physical，power 85%。每回合1次。',
-        notes: '攻击后机动，打完调位。高机动打法核心，两个转职转职后均可受益。', tags: 'sword,mobility,melee', exclusive: '', requires: '' },
-
-      { id: 'sw_counter_edge', name: '剑意', type: 'passive', cost: 1,
-        level: 4, x: 370, y: 380,
-        desc: '被动：反击时，命中率 +15，伤害 +10%，且无视目标地形带来的闪避加成。',
-        notes: '强化反击可靠性。地形穿透让反击不受地形干扰，对两个转职均有意义。', tags: 'sword,counter,hit', exclusive: '', requires: '' },
-
-      // ── Layer 4: Convergence (1 node) ─────────────────────────────
-      { id: 'sw_heart_pulse', name: '剑心感应', type: 'trait', cost: 1,
-        level: 5, x: 270, y: 470,
-        desc: '特质：每当本单位造成暴击，下一次攻击（含当回合）额外无视目标20%的物理防御（一次性效果，每次暴击后刷新）。',
-        notes: '汇聚节点。暴击复利——暴击越多穿防越多，对混合伤害的物理部分也有帮助。', tags: 'sword,crit,penetration', exclusive: '', requires: '' },
-
-      // ── Layer 5: Widening again (2 nodes) ─────────────────────────
-      { id: 'sw_fluid_dance', name: '灵动', type: 'active_skill', cost: 1,
-        level: 6, x: 155, y: 570,
-        desc: '主动技能：激活「流形」状态（持续1回合）：闪避 +15。「流形」状态下若被攻击并成功闪避，立即以普攻反击1次（伤害70%，不触发二次反击）。CD：2回合。',
-        notes: '主动制造闪避机会，闪避→反击转化。闪避流核心技能。', tags: 'sword,evasion,counter,active', exclusive: '', requires: '' },
-
-      { id: 'sw_cleave_mark', name: '斩铁', type: 'skill_upgrade', cost: 1,
-        level: 6, x: 415, y: 570,
-        desc: '技能升级：「斩击」命中后若造成暴击，对目标附加「锐标」（目标下次受到的伤害 +15%，任何来源均可触发，消耗后消失）。',
-        notes: '暴击配合机制——打出标记提升下一次输出，也可与队友联动。', tags: 'sword,crit,upgrade', exclusive: '', requires: '' },
-
-      // ── Layer 6: Widening (2 nodes) ───────────────────────────────
-      { id: 'sw_first_edge', name: '先机之刃', type: 'passive', cost: 1,
-        level: 7, x: 80, y: 670,
-        desc: '被动：若本单位在本回合所有行动单位中最先行动（速度最快），本回合所有攻击暴击率 +10%。',
-        notes: '先手优势→暴击。激励玩家维持速度优先，契合剑士高速度定位。', tags: 'sword,speed,crit', exclusive: '', requires: '' },
-
-      { id: 'sw_momentum', name: '势不可挡', type: 'passive', cost: 1,
-        level: 7, x: 320, y: 670,
-        desc: '被动：本回合内若已造成2次以上命中（含反击），之后每次攻击的暴击伤害倍率 +0.25（1.5x → 1.75x，本回合持续有效，最高 +0.5）。',
-        notes: '复利雪球。鼓励一回合多次命中，对连击流和反击流均有激励。', tags: 'sword,crit,momentum', exclusive: '', requires: '' },
-
-      // ── Layer 7: Convergence (1 node) ─────────────────────────────
-      { id: 'sw_sword_essence', name: '剑道精义', type: 'trait', cost: 1,
-        level: 8, x: 225, y: 760,
-        desc: '特质：成功反击后，获得「先机」状态（持续至下回合行动开始）：行动顺序判定时速度视为额外 +5。\n[转职后升级：剑圣→「剑圣精义」，魔剑士→「魔剑精义」，各自获得额外效果。]',
-        notes: '汇聚节点，同时作为转职后升级的基础。反击→先手→更多先手机会的正循环。', tags: 'sword,counter,speed', exclusive: '', requires: '' },
-
-      // ── Layer 8: Final convergence (1 node) ───────────────────────
-      { id: 'sw_edge_limit', name: '临界之刃', type: 'passive', cost: 1,
-        level: 9, x: 225, y: 850,
-        desc: '被动：当自身HP低于70%时，暴击率 +12%，命中 +8。',
-        notes: '逆境爆发。HP越低越有威胁，让剑士在危险状态仍保持压迫力，两个转职均适用。', tags: 'sword,crit,survival', exclusive: '', requires: '' },
-
-      // ── Layer 9: Advancement nodes (EXCLUSIVE) ────────────────────
-      { id: 'sw_adv_saint', name: '剑圣之路', type: 'advancement', cost: 1,
-        level: 10, x: 120, y: 960,
-        desc: '转职：成为剑圣。\n· 激活「剑气」量谱系统（基础获取：暴击命中 +15气，成功闪避 +10气，速度差攻击 +10气）\n· 速度/暴击/闪避成长率强化\n· 「剑道精义」升级为「剑圣精义」（反击后额外获得 +20 剑气）\n· 解锁剑圣专属天赋分支',
-        notes: '左侧转职。速度/暴击/闪避极致化路线。转职后解锁剑气量谱及剑圣专属树。', tags: 'advancement,sword_saint', exclusive: 'adv_choice', requires: '' },
-
-      { id: 'sw_adv_magic', name: '魔剑之路', type: 'advancement', cost: 1,
-        level: 10, x: 340, y: 960,
-        desc: '转职：成为魔剑士。\n· MAG属性开始成长（激活魔攻成长率）\n· 激活「魔刃」量谱系统\n· 解锁混合(hybrid)伤害技能与远程魔法攻击\n· 「剑道精义」升级为「魔剑精义」（反击后魔刃层数 +2）\n· 解锁魔剑士专属天赋分支',
-        notes: '右侧转职。物理+魔法混合路线。转职前无魔攻，转职后MAG开始成长并解锁混合伤害。', tags: 'advancement,magic_swordsman', exclusive: 'adv_choice', requires: '' },
+      { id:'sw_start',name:'剑道入门',type:'trait',cost:0,level:1,x:400,y:60,
+        desc:'解锁初始技能「斩击」（melee/physical，power 90%，hit +5）。激活剑类武器专精。',
+        notes:'免费起始节点，1级自动点亮。',tags:'sword,start',exclusive:'',requires:'' },
+      { id:'sw_sharp_edge',name:'锐刃',type:'passive',cost:1,level:2,x:270,y:160,
+        desc:'被动：「斩击」命中后，目标附加「锐伤」（物防-1，持续2回合，最多叠3层）。',
+        notes:'穿防路线入口。物防降低对暴击流和混合伤害均有价值。',tags:'sword,debuff',exclusive:'',requires:'' },
+      { id:'sw_instinct',name:'敏锐',type:'passive',cost:1,level:2,x:530,y:160,
+        desc:'被动：每回合开始时，若本单位速度高于场上所有存活敌方单位，本回合暴击率+8%。',
+        notes:'速度优势路线入口。速度差→暴击奖励。',tags:'sword,speed,crit',exclusive:'',requires:'' },
+      { id:'sw_chain_strike',name:'连环',type:'passive',cost:1,level:3,x:170,y:270,
+        desc:'被动：本回合内第二次攻击时（含反击），命中率+10，暴击率+5%。',
+        notes:'鼓励打出"先攻+反击"节奏。',tags:'sword,crit,counter',exclusive:'',requires:'' },
+      { id:'sw_phantom_step',name:'虚实',type:'trait',cost:1,level:3,x:450,y:270,
+        desc:'特质：成功闪避后，下一次攻击必定命中（「洞察」，每回合最多触发1次）。',
+        notes:'闪避→进攻转化。两个转职通用。',tags:'sword,evasion,hit',exclusive:'',requires:'' },
+      { id:'sw_sword_dance',name:'剑舞',type:'active_skill',cost:1,level:4,x:110,y:380,
+        desc:'主动：攻击后可立即追加移动1格（不触发额外反击）。melee/physical，power 85%，每回合1次。',
+        notes:'攻击后机动，打完调位。',tags:'sword,mobility,melee',exclusive:'',requires:'' },
+      { id:'sw_counter_edge',name:'剑意',type:'passive',cost:1,level:4,x:370,y:380,
+        desc:'被动：反击时，命中率+15，伤害+10%，且无视目标地形带来的闪避加成。',
+        notes:'强化反击可靠性，地形穿透。',tags:'sword,counter,hit',exclusive:'',requires:'' },
+      { id:'sw_heart_pulse',name:'剑心感应',type:'trait',cost:1,level:5,x:270,y:470,
+        desc:'特质：每当本单位造成暴击，下一次攻击额外无视目标20%物防（一次性，每次暴击后刷新）。',
+        notes:'★第一收束节点。暴击→穿防复利循环。',tags:'sword,crit,penetration',exclusive:'',requires:'' },
+      { id:'sw_fluid_dance',name:'灵动',type:'active_skill',cost:1,level:6,x:155,y:570,
+        desc:'主动：激活「流形」（持续1回合）：闪避+15。「流形」下成功闪避→立即反击1次（普攻70%，不触发二次反击）。CD：2回合。',
+        notes:'主动制造闪避机会，闪避→反击转化。',tags:'sword,evasion,counter,active',exclusive:'',requires:'' },
+      { id:'sw_cleave_mark',name:'斩铁',type:'skill_upgrade',cost:1,level:6,x:415,y:570,
+        desc:'技能升级：「斩击」暴击命中后，目标附加「锐标」（目标下次受伤+15%，任何来源触发，消耗后消失）。',
+        notes:'暴击配合机制，可与队友联动。',tags:'sword,crit,upgrade',exclusive:'',requires:'' },
+      { id:'sw_first_edge',name:'先机之刃',type:'passive',cost:1,level:7,x:80,y:670,
+        desc:'被动：若本单位本回合最先行动（速度最快），所有攻击暴击率+10%。',
+        notes:'先手→暴击转化，激励维持速度优势。',tags:'sword,speed,crit',exclusive:'',requires:'' },
+      { id:'sw_momentum',name:'势不可挡',type:'passive',cost:1,level:7,x:320,y:670,
+        desc:'被动：本回合已命中2次以上（含反击），之后每次攻击暴击伤害倍率+0.25（1.5x→1.75x，本回合持续有效，最高+0.5）。',
+        notes:'复利雪球，鼓励一回合多次命中。',tags:'sword,crit,momentum',exclusive:'',requires:'' },
+      { id:'sw_sword_essence',name:'剑道精义',type:'trait',cost:1,level:8,x:225,y:760,
+        desc:'特质：成功反击后，获得「先机」（持续至下回合行动开始）：行动顺序判定时速度视为额外+5。\n[转职后升级：剑圣→「剑圣精义」，魔剑士→「魔剑精义」]',
+        notes:'★第二收束节点。反击→先手→更多先手的正循环。转职后升级基础。',tags:'sword,counter,speed',exclusive:'',requires:'' },
+      { id:'sw_edge_limit',name:'临界之刃',type:'passive',cost:1,level:9,x:225,y:850,
+        desc:'被动：当自身HP低于70%时，暴击率+12%，命中+8。',
+        notes:'逆境爆发，两个转职均适用。',tags:'sword,crit,survival',exclusive:'',requires:'' },
+      { id:'sw_adv_saint',name:'剑圣之路',type:'advancement',cost:1,level:10,x:120,y:960,
+        desc:'转职：成为剑圣。\n· 激活「剑气」量谱（暴击命中+15气，成功闪避+10气，速度差攻击+10气）\n· 速度/暴击/闪避成长率强化\n· 「剑道精义」→「剑圣精义」（反击后+20剑气）\n· 解锁剑圣专属天赋分支',
+        notes:'左侧转职。速度/暴击/闪避极致化路线。',tags:'advancement,sword_saint',exclusive:'adv_choice',requires:'' },
+      { id:'sw_adv_magic',name:'魔剑之路',type:'advancement',cost:1,level:10,x:340,y:960,
+        desc:'转职：成为魔剑士。\n· MAG属性开始成长\n· 激活「魔刃」量谱系统\n· 解锁hybrid伤害技能与远程魔法攻击\n· 「剑道精义」→「魔剑精义」（反击后魔刃层数+2）\n· 解锁魔剑士专属天赋分支',
+        notes:'右侧转职。物理+魔法混合路线，转职前无魔攻。',tags:'advancement,magic_swordsman',exclusive:'adv_choice',requires:'' },
     ],
-
     edges: [
-      // Layer 0 → Layer 1
-      { from: 'sw_start',       to: 'sw_sharp_edge'   },
-      { from: 'sw_start',       to: 'sw_instinct'      },
-
-      // Layer 1 → Layer 2
-      { from: 'sw_sharp_edge',  to: 'sw_chain_strike'  },
-      { from: 'sw_sharp_edge',  to: 'sw_phantom_step'  },
-      { from: 'sw_instinct',    to: 'sw_phantom_step'  },
-
-      // Layer 2 → Layer 3
-      { from: 'sw_chain_strike', to: 'sw_sword_dance'  },
-      { from: 'sw_chain_strike', to: 'sw_counter_edge' },
-      { from: 'sw_phantom_step', to: 'sw_counter_edge' },
-
-      // Layer 3 → Layer 4 (convergence)
-      { from: 'sw_sword_dance',  to: 'sw_heart_pulse'  },
-      { from: 'sw_counter_edge', to: 'sw_heart_pulse'  },
-
-      // Layer 4 → Layer 5
-      { from: 'sw_heart_pulse',  to: 'sw_fluid_dance'  },
-      { from: 'sw_heart_pulse',  to: 'sw_cleave_mark'  },
-
-      // Layer 5 → Layer 6
-      { from: 'sw_fluid_dance',  to: 'sw_first_edge'   },
-      { from: 'sw_fluid_dance',  to: 'sw_momentum'     },
-      { from: 'sw_cleave_mark',  to: 'sw_momentum'     },
-
-      // Layer 6 → Layer 7 (convergence)
-      { from: 'sw_first_edge',   to: 'sw_sword_essence'},
-      { from: 'sw_momentum',     to: 'sw_sword_essence'},
-
-      // Layer 7 → Layer 8
-      { from: 'sw_sword_essence', to: 'sw_edge_limit'  },
-
-      // Layer 8 → Advancement (exclusive)
-      { from: 'sw_edge_limit',   to: 'sw_adv_saint'    },
-      { from: 'sw_edge_limit',   to: 'sw_adv_magic'    },
+      {from:'sw_start',to:'sw_sharp_edge'},{from:'sw_start',to:'sw_instinct'},
+      {from:'sw_sharp_edge',to:'sw_chain_strike'},{from:'sw_sharp_edge',to:'sw_phantom_step'},
+      {from:'sw_instinct',to:'sw_phantom_step'},
+      {from:'sw_chain_strike',to:'sw_sword_dance'},{from:'sw_chain_strike',to:'sw_counter_edge'},
+      {from:'sw_phantom_step',to:'sw_counter_edge'},
+      {from:'sw_sword_dance',to:'sw_heart_pulse'},{from:'sw_counter_edge',to:'sw_heart_pulse'},
+      {from:'sw_heart_pulse',to:'sw_fluid_dance'},{from:'sw_heart_pulse',to:'sw_cleave_mark'},
+      {from:'sw_fluid_dance',to:'sw_first_edge'},{from:'sw_fluid_dance',to:'sw_momentum'},
+      {from:'sw_cleave_mark',to:'sw_momentum'},
+      {from:'sw_first_edge',to:'sw_sword_essence'},{from:'sw_momentum',to:'sw_sword_essence'},
+      {from:'sw_sword_essence',to:'sw_edge_limit'},
+      {from:'sw_edge_limit',to:'sw_adv_saint'},{from:'sw_edge_limit',to:'sw_adv_magic'},
     ]
-  };
+  },
+
+  // ── B: Twin Spires (双塔形) ─ 18 nodes ─ 攻势/应势两柱+跨塔边 ──
+  // Left column (L) = 攻势 (proactive/crit)
+  // Right column (R) = 应势 (reactive/counter-evasion)
+  // Cross edges allow hybrid builds
+  sw_b: {
+    class_id: 'sw_b', class_name: '剑士 B · 双塔形',
+    nodes: [
+      { id:'sw2_start',name:'剑道入门',type:'trait',cost:0,level:1,x:380,y:60,
+        desc:'解锁初始技能「斩击」（melee/physical，power 90%，hit +5）。激活剑类武器专精。',
+        notes:'免费起始节点。',tags:'sword,start',exclusive:'',requires:'' },
+      // L1 / R1
+      { id:'sw2_vanguard',name:'先锋之锋',type:'passive',cost:1,level:2,x:220,y:160,
+        desc:'被动：本单位每回合首次攻击命中时，若目标本回合尚未受到任何攻击，伤害+12%（首击奖励）。',
+        notes:'攻势路线入口。奖励主动先手出击。',tags:'sword,first_strike',exclusive:'',requires:'' },
+      { id:'sw2_sentinel',name:'守望之刃',type:'passive',cost:1,level:2,x:540,y:160,
+        desc:'被动：每回合结束时，若本回合成功闪避≥1次，下回合命中+8，暴击率+4%。',
+        notes:'应势路线入口。闪避积累转化为下回合进攻准备。',tags:'sword,evasion,crit',exclusive:'',requires:'' },
+      // L2 / R2
+      { id:'sw2_chain_thrust',name:'连刺',type:'active_skill',cost:1,level:3,x:140,y:260,
+        desc:'主动：对目标发动2次攻击，各自独立结算命中/暴击。melee/physical，power 65%×2。',
+        notes:'多次攻击触发连环类被动，攻势核心技能。',tags:'sword,multi_hit,melee',exclusive:'',requires:'' },
+      { id:'sw2_read_blade',name:'读刃',type:'passive',cost:1,level:3,x:620,y:260,
+        desc:'被动：反击时，命中率+15，伤害+10%，无视目标地形带来的闪避加成。',
+        notes:'强化反击可靠性，应势路线核心收益。',tags:'sword,counter,hit',exclusive:'',requires:'' },
+      // L3 / R3
+      { id:'sw2_suppress',name:'压制',type:'passive',cost:1,level:3,x:140,y:360,
+        desc:'被动：本回合每次攻击命中（含反击），目标本回合闪避-3（可叠加，上限-12）。',
+        notes:'持续命中逐渐剥除目标闪避，方便后续攻击。',tags:'sword,debuff,evasion',exclusive:'',requires:'' },
+      { id:'sw2_phantom',name:'虚实',type:'trait',cost:1,level:3,x:620,y:360,
+        desc:'特质：成功闪避后，下次攻击必定命中（「洞察」，每回合最多触发1次）。',
+        notes:'闪避→进攻转化，应势打法关键特质。',tags:'sword,evasion,hit',exclusive:'',requires:'' },
+      // L4 / R4
+      { id:'sw2_crit_surge',name:'暴锋',type:'passive',cost:1,level:4,x:140,y:460,
+        desc:'被动：本回合内已造成暴击≥1次，之后每次攻击暴击率额外+8%（本回合有效）。',
+        notes:'暴击滚雪球，攻势积累的关键节点。',tags:'sword,crit',exclusive:'',requires:'' },
+      { id:'sw2_fluid',name:'灵动',type:'active_skill',cost:1,level:4,x:620,y:460,
+        desc:'主动：激活「流形」（持续1回合）：闪避+15。「流形」下成功闪避→立即反击1次（普攻70%，不触发二次反击）。CD：2回合。',
+        notes:'主动制造闪避机会，闪避→反击收益。',tags:'sword,evasion,counter,active',exclusive:'',requires:'' },
+      // L5 / R5
+      { id:'sw2_mark',name:'斩铁',type:'skill_upgrade',cost:1,level:5,x:140,y:560,
+        desc:'技能升级：「斩击」暴击命中后，目标附加「锐标」（下次受伤+15%，任何来源触发，一次消耗）。',
+        notes:'暴击配合机制，可与队友联动。',tags:'sword,crit,upgrade',exclusive:'',requires:'' },
+      { id:'sw2_formless',name:'无懈',type:'trait',cost:1,level:5,x:620,y:560,
+        desc:'特质：若本回合未被任何攻击命中（含已闪避），回合结束时闪避+5（可累积至+15，被命中后归零）。',
+        notes:'逐渐积累防御优势，奖励零受击回合。',tags:'sword,evasion,accumulate',exclusive:'',requires:'' },
+      // L6 / R6
+      { id:'sw2_first_edge',name:'先机之刃',type:'passive',cost:1,level:6,x:220,y:660,
+        desc:'被动：若本单位本回合最先行动，所有攻击暴击率+10%。',
+        notes:'先手→暴击转化，激励维持速度优势。',tags:'sword,speed,crit',exclusive:'',requires:'' },
+      { id:'sw2_bide',name:'以逸待劳',type:'trait',cost:1,level:6,x:540,y:660,
+        desc:'特质：若本回合尚未主动攻击而被攻击并成功闪避，立即获得「蓄势」（本回合下次主动攻击伤害+25%，命中+10）。',
+        notes:'等待敌人攻击，利用闪避蓄积攻击能量。',tags:'sword,evasion,bide',exclusive:'',requires:'' },
+      // L7 / R7
+      { id:'sw2_saint_will',name:'剑圣之魄',type:'passive',cost:1,level:7,x:280,y:760,
+        desc:'被动：每次暴击，下次攻击（含当回合）额外无视目标20%物防（一次性，每次暴击后刷新）。',
+        notes:'攻势顶端。暴击穿防复利，两个转职方向均受益（hybrid伤害的物理部分同样受益）。',tags:'sword,crit,penetration',exclusive:'',requires:'' },
+      { id:'sw2_sword_essence',name:'剑道精义',type:'trait',cost:1,level:7,x:480,y:760,
+        desc:'特质：成功反击后，获得「先机」（下回合行动速度+5）。\n[转职后升级：剑圣→「剑圣精义」，魔剑士→「魔剑精义」]',
+        notes:'应势顶端。反击→先手循环，转职后升级基础。',tags:'sword,counter,speed',exclusive:'',requires:'' },
+      // Pre-Adv
+      { id:'sw2_edge_limit',name:'临界之刃',type:'passive',cost:1,level:8,x:380,y:860,
+        desc:'被动：当自身HP低于70%时，暴击率+12%，命中+8。',
+        notes:'汇聚节点，逆境爆发。两个转职均适用。',tags:'sword,crit,survival',exclusive:'',requires:'' },
+      // Advancement
+      { id:'sw2_adv_saint',name:'剑圣之路',type:'advancement',cost:1,level:9,x:260,y:960,
+        desc:'转职：成为剑圣。\n· 激活「剑气」量谱（暴击命中+15气，成功闪避+10气，速度差攻击+10气）\n· 速度/暴击/闪避成长率强化\n· 「剑道精义」→「剑圣精义」（反击后+20剑气）\n· 解锁剑圣专属天赋分支',
+        notes:'左塔偏向剑圣（暴击驱动）但两塔均可转职。',tags:'advancement,sword_saint',exclusive:'adv_choice',requires:'' },
+      { id:'sw2_adv_magic',name:'魔剑之路',type:'advancement',cost:1,level:9,x:500,y:960,
+        desc:'转职：成为魔剑士。\n· MAG属性开始成长\n· 激活「魔刃」量谱系统\n· 解锁hybrid伤害技能与远程魔法攻击\n· 「剑道精义」→「魔剑精义」（反击后魔刃层数+2）\n· 解锁魔剑士专属天赋分支',
+        notes:'右塔偏向魔剑士（反击驱动）但两塔均可转职。',tags:'advancement,magic_swordsman',exclusive:'adv_choice',requires:'' },
+    ],
+    edges: [
+      {from:'sw2_start',to:'sw2_vanguard'},{from:'sw2_start',to:'sw2_sentinel'},
+      // L column
+      {from:'sw2_vanguard',to:'sw2_chain_thrust'},
+      {from:'sw2_chain_thrust',to:'sw2_suppress'},
+      {from:'sw2_suppress',to:'sw2_crit_surge'},
+      {from:'sw2_crit_surge',to:'sw2_mark'},
+      {from:'sw2_mark',to:'sw2_first_edge'},
+      {from:'sw2_first_edge',to:'sw2_saint_will'},
+      // R column
+      {from:'sw2_sentinel',to:'sw2_read_blade'},
+      {from:'sw2_read_blade',to:'sw2_phantom'},
+      {from:'sw2_phantom',to:'sw2_fluid'},
+      {from:'sw2_fluid',to:'sw2_formless'},
+      {from:'sw2_formless',to:'sw2_bide'},
+      {from:'sw2_bide',to:'sw2_sword_essence'},
+      // Cross edges (tower switches)
+      {from:'sw2_chain_thrust',to:'sw2_phantom'},   // L2→R3: 攻势转应势
+      {from:'sw2_read_blade',to:'sw2_suppress'},    // R2→L3: 应势转攻势
+      {from:'sw2_crit_surge',to:'sw2_formless'},    // L4→R5: 暴击流转无懈
+      {from:'sw2_fluid',to:'sw2_mark'},             // R4→L5: 灵动后斩铁标记
+      // Both capstones → pre-adv
+      {from:'sw2_saint_will',to:'sw2_edge_limit'},
+      {from:'sw2_sword_essence',to:'sw2_edge_limit'},
+      // Advancement
+      {from:'sw2_edge_limit',to:'sw2_adv_saint'},
+      {from:'sw2_edge_limit',to:'sw2_adv_magic'},
+    ]
+  },
+
+  // ── C: Star Burst (星爆形) ─ 16 nodes ─ 强制汇聚节点+辐射 ───────
+  // All paths converge at 剑心通明 (Hub), then radiate outward
+  // Hub creates 「明」state (crit OR evasion triggers it)
+  sw_c: {
+    class_id: 'sw_c', class_name: '剑士 C · 星爆形',
+    nodes: [
+      { id:'sw3_start',name:'剑道入门',type:'trait',cost:0,level:1,x:300,y:60,
+        desc:'解锁初始技能「斩击」（melee/physical，power 90%，hit +5）。激活剑类武器专精。',
+        notes:'免费起始节点。',tags:'sword,start',exclusive:'',requires:'' },
+      // Pre-Hub layer 1
+      { id:'sw3_keen',name:'锐感',type:'passive',cost:1,level:2,x:170,y:155,
+        desc:'被动：「斩击」命中后，若目标处于任何debuff状态，伤害+10%。',
+        notes:'引导玩家重视控制链，利用debuff打出更高伤害。',tags:'sword,debuff,synergy',exclusive:'',requires:'' },
+      { id:'sw3_momentum',name:'先势',type:'passive',cost:1,level:2,x:430,y:155,
+        desc:'被动：若本单位速度比行动顺序中紧随其后的单位高≥5，本回合攻击命中+8，暴击+5%。',
+        notes:'速度优势→攻击质量。契合剑士高速度定位。',tags:'sword,speed,crit',exclusive:'',requires:'' },
+      // Pre-Hub layer 2
+      { id:'sw3_wound',name:'锐伤',type:'skill_upgrade',cost:1,level:3,x:100,y:250,
+        desc:'技能升级：「斩击」命中后，目标附加「锐伤」（物防-1，持续2回合，最多叠3层）。',
+        notes:'持续穿防，与「锐感」形成配合（锐伤是debuff，可触发锐感加成）。',tags:'sword,debuff,upgrade',exclusive:'',requires:'' },
+      { id:'sw3_evasion',name:'识破',type:'passive',cost:1,level:3,x:380,y:250,
+        desc:'被动：成功闪避后，下次攻击必定命中（「洞察」，每回合1次）。',
+        notes:'闪避→必中转化，为Hub节点的「明」状态提供另一条驱动路线。',tags:'sword,evasion,hit',exclusive:'',requires:'' },
+      // HUB (mandatory convergence)
+      { id:'sw3_heart',name:'剑心通明',type:'gauge_core',cost:1,level:4,x:240,y:350,
+        desc:'★核心节点：每次暴击命中后，或每次成功闪避后，获得「明」标记（不叠加，刷新型）。\n「明」激活时：\n· 发起攻击 → 伤害+15%\n· 被攻击 → 闪避+8\n[转职后，「剑圣精义」和「魔剑精义」各自强化「明」的触发或效果]',
+        notes:'★强制汇聚节点，所有路线必须经过。暴击和闪避均可驱动「明」，统一两条前路。',tags:'sword,hub,gauge',exclusive:'',requires:'' },
+      // Post-Hub layer 1 (3 radiating paths)
+      { id:'sw3_dancer',name:'剑舞',type:'active_skill',cost:1,level:5,x:80,y:460,
+        desc:'主动：攻击后可立即追加移动1格（不触发额外反击）。melee/physical，power 85%，每回合1次。',
+        notes:'机动型延伸路线。攻击后调位，适合高机动打法。',tags:'sword,mobility,melee',exclusive:'',requires:'' },
+      { id:'sw3_chain',name:'连环',type:'passive',cost:1,level:5,x:255,y:460,
+        desc:'被动：本回合第二次攻击时（含反击），命中+10，暴击率+5%。',
+        notes:'多段攻击型延伸路线（中间路线）。',tags:'sword,crit,counter',exclusive:'',requires:'' },
+      { id:'sw3_counter',name:'剑意',type:'passive',cost:1,level:5,x:440,y:460,
+        desc:'被动：反击时命中+15，伤害+10%，无视目标地形带来的闪避加成。',
+        notes:'反击型延伸路线。',tags:'sword,counter,hit',exclusive:'',requires:'' },
+      // Post-Hub layer 2
+      { id:'sw3_surge',name:'势不可挡',type:'passive',cost:1,level:6,x:165,y:555,
+        desc:'被动：本回合已命中≥2次（含反击），之后攻击暴击伤害倍率+0.25（1.5x→1.75x，本回合有效）。',
+        notes:'多命中后的暴击爆发，机动和多段路线的自然延伸。',tags:'sword,crit,momentum',exclusive:'',requires:'' },
+      { id:'sw3_fluid',name:'流形',type:'active_skill',cost:1,level:6,x:365,y:555,
+        desc:'主动：激活「流形」（持续1回合）：闪避+15。「流形」下成功闪避→立即反击1次（普攻70%，不触发二次反击）。CD：2回合。',
+        notes:'闪避→反击转化，反击路线的自然延伸。',tags:'sword,evasion,counter,active',exclusive:'',requires:'' },
+      // Post-Hub convergence
+      { id:'sw3_essence',name:'剑道精义',type:'trait',cost:1,level:7,x:265,y:645,
+        desc:'特质：成功反击后，获得「先机」（下回合行动速度+5）。\n[转职后升级：剑圣→「剑圣精义」，魔剑士→「魔剑精义」]',
+        notes:'收束节点。反击→先手循环，转职后升级基础。',tags:'sword,counter,speed',exclusive:'',requires:'' },
+      // Hub upgrade
+      { id:'sw3_deepen',name:'剑意融合',type:'gauge_extend',cost:1,level:8,x:265,y:730,
+        desc:'特质：「明」标记（来自「剑心通明」）的持续时间额外+1回合，且「明」状态下的伤害加成从+15%提升至+20%。',
+        notes:'★直接升级Hub节点效果。"我在强化我的核心顿悟"——清晰的Build叙事。',tags:'sword,hub,upgrade',exclusive:'',requires:'' },
+      // Final
+      { id:'sw3_brink',name:'临界之刃',type:'passive',cost:1,level:9,x:265,y:815,
+        desc:'被动：当自身HP低于70%时，暴击率+12%，命中+8。',
+        notes:'逆境爆发。两个转职均适用。',tags:'sword,crit,survival',exclusive:'',requires:'' },
+      // Advancement
+      { id:'sw3_adv_saint',name:'剑圣之路',type:'advancement',cost:1,level:10,x:160,y:910,
+        desc:'转职：成为剑圣。\n· 激活「剑气」量谱（暴击命中+15气，成功闪避+10气，速度差攻击+10气）\n· 速度/暴击/闪避成长率强化\n· 「剑道精义」→「剑圣精义」（反击后+20剑气）\n· 「明」状态升级：暴击触发概率+效果强化\n· 解锁剑圣专属天赋分支',
+        notes:'左侧转职。「明」的暴击触发被强化。',tags:'advancement,sword_saint',exclusive:'adv_choice',requires:'' },
+      { id:'sw3_adv_magic',name:'魔剑之路',type:'advancement',cost:1,level:10,x:375,y:910,
+        desc:'转职：成为魔剑士。\n· MAG属性开始成长\n· 激活「魔刃」量谱系统\n· 解锁hybrid伤害技能与远程魔法攻击\n· 「剑道精义」→「魔剑精义」（反击后魔刃层数+2）\n· 「明」状态升级：闪避触发概率+效果强化\n· 解锁魔剑士专属天赋分支',
+        notes:'右侧转职。「明」的闪避触发被强化。',tags:'advancement,magic_swordsman',exclusive:'adv_choice',requires:'' },
+    ],
+    edges: [
+      {from:'sw3_start',to:'sw3_keen'},{from:'sw3_start',to:'sw3_momentum'},
+      // Pre-hub cross connections (both L1 nodes can reach both L2 nodes)
+      {from:'sw3_keen',to:'sw3_wound'},{from:'sw3_keen',to:'sw3_evasion'},
+      {from:'sw3_momentum',to:'sw3_wound'},{from:'sw3_momentum',to:'sw3_evasion'},
+      // Converge to hub
+      {from:'sw3_wound',to:'sw3_heart'},{from:'sw3_evasion',to:'sw3_heart'},
+      // Hub radiates to 3 paths
+      {from:'sw3_heart',to:'sw3_dancer'},{from:'sw3_heart',to:'sw3_chain'},{from:'sw3_heart',to:'sw3_counter'},
+      // Post-hub connections
+      {from:'sw3_dancer',to:'sw3_surge'},{from:'sw3_chain',to:'sw3_surge'},{from:'sw3_chain',to:'sw3_fluid'},
+      {from:'sw3_counter',to:'sw3_fluid'},
+      // Cross in post-hub (dancer can reach fluid, counter can reach surge)
+      {from:'sw3_dancer',to:'sw3_fluid'},{from:'sw3_counter',to:'sw3_surge'},
+      // Convergence → upgrade → final
+      {from:'sw3_surge',to:'sw3_essence'},{from:'sw3_fluid',to:'sw3_essence'},
+      {from:'sw3_essence',to:'sw3_deepen'},
+      {from:'sw3_deepen',to:'sw3_brink'},
+      {from:'sw3_brink',to:'sw3_adv_saint'},{from:'sw3_brink',to:'sw3_adv_magic'},
+    ]
+  }
+};
+
+function getDefaultData() {
+  return JSON.parse(JSON.stringify(TREES.sw_a));
+}
+
+function switchTree(variantId) {
+  if (!TREES[variantId]) return;
+  if (undoStack.length > 0 || treeData.nodes.length !== getDefaultData().nodes.length) {
+    if (!confirm('切换方案将清除当前未保存的修改，确认切换？')) {
+      document.getElementById('class-selector').value =
+        Object.keys(TREES).find(k => TREES[k].class_id === treeData.class_id) || 'sw_a';
+      return;
+    }
+  }
+  undoStack = []; redoStack = [];
+  treeData = JSON.parse(JSON.stringify(TREES[variantId]));
+  selectNode(null);
+  setTimeout(fitView, 80);
+  toast('已切换：' + TREES[variantId].class_name);
 }
 
 // ============================================================
