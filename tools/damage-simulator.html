@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title data-i18n="dmg_title">Ship of Theseus - 伤害模拟器</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e0e0e0;padding:20px}
+.header{display:flex;justify-content:center;align-items:center;gap:16px;margin-bottom:20px}
+h1{text-align:center;color:#e94560;font-size:1.5em}
+.container{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;max-width:1200px;margin:0 auto}
+.panel{background:#16213e;border:1px solid #0f3460;border-radius:8px;padding:16px}
+.panel h2{color:#e94560;font-size:1.1em;margin-bottom:12px;border-bottom:1px solid #0f3460;padding-bottom:6px}
+label{display:block;font-size:0.85em;margin:6px 0 2px;color:#a0a0c0}
+select,input[type=number]{width:100%;padding:6px 8px;background:#0f3460;border:1px solid #533483;color:#e0e0e0;border-radius:4px;font-size:0.9em}
+input[type=number]{width:80px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row label{min-width:60px;margin:0}
+.row input{flex:1;min-width:60px}
+.result{background:#0f3460;border:1px solid #533483;border-radius:6px;padding:12px;margin-top:8px;font-family:monospace;font-size:0.85em;line-height:1.6;white-space:pre-wrap}
+.highlight{color:#e94560;font-weight:bold}
+.good{color:#4ecca3}
+.warn{color:#f0c040}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px}
+button{background:#e94560;color:white;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:0.9em;margin-top:8px}
+button:hover{background:#c73050}
+.full-width{grid-column:1/-1}
+.section{margin-top:12px;padding-top:8px;border-top:1px solid #0f3460}
+.tag{display:inline-block;background:#533483;color:#e0e0e0;padding:2px 6px;border-radius:3px;font-size:0.75em;margin:2px}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Ship of Theseus — <span data-i18n="dmg_title">伤害模拟器</span> v1.0</h1>
+  <div id="lang-slot"></div>
+</div>
+
+<div class="container">
+  <!-- 攻击方面板 -->
+  <div class="panel">
+    <h2 data-i18n="dmg_attacker">攻击方</h2>
+    <label data-i18n="dmg_preset">职业预设</label>
+    <select id="atk-preset" onchange="applyPreset('atk')">
+      <option value="" data-i18n="dmg_custom">自定义</option>
+      <option value="sw_1">剑士 Lv1</option>
+      <option value="sw_10">剑士 Lv10(转职前)</option>
+      <option value="ss_15">剑圣 Lv15</option>
+      <option value="ss_25">剑圣 Lv25</option>
+      <option value="ms_25">魔剑士 Lv25</option>
+      <option value="ar_10">弓箭手 Lv10</option>
+      <option value="sn_25">神射手 Lv25</option>
+      <option value="el_25">精灵射手 Lv25</option>
+      <option value="mg_10">魔法师 Lv10</option>
+      <option value="fs_25">火贤者 Lv25</option>
+      <option value="ws_25">水贤者 Lv25</option>
+    </select>
+    <div class="stat-grid">
+      <div><label>ATK</label><input type="number" id="a-atk" value="113"></div>
+      <div><label>MAG</label><input type="number" id="a-mag" value="5"></div>
+      <div><label>HIT</label><input type="number" id="a-hit" value="133"></div>
+      <div><label>CRIT</label><input type="number" id="a-crit" value="80"></div>
+      <div><label data-i18n="dmg_wep_atk">武器ATK+</label><input type="number" id="a-wep-atk" value="12"></div>
+      <div><label data-i18n="dmg_wep_crit">武器CRIT+</label><input type="number" id="a-wep-crit" value="5"></div>
+      <div><label data-i18n="dmg_wep_hit">武器HIT+</label><input type="number" id="a-wep-hit" value="5"></div>
+    </div>
+    <div class="section">
+      <label data-i18n="dmg_skill">技能</label>
+      <select id="skill-type">
+        <option value="physical">Physical 物理</option>
+        <option value="magical">Magical 魔法</option>
+        <option value="holy">Holy 神圣</option>
+        <option value="hybrid">Hybrid 混合</option>
+      </select>
+      <div class="row" style="margin-top:6px">
+        <label>Power%</label><input type="number" id="skill-power" value="90" style="width:60px">
+        <label>HIT+</label><input type="number" id="skill-hit" value="5" style="width:60px">
+        <label>CRIT+</label><input type="number" id="skill-crit" value="0" style="width:60px">
+      </div>
+    </div>
+    <div class="section">
+      <label data-i18n="dmg_talent_layer">天赋/Buff加成</label>
+      <div class="row">
+        <label data-i18n="dmg_dmg_pct">伤害+%</label><input type="number" id="buff-dmg" value="0" style="width:60px">
+        <label data-i18n="dmg_crit_mult">暴伤倍率+</label><input type="number" id="buff-crit-mult" value="0" step="0.05" style="width:60px">
+        <label>ATK+%</label><input type="number" id="buff-atk-pct" value="0" style="width:60px">
+      </div>
+    </div>
+  </div>
+
+  <!-- 防御方面板 -->
+  <div class="panel">
+    <h2 data-i18n="dmg_defender">防御方</h2>
+    <label data-i18n="dmg_enemy_preset">敌人预设</label>
+    <select id="def-preset" onchange="applyPreset('def')">
+      <option value="" data-i18n="dmg_custom">自定义</option>
+      <option value="grunt_early" data-i18n="dmg_grunt_early">早期哥布林(1-5关)</option>
+      <option value="orc_mid" data-i18n="dmg_orc_mid">中期兽人(6-15关)</option>
+      <option value="knight_late" data-i18n="dmg_knight_late">后期暗骑士(16-25关)</option>
+      <option value="boss" data-i18n="dmg_boss">Boss龙骑将军</option>
+    </select>
+    <div class="stat-grid">
+      <div><label>HP</label><input type="number" id="d-hp" value="200"></div>
+      <div><label>P.DEF</label><input type="number" id="d-pdef" value="25"></div>
+      <div><label>M.DEF</label><input type="number" id="d-mdef" value="20"></div>
+      <div><label>EVA</label><input type="number" id="d-eva" value="15"></div>
+      <div><label>CRIT_EVA</label><input type="number" id="d-crit-eva" value="10"></div>
+      <div><label>BLOCK%</label><input type="number" id="d-block" value="0"></div>
+      <div><label>RES%</label><input type="number" id="d-res" value="10"></div>
+      <div><label data-i18n="dmg_armor_def">护甲DEF+</label><input type="number" id="d-armor" value="6"></div>
+    </div>
+    <div class="section">
+      <label data-i18n="dmg_terrain_special">地形/特殊</label>
+      <div class="row">
+        <label data-i18n="dmg_terrain_eva">地形EVA+</label><input type="number" id="terrain-eva" value="0" style="width:60px">
+        <label data-i18n="dmg_terrain_def">地形DEF+</label><input type="number" id="terrain-def" value="0" style="width:60px">
+        <label data-i18n="dmg_terrain_mult">特殊地形修正</label><input type="number" id="terrain-mult" value="100" style="width:60px">%
+      </div>
+    </div>
+  </div>
+
+  <!-- 结果面板 -->
+  <div class="panel">
+    <h2 data-i18n="dmg_results">计算结果</h2>
+    <button onclick="calculate()" data-i18n="dmg_calculate">计算</button>
+    <button onclick="simulate1000()" style="background:#533483" data-i18n="dmg_simulate">模拟1000次</button>
+    <div class="result" id="result" data-i18n="dmg_click_calc">点击「计算」查看结果</div>
+  </div>
+
+  <!-- 天赋对比面板 -->
+  <div class="panel full-width">
+    <h2 data-i18n="dmg_compare">天赋节点价值对比</h2>
+    <button onclick="compareNodes()" data-i18n="dmg_compare_btn">计算节点增益对比</button>
+    <div class="result" id="compare-result" data-i18n="dmg_compare_hint">点击「计算节点增益对比」查看各天赋节点在当前配置下的实际收益</div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+// ========== I18N for damage simulator specific keys ==========
+const DMG_I18N = {
+  zh: {
+    dmg_wep_atk: '武器ATK+', dmg_wep_crit: '武器CRIT+', dmg_wep_hit: '武器HIT+',
+    dmg_skill: '技能', dmg_dmg_pct: '伤害+%', dmg_crit_mult: '暴伤倍率+',
+    dmg_enemy_preset: '敌人预设', dmg_armor_def: '护甲DEF+',
+    dmg_terrain_special: '地形/特殊', dmg_terrain_eva: '地形EVA+',
+    dmg_terrain_def: '地形DEF+', dmg_terrain_mult: '特殊地形修正',
+    dmg_click_calc: '点击「计算」查看结果',
+    dmg_compare_btn: '计算节点增益对比',
+    dmg_compare_hint: '点击「计算节点增益对比」查看各天赋节点在当前配置下的实际收益',
+    dmg_grunt_early: '早期哥布林(1-5关)', dmg_orc_mid: '中期兽人(6-15关)',
+    dmg_knight_late: '后期暗骑士(16-25关)', dmg_boss: 'Boss龙骑将军',
+    // Output labels
+    lbl_stat_summary: '═══ 属性概要 ═══',
+    lbl_eff_atk: '有效ATK', lbl_eff_mag: '有效MAG',
+    lbl_eff_pdef: '有效P.DEF', lbl_eff_mdef: '有效M.DEF',
+    lbl_base_dmg: '═══ 基础伤害 ═══',
+    lbl_base_atk_def: '基础伤害(ATK-DEF)',
+    lbl_skill_mult: '×技能倍率',
+    lbl_prob: '═══ 判定概率 ═══',
+    lbl_hit_rate: '命中率', lbl_crit_rate: '暴击率', lbl_block_rate: '格挡率',
+    lbl_crit_mult: '暴击倍率',
+    lbl_dmg_result: '═══ 伤害结果 ═══',
+    lbl_normal_hit: '普通命中', lbl_crit_hit: '暴击命中', lbl_block_hit: '格挡命中',
+    lbl_expected: '═══ 期望值 ═══',
+    lbl_expected_dmg: '每次攻击期望伤害',
+    lbl_miss: 'miss', lbl_normal: '普通', lbl_crit: '暴击', lbl_block: '格挡',
+    lbl_hits_to_kill: '击杀需要', lbl_times: '次', lbl_target_hp: '目标HP',
+    lbl_hp_pct: '占目标HP',
+    lbl_sim: '═══ 1000次模拟 ═══',
+    lbl_total_dmg: '总伤害', lbl_avg: '平均',
+    lbl_sim_hit: '命中', lbl_sim_miss: 'Miss',
+    lbl_one_shot: '单击击杀', lbl_theory: '理论期望', lbl_actual: '实际均值',
+    lbl_deviation: '偏差', lbl_base_expected: '基准期望伤害',
+  },
+  en: {
+    dmg_wep_atk: 'Wep ATK+', dmg_wep_crit: 'Wep CRIT+', dmg_wep_hit: 'Wep HIT+',
+    dmg_skill: 'Skill', dmg_dmg_pct: 'Dmg+%', dmg_crit_mult: 'CritMult+',
+    dmg_enemy_preset: 'Enemy Preset', dmg_armor_def: 'Armor DEF+',
+    dmg_terrain_special: 'Terrain/Special', dmg_terrain_eva: 'Terrain EVA+',
+    dmg_terrain_def: 'Terrain DEF+', dmg_terrain_mult: 'Special Terrain Mod',
+    dmg_click_calc: 'Click "Calculate" to see results',
+    dmg_compare_btn: 'Calculate Node Comparison',
+    dmg_compare_hint: 'Click "Calculate Node Comparison" to see actual value of each talent node under current setup',
+    dmg_grunt_early: 'Early Goblin (Stage 1-5)', dmg_orc_mid: 'Mid Orc (Stage 6-15)',
+    dmg_knight_late: 'Late Dark Knight (Stage 16-25)', dmg_boss: 'Boss Dragon General',
+    lbl_stat_summary: '═══ Stat Summary ═══',
+    lbl_eff_atk: 'Eff. ATK', lbl_eff_mag: 'Eff. MAG',
+    lbl_eff_pdef: 'Eff. P.DEF', lbl_eff_mdef: 'Eff. M.DEF',
+    lbl_base_dmg: '═══ Base Damage ═══',
+    lbl_base_atk_def: 'Base Dmg (ATK-DEF)',
+    lbl_skill_mult: '× Skill Power',
+    lbl_prob: '═══ Hit Probability ═══',
+    lbl_hit_rate: 'Hit Rate', lbl_crit_rate: 'Crit Rate', lbl_block_rate: 'Block Rate',
+    lbl_crit_mult: 'Crit Multiplier',
+    lbl_dmg_result: '═══ Damage Results ═══',
+    lbl_normal_hit: 'Normal Hit', lbl_crit_hit: 'Critical Hit', lbl_block_hit: 'Blocked Hit',
+    lbl_expected: '═══ Expected Value ═══',
+    lbl_expected_dmg: 'Expected Damage per Attack',
+    lbl_miss: 'miss', lbl_normal: 'normal', lbl_crit: 'crit', lbl_block: 'block',
+    lbl_hits_to_kill: 'Hits to Kill', lbl_times: 'hits', lbl_target_hp: 'Target HP',
+    lbl_hp_pct: 'of Target HP',
+    lbl_sim: '═══ 1000 Simulations ═══',
+    lbl_total_dmg: 'Total Damage', lbl_avg: 'Average',
+    lbl_sim_hit: 'Hits', lbl_sim_miss: 'Miss',
+    lbl_one_shot: 'One-shot kills', lbl_theory: 'Theory', lbl_actual: 'Actual',
+    lbl_deviation: 'Deviation', lbl_base_expected: 'Base Expected Damage',
+  },
+};
+
+// Local t() that checks shared I18N first, then local dict
+function t(key) {
+  if (typeof I18N !== 'undefined') {
+    const shared = I18N.t(key);
+    if (shared !== key) return shared;
+  }
+  const lang = (typeof I18N !== 'undefined') ? I18N.lang : 'zh';
+  const dict = DMG_I18N[lang] || DMG_I18N.zh;
+  return dict[key] !== undefined ? dict[key] : key;
+}
+
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const text = t(key);
+    if (text !== key) el.textContent = text;
+  });
+}
+
+// ========== 预设数据 ==========
+const PRESETS_ATK = {
+  sw_1:  {atk:14,mag:5,hit:85,crit:12,wepAtk:2,wepCrit:0,wepHit:5},
+  sw_10: {atk:41,mag:5,hit:103,crit:30,wepAtk:5,wepCrit:0,wepHit:5},
+  ss_15: {atk:61,mag:5,hit:113,crit:45,wepAtk:8,wepCrit:3,wepHit:5},
+  ss_25: {atk:101,mag:5,hit:133,crit:75,wepAtk:12,wepCrit:5,wepHit:5},
+  ms_25: {atk:71,mag:50,hit:133,crit:60,wepAtk:12,wepCrit:3,wepHit:5},
+  ar_10: {atk:43,mag:5,hit:96,crit:41,wepAtk:5,wepCrit:3,wepHit:5},
+  sn_25: {atk:103,mag:5,hit:141,crit:86,wepAtk:10,wepCrit:3,wepHit:5},
+  el_25: {atk:88,mag:5,hit:126,crit:71,wepAtk:8,wepCrit:3,wepHit:5},
+  mg_10: {atk:5,mag:56,hit:100,crit:14,wepAtk:0,wepCrit:0,wepHit:5},
+  fs_25: {atk:5,mag:131,hit:130,crit:44,wepAtk:0,wepCrit:0,wepHit:5},
+  ws_25: {atk:5,mag:116,hit:130,crit:29,wepAtk:0,wepCrit:0,wepHit:5},
+};
+const PRESETS_DEF = {
+  grunt_early:  {hp:70,pdef:7,mdef:4,eva:6,critEva:4,block:0,res:0,armor:1},
+  orc_mid:      {hp:130,pdef:15,mdef:10,eva:10,critEva:6,block:0,res:8,armor:3},
+  knight_late:  {hp:200,pdef:25,mdef:20,eva:15,critEva:10,block:0,res:10,armor:6},
+  boss:         {hp:400,pdef:30,mdef:25,eva:18,critEva:12,block:10,res:20,armor:8},
+};
+
+function applyPreset(side) {
+  if (side === 'atk') {
+    const p = PRESETS_ATK[document.getElementById('atk-preset').value];
+    if (!p) return;
+    document.getElementById('a-atk').value = p.atk;
+    document.getElementById('a-mag').value = p.mag;
+    document.getElementById('a-hit').value = p.hit;
+    document.getElementById('a-crit').value = p.crit;
+    document.getElementById('a-wep-atk').value = p.wepAtk;
+    document.getElementById('a-wep-crit').value = p.wepCrit;
+    document.getElementById('a-wep-hit').value = p.wepHit;
+  } else {
+    const p = PRESETS_DEF[document.getElementById('def-preset').value];
+    if (!p) return;
+    document.getElementById('d-hp').value = p.hp;
+    document.getElementById('d-pdef').value = p.pdef;
+    document.getElementById('d-mdef').value = p.mdef;
+    document.getElementById('d-eva').value = p.eva;
+    document.getElementById('d-crit-eva').value = p.critEva;
+    document.getElementById('d-block').value = p.block;
+    document.getElementById('d-res').value = p.res;
+    document.getElementById('d-armor').value = p.armor;
+  }
+}
+
+function getInputs() {
+  const v = id => parseFloat(document.getElementById(id).value) || 0;
+  return {
+    atk: v('a-atk'), mag: v('a-mag'), hit: v('a-hit'), crit: v('a-crit'),
+    wepAtk: v('a-wep-atk'), wepCrit: v('a-wep-crit'), wepHit: v('a-wep-hit'),
+    skillType: document.getElementById('skill-type').value,
+    skillPower: v('skill-power'), skillHit: v('skill-hit'), skillCrit: v('skill-crit'),
+    buffDmg: v('buff-dmg'), buffCritMult: v('buff-crit-mult'), buffAtkPct: v('buff-atk-pct'),
+    hp: v('d-hp'), pdef: v('d-pdef'), mdef: v('d-mdef'), eva: v('d-eva'),
+    critEva: v('d-crit-eva'), block: v('d-block'), res: v('d-res'), armor: v('d-armor'),
+    terrainEva: v('terrain-eva'), terrainDef: v('terrain-def'), terrainMult: v('terrain-mult'),
+  };
+}
+
+function calcDamage(inp, overrides) {
+  const o = {...inp, ...overrides};
+  // 有效攻击力
+  let effAtk = o.atk + o.wepAtk;
+  let effMag = o.mag;
+  if (o.buffAtkPct > 0) {
+    effAtk = Math.floor(effAtk * (1 + o.buffAtkPct / 100));
+    effMag = Math.floor(effMag * (1 + o.buffAtkPct / 100));
+  }
+  // 有效防御
+  let effPdef = o.pdef + o.armor + o.terrainDef;
+  let effMdef = o.mdef + o.terrainDef;
+
+  // 基础伤害
+  let baseDmg;
+  const st = o.skillType;
+  if (st === 'physical') baseDmg = Math.max(0, effAtk - effPdef);
+  else if (st === 'magical') baseDmg = Math.max(0, effMag - effMdef);
+  else if (st === 'holy') baseDmg = effAtk > effMag ? effAtk : effMag; // 无减防
+  else baseDmg = Math.max(0, effAtk - Math.min(effPdef, effMdef)); // hybrid
+
+  // 技能倍率
+  let dmg = baseDmg * (o.skillPower / 100);
+
+  // 特殊地形修正
+  dmg *= (o.terrainMult / 100);
+
+  // 命中率
+  let hitRate = o.hit + o.wepHit + o.skillHit - o.eva - o.terrainEva;
+  hitRate = Math.max(20, Math.min(100, hitRate));
+
+  // 暴击率
+  let critRate = 0;
+  let canCrit = st !== 'holy';
+  if (canCrit) {
+    critRate = (o.crit + o.wepCrit + o.skillCrit - o.critEva);
+    critRate = Math.max(0, Math.min(50, critRate));
+  }
+
+  // 格挡率
+  let canBlock = st !== 'holy';
+  let blockRate = canBlock ? o.block : 0;
+
+  // 暴击倍率
+  let critMult = 1.5 + o.buffCritMult;
+
+  // 伤害加成（最终乘区）
+  let finalMult = 1 + o.buffDmg / 100;
+
+  // 各种情况的伤害
+  let normalDmg = Math.floor(dmg * finalMult);
+  let critDmg = Math.floor(dmg * critMult * finalMult);
+  let blockDmg = Math.floor(dmg * 0.3 * finalMult);
+
+  // 期望伤害
+  let missChance = 1 - hitRate / 100;
+  let hitChance = hitRate / 100;
+  let blockChance_ifHit = blockRate / 100;
+  let critChance_ifNotBlocked = critRate / 100;
+  let normalChance = hitChance * (1 - blockChance_ifHit) * (1 - critChance_ifNotBlocked);
+  let critChance_final = hitChance * (1 - blockChance_ifHit) * critChance_ifNotBlocked;
+  let blockChance_final = hitChance * blockChance_ifHit;
+
+  let expectedDmg = normalChance * normalDmg + critChance_final * critDmg + blockChance_final * blockDmg;
+
+  return {
+    baseDmg, dmg: Math.floor(dmg), normalDmg, critDmg, blockDmg,
+    hitRate, critRate, blockRate, critMult,
+    expectedDmg: Math.round(expectedDmg),
+    effAtk, effMag, effPdef, effMdef,
+    hitsToKill: Math.ceil(o.hp / Math.max(1, expectedDmg)),
+    normalChance, critChance_final, blockChance_final, missChance,
+  };
+}
+
+function calculate() {
+  const inp = getInputs();
+  const r = calcDamage(inp, {});
+  const el = document.getElementById('result');
+  el.innerHTML =
+`<span class="highlight">${t('lbl_stat_summary')}</span>
+${t('lbl_eff_atk')}: ${r.effAtk}  ${t('lbl_eff_mag')}: ${r.effMag}
+${t('lbl_eff_pdef')}: ${r.effPdef}  ${t('lbl_eff_mdef')}: ${r.effMdef}
+
+<span class="highlight">${t('lbl_base_dmg')}</span>
+${t('lbl_base_atk_def')}: ${r.baseDmg}
+${t('lbl_skill_mult')}(${inp.skillPower}%): ${r.dmg}
+
+<span class="highlight">${t('lbl_prob')}</span>
+${t('lbl_hit_rate')}: <span class="${r.hitRate>=90?'good':'warn'}">${r.hitRate}%</span>
+${t('lbl_crit_rate')}: <span class="${r.critRate>=30?'good':'warn'}">${r.critRate}%</span> (cap 50%)
+${t('lbl_block_rate')}: ${r.blockRate}%
+${t('lbl_crit_mult')}: ×${r.critMult.toFixed(2)}
+
+<span class="highlight">${t('lbl_dmg_result')}</span>
+${t('lbl_normal_hit')}: ${r.normalDmg}
+${t('lbl_crit_hit')}: <span class="good">${r.critDmg}</span> (×${r.critMult.toFixed(2)})
+${t('lbl_block_hit')}: ${r.blockDmg} (×0.3)
+
+<span class="highlight">${t('lbl_expected')}</span>
+${t('lbl_expected_dmg')}: <span class="highlight">${r.expectedDmg}</span>
+  ${t('lbl_miss')} ${(r.missChance*100).toFixed(1)}% / ${t('lbl_normal')} ${(r.normalChance*100).toFixed(1)}% / ${t('lbl_crit')} ${(r.critChance_final*100).toFixed(1)}% / ${t('lbl_block')} ${(r.blockChance_final*100).toFixed(1)}%
+${t('lbl_hits_to_kill')}: <span class="warn">${r.hitsToKill}${t('lbl_times')}</span> (${t('lbl_target_hp')} ${inp.hp})
+${t('lbl_hp_pct')}: ${(r.expectedDmg/inp.hp*100).toFixed(1)}%`;
+}
+
+function simulate1000() {
+  const inp = getInputs();
+  const r = calcDamage(inp, {});
+  let total = 0, crits = 0, misses = 0, blocks = 0, kills = 0;
+  const N = 1000;
+  for (let i = 0; i < N; i++) {
+    let roll = Math.random() * 100;
+    if (roll >= r.hitRate) { misses++; continue; }
+    let dmg;
+    if (r.blockRate > 0 && Math.random() * 100 < r.blockRate) {
+      blocks++; dmg = r.blockDmg;
+    } else if (r.critRate > 0 && Math.random() * 100 < r.critRate) {
+      crits++; dmg = r.critDmg;
+    } else {
+      dmg = r.normalDmg;
+    }
+    total += dmg;
+    if (dmg >= inp.hp) kills++;
+  }
+  const el = document.getElementById('result');
+  el.innerHTML += `
+
+<span class="highlight">${t('lbl_sim')}</span>
+${t('lbl_total_dmg')}: ${total}  ${t('lbl_avg')}: <span class="good">${(total/N).toFixed(1)}</span>
+${t('lbl_sim_hit')}: ${N-misses} / ${t('lbl_crit')}: ${crits} / ${t('lbl_block')}: ${blocks} / ${t('lbl_sim_miss')}: ${misses}
+${t('lbl_one_shot')}: ${kills}${t('lbl_times')} (${(kills/N*100).toFixed(1)}%)
+${t('lbl_theory')}: ${r.expectedDmg} vs ${t('lbl_actual')}: ${(total/N).toFixed(1)} (${t('lbl_deviation')}${((total/N-r.expectedDmg)/r.expectedDmg*100).toFixed(1)}%)`;
+}
+
+function compareNodes() {
+  const inp = getInputs();
+  const base = calcDamage(inp, {});
+  const nodes = [
+    {name:'剑心通明(伤害+15%)', mod:{buffDmg: inp.buffDmg + 15}},
+    {name:'剑意融合(伤害+20%)', mod:{buffDmg: inp.buffDmg + 20}},
+    {name:'连环(伤害+5%,暴击+5%)', mod:{buffDmg: inp.buffDmg + 5, crit: inp.crit + 5}},
+    {name:'势不可挡1层(暴伤+0.15)', mod:{buffCritMult: inp.buffCritMult + 0.15}},
+    {name:'势不可挡3层(暴伤+0.45)', mod:{buffCritMult: inp.buffCritMult + 0.45}},
+    {name:'临界之刃(暴伤+0.2,明刷新)', mod:{buffCritMult: inp.buffCritMult + 0.2}},
+    {name:'锐伤3层(目标DEF-6)', mod:{pdef: inp.pdef - 6}},
+    {name:'先势(伤害+6%,暴击+5%)', mod:{buffDmg: inp.buffDmg + 6, crit: inp.crit + 5}},
+    {name:'稳射(伤害+8%)', mod:{buffDmg: inp.buffDmg + 8}},
+    {name:'集中火力(伤害+12%)', mod:{buffDmg: inp.buffDmg + 12}},
+    {name:'狙击本能(伤害+10%)', mod:{buffDmg: inp.buffDmg + 10}},
+    {name:'孤注一掷(ATK+10%,暴伤+0.1)', mod:{buffAtkPct: inp.buffAtkPct + 10, buffCritMult: inp.buffCritMult + 0.1}},
+    {name:'锐3层(暴伤+0.3)', mod:{buffCritMult: inp.buffCritMult + 0.3}},
+    {name:'气涌(ATK+12%)', mod:{buffAtkPct: inp.buffAtkPct + 12}},
+    {name:'气盛(ATK+12%,CRIT+8,暴伤+0.2)', mod:{buffAtkPct: inp.buffAtkPct + 12, crit: inp.crit + 8, buffCritMult: inp.buffCritMult + 0.2}},
+    {name:'增幅(AOE≥2时伤害+8%)', mod:{buffDmg: inp.buffDmg + 8}},
+    {name:'元素狂潮(伤害+25%)', mod:{buffDmg: inp.buffDmg + 25}},
+    {name:'奥术精通(伤害+15%)', mod:{buffDmg: inp.buffDmg + 15}},
+    {name:'孤注一掷魔(MAG+15%受伤+10%)', mod:{buffAtkPct: inp.buffAtkPct + 15}},
+  ];
+
+  let lines = [];
+  const lExpected = t('lbl_expected_dmg').substring(0, 4);
+  for (const n of nodes) {
+    const r2 = calcDamage(inp, n.mod);
+    const diff = r2.expectedDmg - base.expectedDmg;
+    const pct = base.expectedDmg > 0 ? (diff / base.expectedDmg * 100).toFixed(1) : '∞';
+    const bar = '█'.repeat(Math.min(30, Math.max(0, Math.round(Math.abs(diff) / 2))));
+    const cls = diff > 0 ? 'good' : diff < 0 ? 'warn' : '';
+    lines.push(`<span class="${cls}">${n.name.padEnd(30)} E[${r2.expectedDmg.toString().padStart(4)}] (${diff>=0?'+':''}${diff.toString().padStart(4)}, ${diff>=0?'+':''}${pct}%) ${bar}</span>`);
+  }
+  lines.sort((a, b) => {
+    const getVal = s => parseFloat(s.match(/\(([+-]?\d+),/)?.[1] || 0);
+    return getVal(b) - getVal(a);
+  });
+
+  document.getElementById('compare-result').innerHTML =
+    `<span class="highlight">${t('lbl_base_expected')}: ${base.expectedDmg} (${t('lbl_crit_hit')} ${base.critDmg})</span>\n\n` +
+    lines.join('\n');
+}
+
+// Init
+applyI18n();
+const langSlot = document.getElementById('lang-slot');
+if (langSlot && typeof I18N !== 'undefined') {
+  langSlot.appendChild(I18N.createLangSwitcher());
+}
+</script>
+</body>
+</html>

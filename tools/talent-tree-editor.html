@@ -1,0 +1,2542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>天赋树编辑器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* === Layout === */
+#app {
+  display: flex;
+  height: 100vh;
+}
+
+#sidebar {
+  width: 320px;
+  min-width: 320px;
+  background: #16213e;
+  border-right: 2px solid #0f3460;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#canvas-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+#toolbar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+#toolbar button {
+  padding: 8px 14px;
+  background: #0f3460;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+#toolbar button:hover { background: #1a5276; }
+#toolbar button.active { background: #e94560; border-color: #e94560; }
+#toolbar button.danger { border-color: #c0392b; }
+#toolbar button.danger:hover { background: #c0392b; }
+
+canvas {
+  display: block;
+  cursor: grab;
+}
+
+canvas.connecting { cursor: crosshair; }
+canvas.grabbing { cursor: grabbing; }
+
+/* === Sidebar === */
+#sidebar-header {
+  padding: 16px;
+  background: #0f3460;
+  border-bottom: 1px solid #1a5276;
+}
+
+#sidebar-header h2 {
+  font-size: 16px;
+  color: #e94560;
+  margin-bottom: 8px;
+}
+
+#class-selector {
+  width: 100%;
+  padding: 6px 10px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+#sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+#sidebar-content::-webkit-scrollbar { width: 6px; }
+#sidebar-content::-webkit-scrollbar-track { background: #16213e; }
+#sidebar-content::-webkit-scrollbar-thumb { background: #0f3460; border-radius: 3px; }
+
+.panel {
+  margin-bottom: 16px;
+}
+
+.panel-title {
+  font-size: 13px;
+  color: #a0a0a0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #0f3460;
+}
+
+.field {
+  margin-bottom: 10px;
+}
+
+.field label {
+  display: block;
+  font-size: 12px;
+  color: #a0a0a0;
+  margin-bottom: 3px;
+}
+
+.field input, .field select, .field textarea {
+  width: 100%;
+  padding: 6px 8px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none;
+  border-color: #e94560;
+}
+
+.field-row {
+  display: flex;
+  gap: 8px;
+}
+
+.field-row .field { flex: 1; }
+
+#no-selection {
+  text-align: center;
+  color: #666;
+  padding: 40px 20px;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+/* === Node type colors === */
+.node-type-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+/* === Footer === */
+#sidebar-footer {
+  padding: 12px;
+  background: #0f3460;
+  border-top: 1px solid #1a5276;
+  display: flex;
+  gap: 6px;
+}
+
+#sidebar-footer button {
+  flex: 1;
+  padding: 8px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+#sidebar-footer button:hover { background: #1a5276; }
+
+/* === Help overlay === */
+#help-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+}
+
+#help-overlay.show { display: flex; }
+
+#help-content {
+  background: #16213e;
+  border: 2px solid #0f3460;
+  border-radius: 12px;
+  padding: 30px;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+#help-content h3 {
+  color: #e94560;
+  margin-bottom: 16px;
+  font-size: 18px;
+}
+
+#help-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+#help-content td {
+  padding: 6px 12px;
+  border-bottom: 1px solid #0f3460;
+  font-size: 13px;
+}
+
+#help-content td:first-child {
+  color: #e94560;
+  font-weight: bold;
+  white-space: nowrap;
+  width: 160px;
+}
+
+#help-content .close-btn {
+  display: block;
+  margin: 16px auto 0;
+  padding: 8px 24px;
+  background: #e94560;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* === Toast === */
+#toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: #0f3460;
+  color: #e0e0e0;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 13px;
+  transition: transform 0.3s;
+  z-index: 50;
+  border: 1px solid #1a5276;
+}
+
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* === Stats bar === */
+#stats-bar {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(15, 52, 96, 0.9);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #a0a0a0;
+  z-index: 10;
+  border: 1px solid #1a5276;
+}
+
+/* === Feature: Path cost info bar === */
+#path-info-bar {
+  position: absolute;
+  bottom: 40px;
+  left: 12px;
+  background: rgba(15, 52, 96, 0.95);
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #a0a0a0;
+  z-index: 10;
+  border: 1px solid #1a5276;
+  max-width: 450px;
+  line-height: 1.6;
+  display: none;
+}
+
+#path-info-bar .path-label { color: #e94560; font-weight: bold; }
+#path-info-bar .path-cost { color: #f1c40f; font-weight: bold; }
+
+/* === Feature: Validation overlay === */
+#validation-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+}
+
+#validation-overlay.show { display: flex; }
+
+#validation-content {
+  background: #16213e;
+  border: 2px solid #0f3460;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 550px;
+  max-height: 70vh;
+  overflow-y: auto;
+  min-width: 360px;
+}
+
+#validation-content h3 {
+  color: #e94560;
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+#validation-content .val-ok { color: #2ecc71; }
+#validation-content .val-err { color: #e94560; }
+#validation-content .val-warn { color: #f39c12; }
+
+#validation-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+}
+
+#validation-content ul li {
+  padding: 4px 0;
+  font-size: 13px;
+  border-bottom: 1px solid #0f3460;
+}
+
+#validation-content .close-btn {
+  display: block;
+  margin: 16px auto 0;
+  padding: 8px 24px;
+  background: #e94560;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* === Feature: Search box === */
+#search-box-container {
+  padding: 8px 16px;
+  background: #0f3460;
+  border-bottom: 1px solid #1a5276;
+}
+
+#search-input {
+  width: 100%;
+  padding: 6px 10px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+#search-input:focus {
+  outline: none;
+  border-color: #e94560;
+}
+
+#search-input::placeholder {
+  color: #666;
+}
+
+/* === Feature: Toolbar active states for Path === */
+#toolbar button.path-active { background: #f39c12; border-color: #f39c12; color: #1a1a2e; }
+</style>
+<script src="shared.js"></script>
+</head>
+<body>
+
+<div id="app">
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <h2 data-i18n="tt_title">天赋树编辑器</h2>
+        <span id="lang-switcher-slot"></span>
+      </div>
+      <select id="class-selector" onchange="onSelectorChange(this.value)">
+        <option value="sw_a">剑士 A · 双菱形</option>
+        <option value="sw_b">剑士 B · 双塔形</option>
+        <option value="sw_c">剑士 C · 星爆形</option>
+        <option value="ar_a">弓箭手 · 三角洲形</option>
+        <option value="mg_a">魔法师 · 魔法阵形</option>
+        <option disabled>──────────</option>
+        <option value="__new__">+ 新建天赋页</option>
+      </select>
+      <div id="tree-meta" style="margin-top:6px;">
+        <div style="display:flex;gap:4px;">
+          <input type="text" id="tree-class-id" placeholder="class_id" style="flex:1;padding:4px 6px;background:#0f3460;border:1px solid #1a5276;color:#e0e0e0;border-radius:3px;font-size:12px;" onchange="updateTreeMeta()">
+          <input type="text" id="tree-class-name" placeholder="显示名称" style="flex:2;padding:4px 6px;background:#0f3460;border:1px solid #1a5276;color:#e0e0e0;border-radius:3px;font-size:12px;" onchange="updateTreeMeta()">
+        </div>
+        <div style="display:flex;gap:4px;margin-top:4px;">
+          <button onclick="saveTreeToStorage()" style="flex:1;padding:4px 6px;background:#2ecc71;color:#fff;border:none;border-radius:3px;font-size:11px;cursor:pointer;" title="保存到浏览器本地">💾 Save</button>
+          <button onclick="deleteTreeFromStorage()" style="flex:1;padding:4px 6px;background:#c0392b;color:#fff;border:none;border-radius:3px;font-size:11px;cursor:pointer;" title="删除当前自定义树">🗑 Delete</button>
+          <button onclick="exportJSONFile()" style="flex:1;padding:4px 6px;background:#0f3460;color:#e0e0e0;border:1px solid #1a5276;border-radius:3px;font-size:11px;cursor:pointer;" title="下载JSON文件">📥 .json</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- === Feature 5: Node Search/Filter === -->
+    <div id="search-box-container">
+      <input type="text" id="search-input" data-i18n-placeholder="tt_search_placeholder" placeholder="按名称或标签搜索节点..." oninput="onSearchInput(this.value)">
+    </div>
+
+    <div id="sidebar-content">
+      <div id="no-selection">
+        <p data-i18n="tt_click_to_edit">点击节点进行编辑</p>
+        <p data-i18n="tt_dblclick_create">双击画布创建节点</p>
+        <p style="margin-top:12px; font-size:11px; color:#555;" data-i18n="tt_press_h">按 H 查看帮助</p>
+      </div>
+
+      <div id="node-editor" style="display:none;">
+        <div class="panel">
+          <div class="panel-title" data-i18n="tt_basic_info">基础信息</div>
+          <div class="field">
+            <label>ID</label>
+            <input type="text" id="node-id" data-i18n-placeholder="tt_node_id_placeholder" placeholder="唯一节点ID">
+          </div>
+          <div class="field">
+            <label data-i18n="name">名称</label>
+            <input type="text" id="node-name" data-i18n-placeholder="tt_node_name_placeholder" placeholder="节点名称">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label data-i18n="type">类型</label>
+              <select id="node-type">
+                <option value="active_skill" data-i18n="nt_active_skill">主动技能</option>
+                <option value="passive" data-i18n="nt_passive">被动</option>
+                <option value="trait" data-i18n="nt_trait">特质</option>
+                <option value="skill_upgrade" data-i18n="nt_skill_upgrade">技能升级</option>
+                <option value="advancement" data-i18n="nt_advancement">转职</option>
+                <option value="gauge_core" data-i18n="nt_gauge_core">量谱核心</option>
+                <option value="gauge_extend" data-i18n="nt_gauge_extend">量谱扩展</option>
+                <option value="stat_minor" data-i18n="nt_stat_minor">小属性</option>
+              </select>
+            </div>
+            <div class="field">
+              <label data-i18n="cost">花费</label>
+              <input type="number" id="node-cost" value="1" min="1" max="5" style="width:60px;">
+            </div>
+          </div>
+          <div class="field">
+            <label data-i18n="tt_level_req">等级需求</label>
+            <input type="number" id="node-level" value="1" min="1" max="30">
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title" data-i18n="tt_description">描述信息</div>
+          <div class="field">
+            <label data-i18n="tt_effect">效果</label>
+            <textarea id="node-desc" data-i18n-placeholder="tt_node_desc_placeholder" placeholder="描述节点效果..."></textarea>
+          </div>
+          <div class="field">
+            <label data-i18n="tt_design_notes">设计备注</label>
+            <textarea id="node-notes" data-i18n-placeholder="tt_node_notes_placeholder" placeholder="内部设计备注..."></textarea>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title" data-i18n="tt_constraints">约束条件</div>
+          <div class="field">
+            <label data-i18n="tt_exclusive_group">互斥组</label>
+            <input type="text" id="node-exclusive" data-i18n-placeholder="tt_node_exclusive_placeholder" placeholder="例: adv_choice">
+          </div>
+          <div class="field">
+            <label data-i18n="tt_required_nodes">前置节点ID（逗号分隔）</label>
+            <input type="text" id="node-requires" data-i18n-placeholder="tt_node_requires_placeholder" placeholder="例: node_a, node_b">
+          </div>
+          <div class="field">
+            <label data-i18n="tt_tags">标签（逗号分隔）</label>
+            <input type="text" id="node-tags" data-i18n-placeholder="tt_node_tags_placeholder" placeholder="例: fire, aoe, melee">
+          </div>
+        </div>
+
+        <div class="panel">
+          <div style="display:flex; gap:6px;">
+            <button onclick="duplicateNode()" style="flex:1; padding:6px; background:#0f3460; color:#e0e0e0; border:1px solid #1a5276; border-radius:4px; cursor:pointer; font-size:12px;" data-i18n="tt_duplicate">复制节点</button>
+            <button onclick="deleteSelectedNode()" style="flex:1; padding:6px; background:#1a1a2e; color:#c0392b; border:1px solid #c0392b; border-radius:4px; cursor:pointer; font-size:12px;" data-i18n="tt_delete_node">删除节点</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="sidebar-footer">
+      <button onclick="exportJSON()" data-i18n="tt_export_json">导出JSON</button>
+      <button onclick="importJSON()" data-i18n="tt_import_json">导入JSON</button>
+      <button onclick="exportImage()" data-i18n="tt_export_png">导出PNG</button>
+      <!-- === Feature 4: Mermaid Export === -->
+      <button onclick="exportMermaid()" title="Export as Mermaid flowchart" data-i18n="tt_export_mermaid">Mermaid</button>
+    </div>
+  </div>
+
+  <div id="canvas-container">
+    <div id="toolbar">
+      <button id="btn-select" class="active" onclick="setMode('select')" title="Select & Move (V)" data-i18n="tt_select">选择</button>
+      <button id="btn-connect" onclick="setMode('connect')" title="Connect Nodes (C)" data-i18n="tt_connect">连线</button>
+      <button id="btn-delete-edge" class="danger" onclick="setMode('delete_edge')" title="Delete Edge (X)" data-i18n="tt_del_edge">删边</button>
+      <button onclick="autoLayout()" title="Auto-arrange nodes (L)" data-i18n="tt_auto_layout">自动布局</button>
+      <button onclick="fitView()" title="Fit to view (F)" data-i18n="tt_fit_view">适应视图</button>
+      <!-- === Feature 1: DAG Validation === -->
+      <button onclick="validateDAG()" title="Validate DAG structure" data-i18n="tt_validate">校验</button>
+      <!-- === Feature 2: Path Cost Analysis === -->
+      <button id="btn-path" onclick="togglePathMode()" title="Show shortest path to selected node (T)" data-i18n="tt_path">路径</button>
+      <button onclick="showHelp()" title="Show help (H)">?</button>
+    </div>
+    <canvas id="canvas"></canvas>
+    <div id="stats-bar"></div>
+    <!-- === Feature 2: Path cost info === -->
+    <div id="path-info-bar"></div>
+  </div>
+</div>
+
+<div id="help-overlay">
+  <div id="help-content">
+    <h3 data-i18n="help_title">键盘与鼠标操作</h3>
+    <table>
+      <tr><td data-i18n="help_dblclick">双击</td><td data-i18n="help_dblclick_desc">创建新节点</td></tr>
+      <tr><td data-i18n="help_click_node">点击节点</td><td data-i18n="help_click_node_desc">选中并在侧栏编辑</td></tr>
+      <tr><td data-i18n="help_drag_node">拖拽节点</td><td data-i18n="help_drag_node_desc">移动节点位置</td></tr>
+      <tr><td data-i18n="help_drag_canvas">拖拽画布</td><td data-i18n="help_drag_canvas_desc">平移视图</td></tr>
+      <tr><td data-i18n="help_scroll">滚轮</td><td data-i18n="help_scroll_desc">缩放</td></tr>
+      <tr><td data-i18n="help_del">Delete / Backspace</td><td data-i18n="help_del_desc">删除选中节点</td></tr>
+      <tr><td>V</td><td>Select mode</td></tr>
+      <tr><td>C</td><td>Connect mode</td></tr>
+      <tr><td>X</td><td>Delete edge mode</td></tr>
+      <tr><td>L</td><td>Auto layout</td></tr>
+      <tr><td>F</td><td>Fit view</td></tr>
+      <tr><td>H</td><td>Toggle help</td></tr>
+      <tr><td>Ctrl+S</td><td>Export JSON to clipboard</td></tr>
+      <tr><td>Ctrl+Z</td><td>Undo</td></tr>
+      <tr><td>Ctrl+Shift+Z</td><td>Redo</td></tr>
+      <tr><td>T</td><td>Toggle path analysis mode</td></tr>
+    </table>
+    <h3 style="margin-top:16px;" data-i18n="help_node_types">节点类型</h3>
+    <table>
+      <tr><td style="color:#3498db;" data-i18n="nt_active_skill">主动技能</td><td>Unlocks a new usable skill</td></tr>
+      <tr><td style="color:#2ecc71;" data-i18n="nt_passive">被动</td><td>Triggered effect on condition</td></tr>
+      <tr><td style="color:#9b59b6;" data-i18n="nt_trait">特质</td><td>Changes fundamental mechanics</td></tr>
+      <tr><td style="color:#e67e22;" data-i18n="nt_skill_upgrade">技能升级</td><td>Modifies existing skill behavior</td></tr>
+      <tr><td style="color:#e94560;" data-i18n="nt_advancement">转职</td><td>Class advancement (pick one)</td></tr>
+      <tr><td style="color:#f1c40f;" data-i18n="nt_gauge_core">量谱核心</td><td>Unlocks gauge system base</td></tr>
+      <tr><td style="color:#f39c12;" data-i18n="nt_gauge_extend">量谱扩展</td><td>Extends gauge mechanics</td></tr>
+      <tr><td style="color:#7f8c8d;" data-i18n="nt_stat_minor">小属性</td><td>Minor stat adjustment (use sparingly)</td></tr>
+    </table>
+    <h3 style="margin-top:16px;" data-i18n="help_connect_mode">连线模式</h3>
+    <p style="font-size:13px; line-height:1.6;" data-i18n="help_connect_desc">连线模式下，点击源节点再点击目标节点创建有向边（前置关系）。删边模式下，点击边将其删除。</p>
+    <button class="close-btn" onclick="hideHelp()" data-i18n="ok">确定</button>
+  </div>
+</div>
+
+<!-- === Feature 1: Validation Overlay === -->
+<div id="validation-overlay">
+  <div id="validation-content">
+    <h3>DAG Validation Results</h3>
+    <div id="validation-results"></div>
+    <button class="close-btn" onclick="document.getElementById('validation-overlay').classList.remove('show'); clearValidationHighlights();">OK</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<input type="file" id="file-input" accept=".json" style="display:none">
+
+<script>
+// ============================================================
+// Data Model
+// ============================================================
+
+const NODE_COLORS = {
+  active_skill: { fill: '#1a3a5c', stroke: '#3498db', text: '#3498db' },
+  passive:      { fill: '#1a3c2a', stroke: '#2ecc71', text: '#2ecc71' },
+  trait:        { fill: '#2a1a3c', stroke: '#9b59b6', text: '#9b59b6' },
+  skill_upgrade:{ fill: '#3c2a1a', stroke: '#e67e22', text: '#e67e22' },
+  advancement:  { fill: '#3c1a2a', stroke: '#e94560', text: '#e94560' },
+  gauge_core:   { fill: '#3c3a1a', stroke: '#f1c40f', text: '#f1c40f' },
+  gauge_extend: { fill: '#3c2e1a', stroke: '#f39c12', text: '#f39c12' },
+  stat_minor:   { fill: '#2a2a2a', stroke: '#7f8c8d', text: '#7f8c8d' },
+};
+
+const NODE_RADIUS = 32;
+const NODE_LABEL_MAP = {
+  active_skill: 'Skill',
+  passive: 'Passive',
+  trait: 'Trait',
+  skill_upgrade: 'Upgrade',
+  advancement: 'ADV',
+  gauge_core: 'Gauge',
+  gauge_extend: 'G.Ext',
+  stat_minor: 'Stat',
+};
+
+// ============================================================
+// All Swordsman Variant Trees
+// Rule: min path = 10 nodes (Start(1) + 8 mid + Adv = 10 pts)
+// ============================================================
+const TREES = {
+
+  // ── A: Hourglass (双菱形) ─ 16 nodes ─ wide→converge×2 ────────
+  sw_a: {
+    class_id: 'sw_a', class_name: '剑士 A · 双菱形',
+    nodes: [
+      { id:'sw_start',name:'剑道入门',type:'trait',cost:1,level:1,x:400,y:60,
+        desc:'解锁初始技能「斩击」（melee/physical，power 90%，hit +5）。激活剑类武器专精。',
+        notes:'起始节点，需花费1天赋点解锁。',tags:'sword,start',exclusive:'',requires:'' },
+      { id:'sw_sharp_edge',name:'锐刃',type:'passive',cost:1,level:2,x:270,y:160,
+        desc:'被动：「斩击」命中后，目标附加「锐伤」（物防-2，持续2回合，最多叠3层）。',
+        notes:'穿防路线入口（满层-6物防）。物防降低对暴击流和混合伤害均有价值。',tags:'sword,debuff',exclusive:'',requires:'' },
+      { id:'sw_instinct',name:'敏锐',type:'passive',cost:1,level:2,x:530,y:160,
+        desc:'被动：每回合开始时，若本回合行动队列中本单位前方无任何敌方单位（即本单位最先行动），本回合暴击率+8%。',
+        notes:'速度优势路线入口。先手→暴击奖励，比"高于所有敌人"更公平稳定。',tags:'sword,speed,crit',exclusive:'',requires:'' },
+      { id:'sw_chain_strike',name:'连环',type:'passive',cost:1,level:3,x:170,y:270,
+        desc:'被动：若连续2回合均发动攻击并命中，获得「连环」（伤害+5%，暴击率+5%，持续保持）。\n维持：每回合攻击并命中。\n粘滞：允许1回合空窗（该回合未攻击不立即消失，但连续2回合未攻击命中则消失）。',
+        notes:'跨回合连击追踪，奖励持续进攻节奏。命中已全段溢出，改为伤害加成。',tags:'sword,damage,crit,sustain',exclusive:'',requires:'' },
+      { id:'sw_phantom_step',name:'虚实',type:'trait',cost:1,level:3,x:450,y:270,
+        desc:'特质：成功闪避后，下一次攻击必定命中（「洞察」，每回合最多触发1次）。',
+        notes:'闪避→进攻转化。两个转职通用。',tags:'sword,evasion,hit',exclusive:'',requires:'' },
+      { id:'sw_sword_dance',name:'剑舞',type:'active_skill',cost:1,level:4,x:110,y:380,
+        desc:'主动：攻击后可立即追加移动1格（不触发额外反击）。melee/physical，power 85%，每回合1次。',
+        notes:'攻击后机动，打完调位。',tags:'sword,mobility,melee',exclusive:'',requires:'' },
+      { id:'sw_counter_edge',name:'剑意',type:'passive',cost:1,level:4,x:370,y:380,
+        desc:'被动：反击时，命中率+15，伤害+10%，且无视目标地形带来的闪避加成。',
+        notes:'强化反击可靠性，地形穿透。',tags:'sword,counter,hit',exclusive:'',requires:'' },
+      { id:'sw_heart_pulse',name:'剑心感应',type:'trait',cost:1,level:5,x:270,y:470,
+        desc:'特质：每当本单位造成暴击，下一次攻击额外无视目标20%物防（一次性，每次暴击后刷新）。',
+        notes:'★第一收束节点。暴击→穿防复利循环。',tags:'sword,crit,penetration',exclusive:'',requires:'' },
+      { id:'sw_fluid_dance',name:'灵动',type:'active_skill',cost:1,level:6,x:155,y:570,
+        desc:'主动：激活「流形」（持续1回合）：闪避+15。「流形」下成功闪避→立即反击1次（普攻70%，不触发二次反击）。CD：2回合。',
+        notes:'主动制造闪避机会，闪避→反击转化。',tags:'sword,evasion,counter,active',exclusive:'',requires:'' },
+      { id:'sw_cleave_mark',name:'斩铁',type:'skill_upgrade',cost:1,level:6,x:415,y:570,
+        desc:'技能升级：「斩击」暴击命中后，目标附加「锐标」（目标下次受伤+15%，任何来源触发，消耗后消失）。',
+        notes:'暴击配合机制，可与队友联动。',tags:'sword,crit,upgrade',exclusive:'',requires:'' },
+      { id:'sw_first_edge',name:'先机之刃',type:'passive',cost:1,level:7,x:80,y:670,
+        desc:'被动：若本单位本回合最先行动（速度最快），所有攻击暴击率+10%。',
+        notes:'先手→暴击转化，激励维持速度优势。',tags:'sword,speed,crit',exclusive:'',requires:'' },
+      { id:'sw_momentum',name:'势不可挡',type:'passive',cost:1,level:7,x:320,y:670,
+        desc:'被动：每次主动攻击命中后获得1层「势」（跨回合保留，最多3层）。主动攻击未命中时失去所有「势」。\n每层效果：暴击伤害倍率+0.15（1层1.65x / 2层1.80x / 3层1.95x）。\n非攻击回合不影响已有「势」层数。',
+        notes:'命中连续性追踪（hit streak），与「连环」互补：连环追踪"是否进攻"，势不可挡追踪"是否命中"。',tags:'sword,crit,momentum,accuracy',exclusive:'',requires:'' },
+      { id:'sw_sword_essence',name:'剑道精义',type:'trait',cost:1,level:8,x:225,y:760,
+        desc:'特质：成功反击后，获得「先机」（持续至下回合行动开始）：下回合行动顺序中先制+1，超越所有同速单位优先行动。\n[转职后升级：剑圣→「剑圣精义」，魔剑士→「魔剑精义」]',
+        notes:'★第二收束节点。反击→先制优先级循环；先制+1对SPD 12无冗余，与速度独立。',tags:'sword,counter,priority',exclusive:'',requires:'' },
+      { id:'sw_edge_limit',name:'临界之刃',type:'passive',cost:1,level:9,x:225,y:850,
+        desc:'被动：当自身HP低于70%时，暴击伤害倍率+0.2，受到攻击时「明」自动刷新。',
+        notes:'逆境爆发，两个转职均适用。',tags:'sword,crit,survival',exclusive:'',requires:'' },
+      { id:'sw_adv_saint',name:'剑圣之路',type:'advancement',cost:1,level:10,x:120,y:960,
+        desc:'转职：成为剑圣。\n· 激活「剑气」量谱（暴击命中+15气，成功闪避+10气，速度差攻击+10气）\n· 速度/暴击/闪避成长率强化\n· 「剑道精义」→「剑圣精义」（反击后+20剑气）\n· 解锁剑圣专属天赋分支',
+        notes:'左侧转职。速度/暴击/闪避极致化路线。',tags:'advancement,sword_saint',exclusive:'adv_choice',requires:'' },
+      { id:'sw_adv_magic',name:'魔剑之路',type:'advancement',cost:1,level:10,x:340,y:960,
+        desc:'转职：成为魔剑士。\n· MAG属性开始成长\n· 激活「魔刃」量谱系统\n· 解锁hybrid伤害技能与远程魔法攻击\n· 「剑道精义」→「魔剑精义」（反击后魔刃层数+2）\n· 解锁魔剑士专属天赋分支',
+        notes:'右侧转职。物理+魔法混合路线，转职前无魔攻。',tags:'advancement,magic_swordsman',exclusive:'adv_choice',requires:'' },
+    ],
+    edges: [
+      {from:'sw_start',to:'sw_sharp_edge'},{from:'sw_start',to:'sw_instinct'},
+      {from:'sw_sharp_edge',to:'sw_chain_strike'},{from:'sw_sharp_edge',to:'sw_phantom_step'},
+      {from:'sw_instinct',to:'sw_phantom_step'},
+      {from:'sw_chain_strike',to:'sw_sword_dance'},{from:'sw_chain_strike',to:'sw_counter_edge'},
+      {from:'sw_phantom_step',to:'sw_counter_edge'},
+      {from:'sw_sword_dance',to:'sw_heart_pulse'},{from:'sw_counter_edge',to:'sw_heart_pulse'},
+      {from:'sw_heart_pulse',to:'sw_fluid_dance'},{from:'sw_heart_pulse',to:'sw_cleave_mark'},
+      {from:'sw_fluid_dance',to:'sw_first_edge'},{from:'sw_fluid_dance',to:'sw_momentum'},
+      {from:'sw_cleave_mark',to:'sw_momentum'},
+      {from:'sw_first_edge',to:'sw_sword_essence'},{from:'sw_momentum',to:'sw_sword_essence'},
+      {from:'sw_sword_essence',to:'sw_edge_limit'},
+      {from:'sw_edge_limit',to:'sw_adv_saint'},{from:'sw_edge_limit',to:'sw_adv_magic'},
+    ]
+  },
+
+  // ── B: Twin Spires (双塔形) ─ 18 nodes ─ 攻势/应势两柱+跨塔边 ──
+  // Left column (L) = 攻势 (proactive/crit)
+  // Right column (R) = 应势 (reactive/counter-evasion)
+  // Cross edges allow hybrid builds
+  sw_b: {
+    class_id: 'sw_b', class_name: '剑士 B · 双塔形',
+    nodes: [
+      { id:'sw2_start',name:'剑道入门',type:'trait',cost:1,level:1,x:380,y:60,
+        desc:'解锁初始技能「斩击」（melee/physical，power 90%，hit +5）。激活剑类武器专精。',
+        notes:'起始节点，需花费1天赋点解锁。',tags:'sword,start',exclusive:'',requires:'' },
+      // L1 / R1
+      { id:'sw2_vanguard',name:'先锋之锋',type:'passive',cost:1,level:2,x:220,y:160,
+        desc:'被动：本单位每回合首次攻击命中时，若目标本回合尚未受到任何攻击，伤害+12%（首击奖励）。',
+        notes:'攻势路线入口。奖励主动先手出击。',tags:'sword,first_strike',exclusive:'',requires:'' },
+      { id:'sw2_sentinel',name:'守望之刃',type:'passive',cost:1,level:2,x:540,y:160,
+        desc:'被动：每回合结束时，若本回合成功闪避≥1次，下回合命中+8，暴击率+4%。',
+        notes:'应势路线入口。闪避积累转化为下回合进攻准备。',tags:'sword,evasion,crit',exclusive:'',requires:'' },
+      // L2 / R2
+      { id:'sw2_chain_thrust',name:'连刺',type:'active_skill',cost:1,level:3,x:140,y:260,
+        desc:'主动：对目标发动2次攻击，各自独立结算命中/暴击。melee/physical，power 65%×2。',
+        notes:'双塔攻势路线核心——单回合2次攻击，天然适配暴击/穿防叠加。',tags:'sword,multi_hit,melee',exclusive:'',requires:'' },
+      { id:'sw2_read_blade',name:'读刃',type:'passive',cost:1,level:3,x:620,y:260,
+        desc:'被动：反击时，命中率+15，伤害+10%，无视目标地形带来的闪避加成。',
+        notes:'强化反击可靠性，应势路线核心收益。',tags:'sword,counter,hit',exclusive:'',requires:'' },
+      // L3 / R3
+      { id:'sw2_suppress',name:'压制',type:'passive',cost:1,level:3,x:140,y:360,
+        desc:'被动：本回合每次攻击命中（含反击），目标本回合闪避-3（可叠加，上限-12）。',
+        notes:'持续命中逐渐剥除目标闪避，方便后续攻击。',tags:'sword,debuff,evasion',exclusive:'',requires:'' },
+      { id:'sw2_phantom',name:'虚实',type:'trait',cost:1,level:3,x:620,y:360,
+        desc:'特质：成功闪避后，下次攻击必定命中（「洞察」，每回合最多触发1次）。',
+        notes:'闪避→进攻转化，应势打法关键特质。',tags:'sword,evasion,hit',exclusive:'',requires:'' },
+      // L4 / R4
+      { id:'sw2_crit_surge',name:'暴锋',type:'passive',cost:1,level:4,x:140,y:460,
+        desc:'被动：本回合内已造成暴击≥1次，之后每次攻击暴击率额外+8%（本回合有效）。',
+        notes:'暴击滚雪球，攻势积累的关键节点。',tags:'sword,crit',exclusive:'',requires:'' },
+      { id:'sw2_fluid',name:'灵动',type:'active_skill',cost:1,level:4,x:620,y:460,
+        desc:'主动：激活「流形」（持续1回合）：闪避+15。「流形」下成功闪避→立即反击1次（普攻70%，不触发二次反击）。CD：2回合。',
+        notes:'主动制造闪避机会，闪避→反击收益。',tags:'sword,evasion,counter,active',exclusive:'',requires:'' },
+      // L5 / R5
+      { id:'sw2_mark',name:'斩铁',type:'skill_upgrade',cost:1,level:5,x:140,y:560,
+        desc:'技能升级：「斩击」暴击命中后，目标附加「锐标」（下次受伤+15%，任何来源触发，一次消耗）。',
+        notes:'暴击配合机制，可与队友联动。',tags:'sword,crit,upgrade',exclusive:'',requires:'' },
+      { id:'sw2_formless',name:'无懈',type:'trait',cost:1,level:5,x:620,y:560,
+        desc:'特质：若本回合未被任何攻击命中（含已闪避），回合结束时闪避+5（可累积至+15，被命中后归零）。',
+        notes:'逐渐积累防御优势，奖励零受击回合。',tags:'sword,evasion,accumulate',exclusive:'',requires:'' },
+      // L6 / R6
+      { id:'sw2_first_edge',name:'先机之刃',type:'passive',cost:1,level:6,x:220,y:660,
+        desc:'被动：若本单位本回合最先行动，所有攻击暴击率+10%。',
+        notes:'先手→暴击转化，激励维持速度优势。',tags:'sword,speed,crit',exclusive:'',requires:'' },
+      { id:'sw2_bide',name:'以逸待劳',type:'trait',cost:1,level:6,x:540,y:660,
+        desc:'特质：本回合内主动使用「流形」后，若成功闪避任意攻击，获得「蓄势」（持续至本单位下次主动攻击时消耗：伤害+25%，命中+10）。',
+        notes:'与「流形」深度绑定——先主动开盾，再等敌人打过来，再爆发。SPD 12先手问题通过"主动触发流形"绕过。',tags:'sword,evasion,bide',exclusive:'',requires:'' },
+      // L7 / R7
+      { id:'sw2_saint_will',name:'剑圣之魄',type:'passive',cost:1,level:7,x:280,y:760,
+        desc:'被动：每次暴击，下次攻击（含当回合）额外无视目标20%物防（一次性，每次暴击后刷新）。',
+        notes:'攻势顶端。暴击穿防复利，两个转职方向均受益（hybrid伤害的物理部分同样受益）。',tags:'sword,crit,penetration',exclusive:'',requires:'' },
+      { id:'sw2_sword_essence',name:'剑道精义',type:'trait',cost:1,level:7,x:480,y:760,
+        desc:'特质：成功反击后，获得「先机」（下回合行动先制+1，超越所有同速单位优先行动）。\n[转职后升级：剑圣→「剑圣精义」，魔剑士→「魔剑精义」]',
+        notes:'应势顶端。反击→先制优先级循环；先制+1对SPD 12无冗余，效果清晰。',tags:'sword,counter,priority',exclusive:'',requires:'' },
+      // Pre-Adv
+      { id:'sw2_edge_limit',name:'临界之刃',type:'passive',cost:1,level:8,x:380,y:860,
+        desc:'被动：当自身HP低于70%时，暴击伤害倍率+0.2，受到攻击时「明」自动刷新。',
+        notes:'汇聚节点，逆境爆发。两个转职均适用。',tags:'sword,crit,survival',exclusive:'',requires:'' },
+      // Advancement
+      { id:'sw2_adv_saint',name:'剑圣之路',type:'advancement',cost:1,level:9,x:260,y:960,
+        desc:'转职：成为剑圣。\n· 激活「剑气」量谱（暴击命中+15气，成功闪避+10气，速度差攻击+10气）\n· 速度/暴击/闪避成长率强化\n· 「剑道精义」→「剑圣精义」（反击后+20剑气）\n· 解锁剑圣专属天赋分支',
+        notes:'左塔偏向剑圣（暴击驱动）但两塔均可转职。',tags:'advancement,sword_saint',exclusive:'adv_choice',requires:'' },
+      { id:'sw2_adv_magic',name:'魔剑之路',type:'advancement',cost:1,level:9,x:500,y:960,
+        desc:'转职：成为魔剑士。\n· MAG属性开始成长\n· 激活「魔刃」量谱系统\n· 解锁hybrid伤害技能与远程魔法攻击\n· 「剑道精义」→「魔剑精义」（反击后魔刃层数+2）\n· 解锁魔剑士专属天赋分支',
+        notes:'右塔偏向魔剑士（反击驱动）但两塔均可转职。',tags:'advancement,magic_swordsman',exclusive:'adv_choice',requires:'' },
+    ],
+    edges: [
+      {from:'sw2_start',to:'sw2_vanguard'},{from:'sw2_start',to:'sw2_sentinel'},
+      // L column
+      {from:'sw2_vanguard',to:'sw2_chain_thrust'},
+      {from:'sw2_chain_thrust',to:'sw2_suppress'},
+      {from:'sw2_suppress',to:'sw2_crit_surge'},
+      {from:'sw2_crit_surge',to:'sw2_mark'},
+      {from:'sw2_mark',to:'sw2_first_edge'},
+      {from:'sw2_first_edge',to:'sw2_saint_will'},
+      // R column
+      {from:'sw2_sentinel',to:'sw2_read_blade'},
+      {from:'sw2_read_blade',to:'sw2_phantom'},
+      {from:'sw2_phantom',to:'sw2_fluid'},
+      {from:'sw2_fluid',to:'sw2_formless'},
+      {from:'sw2_formless',to:'sw2_bide'},
+      {from:'sw2_bide',to:'sw2_sword_essence'},
+      // Cross edges (tower switches)
+      {from:'sw2_chain_thrust',to:'sw2_phantom'},   // L2→R3: 攻势转应势
+      {from:'sw2_read_blade',to:'sw2_suppress'},    // R2→L3: 应势转攻势
+      {from:'sw2_crit_surge',to:'sw2_formless'},    // L4→R5: 暴击流转无懈
+      {from:'sw2_fluid',to:'sw2_mark'},             // R4→L5: 灵动后斩铁标记
+      // Both capstones → pre-adv
+      {from:'sw2_saint_will',to:'sw2_edge_limit'},
+      {from:'sw2_sword_essence',to:'sw2_edge_limit'},
+      // Advancement
+      {from:'sw2_edge_limit',to:'sw2_adv_saint'},
+      {from:'sw2_edge_limit',to:'sw2_adv_magic'},
+    ]
+  },
+
+  // ── C: Star Burst (星爆形) ─ 16 nodes ─ 强制汇聚节点+辐射 ───────
+  // All paths converge at 剑心通明 (Hub), then radiate outward
+  // Hub creates 「明」state (crit OR evasion triggers it)
+  sw_c: {
+    class_id: 'sw_c', class_name: '剑士 C · 星爆形',
+    nodes: [
+      { id:'sw3_start',name:'剑道入门',type:'trait',cost:1,level:1,x:300,y:60,
+        desc:'解锁初始技能「斩击」（melee/physical，power 90%，hit +5）。激活剑类武器专精。',
+        notes:'起始节点，需花费1天赋点解锁。',tags:'sword,start',exclusive:'',requires:'' },
+      // Pre-Hub layer 1
+      { id:'sw3_keen',name:'锐感',type:'passive',cost:1,level:2,x:170,y:155,
+        desc:'被动：「斩击」命中后，若目标处于任何debuff状态，伤害+10%。',
+        notes:'引导玩家重视控制链，利用debuff打出更高伤害。',tags:'sword,debuff,synergy',exclusive:'',requires:'' },
+      { id:'sw3_momentum',name:'先势',type:'passive',cost:1,level:2,x:430,y:155,
+        desc:'被动：若本单位速度比行动顺序中紧随其后的单位高≥5，本回合首次攻击伤害+6%，暴击率+5%。',
+        notes:'速度优势→攻击质量。命中已溢出故改为伤害加成。',tags:'sword,speed,crit',exclusive:'',requires:'' },
+      // Pre-Hub layer 2
+      { id:'sw3_wound',name:'锐伤',type:'skill_upgrade',cost:1,level:3,x:100,y:250,
+        desc:'技能升级：「斩击」命中后，目标附加「锐伤」（物防-2，持续2回合，最多叠3层）。',
+        notes:'持续穿防（满层-6物防），与「锐感」形成配合（锐伤是debuff，可触发锐感加成）。',tags:'sword,debuff,upgrade',exclusive:'',requires:'' },
+      { id:'sw3_evasion',name:'识破',type:'passive',cost:1,level:3,x:380,y:250,
+        desc:'被动：成功闪避后，下次攻击必定命中（「洞察」，每回合1次）。',
+        notes:'闪避→必中转化，为Hub节点的「明」状态提供另一条驱动路线。',tags:'sword,evasion,hit',exclusive:'',requires:'' },
+      // HUB (mandatory convergence)
+      { id:'sw3_heart',name:'剑心通明',type:'gauge_core',cost:1,level:4,x:240,y:350,
+        desc:'★核心节点：每次暴击命中后，或每次成功闪避后，获得「明」标记（不叠加，刷新型；「明」持续到本角色回合结束，每次触发可刷新延长）。\n「明」激活时：\n· 发起攻击 → 伤害+15%\n· 被攻击 → 闪避+8\n[转职后，「剑圣精义」和「魔剑精义」各自强化「明」的触发或效果]',
+        notes:'★强制汇聚节点，补充「明」持续时间（回合末消失，触发可刷新）——防止无限永久BUFF或零效果双极端。',tags:'sword,hub,gauge',exclusive:'',requires:'' },
+      // Post-Hub layer 1 (3 radiating paths)
+      { id:'sw3_dancer',name:'剑舞',type:'active_skill',cost:1,level:5,x:80,y:460,
+        desc:'主动：攻击后可立即追加移动1格（不触发额外反击）。melee/physical，power 85%，每回合1次。',
+        notes:'机动型延伸路线。攻击后调位，适合高机动打法。',tags:'sword,mobility,melee',exclusive:'',requires:'' },
+      { id:'sw3_chain',name:'连环',type:'passive',cost:1,level:5,x:255,y:460,
+        desc:'被动：若连续2回合均发动攻击并命中，获得「连环」（伤害+5%，暴击率+5%，持续保持）。\n维持：每回合攻击并命中。\n粘滞：允许1回合空窗（该回合未攻击不立即消失，但连续2回合未攻击命中则消失）。',
+        notes:'跨回合连击追踪。命中已全段溢出，改为伤害加成。',tags:'sword,damage,crit,sustain',exclusive:'',requires:'' },
+      { id:'sw3_counter',name:'剑意',type:'passive',cost:1,level:5,x:440,y:460,
+        desc:'被动：反击时命中+15，伤害+10%，无视目标地形带来的闪避加成。',
+        notes:'反击型延伸路线。',tags:'sword,counter,hit',exclusive:'',requires:'' },
+      // Post-Hub layer 2
+      { id:'sw3_surge',name:'势不可挡',type:'passive',cost:1,level:6,x:165,y:555,
+        desc:'被动：每次主动攻击命中后获得1层「势」（跨回合保留，最多3层）。主动攻击未命中时失去所有「势」。\n每层效果：暴击伤害倍率+0.15（1层1.65x / 2层1.80x / 3层1.95x）。\n非攻击回合不影响已有「势」层数。',
+        notes:'命中连续性追踪（hit streak），与A变体「势不可挡」保持一致定义。',tags:'sword,crit,momentum,accuracy',exclusive:'',requires:'' },
+      { id:'sw3_fluid',name:'流形',type:'active_skill',cost:1,level:6,x:365,y:555,
+        desc:'主动：激活「流形」（持续1回合）：闪避+15。「流形」下成功闪避→立即反击1次（普攻70%，不触发二次反击）。CD：2回合。',
+        notes:'闪避→反击转化，反击路线的自然延伸。',tags:'sword,evasion,counter,active',exclusive:'',requires:'' },
+      // Post-Hub convergence
+      { id:'sw3_essence',name:'剑道精义',type:'trait',cost:1,level:7,x:265,y:645,
+        desc:'特质：成功反击后，获得「先机」（下回合行动先制+1，超越所有同速单位优先行动）。\n[转职后升级：剑圣→「剑圣精义」，魔剑士→「魔剑精义」]',
+        notes:'收束节点。反击→先制优先级循环；三个变体「剑道精义」效果统一。',tags:'sword,counter,priority',exclusive:'',requires:'' },
+      // Hub upgrade
+      { id:'sw3_deepen',name:'剑意融合',type:'gauge_extend',cost:1,level:8,x:265,y:730,
+        desc:'特质：「明」标记（来自「剑心通明」）的持续时间额外+1回合，且「明」状态下的伤害加成从+15%提升至+20%。',
+        notes:'★直接升级Hub节点效果。"我在强化我的核心顿悟"——清晰的Build叙事。',tags:'sword,hub,upgrade',exclusive:'',requires:'' },
+      // Final
+      { id:'sw3_brink',name:'临界之刃',type:'passive',cost:1,level:9,x:265,y:815,
+        desc:'被动：当自身HP低于70%时，暴击伤害倍率+0.2，受到攻击时「明」自动刷新。',
+        notes:'逆境爆发+防御联动。暴击率已被cap，改为暴击伤害倍率；「明」自动刷新增加低HP时的生存能力。',tags:'sword,crit_damage,survival',exclusive:'',requires:'' },
+      // Advancement
+      { id:'sw3_adv_saint',name:'剑圣之路',type:'advancement',cost:1,level:10,x:160,y:910,
+        desc:'转职：成为剑圣。\n· 激活「剑气」量谱（暴击命中+15气，成功闪避+10气，速度差攻击+10气）\n· 速度/暴击/闪避成长率强化\n· 「剑道精义」→「剑圣精义」（反击后+20剑气）\n· 「明」状态升级：暴击触发概率+效果强化\n· 解锁剑圣专属天赋分支',
+        notes:'左侧转职。「明」的暴击触发被强化。',tags:'advancement,sword_saint',exclusive:'adv_choice',requires:'' },
+      { id:'sw3_adv_magic',name:'魔剑之路',type:'advancement',cost:1,level:10,x:375,y:910,
+        desc:'转职：成为魔剑士。\n· MAG属性开始成长\n· 激活「魔刃」量谱系统\n· 解锁hybrid伤害技能与远程魔法攻击\n· 「剑道精义」→「魔剑精义」（反击后魔刃层数+2）\n· 「明」状态升级：闪避触发概率+效果强化\n· 解锁魔剑士专属天赋分支',
+        notes:'右侧转职。「明」的闪避触发被强化。',tags:'advancement,magic_swordsman',exclusive:'adv_choice',requires:'' },
+    ],
+    edges: [
+      {from:'sw3_start',to:'sw3_keen'},{from:'sw3_start',to:'sw3_momentum'},
+      // Pre-hub cross connections (both L1 nodes can reach both L2 nodes)
+      {from:'sw3_keen',to:'sw3_wound'},{from:'sw3_keen',to:'sw3_evasion'},
+      {from:'sw3_momentum',to:'sw3_wound'},{from:'sw3_momentum',to:'sw3_evasion'},
+      // Converge to hub
+      {from:'sw3_wound',to:'sw3_heart'},{from:'sw3_evasion',to:'sw3_heart'},
+      // Hub radiates to 3 paths
+      {from:'sw3_heart',to:'sw3_dancer'},{from:'sw3_heart',to:'sw3_chain'},{from:'sw3_heart',to:'sw3_counter'},
+      // Post-hub connections
+      {from:'sw3_dancer',to:'sw3_surge'},{from:'sw3_chain',to:'sw3_surge'},{from:'sw3_chain',to:'sw3_fluid'},
+      {from:'sw3_counter',to:'sw3_fluid'},
+      // Cross in post-hub (dancer can reach fluid, counter can reach surge)
+      {from:'sw3_dancer',to:'sw3_fluid'},{from:'sw3_counter',to:'sw3_surge'},
+      // Convergence → upgrade → final
+      {from:'sw3_surge',to:'sw3_essence'},{from:'sw3_fluid',to:'sw3_essence'},
+      {from:'sw3_essence',to:'sw3_deepen'},
+      {from:'sw3_deepen',to:'sw3_brink'},
+      {from:'sw3_brink',to:'sw3_adv_saint'},{from:'sw3_brink',to:'sw3_adv_magic'},
+    ]
+  },
+
+  // ═══════════════════════════════════════════════════
+  //  弓箭手 · 三角洲形 (River Delta)
+  // ═══════════════════════════════════════════════════
+  ar_a: {
+    class_id: 'ar_a', class_name: '弓箭手 · 三角洲形',
+    nodes: [
+      // Layer 0: Start
+      { id:'ar_start',name:'射手之眼',type:'trait',cost:1,level:1,x:265,y:50,
+        desc:'起始节点。解锁「射击」（ranged/physical，power 100%，diamond 2-4）。激活弓类武器专精。',
+        notes:'弓箭手起始节点，远程物理基础。',tags:'archer,start',exclusive:'',requires:'' },
+      // Layer 1: 左精准 / 右机动
+      { id:'ar_steady',name:'稳射',type:'passive',cost:1,level:2,x:130,y:155,
+        desc:'被动：若本回合未移动即发动攻击，伤害+8%。',
+        notes:'站桩奖励。命中已溢出，改为伤害加成。契合神射手定位。',tags:'archer,damage,steady',exclusive:'',requires:'' },
+      { id:'ar_keen_eye',name:'鹰眼',type:'passive',cost:1,level:2,x:400,y:155,
+        desc:'被动：攻击低于50%HP的目标时，暴击率+8%。',
+        notes:'补刀强化。低HP目标=高暴击，鼓励集火。',tags:'archer,crit,execute',exclusive:'',requires:'' },
+      // Layer 2: 三路展开
+      { id:'ar_pierce',name:'穿透射击',type:'skill_upgrade',cost:1,level:3,x:70,y:260,
+        desc:'技能升级：「射击」命中后，无视目标10%物防。',
+        notes:'左路精准线深入。',tags:'archer,armor_pen',exclusive:'',requires:'' },
+      { id:'ar_focus_fire',name:'集中火力',type:'passive',cost:1,level:3,x:265,y:260,
+        desc:'被动：连续2回合攻击同一目标，第二次攻击伤害+12%（粘滞1回合空窗）。',
+        notes:'中路专注线。奖励集火单目标。',tags:'archer,damage,focus',exclusive:'',requires:'' },
+      { id:'ar_quick_step',name:'轻步',type:'trait',cost:1,level:3,x:460,y:260,
+        desc:'特质：攻击后可向远离目标方向移动1格（后撤步，不触发反击）。',
+        notes:'右路机动线。位移质变效果，不随等级贬值。',tags:'archer,mobility',exclusive:'',requires:'' },
+      // Layer 3: 三路技能
+      { id:'ar_mark_shot',name:'标记射击',type:'active_skill',cost:1,level:4,x:70,y:370,
+        desc:'主动：对目标射击(power 80%)并附加「标记」(持续2回合)：队友攻击标记目标命中+10。ranged/physical，CD1。',
+        notes:'团队辅助+输出。标记是核心联动点。',tags:'archer,mark,team',exclusive:'',requires:'' },
+      { id:'ar_crit_chain',name:'连锁暴击',type:'passive',cost:1,level:4,x:265,y:370,
+        desc:'被动：本回合造成暴击后，下次攻击暴击率+10%（本回合有效，可跨反击触发）。',
+        notes:'中路暴击线。暴击→更多暴击的正反馈。',tags:'archer,crit,chain',exclusive:'',requires:'' },
+      { id:'ar_wind_walk',name:'风行',type:'active_skill',cost:1,level:4,x:460,y:370,
+        desc:'主动：移动后立即攻击（不消耗行动），power 75%。ranged/physical，CD2。',
+        notes:'右路机动。先移动后射击，打破标准行动顺序。',tags:'archer,mobility,skill',exclusive:'',requires:'' },
+      // Layer 4: 左中收束
+      { id:'ar_bulls_eye',name:'正中靶心',type:'trait',cost:1,level:5,x:165,y:475,
+        desc:'特质：★左中收束。暴击命中时，额外造成目标最大HP 5%的固定伤害（无视防御，建筑不适用）。',
+        notes:'暴击→%HP固定伤害，对Boss有特殊价值。',tags:'archer,crit,percent_hp',exclusive:'',requires:'' },
+      { id:'ar_evasive',name:'身轻如燕',type:'passive',cost:1,level:5,x:400,y:475,
+        desc:'被动：被近战攻击时闪避+10。被远程攻击时可反击（若射程可达）。',
+        notes:'右路防御。远程反击是独特机制。',tags:'archer,evasion,counter',exclusive:'',requires:'' },
+      // Layer 5: 深入
+      { id:'ar_snipe_instinct',name:'狙击本能',type:'passive',cost:1,level:6,x:100,y:575,
+        desc:'被动：攻击距离≥3格的目标时伤害+10%；距离≥4格时再+5%。',
+        notes:'距离=伤害，核心神射手节点。',tags:'archer,range,damage',exclusive:'',requires:'' },
+      { id:'ar_relentless',name:'追击',type:'passive',cost:1,level:6,x:340,y:575,
+        desc:'被动：击杀目标后，下次攻击（本回合或下回合）暴击率+15%，命中+10。',
+        notes:'击杀奖励。连续击杀时滚雪球。',tags:'archer,kill,crit',exclusive:'',requires:'' },
+      // Layer 6: 总收束
+      { id:'ar_vital_sense',name:'急所感知',type:'trait',cost:1,level:7,x:220,y:670,
+        desc:'特质：★总收束。每次暴击命中后，获得1层「锐」（最多3层，跨回合保留）。每层「锐」：暴击伤害倍率+0.1。主动攻击未命中则全部失去。',
+        notes:'暴击伤害倍率堆叠（非暴击率），不受50% cap影响。',tags:'archer,crit_damage,stack',exclusive:'',requires:'' },
+      // Layer 7: 终端
+      { id:'ar_last_stand',name:'孤注一掷',type:'passive',cost:1,level:8,x:220,y:770,
+        desc:'被动：周围1格内无友方单位时，ATK+10%，暴击伤害倍率+0.1。',
+        notes:'远程角色常满足条件。暴击率改为暴击伤害倍率避免cap问题。',tags:'archer,lone,damage',exclusive:'',requires:'' },
+      // Layer 8: 转职（互斥）
+      { id:'ar_adv_sniper',name:'神射手之路',type:'advancement',cost:1,level:9,x:120,y:870,
+        desc:'转职：成为神射手。\n· 射程全局+1\n· 「锐」层数上限+2（→5层）\n· 解锁Focus集中量谱系统\n· ATK/HIT成长率强化\n· 解锁神射手专属天赋分支',
+        notes:'远程极致化转职。',tags:'advancement,sniper',exclusive:'adv_choice',requires:'' },
+      { id:'ar_adv_elven',name:'精灵射手之路',type:'advancement',cost:1,level:9,x:320,y:870,
+        desc:'转职：成为精灵射手。\n· 解锁melee型弓术技能\n· 弓箭附魔系统（火矢/冰矢）\n· EVA成长率+2\n· 解锁Harmony自然共鸣量谱系统\n· 解锁精灵射手专属天赋分支',
+        notes:'近战兼容+附魔+闪避转职。',tags:'advancement,elven_archer',exclusive:'adv_choice',requires:'' },
+    ],
+    edges: [
+      {from:'ar_start',to:'ar_steady'},{from:'ar_start',to:'ar_keen_eye'},
+      {from:'ar_steady',to:'ar_pierce'},{from:'ar_steady',to:'ar_focus_fire'},
+      {from:'ar_keen_eye',to:'ar_focus_fire'},{from:'ar_keen_eye',to:'ar_quick_step'},
+      {from:'ar_pierce',to:'ar_mark_shot'},
+      {from:'ar_focus_fire',to:'ar_crit_chain'},{from:'ar_focus_fire',to:'ar_mark_shot'},
+      {from:'ar_quick_step',to:'ar_crit_chain'},{from:'ar_quick_step',to:'ar_wind_walk'},
+      {from:'ar_mark_shot',to:'ar_bulls_eye'},
+      {from:'ar_crit_chain',to:'ar_bulls_eye'},{from:'ar_crit_chain',to:'ar_evasive'},
+      {from:'ar_wind_walk',to:'ar_evasive'},
+      {from:'ar_bulls_eye',to:'ar_snipe_instinct'},{from:'ar_bulls_eye',to:'ar_relentless'},
+      {from:'ar_evasive',to:'ar_relentless'},
+      {from:'ar_snipe_instinct',to:'ar_vital_sense'},
+      {from:'ar_relentless',to:'ar_vital_sense'},
+      {from:'ar_vital_sense',to:'ar_last_stand'},
+      {from:'ar_last_stand',to:'ar_adv_sniper'},{from:'ar_last_stand',to:'ar_adv_elven'},
+    ]
+  },
+
+  // ═══════════════════════════════════════════════════
+  //  魔法师 · 魔法阵形 (Pentagram)
+  // ═══════════════════════════════════════════════════
+  mg_a: {
+    class_id: 'mg_a', class_name: '魔法师 · 魔法阵形',
+    nodes: [
+      // Layer 0: Start
+      { id:'mg_start',name:'魔导启蒙',type:'trait',cost:1,level:1,x:265,y:50,
+        desc:'起始节点。解锁「火球术」（magical/area，power 120%，diamond 2-4，area diamond(1)，燃烧30%，CD2）和「冰冻术」（magical/ranged，power 100%，diamond 1-3，减速50%，CD1）。',
+        notes:'魔法师起始节点，双技能。',tags:'mage,start',exclusive:'',requires:'' },
+      // Layer 1: 左毁灭 / 右掌控
+      { id:'mg_amplify',name:'增幅',type:'passive',cost:1,level:2,x:130,y:155,
+        desc:'被动：使用AOE技能命中≥2个目标时，伤害+8%。',
+        notes:'左路毁灭线入口。AOE奖励。',tags:'mage,aoe,damage',exclusive:'',requires:'' },
+      { id:'mg_conserve',name:'凝练',type:'passive',cost:1,level:2,x:400,y:155,
+        desc:'被动：使用冷却≥2的技能时，有25%概率冷却-1（最低1）。',
+        notes:'右路掌控线入口。CD管理。',tags:'mage,cooldown',exclusive:'',requires:'' },
+      // Layer 2: 三路（含交叉点1）
+      { id:'mg_burn_mastery',name:'燃烬',type:'passive',cost:1,level:3,x:70,y:260,
+        desc:'被动：燃烧DOT伤害+30%；燃烧中的目标受到本单位魔法攻击时额外受伤+5%。',
+        notes:'左路深入。燃烧专精。',tags:'mage,fire,dot',exclusive:'',requires:'' },
+      { id:'mg_frost_chain',name:'冰锁',type:'skill_upgrade',cost:1,level:3,x:265,y:260,
+        desc:'技能升级：「冰冻术」升级：减速的目标再次受到魔法攻击时冰冻1回合（每目标每战1次）。',
+        notes:'★交叉点1。左右路均可到达。控制质变。',tags:'mage,ice,cc',exclusive:'',requires:'' },
+      { id:'mg_long_cast',name:'远咏',type:'passive',cost:1,level:3,x:460,y:260,
+        desc:'被动：所有射程≥2的技能射程+1（不影响area范围）。',
+        notes:'右路深入。射程扩展。',tags:'mage,range',exclusive:'',requires:'' },
+      // Layer 3: 技能层
+      { id:'mg_chain_cast',name:'连咏',type:'trait',cost:1,level:4,x:100,y:370,
+        desc:'特质：若上一回合使用了攻击魔法且命中，本回合首个攻击魔法伤害+10%。（跨回合连击，粘滞1回合）',
+        notes:'左路连续施法奖励。',tags:'mage,chain,damage',exclusive:'',requires:'' },
+      { id:'mg_mana_well',name:'魔力泉源',type:'passive',cost:1,level:4,x:265,y:370,
+        desc:'被动：每回合结束时，若本回合未受到伤害，下回合一个技能冷却-1。',
+        notes:'★交叉点2。安全=CD回复。',tags:'mage,cooldown,safety',exclusive:'',requires:'' },
+      { id:'mg_barrier',name:'魔力屏障',type:'active_skill',cost:1,level:4,x:430,y:370,
+        desc:'主动：self/buff，受到下一次物理攻击时伤害-40%（持续2回合或触发后消失）。CD3。',
+        notes:'右路生存技能。',tags:'mage,shield,survival',exclusive:'',requires:'' },
+      // Layer 4: 收束
+      { id:'mg_elemental_fury',name:'元素狂潮',type:'trait',cost:1,level:5,x:130,y:475,
+        desc:'特质：★左侧收束。连续3回合使用攻击魔法（粘滞1回合空窗），第3回合攻击魔法伤害+25%且AOE范围+1。',
+        notes:'高回报蓄力。需3回合投入。',tags:'mage,aoe,burst',exclusive:'',requires:'' },
+      { id:'mg_spell_echo',name:'咏唱回响',type:'passive',cost:1,level:5,x:400,y:475,
+        desc:'被动：使用冷却≥3的技能后，下一回合首个非冷却技能伤害+15%。',
+        notes:'右路大招→小招联动。',tags:'mage,cooldown,damage',exclusive:'',requires:'' },
+      // Layer 5: 深入
+      { id:'mg_ignite',name:'引爆',type:'active_skill',cost:1,level:6,x:100,y:575,
+        desc:'主动：对处于燃烧状态的目标造成magical/ranged power 130%伤害并消除燃烧。消除燃烧时额外造成剩余燃烧回数×15%的bonus伤害。CD2。',
+        notes:'消耗燃烧DOT换取爆发伤害。',tags:'mage,fire,burst',exclusive:'',requires:'' },
+      { id:'mg_ice_armor',name:'寒冰护体',type:'passive',cost:1,level:6,x:400,y:575,
+        desc:'被动：被近战攻击命中后，攻击者附加减速（SPD-2，2回合），概率50%。',
+        notes:'被动反制近战。',tags:'mage,ice,counter',exclusive:'',requires:'' },
+      // Layer 6: 总收束
+      { id:'mg_arcane_mastery',name:'奥术精通',type:'trait',cost:1,level:7,x:250,y:670,
+        desc:'特质：★总收束。每使用3次攻击魔法（跨回合累计），下一次攻击魔法获得「精通」：伤害+15%，附加效果触发率+20%。计数不因非攻击行动重置。',
+        notes:'宽容的积累条件。+20%附加率是质变效果。',tags:'mage,mastery,damage',exclusive:'',requires:'' },
+      // Layer 7: 终端
+      { id:'mg_desperate',name:'孤注一掷',type:'passive',cost:1,level:8,x:250,y:770,
+        desc:'被动：HP低于50%时MAG+15%，但受到伤害+10%。',
+        notes:'高风险高回报。与魔法师脆皮定位契合。',tags:'mage,risk,damage',exclusive:'',requires:'' },
+      // Layer 8: 转职（互斥）
+      { id:'mg_adv_fire',name:'火之贤者之路',type:'advancement',cost:1,level:9,x:140,y:870,
+        desc:'转职：成为火之贤者。\n· 火系魔法全面强化\n· AOE范围扩大\n· 燃烧可叠层\n· 解锁Inferno业火量谱系统\n· MAG/CRIT成长率强化\n· 解锁火贤者专属天赋分支',
+        notes:'AOE毁灭转职。',tags:'advancement,fire_sage',exclusive:'adv_choice',requires:'' },
+      { id:'mg_adv_water',name:'水之贤者之路',type:'advancement',cost:1,level:9,x:360,y:870,
+        desc:'转职：成为水之贤者。\n· 解锁holy系治疗魔法\n· 水系攻击附加减速增强\n· Buff技能强化\n· 解锁Tide潮汐量谱系统\n· M.DEF/HP成长率强化\n· 解锁水贤者专属天赋分支',
+        notes:'攻治双修转职。',tags:'advancement,water_sage',exclusive:'adv_choice',requires:'' },
+    ],
+    edges: [
+      {from:'mg_start',to:'mg_amplify'},{from:'mg_start',to:'mg_conserve'},
+      {from:'mg_amplify',to:'mg_burn_mastery'},{from:'mg_amplify',to:'mg_frost_chain'},
+      {from:'mg_conserve',to:'mg_frost_chain'},{from:'mg_conserve',to:'mg_long_cast'},
+      {from:'mg_burn_mastery',to:'mg_chain_cast'},
+      {from:'mg_frost_chain',to:'mg_chain_cast'},{from:'mg_frost_chain',to:'mg_mana_well'},
+      {from:'mg_long_cast',to:'mg_mana_well'},{from:'mg_long_cast',to:'mg_barrier'},
+      {from:'mg_chain_cast',to:'mg_elemental_fury'},
+      {from:'mg_mana_well',to:'mg_elemental_fury'},{from:'mg_mana_well',to:'mg_spell_echo'},
+      {from:'mg_barrier',to:'mg_spell_echo'},
+      {from:'mg_elemental_fury',to:'mg_ignite'},
+      {from:'mg_spell_echo',to:'mg_ice_armor'},
+      {from:'mg_ignite',to:'mg_arcane_mastery'},
+      {from:'mg_ice_armor',to:'mg_arcane_mastery'},
+      {from:'mg_arcane_mastery',to:'mg_desperate'},
+      {from:'mg_desperate',to:'mg_adv_fire'},{from:'mg_desperate',to:'mg_adv_water'},
+    ]
+  }
+};
+
+function getDefaultData() {
+  return JSON.parse(JSON.stringify(TREES.sw_a));
+}
+
+// ============================================================
+// Storage key for custom trees
+// ============================================================
+const STORAGE_KEY = 'talent_tree_custom_';
+
+function loadCustomTreesFromStorage() {
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k.startsWith(STORAGE_KEY)) {
+      keys.push(k.substring(STORAGE_KEY.length));
+    }
+  }
+  return keys;
+}
+
+function rebuildSelector() {
+  const sel = document.getElementById('class-selector');
+  const currentVal = sel.value;
+  // Clear all options
+  sel.innerHTML = '';
+  // Built-in presets
+  const builtins = Object.keys(TREES);
+  builtins.forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = TREES[k].class_name;
+    sel.appendChild(opt);
+  });
+  // Separator + custom trees
+  const customKeys = loadCustomTreesFromStorage();
+  if (customKeys.length > 0) {
+    const sep = document.createElement('option');
+    sep.disabled = true;
+    sep.textContent = typeof I18N !== 'undefined' ? I18N.t('tt_custom_trees') : '── 自定义天赋页 ──';
+    sel.appendChild(sep);
+    customKeys.forEach(k => {
+      try {
+        const data = JSON.parse(localStorage.getItem(STORAGE_KEY + k));
+        const opt = document.createElement('option');
+        opt.value = '__custom__' + k;
+        opt.textContent = '📝 ' + (data.class_name || k);
+        sel.appendChild(opt);
+      } catch(e) {}
+    });
+  }
+  // Separator + New
+  const sep2 = document.createElement('option');
+  sep2.disabled = true;
+  sep2.textContent = '──────────';
+  sel.appendChild(sep2);
+  const newOpt = document.createElement('option');
+  newOpt.value = '__new__';
+  newOpt.textContent = typeof I18N !== 'undefined' ? I18N.t('tt_new_tree') : '+ 新建天赋页';
+  sel.appendChild(newOpt);
+  // Restore selection
+  sel.value = currentVal;
+}
+
+function onSelectorChange(val) {
+  if (val === '__new__') {
+    createNewTree();
+  } else if (val.startsWith('__custom__')) {
+    loadCustomTree(val.substring(10));
+  } else {
+    switchTree(val);
+  }
+}
+
+function switchTree(variantId) {
+  if (!TREES[variantId]) return;
+  if (undoStack.length > 0) {
+    if (!confirm('切换方案将清除当前未保存的修改，确认切换？')) {
+      document.getElementById('class-selector').value =
+        Object.keys(TREES).find(k => TREES[k].class_id === treeData.class_id) || 'sw_a';
+      return;
+    }
+  }
+  undoStack = []; redoStack = [];
+  treeData = JSON.parse(JSON.stringify(TREES[variantId]));
+  currentCustomKey = null;
+  selectNode(null);
+  updateMetaFields();
+  setTimeout(fitView, 80);
+  toast('已切换：' + TREES[variantId].class_name);
+}
+
+let currentCustomKey = null; // tracks which custom tree is loaded
+
+function createNewTree() {
+  const id = prompt('输入天赋树ID（英文小写+下划线，如 warrior_a）：');
+  if (!id || !id.trim()) {
+    document.getElementById('class-selector').value = 'sw_a';
+    return;
+  }
+  const cleanId = id.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_');
+  const name = prompt('输入显示名称（如 战士 · 新方案）：', cleanId);
+  if (!name) {
+    document.getElementById('class-selector').value = 'sw_a';
+    return;
+  }
+
+  undoStack = []; redoStack = [];
+  treeData = {
+    class_id: cleanId,
+    class_name: name.trim(),
+    nodes: [
+      {
+        id: cleanId + '_start', name: '起始节点', type: 'trait', cost: 1,
+        level: 1, x: 265, y: 80,
+        desc: '起始节点。', notes: '', tags: 'start', exclusive: '', requires: ''
+      }
+    ],
+    edges: []
+  };
+  currentCustomKey = cleanId;
+  selectNode(null);
+  updateMetaFields();
+  // Auto-save immediately
+  saveTreeToStorage();
+  setTimeout(fitView, 80);
+  toast('已创建新天赋页：' + name);
+}
+
+function saveTreeToStorage() {
+  if (!treeData.class_id) {
+    toast('Error: class_id is empty');
+    return;
+  }
+  const key = currentCustomKey || treeData.class_id;
+  localStorage.setItem(STORAGE_KEY + key, JSON.stringify(treeData));
+  currentCustomKey = key;
+  rebuildSelector();
+  document.getElementById('class-selector').value = '__custom__' + key;
+  toast('已保存：' + treeData.class_name);
+}
+
+function loadCustomTree(key) {
+  const raw = localStorage.getItem(STORAGE_KEY + key);
+  if (!raw) { toast('Error: tree not found'); return; }
+  if (undoStack.length > 0) {
+    if (!confirm('切换将清除当前未保存的修改，确认？')) {
+      return;
+    }
+  }
+  try {
+    undoStack = []; redoStack = [];
+    treeData = JSON.parse(raw);
+    currentCustomKey = key;
+    selectNode(null);
+    updateMetaFields();
+    setTimeout(fitView, 80);
+    toast('已加载：' + treeData.class_name);
+  } catch(e) {
+    toast('Error: invalid JSON in storage');
+  }
+}
+
+function deleteTreeFromStorage() {
+  if (!currentCustomKey) {
+    toast('内置预设不可删除');
+    return;
+  }
+  if (!confirm('确认删除自定义天赋页「' + treeData.class_name + '」？此操作不可撤销。')) return;
+  localStorage.removeItem(STORAGE_KEY + currentCustomKey);
+  currentCustomKey = null;
+  treeData = getDefaultData();
+  selectNode(null);
+  rebuildSelector();
+  document.getElementById('class-selector').value = 'sw_a';
+  updateMetaFields();
+  setTimeout(fitView, 80);
+  toast('已删除');
+}
+
+function exportJSONFile() {
+  const json = JSON.stringify(treeData, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (treeData.class_id || 'talent-tree') + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('JSON已下载：' + a.download);
+}
+
+function updateMetaFields() {
+  document.getElementById('tree-class-id').value = treeData.class_id || '';
+  document.getElementById('tree-class-name').value = treeData.class_name || '';
+}
+
+function updateTreeMeta() {
+  const newId = document.getElementById('tree-class-id').value.trim();
+  const newName = document.getElementById('tree-class-name').value.trim();
+  if (newId) treeData.class_id = newId;
+  if (newName) treeData.class_name = newName;
+  render();
+}
+
+// ============================================================
+// State
+// ============================================================
+
+let treeData = getDefaultData();
+let selectedNodeId = null;
+let mode = 'select'; // select | connect | delete_edge
+let connectSource = null;
+
+// Canvas state
+let cam = { x: 0, y: 0, zoom: 1 };
+let drag = { active: false, type: null, startX: 0, startY: 0, nodeStartX: 0, nodeStartY: 0 };
+let lastClick = 0;
+
+// Undo/Redo
+let undoStack = [];
+let redoStack = [];
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+// ============================================================
+// Canvas Rendering
+// ============================================================
+
+function resizeCanvas() {
+  const container = document.getElementById('canvas-container');
+  canvas.width = container.clientWidth * window.devicePixelRatio;
+  canvas.height = container.clientHeight * window.devicePixelRatio;
+  canvas.style.width = container.clientWidth + 'px';
+  canvas.style.height = container.clientHeight + 'px';
+  ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+  render();
+}
+
+function worldToScreen(wx, wy) {
+  return {
+    x: (wx - cam.x) * cam.zoom + canvas.clientWidth / 2,
+    y: (wy - cam.y) * cam.zoom + canvas.clientHeight / 2
+  };
+}
+
+function screenToWorld(sx, sy) {
+  return {
+    x: (sx - canvas.clientWidth / 2) / cam.zoom + cam.x,
+    y: (sy - canvas.clientHeight / 2) / cam.zoom + cam.y
+  };
+}
+
+function getNodeAt(wx, wy) {
+  for (let i = treeData.nodes.length - 1; i >= 0; i--) {
+    const n = treeData.nodes[i];
+    const dx = n.x - wx, dy = n.y - wy;
+    if (dx*dx + dy*dy <= NODE_RADIUS * NODE_RADIUS) return n;
+  }
+  return null;
+}
+
+function getEdgeAt(wx, wy) {
+  const threshold = 8;
+  for (const e of treeData.edges) {
+    const a = treeData.nodes.find(n => n.id === e.from);
+    const b = treeData.nodes.find(n => n.id === e.to);
+    if (!a || !b) continue;
+    const dist = pointToSegmentDist(wx, wy, a.x, a.y, b.x, b.y);
+    if (dist < threshold) return e;
+  }
+  return null;
+}
+
+function pointToSegmentDist(px, py, ax, ay, bx, by) {
+  const dx = bx - ax, dy = by - ay;
+  const len2 = dx*dx + dy*dy;
+  if (len2 === 0) return Math.sqrt((px-ax)*(px-ax)+(py-ay)*(py-ay));
+  let t = ((px-ax)*dx + (py-ay)*dy) / len2;
+  t = Math.max(0, Math.min(1, t));
+  const cx = ax + t*dx, cy = ay + t*dy;
+  return Math.sqrt((px-cx)*(px-cx) + (py-cy)*(py-cy));
+}
+
+function render() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  ctx.clearRect(0, 0, w, h);
+
+  // === Feature 2: Compute path data before drawing ===
+  if (pathModeActive) {
+    updatePathAnalysis();
+  }
+
+  // Background grid
+  ctx.save();
+  const gridSize = 40 * cam.zoom;
+  const offX = (w/2 - cam.x * cam.zoom) % gridSize;
+  const offY = (h/2 - cam.y * cam.zoom) % gridSize;
+  ctx.strokeStyle = '#1e1e3a';
+  ctx.lineWidth = 1;
+  for (let x = offX; x < w; x += gridSize) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+  }
+  for (let y = offY; y < h; y += gridSize) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+  }
+  ctx.restore();
+
+  // === Feature 3: Draw exclusive group dashed lines (behind edges) ===
+  drawExclusiveLines(ctx);
+
+  // Draw edges
+  for (const e of treeData.edges) {
+    const a = treeData.nodes.find(n => n.id === e.from);
+    const b = treeData.nodes.find(n => n.id === e.to);
+    if (!a || !b) continue;
+
+    const sa = worldToScreen(a.x, a.y);
+    const sb = worldToScreen(b.x, b.y);
+
+    // === Feature 2: Check if this edge is on the highlighted path ===
+    const isPathEdge = pathModeActive && pathHighlightEdges.some(pe => pe.from === e.from && pe.to === e.to);
+
+    // === Feature 5: Dim edges if search is active and neither endpoint matches ===
+    const searchDimEdge = searchQuery && (!isNodeMatchingSearch(a) && !isNodeMatchingSearch(b));
+
+    ctx.save();
+    if (searchDimEdge) ctx.globalAlpha = 0.15;
+
+    // Edge line
+    ctx.beginPath();
+    ctx.moveTo(sa.x, sa.y);
+    ctx.lineTo(sb.x, sb.y);
+    if (isPathEdge) {
+      ctx.strokeStyle = '#f1c40f';
+      ctx.lineWidth = 4 * cam.zoom;
+      ctx.shadowColor = '#f1c40f';
+      ctx.shadowBlur = 8;
+    } else {
+      ctx.strokeStyle = '#1a5276';
+      ctx.lineWidth = 2 * cam.zoom;
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Arrow
+    const angle = Math.atan2(sb.y - sa.y, sb.x - sa.x);
+    const r = NODE_RADIUS * cam.zoom;
+    const ax2 = sb.x - r * Math.cos(angle);
+    const ay2 = sb.y - r * Math.sin(angle);
+    const arrowSize = 8 * cam.zoom;
+    ctx.beginPath();
+    ctx.moveTo(ax2, ay2);
+    ctx.lineTo(ax2 - arrowSize * Math.cos(angle - 0.4), ay2 - arrowSize * Math.sin(angle - 0.4));
+    ctx.lineTo(ax2 - arrowSize * Math.cos(angle + 0.4), ay2 - arrowSize * Math.sin(angle + 0.4));
+    ctx.closePath();
+    ctx.fillStyle = isPathEdge ? '#f1c40f' : '#1a5276';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Draw connecting line if in connect mode
+  if (mode === 'connect' && connectSource && drag.active) {
+    const s = worldToScreen(connectSource.x, connectSource.y);
+    ctx.beginPath();
+    ctx.moveTo(s.x, s.y);
+    ctx.lineTo(drag.startX, drag.startY);
+    ctx.strokeStyle = '#e94560';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Draw nodes
+  for (const n of treeData.nodes) {
+    const s = worldToScreen(n.x, n.y);
+    const r = NODE_RADIUS * cam.zoom;
+    const colors = NODE_COLORS[n.type] || NODE_COLORS.passive;
+    const isSelected = n.id === selectedNodeId;
+    const isAdvancement = n.type === 'advancement';
+    const isValidationError = validationErrorNodes.has(n.id);
+    const isPathNode = pathModeActive && pathHighlightNodes.has(n.id);
+
+    // === Feature 5: Search dimming ===
+    const searchDim = searchQuery && !isNodeMatchingSearch(n);
+
+    ctx.save();
+    if (searchDim) ctx.globalAlpha = 0.15;
+
+    // === Feature 1: Validation error highlight (red ring) ===
+    if (isValidationError) {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, r + 6 * cam.zoom, 0, Math.PI * 2);
+      ctx.strokeStyle = '#e74c3c';
+      ctx.lineWidth = 3 * cam.zoom;
+      ctx.setLineDash([4 * cam.zoom, 3 * cam.zoom]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // === Feature 2: Path highlight (gold ring) ===
+    if (isPathNode && !isSelected) {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, r + 5 * cam.zoom, 0, Math.PI * 2);
+      ctx.strokeStyle = '#f1c40f';
+      ctx.lineWidth = 2.5 * cam.zoom;
+      ctx.shadowColor = '#f1c40f';
+      ctx.shadowBlur = 6;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+
+    // Glow for selected
+    if (isSelected) {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, r + 4 * cam.zoom, 0, Math.PI * 2);
+      ctx.strokeStyle = '#e94560';
+      ctx.lineWidth = 3 * cam.zoom;
+      ctx.stroke();
+    }
+
+    // Node shape
+    if (isAdvancement) {
+      // Diamond shape for advancement nodes
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y - r * 1.2);
+      ctx.lineTo(s.x + r * 1.2, s.y);
+      ctx.lineTo(s.x, s.y + r * 1.2);
+      ctx.lineTo(s.x - r * 1.2, s.y);
+      ctx.closePath();
+    } else {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
+    }
+
+    ctx.fillStyle = colors.fill;
+    ctx.fill();
+    ctx.strokeStyle = colors.stroke;
+    ctx.lineWidth = 2 * cam.zoom;
+    ctx.stroke();
+
+    // Type label (small)
+    ctx.fillStyle = colors.text;
+    ctx.font = `${Math.max(9, 9 * cam.zoom)}px 'Segoe UI', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(NODE_LABEL_MAP[n.type] || n.type, s.x, s.y - 2 * cam.zoom);
+
+    // Node name
+    ctx.fillStyle = '#e0e0e0';
+    ctx.font = `bold ${Math.max(10, 11 * cam.zoom)}px 'Segoe UI', 'Microsoft YaHei', sans-serif`;
+    ctx.textBaseline = 'top';
+
+    // Word wrap for name
+    const maxW = r * 2 - 4;
+    const name = n.name || n.id;
+    if (ctx.measureText(name).width > maxW) {
+      const words = name.split(/\s+/);
+      let line1 = '', line2 = '';
+      for (const wd of words) {
+        if (ctx.measureText(line1 + ' ' + wd).width < maxW || !line1) {
+          line1 = line1 ? line1 + ' ' + wd : wd;
+        } else {
+          line2 += (line2 ? ' ' : '') + wd;
+        }
+      }
+      ctx.fillText(line1, s.x, s.y + 2 * cam.zoom);
+      if (line2) {
+        ctx.font = `${Math.max(9, 10 * cam.zoom)}px 'Segoe UI', sans-serif`;
+        ctx.fillText(line2, s.x, s.y + 14 * cam.zoom);
+      }
+    } else {
+      ctx.fillText(name, s.x, s.y + 2 * cam.zoom);
+    }
+
+    // Cost badge
+    if (n.cost > 0) {
+      const bx = s.x + r * 0.7;
+      const by = s.y - r * 0.7;
+      const br = 9 * cam.zoom;
+      ctx.beginPath();
+      ctx.arc(bx, by, br, 0, Math.PI * 2);
+      ctx.fillStyle = '#e94560';
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = `bold ${Math.max(9, 10 * cam.zoom)}px sans-serif`;
+      ctx.textBaseline = 'middle';
+      ctx.fillText(n.cost, bx, by);
+    }
+
+    // Level badge
+    const lx = s.x - r * 0.7;
+    const ly = s.y - r * 0.7;
+    const lr = 9 * cam.zoom;
+    ctx.beginPath();
+    ctx.arc(lx, ly, lr, 0, Math.PI * 2);
+    ctx.fillStyle = '#0f3460';
+    ctx.fill();
+    ctx.strokeStyle = '#1a5276';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = '#a0a0a0';
+    ctx.font = `${Math.max(8, 9 * cam.zoom)}px sans-serif`;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    ctx.fillText('L' + n.level, lx, ly);
+
+    ctx.restore(); // restore globalAlpha for search dimming
+  }
+
+  // Update stats bar
+  const totalCost = treeData.nodes.reduce((s, n) => s + (n.cost || 0), 0);
+  document.getElementById('stats-bar').textContent =
+    `Nodes: ${treeData.nodes.length} | Edges: ${treeData.edges.length} | Total Cost: ${totalCost} pts | Zoom: ${Math.round(cam.zoom*100)}%`;
+
+}
+
+// ============================================================
+// Interaction
+// ============================================================
+
+function setMode(m) {
+  mode = m;
+  connectSource = null;
+  document.querySelectorAll('#toolbar button').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('btn-' + m.replace('_', '-'));
+  if (btn) btn.classList.add('active');
+  canvas.className = m === 'connect' ? 'connecting' : '';
+  render();
+}
+
+canvas.addEventListener('mousedown', (e) => {
+  if (e.button !== 0) return;
+  const rect = canvas.getBoundingClientRect();
+  const sx = e.clientX - rect.left;
+  const sy = e.clientY - rect.top;
+  const w = screenToWorld(sx, sy);
+
+  const now = Date.now();
+  const isDoubleClick = now - lastClick < 350;
+  lastClick = now;
+
+  if (mode === 'connect') {
+    const node = getNodeAt(w.x, w.y);
+    if (node) {
+      if (!connectSource) {
+        connectSource = node;
+        drag.active = true;
+        drag.startX = sx;
+        drag.startY = sy;
+      } else if (node.id !== connectSource.id) {
+        // Create edge
+        const exists = treeData.edges.some(e => e.from === connectSource.id && e.to === node.id);
+        if (!exists) {
+          pushUndo();
+          treeData.edges.push({ from: connectSource.id, to: node.id });
+          toast('Edge created');
+        }
+        connectSource = null;
+        drag.active = false;
+      }
+    }
+    render();
+    return;
+  }
+
+  if (mode === 'delete_edge') {
+    const edge = getEdgeAt(w.x, w.y);
+    if (edge) {
+      pushUndo();
+      treeData.edges = treeData.edges.filter(e => e !== edge);
+      toast('Edge deleted');
+      render();
+    }
+    return;
+  }
+
+  // Select mode
+  const node = getNodeAt(w.x, w.y);
+  if (node) {
+    selectNode(node.id);
+    drag.active = true;
+    drag.type = 'node';
+    drag.startX = sx;
+    drag.startY = sy;
+    drag.nodeStartX = node.x;
+    drag.nodeStartY = node.y;
+    canvas.className = '';
+  } else if (isDoubleClick) {
+    // Create new node
+    pushUndo();
+    const newId = 'node_' + Date.now().toString(36);
+    treeData.nodes.push({
+      id: newId, name: 'New Node', type: 'passive', cost: 1,
+      level: 1, x: Math.round(w.x), y: Math.round(w.y),
+      desc: '', notes: '', tags: '', exclusive: '', requires: ''
+    });
+    selectNode(newId);
+    toast('Node created');
+    render();
+  } else {
+    selectNode(null);
+    drag.active = true;
+    drag.type = 'pan';
+    drag.startX = sx;
+    drag.startY = sy;
+    drag.camStartX = cam.x;
+    drag.camStartY = cam.y;
+    canvas.className = 'grabbing';
+  }
+});
+
+canvas.addEventListener('mousemove', (e) => {
+  if (!drag.active) return;
+  const rect = canvas.getBoundingClientRect();
+  const sx = e.clientX - rect.left;
+  const sy = e.clientY - rect.top;
+
+  if (mode === 'connect' && connectSource) {
+    drag.startX = sx;
+    drag.startY = sy;
+    render();
+    return;
+  }
+
+  if (drag.type === 'node' && selectedNodeId) {
+    const node = treeData.nodes.find(n => n.id === selectedNodeId);
+    if (node) {
+      node.x = drag.nodeStartX + (sx - drag.startX) / cam.zoom;
+      node.y = drag.nodeStartY + (sy - drag.startY) / cam.zoom;
+    }
+    render();
+  } else if (drag.type === 'pan') {
+    cam.x = drag.camStartX - (sx - drag.startX) / cam.zoom;
+    cam.y = drag.camStartY - (sy - drag.startY) / cam.zoom;
+    render();
+  }
+});
+
+canvas.addEventListener('mouseup', (e) => {
+  if (drag.type === 'node' && selectedNodeId) {
+    const node = treeData.nodes.find(n => n.id === selectedNodeId);
+    if (node && (node.x !== drag.nodeStartX || node.y !== drag.nodeStartY)) {
+      // Position changed, save undo state (but the change is already applied)
+    }
+  }
+  drag.active = false;
+  drag.type = null;
+  canvas.className = mode === 'connect' ? 'connecting' : '';
+});
+
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const sx = e.clientX - rect.left;
+  const sy = e.clientY - rect.top;
+  const w = screenToWorld(sx, sy);
+
+  const factor = e.deltaY > 0 ? 0.9 : 1.1;
+  const newZoom = Math.max(0.2, Math.min(3, cam.zoom * factor));
+  cam.x = w.x - (sx - canvas.clientWidth / 2) / newZoom;
+  cam.y = w.y - (sy - canvas.clientHeight / 2) / newZoom;
+  cam.zoom = newZoom;
+  render();
+}, { passive: false });
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+  if (e.key === 'v' || e.key === 'V') setMode('select');
+  else if (e.key === 'c' || e.key === 'C') setMode('connect');
+  else if (e.key === 'x' || e.key === 'X') setMode('delete_edge');
+  else if (e.key === 'l' || e.key === 'L') autoLayout();
+  else if (e.key === 'f' || e.key === 'F') fitView();
+  else if (e.key === 'h' || e.key === 'H') toggleHelp();
+  // === Feature 6: T shortcut for path analysis toggle ===
+  else if (e.key === 't' || e.key === 'T') togglePathMode();
+  else if ((e.key === 'Delete' || e.key === 'Backspace') && selectedNodeId) { deleteSelectedNode(); }
+  else if (e.ctrlKey && e.key === 's') { e.preventDefault(); exportJSON(); }
+  else if (e.ctrlKey && !e.shiftKey && e.key === 'z') { e.preventDefault(); undo(); }
+  else if (e.ctrlKey && e.shiftKey && (e.key === 'z' || e.key === 'Z')) { e.preventDefault(); redo(); }
+});
+
+// ============================================================
+// Node Selection & Editing
+// ============================================================
+
+function selectNode(id) {
+  selectedNodeId = id;
+  const editor = document.getElementById('node-editor');
+  const noSel = document.getElementById('no-selection');
+
+  if (!id) {
+    editor.style.display = 'none';
+    noSel.style.display = 'block';
+    render();
+    return;
+  }
+
+  const node = treeData.nodes.find(n => n.id === id);
+  if (!node) return;
+
+  editor.style.display = 'block';
+  noSel.style.display = 'none';
+
+  document.getElementById('node-id').value = node.id;
+  document.getElementById('node-name').value = node.name || '';
+  document.getElementById('node-type').value = node.type;
+  document.getElementById('node-cost').value = node.cost || 0;
+  document.getElementById('node-level').value = node.level || 1;
+  document.getElementById('node-desc').value = node.desc || '';
+  document.getElementById('node-notes').value = node.notes || '';
+  document.getElementById('node-exclusive').value = node.exclusive || '';
+  document.getElementById('node-requires').value = node.requires || '';
+  document.getElementById('node-tags').value = node.tags || '';
+
+  render();
+}
+
+// Bind sidebar inputs to update node data
+['node-id','node-name','node-type','node-cost','node-level','node-desc','node-notes','node-exclusive','node-requires','node-tags'].forEach(fid => {
+  const el = document.getElementById(fid);
+  el.addEventListener('input', () => {
+    if (!selectedNodeId) return;
+    const node = treeData.nodes.find(n => n.id === selectedNodeId);
+    if (!node) return;
+
+    const field = fid.replace('node-', '');
+    const val = el.value;
+
+    if (field === 'id') {
+      const oldId = node.id;
+      const newId = val.trim();
+      if (newId && newId !== oldId && !treeData.nodes.some(n => n.id === newId)) {
+        // Update edges
+        treeData.edges.forEach(e => {
+          if (e.from === oldId) e.from = newId;
+          if (e.to === oldId) e.to = newId;
+        });
+        node.id = newId;
+        selectedNodeId = newId;
+      }
+    } else if (field === 'cost' || field === 'level') {
+      node[field] = parseInt(val) || 0;
+    } else {
+      node[field] = val;
+    }
+    render();
+  });
+});
+
+function deleteSelectedNode() {
+  if (!selectedNodeId) return;
+  pushUndo();
+  treeData.nodes = treeData.nodes.filter(n => n.id !== selectedNodeId);
+  treeData.edges = treeData.edges.filter(e => e.from !== selectedNodeId && e.to !== selectedNodeId);
+  selectNode(null);
+  toast('Node deleted');
+  render();
+}
+
+function duplicateNode() {
+  if (!selectedNodeId) return;
+  const src = treeData.nodes.find(n => n.id === selectedNodeId);
+  if (!src) return;
+  pushUndo();
+  const newNode = { ...src, id: src.id + '_copy', x: src.x + 60, y: src.y + 60 };
+  treeData.nodes.push(newNode);
+  selectNode(newNode.id);
+  toast('Node duplicated');
+  render();
+}
+
+// ============================================================
+// Layout & View
+// ============================================================
+
+function autoLayout() {
+  pushUndo();
+  // Topological sort based on edges
+  const inDegree = {};
+  const children = {};
+  treeData.nodes.forEach(n => { inDegree[n.id] = 0; children[n.id] = []; });
+  treeData.edges.forEach(e => {
+    inDegree[e.to] = (inDegree[e.to] || 0) + 1;
+    if (children[e.from]) children[e.from].push(e.to);
+  });
+
+  // BFS layers
+  const layers = [];
+  let queue = treeData.nodes.filter(n => inDegree[n.id] === 0).map(n => n.id);
+  const visited = new Set();
+
+  while (queue.length > 0) {
+    layers.push([...queue]);
+    queue.forEach(id => visited.add(id));
+    const next = [];
+    for (const id of queue) {
+      for (const child of children[id]) {
+        inDegree[child]--;
+        if (inDegree[child] === 0 && !visited.has(child)) {
+          next.push(child);
+        }
+      }
+    }
+    queue = next;
+  }
+
+  // Position nodes
+  const layerGap = 120;
+  const nodeGap = 140;
+  layers.forEach((layer, li) => {
+    const totalWidth = (layer.length - 1) * nodeGap;
+    layer.forEach((id, ni) => {
+      const node = treeData.nodes.find(n => n.id === id);
+      if (node) {
+        node.x = -totalWidth / 2 + ni * nodeGap + 400;
+        node.y = li * layerGap + 80;
+      }
+    });
+  });
+
+  // Handle unvisited nodes
+  const unvisited = treeData.nodes.filter(n => !visited.has(n.id));
+  unvisited.forEach((n, i) => {
+    n.x = 400 + i * nodeGap;
+    n.y = layers.length * layerGap + 80;
+  });
+
+  fitView();
+  toast('Auto layout applied');
+}
+
+function fitView() {
+  if (treeData.nodes.length === 0) return;
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  treeData.nodes.forEach(n => {
+    minX = Math.min(minX, n.x);
+    maxX = Math.max(maxX, n.x);
+    minY = Math.min(minY, n.y);
+    maxY = Math.max(maxY, n.y);
+  });
+
+  const padding = 80;
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+  const rangeX = (maxX - minX) + padding * 2;
+  const rangeY = (maxY - minY) + padding * 2;
+
+  cam.zoom = Math.min(w / rangeX, h / rangeY, 2);
+  cam.x = (minX + maxX) / 2;
+  cam.y = (minY + maxY) / 2;
+  render();
+}
+
+// ============================================================
+// Undo / Redo
+// ============================================================
+
+function pushUndo() {
+  undoStack.push(JSON.stringify(treeData));
+  if (undoStack.length > 50) undoStack.shift();
+  redoStack = [];
+}
+
+function undo() {
+  if (undoStack.length === 0) return;
+  redoStack.push(JSON.stringify(treeData));
+  treeData = JSON.parse(undoStack.pop());
+  selectNode(null);
+  render();
+  toast('Undo');
+}
+
+function redo() {
+  if (redoStack.length === 0) return;
+  undoStack.push(JSON.stringify(treeData));
+  treeData = JSON.parse(redoStack.pop());
+  selectNode(null);
+  render();
+  toast('Redo');
+}
+
+// ============================================================
+// Import / Export
+// ============================================================
+
+function exportJSON() {
+  const json = JSON.stringify(treeData, null, 2);
+  navigator.clipboard.writeText(json).then(() => {
+    toast('JSON copied to clipboard');
+  }).catch(() => {
+    // Fallback: download
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = treeData.class_id + '-talent-tree.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('JSON downloaded');
+  });
+}
+
+function importJSON() {
+  const input = document.getElementById('file-input');
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        pushUndo();
+        treeData = JSON.parse(ev.target.result);
+        currentCustomKey = null;
+        selectNode(null);
+        updateMetaFields();
+        fitView();
+        toast('JSON imported: ' + (treeData.class_name || 'unknown'));
+      } catch (err) {
+        toast('Error: Invalid JSON');
+      }
+    };
+    reader.readAsText(file);
+    input.value = '';
+  };
+  input.click();
+}
+
+function exportImage() {
+  // Create offscreen canvas with white background
+  const padding = 60;
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  treeData.nodes.forEach(n => {
+    minX = Math.min(minX, n.x - NODE_RADIUS - 20);
+    maxX = Math.max(maxX, n.x + NODE_RADIUS + 20);
+    minY = Math.min(minY, n.y - NODE_RADIUS - 20);
+    maxY = Math.max(maxY, n.y + NODE_RADIUS + 20);
+  });
+
+  const imgW = (maxX - minX) + padding * 2;
+  const imgH = (maxY - minY) + padding * 2;
+  const scale = 2;
+
+  const offCanvas = document.createElement('canvas');
+  offCanvas.width = imgW * scale;
+  offCanvas.height = imgH * scale;
+  const offCtx = offCanvas.getContext('2d');
+  offCtx.scale(scale, scale);
+  offCtx.fillStyle = '#1a1a2e';
+  offCtx.fillRect(0, 0, imgW, imgH);
+
+  const offsetX = padding - minX;
+  const offsetY = padding - minY;
+
+  // Draw edges
+  for (const e of treeData.edges) {
+    const a = treeData.nodes.find(n => n.id === e.from);
+    const b = treeData.nodes.find(n => n.id === e.to);
+    if (!a || !b) continue;
+    offCtx.beginPath();
+    offCtx.moveTo(a.x + offsetX, a.y + offsetY);
+    offCtx.lineTo(b.x + offsetX, b.y + offsetY);
+    offCtx.strokeStyle = '#1a5276';
+    offCtx.lineWidth = 2;
+    offCtx.stroke();
+
+    const angle = Math.atan2(b.y - a.y, b.x - a.x);
+    const ax2 = b.x + offsetX - NODE_RADIUS * Math.cos(angle);
+    const ay2 = b.y + offsetY - NODE_RADIUS * Math.sin(angle);
+    offCtx.beginPath();
+    offCtx.moveTo(ax2, ay2);
+    offCtx.lineTo(ax2 - 8*Math.cos(angle-0.4), ay2 - 8*Math.sin(angle-0.4));
+    offCtx.lineTo(ax2 - 8*Math.cos(angle+0.4), ay2 - 8*Math.sin(angle+0.4));
+    offCtx.closePath();
+    offCtx.fillStyle = '#1a5276';
+    offCtx.fill();
+  }
+
+  // Draw nodes
+  for (const n of treeData.nodes) {
+    const nx = n.x + offsetX;
+    const ny = n.y + offsetY;
+    const r = NODE_RADIUS;
+    const colors = NODE_COLORS[n.type] || NODE_COLORS.passive;
+    const isAdv = n.type === 'advancement';
+
+    if (isAdv) {
+      offCtx.beginPath();
+      offCtx.moveTo(nx, ny - r*1.2);
+      offCtx.lineTo(nx + r*1.2, ny);
+      offCtx.lineTo(nx, ny + r*1.2);
+      offCtx.lineTo(nx - r*1.2, ny);
+      offCtx.closePath();
+    } else {
+      offCtx.beginPath();
+      offCtx.arc(nx, ny, r, 0, Math.PI*2);
+    }
+    offCtx.fillStyle = colors.fill;
+    offCtx.fill();
+    offCtx.strokeStyle = colors.stroke;
+    offCtx.lineWidth = 2;
+    offCtx.stroke();
+
+    offCtx.fillStyle = colors.text;
+    offCtx.font = '9px sans-serif';
+    offCtx.textAlign = 'center';
+    offCtx.textBaseline = 'bottom';
+    offCtx.fillText(NODE_LABEL_MAP[n.type] || n.type, nx, ny - 2);
+
+    offCtx.fillStyle = '#e0e0e0';
+    offCtx.font = 'bold 11px sans-serif';
+    offCtx.textBaseline = 'top';
+    offCtx.fillText(n.name || n.id, nx, ny + 2);
+  }
+
+  // Title
+  offCtx.fillStyle = '#e94560';
+  offCtx.font = 'bold 18px sans-serif';
+  offCtx.textAlign = 'left';
+  offCtx.textBaseline = 'top';
+  offCtx.fillText(treeData.class_name + ' - Talent Tree (Lv1-9)', padding, 15);
+
+  const link = document.createElement('a');
+  link.download = treeData.class_id + '-talent-tree.png';
+  link.href = offCanvas.toDataURL('image/png');
+  link.click();
+  toast('PNG exported');
+}
+
+// ============================================================
+// Helpers
+// ============================================================
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function showHelp() { document.getElementById('help-overlay').classList.add('show'); }
+function hideHelp() { document.getElementById('help-overlay').classList.remove('show'); }
+function toggleHelp() {
+  const o = document.getElementById('help-overlay');
+  o.classList.toggle('show');
+}
+
+// ============================================================
+// Feature 1: DAG Validation
+// ============================================================
+
+let validationErrorNodes = new Set(); // node IDs to highlight red
+
+function validateDAG() {
+  const results = [];
+  const errorNodes = new Set();
+  let hasErrors = false;
+
+  // 1. Check duplicate IDs
+  const idCounts = {};
+  treeData.nodes.forEach(n => {
+    idCounts[n.id] = (idCounts[n.id] || 0) + 1;
+  });
+  const dupes = Object.entries(idCounts).filter(([_, c]) => c > 1);
+  if (dupes.length > 0) {
+    hasErrors = true;
+    dupes.forEach(([id, count]) => {
+      results.push({ type: 'err', msg: `Duplicate ID: "${id}" appears ${count} times` });
+      errorNodes.add(id);
+    });
+  } else {
+    results.push({ type: 'ok', msg: 'No duplicate IDs' });
+  }
+
+  // 2. Check for cycles (DFS)
+  const adj = {};
+  treeData.nodes.forEach(n => { adj[n.id] = []; });
+  treeData.edges.forEach(e => {
+    if (adj[e.from]) adj[e.from].push(e.to);
+  });
+
+  const WHITE = 0, GRAY = 1, BLACK = 2;
+  const color = {};
+  treeData.nodes.forEach(n => { color[n.id] = WHITE; });
+  let hasCycle = false;
+  const cycleNodes = new Set();
+
+  function dfs(u, path) {
+    color[u] = GRAY;
+    path.push(u);
+    for (const v of (adj[u] || [])) {
+      if (color[v] === GRAY) {
+        hasCycle = true;
+        // Mark all nodes in the cycle
+        const cycleStart = path.indexOf(v);
+        for (let i = cycleStart; i < path.length; i++) {
+          cycleNodes.add(path[i]);
+        }
+        cycleNodes.add(v);
+      } else if (color[v] === WHITE) {
+        dfs(v, path);
+      }
+    }
+    path.pop();
+    color[u] = BLACK;
+  }
+
+  treeData.nodes.forEach(n => {
+    if (color[n.id] === WHITE) dfs(n.id, []);
+  });
+
+  if (hasCycle) {
+    hasErrors = true;
+    results.push({ type: 'err', msg: `Cycle detected! Nodes in cycle: ${[...cycleNodes].join(', ')}` });
+    cycleNodes.forEach(id => errorNodes.add(id));
+  } else {
+    results.push({ type: 'ok', msg: 'No cycles detected (valid DAG)' });
+  }
+
+  // 3. Check orphan nodes (no edges at all)
+  const connectedNodes = new Set();
+  treeData.edges.forEach(e => {
+    connectedNodes.add(e.from);
+    connectedNodes.add(e.to);
+  });
+  const orphans = treeData.nodes.filter(n => !connectedNodes.has(n.id));
+  if (orphans.length > 0 && treeData.nodes.length > 1) {
+    hasErrors = true;
+    orphans.forEach(n => {
+      results.push({ type: 'warn', msg: `Orphan node (no edges): "${n.id}" (${n.name})` });
+      errorNodes.add(n.id);
+    });
+  } else {
+    results.push({ type: 'ok', msg: 'No orphan nodes' });
+  }
+
+  // 4. Check edges referencing missing nodes
+  treeData.edges.forEach(e => {
+    if (!treeData.nodes.find(n => n.id === e.from)) {
+      hasErrors = true;
+      results.push({ type: 'err', msg: `Edge references missing source node: "${e.from}"` });
+    }
+    if (!treeData.nodes.find(n => n.id === e.to)) {
+      hasErrors = true;
+      results.push({ type: 'err', msg: `Edge references missing target node: "${e.to}"` });
+    }
+  });
+
+  // Display results
+  validationErrorNodes = errorNodes;
+  render();
+
+  const container = document.getElementById('validation-results');
+  let html = '';
+  if (!hasErrors) {
+    html += '<p class="val-ok" style="font-size:14px;margin-bottom:12px;">All checks passed!</p>';
+  }
+  results.forEach(r => {
+    const cls = r.type === 'ok' ? 'val-ok' : r.type === 'err' ? 'val-err' : 'val-warn';
+    const icon = r.type === 'ok' ? '[OK]' : r.type === 'err' ? '[ERROR]' : '[WARN]';
+    html += `<p class="${cls}" style="font-size:13px;margin:4px 0;">${icon} ${r.msg}</p>`;
+  });
+  container.innerHTML = html;
+  document.getElementById('validation-overlay').classList.add('show');
+}
+
+function clearValidationHighlights() {
+  validationErrorNodes = new Set();
+  render();
+}
+
+// ============================================================
+// Feature 2: Path Cost Analysis (Dijkstra on DAG)
+// ============================================================
+
+let pathModeActive = false;
+let pathHighlightEdges = []; // [{from, to}]
+let pathHighlightNodes = new Set(); // node IDs on shortest path
+
+function togglePathMode() {
+  pathModeActive = !pathModeActive;
+  const btn = document.getElementById('btn-path');
+  if (pathModeActive) {
+    btn.classList.add('path-active');
+  } else {
+    btn.classList.remove('path-active');
+    pathHighlightEdges = [];
+    pathHighlightNodes = new Set();
+    document.getElementById('path-info-bar').style.display = 'none';
+  }
+  render();
+}
+
+function computeShortestPaths() {
+  // Find start nodes (nodes with no incoming edges = root nodes)
+  const hasIncoming = new Set();
+  treeData.edges.forEach(e => hasIncoming.add(e.to));
+  const startNodes = treeData.nodes.filter(n => !hasIncoming.has(n.id));
+  if (startNodes.length === 0) return { dist: {}, prev: {} };
+
+  // Build adjacency list (edges go from -> to, we traverse in edge direction)
+  const adj = {};
+  treeData.nodes.forEach(n => { adj[n.id] = []; });
+  treeData.edges.forEach(e => {
+    if (adj[e.from]) adj[e.from].push(e.to);
+  });
+
+  // Dijkstra-like BFS (cost = sum of node costs along path, including start node)
+  const dist = {};
+  const prev = {};
+  treeData.nodes.forEach(n => { dist[n.id] = Infinity; prev[n.id] = null; });
+
+  // Priority queue (simple array-based)
+  const pq = [];
+  startNodes.forEach(s => {
+    dist[s.id] = s.cost || 1; // start nodes cost talent points too
+    pq.push({ id: s.id, cost: dist[s.id] });
+  });
+
+  while (pq.length > 0) {
+    pq.sort((a, b) => a.cost - b.cost);
+    const { id: uid, cost: ucost } = pq.shift();
+    if (ucost > dist[uid]) continue;
+
+    for (const vid of (adj[uid] || [])) {
+      const vnode = treeData.nodes.find(n => n.id === vid);
+      if (!vnode) continue;
+      const newCost = ucost + (vnode.cost || 0);
+      if (newCost < dist[vid]) {
+        dist[vid] = newCost;
+        prev[vid] = uid;
+        pq.push({ id: vid, cost: newCost });
+      }
+    }
+  }
+
+  return { dist, prev };
+}
+
+function reconstructPath(prev, targetId) {
+  const path = [];
+  let cur = targetId;
+  while (cur !== null) {
+    path.unshift(cur);
+    cur = prev[cur];
+  }
+  return path;
+}
+
+function updatePathAnalysis() {
+  if (!pathModeActive) return;
+
+  const { dist, prev } = computeShortestPaths();
+  const infoBar = document.getElementById('path-info-bar');
+
+  // Build advancement info
+  const advNodes = treeData.nodes.filter(n => n.type === 'advancement');
+  let html = '<span class="path-label">Path Cost Analysis</span><br>';
+
+  // Show advancement paths
+  if (advNodes.length > 0) {
+    html += '<span style="color:#e94560;">Advancement paths:</span><br>';
+    advNodes.forEach(adv => {
+      const cost = dist[adv.id];
+      const costStr = cost === Infinity ? '(unreachable)' : cost + ' pts';
+      html += `&nbsp;&nbsp;${adv.name}: <span class="path-cost">${costStr}</span><br>`;
+    });
+  }
+
+  // Show selected node path
+  if (selectedNodeId) {
+    const selNode = treeData.nodes.find(n => n.id === selectedNodeId);
+    if (selNode) {
+      const cost = dist[selectedNodeId];
+      const costStr = cost === Infinity ? '(unreachable)' : cost + ' pts';
+      html += `<span style="color:#3498db;">Selected "${selNode.name}":</span> <span class="path-cost">${costStr}</span>`;
+
+      // Reconstruct and highlight path
+      if (cost !== Infinity) {
+        const path = reconstructPath(prev, selectedNodeId);
+        pathHighlightNodes = new Set(path);
+        pathHighlightEdges = [];
+        for (let i = 0; i < path.length - 1; i++) {
+          pathHighlightEdges.push({ from: path[i], to: path[i+1] });
+        }
+      } else {
+        pathHighlightNodes = new Set();
+        pathHighlightEdges = [];
+      }
+    }
+  } else {
+    pathHighlightNodes = new Set();
+    pathHighlightEdges = [];
+  }
+
+  infoBar.innerHTML = html;
+  infoBar.style.display = 'block';
+}
+
+// ============================================================
+// Feature 3: Exclusive Group Visualization
+// ============================================================
+
+function getExclusiveGroups() {
+  const groups = {};
+  treeData.nodes.forEach(n => {
+    if (n.exclusive && n.exclusive.trim()) {
+      const key = n.exclusive.trim();
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(n);
+    }
+  });
+  return groups;
+}
+
+// Exclusive group colors for labels
+const EXCLUSIVE_COLORS = ['#e94560', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22'];
+
+function drawExclusiveLines(ctx_ref) {
+  const groups = getExclusiveGroups();
+  let colorIdx = 0;
+
+  Object.entries(groups).forEach(([groupName, nodes]) => {
+    if (nodes.length < 2) return;
+    const color = EXCLUSIVE_COLORS[colorIdx % EXCLUSIVE_COLORS.length];
+    colorIdx++;
+
+    // Draw red dashed lines between all pairs in the group
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const sa = worldToScreen(nodes[i].x, nodes[i].y);
+        const sb = worldToScreen(nodes[j].x, nodes[j].y);
+
+        ctx_ref.save();
+        ctx_ref.beginPath();
+        ctx_ref.moveTo(sa.x, sa.y);
+        ctx_ref.lineTo(sb.x, sb.y);
+        ctx_ref.strokeStyle = '#e94560';
+        ctx_ref.lineWidth = 1.5 * cam.zoom;
+        ctx_ref.setLineDash([6 * cam.zoom, 4 * cam.zoom]);
+        ctx_ref.globalAlpha = 0.6;
+        ctx_ref.stroke();
+        ctx_ref.setLineDash([]);
+        ctx_ref.restore();
+      }
+    }
+
+    // Draw exclusive group label near each node
+    nodes.forEach(n => {
+      const s = worldToScreen(n.x, n.y);
+      const r = NODE_RADIUS * cam.zoom;
+      ctx_ref.save();
+      ctx_ref.fillStyle = '#e94560';
+      ctx_ref.globalAlpha = 0.85;
+      ctx_ref.font = `bold ${Math.max(8, 9 * cam.zoom)}px sans-serif`;
+      ctx_ref.textAlign = 'center';
+      ctx_ref.textBaseline = 'top';
+      const labelY = n.type === 'advancement' ? s.y + r * 1.3 + 2 : s.y + r + 4;
+      ctx_ref.fillText('[' + groupName + ']', s.x, labelY);
+      ctx_ref.restore();
+    });
+  });
+}
+
+// ============================================================
+// Feature 4: Mermaid Export
+// ============================================================
+
+function exportMermaid() {
+  let mermaid = 'graph TD\n';
+
+  // Build node labels map
+  const nodeMap = {};
+  treeData.nodes.forEach(n => { nodeMap[n.id] = n; });
+
+  // Add nodes with labels (using different shapes for advancement)
+  const rendered = new Set();
+
+  treeData.edges.forEach(e => {
+    const fromNode = nodeMap[e.from];
+    const toNode = nodeMap[e.to];
+    if (!fromNode || !toNode) return;
+
+    const fromLabel = formatMermaidNode(fromNode);
+    const toLabel = formatMermaidNode(toNode);
+    mermaid += `    ${fromLabel} --> ${toLabel}\n`;
+    rendered.add(e.from);
+    rendered.add(e.to);
+  });
+
+  // Add orphan nodes
+  treeData.nodes.forEach(n => {
+    if (!rendered.has(n.id)) {
+      mermaid += `    ${formatMermaidNode(n)}\n`;
+    }
+  });
+
+  navigator.clipboard.writeText(mermaid).then(() => {
+    toast('Mermaid copied to clipboard');
+  }).catch(() => {
+    // Fallback: prompt
+    prompt('Copy Mermaid:', mermaid);
+    toast('Mermaid generated');
+  });
+}
+
+function formatMermaidNode(n) {
+  const name = (n.name || n.id).replace(/"/g, "'");
+  if (n.type === 'advancement') {
+    return `${n.id}{{"${name}"}}`;
+  } else if (n.type === 'gauge_core' || n.type === 'gauge_extend') {
+    return `${n.id}(("${name}"))`;
+  } else if (n.type === 'active_skill') {
+    return `${n.id}["${name}"]`;
+  } else {
+    return `${n.id}("${name}")`;
+  }
+}
+
+// ============================================================
+// Feature 5: Node Search/Filter
+// ============================================================
+
+let searchQuery = '';
+
+function onSearchInput(value) {
+  searchQuery = value.trim().toLowerCase();
+  render();
+}
+
+function isNodeMatchingSearch(node) {
+  if (!searchQuery) return true;
+  const name = (node.name || '').toLowerCase();
+  const tags = (node.tags || '').toLowerCase();
+  const id = (node.id || '').toLowerCase();
+  return name.includes(searchQuery) || tags.includes(searchQuery) || id.includes(searchQuery);
+}
+
+// ============================================================
+// I18N Support
+// ============================================================
+
+function applyI18n() {
+  // Replace textContent for elements with data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.textContent = I18N.t(key);
+  });
+  // Replace placeholder for elements with data-i18n-placeholder
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    el.placeholder = I18N.t(key);
+  });
+}
+
+// ============================================================
+// Init
+// ============================================================
+
+// Insert language switcher
+const langSlot = document.getElementById('lang-switcher-slot');
+if (langSlot && typeof I18N !== 'undefined') {
+  langSlot.appendChild(I18N.createLangSwitcher());
+}
+
+// Apply i18n translations
+if (typeof I18N !== 'undefined') {
+  applyI18n();
+}
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+rebuildSelector();
+updateMetaFields();
+setTimeout(fitView, 100);
+</script>
+
+</body>
+</html>

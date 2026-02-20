@@ -1,0 +1,2007 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Map Designer</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  overflow: hidden;
+  height: 100vh;
+  user-select: none;
+}
+
+/* === Layout === */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+#top-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: #0f3460;
+  border-bottom: 2px solid #1a5276;
+  flex-wrap: wrap;
+  min-height: 48px;
+}
+
+#top-toolbar .toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#top-toolbar label {
+  font-size: 12px;
+  color: #a0a0a0;
+}
+
+#top-toolbar select, #top-toolbar input[type="number"] {
+  padding: 4px 8px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+#top-toolbar input[type="number"] {
+  width: 52px;
+  text-align: center;
+}
+
+#top-toolbar select:focus, #top-toolbar input:focus {
+  outline: none;
+  border-color: #e94560;
+}
+
+#top-toolbar button {
+  padding: 6px 14px;
+  background: #16213e;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+#top-toolbar button:hover { background: #1a5276; }
+#top-toolbar button.active { background: #e94560; border-color: #e94560; color: #fff; }
+#top-toolbar button.danger { border-color: #c0392b; }
+#top-toolbar button.danger:hover { background: #c0392b; }
+#top-toolbar button.primary { border-color: #2980b9; }
+#top-toolbar button.primary:hover { background: #2980b9; }
+
+.toolbar-sep {
+  width: 1px;
+  height: 28px;
+  background: #1a5276;
+}
+
+/* Layer tabs */
+.layer-tabs {
+  display: flex;
+  gap: 2px;
+}
+
+.layer-tab {
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+  border-radius: 4px 4px 0 0 !important;
+  border-bottom: none !important;
+  position: relative;
+}
+
+.layer-tab.active {
+  background: #e94560 !important;
+  border-color: #e94560 !important;
+}
+
+/* === Main content === */
+#main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Left panel - palette */
+#left-panel {
+  width: 220px;
+  min-width: 220px;
+  background: #16213e;
+  border-right: 2px solid #0f3460;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#left-panel-header {
+  padding: 12px;
+  background: #0f3460;
+  border-bottom: 1px solid #1a5276;
+}
+
+#left-panel-header h3 {
+  font-size: 14px;
+  color: #e94560;
+}
+
+#palette {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+#palette::-webkit-scrollbar { width: 6px; }
+#palette::-webkit-scrollbar-track { background: #16213e; }
+#palette::-webkit-scrollbar-thumb { background: #0f3460; border-radius: 3px; }
+
+.palette-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  margin-bottom: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 2px solid transparent;
+}
+
+.palette-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.palette-item.selected {
+  border-color: #e94560;
+  background: rgba(233, 69, 96, 0.15);
+}
+
+.palette-color {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.2);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.palette-label {
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.palette-label .zh {
+  color: #e0e0e0;
+}
+
+.palette-label .en {
+  color: #888;
+  font-size: 10px;
+}
+
+.palette-label .info {
+  color: #666;
+  font-size: 10px;
+}
+
+/* Eraser */
+.palette-item.eraser {
+  border: 2px dashed #555;
+  margin-top: 8px;
+}
+
+.palette-item.eraser .palette-color {
+  border-style: dashed;
+  color: #e94560;
+}
+
+/* === Canvas area === */
+#canvas-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  background: #12122a;
+  position: relative;
+}
+
+#map-canvas {
+  cursor: crosshair;
+}
+
+#tooltip {
+  position: fixed;
+  padding: 6px 10px;
+  background: rgba(15, 52, 96, 0.95);
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.5;
+  pointer-events: none;
+  z-index: 100;
+  display: none;
+  max-width: 260px;
+  white-space: pre-line;
+}
+
+/* === Right panel === */
+#right-panel {
+  width: 300px;
+  min-width: 300px;
+  background: #16213e;
+  border-left: 2px solid #0f3460;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#right-panel-header {
+  padding: 12px;
+  background: #0f3460;
+  border-bottom: 1px solid #1a5276;
+}
+
+#right-panel-header h3 {
+  font-size: 14px;
+  color: #e94560;
+}
+
+#right-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+#right-content::-webkit-scrollbar { width: 6px; }
+#right-content::-webkit-scrollbar-track { background: #16213e; }
+#right-content::-webkit-scrollbar-thumb { background: #0f3460; border-radius: 3px; }
+
+.panel {
+  margin-bottom: 16px;
+}
+
+.panel-title {
+  font-size: 12px;
+  color: #a0a0a0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #0f3460;
+}
+
+.field {
+  margin-bottom: 8px;
+}
+
+.field label {
+  display: block;
+  font-size: 11px;
+  color: #a0a0a0;
+  margin-bottom: 2px;
+}
+
+.field input, .field select, .field textarea {
+  width: 100%;
+  padding: 5px 8px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none;
+  border-color: #e94560;
+}
+
+.field-row {
+  display: flex;
+  gap: 8px;
+}
+
+.field-row .field { flex: 1; }
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+  font-size: 11px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+
+.stat-item .stat-label { color: #a0a0a0; }
+.stat-item .stat-value { color: #e0e0e0; font-weight: 600; }
+
+#json-preview {
+  width: 100%;
+  min-height: 120px;
+  max-height: 300px;
+  background: #0d0d1a;
+  color: #7fdbca;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  padding: 8px;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 10px;
+  resize: vertical;
+  white-space: pre;
+  overflow: auto;
+  tab-size: 2;
+}
+
+/* === Bottom bar === */
+#bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
+  background: #0f3460;
+  border-top: 2px solid #1a5276;
+  gap: 8px;
+}
+
+#bottom-bar button {
+  padding: 6px 16px;
+  background: #16213e;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+#bottom-bar button:hover { background: #1a5276; }
+#bottom-bar button.danger { border-color: #c0392b; }
+#bottom-bar button.danger:hover { background: #c0392b; }
+#bottom-bar button.primary { border-color: #27ae60; background: #16a085; }
+#bottom-bar button.primary:hover { background: #27ae60; }
+
+#status-bar {
+  font-size: 11px;
+  color: #888;
+}
+
+/* === Map list dialog === */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.modal {
+  background: #16213e;
+  border: 2px solid #0f3460;
+  border-radius: 8px;
+  padding: 20px;
+  min-width: 400px;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal h3 {
+  color: #e94560;
+  margin-bottom: 16px;
+  font-size: 16px;
+}
+
+.modal-close {
+  float: right;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.modal-close:hover { color: #e94560; }
+
+.map-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  background: #1a1a2e;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.map-list-item:hover { border-color: #e94560; }
+.map-list-item.current { border-color: #e94560; background: rgba(233,69,96,0.1); }
+
+.map-list-item .map-info {
+  flex: 1;
+}
+
+.map-list-item .map-name {
+  font-size: 13px;
+  color: #e0e0e0;
+}
+
+.map-list-item .map-detail {
+  font-size: 10px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.map-list-item .map-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.map-list-item .map-actions button {
+  padding: 4px 8px;
+  font-size: 11px;
+  background: #0f3460;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.map-list-item .map-actions button:hover { background: #1a5276; }
+.map-list-item .map-actions button.del { border-color: #c0392b; }
+.map-list-item .map-actions button.del:hover { background: #c0392b; }
+
+/* Build zone drag */
+#canvas-area.build-zone-mode {
+  cursor: crosshair;
+}
+
+/* Teleporter pair mode hint */
+.pair-hint {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #e94560;
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-size: 13px;
+  z-index: 50;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Hidden file input */
+#file-input { display: none; }
+</style>
+<script src="shared.js"></script>
+</head>
+<body>
+<div id="app">
+  <!-- Top toolbar -->
+  <div id="top-toolbar">
+    <div class="toolbar-group">
+      <label data-i18n="map_management">地图管理</label>
+      <button id="btn-map-list" class="primary" data-i18n="map_maps">地图列表</button>
+      <button id="btn-new-map" data-i18n="map_new_map">新建地图</button>
+    </div>
+    <div class="toolbar-sep"></div>
+    <div class="toolbar-group">
+      <label data-i18n="map_width">宽</label>
+      <input type="number" id="map-width" min="1" max="10" value="8">
+      <label data-i18n="map_height">高</label>
+      <input type="number" id="map-height" min="1" max="10" value="8">
+      <button id="btn-resize" data-i18n="map_apply_size">应用尺寸</button>
+    </div>
+    <div class="toolbar-sep"></div>
+    <div class="toolbar-group layer-tabs">
+      <button class="layer-tab active" data-layer="terrain" data-i18n="map_layer_terrain">地形</button>
+      <button class="layer-tab" data-layer="special" data-i18n="map_layer_special">特殊地形</button>
+      <button class="layer-tab" data-layer="building" data-i18n="map_layer_building">建筑</button>
+      <button class="layer-tab" data-layer="spawn" data-i18n="map_layer_spawn">出生点</button>
+      <button class="layer-tab" data-layer="buildzone" data-i18n="map_layer_build_zone">建造区域</button>
+    </div>
+    <div class="toolbar-sep"></div>
+    <div class="toolbar-group">
+      <button id="btn-undo" data-i18n="undo">撤销</button>
+      <button id="btn-redo" data-i18n="redo">重做</button>
+    </div>
+    <div class="toolbar-sep"></div>
+    <div class="toolbar-group" id="lang-switcher-container"></div>
+  </div>
+
+  <!-- Main content -->
+  <div id="main-content">
+    <!-- Left palette -->
+    <div id="left-panel">
+      <div id="left-panel-header">
+        <h3 data-i18n="map_palette">调色板</h3>
+      </div>
+      <div id="palette"></div>
+    </div>
+
+    <!-- Canvas -->
+    <div id="canvas-area">
+      <canvas id="map-canvas"></canvas>
+      <div id="tooltip"></div>
+    </div>
+
+    <!-- Right panel -->
+    <div id="right-panel">
+      <div id="right-panel-header">
+        <h3 data-i18n="map_info">地图信息</h3>
+      </div>
+      <div id="right-content">
+        <div class="panel">
+          <div class="panel-title" data-i18n="map_basic_info">基础信息</div>
+          <div class="field">
+            <label data-i18n="map_map_id">地图 ID</label>
+            <input type="text" id="map-id" placeholder="forest_01">
+          </div>
+          <div class="field">
+            <label data-i18n="map_map_name">地图名称</label>
+            <input type="text" id="map-name" placeholder="密林小径">
+          </div>
+          <div class="field">
+            <label data-i18n="map_wave_config">Wave Config</label>
+            <input type="text" id="wave-config" placeholder="forest_01_waves">
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title" data-i18n="map_stats">统计信息</div>
+          <div class="stat-grid" id="stats-grid"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title" data-i18n="map_json_preview">JSON 预览</div>
+          <textarea id="json-preview" readonly></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div id="bottom-bar">
+    <div style="display:flex;gap:8px;">
+      <button id="btn-export" class="primary" data-i18n="map_export">导出 JSON</button>
+      <button id="btn-import" data-i18n="map_import">导入 JSON</button>
+      <button id="btn-clear" class="danger" data-i18n="map_clear">清空地图</button>
+    </div>
+    <div id="status-bar" data-i18n="map_ready">就绪</div>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept=".json">
+
+<script>
+// ============================================================
+// DATA DEFINITIONS
+// ============================================================
+
+const TERRAIN_DEFS = [
+  { id: 0, key: 'PLAIN',         name: '平地',   i18nKey: 'map_terrain_plain',         color: '#c8d6a0', passable: true,  blocksLOS: false, moveCost: 1, effect: '无',       effectKey: 'map_effect_none' },
+  { id: 1, key: 'FOREST',        name: '树林',   i18nKey: 'map_terrain_forest',        color: '#2d6a4f', passable: true,  blocksLOS: false, moveCost: 2, effect: '+闪避',    effectKey: 'map_effect_evade' },
+  { id: 2, key: 'MOUNTAIN',      name: '山地',   i18nKey: 'map_terrain_mountain',      color: '#8d6e63', passable: true,  blocksLOS: false, moveCost: 2, effect: '+防御,+魔防', effectKey: 'map_effect_def_mdef' },
+  { id: 3, key: 'PEAK',          name: '山峰',   i18nKey: 'map_terrain_peak',          color: '#5d4037', passable: false, blocksLOS: true,  moveCost: -1, effect: '-',        effectKey: 'map_effect_impassable' },
+  { id: 4, key: 'WALL',          name: '墙壁',   i18nKey: 'map_terrain_wall',          color: '#455a64', passable: false, blocksLOS: false, moveCost: -1, effect: '-',        effectKey: 'map_effect_impassable' },
+  { id: 5, key: 'SHALLOW_WATER', name: '浅水',   i18nKey: 'map_terrain_shallow_water', color: '#4fc3f7', passable: true,  blocksLOS: false, moveCost: 2, effect: '潮湿',     effectKey: 'map_effect_wet' },
+  { id: 6, key: 'DEEP_WATER',    name: '深水',   i18nKey: 'map_terrain_deep_water',    color: '#0277bd', passable: false, blocksLOS: false, moveCost: -1, effect: '潮湿',     effectKey: 'map_effect_wet' },
+  { id: 7, key: 'LAVA',          name: '熔岩',   i18nKey: 'map_terrain_lava',          color: '#ff5722', passable: true,  blocksLOS: false, moveCost: 2, effect: '燃烧',     effectKey: 'map_effect_burn' },
+  { id: 8, key: 'SWAMP',         name: '毒沼',   i18nKey: 'map_terrain_swamp',         color: '#7b5e57', passable: true,  blocksLOS: false, moveCost: 3, effect: '中毒',     effectKey: 'map_effect_poison' },
+];
+
+const SPECIAL_TERRAIN_DEFS = [
+  { id: 'healing_ground', name: '治愈之地', i18nKey: 'map_st_healing_ground', symbol: '✚', color: '#2ecc71' },
+  { id: 'buff_zone',      name: '增益区域', i18nKey: 'map_st_buff_zone',      symbol: '▲', color: '#f1c40f' },
+  { id: 'debuff_zone',    name: '减益区域', i18nKey: 'map_st_debuff_zone',    symbol: '▼', color: '#9b59b6' },
+  { id: 'trap',           name: '陷阱',     i18nKey: 'map_st_trap',           symbol: '⚠', color: '#e67e22' },
+  { id: 'teleporter',     name: '传送阵',   i18nKey: 'map_st_teleporter',     symbol: '◎', color: '#00bcd4' },
+];
+
+const BUILDING_DEFS = [
+  { id: 'watchtower',  name: '哨塔',   i18nKey: 'map_bld_watchtower',  symbol: '🗼', color: '#ffb74d' },
+  { id: 'fortress',    name: '要塞',   i18nKey: 'map_bld_fortress',    symbol: '🏰', color: '#90a4ae' },
+  { id: 'barricade',   name: '拒马',   i18nKey: 'map_bld_barricade',   symbol: '╳',  color: '#8d6e63' },
+  { id: 'magic_tower', name: '魔法塔', i18nKey: 'map_bld_magic_tower', symbol: '🔮', color: '#ce93d8' },
+];
+
+// ============================================================
+// I18N HELPERS
+// ============================================================
+
+/** Get localized name for a def object (terrain/special/building) */
+function localName(def) {
+  if (!def) return '';
+  if (def.i18nKey) return I18N.t(def.i18nKey);
+  return def.name;
+}
+
+/** Get localized effect text for terrain */
+function localEffect(def) {
+  if (!def) return '';
+  if (def.effectKey) return I18N.t(def.effectKey);
+  return def.effect;
+}
+
+/** Apply data-i18n attributes to all static DOM elements */
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const text = I18N.t(key);
+    if (text !== key) {
+      el.textContent = text;
+    }
+  });
+  // Update page title
+  document.title = I18N.t('map_title');
+}
+
+// ============================================================
+// STATE
+// ============================================================
+
+const CELL_SIZE = 52;
+const GRID_LINE_WIDTH = 1;
+
+let state = {
+  // Current map data
+  mapId: 'map_01',
+  mapName: '新地图',
+  width: 8,
+  height: 8,
+  terrain: [],         // 2D array of terrain IDs
+  specialTerrain: [],  // array of { type, position:[x,y], faction, pair_position? }
+  buildings: [],       // array of { building_id, position:[x,y], owner }
+  playerSpawns: [],    // array of [x,y]
+  buildZone: null,     // { x_min, x_max, y_min, y_max } or null
+  waveConfig: '',
+
+  // Editor state
+  currentLayer: 'terrain',
+  selectedTool: 0,      // terrain ID, or special terrain ID string, etc.
+  isDrawing: false,
+  teleporterPairMode: false,
+  teleporterFirstPos: null,
+  buildZoneDragStart: null,
+  buildZoneDragging: false,
+
+  // Undo/redo
+  undoStack: [],
+  redoStack: [],
+
+  // Map list
+  mapList: [],         // array of map IDs
+  currentMapKey: null, // localStorage key
+
+  // Hover
+  hoverCell: null,     // { x, y } or null
+};
+
+// ============================================================
+// INITIALIZATION
+// ============================================================
+
+const canvas = document.getElementById('map-canvas');
+const ctx = canvas.getContext('2d');
+const tooltip = document.getElementById('tooltip');
+
+function init() {
+  // Apply i18n to static HTML elements
+  applyI18n();
+
+  // Insert language switcher into toolbar
+  const langContainer = document.getElementById('lang-switcher-container');
+  if (langContainer) {
+    langContainer.appendChild(I18N.createLangSwitcher());
+  }
+
+  loadMapList();
+  if (state.mapList.length === 0) {
+    createNewMap('map_01', I18N.t('map_new_map_name'), 8, 8);
+  } else {
+    loadMap(state.mapList[0]);
+  }
+  setupEventListeners();
+  updatePalette();
+  render();
+}
+
+function createEmptyTerrain(w, h) {
+  const arr = [];
+  for (let y = 0; y < h; y++) {
+    const row = [];
+    for (let x = 0; x < w; x++) {
+      row.push(0); // PLAIN
+    }
+    arr.push(row);
+  }
+  return arr;
+}
+
+function createNewMap(id, name, w, h) {
+  state.mapId = id;
+  state.mapName = name;
+  state.width = w;
+  state.height = h;
+  state.terrain = createEmptyTerrain(w, h);
+  state.specialTerrain = [];
+  state.buildings = [];
+  state.playerSpawns = [];
+  state.buildZone = null;
+  state.waveConfig = '';
+  state.undoStack = [];
+  state.redoStack = [];
+
+  const key = 'map_' + Date.now();
+  state.currentMapKey = key;
+  if (!state.mapList.includes(key)) {
+    state.mapList.push(key);
+  }
+  saveMapList();
+  saveCurrentMap();
+  syncUIFromState();
+  resizeCanvas();
+  render();
+  updateStats();
+  updateJsonPreview();
+}
+
+// ============================================================
+// PERSISTENCE
+// ============================================================
+
+function saveMapList() {
+  localStorage.setItem('mapDesigner_mapList', JSON.stringify(state.mapList));
+}
+
+function loadMapList() {
+  const raw = localStorage.getItem('mapDesigner_mapList');
+  if (raw) {
+    try {
+      state.mapList = JSON.parse(raw);
+    } catch (e) {
+      state.mapList = [];
+    }
+  }
+}
+
+function saveCurrentMap() {
+  if (!state.currentMapKey) return;
+  const data = {
+    mapId: state.mapId,
+    mapName: state.mapName,
+    width: state.width,
+    height: state.height,
+    terrain: state.terrain,
+    specialTerrain: state.specialTerrain,
+    buildings: state.buildings,
+    playerSpawns: state.playerSpawns,
+    buildZone: state.buildZone,
+    waveConfig: state.waveConfig,
+  };
+  localStorage.setItem('mapDesigner_' + state.currentMapKey, JSON.stringify(data));
+  updateStats();
+  updateJsonPreview();
+}
+
+function loadMap(key) {
+  const raw = localStorage.getItem('mapDesigner_' + key);
+  if (!raw) return false;
+  try {
+    const data = JSON.parse(raw);
+    state.mapId = data.mapId || 'map_01';
+    state.mapName = data.mapName || I18N.t('map_unnamed');
+    state.width = data.width || 8;
+    state.height = data.height || 8;
+    state.terrain = data.terrain || createEmptyTerrain(state.width, state.height);
+    state.specialTerrain = data.specialTerrain || [];
+    state.buildings = data.buildings || [];
+    state.playerSpawns = data.playerSpawns || [];
+    state.buildZone = data.buildZone || null;
+    state.waveConfig = data.waveConfig || '';
+    state.currentMapKey = key;
+    state.undoStack = [];
+    state.redoStack = [];
+    syncUIFromState();
+    resizeCanvas();
+    render();
+    updateStats();
+    updateJsonPreview();
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function deleteMap(key) {
+  localStorage.removeItem('mapDesigner_' + key);
+  state.mapList = state.mapList.filter(k => k !== key);
+  saveMapList();
+}
+
+function syncUIFromState() {
+  document.getElementById('map-width').value = state.width;
+  document.getElementById('map-height').value = state.height;
+  document.getElementById('map-id').value = state.mapId;
+  document.getElementById('map-name').value = state.mapName;
+  document.getElementById('wave-config').value = state.waveConfig;
+}
+
+// ============================================================
+// UNDO / REDO
+// ============================================================
+
+function pushUndo() {
+  state.undoStack.push({
+    terrain: JSON.parse(JSON.stringify(state.terrain)),
+    specialTerrain: JSON.parse(JSON.stringify(state.specialTerrain)),
+    buildings: JSON.parse(JSON.stringify(state.buildings)),
+    playerSpawns: JSON.parse(JSON.stringify(state.playerSpawns)),
+    buildZone: state.buildZone ? { ...state.buildZone } : null,
+  });
+  if (state.undoStack.length > 50) state.undoStack.shift();
+  state.redoStack = [];
+}
+
+function undo() {
+  if (state.undoStack.length === 0) return;
+  const snap = state.undoStack.pop();
+  state.redoStack.push({
+    terrain: JSON.parse(JSON.stringify(state.terrain)),
+    specialTerrain: JSON.parse(JSON.stringify(state.specialTerrain)),
+    buildings: JSON.parse(JSON.stringify(state.buildings)),
+    playerSpawns: JSON.parse(JSON.stringify(state.playerSpawns)),
+    buildZone: state.buildZone ? { ...state.buildZone } : null,
+  });
+  Object.assign(state, snap);
+  saveCurrentMap();
+  render();
+}
+
+function redo() {
+  if (state.redoStack.length === 0) return;
+  const snap = state.redoStack.pop();
+  state.undoStack.push({
+    terrain: JSON.parse(JSON.stringify(state.terrain)),
+    specialTerrain: JSON.parse(JSON.stringify(state.specialTerrain)),
+    buildings: JSON.parse(JSON.stringify(state.buildings)),
+    playerSpawns: JSON.parse(JSON.stringify(state.playerSpawns)),
+    buildZone: state.buildZone ? { ...state.buildZone } : null,
+  });
+  Object.assign(state, snap);
+  saveCurrentMap();
+  render();
+}
+
+// ============================================================
+// PALETTE
+// ============================================================
+
+function updatePalette() {
+  const palette = document.getElementById('palette');
+  palette.innerHTML = '';
+
+  if (state.currentLayer === 'terrain') {
+    TERRAIN_DEFS.forEach(t => {
+      const moveCostStr = t.moveCost === -1 ? I18N.t('map_move_impassable') : t.moveCost;
+      const item = createPaletteItem(
+        t.color, null,
+        localName(t),
+        I18N.lang === 'zh' ? t.key : '',
+        `${I18N.t('map_move_label')}:${moveCostStr} | ${localEffect(t)}`,
+        t.id
+      );
+      if (state.selectedTool === t.id) item.classList.add('selected');
+      palette.appendChild(item);
+    });
+  } else if (state.currentLayer === 'special') {
+    SPECIAL_TERRAIN_DEFS.forEach(st => {
+      const item = createPaletteItem(
+        st.color, st.symbol,
+        localName(st),
+        I18N.lang === 'zh' ? st.id : '',
+        st.id === 'teleporter' ? I18N.t('map_teleporter_hint') : '',
+        st.id
+      );
+      if (state.selectedTool === st.id) item.classList.add('selected');
+      palette.appendChild(item);
+    });
+    // Eraser
+    const eraser = createPaletteItem('#333', '✕', I18N.t('map_eraser'), I18N.t('map_erase_special'), '', '_eraser');
+    eraser.classList.add('eraser');
+    if (state.selectedTool === '_eraser') eraser.classList.add('selected');
+    palette.appendChild(eraser);
+  } else if (state.currentLayer === 'building') {
+    BUILDING_DEFS.forEach(b => {
+      const item = createPaletteItem(
+        b.color, b.symbol,
+        localName(b),
+        I18N.lang === 'zh' ? b.id : '',
+        '',
+        b.id
+      );
+      if (state.selectedTool === b.id) item.classList.add('selected');
+      palette.appendChild(item);
+    });
+    const eraser = createPaletteItem('#333', '✕', I18N.t('map_eraser'), I18N.t('map_erase_building'), '', '_eraser');
+    eraser.classList.add('eraser');
+    if (state.selectedTool === '_eraser') eraser.classList.add('selected');
+    palette.appendChild(eraser);
+  } else if (state.currentLayer === 'spawn') {
+    const item = createPaletteItem('#4a90d9', '●', I18N.t('map_spawn_point'), I18N.t('map_spawn_desc'), I18N.t('map_spawn_action'), 'spawn');
+    item.classList.add('selected');
+    palette.appendChild(item);
+
+    // Info text
+    const info = document.createElement('div');
+    info.style.cssText = 'padding:12px;font-size:11px;color:#888;line-height:1.6;';
+    info.textContent = I18N.t('map_spawn_info');
+    palette.appendChild(info);
+  } else if (state.currentLayer === 'buildzone') {
+    const item = createPaletteItem('#27ae60', '▨', I18N.t('map_buildzone_item'), I18N.t('map_buildzone_rect'), I18N.t('map_buildzone_action'), 'buildzone');
+    item.classList.add('selected');
+    palette.appendChild(item);
+
+    const clearBtn = document.createElement('div');
+    clearBtn.className = 'palette-item eraser';
+    clearBtn.innerHTML = `<div class="palette-color" style="background:#333;border-style:dashed;color:#e94560;">✕</div>
+      <div class="palette-label"><span class="zh">${I18N.t('map_clear_buildzone')}</span></div>`;
+    clearBtn.onclick = () => {
+      pushUndo();
+      state.buildZone = null;
+      saveCurrentMap();
+      render();
+    };
+    palette.appendChild(clearBtn);
+
+    const info = document.createElement('div');
+    info.style.cssText = 'padding:12px;font-size:11px;color:#888;line-height:1.6;';
+    info.textContent = I18N.t('map_buildzone_info');
+    palette.appendChild(info);
+  }
+}
+
+function createPaletteItem(color, symbol, name, subtext, info, toolId) {
+  const item = document.createElement('div');
+  item.className = 'palette-item';
+  item.dataset.toolId = toolId;
+
+  const colorDiv = document.createElement('div');
+  colorDiv.className = 'palette-color';
+  colorDiv.style.background = color;
+  if (symbol) {
+    colorDiv.textContent = symbol;
+    colorDiv.style.fontSize = symbol.length > 1 ? '14px' : '18px';
+  }
+
+  const labelDiv = document.createElement('div');
+  labelDiv.className = 'palette-label';
+  let html = `<span class="zh">${name}</span>`;
+  if (subtext) html += `<br><span class="en">${subtext}</span>`;
+  if (info) html += `<br><span class="info">${info}</span>`;
+  labelDiv.innerHTML = html;
+
+  item.appendChild(colorDiv);
+  item.appendChild(labelDiv);
+
+  item.addEventListener('click', () => {
+    state.selectedTool = toolId;
+    state.teleporterPairMode = false;
+    state.teleporterFirstPos = null;
+    removePairHint();
+    document.querySelectorAll('.palette-item').forEach(el => el.classList.remove('selected'));
+    item.classList.add('selected');
+  });
+
+  return item;
+}
+
+// ============================================================
+// CANVAS RENDERING
+// ============================================================
+
+function resizeCanvas() {
+  const cw = state.width * CELL_SIZE + GRID_LINE_WIDTH;
+  const ch = state.height * CELL_SIZE + GRID_LINE_WIDTH;
+  canvas.width = cw;
+  canvas.height = ch;
+  canvas.style.width = cw + 'px';
+  canvas.style.height = ch + 'px';
+}
+
+function render() {
+  const w = state.width;
+  const h = state.height;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw terrain cells
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const tid = state.terrain[y] && state.terrain[y][x] !== undefined ? state.terrain[y][x] : 0;
+      const def = TERRAIN_DEFS[tid] || TERRAIN_DEFS[0];
+      const px = x * CELL_SIZE;
+      const py = y * CELL_SIZE;
+
+      // Fill terrain color
+      ctx.fillStyle = def.color;
+      ctx.fillRect(px, py, CELL_SIZE, CELL_SIZE);
+
+      // Terrain ID mini text (bottom-right)
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.font = '9px monospace';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(tid, px + CELL_SIZE - 3, py + CELL_SIZE - 2);
+    }
+  }
+
+  // Draw build zone
+  if (state.buildZone) {
+    const bz = state.buildZone;
+    const bx = bz.x_min * CELL_SIZE;
+    const by = bz.y_min * CELL_SIZE;
+    const bw = (bz.x_max - bz.x_min + 1) * CELL_SIZE;
+    const bh = (bz.y_max - bz.y_min + 1) * CELL_SIZE;
+
+    ctx.fillStyle = 'rgba(39, 174, 96, 0.12)';
+    ctx.fillRect(bx, by, bw, bh);
+
+    ctx.strokeStyle = '#27ae60';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.strokeRect(bx + 1, by + 1, bw - 2, bh - 2);
+    ctx.setLineDash([]);
+
+    // Label
+    ctx.fillStyle = '#27ae60';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText(I18N.t('map_buildzone_label'), bx + 4, by + 3);
+  }
+
+  // Draw build zone preview while dragging
+  if (state.buildZoneDragging && state.buildZoneDragStart && state.hoverCell) {
+    const x1 = Math.min(state.buildZoneDragStart.x, state.hoverCell.x);
+    const y1 = Math.min(state.buildZoneDragStart.y, state.hoverCell.y);
+    const x2 = Math.max(state.buildZoneDragStart.x, state.hoverCell.x);
+    const y2 = Math.max(state.buildZoneDragStart.y, state.hoverCell.y);
+
+    const bx = x1 * CELL_SIZE;
+    const by = y1 * CELL_SIZE;
+    const bw = (x2 - x1 + 1) * CELL_SIZE;
+    const bh = (y2 - y1 + 1) * CELL_SIZE;
+
+    ctx.fillStyle = 'rgba(39, 174, 96, 0.2)';
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.strokeStyle = '#2ecc71';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 3]);
+    ctx.strokeRect(bx + 1, by + 1, bw - 2, bh - 2);
+    ctx.setLineDash([]);
+  }
+
+  // Draw special terrain
+  state.specialTerrain.forEach(st => {
+    const def = SPECIAL_TERRAIN_DEFS.find(d => d.id === st.type);
+    if (!def) return;
+    const [x, y] = st.position;
+    if (x < 0 || x >= w || y < 0 || y >= h) return;
+    const px = x * CELL_SIZE;
+    const py = y * CELL_SIZE;
+
+    // Semi-transparent overlay
+    ctx.fillStyle = def.color + '40';
+    ctx.fillRect(px + 2, py + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+
+    // Border
+    ctx.strokeStyle = def.color;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(px + 2, py + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+
+    // Symbol
+    ctx.fillStyle = def.color;
+    ctx.font = 'bold 18px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(def.symbol, px + CELL_SIZE / 2, py + CELL_SIZE / 2);
+
+    // Draw teleporter pair line
+    if (st.type === 'teleporter' && st.pair_position) {
+      const [px2, py2] = st.pair_position;
+      if (px2 >= 0 && px2 < w && py2 >= 0 && py2 < h) {
+        ctx.strokeStyle = def.color + '80';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(px + CELL_SIZE / 2, py + CELL_SIZE / 2);
+        ctx.lineTo(px2 * CELL_SIZE + CELL_SIZE / 2, py2 * CELL_SIZE + CELL_SIZE / 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+  });
+
+  // Draw buildings
+  state.buildings.forEach(b => {
+    const def = BUILDING_DEFS.find(d => d.id === b.building_id);
+    if (!def) return;
+    const [x, y] = b.position;
+    if (x < 0 || x >= w || y < 0 || y >= h) return;
+    const px = x * CELL_SIZE;
+    const py = y * CELL_SIZE;
+
+    // Building background
+    ctx.fillStyle = def.color + '50';
+    ctx.fillRect(px + 4, py + 4, CELL_SIZE - 8, CELL_SIZE - 8);
+
+    // Building border
+    ctx.strokeStyle = def.color;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(px + 4, py + 4, CELL_SIZE - 8, CELL_SIZE - 8);
+
+    // Symbol
+    ctx.fillStyle = '#fff';
+    ctx.font = '16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(def.symbol, px + CELL_SIZE / 2, py + CELL_SIZE / 2);
+
+    // Owner indicator
+    const ownerColor = b.owner === 'neutral' ? '#aaa' : '#4a90d9';
+    ctx.fillStyle = ownerColor;
+    ctx.beginPath();
+    ctx.arc(px + CELL_SIZE - 8, py + 8, 3, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Draw player spawns
+  state.playerSpawns.forEach(([x, y]) => {
+    if (x < 0 || x >= w || y < 0 || y >= h) return;
+    const px = x * CELL_SIZE;
+    const py = y * CELL_SIZE;
+
+    ctx.fillStyle = 'rgba(74, 144, 217, 0.4)';
+    ctx.fillRect(px, py, CELL_SIZE, CELL_SIZE);
+
+    ctx.fillStyle = '#4a90d9';
+    ctx.beginPath();
+    ctx.arc(px + CELL_SIZE / 2, py + CELL_SIZE / 2, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('P', px + CELL_SIZE / 2, py + CELL_SIZE / 2);
+  });
+
+  // Draw grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = GRID_LINE_WIDTH;
+  for (let x = 0; x <= w; x++) {
+    ctx.beginPath();
+    ctx.moveTo(x * CELL_SIZE + 0.5, 0);
+    ctx.lineTo(x * CELL_SIZE + 0.5, h * CELL_SIZE);
+    ctx.stroke();
+  }
+  for (let y = 0; y <= h; y++) {
+    ctx.beginPath();
+    ctx.moveTo(0, y * CELL_SIZE + 0.5);
+    ctx.lineTo(w * CELL_SIZE, y * CELL_SIZE + 0.5);
+    ctx.stroke();
+  }
+
+  // Highlight hover cell
+  if (state.hoverCell) {
+    const { x, y } = state.hoverCell;
+    if (x >= 0 && x < w && y >= 0 && y < h) {
+      ctx.strokeStyle = '#e94560';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x * CELL_SIZE + 1, y * CELL_SIZE + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+    }
+  }
+
+  // Highlight teleporter first position if in pair mode
+  if (state.teleporterPairMode && state.teleporterFirstPos) {
+    const { x, y } = state.teleporterFirstPos;
+    ctx.strokeStyle = '#00bcd4';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([3, 3]);
+    ctx.strokeRect(x * CELL_SIZE + 1, y * CELL_SIZE + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+    ctx.setLineDash([]);
+  }
+
+  // Coordinate labels
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.font = '9px monospace';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  for (let x = 0; x < w; x++) {
+    for (let y = 0; y < h; y++) {
+      ctx.fillText(`${x},${y}`, x * CELL_SIZE + 2, y * CELL_SIZE + 2);
+    }
+  }
+}
+
+// ============================================================
+// STATS & JSON
+// ============================================================
+
+function updateStats() {
+  const grid = document.getElementById('stats-grid');
+  const totalCells = state.width * state.height;
+  const terrainCounts = {};
+  let passableCount = 0;
+
+  TERRAIN_DEFS.forEach(t => { terrainCounts[t.id] = 0; });
+
+  for (let y = 0; y < state.height; y++) {
+    for (let x = 0; x < state.width; x++) {
+      const tid = state.terrain[y] && state.terrain[y][x] !== undefined ? state.terrain[y][x] : 0;
+      terrainCounts[tid] = (terrainCounts[tid] || 0) + 1;
+      if (TERRAIN_DEFS[tid] && TERRAIN_DEFS[tid].passable) passableCount++;
+    }
+  }
+
+  let html = '';
+  html += `<div class="stat-item" style="grid-column:span 2"><span class="stat-label">${I18N.t('map_map_size')}</span><span class="stat-value">${state.width} × ${state.height} (${totalCells}${I18N.t('map_cells')})</span></div>`;
+  html += `<div class="stat-item" style="grid-column:span 2"><span class="stat-label">${I18N.t('map_passable_rate')}</span><span class="stat-value">${passableCount}/${totalCells} (${Math.round(passableCount / totalCells * 100)}%)</span></div>`;
+
+  TERRAIN_DEFS.forEach(t => {
+    if (terrainCounts[t.id] > 0) {
+      html += `<div class="stat-item"><span class="stat-label" style="color:${t.color}">${localName(t)}</span><span class="stat-value">${terrainCounts[t.id]}</span></div>`;
+    }
+  });
+
+  html += `<div class="stat-item"><span class="stat-label">${I18N.t('map_special_terrain_count')}</span><span class="stat-value">${state.specialTerrain.length}</span></div>`;
+  html += `<div class="stat-item"><span class="stat-label">${I18N.t('map_building_count')}</span><span class="stat-value">${state.buildings.length}</span></div>`;
+  html += `<div class="stat-item"><span class="stat-label">${I18N.t('map_spawn_count')}</span><span class="stat-value">${state.playerSpawns.length}</span></div>`;
+  html += `<div class="stat-item"><span class="stat-label">${I18N.t('map_build_zone_status')}</span><span class="stat-value">${state.buildZone ? I18N.t('map_set') : I18N.t('map_not_set')}</span></div>`;
+
+  grid.innerHTML = html;
+}
+
+function generateExportJSON() {
+  const obj = {
+    id: state.mapId,
+    name: state.mapName,
+    width: state.width,
+    height: state.height,
+    terrain: state.terrain,
+  };
+
+  if (state.specialTerrain.length > 0) {
+    obj.special_terrain = state.specialTerrain.map(st => {
+      const entry = { type: st.type, position: st.position };
+      if (st.faction) entry.faction = st.faction;
+      if (st.pair_position) entry.pair_position = st.pair_position;
+      return entry;
+    });
+  }
+
+  if (state.buildings.length > 0) {
+    obj.preset_buildings = state.buildings.map(b => ({
+      building_id: b.building_id,
+      position: b.position,
+      owner: b.owner || 'neutral',
+    }));
+  }
+
+  if (state.playerSpawns.length > 0) {
+    obj.player_spawns = state.playerSpawns;
+  }
+
+  if (state.buildZone) {
+    obj.player_build_zone = state.buildZone;
+  }
+
+  if (state.waveConfig) {
+    obj.wave_config = state.waveConfig;
+  }
+
+  return obj;
+}
+
+function updateJsonPreview() {
+  const preview = document.getElementById('json-preview');
+  preview.value = JSON.stringify(generateExportJSON(), null, 2);
+}
+
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+
+function setupEventListeners() {
+  // Layer tabs
+  document.querySelectorAll('.layer-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.layer-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      state.currentLayer = tab.dataset.layer;
+      state.teleporterPairMode = false;
+      state.teleporterFirstPos = null;
+      removePairHint();
+
+      // Set default tool for layer
+      if (state.currentLayer === 'terrain') state.selectedTool = 0;
+      else if (state.currentLayer === 'special') state.selectedTool = 'healing_ground';
+      else if (state.currentLayer === 'building') state.selectedTool = 'watchtower';
+      else if (state.currentLayer === 'spawn') state.selectedTool = 'spawn';
+      else if (state.currentLayer === 'buildzone') state.selectedTool = 'buildzone';
+
+      updatePalette();
+    });
+  });
+
+  // Canvas mouse events
+  canvas.addEventListener('mousedown', onCanvasMouseDown);
+  canvas.addEventListener('mousemove', onCanvasMouseMove);
+  canvas.addEventListener('mouseup', onCanvasMouseUp);
+  canvas.addEventListener('mouseleave', onCanvasMouseLeave);
+  canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+  // Right panel fields
+  document.getElementById('map-id').addEventListener('input', e => {
+    state.mapId = e.target.value;
+    saveCurrentMap();
+  });
+  document.getElementById('map-name').addEventListener('input', e => {
+    state.mapName = e.target.value;
+    saveCurrentMap();
+  });
+  document.getElementById('wave-config').addEventListener('input', e => {
+    state.waveConfig = e.target.value;
+    saveCurrentMap();
+  });
+
+  // Resize
+  document.getElementById('btn-resize').addEventListener('click', onResize);
+  document.getElementById('map-width').addEventListener('change', onResize);
+  document.getElementById('map-height').addEventListener('change', onResize);
+
+  // Top toolbar buttons
+  document.getElementById('btn-map-list').addEventListener('click', showMapListDialog);
+  document.getElementById('btn-new-map').addEventListener('click', () => {
+    const id = 'map_' + String(state.mapList.length + 1).padStart(2, '0');
+    createNewMap(id, I18N.t('map_new_map_name'), 8, 8);
+    setStatus(`${I18N.t('map_created')}: ${id}`);
+  });
+  document.getElementById('btn-undo').addEventListener('click', undo);
+  document.getElementById('btn-redo').addEventListener('click', redo);
+
+  // Bottom bar buttons
+  document.getElementById('btn-export').addEventListener('click', exportJSON);
+  document.getElementById('btn-import').addEventListener('click', () => {
+    document.getElementById('file-input').click();
+  });
+  document.getElementById('file-input').addEventListener('change', importJSON);
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    if (confirm(I18N.t('map_confirm_clear'))) {
+      pushUndo();
+      state.terrain = createEmptyTerrain(state.width, state.height);
+      state.specialTerrain = [];
+      state.buildings = [];
+      state.playerSpawns = [];
+      state.buildZone = null;
+      saveCurrentMap();
+      render();
+      setStatus(I18N.t('map_cleared'));
+    }
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undo(); }
+    if (e.ctrlKey && e.key === 'y') { e.preventDefault(); redo(); }
+    if (e.ctrlKey && e.key === 's') { e.preventDefault(); exportJSON(); }
+
+    // Number keys 1-5 for layers
+    if (!e.ctrlKey && !e.altKey) {
+      const layerKeys = { '1': 'terrain', '2': 'special', '3': 'building', '4': 'spawn', '5': 'buildzone' };
+      if (layerKeys[e.key]) {
+        document.querySelectorAll('.layer-tab').forEach(t => t.classList.remove('active'));
+        document.querySelector(`.layer-tab[data-layer="${layerKeys[e.key]}"]`).classList.add('active');
+        state.currentLayer = layerKeys[e.key];
+        state.teleporterPairMode = false;
+        state.teleporterFirstPos = null;
+        removePairHint();
+
+        if (state.currentLayer === 'terrain') state.selectedTool = 0;
+        else if (state.currentLayer === 'special') state.selectedTool = 'healing_ground';
+        else if (state.currentLayer === 'building') state.selectedTool = 'watchtower';
+        else if (state.currentLayer === 'spawn') state.selectedTool = 'spawn';
+        else if (state.currentLayer === 'buildzone') state.selectedTool = 'buildzone';
+
+        updatePalette();
+      }
+    }
+
+    // Escape to cancel teleporter pair mode
+    if (e.key === 'Escape') {
+      state.teleporterPairMode = false;
+      state.teleporterFirstPos = null;
+      state.buildZoneDragging = false;
+      removePairHint();
+      render();
+    }
+  });
+}
+
+// ============================================================
+// CANVAS INTERACTION
+// ============================================================
+
+function getCellFromEvent(e) {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const x = Math.floor(mx / CELL_SIZE);
+  const y = Math.floor(my / CELL_SIZE);
+  if (x >= 0 && x < state.width && y >= 0 && y < state.height) {
+    return { x, y };
+  }
+  return null;
+}
+
+function onCanvasMouseDown(e) {
+  const cell = getCellFromEvent(e);
+  if (!cell) return;
+
+  if (e.button === 2) {
+    // Right click: erase current layer element
+    pushUndo();
+    eraseAtCell(cell.x, cell.y);
+    saveCurrentMap();
+    render();
+    return;
+  }
+
+  if (e.button !== 0) return;
+
+  if (state.currentLayer === 'buildzone') {
+    pushUndo();
+    state.buildZoneDragging = true;
+    state.buildZoneDragStart = { x: cell.x, y: cell.y };
+    return;
+  }
+
+  if (state.currentLayer === 'spawn') {
+    pushUndo();
+    toggleSpawn(cell.x, cell.y);
+    saveCurrentMap();
+    render();
+    return;
+  }
+
+  if (state.currentLayer === 'special') {
+    if (state.selectedTool === '_eraser') {
+      pushUndo();
+      eraseSpecialAt(cell.x, cell.y);
+      saveCurrentMap();
+      render();
+      return;
+    }
+
+    if (state.selectedTool === 'teleporter') {
+      handleTeleporterClick(cell.x, cell.y);
+      return;
+    }
+
+    pushUndo();
+    placeSpecial(cell.x, cell.y, state.selectedTool);
+    saveCurrentMap();
+    render();
+    return;
+  }
+
+  if (state.currentLayer === 'building') {
+    if (state.selectedTool === '_eraser') {
+      pushUndo();
+      eraseBuildingAt(cell.x, cell.y);
+      saveCurrentMap();
+      render();
+      return;
+    }
+
+    pushUndo();
+    placeBuilding(cell.x, cell.y, state.selectedTool);
+    saveCurrentMap();
+    render();
+    return;
+  }
+
+  // Terrain layer: support drag painting
+  pushUndo();
+  state.isDrawing = true;
+  paintTerrain(cell.x, cell.y);
+  saveCurrentMap();
+  render();
+}
+
+function onCanvasMouseMove(e) {
+  const cell = getCellFromEvent(e);
+  state.hoverCell = cell;
+
+  // Update tooltip
+  if (cell) {
+    updateTooltip(e.clientX, e.clientY, cell.x, cell.y);
+  } else {
+    tooltip.style.display = 'none';
+  }
+
+  // Drag paint for terrain
+  if (state.isDrawing && state.currentLayer === 'terrain' && cell) {
+    paintTerrain(cell.x, cell.y);
+    saveCurrentMap();
+  }
+
+  // Build zone drag preview
+  if (state.buildZoneDragging && cell) {
+    // render is called for preview
+  }
+
+  render();
+}
+
+function onCanvasMouseUp(e) {
+  const cell = getCellFromEvent(e);
+
+  if (state.buildZoneDragging && state.buildZoneDragStart) {
+    if (cell) {
+      const x1 = Math.min(state.buildZoneDragStart.x, cell.x);
+      const y1 = Math.min(state.buildZoneDragStart.y, cell.y);
+      const x2 = Math.max(state.buildZoneDragStart.x, cell.x);
+      const y2 = Math.max(state.buildZoneDragStart.y, cell.y);
+      state.buildZone = { x_min: x1, x_max: x2, y_min: y1, y_max: y2 };
+      saveCurrentMap();
+    }
+    state.buildZoneDragging = false;
+    state.buildZoneDragStart = null;
+    render();
+    return;
+  }
+
+  state.isDrawing = false;
+}
+
+function onCanvasMouseLeave() {
+  state.hoverCell = null;
+  state.isDrawing = false;
+  tooltip.style.display = 'none';
+  render();
+}
+
+function updateTooltip(mx, my, cx, cy) {
+  const tid = state.terrain[cy] && state.terrain[cy][cx] !== undefined ? state.terrain[cy][cx] : 0;
+  const tdef = TERRAIN_DEFS[tid] || TERRAIN_DEFS[0];
+
+  const moveCostText = tdef.moveCost === -1 ? I18N.t('map_tooltip_move_impassable') : tdef.moveCost;
+  let text = `${I18N.t('map_tooltip_coord')}: (${cx}, ${cy})\n`;
+  text += `${I18N.t('map_tooltip_terrain')}: ${localName(tdef)} (${tdef.key})\n`;
+  text += `${I18N.t('map_tooltip_move')}: ${moveCostText}\n`;
+  text += `${I18N.t('map_tooltip_effect')}: ${localEffect(tdef)}`;
+  if (tdef.blocksLOS) text += '\n' + I18N.t('map_blocks_los');
+
+  // Special terrain
+  const sp = state.specialTerrain.find(s => s.position[0] === cx && s.position[1] === cy);
+  if (sp) {
+    const sdef = SPECIAL_TERRAIN_DEFS.find(d => d.id === sp.type);
+    text += `\n${I18N.t('map_tooltip_special')}: ${sdef ? localName(sdef) : sp.type}`;
+    if (sp.pair_position) text += ` → (${sp.pair_position[0]}, ${sp.pair_position[1]})`;
+  }
+
+  // Building
+  const bld = state.buildings.find(b => b.position[0] === cx && b.position[1] === cy);
+  if (bld) {
+    const bdef = BUILDING_DEFS.find(d => d.id === bld.building_id);
+    text += `\n${I18N.t('map_tooltip_building')}: ${bdef ? localName(bdef) : bld.building_id} (${bld.owner})`;
+  }
+
+  // Spawn
+  if (state.playerSpawns.some(([x, y]) => x === cx && y === cy)) {
+    text += '\n★ ' + I18N.t('map_tooltip_spawn');
+  }
+
+  // Build zone
+  if (state.buildZone) {
+    const bz = state.buildZone;
+    if (cx >= bz.x_min && cx <= bz.x_max && cy >= bz.y_min && cy <= bz.y_max) {
+      text += '\n⬜ ' + I18N.t('map_tooltip_in_buildzone');
+    }
+  }
+
+  tooltip.textContent = text;
+  tooltip.style.display = 'block';
+  tooltip.style.left = (mx + 16) + 'px';
+  tooltip.style.top = (my + 16) + 'px';
+
+  // Keep tooltip on screen
+  const rect = tooltip.getBoundingClientRect();
+  if (rect.right > window.innerWidth) {
+    tooltip.style.left = (mx - rect.width - 8) + 'px';
+  }
+  if (rect.bottom > window.innerHeight) {
+    tooltip.style.top = (my - rect.height - 8) + 'px';
+  }
+}
+
+// ============================================================
+// EDIT OPERATIONS
+// ============================================================
+
+function paintTerrain(x, y) {
+  if (typeof state.selectedTool !== 'number') return;
+  if (!state.terrain[y]) return;
+  state.terrain[y][x] = state.selectedTool;
+}
+
+function placeSpecial(x, y, type) {
+  // Remove existing special terrain at position
+  state.specialTerrain = state.specialTerrain.filter(s => !(s.position[0] === x && s.position[1] === y));
+  const entry = { type, position: [x, y], faction: 'all' };
+  state.specialTerrain.push(entry);
+}
+
+function eraseSpecialAt(x, y) {
+  // If erasing a teleporter, also remove its pair
+  const existing = state.specialTerrain.find(s => s.position[0] === x && s.position[1] === y);
+  if (existing && existing.type === 'teleporter' && existing.pair_position) {
+    const [px, py] = existing.pair_position;
+    state.specialTerrain = state.specialTerrain.filter(s => !(s.position[0] === px && s.position[1] === py && s.type === 'teleporter'));
+  }
+  state.specialTerrain = state.specialTerrain.filter(s => !(s.position[0] === x && s.position[1] === y));
+}
+
+function placeBuilding(x, y, buildingId) {
+  state.buildings = state.buildings.filter(b => !(b.position[0] === x && b.position[1] === y));
+  state.buildings.push({ building_id: buildingId, position: [x, y], owner: 'neutral' });
+}
+
+function eraseBuildingAt(x, y) {
+  state.buildings = state.buildings.filter(b => !(b.position[0] === x && b.position[1] === y));
+}
+
+function toggleSpawn(x, y) {
+  const idx = state.playerSpawns.findIndex(([sx, sy]) => sx === x && sy === y);
+  if (idx >= 0) {
+    state.playerSpawns.splice(idx, 1);
+  } else {
+    state.playerSpawns.push([x, y]);
+  }
+}
+
+function eraseAtCell(x, y) {
+  if (state.currentLayer === 'terrain') {
+    if (state.terrain[y]) state.terrain[y][x] = 0;
+  } else if (state.currentLayer === 'special') {
+    eraseSpecialAt(x, y);
+  } else if (state.currentLayer === 'building') {
+    eraseBuildingAt(x, y);
+  } else if (state.currentLayer === 'spawn') {
+    state.playerSpawns = state.playerSpawns.filter(([sx, sy]) => !(sx === x && sy === y));
+  }
+}
+
+function handleTeleporterClick(x, y) {
+  if (!state.teleporterPairMode) {
+    // First click: set first position
+    state.teleporterPairMode = true;
+    state.teleporterFirstPos = { x, y };
+    showPairHint(I18N.t('map_teleporter_pair_hint'));
+    render();
+  } else {
+    // Second click: complete pair
+    const first = state.teleporterFirstPos;
+    if (first.x === x && first.y === y) {
+      // Clicked same cell, cancel
+      state.teleporterPairMode = false;
+      state.teleporterFirstPos = null;
+      removePairHint();
+      render();
+      return;
+    }
+
+    pushUndo();
+
+    // Remove any existing teleporters at both positions
+    eraseSpecialAt(first.x, first.y);
+    eraseSpecialAt(x, y);
+
+    // Place pair
+    state.specialTerrain.push({
+      type: 'teleporter',
+      position: [first.x, first.y],
+      faction: 'all',
+      pair_position: [x, y],
+    });
+    state.specialTerrain.push({
+      type: 'teleporter',
+      position: [x, y],
+      faction: 'all',
+      pair_position: [first.x, first.y],
+    });
+
+    state.teleporterPairMode = false;
+    state.teleporterFirstPos = null;
+    removePairHint();
+    saveCurrentMap();
+    render();
+    setStatus(`${I18N.t('map_teleporter_paired')}: (${first.x},${first.y}) ↔ (${x},${y})`);
+  }
+}
+
+// ============================================================
+// RESIZE
+// ============================================================
+
+function onResize() {
+  const nw = Math.max(1, Math.min(10, parseInt(document.getElementById('map-width').value) || 8));
+  const nh = Math.max(1, Math.min(10, parseInt(document.getElementById('map-height').value) || 8));
+  document.getElementById('map-width').value = nw;
+  document.getElementById('map-height').value = nh;
+
+  if (nw === state.width && nh === state.height) return;
+
+  pushUndo();
+
+  const oldTerrain = state.terrain;
+  const newTerrain = createEmptyTerrain(nw, nh);
+
+  // Copy existing data
+  for (let y = 0; y < Math.min(nh, oldTerrain.length); y++) {
+    for (let x = 0; x < Math.min(nw, oldTerrain[y].length); x++) {
+      newTerrain[y][x] = oldTerrain[y][x];
+    }
+  }
+
+  state.width = nw;
+  state.height = nh;
+  state.terrain = newTerrain;
+
+  // Filter out-of-bounds elements
+  state.specialTerrain = state.specialTerrain.filter(s =>
+    s.position[0] < nw && s.position[1] < nh
+  );
+  state.buildings = state.buildings.filter(b =>
+    b.position[0] < nw && b.position[1] < nh
+  );
+  state.playerSpawns = state.playerSpawns.filter(([x, y]) =>
+    x < nw && y < nh
+  );
+  if (state.buildZone) {
+    state.buildZone.x_max = Math.min(state.buildZone.x_max, nw - 1);
+    state.buildZone.y_max = Math.min(state.buildZone.y_max, nh - 1);
+    if (state.buildZone.x_min > state.buildZone.x_max || state.buildZone.y_min > state.buildZone.y_max) {
+      state.buildZone = null;
+    }
+  }
+
+  resizeCanvas();
+  saveCurrentMap();
+  render();
+  setStatus(`${I18N.t('map_resize_done')} ${nw} × ${nh}`);
+}
+
+// ============================================================
+// IMPORT / EXPORT
+// ============================================================
+
+function exportJSON() {
+  const obj = generateExportJSON();
+  const json = JSON.stringify(obj, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${state.mapId || 'map'}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  setStatus(`${I18N.t('map_exported')}: ${a.download}`);
+}
+
+function importJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.terrain || !Array.isArray(data.terrain)) {
+        throw new Error(I18N.t('map_invalid_json'));
+      }
+
+      pushUndo();
+
+      state.mapId = data.id || 'imported';
+      state.mapName = data.name || I18N.t('map_imported_name');
+      state.width = data.width || data.terrain[0].length;
+      state.height = data.height || data.terrain.length;
+      state.terrain = data.terrain;
+      state.specialTerrain = (data.special_terrain || []).map(st => ({
+        type: st.type,
+        position: st.position,
+        faction: st.faction || 'all',
+        pair_position: st.pair_position || null,
+      }));
+      state.buildings = (data.preset_buildings || []).map(b => ({
+        building_id: b.building_id,
+        position: b.position,
+        owner: b.owner || 'neutral',
+      }));
+      state.playerSpawns = data.player_spawns || [];
+      state.buildZone = data.player_build_zone || null;
+      state.waveConfig = data.wave_config || '';
+
+      saveCurrentMap();
+      syncUIFromState();
+      resizeCanvas();
+      render();
+      setStatus(`${I18N.t('map_imported')}: ${state.mapName}`);
+    } catch (err) {
+      alert(I18N.t('map_import_failed') + ': ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ============================================================
+// MAP LIST DIALOG
+// ============================================================
+
+function showMapListDialog() {
+  // Remove existing modal
+  const existing = document.querySelector('.modal-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.remove();
+  });
+
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+
+  let html = '<button class="modal-close" onclick="this.closest(\'.modal-overlay\').remove()">&times;</button>';
+  html += `<h3>${I18N.t('map_maps')}</h3>`;
+
+  if (state.mapList.length === 0) {
+    html += `<p style="color:#888;text-align:center;padding:20px;">${I18N.t('map_no_maps')}</p>`;
+  } else {
+    state.mapList.forEach(key => {
+      const raw = localStorage.getItem('mapDesigner_' + key);
+      let info = { mapId: key, mapName: I18N.t('map_unknown'), width: '?', height: '?' };
+      if (raw) {
+        try {
+          const d = JSON.parse(raw);
+          info = { mapId: d.mapId || key, mapName: d.mapName || I18N.t('map_unnamed'), width: d.width || '?', height: d.height || '?' };
+        } catch (e) {}
+      }
+      const isCurrent = key === state.currentMapKey;
+      html += `
+        <div class="map-list-item ${isCurrent ? 'current' : ''}" data-key="${key}">
+          <div class="map-info">
+            <div class="map-name">${info.mapName} ${isCurrent ? '(' + I18N.t('map_current') + ')' : ''}</div>
+            <div class="map-detail">ID: ${info.mapId} | ${info.width}×${info.height}</div>
+          </div>
+          <div class="map-actions">
+            ${!isCurrent ? `<button onclick="switchToMap('${key}')">${I18N.t('map_switch')}</button>` : ''}
+            <button onclick="duplicateMap('${key}')">${I18N.t('copy')}</button>
+            ${!isCurrent ? `<button class="del" onclick="confirmDeleteMap('${key}')">${I18N.t('delete')}</button>` : ''}
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  modal.innerHTML = html;
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+}
+
+window.switchToMap = function (key) {
+  loadMap(key);
+  document.querySelector('.modal-overlay')?.remove();
+  setStatus(`${I18N.t('map_switched')}: ${state.mapName}`);
+};
+
+window.duplicateMap = function (key) {
+  const raw = localStorage.getItem('mapDesigner_' + key);
+  if (!raw) return;
+  const data = JSON.parse(raw);
+  data.mapId = data.mapId + '_copy';
+  data.mapName = data.mapName + ` (${I18N.t('map_copy_suffix')})`;
+
+  const newKey = 'map_' + Date.now();
+  localStorage.setItem('mapDesigner_' + newKey, JSON.stringify(data));
+  state.mapList.push(newKey);
+  saveMapList();
+  document.querySelector('.modal-overlay')?.remove();
+  showMapListDialog();
+  setStatus(I18N.t('map_duplicated'));
+};
+
+window.confirmDeleteMap = function (key) {
+  const raw = localStorage.getItem('mapDesigner_' + key);
+  let name = key;
+  if (raw) {
+    try { name = JSON.parse(raw).mapName || key; } catch (e) {}
+  }
+  if (confirm(I18N.t('map_confirm_delete').replace('{name}', name))) {
+    deleteMap(key);
+    document.querySelector('.modal-overlay')?.remove();
+    if (state.mapList.length > 0) {
+      loadMap(state.mapList[0]);
+    } else {
+      createNewMap('map_01', I18N.t('map_new_map_name'), 8, 8);
+    }
+    setStatus(I18N.t('map_deleted'));
+  }
+};
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+function setStatus(text) {
+  document.getElementById('status-bar').textContent = text;
+}
+
+function showPairHint(text) {
+  removePairHint();
+  const hint = document.createElement('div');
+  hint.className = 'pair-hint';
+  hint.id = 'pair-hint';
+  hint.textContent = text;
+  document.body.appendChild(hint);
+}
+
+function removePairHint() {
+  const hint = document.getElementById('pair-hint');
+  if (hint) hint.remove();
+}
+
+// ============================================================
+// START
+// ============================================================
+
+init();
+</script>
+</body>
+</html>
