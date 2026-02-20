@@ -565,6 +565,9 @@ const I18N = {
       tt_search_placeholder: '按名称或标签搜索节点...',
       tt_new_tree: '+ 新建天赋页',
       tt_custom_trees: '── 自定义天赋页 ──',
+      // 天赋树 - 文件系统
+      tt_fs_connected: '已连接', tt_fs_disconnected: '未连接',
+      tt_fs_pick_dir: '📂 选择目录', tt_fs_unsupported: '浏览器不支持',
       tt_node_name_placeholder: '节点名称',
       tt_node_id_placeholder: '唯一节点ID',
       tt_node_desc_placeholder: '描述节点效果...',
@@ -774,6 +777,9 @@ const I18N = {
       tt_search_placeholder: 'Search nodes by name or tags...',
       tt_new_tree: '+ New Tree',
       tt_custom_trees: '── Custom Trees ──',
+      // Talent tree - File system
+      tt_fs_connected: 'Connected', tt_fs_disconnected: 'Not Connected',
+      tt_fs_pick_dir: '📂 Select Directory', tt_fs_unsupported: 'Browser Unsupported',
       tt_node_name_placeholder: 'Node name',
       tt_node_id_placeholder: 'unique_node_id',
       tt_node_desc_placeholder: 'Describe the node effect...',

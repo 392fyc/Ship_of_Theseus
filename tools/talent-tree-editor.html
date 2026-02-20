@@ -427,6 +427,10 @@ canvas.grabbing { cursor: grabbing; }
           <button onclick="deleteTreeFromStorage()" style="flex:1;padding:4px 6px;background:#c0392b;color:#fff;border:none;border-radius:3px;font-size:11px;cursor:pointer;" title="删除当前自定义树">🗑 Delete</button>
           <button onclick="exportJSONFile()" style="flex:1;padding:4px 6px;background:#0f3460;color:#e0e0e0;border:1px solid #1a5276;border-radius:3px;font-size:11px;cursor:pointer;" title="下载JSON文件">📥 .json</button>
         </div>
+        <div style="display:flex;gap:4px;margin-top:4px;align-items:center;">
+          <span id="fs-status" style="font-size:11px;color:#666;user-select:none;">📂</span>
+          <button id="fs-connect-btn" onclick="FSBridge.pickDirectory().then(ok=>{if(ok)loadFSTrees();})" style="display:none;padding:3px 8px;background:#1a5276;color:#e0e0e0;border:1px solid #1a5276;border-radius:3px;font-size:11px;cursor:pointer;" data-i18n="tt_fs_pick_dir">📂 选择目录</button>
+        </div>
       </div>
     </div>
 
@@ -1063,7 +1067,175 @@ function getDefaultData() {
 }
 
 // ============================================================
-// Storage key for custom trees
+// File System Access API Bridge (FSBridge)
+// ============================================================
+const FSBridge = {
+  _rootDirHandle: null,
+  _talentDirHandle: null,
+  _connected: false,
+  _idbName: 'TalentTreeEditorFS',
+  _idbStore: 'handles',
+  _idbKey: 'rootDirHandle',
+
+  isSupported() {
+    return 'showDirectoryPicker' in window;
+  },
+
+  // --- IndexedDB for handle persistence ---
+  async _openIDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(this._idbName, 1);
+      req.onupgradeneeded = (e) => e.target.result.createObjectStore(this._idbStore);
+      req.onsuccess = (e) => resolve(e.target.result);
+      req.onerror = (e) => reject(e.target.error);
+    });
+  },
+
+  async _saveHandle(handle) {
+    const db = await this._openIDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(this._idbStore, 'readwrite');
+      tx.objectStore(this._idbStore).put(handle, this._idbKey);
+      tx.oncomplete = () => resolve();
+      tx.onerror = (e) => reject(e.target.error);
+    });
+  },
+
+  async _loadHandle() {
+    const db = await this._openIDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(this._idbStore, 'readonly');
+      const req = tx.objectStore(this._idbStore).get(this._idbKey);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = (e) => reject(e.target.error);
+    });
+  },
+
+  // --- Directory connection ---
+  async _navigateToTalentDir(rootHandle) {
+    const dataDir = await rootHandle.getDirectoryHandle('data', { create: true });
+    return await dataDir.getDirectoryHandle('talent-tree', { create: true });
+  },
+
+  async pickDirectory() {
+    try {
+      this._rootDirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+      this._talentDirHandle = await this._navigateToTalentDir(this._rootDirHandle);
+      this._connected = true;
+      await this._saveHandle(this._rootDirHandle);
+      this._updateUI();
+      return true;
+    } catch (e) {
+      console.warn('[FSBridge] pickDirectory:', e);
+      this._connected = false;
+      this._updateUI();
+      return false;
+    }
+  },
+
+  async tryRestore() {
+    if (!this.isSupported()) return false;
+    try {
+      const handle = await this._loadHandle();
+      if (!handle) return false;
+      const perm = await handle.requestPermission({ mode: 'readwrite' });
+      if (perm !== 'granted') return false;
+      this._rootDirHandle = handle;
+      this._talentDirHandle = await this._navigateToTalentDir(handle);
+      this._connected = true;
+      this._updateUI();
+      return true;
+    } catch (e) {
+      console.warn('[FSBridge] tryRestore:', e);
+      this._connected = false;
+      this._updateUI();
+      return false;
+    }
+  },
+
+  // --- File operations ---
+  async readAllTrees() {
+    if (!this._connected || !this._talentDirHandle) return [];
+    const trees = [];
+    try {
+      for await (const [name, handle] of this._talentDirHandle) {
+        if (handle.kind === 'file' && name.endsWith('.json')) {
+          try {
+            const file = await handle.getFile();
+            const text = await file.text();
+            const data = JSON.parse(text);
+            trees.push({ key: name.replace(/\.json$/, ''), data });
+          } catch (e) {
+            console.warn('[FSBridge] Failed to read:', name, e);
+          }
+        }
+      }
+    } catch (e) {
+      console.error('[FSBridge] readAllTrees:', e);
+    }
+    return trees;
+  },
+
+  async writeTree(filename, data) {
+    if (!this._connected || !this._talentDirHandle) return false;
+    try {
+      const fh = await this._talentDirHandle.getFileHandle(filename + '.json', { create: true });
+      const w = await fh.createWritable();
+      await w.write(JSON.stringify(data, null, 2));
+      await w.close();
+      return true;
+    } catch (e) {
+      console.error('[FSBridge] writeTree:', e);
+      return false;
+    }
+  },
+
+  async deleteTree(filename) {
+    if (!this._connected || !this._talentDirHandle) return false;
+    try {
+      await this._talentDirHandle.removeEntry(filename + '.json');
+      return true;
+    } catch (e) {
+      console.error('[FSBridge] deleteTree:', e);
+      return false;
+    }
+  },
+
+  // --- UI status ---
+  _updateUI() {
+    const t = (k) => (typeof I18N !== 'undefined') ? I18N.t(k) : k;
+    const indicator = document.getElementById('fs-status');
+    const btn = document.getElementById('fs-connect-btn');
+    if (indicator) {
+      if (!this.isSupported()) {
+        indicator.textContent = '📂 ' + t('tt_fs_unsupported');
+        indicator.style.color = '#666';
+      } else if (this._connected) {
+        indicator.textContent = '📂 ' + t('tt_fs_connected');
+        indicator.style.color = '#2ecc71';
+        indicator.title = 'data/talent-tree/';
+      } else {
+        indicator.textContent = '📂 ' + t('tt_fs_disconnected');
+        indicator.style.color = '#e94560';
+      }
+    }
+    if (btn) {
+      btn.style.display = (!this.isSupported() || this._connected) ? 'none' : 'inline-block';
+    }
+  },
+};
+
+// File system trees cache
+let fsTreesCache = []; // [{key, data}]
+
+async function loadFSTrees() {
+  if (!FSBridge._connected) { fsTreesCache = []; return; }
+  fsTreesCache = await FSBridge.readAllTrees();
+  rebuildSelector();
+}
+
+// ============================================================
+// Storage key for custom trees (localStorage fallback)
 // ============================================================
 const STORAGE_KEY = 'talent_tree_custom_';
 
@@ -1081,34 +1253,39 @@ function loadCustomTreesFromStorage() {
 function rebuildSelector() {
   const sel = document.getElementById('class-selector');
   const currentVal = sel.value;
-  // Clear all options
   sel.innerHTML = '';
   // Built-in presets
-  const builtins = Object.keys(TREES);
-  builtins.forEach(k => {
+  Object.keys(TREES).forEach(k => {
     const opt = document.createElement('option');
     opt.value = k;
     opt.textContent = TREES[k].class_name;
     sel.appendChild(opt);
   });
-  // Separator + custom trees
-  const customKeys = loadCustomTreesFromStorage();
-  if (customKeys.length > 0) {
+  // Merge custom trees: FS (high priority) + localStorage (low priority), dedup
+  const customMap = new Map(); // key -> {data, source}
+  const lsKeys = loadCustomTreesFromStorage();
+  lsKeys.forEach(k => {
+    try {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY + k));
+      if (data) customMap.set(k, { data, source: 'local' });
+    } catch(e) {}
+  });
+  fsTreesCache.forEach(({ key, data }) => {
+    customMap.set(key, { data, source: 'fs' });
+  });
+  if (customMap.size > 0) {
     const sep = document.createElement('option');
     sep.disabled = true;
     sep.textContent = typeof I18N !== 'undefined' ? I18N.t('tt_custom_trees') : '── 自定义天赋页 ──';
     sel.appendChild(sep);
-    customKeys.forEach(k => {
-      try {
-        const data = JSON.parse(localStorage.getItem(STORAGE_KEY + k));
-        const opt = document.createElement('option');
-        opt.value = '__custom__' + k;
-        opt.textContent = '📝 ' + (data.class_name || k);
-        sel.appendChild(opt);
-      } catch(e) {}
-    });
+    for (const [k, { data, source }] of customMap) {
+      const opt = document.createElement('option');
+      opt.value = '__custom__' + k;
+      opt.textContent = (source === 'fs' ? '📂 ' : '📝 ') + (data.class_name || k);
+      sel.appendChild(opt);
+    }
   }
-  // Separator + New
+  // New tree option
   const sep2 = document.createElement('option');
   sep2.disabled = true;
   sep2.textContent = '──────────';
@@ -1117,7 +1294,6 @@ function rebuildSelector() {
   newOpt.value = '__new__';
   newOpt.textContent = typeof I18N !== 'undefined' ? I18N.t('tt_new_tree') : '+ 新建天赋页';
   sel.appendChild(newOpt);
-  // Restore selection
   sel.value = currentVal;
 }
 
@@ -1186,21 +1362,38 @@ function createNewTree() {
   toast('已创建新天赋页：' + name);
 }
 
-function saveTreeToStorage() {
+async function saveTreeToStorage() {
   if (!treeData.class_id) {
     toast('Error: class_id is empty');
     return;
   }
   const key = currentCustomKey || treeData.class_id;
+  // Always write localStorage (fallback/cache)
   localStorage.setItem(STORAGE_KEY + key, JSON.stringify(treeData));
+  // Write to file system if connected
+  if (FSBridge._connected) {
+    const ok = await FSBridge.writeTree(key, treeData);
+    // Update FS cache
+    const idx = fsTreesCache.findIndex(t => t.key === key);
+    const cached = { key, data: JSON.parse(JSON.stringify(treeData)) };
+    if (idx >= 0) fsTreesCache[idx] = cached; else fsTreesCache.push(cached);
+    if (ok) {
+      toast('已保存: data/talent-tree/' + key + '.json');
+    } else {
+      toast('文件写入失败，已保存到 localStorage');
+    }
+  } else {
+    toast('已保存：' + treeData.class_name);
+  }
   currentCustomKey = key;
   rebuildSelector();
   document.getElementById('class-selector').value = '__custom__' + key;
-  toast('已保存：' + treeData.class_name);
 }
 
 function loadCustomTree(key) {
-  const raw = localStorage.getItem(STORAGE_KEY + key);
+  // Prefer file system cache, fallback to localStorage
+  const fsEntry = fsTreesCache.find(t => t.key === key);
+  const raw = fsEntry ? JSON.stringify(fsEntry.data) : localStorage.getItem(STORAGE_KEY + key);
   if (!raw) { toast('Error: tree not found'); return; }
   if (undoStack.length > 0) {
     if (!confirm('切换将清除当前未保存的修改，确认？')) {
@@ -1214,19 +1407,26 @@ function loadCustomTree(key) {
     selectNode(null);
     updateMetaFields();
     setTimeout(fitView, 80);
-    toast('已加载：' + treeData.class_name);
+    const src = fsEntry ? '📂' : '📝';
+    toast(src + ' 已加载：' + treeData.class_name);
   } catch(e) {
-    toast('Error: invalid JSON in storage');
+    toast('Error: invalid JSON');
   }
 }
 
-function deleteTreeFromStorage() {
+async function deleteTreeFromStorage() {
   if (!currentCustomKey) {
     toast('内置预设不可删除');
     return;
   }
   if (!confirm('确认删除自定义天赋页「' + treeData.class_name + '」？此操作不可撤销。')) return;
+  // Delete from localStorage
   localStorage.removeItem(STORAGE_KEY + currentCustomKey);
+  // Delete from file system
+  if (FSBridge._connected) {
+    await FSBridge.deleteTree(currentCustomKey);
+    fsTreesCache = fsTreesCache.filter(t => t.key !== currentCustomKey);
+  }
   currentCustomKey = null;
   treeData = getDefaultData();
   selectNode(null);
@@ -1237,7 +1437,17 @@ function deleteTreeFromStorage() {
   toast('已删除');
 }
 
-function exportJSONFile() {
+async function exportJSONFile() {
+  // If FS connected, write directly to file system
+  if (FSBridge._connected) {
+    const key = treeData.class_id || 'talent-tree';
+    const ok = await FSBridge.writeTree(key, treeData);
+    if (ok) {
+      toast('已导出: data/talent-tree/' + key + '.json');
+      return;
+    }
+  }
+  // Fallback: download file
   const json = JSON.stringify(treeData, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -2533,9 +2743,20 @@ if (typeof I18N !== 'undefined') {
 
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
-rebuildSelector();
-updateMetaFields();
-setTimeout(fitView, 100);
+
+// Async init: restore FS connection, then rebuild selector
+(async function initFS() {
+  if (FSBridge.isSupported()) {
+    const restored = await FSBridge.tryRestore();
+    if (restored) {
+      await loadFSTrees();
+    }
+  }
+  FSBridge._updateUI();
+  rebuildSelector();
+  updateMetaFields();
+  setTimeout(fitView, 100);
+})();
 </script>
 
 </body>
