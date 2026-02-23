@@ -17,6 +17,7 @@ desktop.ini
 CLAUDE.md
 AGENTS.md
 .claude/
+.cursor/
 
 # 编辑器 workspace 数据（天赋树编辑器输出等）
 data/
