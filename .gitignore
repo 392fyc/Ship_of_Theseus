@@ -1,0 +1,23 @@
+# Godot
+.godot/
+*.import
+export_presets.cfg
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+*.swp
+*.swo
+
+# Vibe Coding 设计工具（浏览器端HTML工具集，非游戏代码）
+tools/
+
+# 设计文档（AI辅助开发参考文档，非游戏代码）
+dev_doc/
+
+# 编辑器workspace数据（天赋树编辑器输出等）
+data/talent-tree/
