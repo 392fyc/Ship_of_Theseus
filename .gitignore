@@ -13,11 +13,10 @@ desktop.ini
 *.swp
 *.swo
 
-# Vibe Coding 设计工具（浏览器端HTML工具集，非游戏代码）
-tools/
+# AI Agent 配置与指令文件（各开发者本地维护）
+CLAUDE.md
+AGENTS.md
+.claude/
 
-# 设计文档（AI辅助开发参考文档，非游戏代码）
-dev_doc/
-
-# 编辑器workspace数据（天赋树编辑器输出等）
-data/talent-tree/
+# 编辑器 workspace 数据（天赋树编辑器输出等）
+data/

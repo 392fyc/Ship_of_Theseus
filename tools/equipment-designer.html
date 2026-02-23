@@ -1,0 +1,2283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="eq_title">Equipment Designer</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* === Layout === */
+#app {
+  display: flex;
+  height: 100vh;
+}
+
+/* === Left Panel - Equipment List === */
+#left-panel {
+  width: 280px;
+  min-width: 280px;
+  background: #16213e;
+  border-right: 2px solid #0f3460;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#left-header {
+  padding: 16px;
+  background: #0f3460;
+  border-bottom: 1px solid #1a5276;
+}
+
+#left-header h2 {
+  font-size: 16px;
+  color: #e94560;
+  margin-bottom: 10px;
+}
+
+#search-box {
+  width: 100%;
+  padding: 6px 10px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+#search-box:focus { outline: none; border-color: #e94560; }
+
+#filter-row {
+  display: flex;
+  gap: 6px;
+}
+
+#filter-row select {
+  flex: 1;
+  padding: 4px 6px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+#filter-row select:focus { outline: none; border-color: #e94560; }
+
+#new-equip-btn {
+  width: 100%;
+  padding: 8px;
+  margin-top: 8px;
+  background: #e94560;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+#new-equip-btn:hover { background: #c73850; }
+
+#equip-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+#equip-list::-webkit-scrollbar { width: 6px; }
+#equip-list::-webkit-scrollbar-track { background: #16213e; }
+#equip-list::-webkit-scrollbar-thumb { background: #0f3460; border-radius: 3px; }
+
+.equip-item {
+  padding: 10px 12px;
+  margin-bottom: 4px;
+  background: #1a1a2e;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.equip-item:hover { border-color: #1a5276; background: #1e2642; }
+.equip-item.selected { border-color: #e94560; background: #2a1a2e; }
+
+.equip-item .equip-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.equip-item .equip-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.equip-item .equip-name {
+  font-size: 13px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.equip-item .equip-sub {
+  font-size: 11px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.equip-item .equip-delete {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: all 0.15s;
+}
+
+.equip-item:hover .equip-delete { opacity: 1; }
+.equip-item .equip-delete:hover { color: #e94560; background: rgba(233,69,96,0.15); }
+
+/* === Center Panel - Editor === */
+#center-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#center-header {
+  padding: 12px 20px;
+  background: #0f3460;
+  border-bottom: 1px solid #1a5276;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#center-header h2 {
+  font-size: 16px;
+  color: #e94560;
+}
+
+#center-header .header-actions {
+  display: flex;
+  gap: 6px;
+}
+
+#center-header .header-actions button {
+  padding: 6px 14px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+#center-header .header-actions button:hover { background: #1a5276; }
+#center-header .header-actions button.primary { background: #e94560; border-color: #e94560; }
+#center-header .header-actions button.primary:hover { background: #c73850; }
+
+#editor-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+#editor-area::-webkit-scrollbar { width: 6px; }
+#editor-area::-webkit-scrollbar-track { background: #1a1a2e; }
+#editor-area::-webkit-scrollbar-thumb { background: #0f3460; border-radius: 3px; }
+
+#no-selection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #555;
+  font-size: 14px;
+  text-align: center;
+  line-height: 2;
+}
+
+.editor-section {
+  background: #16213e;
+  border: 1px solid #0f3460;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.editor-section h3 {
+  font-size: 13px;
+  color: #e94560;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #0f3460;
+}
+
+.field {
+  margin-bottom: 10px;
+}
+
+.field label {
+  display: block;
+  font-size: 12px;
+  color: #a0a0a0;
+  margin-bottom: 3px;
+}
+
+.field input, .field select, .field textarea {
+  width: 100%;
+  padding: 6px 8px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none;
+  border-color: #e94560;
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.field-row {
+  display: flex;
+  gap: 8px;
+}
+
+.field-row .field { flex: 1; }
+
+/* Stat editor */
+.stat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-row select {
+  flex: 1;
+  padding: 5px 6px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.stat-row input {
+  width: 70px;
+  padding: 5px 6px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.stat-row select:focus, .stat-row input:focus {
+  outline: none;
+  border-color: #e94560;
+}
+
+.stat-row .remove-stat {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.stat-row .remove-stat:hover { color: #e94560; background: rgba(233,69,96,0.15); }
+
+.add-stat-btn {
+  padding: 5px 12px;
+  background: transparent;
+  color: #a0a0a0;
+  border: 1px dashed #1a5276;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-top: 6px;
+  transition: all 0.15s;
+}
+
+.add-stat-btn:hover { border-color: #e94560; color: #e94560; }
+
+/* Tags editor */
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: #0f3460;
+  border: 1px solid #1a5276;
+  border-radius: 12px;
+  font-size: 11px;
+}
+
+.tag-badge .remove-tag {
+  cursor: pointer;
+  color: #888;
+  font-size: 14px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.tag-badge .remove-tag:hover { color: #e94560; }
+
+.add-tag-row {
+  display: flex;
+  gap: 6px;
+}
+
+.add-tag-row input {
+  flex: 1;
+  padding: 4px 8px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.add-tag-row input:focus { outline: none; border-color: #e94560; }
+
+.add-tag-row button {
+  padding: 4px 10px;
+  background: #0f3460;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s;
+}
+
+.add-tag-row button:hover { background: #1a5276; }
+
+/* Special effect */
+.effect-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.effect-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #a0a0a0;
+}
+
+.effect-toggle input[type="checkbox"] {
+  accent-color: #e94560;
+}
+
+.effect-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: #1a1a2e;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+}
+
+/* === Right Panel - Preview === */
+#right-panel {
+  width: 320px;
+  min-width: 320px;
+  background: #16213e;
+  border-left: 2px solid #0f3460;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#right-header {
+  padding: 16px;
+  background: #0f3460;
+  border-bottom: 1px solid #1a5276;
+}
+
+#right-header h2 {
+  font-size: 16px;
+  color: #e94560;
+}
+
+#right-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+#right-content::-webkit-scrollbar { width: 6px; }
+#right-content::-webkit-scrollbar-track { background: #16213e; }
+#right-content::-webkit-scrollbar-thumb { background: #0f3460; border-radius: 3px; }
+
+/* Preview card */
+.preview-card {
+  background: #1a1a2e;
+  border: 2px solid #0f3460;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.preview-card.rarity-common::before { background: #a0a0a0; }
+.preview-card.rarity-uncommon::before { background: #2ecc71; }
+.preview-card.rarity-rare::before { background: #3498db; }
+.preview-card.rarity-epic::before { background: #9b59b6; }
+.preview-card.rarity-legendary::before { background: #e67e22; }
+
+.preview-card.rarity-common { border-color: rgba(160,160,160,0.3); }
+.preview-card.rarity-uncommon { border-color: rgba(46,204,113,0.3); }
+.preview-card.rarity-rare { border-color: rgba(52,152,219,0.3); }
+.preview-card.rarity-epic { border-color: rgba(155,89,182,0.3); }
+.preview-card.rarity-legendary { border-color: rgba(230,126,34,0.3); }
+
+.preview-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin: 0 auto 12px;
+  border: 2px solid;
+}
+
+.preview-card.rarity-common .preview-icon { background: rgba(160,160,160,0.1); border-color: rgba(160,160,160,0.3); }
+.preview-card.rarity-uncommon .preview-icon { background: rgba(46,204,113,0.1); border-color: rgba(46,204,113,0.3); }
+.preview-card.rarity-rare .preview-icon { background: rgba(52,152,219,0.1); border-color: rgba(52,152,219,0.3); }
+.preview-card.rarity-epic .preview-icon { background: rgba(155,89,182,0.1); border-color: rgba(155,89,182,0.3); }
+.preview-card.rarity-legendary .preview-icon { background: rgba(230,126,34,0.1); border-color: rgba(230,126,34,0.3); }
+
+.preview-name {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.preview-card.rarity-common .preview-name { color: #a0a0a0; }
+.preview-card.rarity-uncommon .preview-name { color: #2ecc71; }
+.preview-card.rarity-rare .preview-name { color: #3498db; }
+.preview-card.rarity-epic .preview-name { color: #9b59b6; }
+.preview-card.rarity-legendary .preview-name { color: #e67e22; }
+
+.preview-type {
+  text-align: center;
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.preview-divider {
+  height: 1px;
+  background: #0f3460;
+  margin: 10px 0;
+}
+
+.preview-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.preview-stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.preview-stat .stat-label { color: #a0a0a0; }
+.preview-stat .stat-value { color: #2ecc71; font-weight: bold; }
+
+.preview-effect {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: rgba(155,89,182,0.1);
+  border: 1px solid rgba(155,89,182,0.3);
+  border-radius: 4px;
+  font-size: 12px;
+  color: #c39bd3;
+}
+
+.preview-desc {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+  text-align: center;
+}
+
+.preview-tags {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.preview-tags .tag {
+  padding: 2px 8px;
+  background: rgba(15,52,96,0.5);
+  border: 1px solid #1a5276;
+  border-radius: 10px;
+  font-size: 10px;
+  color: #a0a0a0;
+}
+
+/* Tier range reference */
+.tier-reference {
+  background: #1a1a2e;
+  border: 1px solid #0f3460;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.tier-reference h4 {
+  font-size: 12px;
+  color: #e94560;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.tier-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tier-table th, .tier-table td {
+  padding: 5px 8px;
+  font-size: 11px;
+  text-align: center;
+  border-bottom: 1px solid #0f3460;
+}
+
+.tier-table th {
+  color: #a0a0a0;
+  font-weight: normal;
+  text-transform: uppercase;
+}
+
+.tier-table td { color: #e0e0e0; }
+
+.tier-table tr.current-tier { background: rgba(233,69,96,0.1); }
+.tier-table tr.current-tier td { color: #e94560; font-weight: bold; }
+
+/* Stat validation */
+.stat-validation {
+  background: #1a1a2e;
+  border: 1px solid #0f3460;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.stat-validation h4 {
+  font-size: 12px;
+  color: #e94560;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.validation-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 12px;
+}
+
+.validation-item .val-label { color: #a0a0a0; }
+.validation-item .val-range { color: #888; }
+.validation-item .val-status { font-weight: bold; }
+.validation-item .val-status.ok { color: #2ecc71; }
+.validation-item .val-status.warn { color: #e67e22; }
+.validation-item .val-status.over { color: #e94560; }
+
+/* JSON preview */
+.json-preview {
+  background: #1a1a2e;
+  border: 1px solid #0f3460;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.json-preview h4 {
+  font-size: 12px;
+  color: #e94560;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.json-preview h4 button {
+  padding: 3px 10px;
+  background: #0f3460;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+  transition: all 0.15s;
+}
+
+.json-preview h4 button:hover { background: #1a5276; }
+
+.json-preview pre {
+  background: #0d1117;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  padding: 10px;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 11px;
+  color: #8b949e;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* === Bottom Bar === */
+#bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 280px;
+  right: 320px;
+  padding: 10px 20px;
+  background: #0f3460;
+  border-top: 1px solid #1a5276;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+}
+
+#bottom-bar .bar-info {
+  font-size: 12px;
+  color: #888;
+}
+
+#bottom-bar .bar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+#bottom-bar .bar-actions button {
+  padding: 6px 16px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+#bottom-bar .bar-actions button:hover { background: #1a5276; }
+#bottom-bar .bar-actions button.primary { background: #e94560; border-color: #e94560; }
+#bottom-bar .bar-actions button.primary:hover { background: #c73850; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  background: #16213e;
+  border: 1px solid #1a5276;
+  border-radius: 6px;
+  font-size: 13px;
+  z-index: 200;
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 2.2s forwards;
+  pointer-events: none;
+}
+
+.toast.success { border-color: #2ecc71; color: #2ecc71; }
+.toast.error { border-color: #e94560; color: #e94560; }
+.toast.info { border-color: #3498db; color: #3498db; }
+
+@keyframes toastIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+
+/* Hidden file input */
+#import-file { display: none; }
+
+/* Duplicate modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-overlay.show { display: flex; }
+
+.modal {
+  background: #16213e;
+  border: 2px solid #0f3460;
+  border-radius: 12px;
+  padding: 24px;
+  min-width: 360px;
+  max-width: 500px;
+}
+
+.modal h3 {
+  color: #e94560;
+  margin-bottom: 16px;
+  font-size: 16px;
+}
+
+.modal .field { margin-bottom: 12px; }
+
+.modal .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.modal .modal-actions button {
+  padding: 7px 18px;
+  border-radius: 4px;
+  border: 1px solid #1a5276;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.15s;
+}
+
+.modal .modal-actions button:hover { background: #1a5276; }
+.modal .modal-actions button.primary { background: #e94560; border-color: #e94560; }
+.modal .modal-actions button.primary:hover { background: #c73850; }
+</style>
+<script src="shared.js"></script>
+</head>
+<body>
+
+<div id="app">
+  <!-- Left Panel -->
+  <div id="left-panel">
+    <div id="left-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <h2 data-i18n="eq_equip_list" style="margin-bottom:0;">装备列表</h2>
+        <div id="lang-switcher-slot"></div>
+      </div>
+      <input type="text" id="search-box" data-i18n-placeholder="eq_search_placeholder" placeholder="搜索装备名称或ID...">
+      <div id="filter-row">
+        <select id="filter-slot">
+          <option value="" data-i18n="eq_all_slots">全部槽位</option>
+          <option value="weapon" data-i18n="eq_slot_weapon">武器</option>
+          <option value="armor" data-i18n="eq_slot_armor">护甲</option>
+          <option value="accessory" data-i18n="eq_slot_accessory">饰品</option>
+        </select>
+        <select id="filter-rarity">
+          <option value="" data-i18n="eq_all_rarity">全部稀有度</option>
+          <option value="common" data-i18n="rarity_common">普通</option>
+          <option value="uncommon" data-i18n="rarity_uncommon">精良</option>
+          <option value="rare" data-i18n="rarity_rare">稀有</option>
+          <option value="epic" data-i18n="rarity_epic">史诗</option>
+          <option value="legendary" data-i18n="rarity_legendary">传说</option>
+        </select>
+        <select id="filter-tier">
+          <option value="" data-i18n="eq_all_tiers">全部阶段</option>
+          <option value="1">T1</option>
+          <option value="2">T2</option>
+          <option value="3">T3</option>
+          <option value="4">T4</option>
+        </select>
+      </div>
+      <button id="new-equip-btn" data-i18n="eq_new">+ 新建装备</button>
+    </div>
+    <div id="equip-list"></div>
+  </div>
+
+  <!-- Center Panel -->
+  <div id="center-panel">
+    <div id="center-header">
+      <h2 data-i18n="eq_title">装备编辑器</h2>
+      <div class="header-actions">
+        <button id="btn-duplicate" data-i18n="copy" data-i18n-title="eq_copy_equip" title="复制当前装备">复制</button>
+        <button id="btn-save" class="primary" data-i18n="save">保存</button>
+      </div>
+    </div>
+    <div id="editor-area">
+      <div id="no-selection">
+        <div>
+          <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;">&#9876;</div>
+          <div data-i18n="eq_no_selection">从左侧选择一个装备进行编辑</div>
+          <div style="margin-top: 4px; font-size: 12px;" data-i18n="eq_no_selection_sub">或点击「+ 新建装备」创建新的装备</div>
+        </div>
+      </div>
+      <div id="editor-form" style="display: none;">
+        <!-- Basic Info -->
+        <div class="editor-section">
+          <h3 data-i18n="eq_basic_info">基础信息</h3>
+          <div class="field-row">
+            <div class="field">
+              <label data-i18n="eq_equip_id">装备ID</label>
+              <input type="text" id="ed-id" placeholder="iron_sword">
+            </div>
+            <div class="field">
+              <label data-i18n="eq_equip_name">装备名称</label>
+              <input type="text" id="ed-name" data-i18n-placeholder="eq_name_placeholder" placeholder="铁剑">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label data-i18n="eq_slot">槽位</label>
+              <select id="ed-slot">
+                <option value="weapon" data-i18n="eq_slot_weapon">武器 (Weapon)</option>
+                <option value="armor" data-i18n="eq_slot_armor">护甲 (Armor)</option>
+                <option value="accessory" data-i18n="eq_slot_accessory">饰品 (Accessory)</option>
+              </select>
+            </div>
+            <div class="field" id="weapon-type-field">
+              <label data-i18n="eq_weapon_type">武器类型</label>
+              <select id="ed-weapon-type">
+                <option value="sword" data-i18n="eq_wt_sword">剑 (Sword)</option>
+                <option value="bow" data-i18n="eq_wt_bow">弓 (Bow)</option>
+                <option value="tome" data-i18n="eq_wt_tome">魔法书 (Tome)</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label data-i18n="eq_rarity">稀有度</label>
+              <select id="ed-rarity">
+                <option value="common" data-i18n="rarity_common">普通 (Common)</option>
+                <option value="uncommon" data-i18n="rarity_uncommon">精良 (Uncommon)</option>
+                <option value="rare" data-i18n="rarity_rare">稀有 (Rare)</option>
+                <option value="epic" data-i18n="rarity_epic">史诗 (Epic)</option>
+                <option value="legendary" data-i18n="rarity_legendary">传说 (Legendary)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label data-i18n="eq_tier">阶段 (Tier)</label>
+              <select id="ed-tier">
+                <option value="1" data-i18n="eq_tier_1">T1 - 初期 (关卡1-5)</option>
+                <option value="2" data-i18n="eq_tier_2">T2 - 中期 (关卡6-15)</option>
+                <option value="3" data-i18n="eq_tier_3">T3 - 后期 (关卡16-25)</option>
+                <option value="4" data-i18n="eq_tier_4">T4 - 终盘 (关卡26-30)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="editor-section">
+          <h3 data-i18n="eq_stats">属性加成</h3>
+          <div class="stat-list" id="stat-list"></div>
+          <button class="add-stat-btn" id="add-stat-btn" data-i18n="eq_add_stat">+ 添加属性</button>
+        </div>
+
+        <!-- Special Effect -->
+        <div class="editor-section">
+          <h3 data-i18n="eq_special_effect">特殊效果</h3>
+          <div class="effect-editor">
+            <label class="effect-toggle">
+              <input type="checkbox" id="ed-has-effect">
+              <span data-i18n="eq_enable_effect">启用特殊效果</span>
+            </label>
+            <div class="effect-fields" id="effect-fields" style="display: none;">
+              <div class="field-row">
+                <div class="field">
+                  <label data-i18n="eq_effect_type">效果类型</label>
+                  <input type="text" id="ed-effect-type" placeholder="speed_boost">
+                </div>
+                <div class="field">
+                  <label data-i18n="eq_effect_value">数值</label>
+                  <input type="number" id="ed-effect-value" placeholder="1">
+                </div>
+              </div>
+              <div class="field">
+                <label data-i18n="eq_effect_condition">触发条件</label>
+                <input type="text" id="ed-effect-condition" data-i18n-placeholder="eq_condition_placeholder" placeholder="hp_above_50 (留空=无条件)">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="editor-section">
+          <h3 data-i18n="eq_equip_tags">装备限制 (Tags)</h3>
+          <div class="tags-container" id="tags-container"></div>
+          <div class="add-tag-row">
+            <input type="text" id="tag-input" data-i18n-placeholder="eq_tag_input_placeholder" placeholder="输入tag后回车或点击添加">
+            <button id="add-tag-btn" data-i18n="eq_add_tag">添加</button>
+          </div>
+          <div style="margin-top: 6px; font-size: 11px; color: #666;" data-i18n="eq_common_tags">
+            常用: swordsman, archer, mage, knight, priest, mounted, armored
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="editor-section">
+          <h3 data-i18n="description">描述</h3>
+          <div class="field">
+            <textarea id="ed-desc" data-i18n-placeholder="eq_desc_placeholder" placeholder="装备的游戏内描述文字..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div id="right-panel">
+    <div id="right-header">
+      <h2 data-i18n="eq_preview">预览 & 工具</h2>
+    </div>
+    <div id="right-content">
+      <div id="right-placeholder" style="text-align:center; color:#555; padding:40px 20px; font-size:13px;" data-i18n-html="eq_right_placeholder">
+        选择或新建装备后<br>此处显示预览
+      </div>
+      <div id="right-panels" style="display: none;">
+        <!-- Preview Card -->
+        <div class="preview-card rarity-common" id="preview-card">
+          <div class="preview-icon" id="preview-icon"></div>
+          <div class="preview-name" id="preview-name">装备名称</div>
+          <div class="preview-type" id="preview-type">武器 - 剑</div>
+          <div class="preview-divider"></div>
+          <div class="preview-stats" id="preview-stats"></div>
+          <div class="preview-effect" id="preview-effect" style="display:none;"></div>
+          <div class="preview-desc" id="preview-desc"></div>
+          <div class="preview-tags" id="preview-tags"></div>
+        </div>
+
+        <!-- Tier Reference -->
+        <div class="tier-reference" id="tier-reference">
+          <h4 data-i18n="eq_tier_ref">阶段数值参考</h4>
+          <table class="tier-table">
+            <thead>
+              <tr><th data-i18n="eq_tier">阶段</th><th data-i18n="eq_tier_stages">关卡</th><th data-i18n="eq_tier_weapon_atk">武器ATK</th><th data-i18n="eq_tier_armor_def">护甲DEF</th></tr>
+            </thead>
+            <tbody id="tier-table-body"></tbody>
+          </table>
+        </div>
+
+        <!-- Stat Validation -->
+        <div class="stat-validation" id="stat-validation">
+          <h4 data-i18n="eq_stat_validation">数值校验</h4>
+          <div id="validation-list"></div>
+        </div>
+
+        <!-- JSON Preview -->
+        <div class="json-preview">
+          <h4><span data-i18n="eq_json_preview">JSON 输出</span> <button id="copy-json-btn" data-i18n="eq_copy_json">复制</button></h4>
+          <pre id="json-output">{}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Bar -->
+<div id="bottom-bar">
+  <div class="bar-info" id="bar-info">共 0 件装备</div>
+  <div class="bar-actions">
+    <button id="btn-import" data-i18n="import">导入JSON</button>
+    <button id="btn-export-all" class="primary" data-i18n="eq_batch_export">批量导出全部</button>
+  </div>
+</div>
+
+<!-- Hidden file input -->
+<input type="file" id="import-file" accept=".json">
+
+<!-- Duplicate Modal -->
+<div class="modal-overlay" id="duplicate-modal">
+  <div class="modal">
+    <h3 data-i18n="eq_copy_equip">复制装备</h3>
+    <div class="field">
+      <label data-i18n="eq_new_id">新装备ID</label>
+      <input type="text" id="dup-id" placeholder="new_equipment_id">
+    </div>
+    <div class="field">
+      <label data-i18n="eq_new_name">新装备名称</label>
+      <input type="text" id="dup-name" data-i18n-placeholder="eq_new_name_placeholder" placeholder="新装备名称">
+    </div>
+    <div class="modal-actions">
+      <button id="dup-cancel" data-i18n="cancel">取消</button>
+      <button id="dup-confirm" class="primary" data-i18n="eq_confirm_copy">确认复制</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// I18N — Local dictionary supplement (keys not in shared.js)
+// ============================================================
+
+const LOCAL_DICT = {
+  zh: {
+    eq_equip_list: '装备列表',
+    eq_basic_info: '基础信息',
+    eq_equip_id: '装备ID',
+    eq_equip_name: '装备名称',
+    eq_name_placeholder: '铁剑',
+    eq_wt_sword: '剑 (Sword)',
+    eq_wt_bow: '弓 (Bow)',
+    eq_wt_tome: '魔法书 (Tome)',
+    eq_tier_1: 'T1 - 初期 (关卡1-5)',
+    eq_tier_2: 'T2 - 中期 (关卡6-15)',
+    eq_tier_3: 'T3 - 后期 (关卡16-25)',
+    eq_tier_4: 'T4 - 终盘 (关卡26-30)',
+    eq_tag_input_placeholder: '输入tag后回车或点击添加',
+    eq_common_tags: '常用: swordsman, archer, mage, knight, priest, mounted, armored',
+    eq_desc_placeholder: '装备的游戏内描述文字...',
+    eq_condition_placeholder: 'hp_above_50 (留空=无条件)',
+    eq_right_placeholder: '选择或新建装备后<br>此处显示预览',
+    eq_no_selection_sub: '或点击「+ 新建装备」创建新的装备',
+    eq_tier_stages: '关卡',
+    eq_tier_weapon_atk: '武器ATK',
+    eq_tier_armor_def: '护甲DEF',
+    eq_stat_validation: '数值校验',
+    eq_new_id: '新装备ID',
+    eq_new_name: '新装备名称',
+    eq_new_name_placeholder: '新装备名称',
+    eq_confirm_copy: '确认复制',
+    eq_no_equip: '暂无装备',
+    eq_unnamed: '未命名',
+    eq_new_equip_default: '新装备',
+    eq_id_empty: '装备ID不能为空',
+    eq_id_exists: 'ID已存在: ',
+    eq_saved: '已保存',
+    eq_delete_confirm: '确定删除装备 "',
+    eq_delete_confirm_end: '"？',
+    eq_copy_suffix: ' (副本)',
+    eq_enter_new_id: '请输入新装备ID',
+    eq_equip_copied: '装备已复制',
+    eq_exported: '已导出 {0} 件装备',
+    eq_imported: '已导入 {0} 件装备',
+    eq_import_skipped: '，跳过 {0} 条无效数据',
+    eq_json_parse_error: 'JSON解析失败: ',
+    eq_json_copied: 'JSON已复制到剪贴板',
+    eq_bar_info: '共 {0} 件装备',
+    eq_bar_info_filtered: ' (已筛选 {0} 件)',
+    eq_main_stat: '主属性',
+    eq_main_def: '主防御',
+    eq_total_points: '属性总点数',
+    eq_ref_prefix: '参考 ~',
+    eq_val_ok: '合理',
+    eq_val_low: '偏低',
+    eq_val_high: '偏高',
+    eq_tag_exists: '该标签已存在',
+    eq_search_placeholder: '搜索装备名称或ID...',
+    // Stat labels (zh)
+    stat_atk: 'ATK (攻击力)',
+    stat_mag: 'MAG (魔法力)',
+    stat_hit: 'HIT (命中)',
+    stat_crit: 'CRIT (暴击)',
+    stat_hp: 'HP (生命值)',
+    stat_pdef: 'PDEF (物理防御)',
+    stat_mdef: 'MDEF (魔法防御)',
+    stat_eva: 'EVA (回避)',
+    stat_crit_eva: 'CRIT_EVA (暴击回避)',
+    stat_res: 'RES (抗性)',
+    stat_speed: 'SPEED (速度)',
+    stat_move: 'MOVE (移动力)',
+    stat_vision: 'VISION (视野)',
+    stat_range_bonus: 'RANGE (射程加成)',
+    // Slot/rarity/weapon names (zh)
+    slot_weapon: '武器',
+    slot_armor: '护甲',
+    slot_accessory: '饰品',
+    wt_sword: '剑',
+    wt_bow: '弓',
+    wt_tome: '魔法书',
+    rarity_name_common: '普通',
+    rarity_name_uncommon: '精良',
+    rarity_name_rare: '稀有',
+    rarity_name_epic: '史诗',
+    rarity_name_legendary: '传说',
+  },
+  en: {
+    eq_equip_list: 'Equipment List',
+    eq_basic_info: 'Basic Info',
+    eq_equip_id: 'Equipment ID',
+    eq_equip_name: 'Equipment Name',
+    eq_name_placeholder: 'Iron Sword',
+    eq_wt_sword: 'Sword',
+    eq_wt_bow: 'Bow',
+    eq_wt_tome: 'Tome',
+    eq_tier_1: 'T1 - Early (Stage 1-5)',
+    eq_tier_2: 'T2 - Mid (Stage 6-15)',
+    eq_tier_3: 'T3 - Late (Stage 16-25)',
+    eq_tier_4: 'T4 - Endgame (Stage 26-30)',
+    eq_tag_input_placeholder: 'Type tag and press Enter or click Add',
+    eq_common_tags: 'Common: swordsman, archer, mage, knight, priest, mounted, armored',
+    eq_desc_placeholder: 'In-game description of the equipment...',
+    eq_condition_placeholder: 'hp_above_50 (empty = unconditional)',
+    eq_right_placeholder: 'Select or create equipment<br>to see preview here',
+    eq_no_selection_sub: 'Or click "+ New Equipment" to create one',
+    eq_tier_stages: 'Stage',
+    eq_tier_weapon_atk: 'Weapon ATK',
+    eq_tier_armor_def: 'Armor DEF',
+    eq_stat_validation: 'Stat Validation',
+    eq_new_id: 'New Equipment ID',
+    eq_new_name: 'New Equipment Name',
+    eq_new_name_placeholder: 'New equipment name',
+    eq_confirm_copy: 'Confirm Copy',
+    eq_no_equip: 'No equipment',
+    eq_unnamed: 'Unnamed',
+    eq_new_equip_default: 'New Equipment',
+    eq_id_empty: 'Equipment ID cannot be empty',
+    eq_id_exists: 'ID already exists: ',
+    eq_saved: 'Saved',
+    eq_delete_confirm: 'Delete equipment "',
+    eq_delete_confirm_end: '"?',
+    eq_copy_suffix: ' (Copy)',
+    eq_enter_new_id: 'Please enter a new equipment ID',
+    eq_equip_copied: 'Equipment copied',
+    eq_exported: 'Exported {0} equipment(s)',
+    eq_imported: 'Imported {0} equipment(s)',
+    eq_import_skipped: ', skipped {0} invalid entries',
+    eq_json_parse_error: 'JSON parse error: ',
+    eq_json_copied: 'JSON copied to clipboard',
+    eq_bar_info: '{0} equipment(s) total',
+    eq_bar_info_filtered: ' ({0} filtered)',
+    eq_main_stat: 'Main Stat',
+    eq_main_def: 'Main Defense',
+    eq_total_points: 'Total Stat Points',
+    eq_ref_prefix: 'Ref ~',
+    eq_val_ok: 'OK',
+    eq_val_low: 'Low',
+    eq_val_high: 'High',
+    eq_tag_exists: 'Tag already exists',
+    eq_search_placeholder: 'Search by name or ID...',
+    // Stat labels (en)
+    stat_atk: 'ATK (Attack)',
+    stat_mag: 'MAG (Magic)',
+    stat_hit: 'HIT (Accuracy)',
+    stat_crit: 'CRIT (Critical)',
+    stat_hp: 'HP (Health)',
+    stat_pdef: 'PDEF (Physical Def)',
+    stat_mdef: 'MDEF (Magic Def)',
+    stat_eva: 'EVA (Evasion)',
+    stat_crit_eva: 'CRIT_EVA (Crit Evasion)',
+    stat_res: 'RES (Resistance)',
+    stat_speed: 'SPEED (Speed)',
+    stat_move: 'MOVE (Movement)',
+    stat_vision: 'VISION (Vision)',
+    stat_range_bonus: 'RANGE (Range Bonus)',
+    // Slot/rarity/weapon names (en)
+    slot_weapon: 'Weapon',
+    slot_armor: 'Armor',
+    slot_accessory: 'Accessory',
+    wt_sword: 'Sword',
+    wt_bow: 'Bow',
+    wt_tome: 'Tome',
+    rarity_name_common: 'Common',
+    rarity_name_uncommon: 'Uncommon',
+    rarity_name_rare: 'Rare',
+    rarity_name_epic: 'Epic',
+    rarity_name_legendary: 'Legendary',
+  }
+};
+
+/**
+ * Translate: try I18N.t() first (from shared.js), then local dict, then return key itself.
+ */
+function t(key) {
+  // Try shared I18N first
+  const shared = I18N.t(key);
+  if (shared !== key) return shared;
+  // Try local dict
+  const dict = LOCAL_DICT[I18N.lang] || LOCAL_DICT.zh;
+  if (dict[key] !== undefined) return dict[key];
+  // Fallback to zh local dict
+  if (LOCAL_DICT.zh[key] !== undefined) return LOCAL_DICT.zh[key];
+  return key;
+}
+
+/** Simple string format: replaces {0}, {1}, etc. */
+function tFmt(key, ...args) {
+  let s = t(key);
+  args.forEach((arg, i) => { s = s.replace('{' + i + '}', arg); });
+  return s;
+}
+
+/**
+ * Apply i18n to all elements with data-i18n, data-i18n-placeholder, data-i18n-html attributes.
+ */
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if (val !== key) {
+      el.textContent = val;
+    }
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    const val = t(key);
+    if (val !== key) {
+      el.placeholder = val;
+    }
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    const val = t(key);
+    if (val !== key) {
+      el.innerHTML = val;
+    }
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.getAttribute('data-i18n-title');
+    const val = t(key);
+    if (val !== key) {
+      el.title = val;
+    }
+  });
+  // Update document title
+  document.title = t('eq_title');
+}
+
+// ============================================================
+// Data Definitions
+// ============================================================
+
+const RARITY_COLORS = {
+  common: '#a0a0a0',
+  uncommon: '#2ecc71',
+  rare: '#3498db',
+  epic: '#9b59b6',
+  legendary: '#e67e22'
+};
+
+function getRarityName(rarity) {
+  return t('rarity_name_' + rarity);
+}
+
+function getSlotName(slot) {
+  return t('slot_' + slot);
+}
+
+function getWeaponTypeName(wt) {
+  return t('wt_' + wt);
+}
+
+const SLOT_ICONS = {
+  weapon: { sword: '\u2694', bow: '\u{1F3F9}', tome: '\u{1F4D6}' },
+  armor: '\u{1F6E1}',
+  accessory: '\u{1F48D}'
+};
+
+function getStatLabel(key) {
+  return t('stat_' + key);
+}
+
+const STAT_KEYS = ['atk', 'mag', 'hit', 'crit', 'hp', 'pdef', 'mdef', 'eva', 'crit_eva', 'res', 'speed', 'move', 'vision', 'range_bonus'];
+const STAT_CATEGORIES = {
+  atk: 'offense', mag: 'offense', hit: 'offense', crit: 'offense',
+  hp: 'defense', pdef: 'defense', mdef: 'defense', eva: 'defense',
+  crit_eva: 'defense', res: 'defense',
+  speed: 'utility', move: 'utility', vision: 'utility', range_bonus: 'utility'
+};
+
+// Tier progression reference
+const TIER_RANGES = {
+  1: { stages: '1-5',  weapon_atk: [2, 4],   armor_def: [1, 2] },
+  2: { stages: '6-15', weapon_atk: [5, 8],   armor_def: [3, 5] },
+  3: { stages: '16-25', weapon_atk: [9, 14],  armor_def: [5, 8] },
+  4: { stages: '26-30', weapon_atk: [12, 18], armor_def: [7, 10] }
+};
+
+const STORAGE_KEY = 'equipmentDesigner_data';
+
+// ============================================================
+// State
+// ============================================================
+
+let equipments = [];   // Array of equipment objects
+let selectedId = null; // Currently selected equipment id
+let dirty = false;     // Whether current editor has unsaved changes
+
+// ============================================================
+// Persistence
+// ============================================================
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      equipments = JSON.parse(raw);
+    }
+  } catch (e) {
+    console.error('Failed to load data from localStorage:', e);
+    equipments = [];
+  }
+}
+
+function saveToStorage() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(equipments));
+  } catch (e) {
+    console.error('Failed to save data to localStorage:', e);
+  }
+}
+
+// ============================================================
+// Utility
+// ============================================================
+
+function generateId() {
+  return 'equip_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 4);
+}
+
+function getEquipIcon(equip) {
+  if (equip.slot === 'weapon') {
+    return SLOT_ICONS.weapon[equip.weapon_type] || '\u2694';
+  }
+  return SLOT_ICONS[equip.slot] || '?';
+}
+
+function getEquipTypeName(equip) {
+  if (equip.slot === 'weapon') {
+    return getSlotName('weapon') + ' - ' + (getWeaponTypeName(equip.weapon_type) || equip.weapon_type);
+  }
+  return getSlotName(equip.slot) || equip.slot;
+}
+
+function showToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2500);
+}
+
+function createDefaultEquipment() {
+  return {
+    id: '',
+    name: t('eq_new_equip_default'),
+    slot: 'weapon',
+    weapon_type: 'sword',
+    rarity: 'common',
+    tier: 1,
+    stats: {},
+    special_effect: null,
+    equip_tags: [],
+    description: ''
+  };
+}
+
+function buildExportObject(equip) {
+  const obj = {
+    id: equip.id,
+    name: equip.name,
+    slot: equip.slot
+  };
+  if (equip.slot === 'weapon') {
+    obj.weapon_type = equip.weapon_type;
+  }
+  obj.rarity = equip.rarity;
+  obj.tier = equip.tier;
+  obj.stats = { ...equip.stats };
+  obj.special_effect = equip.special_effect || null;
+  obj.equip_tags = [...equip.equip_tags];
+  obj.description = equip.description;
+  return obj;
+}
+
+// ============================================================
+// Equipment List (Left Panel)
+// ============================================================
+
+function renderEquipList() {
+  const container = document.getElementById('equip-list');
+  const search = document.getElementById('search-box').value.toLowerCase();
+  const filterSlot = document.getElementById('filter-slot').value;
+  const filterRarity = document.getElementById('filter-rarity').value;
+  const filterTier = document.getElementById('filter-tier').value;
+
+  let filtered = equipments.filter(eq => {
+    if (search && !eq.name.toLowerCase().includes(search) && !eq.id.toLowerCase().includes(search)) return false;
+    if (filterSlot && eq.slot !== filterSlot) return false;
+    if (filterRarity && eq.rarity !== filterRarity) return false;
+    if (filterTier && eq.tier !== parseInt(filterTier)) return false;
+    return true;
+  });
+
+  container.innerHTML = '';
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="text-align:center; color:#555; padding:30px; font-size:12px;">' + t('eq_no_equip') + '</div>';
+  }
+
+  filtered.forEach(eq => {
+    const div = document.createElement('div');
+    div.className = 'equip-item' + (eq.id === selectedId ? ' selected' : '');
+
+    const iconBg = RARITY_COLORS[eq.rarity] || '#a0a0a0';
+
+    div.innerHTML = `
+      <div class="equip-icon" style="background:${iconBg}22; border:1px solid ${iconBg}55; color:${iconBg};">${getEquipIcon(eq)}</div>
+      <div class="equip-info">
+        <div class="equip-name" style="color:${RARITY_COLORS[eq.rarity]}">${eq.name || eq.id}</div>
+        <div class="equip-sub">T${eq.tier} ${getEquipTypeName(eq)}</div>
+      </div>
+      <button class="equip-delete" data-id="${eq.id}" title="${t('delete')}">&times;</button>
+    `;
+
+    div.addEventListener('click', (e) => {
+      if (e.target.classList.contains('equip-delete')) return;
+      selectEquipment(eq.id);
+    });
+
+    div.querySelector('.equip-delete').addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteEquipment(eq.id);
+    });
+
+    container.appendChild(div);
+  });
+
+  document.getElementById('bar-info').textContent = tFmt('eq_bar_info', equipments.length) + (filtered.length !== equipments.length ? tFmt('eq_bar_info_filtered', filtered.length) : '');
+}
+
+// ============================================================
+// Selection & Editor
+// ============================================================
+
+function selectEquipment(id) {
+  if (dirty && selectedId) {
+    saveCurrentToData();
+  }
+
+  selectedId = id;
+  const equip = equipments.find(e => e.id === id);
+  if (!equip) {
+    selectedId = null;
+    showEditorEmpty();
+    renderEquipList();
+    return;
+  }
+
+  showEditorForm(equip);
+  renderEquipList();
+  updatePreview();
+}
+
+function showEditorEmpty() {
+  document.getElementById('no-selection').style.display = 'flex';
+  document.getElementById('editor-form').style.display = 'none';
+  document.getElementById('right-placeholder').style.display = 'block';
+  document.getElementById('right-panels').style.display = 'none';
+  document.getElementById('btn-duplicate').style.display = 'none';
+  document.getElementById('btn-save').style.display = 'none';
+}
+
+function showEditorForm(equip) {
+  document.getElementById('no-selection').style.display = 'none';
+  document.getElementById('editor-form').style.display = 'block';
+  document.getElementById('right-placeholder').style.display = 'none';
+  document.getElementById('right-panels').style.display = 'block';
+  document.getElementById('btn-duplicate').style.display = '';
+  document.getElementById('btn-save').style.display = '';
+
+  // Fill basic info
+  document.getElementById('ed-id').value = equip.id;
+  document.getElementById('ed-name').value = equip.name;
+  document.getElementById('ed-slot').value = equip.slot;
+  document.getElementById('ed-weapon-type').value = equip.weapon_type || 'sword';
+  document.getElementById('ed-rarity').value = equip.rarity;
+  document.getElementById('ed-tier').value = equip.tier;
+  document.getElementById('ed-desc').value = equip.description || '';
+
+  updateWeaponTypeVisibility();
+
+  // Fill stats
+  renderStatList(equip.stats || {});
+
+  // Fill effect
+  const hasEffect = !!equip.special_effect;
+  document.getElementById('ed-has-effect').checked = hasEffect;
+  document.getElementById('effect-fields').style.display = hasEffect ? 'flex' : 'none';
+  if (hasEffect) {
+    document.getElementById('ed-effect-type').value = equip.special_effect.type || '';
+    document.getElementById('ed-effect-value').value = equip.special_effect.value || '';
+    document.getElementById('ed-effect-condition').value = equip.special_effect.condition || '';
+  } else {
+    document.getElementById('ed-effect-type').value = '';
+    document.getElementById('ed-effect-value').value = '';
+    document.getElementById('ed-effect-condition').value = '';
+  }
+
+  // Fill tags
+  renderTags(equip.equip_tags || []);
+
+  dirty = false;
+}
+
+function updateWeaponTypeVisibility() {
+  const slot = document.getElementById('ed-slot').value;
+  document.getElementById('weapon-type-field').style.display = slot === 'weapon' ? '' : 'none';
+}
+
+// ============================================================
+// Stat List Editor
+// ============================================================
+
+let currentStats = {};
+
+function renderStatList(stats) {
+  currentStats = { ...stats };
+  const container = document.getElementById('stat-list');
+  container.innerHTML = '';
+
+  const entries = Object.entries(currentStats);
+  entries.forEach(([key, value]) => {
+    const row = document.createElement('div');
+    row.className = 'stat-row';
+
+    const select = document.createElement('select');
+    STAT_KEYS.forEach(k => {
+      const opt = document.createElement('option');
+      opt.value = k;
+      opt.textContent = getStatLabel(k);
+      if (k === key) opt.selected = true;
+      select.appendChild(opt);
+    });
+
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.value = value;
+    input.step = '1';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-stat';
+    removeBtn.innerHTML = '&times;';
+
+    select.addEventListener('change', () => { collectStats(); markDirty(); updatePreview(); });
+    input.addEventListener('input', () => { collectStats(); markDirty(); updatePreview(); });
+    removeBtn.addEventListener('click', () => { row.remove(); collectStats(); markDirty(); updatePreview(); });
+
+    row.appendChild(select);
+    row.appendChild(input);
+    row.appendChild(removeBtn);
+    container.appendChild(row);
+  });
+}
+
+function addStatRow(key, value) {
+  const container = document.getElementById('stat-list');
+  const row = document.createElement('div');
+  row.className = 'stat-row';
+
+  const select = document.createElement('select');
+  STAT_KEYS.forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = getStatLabel(k);
+    if (k === key) opt.selected = true;
+    select.appendChild(opt);
+  });
+
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.value = value || 0;
+  input.step = '1';
+
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'remove-stat';
+  removeBtn.innerHTML = '&times;';
+
+  select.addEventListener('change', () => { collectStats(); markDirty(); updatePreview(); });
+  input.addEventListener('input', () => { collectStats(); markDirty(); updatePreview(); });
+  removeBtn.addEventListener('click', () => { row.remove(); collectStats(); markDirty(); updatePreview(); });
+
+  row.appendChild(select);
+  row.appendChild(input);
+  row.appendChild(removeBtn);
+  container.appendChild(row);
+}
+
+function collectStats() {
+  const rows = document.querySelectorAll('#stat-list .stat-row');
+  currentStats = {};
+  rows.forEach(row => {
+    const key = row.querySelector('select').value;
+    const val = parseFloat(row.querySelector('input').value) || 0;
+    if (key) currentStats[key] = val;
+  });
+}
+
+// ============================================================
+// Tags Editor
+// ============================================================
+
+let currentTags = [];
+
+function renderTags(tags) {
+  currentTags = [...tags];
+  const container = document.getElementById('tags-container');
+  container.innerHTML = '';
+
+  currentTags.forEach((tag, idx) => {
+    const badge = document.createElement('span');
+    badge.className = 'tag-badge';
+    badge.innerHTML = `${tag} <span class="remove-tag" data-idx="${idx}">&times;</span>`;
+    badge.querySelector('.remove-tag').addEventListener('click', () => {
+      currentTags.splice(idx, 1);
+      renderTags(currentTags);
+      markDirty();
+      updatePreview();
+    });
+    container.appendChild(badge);
+  });
+}
+
+function addTag() {
+  const input = document.getElementById('tag-input');
+  const tag = input.value.trim().toLowerCase();
+  if (!tag) return;
+  if (currentTags.includes(tag)) {
+    showToast(t('eq_tag_exists'), 'error');
+    return;
+  }
+  currentTags.push(tag);
+  renderTags(currentTags);
+  input.value = '';
+  markDirty();
+  updatePreview();
+}
+
+// ============================================================
+// Save / Collect
+// ============================================================
+
+function markDirty() {
+  dirty = true;
+}
+
+function collectEditorData() {
+  const slot = document.getElementById('ed-slot').value;
+  const hasEffect = document.getElementById('ed-has-effect').checked;
+
+  let special_effect = null;
+  if (hasEffect) {
+    const effType = document.getElementById('ed-effect-type').value.trim();
+    const effValue = document.getElementById('ed-effect-value').value;
+    const effCond = document.getElementById('ed-effect-condition').value.trim();
+    if (effType) {
+      special_effect = { type: effType };
+      if (effValue !== '') special_effect.value = parseFloat(effValue) || 0;
+      if (effCond) special_effect.condition = effCond;
+    }
+  }
+
+  collectStats();
+
+  return {
+    id: document.getElementById('ed-id').value.trim(),
+    name: document.getElementById('ed-name').value.trim(),
+    slot: slot,
+    weapon_type: slot === 'weapon' ? document.getElementById('ed-weapon-type').value : undefined,
+    rarity: document.getElementById('ed-rarity').value,
+    tier: parseInt(document.getElementById('ed-tier').value),
+    stats: { ...currentStats },
+    special_effect: special_effect,
+    equip_tags: [...currentTags],
+    description: document.getElementById('ed-desc').value.trim()
+  };
+}
+
+function saveCurrentToData() {
+  if (!selectedId) return;
+
+  const data = collectEditorData();
+
+  if (!data.id) {
+    showToast(t('eq_id_empty'), 'error');
+    return false;
+  }
+
+  // Check ID uniqueness (excluding self)
+  const duplicate = equipments.find(e => e.id === data.id && e.id !== selectedId);
+  if (duplicate) {
+    showToast(t('eq_id_exists') + data.id, 'error');
+    return false;
+  }
+
+  const idx = equipments.findIndex(e => e.id === selectedId);
+  if (idx === -1) return false;
+
+  // Update selected id if it changed
+  const oldId = selectedId;
+  selectedId = data.id;
+  equipments[idx] = data;
+
+  saveToStorage();
+  dirty = false;
+  return true;
+}
+
+function saveAndRefresh() {
+  if (saveCurrentToData()) {
+    renderEquipList();
+    updatePreview();
+    showToast(t('eq_saved'), 'success');
+  }
+}
+
+// ============================================================
+// Create / Delete / Duplicate
+// ============================================================
+
+function createNewEquipment() {
+  if (dirty && selectedId) {
+    saveCurrentToData();
+  }
+
+  const equip = createDefaultEquipment();
+  equip.id = 'new_equip_' + (equipments.length + 1);
+  equip.name = t('eq_new_equip_default');
+  equipments.push(equip);
+  saveToStorage();
+  selectEquipment(equip.id);
+  renderEquipList();
+
+  // Focus the ID field
+  setTimeout(() => {
+    const idField = document.getElementById('ed-id');
+    idField.focus();
+    idField.select();
+  }, 50);
+}
+
+function deleteEquipment(id) {
+  if (!confirm(t('eq_delete_confirm') + (equipments.find(e => e.id === id)?.name || id) + t('eq_delete_confirm_end'))) return;
+
+  equipments = equipments.filter(e => e.id !== id);
+  saveToStorage();
+
+  if (selectedId === id) {
+    selectedId = null;
+    dirty = false;
+    showEditorEmpty();
+  }
+
+  renderEquipList();
+}
+
+function showDuplicateModal() {
+  if (!selectedId) return;
+  const equip = equipments.find(e => e.id === selectedId);
+  if (!equip) return;
+
+  document.getElementById('dup-id').value = equip.id + '_copy';
+  document.getElementById('dup-name').value = equip.name + t('eq_copy_suffix');
+  document.getElementById('duplicate-modal').classList.add('show');
+  setTimeout(() => document.getElementById('dup-id').focus(), 50);
+}
+
+function doDuplicate() {
+  const newId = document.getElementById('dup-id').value.trim();
+  const newName = document.getElementById('dup-name').value.trim();
+
+  if (!newId) {
+    showToast(t('eq_enter_new_id'), 'error');
+    return;
+  }
+
+  if (equipments.find(e => e.id === newId)) {
+    showToast(t('eq_id_exists') + newId, 'error');
+    return;
+  }
+
+  // Save current first
+  if (dirty) saveCurrentToData();
+
+  const source = equipments.find(e => e.id === selectedId);
+  if (!source) return;
+
+  const copy = JSON.parse(JSON.stringify(source));
+  copy.id = newId;
+  copy.name = newName || copy.name;
+  equipments.push(copy);
+  saveToStorage();
+
+  document.getElementById('duplicate-modal').classList.remove('show');
+  selectEquipment(newId);
+  renderEquipList();
+  showToast(t('eq_equip_copied'), 'success');
+}
+
+// ============================================================
+// Preview (Right Panel)
+// ============================================================
+
+function updatePreview() {
+  if (!selectedId) return;
+
+  const data = collectEditorData();
+
+  // Preview card
+  const card = document.getElementById('preview-card');
+  card.className = 'preview-card rarity-' + data.rarity;
+
+  document.getElementById('preview-icon').textContent = getEquipIcon(data);
+  document.getElementById('preview-name').textContent = data.name || data.id || t('eq_unnamed');
+  document.getElementById('preview-type').textContent =
+    'T' + data.tier + ' ' + getRarityName(data.rarity) + ' ' + getEquipTypeName(data);
+
+  // Stats
+  const statsContainer = document.getElementById('preview-stats');
+  statsContainer.innerHTML = '';
+  Object.entries(data.stats).forEach(([key, val]) => {
+    if (val === 0) return;
+    const div = document.createElement('div');
+    div.className = 'preview-stat';
+    const label = getStatLabel(key) || key;
+    div.innerHTML = `<span class="stat-label">${label.split(' ')[0]}</span><span class="stat-value">${val > 0 ? '+' + val : val}</span>`;
+    statsContainer.appendChild(div);
+  });
+
+  // Effect
+  const effectDiv = document.getElementById('preview-effect');
+  if (data.special_effect) {
+    effectDiv.style.display = 'block';
+    let text = data.special_effect.type;
+    if (data.special_effect.value !== undefined) text += ': ' + data.special_effect.value;
+    if (data.special_effect.condition) text += ' (' + data.special_effect.condition + ')';
+    effectDiv.textContent = text;
+  } else {
+    effectDiv.style.display = 'none';
+  }
+
+  // Description
+  document.getElementById('preview-desc').textContent = data.description || '';
+
+  // Tags
+  const tagsContainer = document.getElementById('preview-tags');
+  tagsContainer.innerHTML = '';
+  data.equip_tags.forEach(tag => {
+    const span = document.createElement('span');
+    span.className = 'tag';
+    span.textContent = tag;
+    tagsContainer.appendChild(span);
+  });
+
+  // Tier reference table
+  updateTierReference(data);
+
+  // Stat validation
+  updateStatValidation(data);
+
+  // JSON output
+  const exportObj = buildExportObject(data);
+  document.getElementById('json-output').textContent = JSON.stringify(exportObj, null, 2);
+}
+
+function updateTierReference(data) {
+  const tbody = document.getElementById('tier-table-body');
+  tbody.innerHTML = '';
+
+  [1, 2, 3, 4].forEach(tier => {
+    const r = TIER_RANGES[tier];
+    const tr = document.createElement('tr');
+    if (tier === data.tier) tr.className = 'current-tier';
+    tr.innerHTML = `
+      <td>T${tier}</td>
+      <td>${r.stages}</td>
+      <td>+${r.weapon_atk[0]}~${r.weapon_atk[1]}</td>
+      <td>+${r.armor_def[0]}~${r.armor_def[1]}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function updateStatValidation(data) {
+  const container = document.getElementById('validation-list');
+  container.innerHTML = '';
+
+  const tier = data.tier;
+  const range = TIER_RANGES[tier];
+  if (!range) return;
+
+  // Build validation entries based on slot type
+  const validations = [];
+
+  if (data.slot === 'weapon') {
+    const atkVal = data.stats.atk || 0;
+    const magVal = data.stats.mag || 0;
+    const mainStat = Math.max(atkVal, magVal);
+    const mainLabel = atkVal >= magVal ? 'ATK' : 'MAG';
+    const [lo, hi] = range.weapon_atk;
+
+    let status = 'ok', statusText = t('eq_val_ok');
+    if (mainStat < lo) { status = 'warn'; statusText = t('eq_val_low'); }
+    else if (mainStat > hi) { status = 'over'; statusText = t('eq_val_high'); }
+
+    validations.push({
+      label: `${t('eq_main_stat')} (${mainLabel})`,
+      range: `${lo} ~ ${hi}`,
+      value: mainStat,
+      status: status,
+      statusText: statusText
+    });
+  } else if (data.slot === 'armor') {
+    const pdef = data.stats.pdef || 0;
+    const mdef = data.stats.mdef || 0;
+    const mainDef = Math.max(pdef, mdef);
+    const mainLabel = pdef >= mdef ? 'PDEF' : 'MDEF';
+    const [lo, hi] = range.armor_def;
+
+    let status = 'ok', statusText = t('eq_val_ok');
+    if (mainDef < lo) { status = 'warn'; statusText = t('eq_val_low'); }
+    else if (mainDef > hi) { status = 'over'; statusText = t('eq_val_high'); }
+
+    validations.push({
+      label: `${t('eq_main_def')} (${mainLabel})`,
+      range: `${lo} ~ ${hi}`,
+      value: mainDef,
+      status: status,
+      statusText: statusText
+    });
+  }
+
+  // Total stat weight check (simple heuristic)
+  const totalStatPoints = Object.values(data.stats).reduce((s, v) => s + Math.abs(v), 0);
+  const expectedTotal = tier * 5 + (data.rarity === 'common' ? 0 : data.rarity === 'uncommon' ? 2 : data.rarity === 'rare' ? 4 : data.rarity === 'epic' ? 7 : 10);
+  let totalStatus = 'ok', totalStatusText = t('eq_val_ok');
+  if (totalStatPoints > expectedTotal * 1.5) { totalStatus = 'over'; totalStatusText = t('eq_val_high'); }
+  else if (totalStatPoints < expectedTotal * 0.5 && totalStatPoints > 0) { totalStatus = 'warn'; totalStatusText = t('eq_val_low'); }
+
+  validations.push({
+    label: t('eq_total_points'),
+    range: `${t('eq_ref_prefix')}${expectedTotal}`,
+    value: totalStatPoints,
+    status: totalStatus,
+    statusText: totalStatusText
+  });
+
+  validations.forEach(v => {
+    const div = document.createElement('div');
+    div.className = 'validation-item';
+    div.innerHTML = `
+      <span class="val-label">${v.label}</span>
+      <span class="val-range">${v.range}</span>
+      <span class="val-status ${v.status}">${v.value} (${v.statusText})</span>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// ============================================================
+// Import / Export
+// ============================================================
+
+function exportAll() {
+  if (dirty && selectedId) saveCurrentToData();
+
+  const data = equipments.map(buildExportObject);
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'equipments.json';
+  a.click();
+  URL.revokeObjectURL(url);
+
+  showToast(tFmt('eq_exported', data.length), 'success');
+}
+
+function importFile() {
+  document.getElementById('import-file').click();
+}
+
+function handleImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      let data = JSON.parse(e.target.result);
+
+      // Support both array and single object
+      if (!Array.isArray(data)) {
+        data = [data];
+      }
+
+      let importCount = 0;
+      let skipCount = 0;
+
+      data.forEach(item => {
+        if (!item.id || !item.slot) {
+          skipCount++;
+          return;
+        }
+
+        // Normalize
+        const equip = {
+          id: item.id,
+          name: item.name || item.id,
+          slot: item.slot,
+          weapon_type: item.weapon_type || 'sword',
+          rarity: item.rarity || 'common',
+          tier: item.tier || 1,
+          stats: item.stats || {},
+          special_effect: item.special_effect || null,
+          equip_tags: item.equip_tags || [],
+          description: item.description || ''
+        };
+
+        // Check for existing id
+        const existIdx = equipments.findIndex(e => e.id === equip.id);
+        if (existIdx >= 0) {
+          equipments[existIdx] = equip;
+        } else {
+          equipments.push(equip);
+        }
+        importCount++;
+      });
+
+      saveToStorage();
+      renderEquipList();
+
+      if (selectedId) {
+        const eq = equipments.find(e => e.id === selectedId);
+        if (eq) showEditorForm(eq);
+      }
+
+      showToast(tFmt('eq_imported', importCount) + (skipCount > 0 ? tFmt('eq_import_skipped', skipCount) : ''), 'success');
+    } catch (err) {
+      showToast(t('eq_json_parse_error') + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+
+  // Reset input so same file can be re-imported
+  event.target.value = '';
+}
+
+function copySingleJson() {
+  const text = document.getElementById('json-output').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast(t('eq_json_copied'), 'success');
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    showToast(t('eq_json_copied'), 'success');
+  });
+}
+
+// ============================================================
+// Event Bindings
+// ============================================================
+
+function init() {
+  // Apply i18n translations to static HTML
+  applyI18n();
+
+  // Insert language switcher
+  const langSlot = document.getElementById('lang-switcher-slot');
+  if (langSlot) {
+    langSlot.appendChild(I18N.createLangSwitcher());
+  }
+
+  loadFromStorage();
+
+  // Left panel
+  document.getElementById('search-box').addEventListener('input', renderEquipList);
+  document.getElementById('filter-slot').addEventListener('change', renderEquipList);
+  document.getElementById('filter-rarity').addEventListener('change', renderEquipList);
+  document.getElementById('filter-tier').addEventListener('change', renderEquipList);
+  document.getElementById('new-equip-btn').addEventListener('click', createNewEquipment);
+
+  // Editor change events -> mark dirty + update preview
+  const editorInputs = ['ed-id', 'ed-name', 'ed-desc'];
+  editorInputs.forEach(id => {
+    document.getElementById(id).addEventListener('input', () => { markDirty(); updatePreview(); });
+  });
+
+  const editorSelects = ['ed-slot', 'ed-weapon-type', 'ed-rarity', 'ed-tier'];
+  editorSelects.forEach(id => {
+    document.getElementById(id).addEventListener('change', () => { markDirty(); updatePreview(); });
+  });
+
+  document.getElementById('ed-slot').addEventListener('change', () => {
+    updateWeaponTypeVisibility();
+  });
+
+  // Stat add
+  document.getElementById('add-stat-btn').addEventListener('click', () => {
+    // Find a stat not yet used
+    const usedStats = new Set(Object.keys(currentStats));
+    const available = STAT_KEYS.find(k => !usedStats.has(k));
+    addStatRow(available || 'atk', 0);
+    collectStats();
+    markDirty();
+    updatePreview();
+  });
+
+  // Effect toggle
+  document.getElementById('ed-has-effect').addEventListener('change', (e) => {
+    document.getElementById('effect-fields').style.display = e.target.checked ? 'flex' : 'none';
+    markDirty();
+    updatePreview();
+  });
+
+  const effectInputs = ['ed-effect-type', 'ed-effect-value', 'ed-effect-condition'];
+  effectInputs.forEach(id => {
+    document.getElementById(id).addEventListener('input', () => { markDirty(); updatePreview(); });
+  });
+
+  // Tags
+  document.getElementById('add-tag-btn').addEventListener('click', addTag);
+  document.getElementById('tag-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addTag(); }
+  });
+
+  // Save / Duplicate
+  document.getElementById('btn-save').addEventListener('click', saveAndRefresh);
+  document.getElementById('btn-duplicate').addEventListener('click', showDuplicateModal);
+
+  // Duplicate modal
+  document.getElementById('dup-cancel').addEventListener('click', () => {
+    document.getElementById('duplicate-modal').classList.remove('show');
+  });
+  document.getElementById('dup-confirm').addEventListener('click', doDuplicate);
+  document.getElementById('dup-id').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') doDuplicate();
+  });
+  document.getElementById('duplicate-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('duplicate-modal')) {
+      document.getElementById('duplicate-modal').classList.remove('show');
+    }
+  });
+
+  // JSON copy
+  document.getElementById('copy-json-btn').addEventListener('click', copySingleJson);
+
+  // Bottom bar
+  document.getElementById('btn-import').addEventListener('click', importFile);
+  document.getElementById('btn-export-all').addEventListener('click', exportAll);
+  document.getElementById('import-file').addEventListener('change', handleImport);
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    // Ctrl+S to save
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      if (selectedId) saveAndRefresh();
+    }
+    // Ctrl+N to create new
+    if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+      e.preventDefault();
+      createNewEquipment();
+    }
+    // Escape to close modal
+    if (e.key === 'Escape') {
+      document.getElementById('duplicate-modal').classList.remove('show');
+    }
+  });
+
+  // Initial render
+  showEditorEmpty();
+  renderEquipList();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
