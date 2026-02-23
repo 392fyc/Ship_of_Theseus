@@ -367,6 +367,76 @@ canvas.grabbing { cursor: grabbing; }
   font-size: 14px;
 }
 
+/* === Import dialog overlay === */
+#import-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+}
+#import-overlay.show { display: flex; }
+#import-dialog {
+  background: #16213e;
+  border: 2px solid #0f3460;
+  border-radius: 12px;
+  padding: 24px;
+  width: 520px;
+  max-height: 80vh;
+}
+#import-dialog h3 {
+  color: #e94560;
+  margin-bottom: 16px;
+  font-size: 16px;
+}
+#import-file-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+  border: 2px dashed #1a5276;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #a0a0a0;
+  font-size: 13px;
+  transition: border-color .2s, background .2s;
+}
+#import-file-zone:hover {
+  border-color: #3498db;
+  background: rgba(52,152,219,0.08);
+}
+#import-text-area {
+  width: 100%;
+  height: 180px;
+  background: #0a0a1a;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 6px;
+  padding: 10px;
+  font-family: monospace;
+  font-size: 12px;
+  resize: vertical;
+}
+.import-btn-cancel {
+  padding: 6px 16px;
+  background: #1a1a2e;
+  color: #a0a0a0;
+  border: 1px solid #333;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.import-btn-confirm {
+  padding: 6px 16px;
+  background: #0f3460;
+  color: #e0e0e0;
+  border: 1px solid #1a5276;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 /* === Feature: Search box === */
 #search-box-container {
   padding: 8px 16px;
@@ -429,7 +499,7 @@ canvas.grabbing { cursor: grabbing; }
         </div>
         <div style="display:flex;gap:4px;margin-top:4px;align-items:center;">
           <span id="fs-status" style="font-size:11px;color:#666;user-select:none;">📂</span>
-          <button id="fs-connect-btn" onclick="FSBridge.pickDirectory().then(ok=>{if(ok)loadFSTrees();})" style="display:none;padding:3px 8px;background:#1a5276;color:#e0e0e0;border:1px solid #1a5276;border-radius:3px;font-size:11px;cursor:pointer;" data-i18n="tt_fs_pick_dir">📂 选择目录</button>
+          <button id="fs-connect-btn" onclick="handleFSConnect()" style="display:none;padding:3px 8px;background:#1a5276;color:#e0e0e0;border:1px solid #1a5276;border-radius:3px;font-size:11px;cursor:pointer;" data-i18n="tt_fs_pick_dir">📂 选择目录</button>
         </div>
       </div>
     </div>
@@ -476,10 +546,6 @@ canvas.grabbing { cursor: grabbing; }
               <input type="number" id="node-cost" value="1" min="1" max="5" style="width:60px;">
             </div>
           </div>
-          <div class="field">
-            <label data-i18n="tt_level_req">等级需求</label>
-            <input type="number" id="node-level" value="1" min="1" max="30">
-          </div>
         </div>
 
         <div class="panel">
@@ -521,7 +587,7 @@ canvas.grabbing { cursor: grabbing; }
 
     <div id="sidebar-footer">
       <button onclick="exportJSON()" data-i18n="tt_export_json">导出JSON</button>
-      <button onclick="importJSON()" data-i18n="tt_import_json">导入JSON</button>
+      <button onclick="showImportDialog()" data-i18n="tt_import_json">导入JSON</button>
       <button onclick="exportImage()" data-i18n="tt_export_png">导出PNG</button>
       <!-- === Feature 4: Mermaid Export === -->
       <button onclick="exportMermaid()" title="Export as Mermaid flowchart" data-i18n="tt_export_mermaid">Mermaid</button>
@@ -589,9 +655,30 @@ canvas.grabbing { cursor: grabbing; }
 <!-- === Feature 1: Validation Overlay === -->
 <div id="validation-overlay">
   <div id="validation-content">
-    <h3>DAG Validation Results</h3>
+    <h3 data-i18n="tt_val_title">DAG 校验结果</h3>
     <div id="validation-results"></div>
-    <button class="close-btn" onclick="document.getElementById('validation-overlay').classList.remove('show'); clearValidationHighlights();">OK</button>
+    <button class="close-btn" onclick="document.getElementById('validation-overlay').classList.remove('show'); clearValidationHighlights();" data-i18n="tt_val_ok">确定</button>
+  </div>
+</div>
+
+<!-- === Import Dialog Overlay === -->
+<div id="import-overlay">
+  <div id="import-dialog">
+    <h3 data-i18n="tt_import_json">导入JSON</h3>
+    <div id="import-file-zone" onclick="document.getElementById('file-input').click();">
+      <span style="font-size:24px;">📁</span>
+      <span data-i18n="tt_import_file_hint">点击选择本地JSON文件</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin:12px 0;color:#666;">
+      <hr style="flex:1;border:none;border-top:1px solid #1a5276;">
+      <span style="font-size:12px;white-space:nowrap;" data-i18n="tt_import_or">或者</span>
+      <hr style="flex:1;border:none;border-top:1px solid #1a5276;">
+    </div>
+    <textarea id="import-text-area" data-i18n-placeholder="tt_import_text_placeholder" placeholder="在此粘贴JSON内容..."></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end;">
+      <button onclick="hideImportDialog()" class="import-btn-cancel" data-i18n="tt_cancel">取消</button>
+      <button onclick="doImportText()" class="import-btn-confirm" data-i18n="tt_confirm_import">确认导入</button>
+    </div>
   </div>
 </div>
 
@@ -637,52 +724,52 @@ const TREES = {
   sw_a: {
     class_id: 'sw_a', class_name: '剑士 A · 双菱形',
     nodes: [
-      { id:'sw_start',name:'剑道入门',type:'trait',cost:1,level:1,x:400,y:60,
+      { id:'sw_start',name:'剑道入门',type:'trait',cost:1,x:400,y:60,
         desc:'解锁初始技能「斩击」（melee/physical，power 90%，hit +5）。激活剑类武器专精。',
         notes:'起始节点，需花费1天赋点解锁。',tags:'sword,start',exclusive:'',requires:'' },
-      { id:'sw_sharp_edge',name:'锐刃',type:'passive',cost:1,level:2,x:270,y:160,
+      { id:'sw_sharp_edge',name:'锐刃',type:'passive',cost:1,x:270,y:160,
         desc:'被动：「斩击」命中后，目标附加「锐伤」（物防-2，持续2回合，最多叠3层）。',
         notes:'穿防路线入口（满层-6物防）。物防降低对暴击流和混合伤害均有价值。',tags:'sword,debuff',exclusive:'',requires:'' },
-      { id:'sw_instinct',name:'敏锐',type:'passive',cost:1,level:2,x:530,y:160,
+      { id:'sw_instinct',name:'敏锐',type:'passive',cost:1,x:530,y:160,
         desc:'被动：每回合开始时，若本回合行动队列中本单位前方无任何敌方单位（即本单位最先行动），本回合暴击率+8%。',
         notes:'速度优势路线入口。先手→暴击奖励，比"高于所有敌人"更公平稳定。',tags:'sword,speed,crit',exclusive:'',requires:'' },
-      { id:'sw_chain_strike',name:'连环',type:'passive',cost:1,level:3,x:170,y:270,
+      { id:'sw_chain_strike',name:'连环',type:'passive',cost:1,x:170,y:270,
         desc:'被动：若连续2回合均发动攻击并命中，获得「连环」（伤害+5%，暴击率+5%，持续保持）。\n维持：每回合攻击并命中。\n粘滞：允许1回合空窗（该回合未攻击不立即消失，但连续2回合未攻击命中则消失）。',
         notes:'跨回合连击追踪，奖励持续进攻节奏。命中已全段溢出，改为伤害加成。',tags:'sword,damage,crit,sustain',exclusive:'',requires:'' },
-      { id:'sw_phantom_step',name:'虚实',type:'trait',cost:1,level:3,x:450,y:270,
+      { id:'sw_phantom_step',name:'虚实',type:'trait',cost:1,x:450,y:270,
         desc:'特质：成功闪避后，下一次攻击必定命中（「洞察」，每回合最多触发1次）。',
         notes:'闪避→进攻转化。两个转职通用。',tags:'sword,evasion,hit',exclusive:'',requires:'' },
-      { id:'sw_sword_dance',name:'剑舞',type:'active_skill',cost:1,level:4,x:110,y:380,
+      { id:'sw_sword_dance',name:'剑舞',type:'active_skill',cost:1,x:110,y:380,
         desc:'主动：攻击后可立即追加移动1格（不触发额外反击）。melee/physical，power 85%，每回合1次。',
         notes:'攻击后机动，打完调位。',tags:'sword,mobility,melee',exclusive:'',requires:'' },
-      { id:'sw_counter_edge',name:'剑意',type:'passive',cost:1,level:4,x:370,y:380,
+      { id:'sw_counter_edge',name:'剑意',type:'passive',cost:1,x:370,y:380,
         desc:'被动：反击时，命中率+15，伤害+10%，且无视目标地形带来的闪避加成。',
         notes:'强化反击可靠性，地形穿透。',tags:'sword,counter,hit',exclusive:'',requires:'' },
-      { id:'sw_heart_pulse',name:'剑心感应',type:'trait',cost:1,level:5,x:270,y:470,
+      { id:'sw_heart_pulse',name:'剑心感应',type:'trait',cost:1,x:270,y:470,
         desc:'特质：每当本单位造成暴击，下一次攻击额外无视目标20%物防（一次性，每次暴击后刷新）。',
         notes:'★第一收束节点。暴击→穿防复利循环。',tags:'sword,crit,penetration',exclusive:'',requires:'' },
-      { id:'sw_fluid_dance',name:'灵动',type:'active_skill',cost:1,level:6,x:155,y:570,
+      { id:'sw_fluid_dance',name:'灵动',type:'active_skill',cost:1,x:155,y:570,
         desc:'主动：激活「流形」（持续1回合）：闪避+15。「流形」下成功闪避→立即反击1次（普攻70%，不触发二次反击）。CD：2回合。',
         notes:'主动制造闪避机会，闪避→反击转化。',tags:'sword,evasion,counter,active',exclusive:'',requires:'' },
-      { id:'sw_cleave_mark',name:'斩铁',type:'skill_upgrade',cost:1,level:6,x:415,y:570,
+      { id:'sw_cleave_mark',name:'斩铁',type:'skill_upgrade',cost:1,x:415,y:570,
         desc:'技能升级：「斩击」暴击命中后，目标附加「锐标」（目标下次受伤+15%，任何来源触发，消耗后消失）。',
         notes:'暴击配合机制，可与队友联动。',tags:'sword,crit,upgrade',exclusive:'',requires:'' },
-      { id:'sw_first_edge',name:'先机之刃',type:'passive',cost:1,level:7,x:80,y:670,
+      { id:'sw_first_edge',name:'先机之刃',type:'passive',cost:1,x:80,y:670,
         desc:'被动：若本单位本回合最先行动（速度最快），所有攻击暴击率+10%。',
         notes:'先手→暴击转化，激励维持速度优势。',tags:'sword,speed,crit',exclusive:'',requires:'' },
-      { id:'sw_momentum',name:'势不可挡',type:'passive',cost:1,level:7,x:320,y:670,
+      { id:'sw_momentum',name:'势不可挡',type:'passive',cost:1,x:320,y:670,
         desc:'被动：每次主动攻击命中后获得1层「势」（跨回合保留，最多3层）。主动攻击未命中时失去所有「势」。\n每层效果：暴击伤害倍率+0.15（1层1.65x / 2层1.80x / 3层1.95x）。\n非攻击回合不影响已有「势」层数。',
         notes:'命中连续性追踪（hit streak），与「连环」互补：连环追踪"是否进攻"，势不可挡追踪"是否命中"。',tags:'sword,crit,momentum,accuracy',exclusive:'',requires:'' },
-      { id:'sw_sword_essence',name:'剑道精义',type:'trait',cost:1,level:8,x:225,y:760,
+      { id:'sw_sword_essence',name:'剑道精义',type:'trait',cost:1,x:225,y:760,
         desc:'特质：成功反击后，获得「先机」（持续至下回合行动开始）：下回合行动顺序中先制+1，超越所有同速单位优先行动。\n[转职后升级：剑圣→「剑圣精义」，魔剑士→「魔剑精义」]',
         notes:'★第二收束节点。反击→先制优先级循环；先制+1对SPD 12无冗余，与速度独立。',tags:'sword,counter,priority',exclusive:'',requires:'' },
-      { id:'sw_edge_limit',name:'临界之刃',type:'passive',cost:1,level:9,x:225,y:850,
+      { id:'sw_edge_limit',name:'临界之刃',type:'passive',cost:1,x:225,y:850,
         desc:'被动：当自身HP低于70%时，暴击伤害倍率+0.2，受到攻击时「明」自动刷新。',
         notes:'逆境爆发，两个转职均适用。',tags:'sword,crit,survival',exclusive:'',requires:'' },
-      { id:'sw_adv_saint',name:'剑圣之路',type:'advancement',cost:1,level:10,x:120,y:960,
+      { id:'sw_adv_saint',name:'剑圣之路',type:'advancement',cost:1,x:120,y:960,
         desc:'转职：成为剑圣。\n· 激活「剑气」量谱（暴击命中+15气，成功闪避+10气，速度差攻击+10气）\n· 速度/暴击/闪避成长率强化\n· 「剑道精义」→「剑圣精义」（反击后+20剑气）\n· 解锁剑圣专属天赋分支',
         notes:'左侧转职。速度/暴击/闪避极致化路线。',tags:'advancement,sword_saint',exclusive:'adv_choice',requires:'' },
-      { id:'sw_adv_magic',name:'魔剑之路',type:'advancement',cost:1,level:10,x:340,y:960,
+      { id:'sw_adv_magic',name:'魔剑之路',type:'advancement',cost:1,x:340,y:960,
         desc:'转职：成为魔剑士。\n· MAG属性开始成长\n· 激活「魔刃」量谱系统\n· 解锁hybrid伤害技能与远程魔法攻击\n· 「剑道精义」→「魔剑精义」（反击后魔刃层数+2）\n· 解锁魔剑士专属天赋分支',
         notes:'右侧转职。物理+魔法混合路线，转职前无魔攻。',tags:'advancement,magic_swordsman',exclusive:'adv_choice',requires:'' },
     ],
@@ -709,67 +796,67 @@ const TREES = {
   sw_b: {
     class_id: 'sw_b', class_name: '剑士 B · 双塔形',
     nodes: [
-      { id:'sw2_start',name:'剑道入门',type:'trait',cost:1,level:1,x:380,y:60,
+      { id:'sw2_start',name:'剑道入门',type:'trait',cost:1,x:380,y:60,
         desc:'解锁初始技能「斩击」（melee/physical，power 90%，hit +5）。激活剑类武器专精。',
         notes:'起始节点，需花费1天赋点解锁。',tags:'sword,start',exclusive:'',requires:'' },
       // L1 / R1
-      { id:'sw2_vanguard',name:'先锋之锋',type:'passive',cost:1,level:2,x:220,y:160,
+      { id:'sw2_vanguard',name:'先锋之锋',type:'passive',cost:1,x:220,y:160,
         desc:'被动：本单位每回合首次攻击命中时，若目标本回合尚未受到任何攻击，伤害+12%（首击奖励）。',
         notes:'攻势路线入口。奖励主动先手出击。',tags:'sword,first_strike',exclusive:'',requires:'' },
-      { id:'sw2_sentinel',name:'守望之刃',type:'passive',cost:1,level:2,x:540,y:160,
+      { id:'sw2_sentinel',name:'守望之刃',type:'passive',cost:1,x:540,y:160,
         desc:'被动：每回合结束时，若本回合成功闪避≥1次，下回合命中+8，暴击率+4%。',
         notes:'应势路线入口。闪避积累转化为下回合进攻准备。',tags:'sword,evasion,crit',exclusive:'',requires:'' },
       // L2 / R2
-      { id:'sw2_chain_thrust',name:'连刺',type:'active_skill',cost:1,level:3,x:140,y:260,
+      { id:'sw2_chain_thrust',name:'连刺',type:'active_skill',cost:1,x:140,y:260,
         desc:'主动：对目标发动2次攻击，各自独立结算命中/暴击。melee/physical，power 65%×2。',
         notes:'双塔攻势路线核心——单回合2次攻击，天然适配暴击/穿防叠加。',tags:'sword,multi_hit,melee',exclusive:'',requires:'' },
-      { id:'sw2_read_blade',name:'读刃',type:'passive',cost:1,level:3,x:620,y:260,
+      { id:'sw2_read_blade',name:'读刃',type:'passive',cost:1,x:620,y:260,
         desc:'被动：反击时，命中率+15，伤害+10%，无视目标地形带来的闪避加成。',
         notes:'强化反击可靠性，应势路线核心收益。',tags:'sword,counter,hit',exclusive:'',requires:'' },
       // L3 / R3
-      { id:'sw2_suppress',name:'压制',type:'passive',cost:1,level:3,x:140,y:360,
+      { id:'sw2_suppress',name:'压制',type:'passive',cost:1,x:140,y:360,
         desc:'被动：本回合每次攻击命中（含反击），目标本回合闪避-3（可叠加，上限-12）。',
         notes:'持续命中逐渐剥除目标闪避，方便后续攻击。',tags:'sword,debuff,evasion',exclusive:'',requires:'' },
-      { id:'sw2_phantom',name:'虚实',type:'trait',cost:1,level:3,x:620,y:360,
+      { id:'sw2_phantom',name:'虚实',type:'trait',cost:1,x:620,y:360,
         desc:'特质：成功闪避后，下次攻击必定命中（「洞察」，每回合最多触发1次）。',
         notes:'闪避→进攻转化，应势打法关键特质。',tags:'sword,evasion,hit',exclusive:'',requires:'' },
       // L4 / R4
-      { id:'sw2_crit_surge',name:'暴锋',type:'passive',cost:1,level:4,x:140,y:460,
+      { id:'sw2_crit_surge',name:'暴锋',type:'passive',cost:1,x:140,y:460,
         desc:'被动：本回合内已造成暴击≥1次，之后每次攻击暴击率额外+8%（本回合有效）。',
         notes:'暴击滚雪球，攻势积累的关键节点。',tags:'sword,crit',exclusive:'',requires:'' },
-      { id:'sw2_fluid',name:'灵动',type:'active_skill',cost:1,level:4,x:620,y:460,
+      { id:'sw2_fluid',name:'灵动',type:'active_skill',cost:1,x:620,y:460,
         desc:'主动：激活「流形」（持续1回合）：闪避+15。「流形」下成功闪避→立即反击1次（普攻70%，不触发二次反击）。CD：2回合。',
         notes:'主动制造闪避机会，闪避→反击收益。',tags:'sword,evasion,counter,active',exclusive:'',requires:'' },
       // L5 / R5
-      { id:'sw2_mark',name:'斩铁',type:'skill_upgrade',cost:1,level:5,x:140,y:560,
+      { id:'sw2_mark',name:'斩铁',type:'skill_upgrade',cost:1,x:140,y:560,
         desc:'技能升级：「斩击」暴击命中后，目标附加「锐标」（下次受伤+15%，任何来源触发，一次消耗）。',
         notes:'暴击配合机制，可与队友联动。',tags:'sword,crit,upgrade',exclusive:'',requires:'' },
-      { id:'sw2_formless',name:'无懈',type:'trait',cost:1,level:5,x:620,y:560,
+      { id:'sw2_formless',name:'无懈',type:'trait',cost:1,x:620,y:560,
         desc:'特质：若本回合未被任何攻击命中（含已闪避），回合结束时闪避+5（可累积至+15，被命中后归零）。',
         notes:'逐渐积累防御优势，奖励零受击回合。',tags:'sword,evasion,accumulate',exclusive:'',requires:'' },
       // L6 / R6
-      { id:'sw2_first_edge',name:'先机之刃',type:'passive',cost:1,level:6,x:220,y:660,
+      { id:'sw2_first_edge',name:'先机之刃',type:'passive',cost:1,x:220,y:660,
         desc:'被动：若本单位本回合最先行动，所有攻击暴击率+10%。',
         notes:'先手→暴击转化，激励维持速度优势。',tags:'sword,speed,crit',exclusive:'',requires:'' },
-      { id:'sw2_bide',name:'以逸待劳',type:'trait',cost:1,level:6,x:540,y:660,
+      { id:'sw2_bide',name:'以逸待劳',type:'trait',cost:1,x:540,y:660,
         desc:'特质：本回合内主动使用「流形」后，若成功闪避任意攻击，获得「蓄势」（持续至本单位下次主动攻击时消耗：伤害+25%，命中+10）。',
         notes:'与「流形」深度绑定——先主动开盾，再等敌人打过来，再爆发。SPD 12先手问题通过"主动触发流形"绕过。',tags:'sword,evasion,bide',exclusive:'',requires:'' },
       // L7 / R7
-      { id:'sw2_saint_will',name:'剑圣之魄',type:'passive',cost:1,level:7,x:280,y:760,
+      { id:'sw2_saint_will',name:'剑圣之魄',type:'passive',cost:1,x:280,y:760,
         desc:'被动：每次暴击，下次攻击（含当回合）额外无视目标20%物防（一次性，每次暴击后刷新）。',
         notes:'攻势顶端。暴击穿防复利，两个转职方向均受益（hybrid伤害的物理部分同样受益）。',tags:'sword,crit,penetration',exclusive:'',requires:'' },
-      { id:'sw2_sword_essence',name:'剑道精义',type:'trait',cost:1,level:7,x:480,y:760,
+      { id:'sw2_sword_essence',name:'剑道精义',type:'trait',cost:1,x:480,y:760,
         desc:'特质：成功反击后，获得「先机」（下回合行动先制+1，超越所有同速单位优先行动）。\n[转职后升级：剑圣→「剑圣精义」，魔剑士→「魔剑精义」]',
         notes:'应势顶端。反击→先制优先级循环；先制+1对SPD 12无冗余，效果清晰。',tags:'sword,counter,priority',exclusive:'',requires:'' },
       // Pre-Adv
-      { id:'sw2_edge_limit',name:'临界之刃',type:'passive',cost:1,level:8,x:380,y:860,
+      { id:'sw2_edge_limit',name:'临界之刃',type:'passive',cost:1,x:380,y:860,
         desc:'被动：当自身HP低于70%时，暴击伤害倍率+0.2，受到攻击时「明」自动刷新。',
         notes:'汇聚节点，逆境爆发。两个转职均适用。',tags:'sword,crit,survival',exclusive:'',requires:'' },
       // Advancement
-      { id:'sw2_adv_saint',name:'剑圣之路',type:'advancement',cost:1,level:9,x:260,y:960,
+      { id:'sw2_adv_saint',name:'剑圣之路',type:'advancement',cost:1,x:260,y:960,
         desc:'转职：成为剑圣。\n· 激活「剑气」量谱（暴击命中+15气，成功闪避+10气，速度差攻击+10气）\n· 速度/暴击/闪避成长率强化\n· 「剑道精义」→「剑圣精义」（反击后+20剑气）\n· 解锁剑圣专属天赋分支',
         notes:'左塔偏向剑圣（暴击驱动）但两塔均可转职。',tags:'advancement,sword_saint',exclusive:'adv_choice',requires:'' },
-      { id:'sw2_adv_magic',name:'魔剑之路',type:'advancement',cost:1,level:9,x:500,y:960,
+      { id:'sw2_adv_magic',name:'魔剑之路',type:'advancement',cost:1,x:500,y:960,
         desc:'转职：成为魔剑士。\n· MAG属性开始成长\n· 激活「魔刃」量谱系统\n· 解锁hybrid伤害技能与远程魔法攻击\n· 「剑道精义」→「魔剑精义」（反击后魔刃层数+2）\n· 解锁魔剑士专属天赋分支',
         notes:'右塔偏向魔剑士（反击驱动）但两塔均可转职。',tags:'advancement,magic_swordsman',exclusive:'adv_choice',requires:'' },
     ],
@@ -809,61 +896,61 @@ const TREES = {
   sw_c: {
     class_id: 'sw_c', class_name: '剑士 C · 星爆形',
     nodes: [
-      { id:'sw3_start',name:'剑道入门',type:'trait',cost:1,level:1,x:300,y:60,
+      { id:'sw3_start',name:'剑道入门',type:'trait',cost:1,x:300,y:60,
         desc:'解锁初始技能「斩击」（melee/physical，power 90%，hit +5）。激活剑类武器专精。',
         notes:'起始节点，需花费1天赋点解锁。',tags:'sword,start',exclusive:'',requires:'' },
       // Pre-Hub layer 1
-      { id:'sw3_keen',name:'锐感',type:'passive',cost:1,level:2,x:170,y:155,
+      { id:'sw3_keen',name:'锐感',type:'passive',cost:1,x:170,y:155,
         desc:'被动：「斩击」命中后，若目标处于任何debuff状态，伤害+10%。',
         notes:'引导玩家重视控制链，利用debuff打出更高伤害。',tags:'sword,debuff,synergy',exclusive:'',requires:'' },
-      { id:'sw3_momentum',name:'先势',type:'passive',cost:1,level:2,x:430,y:155,
+      { id:'sw3_momentum',name:'先势',type:'passive',cost:1,x:430,y:155,
         desc:'被动：若本单位速度比行动顺序中紧随其后的单位高≥5，本回合首次攻击伤害+6%，暴击率+5%。',
         notes:'速度优势→攻击质量。命中已溢出故改为伤害加成。',tags:'sword,speed,crit',exclusive:'',requires:'' },
       // Pre-Hub layer 2
-      { id:'sw3_wound',name:'锐伤',type:'skill_upgrade',cost:1,level:3,x:100,y:250,
+      { id:'sw3_wound',name:'锐伤',type:'skill_upgrade',cost:1,x:100,y:250,
         desc:'技能升级：「斩击」命中后，目标附加「锐伤」（物防-2，持续2回合，最多叠3层）。',
         notes:'持续穿防（满层-6物防），与「锐感」形成配合（锐伤是debuff，可触发锐感加成）。',tags:'sword,debuff,upgrade',exclusive:'',requires:'' },
-      { id:'sw3_evasion',name:'识破',type:'passive',cost:1,level:3,x:380,y:250,
+      { id:'sw3_evasion',name:'识破',type:'passive',cost:1,x:380,y:250,
         desc:'被动：成功闪避后，下次攻击必定命中（「洞察」，每回合1次）。',
         notes:'闪避→必中转化，为Hub节点的「明」状态提供另一条驱动路线。',tags:'sword,evasion,hit',exclusive:'',requires:'' },
       // HUB (mandatory convergence)
-      { id:'sw3_heart',name:'剑心通明',type:'gauge_core',cost:1,level:4,x:240,y:350,
+      { id:'sw3_heart',name:'剑心通明',type:'gauge_core',cost:1,x:240,y:350,
         desc:'★核心节点：每次暴击命中后，或每次成功闪避后，获得「明」标记（不叠加，刷新型；「明」持续到本角色回合结束，每次触发可刷新延长）。\n「明」激活时：\n· 发起攻击 → 伤害+15%\n· 被攻击 → 闪避+8\n[转职后，「剑圣精义」和「魔剑精义」各自强化「明」的触发或效果]',
         notes:'★强制汇聚节点，补充「明」持续时间（回合末消失，触发可刷新）——防止无限永久BUFF或零效果双极端。',tags:'sword,hub,gauge',exclusive:'',requires:'' },
       // Post-Hub layer 1 (3 radiating paths)
-      { id:'sw3_dancer',name:'剑舞',type:'active_skill',cost:1,level:5,x:80,y:460,
+      { id:'sw3_dancer',name:'剑舞',type:'active_skill',cost:1,x:80,y:460,
         desc:'主动：攻击后可立即追加移动1格（不触发额外反击）。melee/physical，power 85%，每回合1次。',
         notes:'机动型延伸路线。攻击后调位，适合高机动打法。',tags:'sword,mobility,melee',exclusive:'',requires:'' },
-      { id:'sw3_chain',name:'连环',type:'passive',cost:1,level:5,x:255,y:460,
+      { id:'sw3_chain',name:'连环',type:'passive',cost:1,x:255,y:460,
         desc:'被动：若连续2回合均发动攻击并命中，获得「连环」（伤害+5%，暴击率+5%，持续保持）。\n维持：每回合攻击并命中。\n粘滞：允许1回合空窗（该回合未攻击不立即消失，但连续2回合未攻击命中则消失）。',
         notes:'跨回合连击追踪。命中已全段溢出，改为伤害加成。',tags:'sword,damage,crit,sustain',exclusive:'',requires:'' },
-      { id:'sw3_counter',name:'剑意',type:'passive',cost:1,level:5,x:440,y:460,
+      { id:'sw3_counter',name:'剑意',type:'passive',cost:1,x:440,y:460,
         desc:'被动：反击时命中+15，伤害+10%，无视目标地形带来的闪避加成。',
         notes:'反击型延伸路线。',tags:'sword,counter,hit',exclusive:'',requires:'' },
       // Post-Hub layer 2
-      { id:'sw3_surge',name:'势不可挡',type:'passive',cost:1,level:6,x:165,y:555,
+      { id:'sw3_surge',name:'势不可挡',type:'passive',cost:1,x:165,y:555,
         desc:'被动：每次主动攻击命中后获得1层「势」（跨回合保留，最多3层）。主动攻击未命中时失去所有「势」。\n每层效果：暴击伤害倍率+0.15（1层1.65x / 2层1.80x / 3层1.95x）。\n非攻击回合不影响已有「势」层数。',
         notes:'命中连续性追踪（hit streak），与A变体「势不可挡」保持一致定义。',tags:'sword,crit,momentum,accuracy',exclusive:'',requires:'' },
-      { id:'sw3_fluid',name:'流形',type:'active_skill',cost:1,level:6,x:365,y:555,
+      { id:'sw3_fluid',name:'流形',type:'active_skill',cost:1,x:365,y:555,
         desc:'主动：激活「流形」（持续1回合）：闪避+15。「流形」下成功闪避→立即反击1次（普攻70%，不触发二次反击）。CD：2回合。',
         notes:'闪避→反击转化，反击路线的自然延伸。',tags:'sword,evasion,counter,active',exclusive:'',requires:'' },
       // Post-Hub convergence
-      { id:'sw3_essence',name:'剑道精义',type:'trait',cost:1,level:7,x:265,y:645,
+      { id:'sw3_essence',name:'剑道精义',type:'trait',cost:1,x:265,y:645,
         desc:'特质：成功反击后，获得「先机」（下回合行动先制+1，超越所有同速单位优先行动）。\n[转职后升级：剑圣→「剑圣精义」，魔剑士→「魔剑精义」]',
         notes:'收束节点。反击→先制优先级循环；三个变体「剑道精义」效果统一。',tags:'sword,counter,priority',exclusive:'',requires:'' },
       // Hub upgrade
-      { id:'sw3_deepen',name:'剑意融合',type:'gauge_extend',cost:1,level:8,x:265,y:730,
+      { id:'sw3_deepen',name:'剑意融合',type:'gauge_extend',cost:1,x:265,y:730,
         desc:'特质：「明」标记（来自「剑心通明」）的持续时间额外+1回合，且「明」状态下的伤害加成从+15%提升至+20%。',
         notes:'★直接升级Hub节点效果。"我在强化我的核心顿悟"——清晰的Build叙事。',tags:'sword,hub,upgrade',exclusive:'',requires:'' },
       // Final
-      { id:'sw3_brink',name:'临界之刃',type:'passive',cost:1,level:9,x:265,y:815,
+      { id:'sw3_brink',name:'临界之刃',type:'passive',cost:1,x:265,y:815,
         desc:'被动：当自身HP低于70%时，暴击伤害倍率+0.2，受到攻击时「明」自动刷新。',
         notes:'逆境爆发+防御联动。暴击率已被cap，改为暴击伤害倍率；「明」自动刷新增加低HP时的生存能力。',tags:'sword,crit_damage,survival',exclusive:'',requires:'' },
       // Advancement
-      { id:'sw3_adv_saint',name:'剑圣之路',type:'advancement',cost:1,level:10,x:160,y:910,
+      { id:'sw3_adv_saint',name:'剑圣之路',type:'advancement',cost:1,x:160,y:910,
         desc:'转职：成为剑圣。\n· 激活「剑气」量谱（暴击命中+15气，成功闪避+10气，速度差攻击+10气）\n· 速度/暴击/闪避成长率强化\n· 「剑道精义」→「剑圣精义」（反击后+20剑气）\n· 「明」状态升级：暴击触发概率+效果强化\n· 解锁剑圣专属天赋分支',
         notes:'左侧转职。「明」的暴击触发被强化。',tags:'advancement,sword_saint',exclusive:'adv_choice',requires:'' },
-      { id:'sw3_adv_magic',name:'魔剑之路',type:'advancement',cost:1,level:10,x:375,y:910,
+      { id:'sw3_adv_magic',name:'魔剑之路',type:'advancement',cost:1,x:375,y:910,
         desc:'转职：成为魔剑士。\n· MAG属性开始成长\n· 激活「魔刃」量谱系统\n· 解锁hybrid伤害技能与远程魔法攻击\n· 「剑道精义」→「魔剑精义」（反击后魔刃层数+2）\n· 「明」状态升级：闪避触发概率+效果强化\n· 解锁魔剑士专属天赋分支',
         notes:'右侧转职。「明」的闪避触发被强化。',tags:'advancement,magic_swordsman',exclusive:'adv_choice',requires:'' },
     ],
@@ -896,63 +983,63 @@ const TREES = {
     class_id: 'ar_a', class_name: '弓箭手 · 三角洲形',
     nodes: [
       // Layer 0: Start
-      { id:'ar_start',name:'射手之眼',type:'trait',cost:1,level:1,x:265,y:50,
+      { id:'ar_start',name:'射手之眼',type:'trait',cost:1,x:265,y:50,
         desc:'起始节点。解锁「射击」（ranged/physical，power 100%，diamond 2-4）。激活弓类武器专精。',
         notes:'弓箭手起始节点，远程物理基础。',tags:'archer,start',exclusive:'',requires:'' },
       // Layer 1: 左精准 / 右机动
-      { id:'ar_steady',name:'稳射',type:'passive',cost:1,level:2,x:130,y:155,
+      { id:'ar_steady',name:'稳射',type:'passive',cost:1,x:130,y:155,
         desc:'被动：若本回合未移动即发动攻击，伤害+8%。',
         notes:'站桩奖励。命中已溢出，改为伤害加成。契合神射手定位。',tags:'archer,damage,steady',exclusive:'',requires:'' },
-      { id:'ar_keen_eye',name:'鹰眼',type:'passive',cost:1,level:2,x:400,y:155,
+      { id:'ar_keen_eye',name:'鹰眼',type:'passive',cost:1,x:400,y:155,
         desc:'被动：攻击低于50%HP的目标时，暴击率+8%。',
         notes:'补刀强化。低HP目标=高暴击，鼓励集火。',tags:'archer,crit,execute',exclusive:'',requires:'' },
       // Layer 2: 三路展开
-      { id:'ar_pierce',name:'穿透射击',type:'skill_upgrade',cost:1,level:3,x:70,y:260,
+      { id:'ar_pierce',name:'穿透射击',type:'skill_upgrade',cost:1,x:70,y:260,
         desc:'技能升级：「射击」命中后，无视目标10%物防。',
         notes:'左路精准线深入。',tags:'archer,armor_pen',exclusive:'',requires:'' },
-      { id:'ar_focus_fire',name:'集中火力',type:'passive',cost:1,level:3,x:265,y:260,
+      { id:'ar_focus_fire',name:'集中火力',type:'passive',cost:1,x:265,y:260,
         desc:'被动：连续2回合攻击同一目标，第二次攻击伤害+12%（粘滞1回合空窗）。',
         notes:'中路专注线。奖励集火单目标。',tags:'archer,damage,focus',exclusive:'',requires:'' },
-      { id:'ar_quick_step',name:'轻步',type:'trait',cost:1,level:3,x:460,y:260,
+      { id:'ar_quick_step',name:'轻步',type:'trait',cost:1,x:460,y:260,
         desc:'特质：攻击后可向远离目标方向移动1格（后撤步，不触发反击）。',
         notes:'右路机动线。位移质变效果，不随等级贬值。',tags:'archer,mobility',exclusive:'',requires:'' },
       // Layer 3: 三路技能
-      { id:'ar_mark_shot',name:'标记射击',type:'active_skill',cost:1,level:4,x:70,y:370,
+      { id:'ar_mark_shot',name:'标记射击',type:'active_skill',cost:1,x:70,y:370,
         desc:'主动：对目标射击(power 80%)并附加「标记」(持续2回合)：队友攻击标记目标命中+10。ranged/physical，CD1。',
         notes:'团队辅助+输出。标记是核心联动点。',tags:'archer,mark,team',exclusive:'',requires:'' },
-      { id:'ar_crit_chain',name:'连锁暴击',type:'passive',cost:1,level:4,x:265,y:370,
+      { id:'ar_crit_chain',name:'连锁暴击',type:'passive',cost:1,x:265,y:370,
         desc:'被动：本回合造成暴击后，下次攻击暴击率+10%（本回合有效，可跨反击触发）。',
         notes:'中路暴击线。暴击→更多暴击的正反馈。',tags:'archer,crit,chain',exclusive:'',requires:'' },
-      { id:'ar_wind_walk',name:'风行',type:'active_skill',cost:1,level:4,x:460,y:370,
+      { id:'ar_wind_walk',name:'风行',type:'active_skill',cost:1,x:460,y:370,
         desc:'主动：移动后立即攻击（不消耗行动），power 75%。ranged/physical，CD2。',
         notes:'右路机动。先移动后射击，打破标准行动顺序。',tags:'archer,mobility,skill',exclusive:'',requires:'' },
       // Layer 4: 左中收束
-      { id:'ar_bulls_eye',name:'正中靶心',type:'trait',cost:1,level:5,x:165,y:475,
+      { id:'ar_bulls_eye',name:'正中靶心',type:'trait',cost:1,x:165,y:475,
         desc:'特质：★左中收束。暴击命中时，额外造成目标最大HP 5%的固定伤害（无视防御，建筑不适用）。',
         notes:'暴击→%HP固定伤害，对Boss有特殊价值。',tags:'archer,crit,percent_hp',exclusive:'',requires:'' },
-      { id:'ar_evasive',name:'身轻如燕',type:'passive',cost:1,level:5,x:400,y:475,
+      { id:'ar_evasive',name:'身轻如燕',type:'passive',cost:1,x:400,y:475,
         desc:'被动：被近战攻击时闪避+10。被远程攻击时可反击（若射程可达）。',
         notes:'右路防御。远程反击是独特机制。',tags:'archer,evasion,counter',exclusive:'',requires:'' },
       // Layer 5: 深入
-      { id:'ar_snipe_instinct',name:'狙击本能',type:'passive',cost:1,level:6,x:100,y:575,
+      { id:'ar_snipe_instinct',name:'狙击本能',type:'passive',cost:1,x:100,y:575,
         desc:'被动：攻击距离≥3格的目标时伤害+10%；距离≥4格时再+5%。',
         notes:'距离=伤害，核心神射手节点。',tags:'archer,range,damage',exclusive:'',requires:'' },
-      { id:'ar_relentless',name:'追击',type:'passive',cost:1,level:6,x:340,y:575,
+      { id:'ar_relentless',name:'追击',type:'passive',cost:1,x:340,y:575,
         desc:'被动：击杀目标后，下次攻击（本回合或下回合）暴击率+15%，命中+10。',
         notes:'击杀奖励。连续击杀时滚雪球。',tags:'archer,kill,crit',exclusive:'',requires:'' },
       // Layer 6: 总收束
-      { id:'ar_vital_sense',name:'急所感知',type:'trait',cost:1,level:7,x:220,y:670,
+      { id:'ar_vital_sense',name:'急所感知',type:'trait',cost:1,x:220,y:670,
         desc:'特质：★总收束。每次暴击命中后，获得1层「锐」（最多3层，跨回合保留）。每层「锐」：暴击伤害倍率+0.1。主动攻击未命中则全部失去。',
         notes:'暴击伤害倍率堆叠（非暴击率），不受50% cap影响。',tags:'archer,crit_damage,stack',exclusive:'',requires:'' },
       // Layer 7: 终端
-      { id:'ar_last_stand',name:'孤注一掷',type:'passive',cost:1,level:8,x:220,y:770,
+      { id:'ar_last_stand',name:'孤注一掷',type:'passive',cost:1,x:220,y:770,
         desc:'被动：周围1格内无友方单位时，ATK+10%，暴击伤害倍率+0.1。',
         notes:'远程角色常满足条件。暴击率改为暴击伤害倍率避免cap问题。',tags:'archer,lone,damage',exclusive:'',requires:'' },
       // Layer 8: 转职（互斥）
-      { id:'ar_adv_sniper',name:'神射手之路',type:'advancement',cost:1,level:9,x:120,y:870,
+      { id:'ar_adv_sniper',name:'神射手之路',type:'advancement',cost:1,x:120,y:870,
         desc:'转职：成为神射手。\n· 射程全局+1\n· 「锐」层数上限+2（→5层）\n· 解锁Focus集中量谱系统\n· ATK/HIT成长率强化\n· 解锁神射手专属天赋分支',
         notes:'远程极致化转职。',tags:'advancement,sniper',exclusive:'adv_choice',requires:'' },
-      { id:'ar_adv_elven',name:'精灵射手之路',type:'advancement',cost:1,level:9,x:320,y:870,
+      { id:'ar_adv_elven',name:'精灵射手之路',type:'advancement',cost:1,x:320,y:870,
         desc:'转职：成为精灵射手。\n· 解锁melee型弓术技能\n· 弓箭附魔系统（火矢/冰矢）\n· EVA成长率+2\n· 解锁Harmony自然共鸣量谱系统\n· 解锁精灵射手专属天赋分支',
         notes:'近战兼容+附魔+闪避转职。',tags:'advancement,elven_archer',exclusive:'adv_choice',requires:'' },
     ],
@@ -982,63 +1069,63 @@ const TREES = {
     class_id: 'mg_a', class_name: '魔法师 · 魔法阵形',
     nodes: [
       // Layer 0: Start
-      { id:'mg_start',name:'魔导启蒙',type:'trait',cost:1,level:1,x:265,y:50,
+      { id:'mg_start',name:'魔导启蒙',type:'trait',cost:1,x:265,y:50,
         desc:'起始节点。解锁「火球术」（magical/area，power 120%，diamond 2-4，area diamond(1)，燃烧30%，CD2）和「冰冻术」（magical/ranged，power 100%，diamond 1-3，减速50%，CD1）。',
         notes:'魔法师起始节点，双技能。',tags:'mage,start',exclusive:'',requires:'' },
       // Layer 1: 左毁灭 / 右掌控
-      { id:'mg_amplify',name:'增幅',type:'passive',cost:1,level:2,x:130,y:155,
+      { id:'mg_amplify',name:'增幅',type:'passive',cost:1,x:130,y:155,
         desc:'被动：使用AOE技能命中≥2个目标时，伤害+8%。',
         notes:'左路毁灭线入口。AOE奖励。',tags:'mage,aoe,damage',exclusive:'',requires:'' },
-      { id:'mg_conserve',name:'凝练',type:'passive',cost:1,level:2,x:400,y:155,
+      { id:'mg_conserve',name:'凝练',type:'passive',cost:1,x:400,y:155,
         desc:'被动：使用冷却≥2的技能时，有25%概率冷却-1（最低1）。',
         notes:'右路掌控线入口。CD管理。',tags:'mage,cooldown',exclusive:'',requires:'' },
       // Layer 2: 三路（含交叉点1）
-      { id:'mg_burn_mastery',name:'燃烬',type:'passive',cost:1,level:3,x:70,y:260,
+      { id:'mg_burn_mastery',name:'燃烬',type:'passive',cost:1,x:70,y:260,
         desc:'被动：燃烧DOT伤害+30%；燃烧中的目标受到本单位魔法攻击时额外受伤+5%。',
         notes:'左路深入。燃烧专精。',tags:'mage,fire,dot',exclusive:'',requires:'' },
-      { id:'mg_frost_chain',name:'冰锁',type:'skill_upgrade',cost:1,level:3,x:265,y:260,
+      { id:'mg_frost_chain',name:'冰锁',type:'skill_upgrade',cost:1,x:265,y:260,
         desc:'技能升级：「冰冻术」升级：减速的目标再次受到魔法攻击时冰冻1回合（每目标每战1次）。',
         notes:'★交叉点1。左右路均可到达。控制质变。',tags:'mage,ice,cc',exclusive:'',requires:'' },
-      { id:'mg_long_cast',name:'远咏',type:'passive',cost:1,level:3,x:460,y:260,
+      { id:'mg_long_cast',name:'远咏',type:'passive',cost:1,x:460,y:260,
         desc:'被动：所有射程≥2的技能射程+1（不影响area范围）。',
         notes:'右路深入。射程扩展。',tags:'mage,range',exclusive:'',requires:'' },
       // Layer 3: 技能层
-      { id:'mg_chain_cast',name:'连咏',type:'trait',cost:1,level:4,x:100,y:370,
+      { id:'mg_chain_cast',name:'连咏',type:'trait',cost:1,x:100,y:370,
         desc:'特质：若上一回合使用了攻击魔法且命中，本回合首个攻击魔法伤害+10%。（跨回合连击，粘滞1回合）',
         notes:'左路连续施法奖励。',tags:'mage,chain,damage',exclusive:'',requires:'' },
-      { id:'mg_mana_well',name:'魔力泉源',type:'passive',cost:1,level:4,x:265,y:370,
+      { id:'mg_mana_well',name:'魔力泉源',type:'passive',cost:1,x:265,y:370,
         desc:'被动：每回合结束时，若本回合未受到伤害，下回合一个技能冷却-1。',
         notes:'★交叉点2。安全=CD回复。',tags:'mage,cooldown,safety',exclusive:'',requires:'' },
-      { id:'mg_barrier',name:'魔力屏障',type:'active_skill',cost:1,level:4,x:430,y:370,
+      { id:'mg_barrier',name:'魔力屏障',type:'active_skill',cost:1,x:430,y:370,
         desc:'主动：self/buff，受到下一次物理攻击时伤害-40%（持续2回合或触发后消失）。CD3。',
         notes:'右路生存技能。',tags:'mage,shield,survival',exclusive:'',requires:'' },
       // Layer 4: 收束
-      { id:'mg_elemental_fury',name:'元素狂潮',type:'trait',cost:1,level:5,x:130,y:475,
+      { id:'mg_elemental_fury',name:'元素狂潮',type:'trait',cost:1,x:130,y:475,
         desc:'特质：★左侧收束。连续3回合使用攻击魔法（粘滞1回合空窗），第3回合攻击魔法伤害+25%且AOE范围+1。',
         notes:'高回报蓄力。需3回合投入。',tags:'mage,aoe,burst',exclusive:'',requires:'' },
-      { id:'mg_spell_echo',name:'咏唱回响',type:'passive',cost:1,level:5,x:400,y:475,
+      { id:'mg_spell_echo',name:'咏唱回响',type:'passive',cost:1,x:400,y:475,
         desc:'被动：使用冷却≥3的技能后，下一回合首个非冷却技能伤害+15%。',
         notes:'右路大招→小招联动。',tags:'mage,cooldown,damage',exclusive:'',requires:'' },
       // Layer 5: 深入
-      { id:'mg_ignite',name:'引爆',type:'active_skill',cost:1,level:6,x:100,y:575,
+      { id:'mg_ignite',name:'引爆',type:'active_skill',cost:1,x:100,y:575,
         desc:'主动：对处于燃烧状态的目标造成magical/ranged power 130%伤害并消除燃烧。消除燃烧时额外造成剩余燃烧回数×15%的bonus伤害。CD2。',
         notes:'消耗燃烧DOT换取爆发伤害。',tags:'mage,fire,burst',exclusive:'',requires:'' },
-      { id:'mg_ice_armor',name:'寒冰护体',type:'passive',cost:1,level:6,x:400,y:575,
+      { id:'mg_ice_armor',name:'寒冰护体',type:'passive',cost:1,x:400,y:575,
         desc:'被动：被近战攻击命中后，攻击者附加减速（SPD-2，2回合），概率50%。',
         notes:'被动反制近战。',tags:'mage,ice,counter',exclusive:'',requires:'' },
       // Layer 6: 总收束
-      { id:'mg_arcane_mastery',name:'奥术精通',type:'trait',cost:1,level:7,x:250,y:670,
+      { id:'mg_arcane_mastery',name:'奥术精通',type:'trait',cost:1,x:250,y:670,
         desc:'特质：★总收束。每使用3次攻击魔法（跨回合累计），下一次攻击魔法获得「精通」：伤害+15%，附加效果触发率+20%。计数不因非攻击行动重置。',
         notes:'宽容的积累条件。+20%附加率是质变效果。',tags:'mage,mastery,damage',exclusive:'',requires:'' },
       // Layer 7: 终端
-      { id:'mg_desperate',name:'孤注一掷',type:'passive',cost:1,level:8,x:250,y:770,
+      { id:'mg_desperate',name:'孤注一掷',type:'passive',cost:1,x:250,y:770,
         desc:'被动：HP低于50%时MAG+15%，但受到伤害+10%。',
         notes:'高风险高回报。与魔法师脆皮定位契合。',tags:'mage,risk,damage',exclusive:'',requires:'' },
       // Layer 8: 转职（互斥）
-      { id:'mg_adv_fire',name:'火之贤者之路',type:'advancement',cost:1,level:9,x:140,y:870,
+      { id:'mg_adv_fire',name:'火之贤者之路',type:'advancement',cost:1,x:140,y:870,
         desc:'转职：成为火之贤者。\n· 火系魔法全面强化\n· AOE范围扩大\n· 燃烧可叠层\n· 解锁Inferno业火量谱系统\n· MAG/CRIT成长率强化\n· 解锁火贤者专属天赋分支',
         notes:'AOE毁灭转职。',tags:'advancement,fire_sage',exclusive:'adv_choice',requires:'' },
-      { id:'mg_adv_water',name:'水之贤者之路',type:'advancement',cost:1,level:9,x:360,y:870,
+      { id:'mg_adv_water',name:'水之贤者之路',type:'advancement',cost:1,x:360,y:870,
         desc:'转职：成为水之贤者。\n· 解锁holy系治疗魔法\n· 水系攻击附加减速增强\n· Buff技能强化\n· 解锁Tide潮汐量谱系统\n· M.DEF/HP成长率强化\n· 解锁水贤者专属天赋分支',
         notes:'攻治双修转职。',tags:'advancement,water_sage',exclusive:'adv_choice',requires:'' },
     ],
@@ -1070,12 +1157,12 @@ function getDefaultData() {
 // File System Access API Bridge (FSBridge)
 // ============================================================
 const FSBridge = {
-  _rootDirHandle: null,
-  _talentDirHandle: null,
+  _dirHandle: null,   // user-selected directory handle (used directly)
   _connected: false,
+  _hasSavedHandle: false,  // true if IndexedDB has a persisted handle (even if not yet authorized)
   _idbName: 'TalentTreeEditorFS',
   _idbStore: 'handles',
-  _idbKey: 'rootDirHandle',
+  _idbKey: 'dirHandle',
 
   isSupported() {
     return 'showDirectoryPicker' in window;
@@ -1084,8 +1171,13 @@ const FSBridge = {
   // --- IndexedDB for handle persistence ---
   async _openIDB() {
     return new Promise((resolve, reject) => {
-      const req = indexedDB.open(this._idbName, 1);
-      req.onupgradeneeded = (e) => e.target.result.createObjectStore(this._idbStore);
+      const req = indexedDB.open(this._idbName, 2);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(this._idbStore)) {
+          db.createObjectStore(this._idbStore);
+        }
+      };
       req.onsuccess = (e) => resolve(e.target.result);
       req.onerror = (e) => reject(e.target.error);
     });
@@ -1112,17 +1204,11 @@ const FSBridge = {
   },
 
   // --- Directory connection ---
-  async _navigateToTalentDir(rootHandle) {
-    const dataDir = await rootHandle.getDirectoryHandle('data', { create: true });
-    return await dataDir.getDirectoryHandle('talent-tree', { create: true });
-  },
-
   async pickDirectory() {
     try {
-      this._rootDirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-      this._talentDirHandle = await this._navigateToTalentDir(this._rootDirHandle);
+      this._dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
       this._connected = true;
-      await this._saveHandle(this._rootDirHandle);
+      await this._saveHandle(this._dirHandle);
       this._updateUI();
       return true;
     } catch (e) {
@@ -1133,16 +1219,30 @@ const FSBridge = {
     }
   },
 
+  // Check if IndexedDB has a saved handle (no permission request, safe to call on load)
+  async checkSaved() {
+    if (!this.isSupported()) return false;
+    try {
+      const handle = await this._loadHandle();
+      this._hasSavedHandle = !!handle;
+      return this._hasSavedHandle;
+    } catch (e) {
+      this._hasSavedHandle = false;
+      return false;
+    }
+  },
+
+  // Restore from saved handle (requires user gesture for requestPermission)
   async tryRestore() {
     if (!this.isSupported()) return false;
     try {
       const handle = await this._loadHandle();
-      if (!handle) return false;
+      if (!handle) { this._hasSavedHandle = false; return false; }
       const perm = await handle.requestPermission({ mode: 'readwrite' });
       if (perm !== 'granted') return false;
-      this._rootDirHandle = handle;
-      this._talentDirHandle = await this._navigateToTalentDir(handle);
+      this._dirHandle = handle;
       this._connected = true;
+      this._hasSavedHandle = true;
       this._updateUI();
       return true;
     } catch (e) {
@@ -1153,12 +1253,12 @@ const FSBridge = {
     }
   },
 
-  // --- File operations ---
+  // --- File operations (directly in user-selected directory) ---
   async readAllTrees() {
-    if (!this._connected || !this._talentDirHandle) return [];
+    if (!this._connected || !this._dirHandle) return [];
     const trees = [];
     try {
-      for await (const [name, handle] of this._talentDirHandle) {
+      for await (const [name, handle] of this._dirHandle) {
         if (handle.kind === 'file' && name.endsWith('.json')) {
           try {
             const file = await handle.getFile();
@@ -1177,9 +1277,9 @@ const FSBridge = {
   },
 
   async writeTree(filename, data) {
-    if (!this._connected || !this._talentDirHandle) return false;
+    if (!this._connected || !this._dirHandle) return false;
     try {
-      const fh = await this._talentDirHandle.getFileHandle(filename + '.json', { create: true });
+      const fh = await this._dirHandle.getFileHandle(filename + '.json', { create: true });
       const w = await fh.createWritable();
       await w.write(JSON.stringify(data, null, 2));
       await w.close();
@@ -1191,9 +1291,9 @@ const FSBridge = {
   },
 
   async deleteTree(filename) {
-    if (!this._connected || !this._talentDirHandle) return false;
+    if (!this._connected || !this._dirHandle) return false;
     try {
-      await this._talentDirHandle.removeEntry(filename + '.json');
+      await this._dirHandle.removeEntry(filename + '.json');
       return true;
     } catch (e) {
       console.error('[FSBridge] deleteTree:', e);
@@ -1211,16 +1311,32 @@ const FSBridge = {
         indicator.textContent = '📂 ' + t('tt_fs_unsupported');
         indicator.style.color = '#666';
       } else if (this._connected) {
+        const dirName = this._dirHandle ? this._dirHandle.name : '';
         indicator.textContent = '📂 ' + t('tt_fs_connected');
         indicator.style.color = '#2ecc71';
-        indicator.title = 'data/talent-tree/';
+        indicator.title = dirName ? dirName + '/' : '';
+      } else if (this._hasSavedHandle) {
+        indicator.textContent = '📂 ' + t('tt_fs_saved');
+        indicator.style.color = '#f39c12';
+        indicator.title = '';
       } else {
         indicator.textContent = '📂 ' + t('tt_fs_disconnected');
         indicator.style.color = '#e94560';
       }
     }
     if (btn) {
-      btn.style.display = (!this.isSupported() || this._connected) ? 'none' : 'inline-block';
+      if (!this.isSupported()) {
+        btn.style.display = 'none';
+      } else {
+        btn.style.display = 'inline-block';
+        if (this._connected) {
+          btn.textContent = '🔄 ' + t('tt_fs_rebind');
+        } else if (this._hasSavedHandle) {
+          btn.textContent = '🔗 ' + t('tt_fs_restore');
+        } else {
+          btn.textContent = '📂 ' + t('tt_fs_pick_dir');
+        }
+      }
     }
   },
 };
@@ -1232,6 +1348,20 @@ async function loadFSTrees() {
   if (!FSBridge._connected) { fsTreesCache = []; return; }
   fsTreesCache = await FSBridge.readAllTrees();
   rebuildSelector();
+}
+
+// Unified FS button handler: restore saved handle or pick new directory
+async function handleFSConnect() {
+  let ok = false;
+  if (!FSBridge._connected && FSBridge._hasSavedHandle) {
+    // Has saved handle → try restore (user gesture context, so requestPermission works)
+    ok = await FSBridge.tryRestore();
+  }
+  if (!ok) {
+    // No saved handle, or restore failed → pick new directory
+    ok = await FSBridge.pickDirectory();
+  }
+  if (ok) { await loadFSTrees(); }
 }
 
 // ============================================================
@@ -1347,7 +1477,7 @@ function createNewTree() {
     nodes: [
       {
         id: cleanId + '_start', name: '起始节点', type: 'trait', cost: 1,
-        level: 1, x: 265, y: 80,
+        x: 265, y: 80,
         desc: '起始节点。', notes: '', tags: 'start', exclusive: '', requires: ''
       }
     ],
@@ -1367,6 +1497,7 @@ async function saveTreeToStorage() {
     toast('Error: class_id is empty');
     return;
   }
+  stripLevelField(treeData); // clean up deprecated level field
   const key = currentCustomKey || treeData.class_id;
   // Always write localStorage (fallback/cache)
   localStorage.setItem(STORAGE_KEY + key, JSON.stringify(treeData));
@@ -1378,7 +1509,7 @@ async function saveTreeToStorage() {
     const cached = { key, data: JSON.parse(JSON.stringify(treeData)) };
     if (idx >= 0) fsTreesCache[idx] = cached; else fsTreesCache.push(cached);
     if (ok) {
-      toast('已保存: data/talent-tree/' + key + '.json');
+      toast('已保存: ' + (FSBridge._dirHandle ? FSBridge._dirHandle.name + '/' : '') + key + '.json');
     } else {
       toast('文件写入失败，已保存到 localStorage');
     }
@@ -1397,12 +1528,19 @@ function loadCustomTree(key) {
   if (!raw) { toast('Error: tree not found'); return; }
   if (undoStack.length > 0) {
     if (!confirm('切换将清除当前未保存的修改，确认？')) {
+      // Restore selector to reflect currently loaded tree
+      const sel = document.getElementById('class-selector');
+      if (currentCustomKey) {
+        sel.value = '__custom__' + currentCustomKey;
+      } else {
+        sel.value = Object.keys(TREES).find(k => TREES[k].class_id === treeData.class_id) || 'sw_a';
+      }
       return;
     }
   }
   try {
     undoStack = []; redoStack = [];
-    treeData = JSON.parse(raw);
+    treeData = stripLevelField(JSON.parse(raw));
     currentCustomKey = key;
     selectNode(null);
     updateMetaFields();
@@ -1438,12 +1576,13 @@ async function deleteTreeFromStorage() {
 }
 
 async function exportJSONFile() {
+  stripLevelField(treeData);
   // If FS connected, write directly to file system
   if (FSBridge._connected) {
     const key = treeData.class_id || 'talent-tree';
     const ok = await FSBridge.writeTree(key, treeData);
     if (ok) {
-      toast('已导出: data/talent-tree/' + key + '.json');
+      toast('已导出: ' + (FSBridge._dirHandle ? FSBridge._dirHandle.name + '/' : '') + key + '.json');
       return;
     }
   }
@@ -1552,9 +1691,24 @@ function pointToSegmentDist(px, py, ax, ay, bx, by) {
   return Math.sqrt((px-cx)*(px-cx) + (py-cy)*(py-cy));
 }
 
+// Cached shortest-path data — recomputed once per render, reused by path analysis
+let _cachedPathData = null;
+
+function getCachedPathData() {
+  if (!_cachedPathData) _cachedPathData = computeShortestPaths();
+  return _cachedPathData;
+}
+
 function render() {
   const w = canvas.clientWidth, h = canvas.clientHeight;
   ctx.clearRect(0, 0, w, h);
+
+  // Invalidate path cache at start of each render frame
+  _cachedPathData = null;
+
+  // Auto-compute min level (= shortest path cost from start nodes) for each node
+  const _pathData = getCachedPathData();
+  const _minLevel = _pathData.dist; // { nodeId: minCostToReach }
 
   // === Feature 2: Compute path data before drawing ===
   if (pathModeActive) {
@@ -1774,7 +1928,8 @@ function render() {
     ctx.font = `${Math.max(8, 9 * cam.zoom)}px sans-serif`;
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
-    ctx.fillText('L' + n.level, lx, ly);
+    const autoLv = _minLevel[n.id];
+    ctx.fillText(autoLv != null && autoLv !== Infinity ? 'Lv' + autoLv : '?', lx, ly);
 
     ctx.restore(); // restore globalAlpha for search dimming
   }
@@ -1856,6 +2011,7 @@ canvas.addEventListener('mousedown', (e) => {
     drag.startY = sy;
     drag.nodeStartX = node.x;
     drag.nodeStartY = node.y;
+    drag.undoPushed = false; // track whether undo was saved for this drag
     canvas.className = '';
   } else if (isDoubleClick) {
     // Create new node
@@ -1863,7 +2019,7 @@ canvas.addEventListener('mousedown', (e) => {
     const newId = 'node_' + Date.now().toString(36);
     treeData.nodes.push({
       id: newId, name: 'New Node', type: 'passive', cost: 1,
-      level: 1, x: Math.round(w.x), y: Math.round(w.y),
+      x: Math.round(w.x), y: Math.round(w.y),
       desc: '', notes: '', tags: '', exclusive: '', requires: ''
     });
     selectNode(newId);
@@ -1897,6 +2053,11 @@ canvas.addEventListener('mousemove', (e) => {
   if (drag.type === 'node' && selectedNodeId) {
     const node = treeData.nodes.find(n => n.id === selectedNodeId);
     if (node) {
+      // Push undo on first movement (before any position changes are visible)
+      if (!drag.undoPushed) {
+        pushUndo();
+        drag.undoPushed = true;
+      }
       node.x = drag.nodeStartX + (sx - drag.startX) / cam.zoom;
       node.y = drag.nodeStartY + (sy - drag.startY) / cam.zoom;
     }
@@ -1909,12 +2070,6 @@ canvas.addEventListener('mousemove', (e) => {
 });
 
 canvas.addEventListener('mouseup', (e) => {
-  if (drag.type === 'node' && selectedNodeId) {
-    const node = treeData.nodes.find(n => n.id === selectedNodeId);
-    if (node && (node.x !== drag.nodeStartX || node.y !== drag.nodeStartY)) {
-      // Position changed, save undo state (but the change is already applied)
-    }
-  }
   drag.active = false;
   drag.type = null;
   canvas.className = mode === 'connect' ? 'connecting' : '';
@@ -1979,7 +2134,6 @@ function selectNode(id) {
   document.getElementById('node-name').value = node.name || '';
   document.getElementById('node-type').value = node.type;
   document.getElementById('node-cost').value = node.cost || 0;
-  document.getElementById('node-level').value = node.level || 1;
   document.getElementById('node-desc').value = node.desc || '';
   document.getElementById('node-notes').value = node.notes || '';
   document.getElementById('node-exclusive').value = node.exclusive || '';
@@ -1990,12 +2144,23 @@ function selectNode(id) {
 }
 
 // Bind sidebar inputs to update node data
-['node-id','node-name','node-type','node-cost','node-level','node-desc','node-notes','node-exclusive','node-requires','node-tags'].forEach(fid => {
+// Push undo once on focus (before user starts typing), not on every keystroke
+['node-id','node-name','node-type','node-cost','node-desc','node-notes','node-exclusive','node-requires','node-tags'].forEach(fid => {
   const el = document.getElementById(fid);
+  let _undoPushedForFocus = false;
+  el.addEventListener('focus', () => {
+    _undoPushedForFocus = false; // reset on each focus
+  });
   el.addEventListener('input', () => {
     if (!selectedNodeId) return;
     const node = treeData.nodes.find(n => n.id === selectedNodeId);
     if (!node) return;
+
+    // Push undo once per focus session (first edit)
+    if (!_undoPushedForFocus) {
+      pushUndo();
+      _undoPushedForFocus = true;
+    }
 
     const field = fid.replace('node-', '');
     const val = el.value;
@@ -2012,7 +2177,7 @@ function selectNode(id) {
         node.id = newId;
         selectedNodeId = newId;
       }
-    } else if (field === 'cost' || field === 'level') {
+    } else if (field === 'cost') {
       node[field] = parseInt(val) || 0;
     } else {
       node[field] = val;
@@ -2036,7 +2201,14 @@ function duplicateNode() {
   const src = treeData.nodes.find(n => n.id === selectedNodeId);
   if (!src) return;
   pushUndo();
-  const newNode = { ...src, id: src.id + '_copy', x: src.x + 60, y: src.y + 60 };
+  // Generate unique ID: append _copy, then _copy2, _copy3, etc. if already taken
+  let newId = src.id + '_copy';
+  let suffix = 2;
+  while (treeData.nodes.some(n => n.id === newId)) {
+    newId = src.id + '_copy' + suffix;
+    suffix++;
+  }
+  const newNode = { ...src, id: newId, x: src.x + 60, y: src.y + 60 };
   treeData.nodes.push(newNode);
   selectNode(newNode.id);
   toast('Node duplicated');
@@ -2047,9 +2219,8 @@ function duplicateNode() {
 // Layout & View
 // ============================================================
 
-function autoLayout() {
-  pushUndo();
-  // Topological sort based on edges
+// Core layout logic (no undo, no toast)
+function _applyAutoLayout() {
   const inDegree = {};
   const children = {};
   treeData.nodes.forEach(n => { inDegree[n.id] = 0; children[n.id] = []; });
@@ -2058,7 +2229,6 @@ function autoLayout() {
     if (children[e.from]) children[e.from].push(e.to);
   });
 
-  // BFS layers
   const layers = [];
   let queue = treeData.nodes.filter(n => inDegree[n.id] === 0).map(n => n.id);
   const visited = new Set();
@@ -2078,7 +2248,6 @@ function autoLayout() {
     queue = next;
   }
 
-  // Position nodes
   const layerGap = 120;
   const nodeGap = 140;
   layers.forEach((layer, li) => {
@@ -2092,13 +2261,16 @@ function autoLayout() {
     });
   });
 
-  // Handle unvisited nodes
   const unvisited = treeData.nodes.filter(n => !visited.has(n.id));
   unvisited.forEach((n, i) => {
     n.x = 400 + i * nodeGap;
     n.y = layers.length * layerGap + 80;
   });
+}
 
+function autoLayout() {
+  pushUndo();
+  _applyAutoLayout();
   fitView();
   toast('Auto layout applied');
 }
@@ -2157,7 +2329,16 @@ function redo() {
 // Import / Export
 // ============================================================
 
+// Strip deprecated 'level' field from node data (level is now auto-computed from path cost)
+function stripLevelField(data) {
+  if (data && data.nodes) {
+    data.nodes.forEach(n => { delete n.level; });
+  }
+  return data;
+}
+
 function exportJSON() {
+  stripLevelField(treeData);
   const json = JSON.stringify(treeData, null, 2);
   navigator.clipboard.writeText(json).then(() => {
     toast('JSON copied to clipboard');
@@ -2174,32 +2355,77 @@ function exportJSON() {
   });
 }
 
-function importJSON() {
+function applyImportedJSON(text) {
+  try {
+    const parsed = stripLevelField(JSON.parse(text));
+    // Ensure nodes array and edges array exist
+    if (!Array.isArray(parsed.nodes)) parsed.nodes = [];
+    if (!Array.isArray(parsed.edges)) parsed.edges = [];
+    // Fill missing fields with defaults
+    parsed.nodes.forEach(n => {
+      if (n.notes === undefined) n.notes = '';
+      if (n.exclusive === undefined) n.exclusive = '';
+      if (n.requires === undefined) n.requires = '';
+      if (n.tags === undefined) n.tags = '';
+      if (n.desc === undefined) n.desc = '';
+      if (n.cost === undefined) n.cost = 1;
+    });
+    pushUndo();
+    treeData = parsed;
+    currentCustomKey = null;
+    selectNode(null);
+    updateMetaFields();
+    // Auto-layout if any node is missing coordinates
+    const needsLayout = treeData.nodes.some(n => n.x == null || n.y == null);
+    if (needsLayout) {
+      // Inline layout without extra pushUndo
+      _applyAutoLayout();
+    }
+    fitView();
+    toast('JSON imported: ' + (treeData.class_name || 'unknown'));
+    return true;
+  } catch (err) {
+    toast('Error: Invalid JSON');
+    return false;
+  }
+}
+
+function showImportDialog() {
+  document.getElementById('import-text-area').value = '';
+  document.getElementById('import-overlay').classList.add('show');
+  // Bind file input to close dialog on success
   const input = document.getElementById('file-input');
   input.onchange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
-      try {
-        pushUndo();
-        treeData = JSON.parse(ev.target.result);
-        currentCustomKey = null;
-        selectNode(null);
-        updateMetaFields();
-        fitView();
-        toast('JSON imported: ' + (treeData.class_name || 'unknown'));
-      } catch (err) {
-        toast('Error: Invalid JSON');
+      if (applyImportedJSON(ev.target.result)) {
+        hideImportDialog();
       }
     };
     reader.readAsText(file);
     input.value = '';
   };
-  input.click();
+}
+
+function hideImportDialog() {
+  document.getElementById('import-overlay').classList.remove('show');
+}
+
+function doImportText() {
+  const text = document.getElementById('import-text-area').value.trim();
+  if (!text) { toast('Error: empty input'); return; }
+  if (applyImportedJSON(text)) {
+    hideImportDialog();
+  }
 }
 
 function exportImage() {
+  if (treeData.nodes.length === 0) {
+    toast('Error: empty tree, nothing to export');
+    return;
+  }
   // Create offscreen canvas with white background
   const padding = 60;
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
@@ -2249,6 +2475,9 @@ function exportImage() {
     offCtx.fill();
   }
 
+  // Compute auto-level for export
+  const _expDist = computeShortestPaths().dist;
+
   // Draw nodes
   for (const n of treeData.nodes) {
     const nx = n.x + offsetX;
@@ -2284,6 +2513,23 @@ function exportImage() {
     offCtx.font = 'bold 11px sans-serif';
     offCtx.textBaseline = 'top';
     offCtx.fillText(n.name || n.id, nx, ny + 2);
+
+    // Level badge (auto-computed)
+    const _expLv = _expDist[n.id];
+    const lx = nx - r * 0.7;
+    const ly = ny - r * 0.7;
+    offCtx.beginPath();
+    offCtx.arc(lx, ly, 9, 0, Math.PI * 2);
+    offCtx.fillStyle = '#0f3460';
+    offCtx.fill();
+    offCtx.strokeStyle = '#1a5276';
+    offCtx.lineWidth = 1;
+    offCtx.stroke();
+    offCtx.fillStyle = '#a0a0a0';
+    offCtx.font = '9px sans-serif';
+    offCtx.textBaseline = 'middle';
+    offCtx.textAlign = 'center';
+    offCtx.fillText(_expLv != null && _expLv !== Infinity ? 'Lv' + _expLv : '?', lx, ly);
   }
 
   // Title
@@ -2291,7 +2537,9 @@ function exportImage() {
   offCtx.font = 'bold 18px sans-serif';
   offCtx.textAlign = 'left';
   offCtx.textBaseline = 'top';
-  offCtx.fillText(treeData.class_name + ' - Talent Tree (Lv1-9)', padding, 15);
+  const _lvVals = Object.values(_expDist).filter(v => v !== Infinity);
+  const lvRange = _lvVals.length > 0 ? `Lv${Math.min(..._lvVals)}-${Math.max(..._lvVals)}` : '';
+  offCtx.fillText(treeData.class_name + ' - Talent Tree' + (lvRange ? ' (' + lvRange + ')' : ''), padding, 15);
 
   const link = document.createElement('a');
   link.download = treeData.class_id + '-talent-tree.png';
@@ -2334,15 +2582,16 @@ function validateDAG() {
   treeData.nodes.forEach(n => {
     idCounts[n.id] = (idCounts[n.id] || 0) + 1;
   });
+  const _t = (typeof I18N !== 'undefined') ? (k, fb) => I18N.t(k) || fb : (k, fb) => fb;
   const dupes = Object.entries(idCounts).filter(([_, c]) => c > 1);
   if (dupes.length > 0) {
     hasErrors = true;
     dupes.forEach(([id, count]) => {
-      results.push({ type: 'err', msg: `Duplicate ID: "${id}" appears ${count} times` });
+      results.push({ type: 'err', msg: _t('tt_val_dup_id', 'Duplicate ID') + `: "${id}" ×${count}` });
       errorNodes.add(id);
     });
   } else {
-    results.push({ type: 'ok', msg: 'No duplicate IDs' });
+    results.push({ type: 'ok', msg: _t('tt_val_no_dup', 'No duplicate IDs') });
   }
 
   // 2. Check for cycles (DFS)
@@ -2384,10 +2633,10 @@ function validateDAG() {
 
   if (hasCycle) {
     hasErrors = true;
-    results.push({ type: 'err', msg: `Cycle detected! Nodes in cycle: ${[...cycleNodes].join(', ')}` });
+    results.push({ type: 'err', msg: _t('tt_val_cycle', 'Cycle detected') + `: ${[...cycleNodes].join(', ')}` });
     cycleNodes.forEach(id => errorNodes.add(id));
   } else {
-    results.push({ type: 'ok', msg: 'No cycles detected (valid DAG)' });
+    results.push({ type: 'ok', msg: _t('tt_val_no_cycle', 'No cycles (valid DAG)') });
   }
 
   // 3. Check orphan nodes (no edges at all)
@@ -2400,22 +2649,22 @@ function validateDAG() {
   if (orphans.length > 0 && treeData.nodes.length > 1) {
     hasErrors = true;
     orphans.forEach(n => {
-      results.push({ type: 'warn', msg: `Orphan node (no edges): "${n.id}" (${n.name})` });
+      results.push({ type: 'warn', msg: _t('tt_val_orphan', 'Orphan node') + `: "${n.id}" (${n.name})` });
       errorNodes.add(n.id);
     });
   } else {
-    results.push({ type: 'ok', msg: 'No orphan nodes' });
+    results.push({ type: 'ok', msg: _t('tt_val_no_orphan', 'No orphan nodes') });
   }
 
   // 4. Check edges referencing missing nodes
   treeData.edges.forEach(e => {
     if (!treeData.nodes.find(n => n.id === e.from)) {
       hasErrors = true;
-      results.push({ type: 'err', msg: `Edge references missing source node: "${e.from}"` });
+      results.push({ type: 'err', msg: _t('tt_val_missing_src', 'Missing source node') + `: "${e.from}"` });
     }
     if (!treeData.nodes.find(n => n.id === e.to)) {
       hasErrors = true;
-      results.push({ type: 'err', msg: `Edge references missing target node: "${e.to}"` });
+      results.push({ type: 'err', msg: _t('tt_val_missing_tgt', 'Missing target node') + `: "${e.to}"` });
     }
   });
 
@@ -2426,7 +2675,7 @@ function validateDAG() {
   const container = document.getElementById('validation-results');
   let html = '';
   if (!hasErrors) {
-    html += '<p class="val-ok" style="font-size:14px;margin-bottom:12px;">All checks passed!</p>';
+    html += '<p class="val-ok" style="font-size:14px;margin-bottom:12px;">' + _t('tt_val_all_pass', 'All checks passed!') + '</p>';
   }
   results.forEach(r => {
     const cls = r.type === 'ok' ? 'val-ok' : r.type === 'err' ? 'val-err' : 'val-warn';
@@ -2523,7 +2772,7 @@ function reconstructPath(prev, targetId) {
 function updatePathAnalysis() {
   if (!pathModeActive) return;
 
-  const { dist, prev } = computeShortestPaths();
+  const { dist, prev } = getCachedPathData();
   const infoBar = document.getElementById('path-info-bar');
 
   // Build advancement info
@@ -2744,13 +2993,12 @@ if (typeof I18N !== 'undefined') {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// Async init: restore FS connection, then rebuild selector
+// Async init: check for saved FS handle, then rebuild selector
 (async function initFS() {
   if (FSBridge.isSupported()) {
-    const restored = await FSBridge.tryRestore();
-    if (restored) {
-      await loadFSTrees();
-    }
+    // Only check if a handle exists in IndexedDB (no permission request, no user gesture needed)
+    await FSBridge.checkSaved();
+    // If saved, button will show "恢复连接"; user clicks it to trigger requestPermission
   }
   FSBridge._updateUI();
   rebuildSelector();
