@@ -1,3 +1,7 @@
+> ⚠️ **归档说明**：本目录（`dev_doc/`）已归档。设计文档的正本已迁移至 Obsidian 知识库：
+> `D:\ShipOfTheseus\ShipOfTheseus-KB\01-Game-Design\`（GitHub: `392fyc/Ship_of_Theseus-KB`）
+> 此目录保留用于 git 历史追溯，请勿在此继续更新文档。
+
 # 战棋Roguelite — 游戏设计总纲
 
 ## 项目概览
