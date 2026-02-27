@@ -2668,6 +2668,27 @@ function validateDAG() {
     }
   });
 
+  // 5. Check requires referencing missing nodes
+  const nodeIds = new Set(treeData.nodes.map(n => n.id));
+  let badRequires = false;
+  treeData.nodes.forEach(n => {
+    if (!n.requires || !n.requires.trim()) return;
+    const reqIds = n.requires.split(/[,|]/).map(r => r.trim()).filter(r => r);
+    reqIds.forEach(reqId => {
+      if (!nodeIds.has(reqId)) {
+        badRequires = true;
+        results.push({ type: 'warn', msg: _t('tt_val_missing_req', 'Requires references missing node') + `: "${n.id}" → "${reqId}"` });
+        errorNodes.add(n.id);
+      }
+    });
+  });
+  if (!badRequires) {
+    const hasAnyRequires = treeData.nodes.some(n => n.requires && n.requires.trim());
+    if (hasAnyRequires) {
+      results.push({ type: 'ok', msg: _t('tt_val_requires_ok', 'All requires references valid') });
+    }
+  }
+
   // Display results
   validationErrorNodes = errorNodes;
   render();
@@ -2714,9 +2735,12 @@ function togglePathMode() {
 }
 
 function computeShortestPaths() {
-  // Find start nodes (nodes with no incoming edges = root nodes)
+  // Find start nodes (nodes with no incoming edges and no requires = root nodes)
   const hasIncoming = new Set();
   treeData.edges.forEach(e => hasIncoming.add(e.to));
+  treeData.nodes.forEach(n => {
+    if (n.requires && n.requires.trim()) hasIncoming.add(n.id);
+  });
   const startNodes = treeData.nodes.filter(n => !hasIncoming.has(n.id));
   if (startNodes.length === 0) return { dist: {}, prev: {} };
 
@@ -2725,6 +2749,19 @@ function computeShortestPaths() {
   treeData.nodes.forEach(n => { adj[n.id] = []; });
   treeData.edges.forEach(e => {
     if (adj[e.from]) adj[e.from].push(e.to);
+  });
+
+  // Add virtual edges from requires (each referenced node → requiring node)
+  // "A,B|C" → virtual edges from A, B, C to this node
+  treeData.nodes.forEach(n => {
+    if (n.requires && n.requires.trim()) {
+      const reqIds = n.requires.split(/[,|]/).map(r => r.trim()).filter(r => r);
+      reqIds.forEach(reqId => {
+        if (adj[reqId] && !adj[reqId].includes(n.id)) {
+          adj[reqId].push(n.id);
+        }
+      });
+    }
   });
 
   // Dijkstra-like BFS (cost = sum of node costs along path, including start node)
@@ -2754,6 +2791,26 @@ function computeShortestPaths() {
         pq.push({ id: vid, cost: newCost });
       }
     }
+  }
+
+  // Enforce AND constraints from requires
+  // "A,B|C" = A AND (B OR C): all AND-groups must have ≥1 reachable OR-option
+  let changed = true;
+  while (changed) {
+    changed = false;
+    treeData.nodes.forEach(n => {
+      if (!n.requires || !n.requires.trim() || dist[n.id] === Infinity) return;
+      const andGroups = n.requires.split(",").map(g => g.trim()).filter(g => g);
+      const satisfied = andGroups.every(group => {
+        const orOptions = group.split("|").map(r => r.trim()).filter(r => r);
+        return orOptions.some(r => dist[r] !== undefined && dist[r] !== Infinity);
+      });
+      if (!satisfied) {
+        dist[n.id] = Infinity;
+        prev[n.id] = null;
+        changed = true;
+      }
+    });
   }
 
   return { dist, prev };
