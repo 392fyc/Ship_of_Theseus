@@ -1,0 +1,35 @@
+{
+  "id": "soldier",
+  "name": "仆兵",
+  "base_stats": {
+    "hp": 100,
+    "attack": 13,
+    "magic": 3,
+    "physical_defense": 9,
+    "magical_defense": 6,
+    "hit": 80,
+    "evade": 8,
+    "crit": 8,
+    "crit_evade": 5,
+    "resistance": 5
+  },
+  "stat_growth": {
+    "hp": 10,
+    "attack": 3,
+    "magic": 1,
+    "physical_defense": 2,
+    "magical_defense": 1,
+    "hit": 2,
+    "evade": 1,
+    "crit": 1,
+    "crit_evade": 0,
+    "resistance": 0
+  },
+  "move": 3,
+  "speed": 8,
+  "vision": 3,
+  "block": false,
+  "attack_type": "melee",
+  "skill_ids": ["soldier_slash", "soldier_shield_bash", "soldier_rally"],
+  "description": "近战均衡的入门职业，兼顾输出与生存。"
+}

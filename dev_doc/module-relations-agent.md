@@ -13,14 +13,16 @@
 modules:
 
   01-turn-system:
-    description: "回合+速度轮动系统，控制行动顺序和回合推进。定义词汇（角色回合开始/结束 vs 回合开始/结束）、先制优先级、同速处理规则、Buff/Debuff时机规则"
+    description: "回合+速度轮动系统，控制行动顺序和回合推进。定义词汇（角色回合开始/结束 vs 回合开始/结束）、先制优先级、同速处理规则、Buff/Debuff时机规则、行动资源系统（移动力/攻击机会/迅捷行动）"
     depends_on: []
     depended_by:
       - 02-grid-and-map:  "回合推进触发地形效果/建筑效果"
       - 03-battle-calculation: "角色回合时序决定Buff/Debuff触发和扣减时机"
-      - 04-skills-and-range: "回合推进触发冷却恢复；Effect的duration扣减规则定义在01"
-      - 06-enemy-and-ai: "AI在自己行动时决策"
-      - 08-network: "GameAction封装所有行动指令"
+      - 04-skills-and-range: "回合推进触发冷却恢复；Effect的duration扣减规则定义在01；技能的action_cost和timing_constraint由行动资源系统定义"
+      - 05-class-system: "职业行动模式倾向受行动资源系统约束；Build技能选择需平衡行动资源分配"
+      - 06-enemy-and-ai: "AI在自己行动时决策；AI需理解行动资源约束来规划技能使用顺序"
+      - 08-network: "GameAction封装所有行动指令；行动资源状态需同步"
+      - 12-talent-tree: "天赋节点技能必须标注行动资源标签"
     key_exports:
       - current_round        # 当前回合数
       - action_queue         # 行动顺序队列（含先制排序）
@@ -28,6 +30,9 @@ modules:
       - priority_system      # 先制优先级（0/+1/+2）
       - timing_definitions   # 角色回合开始/结束 vs 回合开始/结束的定义
       - buff_debuff_timing   # 效果触发=角色回合开始, 持续扣减=角色回合结束
+      - action_resource_system  # 行动资源：移动力/攻击机会(1)/迅捷行动(1)
+      - action_cost_types    # 行动类型标签：move/standard/swift/reaction/free
+      - timing_constraints   # 释放时机约束：any/before_move/after_move/before_attack/after_attack
 
   02-grid-and-map:
     description: "网格系统三层结构（基础地形→特殊地形→建筑）、9种基础地形、攻击线阻挡（PEAK）、寻路、控制区(ZOC)移动惩罚。视野系统待独立文档"
@@ -66,19 +71,19 @@ modules:
       - damage_type_system    # 双轴分类：属性类型(physical/magical/holy/hybrid) × 攻击方式(melee/ranged/area)
 
   04-skills-and-range:
-    description: "技能定义、射程模式、AOE范围、冷却系统"
+    description: "技能定义（含action_cost行动资源标签、timing_constraint释放时机约束）、射程模式、AOE范围、冷却系统"
     depends_on:
-      - 01-turn-system: "回合推进恢复冷却"
+      - 01-turn-system: "回合推进恢复冷却；技能的action_cost和timing_constraint定义来自行动资源系统"
       - 02-grid-and-map: "射程基于网格距离计算"
       - 09-data-architecture: "从JSON加载技能数据"
     depended_by:
       - 03-battle-calculation: "技能倍率参与伤害公式"
       - 05-class-system: "职业定义可用技能列表"
-      - 06-enemy-and-ai: "AI选择使用哪个技能"
+      - 06-enemy-and-ai: "AI选择使用哪个技能；需根据行动资源约束规划技能释放"
     key_exports:
       - get_range_cells()   # 计算技能射程内的格子
       - get_area_cells()    # 计算AOE影响范围
-      - skill_data          # 技能数据字典
+      - skill_data          # 技能数据字典（含action_cost、timing_constraint字段）
 
   05-class-system:
     description: "8基础职业+16转职。职业决定属性/武器限制/初始技能/class_tags。反击系统。追击系统（全职业通用，剑士系深度特化）。Build = 职业+天赋树+随机技能+装备+遗物"
@@ -198,6 +203,7 @@ modules:
 | 修改内容 | 直接影响的文档 |
 |---------|--------------|
 | 回合流程/速度机制/先制/同速规则 | 01, 02(地形效果触发), 03(角色回合时序), 04(冷却和效果持续), 06(AI行动时机), 08(同步) |
+| 行动资源系统/行动类型标签 | 01(定义), 04(技能action_cost字段), 05(职业行动模式/Build规划), 06(AI技能释放规划), 12(天赋节点标签) |
 | Buff/Debuff时机规则 | 01(定义), 03(结算流程), 04(Effect定义) |
 | 地形/地图结构/控制区(ZOC) | 02, 03(地形修正/攻击线), 05(ZOC抵抗天赋), 06(AI寻路/ZOC评估), 09(地图JSON) |
 | 伤害/命中公式 | 03, 06(AI预估伤害) |

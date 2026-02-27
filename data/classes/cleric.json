@@ -1,0 +1,35 @@
+{
+  "id": "cleric",
+  "name": "牧师",
+  "base_stats": {
+    "hp": 70,
+    "attack": 5,
+    "magic": 15,
+    "physical_defense": 4,
+    "magical_defense": 12,
+    "hit": 80,
+    "evade": 5,
+    "crit": 3,
+    "crit_evade": 5,
+    "resistance": 12
+  },
+  "stat_growth": {
+    "hp": 7,
+    "attack": 0,
+    "magic": 4,
+    "physical_defense": 1,
+    "magical_defense": 2,
+    "hit": 2,
+    "evade": 1,
+    "crit": 0,
+    "crit_evade": 0,
+    "resistance": 1
+  },
+  "move": 2,
+  "speed": 7,
+  "vision": 3,
+  "block": false,
+  "attack_type": "ranged",
+  "skill_ids": ["cleric_heal", "cleric_bless", "cleric_holy_smite"],
+  "description": "治疗与增益核心，兼具有限的神圣打击能力。"
+}

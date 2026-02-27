@@ -1,0 +1,27 @@
+{
+  "id": "goblin_archer",
+  "name": "哥布林弓手",
+  "base_stats": {
+    "hp": 62,
+    "attack": 13,
+    "magic": 1,
+    "physical_defense": 4,
+    "magical_defense": 4,
+    "hit": 74,
+    "evade": 10,
+    "crit": 8,
+    "crit_evade": 3,
+    "resistance": 4
+  },
+  "move": 3,
+  "speed": 9,
+  "vision": 4,
+  "attack_type": "ranged",
+  "skill_ids": ["archer_aimed_shot", "archer_piercing_arrow"],
+  "ai_behavior": "AGGRESSIVE",
+  "loot_table": [
+    { "type": "gold", "amount": 10, "chance": 100 },
+    { "type": "material", "id": "rough_arrow", "amount": 2, "chance": 40 }
+  ],
+  "description": "远程输出单位，生存较弱但能压制后排。"
+}

@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/battle_manager.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/core/turn_manager.gd" id="2_turn_mgr"]
+
+[node name="BattleScene" type="Node2D"]
+
+[node name="BattleManager" type="Node" parent="."]
+script = ExtResource("1_script")
+
+[node name="TurnManager" type="Node" parent="BattleManager"]
+script = ExtResource("2_turn_mgr")
+
+[node name="HighlightLayer" type="Node2D" parent="BattleManager"]

@@ -1,0 +1,35 @@
+{
+  "id": "knight",
+  "name": "骑士",
+  "base_stats": {
+    "hp": 120,
+    "attack": 12,
+    "magic": 3,
+    "physical_defense": 14,
+    "magical_defense": 5,
+    "hit": 75,
+    "evade": 3,
+    "crit": 3,
+    "crit_evade": 8,
+    "resistance": 5
+  },
+  "stat_growth": {
+    "hp": 12,
+    "attack": 3,
+    "magic": 0,
+    "physical_defense": 3,
+    "magical_defense": 1,
+    "hit": 1,
+    "evade": 0,
+    "crit": 0,
+    "crit_evade": 1,
+    "resistance": 0
+  },
+  "move": 3,
+  "speed": 6,
+  "vision": 3,
+  "block": true,
+  "attack_type": "melee",
+  "skill_ids": ["knight_charge", "knight_heavy_strike", "knight_iron_wall"],
+  "description": "高防低速前排，依靠格挡与嘲讽承担队伍伤害。"
+}
