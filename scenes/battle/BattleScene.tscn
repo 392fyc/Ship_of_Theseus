@@ -1,14 +1,16 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://b2nulo4rfogvu"]
 
-[ext_resource type="Script" path="res://scripts/core/battle_manager.gd" id="1_script"]
-[ext_resource type="Script" path="res://scripts/core/turn_manager.gd" id="2_turn_mgr"]
+[ext_resource type="Script" uid="uid://o0qrfxjnopia" path="res://scripts/core/battle_manager.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://c4gq4p1lw5xhg" path="res://scripts/core/turn_manager.gd" id="2_turn_mgr"]
 
-[node name="BattleScene" type="Node2D"]
+[node name="BattleScene" type="Node2D" unique_id=369746598]
 
-[node name="BattleManager" type="Node" parent="."]
+[node name="BattleManager" type="Node" parent="." unique_id=1819233230]
 script = ExtResource("1_script")
 
-[node name="TurnManager" type="Node" parent="BattleManager"]
+[node name="TurnManager" type="Node" parent="BattleManager" unique_id=1192966648]
 script = ExtResource("2_turn_mgr")
 
-[node name="HighlightLayer" type="Node2D" parent="BattleManager"]
+[node name="TerrainLayer" type="Node2D" parent="BattleManager"]
+
+[node name="HighlightLayer" type="Node2D" parent="BattleManager" unique_id=1683005674]

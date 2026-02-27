@@ -29,7 +29,7 @@ static func get_move_range(grid: Grid, start: Vector2i,
 			if occ != null and occ.faction != unit_faction:
 				continue
 			var cost := cell.get_move_cost()
-			var remaining := cur.mp - cost
+			var remaining: int = cur.mp - cost
 			if remaining < 0:
 				continue
 			if remaining > reachable.get(nb, -1):

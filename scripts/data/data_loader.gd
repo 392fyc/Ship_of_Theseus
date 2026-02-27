@@ -1,4 +1,3 @@
-class_name DataLoader
 extends Node
 
 var classes:   Dictionary = {}
@@ -36,7 +35,7 @@ func _load_directory(path: String, target: Dictionary) -> void:
 	while filename != "":
 		if filename.ends_with(".json"):
 			var full_path := path + filename
-			var data := _parse_json_file(full_path)
+			var data = _parse_json_file(full_path)
 			if data is Dictionary and data.has("id"):
 				target[data["id"]] = data
 		filename = dir.get_next()
