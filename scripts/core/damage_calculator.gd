@@ -1,10 +1,12 @@
 class_name DamageCalculator
 extends RefCounted
+## ADR-005: FE-style additive base damage + multiplicative outer layers.
+## Block removed from base resolution flow.
+## Hit/Crit derived from DEX/SPD/LCK instead of independent attributes.
 
 
 class AttackResult:
 	var hit: bool = false
-	var blocked: bool = false
 	var crit: bool = false
 	var damage: int = 0
 	var defender_died: bool = false
@@ -18,63 +20,62 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	var damage_type: String = action_data.get("damage_type", "physical")
 	var skill_multiplier: float = action_data.get("skill_multiplier", 1.0)
 	var terrain_multiplier: float = action_data.get("terrain_multiplier", 1.0)
+	var relic_multiplier: float = action_data.get("relic_multiplier", 1.0)
+	var final_multiplier: float = action_data.get("final_multiplier", 1.0)
 	var pure_atk_source: String = action_data.get("pure_atk_source", "phys")
 
-	# M5: weapon_power 暂无武器系统，默认 1.0
-	var weapon_power: float = action_data.get("weapon_power", 1.0)
-	var phys_power: float = weapon_power
-	var mag_power: float = action_data.get("mag_power", 1.0)
-	var armor_resist: float = action_data.get("armor_resist", 1.0)
-	var magic_resist: float = action_data.get("magic_resist", 1.0)
+	# Weapon stats (from action_data; defaults for demo without weapon system)
+	var weapon_might: int = action_data.get("weapon_might", 5)
+	var weapon_hit: int = action_data.get("weapon_hit", 90)
+	var weapon_crit: int = action_data.get("weapon_crit", 0)
+	var terrain_evade_bonus: int = action_data.get("terrain_evade_bonus", 0)
 
-	# ── 步骤 1：命中判定 ──────────────────────────────
-	var hit_rate := clampf(
-		(attacker.stats.hit - defender.stats.evade) / 100.0,
-		0.2, 1.0)
+	# ── Step 1: Hit determination ───────────────────────
+	# Hit = weapon_hit + DEX×2 + LCK×0.5
+	# Avoid = SPD×2 + LCK×0.5 + terrain_evade
+	var hit_value: int = attacker.stats.get_hit(weapon_hit)
+	var avoid_value: int = defender.stats.get_avoid(terrain_evade_bonus)
+	var hit_rate: float = clampf((hit_value - avoid_value) / 100.0, 0.2, 1.0)
 	if randf() > hit_rate:
 		return result  # miss → hit=false
 
 	result.hit = true
 
-	# ── 步骤 2：格挡判定（pure 跳过）─────────────────
-	var is_pure := (damage_type == "pure")
-	if not is_pure and defender.stats.block > 0:
-		if randf() < defender.stats.block / 100.0:
-			result.blocked = true
+	# ── Step 2: Crit determination ──────────────────────
+	# Crit = weapon_crit + DEX/2;  Dodge = LCK
+	var is_pure: bool = (damage_type == "pure")
+	var allow_crit: bool = true
+	if is_pure and not action_data.get("enable_pure_crit", false):
+		allow_crit = false
+	if allow_crit:
+		var crit_value: int = attacker.stats.get_crit(weapon_crit)
+		var dodge_value: int = defender.stats.get_crit_avoid()
+		var crit_rate: float = maxf(0.0, (crit_value - dodge_value) / 100.0)
+		if randf() < crit_rate:
+			result.crit = true
 
-	# ── 步骤 3：暴击判定（格挡成功时跳过）────────────
-	if not result.blocked:
-		var allow_crit := true
-		if is_pure and not action_data.get("enable_pure_crit", false):
-			allow_crit = false
-		if allow_crit:
-			var crit_rate := maxf(0.0,
-				(attacker.stats.crit - defender.stats.crit_evade) / 100.0)
-			if randf() < crit_rate:
-				result.crit = true
-
-	# ── 步骤 4-5：计算并应用最终伤害 ─────────────────
-	var base_damage := _calc_base_damage(
+	# ── Step 3: Base damage (additive, FE-style) ────────
+	var base_damage: float = _calc_base_damage(
 		attacker, defender, damage_type,
-		phys_power, mag_power, armor_resist, magic_resist,
-		weapon_power, pure_atk_source)
+		weapon_might, pure_atk_source)
 
+	# ── Step 4: Apply multiplicative layers ─────────────
 	var final_dmg: float = base_damage * skill_multiplier * terrain_multiplier
 
 	if result.crit:
-		var crit_mult := 1.5
+		var crit_mult: float = 1.5
 		if not is_pure:
 			crit_mult += action_data.get("crit_damage_bonus", 0.0)
 		final_dmg *= crit_mult
 
-	if result.blocked:
-		final_dmg *= 0.3
+	final_dmg *= relic_multiplier * final_multiplier
 
+	# ── Step 5: Apply damage ────────────────────────────
 	result.damage = maxi(0, roundi(final_dmg))
 	defender.take_damage(result.damage, damage_type)
 	result.defender_died = not defender.stats.is_alive()
 
-	# ── 步骤 6-7：附加效果（M5 留空）─────────────────
+	# ── Step 6-7: On-hit / post-damage effects (reserved) ──
 	pass
 
 	return result
@@ -82,32 +83,35 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 
 static func _calc_base_damage(attacker: Unit, defender: Unit,
 		damage_type: String,
-		phys_power: float, mag_power: float,
-		armor_resist: float, magic_resist: float,
-		weapon_power: float, pure_atk_source: String) -> float:
+		weapon_might: int, pure_atk_source: String) -> float:
+	## ADR-005 §4.2: Additive base damage formula.
+	## physical:  max(1, STR + weapon_might - DEF)
+	## magical:   max(1, MAG + tome_might  - RES)
+	## pure:      [source] + weapon_might  (ignores defense)
+	## hybrid:    max(1, (STR+MAG) + hybrid_might - min(DEF,RES))  ⚠️ TBD (ADR-006)
 	var base: float = 0.0
 	match damage_type:
 		"physical":
-			base = attacker.stats.phys_atk * phys_power \
-				 - defender.stats.physical_defense * armor_resist
+			base = float(attacker.stats.str_attr + weapon_might \
+				 - defender.stats.def_attr)
 		"magical":
-			base = attacker.stats.mag_atk * mag_power \
-				 - defender.stats.magical_defense * magic_resist
+			base = float(attacker.stats.mag + weapon_might \
+				 - defender.stats.res)
 		"pure":
 			var raw: float = 0.0
 			match pure_atk_source:
 				"phys":
-					raw = attacker.stats.phys_atk
+					raw = float(attacker.stats.str_attr)
 				"mag":
-					raw = attacker.stats.mag_atk
+					raw = float(attacker.stats.mag)
 				"sum":
-					raw = attacker.stats.phys_atk + attacker.stats.mag_atk
-			base = raw * weapon_power
+					raw = float(attacker.stats.str_attr + attacker.stats.mag)
+			base = raw + float(weapon_might)
+			return base  # pure ignores defense, no max(1) floor needed
 		"hybrid":
-			var hybrid_power := (phys_power + mag_power) / 2.0
-			var both_atk: float = attacker.stats.phys_atk + attacker.stats.mag_atk
-			var both_def: float = minf(
-				defender.stats.physical_defense * armor_resist,
-				defender.stats.magical_defense * magic_resist)
-			base = both_atk * hybrid_power - both_def
-	return maxf(0.0, base)
+			# ⚠️ TBD — placeholder per ADR-005 §4.2. Awaiting ADR-006.
+			var both_atk: float = float(attacker.stats.str_attr + attacker.stats.mag)
+			var weaker_def: float = float(mini(
+				defender.stats.def_attr, defender.stats.res))
+			base = both_atk + float(weapon_might) - weaker_def
+	return maxf(1.0, base)

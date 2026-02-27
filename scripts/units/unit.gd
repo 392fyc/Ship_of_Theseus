@@ -38,10 +38,14 @@ func setup(class_data: Dictionary) -> void:
 	unit_name = class_data.get("name", "Unit")
 	stats = UnitStats.new()
 	var stat_dict: Dictionary = class_data.get("base_stats", {}).duplicate()
-	for key in ["speed", "move", "vision", "block"]:
+	# MOV and VIS are top-level fields in the JSON
+	for key: String in ["MOV", "VIS"]:
 		if class_data.has(key):
 			stat_dict[key] = class_data[key]
 	stats.load_from_dict(stat_dict)
+	# Load growth rates if present (class JSON has them, enemy JSON doesn't)
+	if class_data.has("growth_rates"):
+		stats.load_growth_rates(class_data["growth_rates"])
 	_update_health_bar()
 
 

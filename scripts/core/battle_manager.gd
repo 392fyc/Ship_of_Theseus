@@ -175,7 +175,7 @@ func _select_unit(unit: Unit) -> void:
 	selected_unit = unit
 	input_state = InputState.UNIT_SELECTED
 	_move_range = Pathfinding.get_move_range(
-		grid, unit.grid_position, unit.stats.move, unit.faction)
+		grid, unit.grid_position, unit.stats.mov, unit.faction)
 	_move_range.erase(unit.grid_position)
 	_show_move_highlights()
 
@@ -307,7 +307,7 @@ func _execute_attack_action(action: GameAction) -> void:
 	if allow_pursuit and result.hit \
 			and attacker.stats.is_alive() and defender.stats.is_alive():
 		var pursuit_chance := clampf(
-			(attacker.stats.speed - defender.stats.speed) * 0.1, 0.0, 1.0)
+			(attacker.stats.spd - defender.stats.spd) * 0.1, 0.0, 1.0)
 		if randf() < pursuit_chance:
 			var pursuit_data := {
 				"damage_type": data.get("damage_type", "physical"),
@@ -328,9 +328,9 @@ func _is_adjacent(a: Unit, b: Unit) -> bool:
 func _log_attack(attacker: Unit, defender: Unit,
 		result: DamageCalculator.AttackResult, tag: String) -> void:
 	var prefix := (tag + ": ") if tag != "" else ""
-	print("[Attack] %s%s→%s | hit=%s | blocked=%s | crit=%s | dmg=%d" % [
+	print("[Attack] %s%s→%s | hit=%s | crit=%s | dmg=%d" % [
 		prefix, attacker.unit_name, defender.unit_name,
-		result.hit, result.blocked, result.crit, result.damage])
+		result.hit, result.crit, result.damage])
 
 
 # ── Terrain rendering ────────────────────────────────
@@ -402,7 +402,7 @@ func _render_terrain() -> void:
 				terrain_layer.add_child(label)
 
 
-# ── Deduction Data (M5) ─────────────────────────────
+# ── Deduction Data (M6) ─────────────────────────────
 
 func _print_deduction_data() -> void:
 	var soldier: Unit = null
@@ -415,38 +415,39 @@ func _print_deduction_data() -> void:
 	if not soldier or not goblin:
 		return
 
-	var s_base_dmg := maxi(0, soldier.stats.phys_atk - goblin.stats.physical_defense)
-	var g_base_dmg := maxi(0, goblin.stats.phys_atk - soldier.stats.physical_defense)
-	var s_hit_rate := clampi(soldier.stats.hit - goblin.stats.evade, 20, 100)
-	var g_hit_rate := clampi(goblin.stats.hit - soldier.stats.evade, 20, 100)
+	# ADR-005 additive formula: base = max(1, STR + weapon_might - DEF)
+	var weapon_might: int = 5  # Iron Sword default
+	var s_base_dmg := maxi(1, soldier.stats.str_attr + weapon_might - goblin.stats.def_attr)
+	var g_base_dmg := maxi(1, goblin.stats.str_attr + weapon_might - soldier.stats.def_attr)
 
-	var s_ttk_clean: int = ceili(float(goblin.stats.max_hp) / s_base_dmg) if s_base_dmg > 0 else 999
+	var s_hit_rate := clampi(soldier.stats.get_hit(90) - goblin.stats.get_avoid(), 20, 100)
+	var g_hit_rate := clampi(goblin.stats.get_hit(75) - soldier.stats.get_avoid(), 20, 100)
+
+	var s_ttk_clean: int = ceili(float(goblin.stats.max_hp) / s_base_dmg)
 	var s_ttk_expected: float = ceil(float(s_ttk_clean) / (s_hit_rate / 100.0))
-	var g_ttk_clean: int = ceili(float(soldier.stats.max_hp) / g_base_dmg) if g_base_dmg > 0 else 999
+	var g_ttk_clean: int = ceili(float(soldier.stats.max_hp) / g_base_dmg)
 	var g_ttk_expected: float = ceil(float(g_ttk_clean) / (g_hit_rate / 100.0))
 
+	var s_pursuit := clampf((soldier.stats.spd - goblin.stats.spd) * 0.1, 0.0, 1.0)
+
 	print("[DEDUCTION_DATA] ========================================")
-	print("[DEDUCTION_DATA] M5 属性推演基础数据")
+	print("[DEDUCTION_DATA] M6 ADR-005 属性推演 (FE additive)")
 	print("[DEDUCTION_DATA] ----------------------------------------")
-	print("[DEDUCTION_DATA] soldier: phys_atk=%d, def=%d, hit=%d, crit=%d, speed=%d, HP=%d" % [
-		soldier.stats.phys_atk, soldier.stats.physical_defense,
-		soldier.stats.hit, soldier.stats.crit, soldier.stats.speed, soldier.stats.max_hp])
-	print("[DEDUCTION_DATA] goblin:  phys_atk=%d, def=%d, evade=%d, block=%d, speed=%d, HP=%d" % [
-		goblin.stats.phys_atk, goblin.stats.physical_defense,
-		goblin.stats.evade, goblin.stats.block, goblin.stats.speed, goblin.stats.max_hp])
+	print("[DEDUCTION_DATA] soldier: STR=%d DEX=%d SPD=%d LCK=%d DEF=%d RES=%d HP=%d" % [
+		soldier.stats.str_attr, soldier.stats.dex, soldier.stats.spd,
+		soldier.stats.lck, soldier.stats.def_attr, soldier.stats.res, soldier.stats.max_hp])
+	print("[DEDUCTION_DATA] goblin:  STR=%d DEX=%d SPD=%d LCK=%d DEF=%d RES=%d HP=%d" % [
+		goblin.stats.str_attr, goblin.stats.dex, goblin.stats.spd,
+		goblin.stats.lck, goblin.stats.def_attr, goblin.stats.res, goblin.stats.max_hp])
 	print("[DEDUCTION_DATA] ----------------------------------------")
-	print("[DEDUCTION_DATA] soldier→goblin 单次基础伤害: %d" % s_base_dmg)
-	print("[DEDUCTION_DATA] soldier 命中率: %d%%" % s_hit_rate)
-	print("[DEDUCTION_DATA] soldier TTK(全命中): %d 回合" % s_ttk_clean)
-	print("[DEDUCTION_DATA] soldier TTK(期望): %.1f 回合" % s_ttk_expected)
+	print("[DEDUCTION_DATA] soldier→goblin base(STR+might-DEF): %d" % s_base_dmg)
+	print("[DEDUCTION_DATA] soldier hit rate: %d%%" % s_hit_rate)
+	print("[DEDUCTION_DATA] soldier pursuit chance: %.0f%%" % (s_pursuit * 100))
+	print("[DEDUCTION_DATA] soldier TTK(clean): %d rounds" % s_ttk_clean)
+	print("[DEDUCTION_DATA] soldier TTK(expected): %.1f rounds" % s_ttk_expected)
 	print("[DEDUCTION_DATA] ----------------------------------------")
-	print("[DEDUCTION_DATA] goblin→soldier 单次基础伤害: %d" % g_base_dmg)
-	print("[DEDUCTION_DATA] goblin 命中率: %d%%" % g_hit_rate)
-	print("[DEDUCTION_DATA] goblin TTK(全命中): %d 回合" % g_ttk_clean)
-	print("[DEDUCTION_DATA] goblin TTK(期望): %.1f 回合" % g_ttk_expected)
-	print("[DEDUCTION_DATA] ----------------------------------------")
-	print("[DEDUCTION_DATA] 防御比率 goblin.def/soldier.atk = %.0f%%" % (
-		goblin.stats.physical_defense * 100.0 / soldier.stats.phys_atk))
-	print("[DEDUCTION_DATA] 防御比率 soldier.def/goblin.atk = %.0f%%" % (
-		soldier.stats.physical_defense * 100.0 / goblin.stats.phys_atk))
+	print("[DEDUCTION_DATA] goblin→soldier base(STR+might-DEF): %d" % g_base_dmg)
+	print("[DEDUCTION_DATA] goblin hit rate: %d%%" % g_hit_rate)
+	print("[DEDUCTION_DATA] goblin TTK(clean): %d rounds" % g_ttk_clean)
+	print("[DEDUCTION_DATA] goblin TTK(expected): %.1f rounds" % g_ttk_expected)
 	print("[DEDUCTION_DATA] ========================================")

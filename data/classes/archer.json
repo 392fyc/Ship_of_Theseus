@@ -2,34 +2,31 @@
   "id": "archer",
   "name": "弓箭手",
   "base_stats": {
-    "hp": 75,
-    "phys_atk": 8,
-    "mag_atk": 4,
-    "physical_defense": 5,
-    "magical_defense": 5,
-    "hit": 78,
-    "evade": 12,
-    "crit": 14,
-    "crit_evade": 5,
-    "resistance": 5
+    "HP": 24,
+    "STR": 7,
+    "MAG": 2,
+    "DEX": 8,
+    "SPD": 9,
+    "LCK": 5,
+    "DEF": 4,
+    "RES": 3
   },
-  "stat_growth": {
-    "hp": 7,
-    "attack": 4,
-    "magic": 0,
-    "physical_defense": 1,
-    "magical_defense": 1,
-    "hit": 2,
-    "evade": 2,
-    "crit": 2,
-    "crit_evade": 0,
-    "resistance": 0
+  "growth_rates": {
+    "HP": 40,
+    "STR": 40,
+    "MAG": 5,
+    "DEX": 50,
+    "LCK": 35,
+    "DEF": 20,
+    "RES": 15
   },
-  "move": 3,
-  "speed": 10,
-  "vision": 4,
-  "block": false,
+  "MOV": 3,
+  "VIS": 4,
   "attack_type": "ranged",
-  "skill_ids": ["archer_aimed_shot", "archer_piercing_arrow", "archer_eagle_eye"],
+  "skill_ids": [
+    "archer_aimed_shot",
+    "archer_piercing_arrow",
+    "archer_eagle_eye"
+  ],
   "description": "高命中潜力的远程玻璃炮，依赖站位和先手压制。"
 }

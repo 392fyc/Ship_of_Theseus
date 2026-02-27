@@ -2,26 +2,35 @@
   "id": "goblin_melee",
   "name": "哥布林战士",
   "base_stats": {
-    "hp": 82,
-    "phys_atk": 7,
-    "mag_atk": 2,
-    "physical_defense": 7,
-    "magical_defense": 4,
-    "hit": 72,
-    "evade": 7,
-    "crit": 4,
-    "crit_evade": 3,
-    "resistance": 4
+    "HP": 22,
+    "STR": 6,
+    "MAG": 2,
+    "DEX": 3,
+    "SPD": 5,
+    "LCK": 1,
+    "DEF": 4,
+    "RES": 2
   },
-  "move": 3,
-  "speed": 7,
-  "vision": 3,
+  "MOV": 3,
+  "VIS": 3,
   "attack_type": "melee",
-  "skill_ids": ["soldier_slash", "soldier_shield_bash"],
+  "skill_ids": [
+    "soldier_slash",
+    "soldier_shield_bash"
+  ],
   "ai_behavior": "AGGRESSIVE",
   "loot_table": [
-    { "type": "gold", "amount": 8, "chance": 100 },
-    { "type": "material", "id": "goblin_tooth", "amount": 1, "chance": 35 }
+    {
+      "type": "gold",
+      "amount": 8,
+      "chance": 100
+    },
+    {
+      "type": "material",
+      "id": "goblin_tooth",
+      "amount": 1,
+      "chance": 35
+    }
   ],
   "description": "近战哥布林，数值略低于同级玩家前排。"
 }

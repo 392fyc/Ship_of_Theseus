@@ -62,8 +62,8 @@ func _advance() -> void:
 
 # speed desc → priority desc → player first
 static func _compare_initiative(a: Unit, b: Unit) -> bool:
-	if a.stats.speed != b.stats.speed:
-		return a.stats.speed > b.stats.speed
+	if a.stats.spd != b.stats.spd:
+		return a.stats.spd > b.stats.spd
 	if a.priority != b.priority:
 		return a.priority > b.priority
 	if a.faction != b.faction:
