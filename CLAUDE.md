@@ -6,9 +6,23 @@
 
 ---
 
+## AI 工具与模型版本查询准则
+
+**禁止使用训练数据判断当前 AI 模型版本。** AI 模型更新频率极高，训练截止日期后的新模型无法通过训练数据获知。
+
+**强制规则**：当对话涉及以下内容时，**必须先联网搜索，再作答**：
+- 任何 AI 模型的最新版本（Gemini、Claude、GPT、Llama 等）
+- 任何工具/库/框架的当前版本号
+- 任何发布日期、功能特性的时效性信息
+
+**违反示例（禁止）**：「目前 Google 最新模型是 Gemini 2.5 Pro」
+**正确示例**：先 WebSearch「Gemini latest model 2026」，再根据搜索结果回答
+
+---
+
 ## 项目概述
 
-战棋RPG + Roguelite + 城镇建设，Godot 4 (GDScript)。
+战棋RPG + Roguelite + 城镇建设，Godot 4.6 (GDScript)。
 支持单机1人 / 联机1-4人。当前阶段：设计文档 + 设计工具已完成，尚无游戏代码。
 
 **核心差异化**：城镇建设融入战棋Roguelite，玩家在角色强化和建筑投资之间做经济抉择。
@@ -17,7 +31,7 @@
 
 | 层 | 技术 |
 |---|---|
-| 引擎 | Godot 4.x (GDScript) |
+| 引擎 | Godot 4.6 (GDScript) |
 | 数据 | JSON驱动（游戏内容全JSON，代码只处理逻辑） |
 | 联机 | Godot High-Level Multiplayer API, Host-Client |
 | 架构 | GameAction指令驱动（联机广播同步） |
@@ -178,24 +192,28 @@ Layer 0 (数据层):   09-数据架构
 - 建筑摧毁→废墟，不恢复基础地形效果
 - **控制区(ZOC)**：敌方正交邻接→移动力-2（仅离开时触发，不叠加）
 
-### 伤害计算 (→ dev_doc/03)
+### 伤害计算 (→ KB: battle-calculation.md)
 
 ```
 最终伤害 = 基础伤害 × 技能倍率 × 特殊地形修正 × 暴击修正 × 格挡修正 × 最终伤害增减
-基础伤害 = 攻击力 × 武器威力 - 防御力 × 护甲抵抗  (最低0)
+physical基础 = phys_atk × phys_power - def × armor_resist  (最低0)
+magical基础  = mag_atk  × mag_power  - magic_def × magic_resist  (最低0)
+pure基础     = [skill.pure_atk_source] × weapon_power  (无视防御，受地形修正)
+hybrid基础   = (phys_atk + mag_atk) × (phys_power + mag_power)/2
+               - min(def × armor_resist, magic_def × magic_resist)  (最低0)
 命中率 = hit + weapon.hit + skill_bonus - evade - terrain_evade (20%~100%)
-暴击率 = (crit + weapon.crit + skill_bonus - crit_evade) × 抵抗率 (0%~50%, 1.5x)
+暴击率 = (crit + weapon.crit + skill_bonus - crit_evade) × 抵抗率 (0%起，无上限，1.5x)
 ```
 格挡：固定（不成长），70%减免，**与暴击互斥**
 
 ### 伤害类型双轴
 
-| 属性类型 | 防御 | 暴击/格挡 |
-|---|---|---|
-| physical | 物防×护甲 | Yes |
-| magical | 魔防×魔抗 | Yes |
-| holy | 无视防御 | No |
-| hybrid | 取低者 | Yes |
+| 属性类型 | 防御 | 暴击/格挡 | 说明 |
+|---|---|---|---|
+| physical | 物防×护甲 | Yes | 仅 phys_atk 生效 |
+| magical | 魔防×魔抗 | Yes | 仅 mag_atk 生效 |
+| pure | 无视全部防御 | 格挡No；暴击固定1.5×不受加成 | 稀有；来源由技能 pure_atk_source 声明 |
+| hybrid | min(物防,魔防) | Yes（含倍率加成） | phys_atk+mag_atk 同时生效；武器倍率取平均 |
 
 攻击方式：`melee`(1格) / `ranged`(>1格) / `area`(AOE)
 
@@ -204,7 +222,7 @@ Layer 0 (数据层):   09-数据架构
 ```
 1. 命中(20%~100%) → miss跳到结束
 2. 格挡 → 成功=0.3修正, 跳过暴击
-3. 暴击(0%~50%) → 仅格挡失败时判定
+3. 暴击(0%起无上限) → 仅格挡失败时判定
 4. 计算伤害 → 5. 应用伤害 → 6. 命中后附加效果 → 7. 伤害后附加效果
 8. 反击(attack_type!=area, 存活, 射程可达, 未控制) → 走1-7, 不触发反击/追击
 9. 追击((atk.speed-def.speed)×10%, 0%~100%, 需原始命中) → 走1-7, 不触发反击/追击
@@ -235,7 +253,8 @@ Layer 0 (数据层):   09-数据架构
 ### 常见陷阱
 
 - 格挡和暴击同时生效 → **互斥**
-- holy伤害触发暴击/格挡 → **无视**
+- pure伤害触发格挡 → **无视**；pure暴击倍率受加成提升 → **固定1.5×，不受加成**
+- hybrid使用单一atk计算 → **phys_atk + mag_atk 同时生效**，武器倍率取平均
 - 反击触发反击 → **不触发**，也不触发追击
 - 追击触发追击或反击 → **不触发**
 - area攻击触发反击 → **不触发**
