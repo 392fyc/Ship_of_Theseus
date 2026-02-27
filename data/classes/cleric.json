@@ -3,8 +3,8 @@
   "name": "牧师",
   "base_stats": {
     "hp": 70,
-    "attack": 5,
-    "magic": 15,
+    "phys_atk": 4,
+    "mag_atk": 10,
     "physical_defense": 4,
     "magical_defense": 12,
     "hit": 80,

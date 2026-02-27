@@ -3,8 +3,8 @@
   "name": "哥布林战士",
   "base_stats": {
     "hp": 82,
-    "attack": 10,
-    "magic": 2,
+    "phys_atk": 7,
+    "mag_atk": 2,
     "physical_defense": 7,
     "magical_defense": 4,
     "hit": 72,

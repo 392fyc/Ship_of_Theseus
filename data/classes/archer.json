@@ -3,8 +3,8 @@
   "name": "弓箭手",
   "base_stats": {
     "hp": 75,
-    "attack": 16,
-    "magic": 3,
+    "phys_atk": 8,
+    "mag_atk": 4,
     "physical_defense": 5,
     "magical_defense": 5,
     "hit": 78,

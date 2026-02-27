@@ -28,6 +28,10 @@ func start() -> void:
 	_advance()
 
 
+func force_advance() -> void:
+	_advance()
+
+
 func end_current_turn() -> void:
 	if current_unit == null:
 		return

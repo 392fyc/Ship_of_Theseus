@@ -3,8 +3,8 @@
   "name": "哥布林弓手",
   "base_stats": {
     "hp": 62,
-    "attack": 13,
-    "magic": 1,
+    "phys_atk": 5,
+    "mag_atk": 5,
     "physical_defense": 4,
     "magical_defense": 4,
     "hit": 74,

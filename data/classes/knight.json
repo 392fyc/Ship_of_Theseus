@@ -3,8 +3,8 @@
   "name": "骑士",
   "base_stats": {
     "hp": 120,
-    "attack": 12,
-    "magic": 3,
+    "phys_atk": 11,
+    "mag_atk": 2,
     "physical_defense": 14,
     "magical_defense": 5,
     "hit": 75,

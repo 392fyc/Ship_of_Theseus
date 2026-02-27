@@ -84,6 +84,7 @@ func reset_turn_state() -> void:
 
 
 func mark_done() -> void:
+	has_attacked = true
 	sprite.modulate = Color(0.5, 0.5, 0.5)
 
 

@@ -3,8 +3,8 @@
   "name": "魔法师",
   "base_stats": {
     "hp": 65,
-    "attack": 5,
-    "magic": 20,
+    "phys_atk": 3,
+    "mag_atk": 12,
     "physical_defense": 4,
     "magical_defense": 10,
     "hit": 82,
