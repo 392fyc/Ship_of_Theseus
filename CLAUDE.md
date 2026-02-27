@@ -53,6 +53,11 @@
 - class_name 与 autoload 同名 → 冲突，autoload 脚本**移除 class_name**
 - Variant 类型推断不稳定 → **显式声明变量类型**
 
+### KB 写入标准
+- obsidian_patch_content 对中文标题失效 → KB 所有标题**使用英文**
+- 每个英文标题下第一行添加 `> 原：中文标题` 备注
+- 今后所有 KB 写入**必须遵循此格式**
+
 ### AI 工具查询
 - **禁止用训练数据判断 AI 模型版本**。涉及模型版本号时，必须先 WebSearch 再作答
 
