@@ -1,0 +1,16 @@
+{
+  "id": "knight_charge",
+  "name": "Charge",
+  "damage_type": "physical",
+  "power": 110,
+  "hit_bonus": 5,
+  "range": { "type": "line", "min": 2, "max": 3 },
+  "area": { "type": "single", "size": 0 },
+  "cooldown": 2,
+  "action_cost": "movement",
+  "effects": [
+    { "type": "taunt", "chance": 100, "duration": 1, "value": 1 }
+  ],
+  "tags": ["mobility", "engage"],
+  "description": "沿直线突进并攻击目标，附带嘲讽。"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "archer_eagle_eye",
+  "name": "Eagle Eye",
+  "damage_type": "physical",
+  "power": 0,
+  "hit_bonus": 0,
+  "range": { "type": "self", "min": 0, "max": 0 },
+  "area": { "type": "single", "size": 0 },
+  "cooldown": 3,
+  "action_cost": "swift",
+  "effects": [
+    { "type": "vision_up", "chance": 100, "duration": 2, "value": 1 },
+    { "type": "hit_up", "chance": 100, "duration": 2, "value": 15 }
+  ],
+  "tags": ["buff", "passive_like"],
+  "description": "短时间提升视野与命中。"
+}

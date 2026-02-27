@@ -1,0 +1,14 @@
+{
+  "id": "archer_piercing_arrow",
+  "name": "Piercing Arrow",
+  "damage_type": "physical",
+  "power": 95,
+  "hit_bonus": 0,
+  "range": { "type": "line", "min": 2, "max": 4 },
+  "area": { "type": "line", "size": 4 },
+  "cooldown": 2,
+  "action_cost": "standard",
+  "effects": [],
+  "tags": ["ranged", "pierce"],
+  "description": "沿直线贯穿多个目标的箭矢。"
+}

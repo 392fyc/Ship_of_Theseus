@@ -1,0 +1,16 @@
+{
+  "id": "mage_fireball",
+  "name": "Fireball",
+  "damage_type": "magical",
+  "power": 120,
+  "hit_bonus": 10,
+  "range": { "type": "diamond", "min": 2, "max": 4 },
+  "area": { "type": "diamond", "size": 1 },
+  "cooldown": 2,
+  "action_cost": "standard",
+  "effects": [
+    { "type": "burn", "chance": 35, "duration": 2, "value": 8 }
+  ],
+  "tags": ["magic", "aoe", "fire"],
+  "description": "投掷火球并在小范围内爆炸。"
+}
