@@ -16,8 +16,9 @@ desktop.ini
 # AI Agent 运行时配置（本地）
 .claude/*
 !.claude/skills/
-.cursor/
-# 注：CLAUDE.md / AGENTS.md / .claude/skills/ 为项目级 AI 指令，纳入版本控制
+.cursor/*
+!.cursor/rules/
+# 注：CLAUDE.md / AGENTS.md / .cursorrules / .claude/skills/ / .cursor/rules/ 为项目级 AI 指令，纳入版本控制
 
 # 编辑器 workspace 数据（天赋树编辑器输出等）
 /data/talent-tree/
