@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://5882ghyxqhs3"]
+
+[ext_resource type="Script" uid="uid://jnkv5stargen" path="res://scenes/playground/terrain_highlight_playground.gd" id="1_script"]
+
+[node name="TerrainHighlightPlayground" type="Node2D" unique_id=1389521861]
+script = ExtResource("1_script")
