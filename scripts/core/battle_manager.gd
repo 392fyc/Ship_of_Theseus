@@ -7,9 +7,11 @@ extends Node
 
 var grid: Grid = Grid.new()
 var units: Array = []
+var battle_active: bool = false
 
 signal battle_started
 signal unit_action_completed(unit: Unit)
+signal unit_killed(unit: Unit)
 
 enum InputState { IDLE, UNIT_SELECTED, ATTACK_SELECT, ANIMATING }
 var input_state := InputState.IDLE
@@ -20,32 +22,35 @@ var _attack_cells: Array[Vector2i] = []
 
 
 func _ready() -> void:
-	setup_battle("forest_01")
-	_render_terrain()
-	spawn_unit("soldier", Vector2i(1, 1), "player")
-	spawn_unit("goblin_melee", Vector2i(5, 5), "enemy")
-	print("[Test] Units spawned: ", units.size())
-
 	turn_manager.turn_started.connect(_on_turn_started)
 	turn_manager.turn_ended.connect(_on_turn_ended)
 	turn_manager.round_ended.connect(_on_round_ended)
 
+
+# ── Public API (called by battle_scene.gd) ───────────
+
+func initialize_battle(map_id: String) -> void:
+	var map_data: Dictionary = DataLoader.maps.get(map_id, {})
+	if map_data.is_empty():
+		push_error("[BattleManager] Map not found: " + map_id)
+		return
+	grid.initialize(map_data)
+	_render_terrain()
+	battle_started.emit()
+
+
+func start_battle() -> void:
+	battle_active = true
 	var typed_units: Array[Unit] = []
 	for u in units:
 		typed_units.append(u)
 	turn_manager.add_units(typed_units)
 	turn_manager.start()
 
-	_print_deduction_data()
 
-
-func setup_battle(map_id: String) -> void:
-	var map_data: Dictionary = DataLoader.maps.get(map_id, {})
-	if map_data.is_empty():
-		push_error("[BattleManager] Map not found: " + map_id)
-		return
-	grid.initialize(map_data)
-	battle_started.emit()
+func stop_battle() -> void:
+	battle_active = false
+	turn_manager.stop()
 
 
 func spawn_unit(class_id: String, spawn_pos: Vector2i,
@@ -69,34 +74,24 @@ func spawn_unit(class_id: String, spawn_pos: Vector2i,
 
 
 func _on_unit_died(unit: Unit) -> void:
+	print("[BattleManager] %s (%s) died at %s | HP=%d" % [
+		unit.unit_name, unit.faction, unit.grid_position, unit.stats.hp])
 	grid.remove_unit(unit)
 	units.erase(unit)
 	var was_active := (turn_manager.current_unit == unit)
 	turn_manager.remove_unit(unit)
 	if was_active:
 		_deselect_unit()
+	unit_killed.emit(unit)
+	if was_active and battle_active:
 		turn_manager.force_advance.call_deferred()
-	_check_battle_end()
-
-
-func _check_battle_end() -> void:
-	var has_player := false
-	var has_enemy := false
-	for u in units:
-		if u.stats.is_alive():
-			if u.faction == "player":
-				has_player = true
-			else:
-				has_enemy = true
-	if not has_player:
-		print("[Battle] Defeat!")
-	elif not has_enemy:
-		print("[Battle] Victory!")
 
 
 # ── Turn callbacks ───────────────────────────────────
 
 func _on_turn_started(unit: Unit) -> void:
+	if not battle_active:
+		return
 	current_unit = unit
 	unit.reset_turn_state()
 	print("[TurnManager] Turn: %s (%s)" % [unit.unit_name, unit.faction])
@@ -114,30 +109,43 @@ func _on_round_ended() -> void:
 
 func _do_enemy_turn(unit: Unit) -> void:
 	await get_tree().create_timer(0.3).timeout
-	if turn_manager.current_unit != unit:
+	if not battle_active or turn_manager.current_unit != unit:
 		return
-	var target := _find_adjacent_enemy(unit)
-	if target:
-		var action := GameAction.make_attack(unit, target)
-		_execute_attack_action(action)
-	if turn_manager.current_unit == unit:
+
+	var actions: Array[GameAction] = EnemyAI.decide_actions(unit, grid, units)
+
+	if actions.is_empty():
+		print("[AI] %s: no actions (idle)" % unit.unit_name)
+
+	for action in actions:
+		if not battle_active or turn_manager.current_unit != unit:
+			break
+		if not unit.stats.is_alive():
+			break
+		match action.type:
+			GameAction.Type.MOVE:
+				var from := unit.grid_position
+				print("[AI] %s: move %s → %s" % [
+					unit.unit_name, from, action.target_pos])
+				unit.has_moved = true
+				await unit.move_to(action.target_pos, grid)
+				grid.move_unit(unit, from, action.target_pos)
+				await get_tree().create_timer(0.15).timeout
+			GameAction.Type.ATTACK:
+				print("[AI] %s: attack %s" % [
+					unit.unit_name, action.target_unit.unit_name])
+				_execute_attack_action(action)
+
+	if battle_active and unit.stats.is_alive() \
+			and turn_manager.current_unit == unit:
 		turn_manager.end_current_turn()
-
-
-func _find_adjacent_enemy(unit: Unit) -> Unit:
-	for offset: Vector2i in [Vector2i(0, -1), Vector2i(0, 1),
-					Vector2i(-1, 0), Vector2i(1, 0)]:
-		var pos: Vector2i = unit.grid_position + offset
-		var target = grid.get_unit_at(pos)
-		if target and target.faction != unit.faction \
-				and target.stats.is_alive():
-			return target
-	return null
 
 
 # ── Input handling ───────────────────────────────────
 
 func _unhandled_input(event: InputEvent) -> void:
+	if not battle_active:
+		return
 	if current_unit == null or current_unit.faction != "player":
 		return
 	if input_state == InputState.ANIMATING:
@@ -192,7 +200,8 @@ func _enter_attack_select() -> void:
 	_clear_highlights()
 	_move_range = {}
 	input_state = InputState.ATTACK_SELECT
-	_attack_cells = _get_attack_range(current_unit.grid_position)
+	_attack_cells = _get_attack_range(
+		current_unit.grid_position, current_unit.attack_range)
 	_show_attack_highlights()
 
 
@@ -204,27 +213,48 @@ func _end_turn_from_attack_select() -> void:
 	turn_manager.end_current_turn()
 
 
-# ── Highlight ────────────────────────────────────────
+# ── Highlight colors（方案B — GBA经典明亮）─────────────
+
+const HIGHLIGHT_MOVE_FILL    := Color(0.24, 0.47, 1.00, 0.35)
+const HIGHLIGHT_MOVE_BORDER  := Color(0.40, 0.70, 1.00, 0.90)
+const HIGHLIGHT_ATK_FILL     := Color(1.00, 0.24, 0.24, 0.35)
+const HIGHLIGHT_ATK_BORDER   := Color(1.00, 0.50, 0.30, 0.90)
+const HIGHLIGHT_HOVER_FILL   := Color(1.00, 0.94, 0.24, 0.35)
+const HIGHLIGHT_HOVER_BORDER := Color(1.00, 1.00, 0.60, 0.90)
+const HIGHLIGHT_BORDER_WIDTH := 2.0
+
 
 func _show_move_highlights() -> void:
 	_clear_highlights()
 	for cell_pos: Vector2i in _move_range:
-		_add_highlight(cell_pos, Color(0.2, 0.5, 1.0, 0.4))
+		_add_highlight(cell_pos, HIGHLIGHT_MOVE_FILL, HIGHLIGHT_MOVE_BORDER)
 
 
 func _show_attack_highlights() -> void:
 	_clear_highlights()
 	for cell_pos: Vector2i in _attack_cells:
-		_add_highlight(cell_pos, Color(1.0, 0.2, 0.2, 0.4))
+		_add_highlight(cell_pos, HIGHLIGHT_ATK_FILL, HIGHLIGHT_ATK_BORDER)
 
 
-func _add_highlight(cell_pos: Vector2i, color: Color) -> void:
+func _add_highlight(cell_pos: Vector2i, fill_color: Color, border_color: Color) -> void:
+	var cell_size := Vector2(Grid.CELL_SIZE)
+	var world_pos: Vector2 = grid.grid_to_world(cell_pos) - cell_size / 2.0
+
 	var rect := ColorRect.new()
-	rect.color = color
+	rect.color = fill_color
 	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	rect.size = Vector2(Grid.CELL_SIZE)
-	rect.position = grid.grid_to_world(cell_pos) - Vector2(Grid.CELL_SIZE) / 2.0
+	rect.size = cell_size
+	rect.position = world_pos
 	highlight_layer.add_child(rect)
+
+	var border := ReferenceRect.new()
+	border.size = cell_size
+	border.position = world_pos
+	border.border_color = border_color
+	border.border_width = HIGHLIGHT_BORDER_WIDTH
+	border.editor_only = false
+	border.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	highlight_layer.add_child(border)
 
 
 func _clear_highlights() -> void:
@@ -232,13 +262,16 @@ func _clear_highlights() -> void:
 		child.queue_free()
 
 
-func _get_attack_range(origin: Vector2i, _atk_range: int = 1) -> Array[Vector2i]:
+func _get_attack_range(origin: Vector2i, atk_range: int = 1) -> Array[Vector2i]:
 	var result: Array[Vector2i] = []
-	for offset: Vector2i in [Vector2i(0, -1), Vector2i(0, 1),
-					Vector2i(-1, 0), Vector2i(1, 0)]:
-		var pos: Vector2i = origin + offset
-		if grid.is_valid(pos):
-			result.append(pos)
+	for dy in range(-atk_range, atk_range + 1):
+		for dx in range(-atk_range, atk_range + 1):
+			var dist: int = absi(dx) + absi(dy)
+			if dist < 1 or dist > atk_range:
+				continue
+			var pos: Vector2i = origin + Vector2i(dx, dy)
+			if grid.is_valid(pos):
+				result.append(pos)
 	return result
 
 
@@ -277,15 +310,18 @@ func _execute_attack_action(action: GameAction) -> void:
 
 	attacker.has_attacked = true
 	var data: Dictionary = action.data
+	var damage_type: String = data.get("damage_type", "physical")
 
-	# Steps 1-7: main attack
+	# Main attack: calculate → log → apply
 	var result := DamageCalculator.resolve_attack(attacker, defender, data)
 	_log_attack(attacker, defender, result, "")
+	if result.hit:
+		defender.take_damage(result.damage, damage_type)
 
 	if result.defender_died:
 		return
 
-	# Step 8: counter-attack
+	# Counter-attack (melee range only)
 	var allow_counter: bool = data.get("allow_counter", true)
 	if allow_counter and result.hit \
 			and defender.stats.is_alive() \
@@ -298,11 +334,13 @@ func _execute_attack_action(action: GameAction) -> void:
 		var counter_result := DamageCalculator.resolve_attack(
 			defender, attacker, counter_data)
 		_log_attack(defender, attacker, counter_result, "Counterattack")
+		if counter_result.hit:
+			attacker.take_damage(counter_result.damage, "physical")
 		if counter_result.defender_died:
 			result.attacker_died = true
 			return
 
-	# Step 9: pursuit
+	# Pursuit
 	var allow_pursuit: bool = data.get("allow_pursuit", true)
 	if allow_pursuit and result.hit \
 			and attacker.stats.is_alive() and defender.stats.is_alive():
@@ -317,6 +355,9 @@ func _execute_attack_action(action: GameAction) -> void:
 			var pursuit_result := DamageCalculator.resolve_attack(
 				attacker, defender, pursuit_data)
 			_log_attack(attacker, defender, pursuit_result, "Pursuit")
+			if pursuit_result.hit:
+				defender.take_damage(pursuit_result.damage,
+					pursuit_data.get("damage_type", "physical"))
 
 
 func _is_adjacent(a: Unit, b: Unit) -> bool:
@@ -336,15 +377,15 @@ func _log_attack(attacker: Unit, defender: Unit,
 # ── Terrain rendering ────────────────────────────────
 
 const TERRAIN_COLORS: Dictionary = {
-	Cell.Terrain.PLAIN:         Color(0.72, 0.85, 0.55),
-	Cell.Terrain.FOREST:        Color(0.30, 0.58, 0.32),
-	Cell.Terrain.MOUNTAIN:      Color(0.65, 0.55, 0.40),
-	Cell.Terrain.PEAK:          Color(0.45, 0.45, 0.50),
-	Cell.Terrain.WALL:          Color(0.40, 0.35, 0.30),
-	Cell.Terrain.SHALLOW_WATER: Color(0.50, 0.72, 0.88),
-	Cell.Terrain.DEEP_WATER:    Color(0.22, 0.40, 0.70),
-	Cell.Terrain.LAVA:          Color(0.88, 0.30, 0.12),
-	Cell.Terrain.SWAMP:         Color(0.42, 0.50, 0.30),
+	Cell.Terrain.PLAIN:         Color(0.44, 0.78, 0.28),
+	Cell.Terrain.FOREST:        Color(0.22, 0.53, 0.29),
+	Cell.Terrain.MOUNTAIN:      Color(0.78, 0.66, 0.41),
+	Cell.Terrain.PEAK:          Color(0.69, 0.69, 0.72),
+	Cell.Terrain.WALL:          Color(0.53, 0.53, 0.60),
+	Cell.Terrain.SHALLOW_WATER: Color(0.35, 0.69, 0.85),
+	Cell.Terrain.DEEP_WATER:    Color(0.19, 0.38, 0.63),
+	Cell.Terrain.LAVA:          Color(0.88, 0.41, 0.19),
+	Cell.Terrain.SWAMP:         Color(0.41, 0.47, 0.22),
 }
 
 const TERRAIN_LABELS: Dictionary = {
@@ -400,54 +441,3 @@ func _render_terrain() -> void:
 					Color(1, 1, 1, 0.6))
 				label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 				terrain_layer.add_child(label)
-
-
-# ── Deduction Data (M6) ─────────────────────────────
-
-func _print_deduction_data() -> void:
-	var soldier: Unit = null
-	var goblin: Unit = null
-	for u in units:
-		if u.unit_id == "soldier":
-			soldier = u
-		elif u.unit_id == "goblin_melee":
-			goblin = u
-	if not soldier or not goblin:
-		return
-
-	# ADR-005 additive formula: base = max(1, STR + weapon_might - DEF)
-	var weapon_might: int = 5  # Iron Sword default
-	var s_base_dmg := maxi(1, soldier.stats.str_attr + weapon_might - goblin.stats.def_attr)
-	var g_base_dmg := maxi(1, goblin.stats.str_attr + weapon_might - soldier.stats.def_attr)
-
-	var s_hit_rate := clampi(soldier.stats.get_hit(90) - goblin.stats.get_avoid(), 20, 100)
-	var g_hit_rate := clampi(goblin.stats.get_hit(75) - soldier.stats.get_avoid(), 20, 100)
-
-	var s_ttk_clean: int = ceili(float(goblin.stats.max_hp) / s_base_dmg)
-	var s_ttk_expected: float = ceil(float(s_ttk_clean) / (s_hit_rate / 100.0))
-	var g_ttk_clean: int = ceili(float(soldier.stats.max_hp) / g_base_dmg)
-	var g_ttk_expected: float = ceil(float(g_ttk_clean) / (g_hit_rate / 100.0))
-
-	var s_pursuit := clampf((soldier.stats.spd - goblin.stats.spd) * 0.1, 0.0, 1.0)
-
-	print("[DEDUCTION_DATA] ========================================")
-	print("[DEDUCTION_DATA] M6 ADR-005 属性推演 (FE additive)")
-	print("[DEDUCTION_DATA] ----------------------------------------")
-	print("[DEDUCTION_DATA] soldier: STR=%d DEX=%d SPD=%d LCK=%d DEF=%d RES=%d HP=%d" % [
-		soldier.stats.str_attr, soldier.stats.dex, soldier.stats.spd,
-		soldier.stats.lck, soldier.stats.def_attr, soldier.stats.res, soldier.stats.max_hp])
-	print("[DEDUCTION_DATA] goblin:  STR=%d DEX=%d SPD=%d LCK=%d DEF=%d RES=%d HP=%d" % [
-		goblin.stats.str_attr, goblin.stats.dex, goblin.stats.spd,
-		goblin.stats.lck, goblin.stats.def_attr, goblin.stats.res, goblin.stats.max_hp])
-	print("[DEDUCTION_DATA] ----------------------------------------")
-	print("[DEDUCTION_DATA] soldier→goblin base(STR+might-DEF): %d" % s_base_dmg)
-	print("[DEDUCTION_DATA] soldier hit rate: %d%%" % s_hit_rate)
-	print("[DEDUCTION_DATA] soldier pursuit chance: %.0f%%" % (s_pursuit * 100))
-	print("[DEDUCTION_DATA] soldier TTK(clean): %d rounds" % s_ttk_clean)
-	print("[DEDUCTION_DATA] soldier TTK(expected): %.1f rounds" % s_ttk_expected)
-	print("[DEDUCTION_DATA] ----------------------------------------")
-	print("[DEDUCTION_DATA] goblin→soldier base(STR+might-DEF): %d" % g_base_dmg)
-	print("[DEDUCTION_DATA] goblin hit rate: %d%%" % g_hit_rate)
-	print("[DEDUCTION_DATA] goblin TTK(clean): %d rounds" % g_ttk_clean)
-	print("[DEDUCTION_DATA] goblin TTK(expected): %.1f rounds" % g_ttk_expected)
-	print("[DEDUCTION_DATA] ========================================")

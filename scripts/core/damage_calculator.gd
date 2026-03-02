@@ -70,13 +70,9 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 
 	final_dmg *= relic_multiplier * final_multiplier
 
-	# ── Step 5: Apply damage ────────────────────────────
+	# ── Step 5: Calculate final damage (caller applies) ─
 	result.damage = maxi(0, roundi(final_dmg))
-	defender.take_damage(result.damage, damage_type)
-	result.defender_died = not defender.stats.is_alive()
-
-	# ── Step 6-7: On-hit / post-damage effects (reserved) ──
-	pass
+	result.defender_died = defender.stats.hp <= result.damage
 
 	return result
 

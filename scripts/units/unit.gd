@@ -10,6 +10,7 @@ var priority: int = 0  # initiative tie-breaker (0/+1/+2)
 # ── 数据 ────────────────────────────────────────────
 var stats: UnitStats = null
 var buffs: Array = []
+var attack_range: int = 1
 
 # ── 位置（ADR-3 双向引用）──────────────────────────
 var grid_position: Vector2i = Vector2i.ZERO
@@ -24,9 +25,27 @@ signal damage_taken(amount: int, damage_type: String)
 signal unit_died
 signal moved(from: Vector2i, to: Vector2i)
 
+# ── 阵营颜色 ─────────────────────────────────────────
+const FACTION_COLORS: Dictionary = {
+	"player": Color(0.30, 0.55, 1.00),
+	"enemy":  Color(1.00, 0.30, 0.30),
+}
+
+const UNIT_LABELS: Dictionary = {
+	"soldier":       "兵",
+	"archer":        "弓",
+	"knight":        "骑",
+	"mage":          "法",
+	"cleric":        "僧",
+	"goblin_melee":  "哥战",
+	"goblin_archer": "哥弓",
+	"goblin_shaman": "哥巫",
+}
+
 # ── 节点引用 ─────────────────────────────────────────
 @onready var sprite: AnimatedSprite2D = $Sprite
 @onready var health_bar: ProgressBar  = $HealthBar
+var _unit_label: Label = null
 
 
 func _ready() -> void:
@@ -46,7 +65,10 @@ func setup(class_data: Dictionary) -> void:
 	# Load growth rates if present (class JSON has them, enemy JSON doesn't)
 	if class_data.has("growth_rates"):
 		stats.load_growth_rates(class_data["growth_rates"])
+	var atk_type: String = class_data.get("attack_type", "melee")
+	attack_range = 2 if atk_type == "ranged" else 1
 	_update_health_bar()
+	_apply_visuals()
 
 
 # ── 战斗接口 ─────────────────────────────────────────
@@ -84,15 +106,42 @@ func reset_turn_state() -> void:
 	has_moved      = false
 	has_attacked   = false
 	has_used_swift = false
-	sprite.modulate = Color.WHITE
+	modulate = Color.WHITE
 
 
 func mark_done() -> void:
 	has_attacked = true
-	sprite.modulate = Color(0.5, 0.5, 0.5)
+	modulate = Color(0.6, 0.6, 0.6)
 
 
 # ── 私有方法 ─────────────────────────────────────────
+
+func _apply_visuals() -> void:
+	sprite.self_modulate = FACTION_COLORS.get(faction, Color.WHITE)
+
+	var hp_bar_fill := health_bar.get_theme_stylebox("fill") as StyleBoxFlat
+	if hp_bar_fill:
+		var bar_color: Color = FACTION_COLORS.get(faction, Color.GREEN)
+		hp_bar_fill = hp_bar_fill.duplicate()
+		bar_color.s = 0.5
+		bar_color.v = 0.9
+		hp_bar_fill.bg_color = bar_color
+		health_bar.add_theme_stylebox_override("fill", hp_bar_fill)
+
+	_unit_label = Label.new()
+	_unit_label.name = "UnitLabel"
+	_unit_label.text = UNIT_LABELS.get(unit_id, unit_name.left(2))
+	_unit_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_unit_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_unit_label.position = Vector2(-32, -14)
+	_unit_label.size = Vector2(64, 28)
+	_unit_label.add_theme_font_size_override("font_size", 18)
+	_unit_label.add_theme_color_override("font_color", Color.WHITE)
+	_unit_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	_unit_label.add_theme_constant_override("outline_size", 3)
+	_unit_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_unit_label)
+
 
 func _update_health_bar() -> void:
 	if health_bar == null or stats == null:

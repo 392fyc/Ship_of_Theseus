@@ -8,6 +8,7 @@ signal round_ended()
 var _queue: Array[Unit] = []
 var _all_units: Array[Unit] = []
 var current_unit: Unit = null
+var _round_number: int = 0
 
 
 func add_units(units: Array[Unit]) -> void:
@@ -32,11 +33,15 @@ func force_advance() -> void:
 	_advance()
 
 
+func stop() -> void:
+	current_unit = null
+	_queue.clear()
+
+
 func end_current_turn() -> void:
 	if current_unit == null:
 		return
 	current_unit.mark_done()
-	print("[TurnManager] Buff decrement placeholder: %s" % current_unit.unit_name)
 	var ended := current_unit
 	current_unit = null
 	turn_ended.emit(ended)
@@ -44,8 +49,14 @@ func end_current_turn() -> void:
 
 
 func _rebuild_queue() -> void:
+	_round_number += 1
 	_queue = _all_units.filter(func(u: Unit): return u.stats.is_alive())
 	_queue.sort_custom(_compare_initiative)
+	var names: PackedStringArray = []
+	for u in _queue:
+		names.append("%s(%s)" % [u.unit_name, u.faction])
+	print("[TurnManager] Round %d queue: [%s]" % [
+		_round_number, ", ".join(names)])
 
 
 func _advance() -> void:
@@ -56,7 +67,6 @@ func _advance() -> void:
 			push_warning("[TurnManager] No units alive")
 			return
 	current_unit = _queue.pop_front()
-	print("[TurnManager] Buff trigger placeholder: %s" % current_unit.unit_name)
 	turn_started.emit(current_unit)
 
 
