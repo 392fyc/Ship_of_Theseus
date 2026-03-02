@@ -27,8 +27,9 @@
 - `dev_doc/` 已归档不再更新
 - 游戏规则、伤害公式、设计决策 → 查 KB，不在此文件复述
 
-**会话开始**必读：`obsidian_get_file_contents("03-AI-Context/Active-Context/current-session.md")`
-**会话结束**必写：更新 `current-session.md`（格式参考 `03-AI-Context/Handoffs/handoff-template.md`）
+**会话开始**：使用 `/sot-session-start` skill（或手动执行 `obsidian_get_file_contents("03-AI-Context/Active-Context/current-session.md")`）
+**会话结束**：使用 `/sot-session-end` skill（或手动更新 `current-session.md`，Read + Write，≤100行）
+**KB 写入**：使用 `/sot-kb-write` skill 选择最可靠的写入方法
 
 ---
 
@@ -80,9 +81,12 @@
 - Variant 类型推断不稳定 → **显式声明变量类型**
 
 ### KB 写入标准
-- obsidian_patch_content 对中文标题失效 → KB 所有标题**使用英文**
-- 每个英文标题下第一行追加中文标题，例如：`> 中文标题`
-- 今后所有 KB 写入**必须遵循此格式**
+- KB 文档全英文（标题 + 正文），Dashboard.md 除外
+- 标题仅用英文，不加 `> 中文标题` 副标题行
+- 标题中避免括号 `()`、方括号 `[]`、中文字符（会导致 obsidian_patch_content 失败）
+- KB 写入方法选择 → 使用 `/sot-kb-write` skill 的决策树
+- **禁止**用 PowerShell 写入 KB 文件（UTF-8 BOM 问题）
+- **禁止**对 current-session.md 使用 append（会导致维度爆炸），始终全文替换
 
 ### AI 工具查询
 - **禁止用训练数据判断 AI 模型版本**。涉及模型版本号时，必须先 WebSearch 再作答
