@@ -1,0 +1,55 @@
+---
+description: Guidelines for modifying the HTML design tools (talent tree editor, etc.)
+globs: ["tools/**/*.html", "tools/**/*.js"]
+---
+
+# 设计工具维护指南
+
+## 核心原则：不要直接读取 HTML 文件
+
+所有工具 HTML 文件体量大（天赋树编辑器 3000+ 行），直接读取会消耗大量上下文。
+**修改工具时应使用搜索工具定位具体代码段后直接编辑**，不要通篇阅读。
+
+## 天赋树编辑器（talent-tree-editor.html）
+
+单文件 Canvas 图编辑器，关键模块：
+
+| 模块 | 定位关键词 | 说明 |
+|---|---|---|
+| FSBridge | `const FSBridge` | 本地目录读写（File System Access API）、IndexedDB持久化 |
+| computeShortestPaths | `function computeShortestPaths` | Dijkstra算法，自动计算节点最低等级 |
+| getCachedPathData | `function getCachedPathData` | 路径计算缓存，每帧仅计算一次 |
+| render | `function render()` | Canvas主绘制循环 |
+| Undo/Redo | `function pushUndo` | JSON快照栈，突变前必须调用 pushUndo() |
+| 侧边栏绑定 | `forEach(fid =>` | 属性面板输入绑定，focus时pushUndo |
+| validateDAG | `function validateDAG` | DAG校验（重复ID/环/孤立节点/悬空边） |
+| 路径分析 | `function updatePathAnalysis` | 最短路径高亮与花费分析 |
+| 导入导出 | `function applyImportedJSON` | JSON导入（自动布局缺失坐标） |
+| 搜索 | `searchQuery` | 节点名称/标签搜索与高亮 |
+
+**节点数据格式**：
+```json
+{
+  "class_id": "string", "class_name": "string",
+  "nodes": [{
+    "id": "string", "name": "string",
+    "type": "passive|active_skill|trait|skill_upgrade|advancement|gauge_core|gauge_extend|stat_minor",
+    "cost": 1, "x": 0, "y": 0,
+    "desc": "", "notes": "", "tags": "", "exclusive": "", "requires": ""
+  }],
+  "edges": [{ "from": "node_id", "to": "node_id" }]
+}
+```
+
+注意：节点无 `level` 字段，等级由 `computeShortestPaths()` 从起始节点路径花费自动计算。
+
+## shared.js（共享模块）
+
+| 内容 | 说明 |
+|---|---|
+| 游戏常量 | TERRAIN_TYPES, SPECIAL_TERRAIN_TYPES, BUILDING_TYPES, CLASS_DEFS 等 |
+| I18N系统 | `I18N.t(key)`, `data-i18n` 属性, `createLangSwitcher()`, localStorage持久化 |
+| 公式函数 | 伤害/命中/暴击计算器 |
+| 工具函数 | toast, JSON导入导出, localStorage管理 |
+
+添加 i18n 词条时：在 `shared.js` 的 `zh` 和 `en` 对象中同步添加。

@@ -1,0 +1,16 @@
+---
+description: GDScript coding conventions and data-driven architecture rules
+globs: ["scripts/**/*.gd", "scenes/**/*.gd", "data/**/*.json"]
+---
+
+# 编码规范
+
+## GDScript
+- 类名 PascalCase，变量/函数 snake_case，常量 UPPER_SNAKE_CASE
+- 信号 past_tense：`signal damage_dealt`, `signal unit_killed`
+- GameAction模式：所有操作封装为可序列化Action
+
+## 数据驱动
+- 游戏内容 = JSON文件，代码只处理逻辑
+- **禁止**在代码中硬编码数值，必须从JSON读取
+- speed/move/vision/block 不出现在 stat_growth 中
