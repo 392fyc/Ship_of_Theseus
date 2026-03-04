@@ -141,3 +141,17 @@
 - `CLAUDE.md` — Claude Code 专用指令
 - `AGENTS.md` — 通用 Agent 指令（与本文件内容一致）
 - `.claude/skills/` — Claude Code workflow skills
+
+---
+
+## Universal Agent Rules (from KB)
+
+### Version Check
+Any operation involving version numbers: WebSearch first, cross-verify 2+ sources, then reference.
+Known versions (2026-03): Claude Opus 4.6 / Sonnet 4.6, GPT-5.3-Codex, Gemini 3.1 Pro, Godot 4.6
+
+### Web Research Boundaries
+L1 (precise): max 3 searches | L2 (survey): max 5 searches + 3 fetches, output comparison table | L3 (open): requires Main Agent approval + defined termination criteria
+
+### Git Workflow
+Branch naming: {agent}/{task-name}. No PR for personal work. Sub Agents create isolated branches/worktrees. Conflict resolution in neutral independent session only.

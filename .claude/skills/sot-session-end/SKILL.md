@@ -83,7 +83,21 @@ Only include rules that future sessions MUST know. Remove stale rules.
 - PowerShell scripts — encoding issues with UTF-8 content
 - `obsidian_append_content` — appending causes dimensional explosion (the core problem we're solving)
 
-### Step 4: Verify
+### Step 4: KB Task Sync
+
+After writing session state, compare completed work in this session against Phase1-Tasks.md checkbox states.
+
+```
+obsidian_get_file_contents("02-Development/Tasks/Phase1-Tasks.md")
+```
+
+Scan the task file for checkboxes that should be updated based on the work completed in this session:
+- If a task was completed during this session but the corresponding checkbox is still `[ ]`, update it to `[x]` using the sot-kb-write decision tree.
+- If a task was partially completed, update it to `[~]` if not already marked.
+- Only sync tasks you are confident were completed — do not guess.
+- Log which checkboxes were updated in the session summary.
+
+### Step 5: Verify
 
 After writing, read the file back to confirm:
 ```

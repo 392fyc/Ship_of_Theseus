@@ -72,6 +72,19 @@
 
 ---
 
+## ADR 索引
+
+| ADR | 标题 | 文件 |
+|-----|------|------|
+| ADR-001 | Grid Coordinate System | adr-2026-02-26-grid-coordinate-system.md |
+| ADR-002 | Buff/Debuff Structure | adr-2026-02-26-buff-debuff-structure.md |
+| ADR-003 | Unit-Cell Bidirectional Reference | adr-2026-02-26-unit-cell-reference.md |
+| ADR-004 | Four Damage Types | adr-2026-02-27-damage-type-redesign.md |
+| ADR-005 | Attribute System v1 | adr-2026-02-27-attribute-system-v1.md |
+| ADR-007 | Multi-Agent Toolchain Optimization | adr-2026-03-03-multi-agent-toolchain.md |
+
+---
+
 ## 已确认的错误模式
 
 > 此节仅收录模型**反复犯错后**经纠正确认的模式。新规则需经人工总控台批准后添加。
@@ -103,3 +116,49 @@
 - 距离影响伤害/命中 → **无衰减**
 - 多个敌方ZOC叠加 → **不叠加**，固定-2
 - 向敌人方向移动触发ZOC → **不触发**，仅从控制区离开时触发
+
+---
+
+## Universal Agent Rules
+
+### Version Check
+Any operation involving version numbers must follow this sequence:
+1. WebSearch for the latest version first
+2. Cross-verify with at least 2 independent sources or official documentation
+3. Only then may the version be referenced in subsequent work
+
+Applies to: AI models, game engines, SDKs, libraries, plugins.
+
+Known versions (as of 2026-03): Claude Opus 4.6, Sonnet 4.6 | OpenAI GPT-5.3-Codex | Google Gemini 3.1 Pro | Godot 4.6
+
+### Web Research Boundaries
+
+**L1 Precise Query** (max 3 searches): Clear target, stop on find. Examples: Godot 4.6 API, version confirmation.
+
+**L2 Directed Survey** (max 5 searches + 3 fetches): Clear scope with structured comparison table deliverable. Examples: asset search, solution comparison.
+
+**L3 Open Research**: Broad scope requiring Main Agent approval, defined deliverable format, and termination criteria before execution.
+
+### Git Workflow
+
+Branch naming: `{agent}/{task-name}`. Examples: `cursor/pkg-e-battle-ui`, `codex/batch-json-gen`, `ag/parallel-task-xxx`
+
+**Personal work**: No PR required. Direct merge to feature branch after completion.
+
+**Sub Agent isolation**: Each task creates independent branch/worktree. Different agents never work on same branch. Sub Agent notifies Main Agent on completion.
+
+**Conflict resolution**: Use neutral independent session, pull both branches, perform merge, review, then merge to target.
+
+### Agent Task Matrix
+
+| Task | Agent | Note |
+|------|-------|------|
+| GDScript implementation | Cursor | Primary development agent |
+| Godot editor / debug | Cursor | Godot MCP exclusive — single client only |
+| Playground proposals | Cursor | Visual proposals in Godot |
+| Batch JSON / data gen | Codex CLI | GPT-5.3-Codex, sandbox safe |
+| Codebase research | Codex CLI or AntiGravity | Do NOT use Claude for large file research |
+| Asset creation (sprite/animation/music) | AntiGravity (Gemini 3.1 Pro) | Gemini multimodal + web plugins |
+| Design / KB / orchestration | Claude Code | Main Agent only — no self-spawning Sub Agents |
+
+**Sub Agent dispatch rule**: When the user says "dispatch to Sub Agent", this means instructing external tools (Cursor, Codex CLI, AntiGravity) — NOT spawning Claude internal agents via Task tool.
