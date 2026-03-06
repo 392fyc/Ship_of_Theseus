@@ -129,7 +129,7 @@ Any operation involving version numbers must follow this sequence:
 
 Applies to: AI models, game engines, SDKs, libraries, plugins.
 
-Known versions (as of 2026-03): Claude Opus 4.6, Sonnet 4.6 | OpenAI GPT-5.3-Codex | Google Gemini 3.1 Pro | Godot 4.6
+Known versions (as of 2026-03): Claude Opus 4.6, Sonnet 4.6 | OpenAI GPT-5.4, GPT-5.3-Codex | Google Gemini 3.1 Pro | Godot 4.6
 
 ### Web Research Boundaries
 
@@ -153,12 +153,15 @@ Branch naming: `{agent}/{task-name}`. Examples: `cursor/pkg-e-battle-ui`, `codex
 
 | Task | Agent | Note |
 |------|-------|------|
-| GDScript implementation | Cursor | Primary development agent |
+| GDScript implementation | Cursor + Codex CLI | Cursor primary (Godot MCP); Codex (GPT-5.4) parallel capable |
 | Godot editor / debug | Cursor | Godot MCP exclusive — single client only |
 | Playground proposals | Cursor | Visual proposals in Godot |
-| Batch JSON / data gen | Codex CLI | GPT-5.3-Codex, sandbox safe |
+| Global architecture design | Codex CLI (GPT-5.4) | Main Agent primary backup; high-level system design |
+| Batch JSON / data gen | Codex CLI | GPT-5.4 or GPT-5.3-Codex, sandbox safe |
 | Codebase research | Codex CLI or AntiGravity | Do NOT use Claude for large file research |
 | Asset creation (sprite/animation/music) | AntiGravity (Gemini 3.1 Pro) | Gemini multimodal + web plugins |
 | Design / KB / orchestration | Claude Code | Main Agent only — no self-spawning Sub Agents |
 
 **Sub Agent dispatch rule**: When the user says "dispatch to Sub Agent", this means instructing external tools (Cursor, Codex CLI, AntiGravity) — NOT spawning Claude internal agents via Task tool.
+
+**Cursor model options**: Claude Opus 4.6 / GPT-5.4 (selectable per task; not limited to a single model).
