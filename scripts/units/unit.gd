@@ -42,10 +42,18 @@ const UNIT_LABELS: Dictionary = {
 	"goblin_shaman": "哥巫",
 }
 
+# ── HP Bar — Proposal B Classic TRPG ─────────────────
+const HP_FULL_COLOR  := Color(0.24, 0.68, 0.24)
+const HP_LOW_COLOR   := Color(0.82, 0.55, 0.15)
+const HP_CRIT_COLOR  := Color(0.82, 0.18, 0.18)
+const HP_BAR_BG      := Color(0.15, 0.15, 0.18)
+const HP_BAR_BORDER  := Color(0.06, 0.06, 0.08)
+
 # ── 节点引用 ─────────────────────────────────────────
 @onready var sprite: AnimatedSprite2D = $Sprite
 @onready var health_bar: ProgressBar  = $HealthBar
 var _unit_label: Label = null
+var _hp_label: Label = null
 
 
 func _ready() -> void:
@@ -119,14 +127,31 @@ func mark_done() -> void:
 func _apply_visuals() -> void:
 	sprite.self_modulate = FACTION_COLORS.get(faction, Color.WHITE)
 
-	var hp_bar_fill := health_bar.get_theme_stylebox("fill") as StyleBoxFlat
-	if hp_bar_fill:
-		var bar_color: Color = FACTION_COLORS.get(faction, Color.GREEN)
-		hp_bar_fill = hp_bar_fill.duplicate()
-		bar_color.s = 0.5
-		bar_color.v = 0.9
-		hp_bar_fill.bg_color = bar_color
-		health_bar.add_theme_stylebox_override("fill", hp_bar_fill)
+	# B-style HP bar: dark bg with border
+	var bg_style := StyleBoxFlat.new()
+	bg_style.bg_color = HP_BAR_BG
+	bg_style.border_width_left = 2
+	bg_style.border_width_top = 2
+	bg_style.border_width_right = 2
+	bg_style.border_width_bottom = 2
+	bg_style.border_color = HP_BAR_BORDER
+	health_bar.add_theme_stylebox_override("background", bg_style)
+	_update_health_bar()
+
+	# HP number overlay centered on bar
+	_hp_label = Label.new()
+	_hp_label.name = "HPLabel"
+	_hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hp_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_hp_label.position = health_bar.position
+	_hp_label.size = health_bar.size
+	_hp_label.add_theme_font_size_override("font_size", 9)
+	_hp_label.add_theme_color_override("font_color", Color.WHITE)
+	_hp_label.add_theme_color_override("font_outline_color",
+		Color(0.0, 0.0, 0.0, 0.80))
+	_hp_label.add_theme_constant_override("outline_size", 2)
+	_hp_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_hp_label)
 
 	_unit_label = Label.new()
 	_unit_label.name = "UnitLabel"
@@ -148,6 +173,21 @@ func _update_health_bar() -> void:
 		return
 	health_bar.max_value = stats.max_hp
 	health_bar.value     = stats.hp
+
+	var ratio := float(stats.hp) / float(stats.max_hp) if stats.max_hp > 0 else 0.0
+	var fill_color: Color
+	if ratio > 0.6:
+		fill_color = HP_FULL_COLOR
+	elif ratio > 0.3:
+		fill_color = HP_LOW_COLOR
+	else:
+		fill_color = HP_CRIT_COLOR
+	var fill_style := StyleBoxFlat.new()
+	fill_style.bg_color = fill_color
+	health_bar.add_theme_stylebox_override("fill", fill_style)
+
+	if _hp_label:
+		_hp_label.text = "%d / %d" % [stats.hp, stats.max_hp]
 
 
 func _set_walk_direction(dir: Vector2i) -> void:

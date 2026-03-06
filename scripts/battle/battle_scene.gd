@@ -5,6 +5,8 @@ extends Node2D
 @onready var result_overlay: ColorRect = $UILayer/ResultOverlay
 @onready var result_label: Label = $UILayer/ResultLabel
 
+var _turn_order_bar: TurnOrderBar = null
+
 signal battle_ended(result: String)
 
 # ── Spawn configuration ──────────────────────────────
@@ -38,6 +40,11 @@ func _ready() -> void:
 
 	battle_manager.unit_killed.connect(_on_unit_killed)
 
+	_turn_order_bar = TurnOrderBar.new()
+	$UILayer.add_child(_turn_order_bar)
+	battle_manager.turn_manager.turn_started.connect(_on_turn_changed)
+	battle_manager.turn_manager.turn_ended.connect(_on_turn_changed)
+
 	result_overlay.visible = false
 	result_label.visible = false
 
@@ -46,9 +53,22 @@ func _ready() -> void:
 
 # ── Victory / Defeat ─────────────────────────────────
 
+func _on_turn_changed(_unit: Unit) -> void:
+	_refresh_turn_order()
+
+
+func _refresh_turn_order() -> void:
+	if _turn_order_bar == null:
+		return
+	var queue := battle_manager.turn_manager.get_display_queue()
+	_turn_order_bar.update_queue(queue,
+		battle_manager.turn_manager.current_unit)
+
+
 func _on_unit_killed(unit: Unit) -> void:
 	print("[BattleScene] Unit killed: %s (%s) | remaining: %d" % [
 		unit.unit_name, unit.faction, battle_manager.units.size()])
+	_refresh_turn_order.call_deferred()
 	if _battle_over:
 		return
 	_check_battle_end()

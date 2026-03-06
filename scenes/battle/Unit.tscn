@@ -65,10 +65,15 @@ animations = [{
 }]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fill"]
-bg_color = Color(0.2, 0.8, 0.2, 1)
+bg_color = Color(0.24, 0.68, 0.24, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
-bg_color = Color(0.2, 0.2, 0.2, 1)
+bg_color = Color(0.15, 0.15, 0.18, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.06, 0.06, 0.08, 1)
 
 [node name="Unit" type="Node2D"]
 script = ExtResource("1_script")
@@ -80,9 +85,9 @@ autoplay = "idle"
 
 [node name="HealthBar" type="ProgressBar" parent="."]
 offset_left = -32.0
-offset_top = -36.0
+offset_top = -44.0
 offset_right = 32.0
-offset_bottom = -30.0
+offset_bottom = -28.0
 show_percentage = false
 value = 100.0
 theme_override_styles/fill = SubResource("StyleBoxFlat_fill")

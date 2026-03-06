@@ -24,3 +24,6 @@ desktop.ini
 
 # 编辑器 workspace 数据（天赋树编辑器输出等）
 /data/talent-tree/
+
+# Windows reserved device names
+nul

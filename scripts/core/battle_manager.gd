@@ -4,6 +4,7 @@ extends Node
 @onready var turn_manager: TurnManager = $TurnManager
 @onready var terrain_layer: Node2D = $TerrainLayer
 @onready var highlight_layer: Node2D = $HighlightLayer
+@onready var popup_layer: Node2D = $PopupLayer
 
 var grid: Grid = Grid.new()
 var units: Array = []
@@ -312,11 +313,15 @@ func _execute_attack_action(action: GameAction) -> void:
 	var data: Dictionary = action.data
 	var damage_type: String = data.get("damage_type", "physical")
 
-	# Main attack: calculate → log → apply
+	# Main attack: calculate → popup → apply
 	var result := DamageCalculator.resolve_attack(attacker, defender, data)
 	_log_attack(attacker, defender, result, "")
 	if result.hit:
+		DamagePopup.spawn(popup_layer, defender.position,
+			result.damage, damage_type, result.crit)
 		defender.take_damage(result.damage, damage_type)
+	else:
+		DamagePopup.spawn_miss(popup_layer, defender.position)
 
 	if result.defender_died:
 		return
@@ -335,7 +340,11 @@ func _execute_attack_action(action: GameAction) -> void:
 			defender, attacker, counter_data)
 		_log_attack(defender, attacker, counter_result, "Counterattack")
 		if counter_result.hit:
+			DamagePopup.spawn(popup_layer, attacker.position,
+				counter_result.damage, "physical", counter_result.crit)
 			attacker.take_damage(counter_result.damage, "physical")
+		else:
+			DamagePopup.spawn_miss(popup_layer, attacker.position)
 		if counter_result.defender_died:
 			result.attacker_died = true
 			return
@@ -356,8 +365,12 @@ func _execute_attack_action(action: GameAction) -> void:
 				attacker, defender, pursuit_data)
 			_log_attack(attacker, defender, pursuit_result, "Pursuit")
 			if pursuit_result.hit:
-				defender.take_damage(pursuit_result.damage,
-					pursuit_data.get("damage_type", "physical"))
+				var p_type: String = pursuit_data.get("damage_type", "physical")
+				DamagePopup.spawn(popup_layer, defender.position,
+					pursuit_result.damage, p_type, pursuit_result.crit)
+				defender.take_damage(pursuit_result.damage, p_type)
+			else:
+				DamagePopup.spawn_miss(popup_layer, defender.position)
 
 
 func _is_adjacent(a: Unit, b: Unit) -> bool:

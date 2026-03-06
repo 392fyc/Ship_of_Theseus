@@ -33,6 +33,16 @@ func force_advance() -> void:
 	_advance()
 
 
+func get_display_queue() -> Array[Unit]:
+	var result: Array[Unit] = []
+	if current_unit and current_unit.stats.is_alive():
+		result.append(current_unit)
+	for u in _queue:
+		if u.stats.is_alive():
+			result.append(u)
+	return result
+
+
 func stop() -> void:
 	current_unit = null
 	_queue.clear()
