@@ -1,575 +1,308 @@
-# 战棋Roguelite — 核心系统设计文档
+# 战棋Roguelite — 核心系统设计文档（GDD）
+
+> 本文档是各模块设计文档的总纲摘要。详细规则请查阅对应的模块文档（01~12）。
+> 与模块文档冲突时，以模块文档为准。
 
 ## 项目概览
 
 | 项目属性 | 决策 |
 |---------|------|
-| 类型 | 战棋RPG + Roguelite |
+| 类型 | 战棋RPG + Roguelite + 城镇建设 |
 | 引擎 | Godot 4 (GDScript) |
-| 网格 | 正方形网格（四方向/八方向） |
-| 地图规模 | ≤10×10，敌人分批加入 |
-| 回合制 | 速度轮动制（CTB/个体行动制） |
+| 网格 | 正方形网格，≤10×10，无高低差 |
+| 回合制 | 速度轮动制（按speed降序排列行动） |
 | 玩家人数 | 单机1人 / 联机1-4人 |
-| 联机模式 | 每人控制1个角色，轮动操作 |
-| 核心循环 | 杀戮尖塔式一次Run多关 |
-| 画风 | GBA像素（初期跳过，先搭系统） |
-| 开发方式 | Vibe Coding + AI素材生成 |
+| 联机模式 | 每人控制角色，GameAction指令同步 |
+| 核心循环 | 3大关×10小关的Run结构 + 城镇建设 |
+| 数据架构 | JSON驱动（内容全JSON，代码只处理逻辑） |
+| 核心差异化 | 城镇建设融入战棋Roguelite，经济在角色强化与建筑投资间抉择 |
 
 ---
 
-## 1. 回合系统（CTB - Charge Time Battle）
+## 1. 回合系统（→ 01-turn-system.md）
 
-### 1.1 核心机制：速度轮动制
+### 速度轮动制
 
-每个单位（含敌方）拥有一个 **行动值（CT: Charge Time）**，速度越高CT积攒越快，CT满时获得行动权。
+每回合所有单位按 `speed` 降序排列行动，非CT积攒模型。
 
-```
-每个Tick:
-  for unit in all_units:
-    unit.ct += unit.speed
-  
-  if any unit.ct >= CT_THRESHOLD (例如100):
-    取CT最高者行动（同值时按优先级规则）
-    行动后 CT 归零（或扣除阈值）
-```
+- **先制优先级**：0(普通) / +1 / +2，高优先级无视speed排在前面
+- **同速处理**：低难度玩家先，最高难度敌人先
+- **Buff/Debuff时机**：效果触发=角色回合开始，持续扣减=角色回合结束，施加=立即生效
 
-### 1.2 数据结构
+### 行动资源系统
 
-```
-Unit:
-  id: String
-  owner: PlayerID | "enemy"
-  ct: int = 0
-  speed: int          # 决定CT积攒速率
-  ct_threshold: int = 100
+每个单位的回合内拥有**结构化的行动资源**，参考BG3的行动经济：
 
-TurnManager:
-  units: Array[Unit]          # 所有存活单位
-  action_queue: Array[Unit]   # 按CT排序的行动预览队列
-  current_actor: Unit | null
-```
+| 资源 | 额度 | 说明 |
+|------|------|------|
+| 移动力 | `move`属性 | 普通移动 或 \[移动行动\]技能（二选一） |
+| 攻击机会 | 1次 | 普通攻击 或 \[标准行动\]技能（二选一） |
+| 迅捷行动 | 1次 | \[迅捷行动\]技能，不占其他资源 |
 
-### 1.3 行动预览
+**行动类型标签**（所有主动技能必须标注）：
 
-类似FFT的行动顺序预览条，让玩家看到接下来5-8个行动单位的顺序。这对战术决策至关重要——玩家需要知道"如果我不杀这个敌人，它下回合就会行动"。
+| 标签 | action_cost | 消耗 | 典型场景 |
+|------|------------|------|---------|
+| \[移动行动\] | `"move"` | 移动力 | 位移技能（冲锋/闪避步） |
+| \[标准行动\] | `"standard"` | 攻击机会 | 攻击/强力增减益 |
+| \[迅捷行动\] | `"swift"` | 迅捷行动(1/回合) | 架势切换/轻量Buff |
+| \[反应行动\] | `"reaction"` | 无(条件触发) | 反击强化/受击反应 |
+| \[自由行动\] | `"free"` | 无 | 信息查看/光环开关 |
 
-### 1.4 联机适配
+**设计意义**：避免"一回合释放所有技能"——不同技能竞争相同资源，保留普攻和移动的战术价值。
 
-轮动制天然适合联机：
-- 同一时刻只有一个单位行动
-- 其他玩家等待时可以观察/规划
-- 只需同步"谁在行动"和"行动指令"
-- 可设置行动时间限制（如60秒）防止挂机
+### 联机适配
+
+- 轮动制下同一时刻仅1个单位行动，只需同步当前行动者的GameAction
+- 所有操作封装为GameAction，单机直接执行，联机时广播后执行
 
 ---
 
-## 2. 网格与地图系统
+## 2. 网格与地图（→ 02-grid-and-map.md）
 
-### 2.1 网格定义
-
-```
-Grid:
-  width: int (max 10)
-  height: int (max 10)
-  cells: Array[Array[Cell]]
-
-Cell:
-  position: Vector2i
-  terrain: TerrainType
-  elevation: int        # 高度层级（0-3）
-  occupant: Unit | null
-  effects: Array[CellEffect]  # 地形buff/陷阱等
-
-TerrainType: enum
-  PLAIN       # 平地：无特殊效果
-  FOREST      # 树林：+闪避, 移动消耗+1
-  MOUNTAIN    # 山地：+防御, 移动消耗+2
-  WATER       # 水面：大多数职业不可通行
-  WALL        # 墙壁：不可通行, 阻挡视线
-  COVER       # 掩体：方向性防御加成
-```
-
-### 2.2 高低差系统
-
-高度差影响：
-- **攻击加成**：从高处往低处攻击有伤害/命中加成
-- **攻击惩罚**：从低处往高处攻击有伤害/命中惩罚
-- **射程变化**：远程攻击从高处可增加有效射程
-- **移动消耗**：上坡消耗额外移动力，下坡可能减少
+### 三层结构
 
 ```
-elevation_bonus(attacker, defender):
-  diff = attacker.cell.elevation - defender.cell.elevation
-  if diff > 0: return +damage_bonus_per_level * diff
-  if diff < 0: return -damage_penalty_per_level * abs(diff)
-  return 0
+Layer 1: 基础地形（9种，始终存在）
+Layer 2: 特殊地形（叠加在基础地形上）
+Layer 3: 建筑（覆盖基础地形效果，摧毁变废墟）
 ```
 
-### 2.3 移动与寻路
+### 基础地形
 
-- 使用 **A* 寻路**，移动消耗因地形而异
-- 移动范围计算用 **BFS（广度优先搜索）** + 移动力
-- 每个单位有 `move_points`，地形消耗不同点数
+| ID | 地形 | 移动消耗 | 可通行 | 阻挡攻击线 |
+|----|------|---------|--------|-----------|
+| 0 | 平地 | 1 | ✓ | ✗ |
+| 1 | 树林 | 2 | ✓ | ✗ |
+| 2 | 山地 | 2 | ✓ | ✗ |
+| 3 | 山峰 | — | ✗ | **✓（唯一）** |
+| 4 | 墙壁 | — | ✗ | ✗ |
+| 5 | 浅水 | 2 | ✓ | ✗ |
+| 6 | 深水 | — | ✗ | ✗ |
+| 7 | 熔岩 | 2 | ✓ | ✗ |
+| 8 | 毒沼 | 3 | ✓ | ✗ |
 
-```
-移动消耗表:
-  PLAIN:    1
-  FOREST:   2
-  MOUNTAIN: 3
-  上坡+1层: +1
-  下坡:     0（不额外消耗）
-```
+### 寻路
+
+- BFS计算移动范围，A*计算路径
+- 陷阱不影响寻路
 
 ---
 
-## 3. 战斗系统
+## 3. 战斗计算（→ 03-battle-calculation.md）
 
-### 3.1 核心属性
-
-```
-UnitStats:
-  hp: int             # 生命值
-  max_hp: int
-  attack: int         # 物理攻击
-  magic: int          # 魔法攻击
-  defense: int        # 物理防御
-  resistance: int     # 魔法防御
-  speed: int          # 影响CT和闪避
-  move: int           # 移动力（格数）
-  hit: int            # 命中率基础值
-  evade: int          # 闪避率基础值
-```
-
-### 3.2 伤害公式
-
-保持简单可调：
+### 伤害公式（乘区分层）
 
 ```
-基础伤害 = attacker.attack - defender.defense  (物理)
-         = attacker.magic - defender.resistance (魔法)
-
-最终伤害 = 基础伤害
-         × 技能倍率
-         × 地形修正（高低差、掩体）
-         × 暴击修正（暴击时×1.5）
-         × 随机波动（0.9~1.1）
-
-最低伤害 = 1（保底）
+最终伤害 = 基础伤害 × 技能倍率 × 特殊地形修正 × 暴击修正 × 格挡修正 × 最终伤害增减
+基础伤害 = 攻击力 × 武器威力 - 防御力 × 护甲抵抗  (最低0，无保底)
 ```
 
-### 3.3 命中判定
+### 命中 / 暴击 / 格挡
 
 ```
-命中率 = attacker.hit + 武器命中 - defender.evade - 地形闪避 - 高低差修正
-暴击率 = attacker.crit - defender.crit_evade
+命中率 = hit + weapon.hit + skill_bonus - evade - terrain_evade  (20%~100%)
+暴击率 = (crit + weapon.crit + skill_bonus - crit_evade) × 抵抗率  (0%~50%, 1.5x)
+格挡  = 职业固定（不成长），70%减免，与暴击互斥
 ```
 
-### 3.4 武器与技能射程系统
+### 伤害类型双轴
 
-这是你选择的核心机制之一。每个武器/技能有：
+**属性类型**（决定防御计算）：
 
-```
-Skill:
-  id: String
-  name: String
-  damage_type: "physical" | "magical" | "pure"
-  power: int              # 技能倍率基础
-  hit_bonus: int          # 命中修正
-  range: RangePattern     # 射程模式
-  area: AreaPattern       # 效果范围模式
-  ct_cost: int            # 使用后额外CT延迟（重技能慢，轻技能快）
-  cooldown: int           # 冷却回合数
-  effects: Array[Effect]  # 附加效果（debuff等）
+| 类型 | 防御 | 暴击/格挡 |
+|------|------|----------|
+| physical | 物防×护甲 | ✓ |
+| magical | 魔防×魔抗 | ✓ |
+| holy | 无视防御 | ✗ |
+| hybrid | 取物防/魔防较低者 | ✓ |
 
-RangePattern:
-  type: "diamond" | "line" | "cross" | "square" | "custom"
-  min_range: int    # 最小射程（近战=1, 有些技能=2代表不能打邻接）
-  max_range: int    # 最大射程
+**攻击方式**：`melee`(1格) / `ranged`(>1格) / `area`(AOE)
 
-AreaPattern:
-  type: "single" | "diamond" | "line" | "cross" | "square"
-  size: int         # 范围大小
-```
-
-**射程示例（10×10网格上）：**
-- 剑：range 1, area single（邻接单体）
-- 弓：range 2-4, area single（远距单体，不能打邻接）
-- 火球：range 3, area diamond(1)（3格内投射，爆炸范围1格菱形=5格）
-- 治疗光环：range 0, area diamond(2)（以自身为中心，范围2的菱形）
-
-### 3.5 CT消耗与技能权衡
-
-轮动制的一个独特点：**强力技能会让你下次行动更慢**。
+### 结算顺序
 
 ```
-行动后CT处理:
-  unit.ct = 0 - skill.ct_cost
-
-  例如:
-  - 普通攻击: ct_cost = 0  → CT归0，正常恢复
-  - 重击:     ct_cost = 30 → CT变为-30，需要更久才到100
-  - 快速斩:   ct_cost = -20 → CT变为20，比普通更快恢复
-```
-
-这让"什么时候用大招"成为核心战术决策。
-
----
-
-## 4. 职业与Build系统
-
-### 4.1 职业框架
-
-Roguelite不需要像火纹那样的转职树，更适合**起始职业 + 技能获取**的模式：
-
-```
-Class:
-  id: String
-  name: String
-  base_stats: UnitStats      # 基础属性
-  stat_growth: UnitStats     # 每次升级成长率
-  innate_skills: Array[Skill]  # 初始自带技能
-  equip_types: Array[String]   # 可装备类型
-  move_type: "foot" | "armored" | "flying" | "mounted"
-```
-
-**初始职业示例（4个基础，覆盖不同战术位）：**
-
-| 职业 | 定位 | 移动 | 特点 |
-|------|------|------|------|
-| 战士 | 近战坦克 | 3格 | 高HP/防御, 嘲讽/护盾技能 |
-| 弓手 | 远程输出 | 3格 | 长射程, 对空特效 |
-| 法师 | 范围控制 | 2格 | AOE魔法, 低HP |
-| 盗贼 | 机动刺杀 | 5格 | 高速度, 背刺加成, 低防 |
-
-### 4.2 Build多样性来源（Roguelite层面）
-
-每次Run中通过以下途径获取Build差异化：
-- **技能获取**：战斗奖励/商店选择新技能装备到角色
-- **遗物/被动**：全局增益（类杀戮尖塔遗物）
-- **装备**：武器/防具影响属性和技能
-- **技能槽位限制**：角色只能装备N个主动技能，迫使选择
-
-```
-UnitBuild:
-  class: Class
-  level: int
-  equipped_skills: Array[Skill]  # 有限槽位（如4个）
-  weapon: Weapon
-  armor: Armor
-  relics: Array[Relic]           # 被动遗物
+1. 命中判定 → miss则跳到结束
+2. 格挡判定 → 成功=0.3修正, 跳过暴击
+3. 暴击判定 → 仅格挡失败时判定
+4. 计算伤害 → 5. 应用伤害 → 6. 命中后附加效果 → 7. 伤害后附加效果
+8. 反击（attack_type!=area, 存活, 射程可达, 未控制）→ 走1-7, 不触发反击/追击
+9. 追击（(atk.speed-def.speed)×10%, 0%~100%, 需原始命中）→ 走1-7, 不触发反击/追击
 ```
 
 ---
 
-## 5. 敌人与AI系统
+## 4. 技能与射程（→ 04-skills-and-range.md）
 
-### 5.1 AI行为模式
-
-10×10的小地图 + 少量单位 = AI可以做得简单但有效。
-
-```
-AIBehavior: enum
-  AGGRESSIVE   # 优先攻击最近/血最少的目标
-  DEFENSIVE    # 守在某个区域，被接近才反击
-  SUPPORT      # 优先治疗/Buff队友
-  HIT_AND_RUN  # 攻击后尽量拉开距离
-  BOSS         # 特殊行动模式（固定技能循环）
-
-EnemyUnit extends Unit:
-  ai_behavior: AIBehavior
-  target_priority: "nearest" | "lowest_hp" | "highest_threat" | "specific_class"
-```
-
-### 5.2 AI决策流程（简化版）
-
-```
-AI行动:
-  1. 计算所有可能的 (移动目标格, 攻击目标, 使用技能) 组合
-  2. 对每个组合评分:
-     score = 预期伤害 × 权重
-           + 击杀奖励（能击杀额外加分）
-           + 位置评分（背对敌人扣分，占据有利地形加分）
-           - 风险惩罚（移动到危险位置扣分）
-  3. 选择最高分组合执行
-```
-
-### 5.3 分批入场
-
-```
-WaveConfig:
-  waves: Array[Wave]
-
-Wave:
-  trigger: WaveTrigger
-  enemies: Array[EnemySpawn]
-
-WaveTrigger:
-  type: "turn" | "enemy_count" | "hp_threshold"
-  value: int   # 第N回合 / 剩余敌人≤N / Boss血量≤N%
-
-EnemySpawn:
-  unit_template: String  # 引用敌人模板ID
-  position: Vector2i     # 入场位置
-  delay: int             # 入场后的CT初始值
-```
-
----
-
-## 6. Roguelite循环：一次Run的结构
-
-### 6.1 Run流程
-
-```
-一次Run:
-  ┌─ 选择起始角色（单机选1-4个，联机各选1个）
-  │
-  ├─ [关卡1] 战斗 → 奖励选择（技能/遗物/回复 三选一）
-  ├─ [关卡2] 战斗 → 奖励选择
-  ├─ [事件] 随机事件（商店/休息/特殊遭遇）
-  ├─ [关卡3] 战斗 → 奖励选择
-  ├─ [关卡4] 精英战 → 高级奖励
-  ├─ [事件] 随机事件
-  ├─ [关卡5] Boss战
-  │
-  ├─ 进入下一幕（难度提升）...
-  │
-  └─ 最终Boss → Run结束
-```
-
-### 6.2 地图选择（杀戮尖塔式路径）
-
-```
-RunMap:
-  floors: Array[Floor]
-
-Floor:
-  nodes: Array[MapNode]
-  connections: Array[Connection]  # 节点间的路径
-
-MapNode:
-  type: "battle" | "elite" | "boss" | "shop" | "rest" | "event" | "treasure"
-  difficulty: int
-  preview: String  # 简要预览信息（如"3个近战敌人"）
-```
-
-### 6.3 Meta进度（Run间的持久升级）
-
-```
-MetaProgress:
-  currency: int                  # 死亡/通关获得的永久货币
-  unlocked_classes: Array[String]
-  unlocked_relics: Array[String] # 解锁后才会出现在Run中
-  upgrades: Dict[String, int]    # 永久升级（如+5%初始HP）
-```
-
----
-
-## 7. 联机架构
-
-### 7.1 为什么轮动制简化了联机
-
-传统战棋联机的难点是"我方回合所有单位都能操作"时的并行问题。轮动制下：
-- **任何时刻只有1个单位行动** → 只需要同步1个玩家的输入
-- 其他玩家处于"观战等待"状态
-- 类似于回合制卡牌游戏的联机模型
-
-### 7.2 指令同步模型
-
-```
-GameAction:
-  actor_id: String        # 行动单位
-  player_id: String       # 控制玩家
-  action_type: "move" | "skill" | "wait" | "item"
-  move_target: Vector2i | null
-  skill_id: String | null
-  skill_target: Vector2i | null
-
-同步流程:
-  1. TurnManager确定当前行动者 → 通知所有客户端
-  2. 对应玩家客户端进入操作状态，其他客户端等待
-  3. 玩家提交GameAction → 广播给所有客户端
-  4. 所有客户端本地执行同一GameAction → 状态一致
-  5. 回到步骤1
-```
-
-### 7.3 初期设计原则
-
-- **先做单机，但所有游戏逻辑通过GameAction驱动**
-- 单机时GameAction直接本地执行
-- 联机时GameAction通过网络发送后再执行
-- 这样联机只是给GameAction加一层网络传输，不需要重构游戏逻辑
-
-```
-# 单机模式
-func execute_action(action: GameAction):
-  game_state.apply(action)
-
-# 联机模式（未来）
-func execute_action(action: GameAction):
-  network.broadcast(action)  # 发送给所有客户端
-  # 收到确认后
-  game_state.apply(action)   # 同一套逻辑
-```
-
----
-
-## 8. 数据驱动架构
-
-### 8.1 所有内容用数据文件定义
-
-```
-/data
-  /classes
-    warrior.json
-    archer.json
-    mage.json
-    rogue.json
-  /skills
-    slash.json
-    power_strike.json
-    fireball.json
-    heal.json
-  /enemies
-    goblin.json
-    skeleton_archer.json
-    boss_dragon.json
-  /maps
-    forest_01.json
-    cave_02.json
-  /relics
-    iron_shield.json
-    speed_boots.json
-  /events
-    merchant.json
-    mysterious_shrine.json
-```
-
-### 8.2 示例：技能数据
+### 技能数据结构
 
 ```json
 {
-  "id": "fireball",
-  "name": "火球术",
-  "damage_type": "magical",
-  "power": 120,
-  "hit_bonus": 10,
-  "range": { "type": "diamond", "min": 2, "max": 4 },
-  "area": { "type": "diamond", "size": 1 },
-  "ct_cost": 25,
-  "cooldown": 2,
-  "effects": [
-    { "type": "burn", "chance": 30, "duration": 3, "damage_per_tick": 10 }
-  ],
-  "description": "向目标投掷火球，爆炸范围1格，有几率附加燃烧"
+  "id": "string",
+  "action_cost": "move|standard|swift|reaction|free",
+  "timing_constraint": "any|before_move|after_move|before_attack|after_attack",
+  "element_type": "physical|magical|holy|hybrid",
+  "attack_type": "melee|ranged|area",
+  "power": 100,
+  "range": { "type": "diamond|line|cross|self", "min": 1, "max": 1 },
+  "area": { "type": "single|diamond|line|cross|square", "size": 0 },
+  "cooldown": 0,
+  "effects": [{ "type": "string", "chance": 0, "timing": "on_hit|after_damage" }]
 }
 ```
 
-### 8.3 好处
+- `action_cost`：行动资源类型（→ 01-turn-system.md 行动资源系统）
+- `timing_constraint`：释放时机约束（默认 `"any"`，可限制移动前/后、攻击前/后）
 
-- 添加新职业/技能/敌人 = 新增JSON文件，不改代码
-- Vibe coding时AI可以直接生成JSON数据
-- 平衡调整只需改数值，不需要碰代码逻辑
+### Debuff附加公式
+
+```
+实际附加率 = skill_effect.chance × (1 - defender.resistance / 100)
+```
 
 ---
 
-## 9. 开发里程碑
+## 5. 职业系统（→ 05-class-system.md）
 
-### Phase 1: 网格原型（1-2周）
-- [ ] Godot项目搭建 + TileMap网格
-- [ ] 单位在网格上放置和显示（色块即可）
-- [ ] 点击选择单位，显示移动范围（BFS）
-- [ ] 点击目标格移动单位（A*寻路）
-- [ ] 基础地形显示（不同颜色代表不同地形）
+### 职业架构
 
-### Phase 2: 回合与战斗（2-3周）
-- [ ] CT轮动系统实现
-- [ ] 行动顺序预览UI
-- [ ] 基础攻击（单体近战）
-- [ ] 伤害公式 + 命中判定
-- [ ] 单位死亡/移除
-- [ ] 胜负判定（全灭）
+- **8基础职业**：剑士、佣兵、弓箭手、工匠、魔法师、骑士、猎人、牧师
+- **16转职方向**：每个基础职业2个（魔法师4系分支）
+- v1测试5职业：佣兵/弓箭手/魔法师/骑士/牧师
+- **不成长属性**：speed, move, block, vision
+- 转职通过天赋树特殊节点触发，选后不可更改
 
-### Phase 3: 技能与射程（2-3周）
-- [ ] 技能数据加载（JSON）
-- [ ] 射程显示（不同pattern）
-- [ ] AOE范围预览和执行
-- [ ] CT消耗权衡
-- [ ] 2-3个技能实装测试
+### 反击系统
 
-### Phase 4: 职业与AI（2-3周）
-- [ ] 职业数据加载
-- [ ] 4个基础职业实装
-- [ ] 敌方AI基础版（评分系统）
-- [ ] 敌人分批入场
-- [ ] 完整一场战斗可玩
+```
+条件: attack_type != "area" AND 目标存活 AND 未被控制 AND 射程可达
+方式: 普通攻击（走完整结算），不触发二次反击，不触发追击
+```
 
-### Phase 5: Roguelite框架（3-4周）
-- [ ] Run流程管理器
-- [ ] 路径选择地图
-- [ ] 战斗奖励（技能/遗物选择）
-- [ ] 商店/休息事件
-- [ ] Meta进度存储
-- [ ] 完整一次Run可玩
+### 追击系统
 
-### Phase 6: 联机（4-6周）
-- [ ] GameAction网络序列化
-- [ ] P2P连接（Godot高层API或Steam）
-- [ ] 行动同步
-- [ ] 等待/超时处理
-- [ ] 联机角色选择
-- [ ] 联机测试与调试
+```
+概率: (attacker.speed - defender.speed) × 10%  (0%~100%)
+条件: 攻击方存活 AND 原始攻击命中
+方式: 普通攻击（走完整结算），不触发反击，不触发二次追击
+时机: 反击之后
+```
+
+全职业通用，剑士系为核心受益职业。
+
+### Build构成
+
+```
+UnitBuild = 职业 + 天赋树（骨架） + 装备 + 随机技能/遗物（血肉）
+```
 
 ---
 
-## 10. Godot项目结构建议
+## 6. 敌人与AI（→ 06-enemy-and-ai.md）
+
+### AI行为模式
+
+| 模式 | 说明 |
+|------|------|
+| AGGRESSIVE | 优先攻击最近/血最少目标 |
+| DEFENSIVE | 守区域，被接近才反击 |
+| SUPPORT | 优先治疗/Buff队友 |
+| HIT_AND_RUN | 攻击后拉开距离 |
+| BOSS | 固定技能循环 |
+
+### 分批入场
+
+敌人按波次触发入场（回合数/剩余数量/Boss血量阈值）。
+
+---
+
+## 7. Run循环与Meta（→ 07-run-loop.md）
+
+### Run结构
 
 ```
-project/
-├── scenes/
-│   ├── battle/
-│   │   ├── BattleScene.tscn      # 战斗主场景
-│   │   ├── Grid.tscn              # 网格系统
-│   │   ├── Unit.tscn              # 单位场景
-│   │   └── UI/
-│   │       ├── TurnOrderBar.tscn  # 行动顺序条
-│   │       ├── ActionMenu.tscn    # 行动菜单
-│   │       └── DamagePopup.tscn   # 伤害数字
-│   ├── roguelite/
-│   │   ├── RunMap.tscn            # 路径选择
-│   │   ├── RewardScreen.tscn      # 奖励选择
-│   │   └── ShopScreen.tscn        # 商店
-│   └── menus/
-│       ├── MainMenu.tscn
-│       └── CharacterSelect.tscn
-├── scripts/
-│   ├── core/
-│   │   ├── grid.gd                # 网格逻辑
-│   │   ├── pathfinding.gd         # 寻路
-│   │   ├── turn_manager.gd        # 回合管理
-│   │   ├── battle_manager.gd      # 战斗流程
-│   │   ├── damage_calculator.gd   # 伤害计算
-│   │   └── game_action.gd         # 行动指令定义
-│   ├── units/
-│   │   ├── unit.gd                # 单位基类
-│   │   ├── unit_stats.gd          # 属性系统
-│   │   └── skill_executor.gd      # 技能执行
-│   ├── ai/
-│   │   └── enemy_ai.gd            # AI决策
-│   ├── roguelite/
-│   │   ├── run_manager.gd         # Run流程
-│   │   ├── relic_system.gd        # 遗物系统
-│   │   └── reward_generator.gd    # 奖励生成
-│   └── network/
-│       └── network_manager.gd     # 联机管理（后期）
-├── data/
-│   ├── classes/
-│   ├── skills/
-│   ├── enemies/
-│   ├── maps/
-│   └── relics/
-└── assets/
-    ├── sprites/    # 后期替换
-    ├── tilesets/
-    ├── ui/
-    └── audio/
+一次Run = 3大关 × 10小关（含战斗/事件/精英/Boss）
+准备阶段 → 战斗 → 奖励选择 → 城镇建设 → 下一关
 ```
+
+### Meta进度原则
+
+**核心原则：Meta = 横向解锁（更多选择），绝不纵向强化（数值提升）**
+
+- ✓ 解锁新职业/转职/遗物/建筑
+- ✓ 便利性升级（经济/信息层面）
+- ✗ 起始HP/攻击力加成
+- ✗ 因Meta不足导致核心机制缺失
+
+---
+
+## 8. 联机架构（→ 08-network.md）
+
+- Godot High-Level Multiplayer API，Host-Client模型
+- 所有操作封装为GameAction，联机时广播同步
+- 叠加层设计：不改变游戏逻辑，单机时可完全忽略
+
+---
+
+## 9. 数据架构（→ 09-data-architecture.md）
+
+```
+data/
+├── classes/    # 职业定义
+├── skills/     # 技能定义
+├── enemies/    # 敌人模板
+├── maps/       # 地图配置
+├── relics/     # 遗物定义
+├── buildings/  # 建筑定义
+├── waves/      # 波次配置
+└── events/     # 事件配置
+```
+
+新增游戏内容 = 新增JSON文件，不改代码。
+
+---
+
+## 10. 城镇建设（→ 11-town-building.md）
+
+- **6种战场建筑**：哨塔/要塞/拒马/生命泉水/巨弩/魔法塔
+- **四种子类型**：通用/限制/阻挡/范围
+- **建筑耐久**：按伤害类型固定扣减，不走常规伤害公式
+- **占据机制**：符合条件的单位停留即自动占据
+- 摧毁变废墟，准备阶段消耗金币修复
+
+---
+
+## 11. 天赋树（→ 12-talent-tree.md，文档完善中）
+
+- 每次Run重置，重新选择路径
+- Meta解锁可选范围，Run中获得天赋点解锁节点
+- 包含被动特性、主动技能、转职节点
+- 初始天赋区域包含1个转职的完整核心玩法
+- **设计工具已完成**：tools/talent-tree-editor.html（Canvas图编辑器）
+
+---
+
+## 12. 系统分层
+
+```
+Layer 4 (Meta层):   07-Run循环  ←→  11-城镇建设
+Layer 3 (角色层):   05-职业系统  ←→  06-敌人与AI  ←→ 12-天赋树
+Layer 2 (战斗层):   01-回合  →  04-技能  →  03-伤害计算
+Layer 1 (基础层):   02-网格与地图
+Layer 0 (数据层):   09-数据架构
+叠加层:             08-联机架构（不改变游戏逻辑）
+```
+
+开发顺序自下而上：Layer 0/1 → Layer 2 → Layer 3 → Layer 4 → 叠加层
+
+---
+
+## 13. 设计哲学
+
+1. **一般难度要爽，高难度要有深度**：多乘区体系支撑BD多样性
+2. **Meta横向不纵向**：解锁更多选择，不解锁更强数值
+3. **天赋是骨架，随机是血肉**：可控方向规划 + Roguelite随机惊喜
+4. **属性全透明**：加法模型命中/暴击，玩家可精确计算
+5. **城镇建设是核心差异化**：金币在角色强化和建筑投资之间抉择
+6. **转职是方向选择非数值提升**：每个转职开辟不同玩法思路
+7. **行动资源即策略深度**：每回合有限的行动资源（移动/攻击/迅捷）迫使玩家在技能间抉择，技能不是越多越好

@@ -1,0 +1,29 @@
+# Godot
+.godot/
+*.import
+export_presets.cfg
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+*.swp
+*.swo
+
+# AI Agent 运行时配置（本地）
+.claude/*
+!.claude/skills/
+.cursor/*
+!.cursor/rules/
+.mcp.json
+# 注：CLAUDE.md / AGENTS.md / .cursorrules / .claude/skills/ / .cursor/rules/ 为项目级 AI 指令，纳入版本控制
+# 注：.mcp.json 含 API Key，禁止入库
+
+# 编辑器 workspace 数据（天赋树编辑器输出等）
+/data/talent-tree/
+
+# Windows reserved device names
+nul

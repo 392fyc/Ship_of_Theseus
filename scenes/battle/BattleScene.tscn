@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://b2nulo4rfogvu"]
+
+[ext_resource type="Script" uid="uid://o0qrfxjnopia" path="res://scripts/core/battle_manager.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://c4gq4p1lw5xhg" path="res://scripts/core/turn_manager.gd" id="2_turn_mgr"]
+[ext_resource type="Script" path="res://scripts/battle/battle_scene.gd" id="3_scene_script"]
+
+[node name="BattleScene" type="Node2D" unique_id=369746598]
+script = ExtResource("3_scene_script")
+
+[node name="BattleManager" type="Node" parent="." unique_id=1819233230]
+script = ExtResource("1_script")
+
+[node name="TurnManager" type="Node" parent="BattleManager" unique_id=1192966648]
+script = ExtResource("2_turn_mgr")
+
+[node name="TerrainLayer" type="Node2D" parent="BattleManager" unique_id=463354927]
+
+[node name="HighlightLayer" type="Node2D" parent="BattleManager" unique_id=1683005674]
+
+[node name="PopupLayer" type="Node2D" parent="BattleManager"]
+z_index = 50
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="ResultOverlay" type="ColorRect" parent="UILayer"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="ResultLabel" type="Label" parent="UILayer"]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 64
+horizontal_alignment = 1
+vertical_alignment = 1

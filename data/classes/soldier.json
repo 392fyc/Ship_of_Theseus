@@ -1,0 +1,32 @@
+{
+  "id": "soldier",
+  "name": "仆兵",
+  "base_stats": {
+    "HP": 28,
+    "STR": 8,
+    "MAG": 3,
+    "DEX": 6,
+    "SPD": 7,
+    "LCK": 4,
+    "DEF": 6,
+    "RES": 3
+  },
+  "growth_rates": {
+    "HP": 50,
+    "STR": 45,
+    "MAG": 10,
+    "DEX": 40,
+    "LCK": 30,
+    "DEF": 35,
+    "RES": 15
+  },
+  "MOV": 3,
+  "VIS": 3,
+  "attack_type": "melee",
+  "skill_ids": [
+    "soldier_slash",
+    "soldier_shield_bash",
+    "soldier_rally"
+  ],
+  "description": "近战均衡的入门职业，兼顾输出与生存。"
+}

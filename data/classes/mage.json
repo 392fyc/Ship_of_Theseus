@@ -1,0 +1,32 @@
+{
+  "id": "mage",
+  "name": "魔法师",
+  "base_stats": {
+    "HP": 22,
+    "STR": 2,
+    "MAG": 10,
+    "DEX": 5,
+    "SPD": 6,
+    "LCK": 5,
+    "DEF": 3,
+    "RES": 7
+  },
+  "growth_rates": {
+    "HP": 35,
+    "STR": 10,
+    "MAG": 50,
+    "DEX": 35,
+    "LCK": 35,
+    "DEF": 15,
+    "RES": 40
+  },
+  "MOV": 2,
+  "VIS": 3,
+  "attack_type": "ranged",
+  "skill_ids": [
+    "mage_fireball",
+    "mage_ice_bolt",
+    "mage_mana_shield"
+  ],
+  "description": "高魔法输出职业，擅长范围清场但防御薄弱。"
+}

@@ -1,0 +1,37 @@
+{
+  "id": "goblin_shaman",
+  "name": "哥布林萨满",
+  "base_stats": {
+    "HP": 18,
+    "STR": 1,
+    "MAG": 6,
+    "DEX": 4,
+    "SPD": 4,
+    "LCK": 3,
+    "DEF": 2,
+    "RES": 6
+  },
+  "MOV": 2,
+  "VIS": 3,
+  "attack_type": "ranged",
+  "skill_ids": [
+    "cleric_heal",
+    "cleric_bless",
+    "mage_ice_bolt"
+  ],
+  "ai_behavior": "SUPPORT",
+  "loot_table": [
+    {
+      "type": "gold",
+      "amount": 12,
+      "chance": 100
+    },
+    {
+      "type": "material",
+      "id": "shaman_totem",
+      "amount": 1,
+      "chance": 30
+    }
+  ],
+  "description": "后排支援单位，优先治疗与增益队友。"
+}

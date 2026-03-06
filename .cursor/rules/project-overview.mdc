@@ -1,0 +1,22 @@
+---
+description: Ship of Theseus project overview and tech stack
+alwaysApply: true
+---
+
+# 项目概述
+
+战棋RPG + Roguelite + 城镇建设，Godot 4.6 (GDScript)。
+
+| 层 | 技术 |
+|---|---|
+| 引擎 | Godot 4.6 (GDScript) |
+| 数据 | JSON驱动（游戏内容全JSON，代码只处理逻辑） |
+| 联机 | Godot High-Level Multiplayer API, Host-Client |
+| 架构 | GameAction指令驱动（联机广播同步） |
+
+## 知识库
+
+设计文档正本：Obsidian Vault `D:\ShipOfTheseus\ShipOfTheseus-KB\`
+- 通过 MCP 工具（`obsidian_*`）访问
+- `dev_doc/` 已归档不再更新
+- 游戏规则、公式、设计决策 → 查 KB
