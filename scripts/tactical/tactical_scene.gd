@@ -1,7 +1,7 @@
 extends Node2D
-## BattleScene controller: spawns units, starts battle, handles victory/defeat.
+## TacticalScene controller: spawns units, starts battle, handles victory/defeat.
 
-@onready var battle_manager: BattleManager = $BattleManager
+@onready var tactical_manager: TacticalManager = $TacticalManager
 @onready var result_overlay: ColorRect = $UILayer/ResultOverlay
 @onready var result_label: Label = $UILayer/ResultLabel
 
@@ -26,29 +26,29 @@ var _battle_over: bool = false
 
 
 func _ready() -> void:
-	battle_manager.initialize_battle("forest_01")
+	tactical_manager.initialize_battle("forest_01")
 
 	for cfg: Dictionary in PLAYER_UNITS:
 		var pos: Vector2i = cfg["pos"]
-		battle_manager.spawn_unit(cfg["class_id"], pos, "player")
+		tactical_manager.spawn_unit(cfg["class_id"], pos, "player")
 
 	for cfg: Dictionary in ENEMY_UNITS:
 		var pos: Vector2i = cfg["pos"]
-		battle_manager.spawn_unit(cfg["class_id"], pos, "enemy")
+		tactical_manager.spawn_unit(cfg["class_id"], pos, "enemy")
 
-	print("[BattleScene] Units spawned: %d" % battle_manager.units.size())
+	print("[TacticalScene] Units spawned: %d" % tactical_manager.units.size())
 
-	battle_manager.unit_killed.connect(_on_unit_killed)
+	tactical_manager.unit_killed.connect(_on_unit_killed)
 
 	_turn_order_bar = TurnOrderBar.new()
 	$UILayer.add_child(_turn_order_bar)
-	battle_manager.turn_manager.turn_started.connect(_on_turn_changed)
-	battle_manager.turn_manager.turn_ended.connect(_on_turn_changed)
+	tactical_manager.turn_manager.turn_started.connect(_on_turn_changed)
+	tactical_manager.turn_manager.turn_ended.connect(_on_turn_changed)
 
 	result_overlay.visible = false
 	result_label.visible = false
 
-	battle_manager.start_battle()
+	tactical_manager.start_battle()
 
 
 # ── Victory / Defeat ─────────────────────────────────
@@ -60,14 +60,14 @@ func _on_turn_changed(_unit: Unit) -> void:
 func _refresh_turn_order() -> void:
 	if _turn_order_bar == null:
 		return
-	var queue := battle_manager.turn_manager.get_display_queue()
+	var queue := tactical_manager.turn_manager.get_display_queue()
 	_turn_order_bar.update_queue(queue,
-		battle_manager.turn_manager.current_unit)
+		tactical_manager.turn_manager.current_unit)
 
 
 func _on_unit_killed(unit: Unit) -> void:
-	print("[BattleScene] Unit killed: %s (%s) | remaining: %d" % [
-		unit.unit_name, unit.faction, battle_manager.units.size()])
+	print("[TacticalScene] Unit killed: %s (%s) | remaining: %d" % [
+		unit.unit_name, unit.faction, tactical_manager.units.size()])
 	_refresh_turn_order.call_deferred()
 	if _battle_over:
 		return
@@ -77,7 +77,7 @@ func _on_unit_killed(unit: Unit) -> void:
 func _check_battle_end() -> void:
 	var has_player: bool = false
 	var has_enemy: bool = false
-	for u in battle_manager.units:
+	for u in tactical_manager.units:
 		if u.stats.is_alive():
 			if u.faction == "player":
 				has_player = true
@@ -92,7 +92,7 @@ func _check_battle_end() -> void:
 
 func _end_battle(result: String) -> void:
 	_battle_over = true
-	battle_manager.stop_battle()
+	tactical_manager.stop_battle()
 
 	result_overlay.visible = true
 	result_label.visible = true
@@ -101,11 +101,11 @@ func _end_battle(result: String) -> void:
 		result_label.text = "VICTORY"
 		result_label.add_theme_color_override("font_color",
 			Color(1.0, 0.85, 0.2))
-		print("[BattleScene] === VICTORY ===")
+		print("[TacticalScene] === VICTORY ===")
 	else:
 		result_label.text = "DEFEAT"
 		result_label.add_theme_color_override("font_color",
 			Color(1.0, 0.3, 0.3))
-		print("[BattleScene] === DEFEAT ===")
+		print("[TacticalScene] === DEFEAT ===")
 
 	battle_ended.emit(result)

@@ -1,23 +1,23 @@
 [gd_scene format=3 uid="uid://b2nulo4rfogvu"]
 
-[ext_resource type="Script" uid="uid://o0qrfxjnopia" path="res://scripts/core/battle_manager.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://o0qrfxjnopia" path="res://scripts/core/tactical_manager.gd" id="1_script"]
 [ext_resource type="Script" uid="uid://c4gq4p1lw5xhg" path="res://scripts/core/turn_manager.gd" id="2_turn_mgr"]
-[ext_resource type="Script" path="res://scripts/battle/battle_scene.gd" id="3_scene_script"]
+[ext_resource type="Script" path="res://scripts/tactical/tactical_scene.gd" id="3_scene_script"]
 
-[node name="BattleScene" type="Node2D" unique_id=369746598]
+[node name="TacticalScene" type="Node2D" unique_id=369746598]
 script = ExtResource("3_scene_script")
 
-[node name="BattleManager" type="Node" parent="." unique_id=1819233230]
+[node name="TacticalManager" type="Node" parent="." unique_id=1819233230]
 script = ExtResource("1_script")
 
-[node name="TurnManager" type="Node" parent="BattleManager" unique_id=1192966648]
+[node name="TurnManager" type="Node" parent="TacticalManager" unique_id=1192966648]
 script = ExtResource("2_turn_mgr")
 
-[node name="TerrainLayer" type="Node2D" parent="BattleManager" unique_id=463354927]
+[node name="TerrainLayer" type="Node2D" parent="TacticalManager" unique_id=463354927]
 
-[node name="HighlightLayer" type="Node2D" parent="BattleManager" unique_id=1683005674]
+[node name="HighlightLayer" type="Node2D" parent="TacticalManager" unique_id=1683005674]
 
-[node name="PopupLayer" type="Node2D" parent="BattleManager"]
+[node name="PopupLayer" type="Node2D" parent="TacticalManager"]
 z_index = 50
 
 [node name="UILayer" type="CanvasLayer" parent="."]

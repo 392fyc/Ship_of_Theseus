@@ -1,7 +1,7 @@
 class_name EnemyAI
 extends RefCounted
 ## AGGRESSIVE AI: move toward and attack the nearest player unit.
-## All decisions are returned as GameAction arrays for BattleManager to execute,
+## All decisions are returned as GameAction arrays for TacticalManager to execute,
 ## keeping the pattern compatible with multiplayer broadcast.
 
 

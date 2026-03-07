@@ -1,4 +1,4 @@
-class_name BattleManager
+class_name TacticalManager
 extends Node
 
 @onready var turn_manager: TurnManager = $TurnManager
@@ -28,12 +28,12 @@ func _ready() -> void:
 	turn_manager.round_ended.connect(_on_round_ended)
 
 
-# ── Public API (called by battle_scene.gd) ───────────
+# ── Public API (called by tactical_scene.gd) ─────────
 
 func initialize_battle(map_id: String) -> void:
 	var map_data: Dictionary = DataLoader.maps.get(map_id, {})
 	if map_data.is_empty():
-		push_error("[BattleManager] Map not found: " + map_id)
+		push_error("[TacticalManager] Map not found: " + map_id)
 		return
 	grid.initialize(map_data)
 	_render_terrain()
@@ -60,9 +60,9 @@ func spawn_unit(class_id: String, spawn_pos: Vector2i,
 	if class_data.is_empty():
 		class_data = DataLoader.enemies.get(class_id, {})
 	if class_data.is_empty():
-		push_error("[BattleManager] Class/enemy not found: " + class_id)
+		push_error("[TacticalManager] Class/enemy not found: " + class_id)
 		return null
-	var unit_scene := preload("res://scenes/battle/Unit.tscn")
+	var unit_scene := preload("res://scenes/tactical/Unit.tscn")
 	var unit: Unit = unit_scene.instantiate()
 	unit.faction = faction
 	add_child(unit)
@@ -75,7 +75,7 @@ func spawn_unit(class_id: String, spawn_pos: Vector2i,
 
 
 func _on_unit_died(unit: Unit) -> void:
-	print("[BattleManager] %s (%s) died at %s | HP=%d" % [
+	print("[TacticalManager] %s (%s) died at %s | HP=%d" % [
 		unit.unit_name, unit.faction, unit.grid_position, unit.stats.hp])
 	grid.remove_unit(unit)
 	units.erase(unit)

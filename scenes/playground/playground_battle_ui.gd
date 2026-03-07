@@ -1,7 +1,7 @@
 extends Node2D
 ## Battle UI Playground — 3 Proposals (A / B / C)
 ## F6 运行此场景，横向对比 3 套 Battle UI 风格。
-## 所有数据为 mock，不依赖 BattleManager / DataLoader。
+## 所有数据为 mock，不依赖 TacticalManager / DataLoader。
 
 # ══════════════════════════════════════════════════════════════════
 #  LAYOUT
