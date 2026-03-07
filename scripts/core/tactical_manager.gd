@@ -238,24 +238,19 @@ func _show_attack_highlights() -> void:
 
 
 func _add_highlight(cell_pos: Vector2i, fill_color: Color, border_color: Color) -> void:
-	var cell_size := Vector2(Grid.CELL_SIZE)
-	var world_pos: Vector2 = grid.grid_to_world(cell_pos) - cell_size / 2.0
+	var center: Vector2 = grid.grid_to_world(cell_pos)
+	var points: PackedVector2Array = _diamond_points(center)
 
-	var rect := ColorRect.new()
-	rect.color = fill_color
-	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	rect.size = cell_size
-	rect.position = world_pos
-	highlight_layer.add_child(rect)
+	var poly := Polygon2D.new()
+	poly.polygon = points
+	poly.color = fill_color
+	highlight_layer.add_child(poly)
 
-	var border := ReferenceRect.new()
-	border.size = cell_size
-	border.position = world_pos
-	border.border_color = border_color
-	border.border_width = HIGHLIGHT_BORDER_WIDTH
-	border.editor_only = false
-	border.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	highlight_layer.add_child(border)
+	var line := Line2D.new()
+	line.points = PackedVector2Array([points[0], points[1], points[2], points[3], points[0]])
+	line.width = HIGHLIGHT_BORDER_WIDTH
+	line.default_color = border_color
+	highlight_layer.add_child(line)
 
 
 func _clear_highlights() -> void:
@@ -418,39 +413,46 @@ func _render_terrain() -> void:
 	for child in terrain_layer.get_children():
 		child.queue_free()
 
-	var cell_size := Vector2(Grid.CELL_SIZE)
-
 	for row in grid.height:
 		for col in grid.width:
 			var cell := grid.get_cell(Vector2i(col, row))
 			if cell == null:
 				continue
-			var world_pos: Vector2 = grid.grid_to_world(Vector2i(col, row)) \
-				- cell_size / 2.0
+			var center: Vector2 = grid.grid_to_world(Vector2i(col, row))
+			var points: PackedVector2Array = _diamond_points(center)
 
-			var rect := ColorRect.new()
-			rect.color = TERRAIN_COLORS.get(cell.terrain, Color.WHITE)
-			rect.size = cell_size
-			rect.position = world_pos
-			rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			terrain_layer.add_child(rect)
+			var poly := Polygon2D.new()
+			poly.polygon = points
+			poly.color = TERRAIN_COLORS.get(cell.terrain, Color.WHITE)
+			terrain_layer.add_child(poly)
 
-			var border := ReferenceRect.new()
-			border.size = cell_size
-			border.position = world_pos
-			border.border_color = Color(0.0, 0.0, 0.0, 0.25)
-			border.border_width = 1.0
-			border.editor_only = false
-			border.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			terrain_layer.add_child(border)
+			var line := Line2D.new()
+			line.points = PackedVector2Array([points[0], points[1], points[2], points[3], points[0]])
+			line.width = 1.0
+			line.default_color = Color(0.0, 0.0, 0.0, 0.25)
+			terrain_layer.add_child(line)
 
 			var label_text: String = TERRAIN_LABELS.get(cell.terrain, "")
 			if label_text != "":
 				var label := Label.new()
 				label.text = label_text
-				label.position = world_pos + Vector2(2, 1)
+				label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+				label.size = Vector2(Grid.TILE_WIDTH, Grid.TILE_HEIGHT)
+				label.position = center - label.size / 2.0
 				label.add_theme_font_size_override("font_size", 11)
 				label.add_theme_color_override("font_color",
 					Color(1, 1, 1, 0.6))
 				label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 				terrain_layer.add_child(label)
+
+
+func _diamond_points(center: Vector2) -> PackedVector2Array:
+	var hw: float = Grid.TILE_WIDTH / 2.0
+	var hh: float = Grid.TILE_HEIGHT / 2.0
+	return PackedVector2Array([
+		center + Vector2(0.0, -hh),
+		center + Vector2(hw, 0.0),
+		center + Vector2(0.0, hh),
+		center + Vector2(-hw, 0.0),
+	])
