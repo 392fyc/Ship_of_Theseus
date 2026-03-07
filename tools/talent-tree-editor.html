@@ -2250,13 +2250,14 @@ function _applyAutoLayout() {
 
   const layerGap = 120;
   const nodeGap = 140;
+  const maxLayerIdx = layers.length - 1;
   layers.forEach((layer, li) => {
     const totalWidth = (layer.length - 1) * nodeGap;
     layer.forEach((id, ni) => {
       const node = treeData.nodes.find(n => n.id === id);
       if (node) {
         node.x = -totalWidth / 2 + ni * nodeGap + 400;
-        node.y = li * layerGap + 80;
+        node.y = (maxLayerIdx - li) * layerGap + 80;
       }
     });
   });
@@ -2264,7 +2265,7 @@ function _applyAutoLayout() {
   const unvisited = treeData.nodes.filter(n => !visited.has(n.id));
   unvisited.forEach((n, i) => {
     n.x = 400 + i * nodeGap;
-    n.y = layers.length * layerGap + 80;
+    n.y = (maxLayerIdx + 1) * layerGap + 80;
   });
 }
 
