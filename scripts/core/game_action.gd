@@ -10,10 +10,10 @@ var target_unit: Unit
 var data: Dictionary = {}
 
 
-static func make_move(actor: Unit, to: Vector2i) -> GameAction:
+static func make_move(unit: Unit, to: Vector2i) -> GameAction:
 	var a := GameAction.new()
 	a.type = Type.MOVE
-	a.actor = actor
+	a.actor = unit
 	a.target_pos = to
 	return a
 
@@ -40,8 +40,8 @@ static func make_attack(attacker: Unit, target: Unit,
 	return a
 
 
-static func make_end_turn(actor: Unit) -> GameAction:
+static func make_end_turn(unit: Unit) -> GameAction:
 	var a := GameAction.new()
 	a.type = Type.END_TURN
-	a.actor = actor
+	a.actor = unit
 	return a

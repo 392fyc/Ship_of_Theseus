@@ -11,7 +11,6 @@ var units: Array = []
 var battle_active: bool = false
 
 signal battle_started
-signal unit_action_completed(unit: Unit)
 signal unit_killed(unit: Unit)
 
 enum InputState { IDLE, UNIT_SELECTED, ATTACK_SELECT, ANIMATING }
