@@ -48,6 +48,7 @@ const HP_LOW_COLOR   := Color(0.82, 0.55, 0.15)
 const HP_CRIT_COLOR  := Color(0.82, 0.18, 0.18)
 const HP_BAR_BG      := Color(0.15, 0.15, 0.18)
 const HP_BAR_BORDER  := Color(0.06, 0.06, 0.08)
+const UNIT_ICON_SCALE: Vector2 = Vector2(0.45, 0.45)
 
 # ── 节点引用 ─────────────────────────────────────────
 @onready var sprite: AnimatedSprite2D = $Sprite
@@ -126,6 +127,7 @@ func mark_done() -> void:
 
 func _apply_visuals() -> void:
 	sprite.self_modulate = FACTION_COLORS.get(faction, Color.WHITE)
+	sprite.scale = UNIT_ICON_SCALE
 
 	# B-style HP bar: dark bg with border
 	var bg_style := StyleBoxFlat.new()
