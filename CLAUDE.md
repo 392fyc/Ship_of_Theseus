@@ -82,6 +82,7 @@
 | ADR-004 | Four Damage Types | adr-2026-02-27-damage-type-redesign.md |
 | ADR-005 | Attribute System v1 | adr-2026-02-27-attribute-system-v1.md |
 | ADR-007 | Multi-Agent Toolchain Optimization | adr-2026-03-03-multi-agent-toolchain.md |
+| ADR-008 | Three-Layer Unit Asset Architecture and Scene Naming | adr-2026-03-07-sprite-layer-architecture.md |
 
 ---
 

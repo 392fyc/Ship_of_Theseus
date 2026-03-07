@@ -2,6 +2,8 @@ class_name Grid
 extends RefCounted
 
 const CELL_SIZE := Vector2i(64, 64)
+const TILE_WIDTH := 64
+const TILE_HEIGHT := 32
 
 signal unit_placed(unit, pos: Vector2i)
 signal unit_moved(unit, from: Vector2i, to: Vector2i)
@@ -10,6 +12,7 @@ signal unit_removed(unit, pos: Vector2i)
 var cells: Array = []   # cells[row][col] = cells[y][x]
 var width:  int = 0
 var height: int = 0
+var _iso_offset: Vector2 = Vector2.ZERO
 
 
 func initialize(map_data: Dictionary) -> void:
@@ -33,6 +36,7 @@ func initialize(map_data: Dictionary) -> void:
 		var c := get_cell(Vector2i(pos[0], pos[1]))
 		if c:
 			c.special_terrain = st
+	_update_iso_offset()
 	print("[Grid] Initialized %dx%d map: %s" % [width, height, map_data.get("id", "?")])
 
 
@@ -60,13 +64,21 @@ func get_neighbors(pos: Vector2i) -> Array[Vector2i]:
 # ── 坐标转换 ─────────────────────────────────────────
 
 func grid_to_world(pos: Vector2i) -> Vector2:
-	return Vector2(pos.x * CELL_SIZE.x + CELL_SIZE.x / 2.0,
-				   pos.y * CELL_SIZE.y + CELL_SIZE.y / 2.0)
+	var sx: float = float(pos.x - pos.y) * TILE_WIDTH / 2.0 + _iso_offset.x
+	var sy: float = float(pos.x + pos.y) * TILE_HEIGHT / 2.0 + _iso_offset.y
+	return Vector2(sx, sy)
 
 
 func world_to_grid(world_pos: Vector2) -> Vector2i:
-	return Vector2i(int(world_pos.x) / CELL_SIZE.x,
-					int(world_pos.y) / CELL_SIZE.y)
+	var wx: float = world_pos.x - _iso_offset.x
+	var wy: float = world_pos.y - _iso_offset.y
+	var gx: float = (wx / (TILE_WIDTH / 2.0) + wy / (TILE_HEIGHT / 2.0)) / 2.0
+	var gy: float = (wy / (TILE_HEIGHT / 2.0) - wx / (TILE_WIDTH / 2.0)) / 2.0
+	return Vector2i(roundi(gx), roundi(gy))
+
+
+func _update_iso_offset() -> void:
+	_iso_offset = Vector2(float(width) * TILE_WIDTH / 2.0, 64.0)
 
 
 # ── Unit 放置（双向引用，ADR-003）─────────────────────

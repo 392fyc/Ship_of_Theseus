@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="ShipOfTheseus"
 config/description="战棋RPG + Roguelite + 城镇建设"
-run/main_scene="res://scenes/battle/BattleScene.tscn"
+run/main_scene="res://scenes/tactical/TacticalScene.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 
 [autoload]

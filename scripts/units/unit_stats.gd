@@ -60,7 +60,7 @@ func get_avoid(terrain_evade_bonus: int = 0) -> int:
 
 
 func get_crit(weapon_crit: int = 0) -> int:
-	return weapon_crit + dex / 2
+	return weapon_crit + int(dex / 2.0)
 
 
 func get_crit_avoid() -> int:
