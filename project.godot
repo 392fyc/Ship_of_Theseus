@@ -38,5 +38,5 @@ enabled=PackedStringArray("res://addons/godot_mcp/plugin.cfg")
 
 bind_mode=0
 custom_bind_ip=""
-port_override_enabled=false
+port_override_enabled=true
 port_override=6550

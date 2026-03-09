@@ -92,3 +92,5 @@ show_percentage = false
 value = 100.0
 theme_override_styles/fill = SubResource("StyleBoxFlat_fill")
 theme_override_styles/background = SubResource("StyleBoxFlat_bg")
+
+[node name="StatusIcons" type="Node2D" parent="."]

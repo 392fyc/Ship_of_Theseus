@@ -1,7 +1,7 @@
 class_name GameAction
 extends RefCounted
 
-enum Type { MOVE, ATTACK, USE_SWIFT, END_TURN }
+enum Type { MOVE, ATTACK, SKILL, USE_SWIFT, END_TURN }
 
 var type: GameAction.Type
 var actor: Unit
@@ -37,6 +37,31 @@ static func make_attack(attacker: Unit, target: Unit,
 		"allow_counter": true,
 		"allow_pursuit": true,
 	}
+	return a
+
+
+static func make_skill(user: Unit, skill_id: String,
+		skill_target_pos: Vector2i = Vector2i.ZERO,
+		target: Unit = null,
+		payload: Dictionary = {}) -> GameAction:
+	var a := GameAction.new()
+	a.type = Type.SKILL
+	a.actor = user
+	a.target_pos = skill_target_pos
+	a.target_unit = target
+	a.data = payload.duplicate(true)
+	a.data["skill_id"] = skill_id
+	return a
+
+
+static func make_use_swift(user: Unit, skill_id: String = "",
+		payload: Dictionary = {}) -> GameAction:
+	var a := GameAction.new()
+	a.type = Type.USE_SWIFT
+	a.actor = user
+	a.data = payload.duplicate(true)
+	if skill_id != "":
+		a.data["skill_id"] = skill_id
 	return a
 
 

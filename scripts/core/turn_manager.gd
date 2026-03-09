@@ -5,6 +5,10 @@ signal turn_started(unit: Unit)
 signal turn_ended(unit: Unit)
 signal round_ended()
 
+enum Difficulty { LOW, NORMAL, HIGH, HIGHEST }
+
+@export var difficulty: Difficulty = Difficulty.LOW
+
 var _queue: Array[Unit] = []
 var _all_units: Array[Unit] = []
 var current_unit: Unit = null
@@ -80,12 +84,14 @@ func _advance() -> void:
 	turn_started.emit(current_unit)
 
 
-# speed desc → priority desc → player first
-static func _compare_initiative(a: Unit, b: Unit) -> bool:
+# speed desc → priority desc → low diff player first / highest diff enemy first
+func _compare_initiative(a: Unit, b: Unit) -> bool:
 	if a.stats.spd != b.stats.spd:
 		return a.stats.spd > b.stats.spd
 	if a.priority != b.priority:
 		return a.priority > b.priority
 	if a.faction != b.faction:
+		if difficulty == Difficulty.HIGHEST:
+			return a.faction == "enemy"
 		return a.faction == "player"
 	return false

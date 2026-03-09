@@ -4,6 +4,7 @@ extends Node2D
 @onready var tactical_manager: TacticalManager = $TacticalManager
 @onready var result_overlay: ColorRect = $UILayer/ResultOverlay
 @onready var result_label: Label = $UILayer/ResultLabel
+@onready var return_button: Button = $UILayer/ReturnButton
 
 var _turn_order_bar: TurnOrderBar = null
 
@@ -23,6 +24,7 @@ const ENEMY_UNITS: Array[Dictionary] = [
 ]
 
 var _battle_over: bool = false
+var _turn_order_scene := preload("res://scenes/tactical/TurnOrderBar.tscn")
 
 
 func _ready() -> void:
@@ -40,13 +42,15 @@ func _ready() -> void:
 
 	tactical_manager.unit_killed.connect(_on_unit_killed)
 
-	_turn_order_bar = TurnOrderBar.new()
+	_turn_order_bar = _turn_order_scene.instantiate()
 	$UILayer.add_child(_turn_order_bar)
 	tactical_manager.turn_manager.turn_started.connect(_on_turn_changed)
 	tactical_manager.turn_manager.turn_ended.connect(_on_turn_changed)
+	return_button.pressed.connect(_on_return_pressed)
 
 	result_overlay.visible = false
 	result_label.visible = false
+	return_button.visible = false
 
 	tactical_manager.start_battle()
 
@@ -96,6 +100,7 @@ func _end_battle(result: String) -> void:
 
 	result_overlay.visible = true
 	result_label.visible = true
+	return_button.visible = true
 
 	if result == "victory":
 		result_label.text = "VICTORY"
@@ -109,3 +114,7 @@ func _end_battle(result: String) -> void:
 		print("[TacticalScene] === DEFEAT ===")
 
 	battle_ended.emit(result)
+
+
+func _on_return_pressed() -> void:
+	get_tree().reload_current_scene()

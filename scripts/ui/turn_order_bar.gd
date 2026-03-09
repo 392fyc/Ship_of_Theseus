@@ -9,13 +9,15 @@ const CURRENT_BG   := Color(1.0, 0.90, 0.40, 0.12)
 const HEADER_COLOR := Color(0.65, 0.65, 0.75)
 const NAME_COLOR   := Color.WHITE
 const INIT_COLOR   := Color(0.55, 0.55, 0.60)
+const STATUS_COLOR := Color(0.72, 0.72, 0.78)
 
 const BAR_WIDTH    := 180
-const INDICATOR_SZ := 16
+const PORTRAIT_SZ  := 24
 const ENTRY_SEP    := 2
 const FONT_NAME    := 13
 const FONT_INIT    := 11
 const FONT_HEADER  := 14
+const FONT_STATUS  := 10
 
 var _vbox: VBoxContainer
 
@@ -83,12 +85,38 @@ func _create_entry(unit: Unit, is_current: bool) -> PanelContainer:
 	hbox.mouse_filter = MOUSE_FILTER_IGNORE
 	panel.add_child(hbox)
 
-	# Faction color indicator (portrait placeholder)
-	var indicator := ColorRect.new()
-	indicator.custom_minimum_size = Vector2(float(INDICATOR_SZ), float(INDICATOR_SZ))
-	indicator.color = PLAYER_COLOR if unit.faction == "player" else ENEMY_COLOR
-	indicator.mouse_filter = MOUSE_FILTER_IGNORE
-	hbox.add_child(indicator)
+	var portrait := PanelContainer.new()
+	var portrait_style := StyleBoxFlat.new()
+	portrait_style.bg_color = PLAYER_COLOR if unit.faction == "player" else ENEMY_COLOR
+	portrait_style.corner_radius_top_left = 3
+	portrait_style.corner_radius_top_right = 3
+	portrait_style.corner_radius_bottom_left = 3
+	portrait_style.corner_radius_bottom_right = 3
+	portrait_style.content_margin_left = 0.0
+	portrait_style.content_margin_right = 0.0
+	portrait_style.content_margin_top = 0.0
+	portrait_style.content_margin_bottom = 0.0
+	portrait.add_theme_stylebox_override("panel", portrait_style)
+	portrait.custom_minimum_size = Vector2(float(PORTRAIT_SZ), float(PORTRAIT_SZ))
+	portrait.mouse_filter = MOUSE_FILTER_IGNORE
+	hbox.add_child(portrait)
+
+	var portrait_label := Label.new()
+	portrait_label.text = unit.get_short_label()
+	portrait_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	portrait_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	portrait_label.size = Vector2(float(PORTRAIT_SZ), float(PORTRAIT_SZ))
+	portrait_label.add_theme_font_size_override("font_size", FONT_NAME)
+	portrait_label.add_theme_color_override("font_color", Color.WHITE)
+	portrait_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	portrait_label.add_theme_constant_override("outline_size", 2)
+	portrait_label.mouse_filter = MOUSE_FILTER_IGNORE
+	portrait.add_child(portrait_label)
+
+	var text_box := VBoxContainer.new()
+	text_box.size_flags_horizontal = SIZE_EXPAND_FILL
+	text_box.mouse_filter = MOUSE_FILTER_IGNORE
+	hbox.add_child(text_box)
 
 	var name_lbl := Label.new()
 	name_lbl.text = unit.unit_name
@@ -96,7 +124,14 @@ func _create_entry(unit: Unit, is_current: bool) -> PanelContainer:
 	name_lbl.add_theme_color_override("font_color", NAME_COLOR)
 	name_lbl.size_flags_horizontal = SIZE_EXPAND_FILL
 	name_lbl.mouse_filter = MOUSE_FILTER_IGNORE
-	hbox.add_child(name_lbl)
+	text_box.add_child(name_lbl)
+
+	var status_lbl := Label.new()
+	status_lbl.text = unit.get_action_status_summary()
+	status_lbl.add_theme_font_size_override("font_size", FONT_STATUS)
+	status_lbl.add_theme_color_override("font_color", STATUS_COLOR)
+	status_lbl.mouse_filter = MOUSE_FILTER_IGNORE
+	text_box.add_child(status_lbl)
 
 	var init_lbl := Label.new()
 	init_lbl.text = "Init %d" % unit.stats.spd
