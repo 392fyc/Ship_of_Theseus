@@ -1,7 +1,12 @@
-# Godot
+# Godot engine cache
 .godot/
 *.import
 export_presets.cfg
+
+# Engine / dev-environment generated files
+# Add entries here when new tools generate disposable files
+*.uid
+.tmp_godot_mcp_*.txt
 
 # OS
 .DS_Store
@@ -13,16 +18,16 @@ desktop.ini
 *.swp
 *.swo
 
-# AI Agent 运行时配置（本地）
+# AI Agent runtime config (local only)
 .claude/*
 !.claude/skills/
 .cursor/*
 !.cursor/rules/
 .mcp.json
-# 注：CLAUDE.md / AGENTS.md / .cursorrules / .claude/skills/ / .cursor/rules/ 为项目级 AI 指令，纳入版本控制
-# 注：.mcp.json 含 API Key，禁止入库
+# Note: CLAUDE.md / AGENTS.md / .cursorrules / .claude/skills/ / .cursor/rules/ are project-level AI instructions, tracked in VCS
+# Note: .mcp.json contains API keys, never commit
 
-# 编辑器 workspace 数据（天赋树编辑器输出等）
+# Editor workspace data
 /data/talent-tree/
 
 # Windows reserved device names
