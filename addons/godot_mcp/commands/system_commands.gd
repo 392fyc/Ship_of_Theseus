@@ -6,6 +6,7 @@ class_name MCPSystemCommands
 func get_commands() -> Dictionary:
 	return {
 		"mcp_handshake": mcp_handshake,
+		"disconnect_client": disconnect_client,
 	}
 
 
@@ -21,6 +22,13 @@ func mcp_handshake(params: Dictionary) -> Dictionary:
 		"project_path": ProjectSettings.globalize_path("res://"),
 		"project_name": ProjectSettings.get_setting("application/config/name", ""),
 		"server_version_received": server_version
+	})
+
+
+func disconnect_client(_params: Dictionary) -> Dictionary:
+	return _success({
+		"status": "disconnecting",
+		"__disconnect_after_response": true,
 	})
 
 

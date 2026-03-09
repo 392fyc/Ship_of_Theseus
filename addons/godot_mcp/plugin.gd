@@ -260,8 +260,27 @@ func get_debugger_plugin() -> MCPDebuggerPlugin:
 
 func _on_command_received(id: String, command: String, params: Dictionary) -> void:
 	var response = await _command_router.handle_command(command, params)
+	var disconnect_after_response := false
+	var disconnect_code := WebSocketServer.CLOSE_CODE_SERVER_DISCONNECT
+	var disconnect_reason := WebSocketServer.CLOSE_REASON_SERVER_DISCONNECT
+
+	if response.has("__disconnect_after_response"):
+		disconnect_after_response = bool(response.get("__disconnect_after_response", false))
+		response.erase("__disconnect_after_response")
+
+	if response.has("__disconnect_code"):
+		disconnect_code = int(response.get("__disconnect_code", disconnect_code))
+		response.erase("__disconnect_code")
+
+	if response.has("__disconnect_reason"):
+		disconnect_reason = str(response.get("__disconnect_reason", disconnect_reason))
+		response.erase("__disconnect_reason")
+
 	response["id"] = id
 	_websocket_server.send_response(response)
+
+	if disconnect_after_response:
+		call_deferred("_disconnect_current_client_after_response", disconnect_code, disconnect_reason)
 
 
 func _on_client_connected() -> void:
@@ -301,3 +320,16 @@ func _get_addon_version() -> String:
 func on_server_version_received(version: String) -> void:
 	if _status_panel and _status_panel.has_method("set_server_version"):
 		_status_panel.set_server_version(version)
+
+
+func disconnect_current_client(code: int = WebSocketServer.CLOSE_CODE_SERVER_DISCONNECT, reason: String = WebSocketServer.CLOSE_REASON_SERVER_DISCONNECT) -> void:
+	if _websocket_server:
+		_websocket_server.disconnect_active_client(code, reason)
+
+
+func has_active_client() -> bool:
+	return _websocket_server != null and _websocket_server.has_active_client()
+
+
+func _disconnect_current_client_after_response(code: int, reason: String) -> void:
+	disconnect_current_client(code, reason)
