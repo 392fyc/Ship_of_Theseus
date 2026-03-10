@@ -1,0 +1,39 @@
+---
+description: Fill Ship of Theseus task-bundle implementation_receipt fields correctly when completing implementation work
+globs: ["*.yaml"]
+---
+
+# Task Receipt
+
+当你正在编辑 Ship of Theseus 的 `TASK-*.yaml`，且实现已经完成、需要交付或回填 `implementation_receipt` 时，遵循以下规则。
+
+## 先做什么
+
+1. 阅读当前 Task Bundle 的 `definition_of_done`、`required_evidence`、`allowed_write_scope`。
+2. 收集真实事实：执行代理、当前分支、实际改动文件、证据、文档更新、剩余风险、完成时间。
+3. 仅回填当前 Task Bundle 的 `implementation_receipt`。
+
+## 字段规则
+
+- `implementer`: 填实际代理与模型，例如 `Codex CLI (GPT-5)`。
+- `branch`: 填实际 git 分支名，不编造。
+- `summary`: 2-4 条结果导向短句，概括交付内容与关键实现决策。
+- `changed_files`: 列出本次实际修改文件；仓库内用 repo-relative，仓库外用绝对路径并注明外部配置。
+- `evidence`: 写可复核证据，优先对应 `definition_of_done` 与 `required_evidence`。
+- `docs_updated`: 只列实际更新的文档；没有则写 `[]`。
+- `residual_risks`: 只列未解决风险或限制；没有则写 `[]`。
+- `completed_at`: 使用带时区的 ISO 8601 时间戳。
+
+## 禁止事项
+
+- 不改 registry、session 文件、acceptance bundles。
+- 不把聊天过程、猜测或未执行的测试写进 receipt。
+- 不留下 `null`、`TODO`、`TBD`。
+
+## 质量检查
+
+- 8 个字段全部完整。
+- `summary` 是结果，`evidence` 是证明，二者不重复。
+- 所有路径真实存在且可定位。
+- 空字段使用 YAML 空数组 `[]`。
+- 写完后停止，等待 Main Agent 接手后续流转。
