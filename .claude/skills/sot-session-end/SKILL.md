@@ -1,115 +1,31 @@
 ---
 name: sot-session-end
-description: "End a Ship of Theseus development session by writing the session state to the KB. Use this skill when the session is ending, the user says 'session end', '会话结束', 'handoff', 'save session', or when context is running low and state needs to be preserved. Also trigger when the user asks to update current-session.md or prepare for handoff to another AI tool."
+description: "End a Ship of Theseus development session by writing session state to KB. Trigger on session end, '会话结束', 'handoff', 'save session', or when context is running low."
 ---
 
 # SOT Session End
 
-Write a compact session state snapshot to the KB for handoff to the next session or AI tool.
-
-## When to Use
-
-- Session is ending (user says "session end", "会话结束", "handoff")
-- Context window is getting full and state needs preservation
-- Switching to a different AI tool (Cursor, Codex, Antigravity)
-- User asks to "save session" or "update current-session.md"
-
 ## Protocol
 
-### Step 1: Gather Session Data
+### Step 1: Generate State Snapshot
+Gather: tasks completed, files modified, decisions made, issues found, next actions.
+Format as tables + bullets, **under 100 lines**, no narrative paragraphs.
 
-Review what was accomplished in this session:
-- Tasks completed
-- Files modified (code and KB docs)
-- Decisions made
-- Issues discovered
-- What's next
-
-### Step 2: Generate State Snapshot
-
-Use this exact template. Keep the total under 100 lines. Be ruthlessly concise.
-
-```markdown
-## Status
-- **Date**: YYYY-MM-DD
-- **Milestone**: [milestone name + status emoji]
-- **Active Task**: [current task description]
-- **Tool**: [which AI tool wrote this]
-
-## Milestone Progress
-| Milestone | Status |
-|---|---|
-| M1-M6 | Done |
-| M7 | [status] |
-
-## Task Status
-| Task | Status | Notes |
-|---|---|---|
-| [task name] | [icon] | [one-line note] |
-
-Status icons: Done, In Progress, Unlocked, Blocked, Not Started
-
-## Architecture Notes
-| Rule | Detail |
-|---|---|
-| [component] | [constraint or pattern] |
-
-Only include rules that future sessions MUST know. Remove stale rules.
-
-## ADR Registry
-| ADR | Topic | Status |
-|---|---|---|
-| ADR-NNN | [topic] | [status] |
-
-## Next Actions
-1. [immediate next step]
-2. [follow-up]
+### Step 2: Write to KB
+```
+1. Read:  D:\ShipOfTheseus\ShipOfTheseus-KB\03-AI-Context\Active-Context\current-session.md
+2. Write: D:\ShipOfTheseus\ShipOfTheseus-KB\03-AI-Context\Active-Context\current-session.md
 ```
 
-### Step 3: Write to KB
+### Step 3: Sync Task Checkboxes
+Read `02-Development/Tasks/Phase{N}-Tasks.md`, update `[ ]` → `[x]` for completed tasks.
 
-**Use this method** (most reliable):
-
-```
-1. Read tool:  D:\ShipOfTheseus\ShipOfTheseus-KB\03-AI-Context\Active-Context\current-session.md
-2. Write tool: D:\ShipOfTheseus\ShipOfTheseus-KB\03-AI-Context\Active-Context\current-session.md
-   (with the new content)
-```
-
-**Why this method**: The `Read` + `Write` combination is the most reliable write method. It avoids `obsidian_patch_content` heading-matching failures and PowerShell encoding issues. The `Read` call is required before `Write` — the Write tool will error without it.
-
-**Do NOT use**:
-- `obsidian_patch_content` — heading matching is fragile for full-file rewrites
-- PowerShell scripts — encoding issues with UTF-8 content
-- `obsidian_append_content` — appending causes dimensional explosion (the core problem we're solving)
-
-### Step 4: KB Task Sync
-
-After writing session state, compare completed work in this session against Phase1-Tasks.md checkbox states.
-
-```
-obsidian_get_file_contents("02-Development/Tasks/Phase1-Tasks.md")
-```
-
-Scan the task file for checkboxes that should be updated based on the work completed in this session:
-- If a task was completed during this session but the corresponding checkbox is still `[ ]`, update it to `[x]` using the sot-kb-write decision tree.
-- If a task was partially completed, update it to `[~]` if not already marked.
-- Only sync tasks you are confident were completed — do not guess.
-- Log which checkboxes were updated in the session summary.
-
-### Step 5: Verify
-
-After writing, read the file back to confirm:
-```
-obsidian_get_file_contents("03-AI-Context/Active-Context/current-session.md")
-```
-
-Verify it's under 100 lines and contains all critical state.
+### Step 4: Verify
+`obsidian_get_file_contents("03-AI-Context/Active-Context/current-session.md")` — confirm under 100 lines.
 
 ## Critical Rules
 
-1. **NEVER append** — always replace the entire file. Appending causes unbounded growth.
-2. **Under 100 lines** — if your snapshot exceeds this, cut non-essential content. Historical session data lives in git history, not in current-session.md.
-3. **No narrative** — use tables and bullet points, not paragraphs.
-4. **Architecture notes are for constraints only** — don't document how things work, document what future sessions must NOT do wrong.
-5. **Frontmatter**: Keep the YAML frontmatter at the top if one exists in the file.
+1. **NEVER append** — always full replace. Appending = unbounded growth.
+2. **Under 100 lines** — historical data lives in git history.
+3. **No narrative** — tables and bullets only.
+4. Architecture notes = constraints only (what NOT to do wrong).
