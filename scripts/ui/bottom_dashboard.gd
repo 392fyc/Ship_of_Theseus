@@ -218,6 +218,14 @@ const BUTTON_META: Dictionary = {
 	"end": {"title": "结束", "fill": Color(0.14, 0.07, 0.08, 1.0), "accent": Color(0.90, 0.18, 0.18, 1.0), "glyph": "end", "icon_frame": false},
 }
 
+const CHARACTER_NAMES: Dictionary = {
+	"弓箭手": "莉丝",
+	"骑士": "加里克",
+	"魔法师": "薇安",
+	"牧师": "赛琳",
+	"仆兵": "罗兰",
+}
+
 const ITEM_PLACEHOLDERS := [
 	{"name": "治疗药剂", "detail": "恢复少量生命值", "badge": "x02"},
 	{"name": "战术卷轴", "detail": "暂未开放的功能占位", "badge": "x01"},
@@ -307,10 +315,11 @@ func update_state(state: Dictionary) -> void:
 	var show_actions: bool = bool(state.get("show_actions", false)) and not is_enemy_mode
 	var show_skills: bool = bool(state.get("skills_visible", false)) and show_actions
 
-	_name_label.text = unit_name
+	var char_name: String = str(state.get("char_name", CHARACTER_NAMES.get(unit_name, unit_name)))
+	_name_label.text = char_name
 	_level_label.text = "Lv.%d" % level_value
-	_class_label.text = unit_label
-	_avatar_label.text = _build_avatar_text(unit_name, unit_label)
+	_class_label.text = unit_name
+	_avatar_label.text = _build_avatar_text(char_name, unit_label)
 	_hp_label.text = "HP %d/%d" % [hp_value, hp_max]
 	_shield_label.text = "护盾 %d" % shield_value if shield_value > 0 else ""
 	_hp_bar.hp = hp_value

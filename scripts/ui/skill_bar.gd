@@ -120,7 +120,7 @@ func _build_ui() -> void:
 	var margin: MarginContainer = MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 10)
 	margin.add_theme_constant_override("margin_right", 10)
-	margin.add_theme_constant_override("margin_top", 10)
+	margin.add_theme_constant_override("margin_top", 8)
 	margin.add_theme_constant_override("margin_bottom", 8)
 	_panel.add_child(margin)
 
@@ -143,7 +143,7 @@ func _build_ui() -> void:
 	circle_label.text = "★"
 	circle_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	circle_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	circle_label.add_theme_font_size_override("font_size", 12)
+	circle_label.add_theme_font_size_override("font_size", 11)
 	circle_label.add_theme_color_override("font_color", GOLD)
 	circle_bg.add_child(circle_label)
 
