@@ -213,8 +213,8 @@ const COLOR_STAT_ABBR: Color = Color(0.68, 0.56, 0.30, 1.0)
 
 const BUTTON_META: Dictionary = {
 	"attack": {"title": "攻击", "fill": Color(0.16, 0.11, 0.08, 1.0), "accent": Color(0.86, 0.80, 0.74, 1.0), "glyph": "attack", "icon_frame": false},
-	"skill": {"title": "技能", "fill": Color(0.10, 0.11, 0.16, 1.0), "accent": Color(0.86, 0.86, 0.94, 1.0), "glyph": "skill", "icon_frame": true},
-	"item": {"title": "道具", "fill": Color(0.13, 0.10, 0.08, 1.0), "accent": Color(0.86, 0.78, 0.68, 1.0), "glyph": "item", "icon_frame": true},
+	"skill": {"title": "技能", "fill": Color(0.10, 0.11, 0.16, 1.0), "accent": Color(0.86, 0.86, 0.94, 1.0), "glyph": "skill", "icon_frame": false},
+	"item": {"title": "道具", "fill": Color(0.13, 0.10, 0.08, 1.0), "accent": Color(0.86, 0.78, 0.68, 1.0), "glyph": "item", "icon_frame": false},
 	"end": {"title": "结束", "fill": Color(0.14, 0.07, 0.08, 1.0), "accent": Color(0.90, 0.18, 0.18, 1.0), "glyph": "end", "icon_frame": false},
 }
 
@@ -808,10 +808,18 @@ func _build_item_popup() -> Control:
 
 	_item_popup_list = VBoxContainer.new()
 	_item_popup_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_item_popup_list.size_flags_stretch_ratio = 1.0
 	_item_popup_list.add_theme_constant_override("separation", 5)
 	scroll.add_child(_item_popup_list)
 
-	scroll.get_v_scroll_bar().modulate = Color(0.0, 0.0, 0.0, 0.0)
+	# Make scrollbar zero-width but still functional for mouse-wheel scrolling.
+	var item_sb: VScrollBar = scroll.get_v_scroll_bar()
+	item_sb.custom_minimum_size.x = 0
+	var sb_empty: StyleBoxEmpty = StyleBoxEmpty.new()
+	item_sb.add_theme_stylebox_override("scroll", sb_empty)
+	item_sb.add_theme_stylebox_override("grabber", sb_empty)
+	item_sb.add_theme_stylebox_override("grabber_highlight", sb_empty)
+	item_sb.add_theme_stylebox_override("grabber_pressed", sb_empty)
 	_rebuild_item_popup_entries()
 	return popup_root
 
@@ -843,8 +851,9 @@ func _build_item_card(item_data: Dictionary) -> PanelContainer:
 	margin.add_child(row)
 
 	var icon_slot: PanelContainer = PanelContainer.new()
-	icon_slot.custom_minimum_size = Vector2(28.0, 28.0)
+	icon_slot.custom_minimum_size = Vector2(32.0, 32.0)
 	icon_slot.size_flags_horizontal = 0
+	icon_slot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	icon_slot.add_theme_stylebox_override("panel", _make_popup_icon_square_style(accent))
 	row.add_child(icon_slot)
 
@@ -1250,7 +1259,10 @@ func _make_popup_card_style(accent: Color) -> StyleBoxFlat:
 func _make_popup_icon_square_style(accent: Color) -> StyleBoxFlat:
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = COLOR_POPUP_ICON_BG
-	style.border_color = accent * Color(1.0, 1.0, 1.0, 0.35)
+	style.border_color = accent * Color(1.0, 1.0, 1.0, 0.45)
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(5)
+	# Rounded square: ~25% of the 32px icon size
+	style.set_corner_radius_all(8)
+	style.shadow_color = accent * Color(1.0, 1.0, 1.0, 0.08)
+	style.shadow_size = 2
 	return style

@@ -179,6 +179,7 @@ func _build_ui() -> void:
 
 	_list = VBoxContainer.new()
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_list.size_flags_stretch_ratio = 1.0
 	_list.add_theme_constant_override("separation", POPUP_CARD_GAP)
 	_scroll.add_child(_list)
 
@@ -192,7 +193,14 @@ func _build_ui() -> void:
 	_empty_label.add_theme_color_override("font_color", TEXT_MUTE)
 	_list.add_child(_empty_label)
 
-	_scroll.get_v_scroll_bar().modulate = Color(1.0, 1.0, 1.0, 0.0)
+	# Make scrollbar zero-width but still functional for mouse-wheel scrolling.
+	var skill_sb: VScrollBar = _scroll.get_v_scroll_bar()
+	skill_sb.custom_minimum_size.x = 0
+	var sb_empty: StyleBoxEmpty = StyleBoxEmpty.new()
+	skill_sb.add_theme_stylebox_override("scroll", sb_empty)
+	skill_sb.add_theme_stylebox_override("grabber", sb_empty)
+	skill_sb.add_theme_stylebox_override("grabber_highlight", sb_empty)
+	skill_sb.add_theme_stylebox_override("grabber_pressed", sb_empty)
 
 
 func _build_skill_card(entry: Dictionary, selected_skill_id: String) -> Control:
@@ -243,8 +251,9 @@ func _build_skill_card(entry: Dictionary, selected_skill_id: String) -> Control:
 
 	var icon_slot: PanelContainer = PanelContainer.new()
 	icon_slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	icon_slot.custom_minimum_size = Vector2(28.0, 28.0)
+	icon_slot.custom_minimum_size = Vector2(32.0, 32.0)
 	icon_slot.size_flags_horizontal = 0
+	icon_slot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	icon_slot.add_theme_stylebox_override("panel", _make_icon_slot_style(accent, available))
 	row.add_child(icon_slot)
 
@@ -406,9 +415,12 @@ func _make_card_style(accent: Color, selected: bool, available: bool) -> StyleBo
 func _make_icon_slot_style(accent: Color, available: bool) -> StyleBoxFlat:
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = POPUP_ICON_BG if available else Color(0.06, 0.05, 0.09, 1.0)
-	style.border_color = accent * Color(1.0, 1.0, 1.0, 0.35) if available else Color(0.28, 0.28, 0.30, 0.50)
+	style.border_color = accent * Color(1.0, 1.0, 1.0, 0.45) if available else Color(0.28, 0.28, 0.30, 0.50)
 	style.set_border_width_all(1)
-	style.set_corner_radius_all(5)
+	# Rounded square: ~25% of the 32px icon size
+	style.set_corner_radius_all(8)
+	style.shadow_color = accent * Color(1.0, 1.0, 1.0, 0.08) if available else Color(0.0, 0.0, 0.0, 0.0)
+	style.shadow_size = 2 if available else 0
 	return style
 
 
