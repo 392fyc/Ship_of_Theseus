@@ -96,12 +96,17 @@ class ActionGlyph extends Control:
 				draw_line(a, b, color, 1.0, true)
 
 
-class HPGradientBar extends Control:
+class HPShieldBar extends Control:
 	var hp: int = 0
 	var hp_max: int = 1
+	var shield: int = 0
 
-	const BAR_BG: Color = Color(0.04, 0.05, 0.10, 1.0)
+	const BAR_BG_C: Color = Color(0.04, 0.05, 0.10, 1.0)
 	const BORDER_NORMAL: Color = Color(0.40, 0.35, 0.22, 0.55)
+	const BORDER_SHIELD: Color = Color(0.40, 0.65, 0.85, 0.65)
+	const SHIELD_FILL_C: Color = Color(0.36, 0.63, 0.92, 0.32)
+	const SHIELD_GLOSS_C: Color = Color(0.82, 0.92, 1.00, 0.14)
+	const SHIELD_EDGE_C: Color = Color(0.72, 0.88, 1.00, 0.28)
 	const HP_STOPS: Array = [
 		Color(0.80, 0.15, 0.15),
 		Color(0.85, 0.40, 0.15),
@@ -115,16 +120,48 @@ class HPGradientBar extends Control:
 		var w: float = size.x
 		var h: float = size.y
 		var hp_ratio: float = clampf(float(hp) / maxf(float(hp_max), 1.0), 0.0, 1.0)
-		draw_rect(Rect2(0.0, 0.0, w, h), BAR_BG)
+		var shield_ratio: float = clampf(float(shield) / maxf(float(hp_max), 1.0), 0.0, 1.0)
+
+		draw_rect(Rect2(0.0, 0.0, w, h), BAR_BG_C)
+
 		if hp_ratio > 0.001:
 			draw_rect(Rect2(1.0, 1.0, (w - 2.0) * hp_ratio, h - 2.0), _hp_gradient(hp_ratio))
-		draw_rect(Rect2(0.0, 0.0, w, h), BORDER_NORMAL, false, 1.0)
+
+		if shield_ratio > 0.001:
+			var sw: float = (w - 2.0) * shield_ratio
+			var sx: float = w - 1.0 - sw
+			var inner_h: float = h - 2.0
+			draw_rect(Rect2(sx, 1.0, sw, inner_h), SHIELD_FILL_C)
+			draw_rect(Rect2(sx + 1.0, 1.0, maxf(sw - 2.0, 0.0), maxf(inner_h * 0.45, 1.0)), SHIELD_GLOSS_C)
+			draw_line(Vector2(sx, 1.0), Vector2(sx, h - 1.0), SHIELD_EDGE_C, 1.0, true)
+			draw_line(Vector2(sx + 1.0, 1.0), Vector2(w - 1.0, 1.0), SHIELD_EDGE_C, 1.0, true)
+
+		var bc: Color = BORDER_SHIELD if shield > 0 else BORDER_NORMAL
+		draw_rect(Rect2(0.0, 0.0, w, h), bc, false, 1.0)
 
 	func _hp_gradient(ratio: float) -> Color:
 		var idx: float = clampf(ratio, 0.0, 1.0) * 5.0
 		var i: int = mini(int(idx), 4)
 		var t: float = idx - float(i)
 		return (HP_STOPS[i] as Color).lerp(HP_STOPS[i + 1] as Color, t)
+
+
+class XPBar extends Control:
+	var xp: int = 0
+	var xp_max: int = 100
+
+	const XP_BG_C: Color = Color(0.10, 0.07, 0.20, 1.0)
+	const XP_FILL_C: Color = Color(0.40, 0.28, 0.70, 1.0)
+	const XP_BORDER_C: Color = Color(0.48, 0.34, 0.72, 0.50)
+
+	func _draw() -> void:
+		var w: float = size.x
+		var h: float = size.y
+		var ratio: float = clampf(float(xp) / maxf(float(xp_max), 1.0), 0.0, 1.0)
+		draw_rect(Rect2(0.0, 0.0, w, h), XP_BG_C)
+		if ratio > 0.001:
+			draw_rect(Rect2(1.0, 1.0, (w - 2.0) * ratio, h - 2.0), XP_FILL_C)
+		draw_rect(Rect2(0.0, 0.0, w, h), XP_BORDER_C, false, 1.0)
 
 
 const PORTRAIT_W: float = 78.0
@@ -135,6 +172,12 @@ const ACTION_BAR_GAP: int = 6
 const ACTION_DIVIDER_H: float = 28.0
 const HP_BAR_W: float = 181.0
 const HP_BAR_H: float = 12.0
+const XP_BAR_W: float = 82.0
+const XP_BAR_H: float = 16.0
+const STAT_CELL_W: float = 44.0
+const STAT_CELL_H: float = 16.0
+const STAT_GRID_SEP: int = 1
+const STATS_SECTION_SEP: int = 3
 const FORECAST_PANEL_SIZE: Vector2 = Vector2(220.0, 80.0)
 const ITEM_POPUP_SIZE: Vector2 = Vector2(330.0, 284.0)
 const PANEL_MARGIN: float = 12.0
@@ -154,9 +197,8 @@ const COLOR_TEXT_MAIN: Color = Color(0.90, 0.86, 0.78, 1.0)
 const COLOR_TEXT_SUB: Color = Color(0.55, 0.56, 0.60, 1.0)
 const COLOR_TEXT_MUTE: Color = Color(0.45, 0.46, 0.50, 1.0)
 const COLOR_HP_LABEL: Color = Color(0.50, 0.78, 0.55, 1.0)
+const COLOR_SHIELD_LABEL: Color = Color(0.50, 0.72, 0.90, 1.0)
 const COLOR_HP_BG: Color = Color(0.04, 0.05, 0.10, 1.0)
-const COLOR_HINT_BG: Color = Color(0.06, 0.06, 0.12, 0.90)
-const COLOR_HINT_BORDER: Color = Color(0.40, 0.35, 0.22, 0.55)
 const COLOR_FORECAST_BG: Color = Color(0.06, 0.06, 0.12, 0.94)
 const COLOR_FORECAST_BORDER: Color = Color(0.72, 0.58, 0.28, 0.70)
 const COLOR_PORTRAIT_BG: Color = Color(0.02, 0.03, 0.07, 1.0)
@@ -202,14 +244,14 @@ var _info_panel: PanelContainer = null
 var _avatar_panel: PanelContainer = null
 var _avatar_label: Label = null
 var _name_label: Label = null
-var _unit_label_label: Label = null
-var _phase_tag_panel: PanelContainer = null
-var _phase_tag: Label = null
+var _level_label: Label = null
+var _class_label: Label = null
+var _xp_bar: XPBar = null
+var _xp_label: Label = null
 var _hp_label: Label = null
-var _hp_bar: HPGradientBar = null
-var _status_row: HBoxContainer = null
-var _hint_panel: PanelContainer = null
-var _hint_label: Label = null
+var _shield_label: Label = null
+var _hp_bar: HPShieldBar = null
+var _stat_value_labels: Array[Label] = []
 
 var _relic_panel: PanelContainer = null
 var _forecast_panel: PanelContainer = null
@@ -258,25 +300,28 @@ func update_state(state: Dictionary) -> void:
 	var unit_label: String = str(state.get("unit_label", ""))
 	var hp_value: int = int(state.get("hp", 0))
 	var hp_max: int = max(int(state.get("hp_max", 0)), 1)
-	var hp_ratio: float = clampf(float(state.get("hp_ratio", 0.0)), 0.0, 1.0)
-	var phase_text: String = str(state.get("phase_text", ""))
-	var hint_text: String = str(state.get("hint_text", ""))
+	var shield_value: int = int(state.get("shield", 0))
+	var level_value: int = int(state.get("level", 1))
+	var xp_value: int = int(state.get("xp", 0))
+	var xp_max_value: int = max(int(state.get("xp_max", 100)), 1)
 	var show_actions: bool = bool(state.get("show_actions", false)) and not is_enemy_mode
 	var show_skills: bool = bool(state.get("skills_visible", false)) and show_actions
 
 	_name_label.text = unit_name
-	_unit_label_label.text = unit_label
-	_phase_tag.text = phase_text
-	_phase_tag_panel.visible = phase_text != ""
+	_level_label.text = "Lv.%d" % level_value
+	_class_label.text = unit_label
 	_avatar_label.text = _build_avatar_text(unit_name, unit_label)
 	_hp_label.text = "HP %d/%d" % [hp_value, hp_max]
+	_shield_label.text = "护盾 %d" % shield_value if shield_value > 0 else ""
 	_hp_bar.hp = hp_value
 	_hp_bar.hp_max = hp_max
+	_hp_bar.shield = shield_value
 	_hp_bar.queue_redraw()
-
-	_hint_label.text = hint_text
-	_hint_panel.visible = hint_text != ""
-	_rebuild_status_row(str(state.get("status_text", "")))
+	_xp_bar.xp = xp_value
+	_xp_bar.xp_max = xp_max_value
+	_xp_bar.queue_redraw()
+	_xp_label.text = "XP %d" % xp_value
+	_update_stat_labels(state.get("stats", {}))
 
 	_action_shell.visible = show_actions
 	if not show_actions:
@@ -325,14 +370,15 @@ func _build_info_panel() -> PanelContainer:
 	margin.add_theme_constant_override("margin_bottom", PANEL_PAD)
 	panel.add_child(margin)
 
-	var row: HBoxContainer = HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
-	margin.add_child(row)
+	var main_row: HBoxContainer = HBoxContainer.new()
+	main_row.add_theme_constant_override("separation", 8)
+	margin.add_child(main_row)
 
+	# ── Left column: Portrait ──
 	var left_col: VBoxContainer = VBoxContainer.new()
 	left_col.add_theme_constant_override("separation", 3)
 	left_col.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	row.add_child(left_col)
+	main_row.add_child(left_col)
 
 	_avatar_panel = PanelContainer.new()
 	_avatar_panel.custom_minimum_size = Vector2(PORTRAIT_W, PORTRAIT_H)
@@ -352,75 +398,138 @@ func _build_info_panel() -> PanelContainer:
 	_avatar_label.add_theme_constant_override("outline_size", 2)
 	avatar_center.add_child(_avatar_label)
 
-	var info_column: VBoxContainer = VBoxContainer.new()
-	info_column.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	info_column.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	info_column.custom_minimum_size.x = HP_BAR_W
-	info_column.add_theme_constant_override("separation", 4)
-	row.add_child(info_column)
+	# ── Right column: Name / Class+XP / HP+Shield / Stats ──
+	var right_col: VBoxContainer = VBoxContainer.new()
+	right_col.add_theme_constant_override("separation", 4)
+	right_col.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	right_col.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	right_col.custom_minimum_size.x = HP_BAR_W
+	main_row.add_child(right_col)
 
+	# Name
 	_name_label = Label.new()
 	_name_label.text = "角色"
 	_name_label.add_theme_font_size_override("font_size", 13)
 	_name_label.add_theme_color_override("font_color", COLOR_TEXT_MAIN)
-	info_column.add_child(_name_label)
+	right_col.add_child(_name_label)
 
-	var subtitle_row: HBoxContainer = HBoxContainer.new()
-	subtitle_row.add_theme_constant_override("separation", 6)
-	info_column.add_child(subtitle_row)
+	# Class row: Lv.X + class + gap + XP bar
+	var class_row: HBoxContainer = HBoxContainer.new()
+	class_row.add_theme_constant_override("separation", 6)
+	right_col.add_child(class_row)
 
-	_unit_label_label = Label.new()
-	_unit_label_label.text = "职业"
-	_unit_label_label.add_theme_font_size_override("font_size", 10)
-	_unit_label_label.add_theme_color_override("font_color", COLOR_TEXT_SUB)
-	subtitle_row.add_child(_unit_label_label)
+	_level_label = Label.new()
+	_level_label.text = "Lv.1"
+	_level_label.add_theme_font_size_override("font_size", 10)
+	_level_label.add_theme_color_override("font_color", COLOR_TEXT_SUB)
+	class_row.add_child(_level_label)
 
-	_phase_tag_panel = PanelContainer.new()
-	_phase_tag_panel.visible = false
-	_phase_tag_panel.add_theme_stylebox_override("panel", _make_tag_style())
-	subtitle_row.add_child(_phase_tag_panel)
+	_class_label = Label.new()
+	_class_label.text = "职业"
+	_class_label.add_theme_font_size_override("font_size", 10)
+	_class_label.add_theme_color_override("font_color", COLOR_TEXT_SUB)
+	class_row.add_child(_class_label)
 
-	_phase_tag = Label.new()
-	_phase_tag.text = ""
-	_phase_tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_phase_tag.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_phase_tag.add_theme_font_size_override("font_size", 9)
-	_phase_tag.add_theme_color_override("font_color", COLOR_GOLD)
-	_phase_tag_panel.add_child(_phase_tag)
+	var xp_gap: Control = Control.new()
+	xp_gap.custom_minimum_size = Vector2(8.0, 0.0)
+	class_row.add_child(xp_gap)
+
+	var xp_area: Control = Control.new()
+	xp_area.custom_minimum_size = Vector2(XP_BAR_W, XP_BAR_H)
+	class_row.add_child(xp_area)
+
+	_xp_bar = XPBar.new()
+	_xp_bar.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	xp_area.add_child(_xp_bar)
+
+	_xp_label = Label.new()
+	_xp_label.text = "XP 0"
+	_xp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_xp_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_xp_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_xp_label.add_theme_font_size_override("font_size", 8)
+	_xp_label.add_theme_color_override("font_color", Color(0.85, 0.80, 0.95, 0.90))
+	xp_area.add_child(_xp_label)
+
+	# HP label row
+	var hp_row: HBoxContainer = HBoxContainer.new()
+	right_col.add_child(hp_row)
 
 	_hp_label = Label.new()
 	_hp_label.text = "HP 0/0"
+	_hp_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_hp_label.add_theme_font_size_override("font_size", 9)
 	_hp_label.add_theme_color_override("font_color", COLOR_HP_LABEL)
-	info_column.add_child(_hp_label)
+	hp_row.add_child(_hp_label)
 
-	_hp_bar = HPGradientBar.new()
+	_shield_label = Label.new()
+	_shield_label.text = ""
+	_shield_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_shield_label.add_theme_font_size_override("font_size", 9)
+	_shield_label.add_theme_color_override("font_color", COLOR_SHIELD_LABEL)
+	hp_row.add_child(_shield_label)
+
+	# HP/Shield bar
+	_hp_bar = HPShieldBar.new()
 	_hp_bar.custom_minimum_size = Vector2(HP_BAR_W, HP_BAR_H)
-	info_column.add_child(_hp_bar)
+	right_col.add_child(_hp_bar)
 
-	_status_row = HBoxContainer.new()
-	_status_row.add_theme_constant_override("separation", 4)
-	info_column.add_child(_status_row)
-
-	_hint_panel = PanelContainer.new()
-	_hint_panel.visible = false
-	_hint_panel.add_theme_stylebox_override("panel", _make_hint_style())
-	info_column.add_child(_hint_panel)
-
-	var hint_margin: MarginContainer = MarginContainer.new()
-	hint_margin.add_theme_constant_override("margin_left", 4)
-	hint_margin.add_theme_constant_override("margin_right", 4)
-	hint_margin.add_theme_constant_override("margin_top", 3)
-	hint_margin.add_theme_constant_override("margin_bottom", 3)
-	_hint_panel.add_child(hint_margin)
-
-	_hint_label = Label.new()
-	_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_hint_label.add_theme_font_size_override("font_size", 8)
-	_hint_label.add_theme_color_override("font_color", COLOR_TEXT_SUB)
-	hint_margin.add_child(_hint_label)
+	# Stats area
+	_build_stats_area(right_col)
 
 	return panel
+
+
+func _build_stats_area(parent: VBoxContainer) -> void:
+	var stats_row: HBoxContainer = HBoxContainer.new()
+	stats_row.add_theme_constant_override("separation", STATS_SECTION_SEP)
+	parent.add_child(stats_row)
+
+	var grid1: GridContainer = GridContainer.new()
+	grid1.columns = 2
+	grid1.add_theme_constant_override("h_separation", STAT_GRID_SEP)
+	grid1.add_theme_constant_override("v_separation", 1)
+	stats_row.add_child(grid1)
+
+	var stat_keys_1: Array = [["STR", 0], ["MAG", 0], ["DEX", 0], ["SPE", 0]]
+	for stat_pair: Array in stat_keys_1:
+		_build_stat_cell(grid1, stat_pair)
+
+	var div: ColorRect = ColorRect.new()
+	div.custom_minimum_size = Vector2(1.0, 0.0)
+	div.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	div.color = Color(0.40, 0.35, 0.22, 0.30)
+	stats_row.add_child(div)
+
+	var grid2: GridContainer = GridContainer.new()
+	grid2.columns = 2
+	grid2.add_theme_constant_override("h_separation", STAT_GRID_SEP)
+	grid2.add_theme_constant_override("v_separation", 1)
+	stats_row.add_child(grid2)
+
+	var stat_keys_2: Array = [["DEF", 0], ["RES", 0], ["LCK", 0], ["MOV", 0]]
+	for stat_pair: Array in stat_keys_2:
+		_build_stat_cell(grid2, stat_pair)
+
+
+func _build_stat_cell(parent: GridContainer, stat: Array) -> void:
+	var cell: HBoxContainer = HBoxContainer.new()
+	cell.custom_minimum_size = Vector2(STAT_CELL_W, STAT_CELL_H)
+	cell.add_theme_constant_override("separation", 2)
+	parent.add_child(cell)
+
+	var abbr: Label = Label.new()
+	abbr.text = str(stat[0])
+	abbr.add_theme_font_size_override("font_size", 9)
+	abbr.add_theme_color_override("font_color", COLOR_STAT_ABBR)
+	cell.add_child(abbr)
+
+	var val_lbl: Label = Label.new()
+	val_lbl.text = str(stat[1])
+	val_lbl.add_theme_font_size_override("font_size", 9)
+	val_lbl.add_theme_color_override("font_color", COLOR_TEXT_MAIN)
+	cell.add_child(val_lbl)
+	_stat_value_labels.append(val_lbl)
 
 
 func _build_relic_panel() -> PanelContainer:
@@ -784,55 +893,11 @@ func _extract_skill_entries(entries_variant: Variant) -> Array[Dictionary]:
 	return entries
 
 
-func _rebuild_status_row(status_text: String) -> void:
-	for child: Node in _status_row.get_children():
-		child.queue_free()
-
-	if status_text == "":
-		return
-
-	for token: String in status_text.split(" ", false):
-		if token == "":
-			continue
-		_status_row.add_child(_build_status_chip(token))
-
-
-func _build_status_chip(token: String) -> PanelContainer:
-	var chip: PanelContainer = PanelContainer.new()
-	var state_key: String = token.left(1)
-	var enabled: bool = token.contains("✓")
-	chip.add_theme_stylebox_override("panel", _make_status_chip_style(enabled))
-
-	var row: HBoxContainer = HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 4)
-	chip.add_child(row)
-
-	var dot: Label = Label.new()
-	dot.text = "●"
-	dot.add_theme_font_size_override("font_size", 8)
-	dot.add_theme_color_override("font_color", Color(0.84, 0.96, 0.90, 1.0) if enabled else Color(0.98, 0.84, 0.84, 1.0))
-	row.add_child(dot)
-
-	var name_label: Label = Label.new()
-	name_label.text = _localize_status_token(state_key)
-	name_label.add_theme_font_size_override("font_size", 10)
-	name_label.add_theme_color_override("font_color", COLOR_TEXT_MAIN)
-	row.add_child(name_label)
-
-	return chip
-
-
-func _localize_status_token(token: String) -> String:
-	match token:
-		"M":
-			return "移动"
-		"A":
-			return "攻击"
-		"S":
-			return "迅捷"
-		_:
-			return token
+func _update_stat_labels(stats: Variant) -> void:
+	var stat_dict: Dictionary = stats if stats is Dictionary else {}
+	var keys: Array = ["str", "mag", "dex", "spd", "def", "res", "lck", "mov"]
+	for i: int in range(mini(keys.size(), _stat_value_labels.size())):
+		_stat_value_labels[i].text = str(int(stat_dict.get(keys[i], 0)))
 
 
 func _build_avatar_text(unit_name: String, unit_label: String) -> String:
@@ -1068,39 +1133,6 @@ func _make_avatar_style() -> StyleBoxFlat:
 	return style
 
 
-func _make_tag_style() -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = Color(0.12, 0.10, 0.08, 0.96)
-	style.border_color = Color(0.60, 0.50, 0.28, 0.55)
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(4)
-	style.content_margin_left = 6
-	style.content_margin_right = 6
-	style.content_margin_top = 2
-	style.content_margin_bottom = 2
-	return style
-
-
-func _make_hint_style() -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = COLOR_HINT_BG
-	style.border_color = COLOR_HINT_BORDER
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(4)
-	return style
-
-
-func _make_status_chip_style(enabled: bool) -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = Color(0.10, 0.22, 0.15, 0.92) if enabled else Color(0.24, 0.12, 0.12, 0.92)
-	style.border_color = Color(0.30, 0.60, 0.40, 0.80) if enabled else Color(0.60, 0.28, 0.28, 0.80)
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(4)
-	style.content_margin_left = 6
-	style.content_margin_right = 6
-	style.content_margin_top = 3
-	style.content_margin_bottom = 3
-	return style
 
 
 func _make_relic_slot_style() -> StyleBoxFlat:
