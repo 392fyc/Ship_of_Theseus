@@ -176,6 +176,7 @@ func _build_ui() -> void:
 	column.add_child(_scroll)
 
 	_list = VBoxContainer.new()
+	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_list.add_theme_constant_override("separation", POPUP_CARD_GAP)
 	_scroll.add_child(_list)
 
