@@ -353,8 +353,9 @@ func _build_info_panel() -> PanelContainer:
 	avatar_center.add_child(_avatar_label)
 
 	var info_column: VBoxContainer = VBoxContainer.new()
-	info_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info_column.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	info_column.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	info_column.custom_minimum_size.x = HP_BAR_W
 	info_column.add_theme_constant_override("separation", 4)
 	row.add_child(info_column)
 
@@ -407,15 +408,15 @@ func _build_info_panel() -> PanelContainer:
 	info_column.add_child(_hint_panel)
 
 	var hint_margin: MarginContainer = MarginContainer.new()
-	hint_margin.add_theme_constant_override("margin_left", 6)
-	hint_margin.add_theme_constant_override("margin_right", 6)
-	hint_margin.add_theme_constant_override("margin_top", 4)
-	hint_margin.add_theme_constant_override("margin_bottom", 4)
+	hint_margin.add_theme_constant_override("margin_left", 4)
+	hint_margin.add_theme_constant_override("margin_right", 4)
+	hint_margin.add_theme_constant_override("margin_top", 3)
+	hint_margin.add_theme_constant_override("margin_bottom", 3)
 	_hint_panel.add_child(hint_margin)
 
 	_hint_label = Label.new()
 	_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_hint_label.add_theme_font_size_override("font_size", 9)
+	_hint_label.add_theme_font_size_override("font_size", 8)
 	_hint_label.add_theme_color_override("font_color", COLOR_TEXT_SUB)
 	hint_margin.add_child(_hint_label)
 
@@ -909,32 +910,44 @@ func _layout_dashboard() -> void:
 	if _info_panel == null or _relic_panel == null or _action_shell == null or _skill_bar == null or _item_popup == null or _forecast_panel == null:
 		return
 
+	var vp_h: float = size.y
+	var vp_w: float = size.x
 	var offset_y: float = _panel_offset_internal
-	var info_sz: Vector2 = _info_panel.size
-	var relic_w: float = RELIC_PANEL_W
-	var action_sz: Vector2 = _action_shell.size
 
-	var info_pos: Vector2 = Vector2(PANEL_MARGIN, size.y - info_sz.y - PANEL_MARGIN + offset_y)
+	# Force panels to content size (not stretched)
+	var info_sz: Vector2 = _info_panel.get_combined_minimum_size()
+	_info_panel.size = info_sz
+	var action_sz: Vector2 = _action_shell.get_combined_minimum_size()
+	_action_shell.size = action_sz
+
+	# Info panel: bottom-left
+	var info_pos: Vector2 = Vector2(PANEL_MARGIN, vp_h - info_sz.y - PANEL_MARGIN + offset_y)
 	_info_panel.position = info_pos
 
-	_relic_panel.custom_minimum_size.y = info_sz.y
-	_relic_panel.size.y = info_sz.y
-	_relic_panel.custom_minimum_size.x = relic_w
-	_relic_panel.size.x = relic_w
+	# Relic panel: adjacent right of info, same height
+	_relic_panel.custom_minimum_size = Vector2(RELIC_PANEL_W, info_sz.y)
+	_relic_panel.size = Vector2(RELIC_PANEL_W, info_sz.y)
 	_relic_panel.position = Vector2(info_pos.x + info_sz.x - 1.0, info_pos.y)
 
-	var action_pos: Vector2 = Vector2(size.x - action_sz.x - PANEL_MARGIN, size.y - action_sz.y - PANEL_MARGIN + offset_y)
+	# Action shell: bottom-right
+	var action_pos: Vector2 = Vector2(vp_w - action_sz.x - PANEL_MARGIN, vp_h - action_sz.y - PANEL_MARGIN + offset_y)
 	_action_shell.position = action_pos
 
+	# Forecast: above the relic/info area
 	_forecast_panel.position = Vector2(
-		maxf(PANEL_MARGIN, _relic_panel.position.x + relic_w - FORECAST_PANEL_SIZE.x),
+		maxf(PANEL_MARGIN, _relic_panel.position.x + RELIC_PANEL_W - FORECAST_PANEL_SIZE.x),
 		info_pos.y - FORECAST_PANEL_SIZE.y - FORECAST_GAP_Y)
 
-	var popup_x: float = clampf(action_pos.x - 96.0, PANEL_MARGIN, size.x - _skill_bar.size.x - PANEL_MARGIN)
-	var popup_y: float = action_pos.y - _skill_bar.size.y - POPUP_GAP_Y
+	# Skill popup: above action shell, shifted left
+	var skill_sz: Vector2 = _skill_bar.get_combined_minimum_size()
+	_skill_bar.size = skill_sz
+	var popup_x: float = clampf(action_pos.x - 96.0, PANEL_MARGIN, vp_w - skill_sz.x - PANEL_MARGIN)
+	var popup_y: float = action_pos.y - skill_sz.y - POPUP_GAP_Y
 	_skill_bar.position = Vector2(popup_x, popup_y)
+
+	# Item popup: above action shell
 	_item_popup.position = Vector2(
-		clampf(action_pos.x - 96.0, PANEL_MARGIN, size.x - ITEM_POPUP_SIZE.x - PANEL_MARGIN),
+		clampf(action_pos.x - 96.0, PANEL_MARGIN, vp_w - ITEM_POPUP_SIZE.x - PANEL_MARGIN),
 		action_pos.y - ITEM_POPUP_SIZE.y - POPUP_GAP_Y)
 
 
