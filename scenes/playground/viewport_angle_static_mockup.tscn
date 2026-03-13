@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://f1ut2wvekwfu"]
 
-[ext_resource type="Script" path="res://scenes/playground/viewport_angle_static_mockup.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://c0qj61cyuev1n" path="res://scenes/playground/viewport_angle_static_mockup.gd" id="1_script"]
 
-[node name="ViewportAngleStaticMockup" type="Node2D"]
+[node name="ViewportAngleStaticMockup" type="Node2D" unique_id=2036431865]
 script = ExtResource("1_script")
