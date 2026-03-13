@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/bottom_dashboard.gd" id="1_bottom_dashboard_script"]
+
+[node name="BottomDashboard" type="Control"]
+script = ExtResource("1_bottom_dashboard_script")

@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/skill_bar.gd" id="1_skill_bar_script"]
+
+[node name="SkillBar" type="Control"]
+script = ExtResource("1_skill_bar_script")
