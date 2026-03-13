@@ -844,6 +844,7 @@ func _build_item_card(item_data: Dictionary) -> PanelContainer:
 
 	var icon_slot: PanelContainer = PanelContainer.new()
 	icon_slot.custom_minimum_size = Vector2(28.0, 28.0)
+	icon_slot.size_flags_horizontal = 0
 	icon_slot.add_theme_stylebox_override("panel", _make_popup_icon_square_style(accent))
 	row.add_child(icon_slot)
 
@@ -865,7 +866,7 @@ func _build_item_card(item_data: Dictionary) -> PanelContainer:
 
 	var title_label: Label = Label.new()
 	title_label.text = str(item_data.get("name", "道具"))
-	title_label.add_theme_font_size_override("font_size", 10)
+	title_label.add_theme_font_size_override("font_size", 11)
 	title_label.add_theme_color_override("font_color", COLOR_TEXT_MAIN)
 	text_column.add_child(title_label)
 

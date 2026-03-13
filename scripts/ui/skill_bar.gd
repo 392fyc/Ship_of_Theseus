@@ -125,6 +125,8 @@ func _build_ui() -> void:
 	_panel.add_child(margin)
 
 	var column: VBoxContainer = VBoxContainer.new()
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	column.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_theme_constant_override("separation", 5)
 	margin.add_child(column)
 
@@ -236,24 +238,28 @@ func _build_skill_card(entry: Dictionary, selected_skill_id: String) -> Control:
 
 	var row: HBoxContainer = HBoxContainer.new()
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 8)
 	inner_margin.add_child(row)
 
 	var icon_slot: PanelContainer = PanelContainer.new()
 	icon_slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	icon_slot.custom_minimum_size = Vector2(28.0, 28.0)
+	icon_slot.size_flags_horizontal = 0
 	icon_slot.add_theme_stylebox_override("panel", _make_icon_slot_style(accent, available))
 	row.add_child(icon_slot)
+
+	var ic_cc: CenterContainer = CenterContainer.new()
+	ic_cc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon_slot.add_child(ic_cc)
 
 	var icon_label: Label = Label.new()
 	icon_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	icon_label.text = icon_text
 	icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	icon_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	icon_label.add_theme_font_size_override("font_size", 13)
+	icon_label.add_theme_font_size_override("font_size", 12)
 	icon_label.add_theme_color_override("font_color", TEXT_MAIN if available else TEXT_DIM)
-	icon_slot.add_child(icon_label)
+	ic_cc.add_child(icon_label)
 
 	var text_column: VBoxContainer = VBoxContainer.new()
 	text_column.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -273,6 +279,7 @@ func _build_skill_card(entry: Dictionary, selected_skill_id: String) -> Control:
 	detail_label.text = _build_detail_text(action_cost, timing_constraint, cooldown_turns, available, reason)
 	detail_label.add_theme_font_size_override("font_size", 8)
 	detail_label.add_theme_color_override("font_color", TEXT_SUB if available else TEXT_MUTE)
+	detail_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	text_column.add_child(detail_label)
 
 	var badge_label: Label = Label.new()
