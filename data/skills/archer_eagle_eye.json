@@ -8,6 +8,8 @@
   "area": { "type": "single", "size": 0 },
   "cooldown": 3,
   "action_cost": "swift",
+  "swift_limit": 1,
+  "timing_constraint": "before_attack",
   "effects": [
     { "type": "vision_up", "chance": 100, "duration": 2, "value": 1 },
     { "type": "hit_up", "chance": 100, "duration": 2, "value": 15 }

@@ -8,6 +8,8 @@
   "area": { "type": "diamond", "size": 1 },
   "cooldown": 3,
   "action_cost": "swift",
+  "swift_limit": 1,
+  "timing_constraint": "any",
   "effects": [
     { "type": "attack_up", "chance": 100, "duration": 2, "value": 3 },
     { "type": "resistance_up", "chance": 100, "duration": 2, "value": 10 }

@@ -7,7 +7,8 @@
   "range": { "type": "line", "min": 2, "max": 3 },
   "area": { "type": "single", "size": 0 },
   "cooldown": 2,
-  "action_cost": "movement",
+  "action_cost": "move",
+  "timing_constraint": "any",
   "effects": [
     { "type": "taunt", "chance": 100, "duration": 1, "value": 1 }
   ],

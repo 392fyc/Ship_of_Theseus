@@ -77,6 +77,43 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	return result
 
 
+static func preview_attack(attacker: Unit, defender: Unit,
+		action_data: Dictionary = {}) -> Dictionary:
+	var damage_type: String = action_data.get("damage_type", "physical")
+	var skill_multiplier: float = action_data.get("skill_multiplier", 1.0)
+	var terrain_multiplier: float = action_data.get("terrain_multiplier", 1.0)
+	var relic_multiplier: float = action_data.get("relic_multiplier", 1.0)
+	var final_multiplier: float = action_data.get("final_multiplier", 1.0)
+	var pure_atk_source: String = action_data.get("pure_atk_source", "phys")
+	var weapon_might: int = action_data.get("weapon_might", 5)
+	var weapon_hit: int = action_data.get("weapon_hit", 90)
+	var weapon_crit: int = action_data.get("weapon_crit", 0)
+	var terrain_evade_bonus: int = action_data.get("terrain_evade_bonus", 0)
+
+	var hit_value: int = attacker.stats.get_hit(weapon_hit)
+	var avoid_value: int = defender.stats.get_avoid(terrain_evade_bonus)
+	var hit_rate: float = clampf((hit_value - avoid_value) / 100.0, 0.2, 1.0)
+
+	var crit_rate: float = 0.0
+	var is_pure: bool = (damage_type == "pure")
+	if not (is_pure and not action_data.get("enable_pure_crit", false)):
+		var crit_value: int = attacker.stats.get_crit(weapon_crit)
+		var dodge_value: int = defender.stats.get_crit_avoid()
+		crit_rate = maxf(0.0, (crit_value - dodge_value) / 100.0)
+
+	var base_damage: float = _calc_base_damage(
+		attacker, defender, damage_type, weapon_might, pure_atk_source)
+	var final_damage: float = base_damage * skill_multiplier * terrain_multiplier
+	final_damage *= relic_multiplier * final_multiplier
+
+	return {
+		"hit_percent": clampi(roundi(hit_rate * 100.0), 0, 100),
+		"crit_percent": clampi(roundi(crit_rate * 100.0), 0, 100),
+		"damage": maxi(0, roundi(final_damage)),
+		"counter_expected": bool(action_data.get("allow_counter", true)),
+	}
+
+
 static func _calc_base_damage(attacker: Unit, defender: Unit,
 		damage_type: String,
 		weapon_might: int, pure_atk_source: String) -> float:

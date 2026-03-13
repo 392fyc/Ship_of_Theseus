@@ -8,6 +8,7 @@
   "area": { "type": "single", "size": 0 },
   "cooldown": 1,
   "action_cost": "standard",
+  "timing_constraint": "any",
   "effects": [],
   "tags": ["ranged", "precision"],
   "description": "高命中的远程单体射击。"

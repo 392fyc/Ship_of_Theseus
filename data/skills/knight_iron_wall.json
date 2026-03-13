@@ -8,6 +8,8 @@
   "area": { "type": "single", "size": 0 },
   "cooldown": 3,
   "action_cost": "swift",
+  "swift_limit": 1,
+  "timing_constraint": "before_move",
   "effects": [
     { "type": "block_up", "chance": 100, "duration": 2, "value": 20 },
     { "type": "physical_defense_up", "chance": 100, "duration": 2, "value": 5 }
