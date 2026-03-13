@@ -8,6 +8,7 @@
   "area": { "type": "diamond", "size": 1 },
   "cooldown": 2,
   "action_cost": "standard",
+  "timing_constraint": "any",
   "effects": [
     { "type": "burn", "chance": 35, "duration": 2, "value": 8 }
   ],

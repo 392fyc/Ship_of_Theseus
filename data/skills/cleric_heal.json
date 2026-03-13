@@ -8,6 +8,7 @@
   "area": { "type": "single", "size": 0 },
   "cooldown": 1,
   "action_cost": "standard",
+  "timing_constraint": "any",
   "effects": [
     { "type": "heal", "chance": 100, "value": 35 }
   ],

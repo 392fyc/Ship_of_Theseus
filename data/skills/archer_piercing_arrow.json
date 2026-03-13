@@ -8,6 +8,7 @@
   "area": { "type": "line", "size": 4 },
   "cooldown": 2,
   "action_cost": "standard",
+  "timing_constraint": "any",
   "effects": [],
   "tags": ["ranged", "pierce"],
   "description": "沿直线贯穿多个目标的箭矢。"

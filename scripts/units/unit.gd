@@ -17,10 +17,14 @@ var skill_cooldowns: Dictionary = {}
 # ── 位置（ADR-3 双向引用）──────────────────────────
 var grid_position: Vector2i = Vector2i.ZERO
 
-# ── 行动资源（Milestone 4）──────────────────────────
+# ── 行动资源（Milestone 8 Action Economy）───────────
 var has_moved:      bool = false
 var has_attacked:   bool = false
 var has_used_swift: bool = false
+var movement_used: bool = false
+var standard_used: bool = false
+var swift_used: bool = false
+var reaction_available: bool = true
 
 # ── 信号 ────────────────────────────────────────────
 signal damage_taken(amount: int, damage_type: String)
@@ -121,16 +125,13 @@ func move_to(target_pos: Vector2i, grid: Grid) -> void:
 # ── 回合状态重置（TurnManager 调用）─────────────────
 
 func reset_turn_state() -> void:
-	has_moved      = false
-	has_attacked   = false
-	has_used_swift = false
+	reset_action_resources()
 	modulate = Color.WHITE
 	_tick_skill_cooldowns()
 	_rebuild_status_icons()
 
 
 func mark_done() -> void:
-	has_attacked = true
 	modulate = Color(0.6, 0.6, 0.6)
 	_rebuild_status_icons()
 
@@ -141,14 +142,74 @@ func get_short_label() -> String:
 
 func get_action_status_summary() -> String:
 	var parts: PackedStringArray = []
-	parts.append("M✓" if not has_moved else "M×")
-	parts.append("A✓" if not has_attacked else "A×")
-	parts.append("S✓" if not has_used_swift else "S×")
+	parts.append("M✓" if not movement_used else "M×")
+	parts.append("A✓" if not standard_used else "A×")
+	parts.append("S✓" if not swift_used else "S×")
 	return " ".join(parts)
 
 
 func refresh_status_icons() -> void:
 	_rebuild_status_icons()
+
+
+func reset_action_resources() -> void:
+	movement_used = false
+	standard_used = false
+	swift_used = false
+	reaction_available = true
+	_sync_legacy_action_flags()
+
+
+func consume_movement_resource() -> void:
+	movement_used = true
+	_sync_legacy_action_flags()
+
+
+func restore_movement_resource() -> void:
+	movement_used = false
+	_sync_legacy_action_flags()
+
+
+func consume_standard_resource() -> void:
+	standard_used = true
+	_sync_legacy_action_flags()
+
+
+func restore_standard_resource() -> void:
+	standard_used = false
+	_sync_legacy_action_flags()
+
+
+func consume_swift_resource() -> void:
+	swift_used = true
+	_sync_legacy_action_flags()
+
+
+func restore_swift_resource() -> void:
+	swift_used = false
+	_sync_legacy_action_flags()
+
+
+func consume_reaction_resource() -> void:
+	reaction_available = false
+
+
+func can_take_normal_move() -> bool:
+	return not movement_used
+
+
+func can_take_normal_attack() -> bool:
+	return not standard_used
+
+
+func can_use_swift_skill(swift_limit: int = 1) -> bool:
+	if swift_limit == -1:
+		return true
+	return not swift_used
+
+
+func are_active_resources_exhausted() -> bool:
+	return movement_used and standard_used and swift_used
 
 
 func is_skill_available(skill_id: String) -> bool:
@@ -317,9 +378,9 @@ func _rebuild_status_icons() -> void:
 		child.queue_free()
 
 	var action_badges := [
-		{"text": "M", "spent": has_moved, "color": Color(0.40, 0.70, 1.00)},
-		{"text": "A", "spent": has_attacked, "color": Color(1.00, 0.50, 0.30)},
-		{"text": "S", "spent": has_used_swift, "color": Color(1.00, 0.90, 0.35)},
+		{"text": "M", "spent": movement_used, "color": Color(0.40, 0.70, 1.00)},
+		{"text": "A", "spent": standard_used, "color": Color(1.00, 0.50, 0.30)},
+		{"text": "S", "spent": swift_used, "color": Color(1.00, 0.90, 0.35)},
 	]
 	for i in action_badges.size():
 		var action_badge: Dictionary = action_badges[i]
@@ -362,3 +423,9 @@ func _make_badge(text: String, pos: Vector2, color: Color, spent: bool) -> Label
 	label.add_theme_constant_override("outline_size", 2)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return label
+
+
+func _sync_legacy_action_flags() -> void:
+	has_moved = movement_used
+	has_attacked = standard_used
+	has_used_swift = swift_used

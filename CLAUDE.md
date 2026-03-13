@@ -43,8 +43,8 @@
 ## Agent Constraints
 
 - **Main Agent = Claude Code**：设计 / KB / 调度。**禁止**自行创建 Sub Agent（禁止 Task tool 派内部 agent）
-- "递交 Sub Agent" = 外部工具（Cursor / Codex CLI / AntiGravity），输出规格交用户转递
-- Godot MCP → **仅 Cursor 连接**，Claude Code 不主动使用
+- "递交 Sub Agent" = 外部工具（GitHub Copilot CLI / Codex CLI / AntiGravity），输出规格交用户转递
+- Godot MCP → **GitHub Copilot CLI / Codex CLI / AntiGravity 连接**，Claude Code 不主动使用
 - 大文件阅读 / 代码库研究 → 委托 Codex CLI 或 AntiGravity，**禁止** Claude 消耗 token
 - Git 分支: `{agent}/{task-name}`，无 PR 个人作业，Sub Agent 隔离分支
 - UI 视觉 → Playground 模式（独立文件，人工审阅后应用）

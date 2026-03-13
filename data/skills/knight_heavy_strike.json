@@ -8,6 +8,7 @@
   "area": { "type": "single", "size": 0 },
   "cooldown": 1,
   "action_cost": "standard",
+  "timing_constraint": "any",
   "effects": [],
   "tags": ["melee", "burst"],
   "description": "高伤害但低命中的重击。"

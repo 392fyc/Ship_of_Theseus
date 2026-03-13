@@ -8,6 +8,7 @@
   "area": { "type": "single", "size": 0 },
   "cooldown": 2,
   "action_cost": "standard",
+  "timing_constraint": "any",
   "effects": [
     { "type": "knockback", "chance": 100, "distance": 1 },
     { "type": "stun", "chance": 40, "duration": 1, "value": 1 }

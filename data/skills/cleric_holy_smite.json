@@ -8,6 +8,7 @@
   "area": { "type": "single", "size": 0 },
   "cooldown": 1,
   "action_cost": "standard",
+  "timing_constraint": "any",
   "effects": [],
   "tags": ["holy", "damage"],
   "description": "神圣打击，无视常规防御。"

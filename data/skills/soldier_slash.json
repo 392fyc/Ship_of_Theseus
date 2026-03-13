@@ -8,6 +8,7 @@
   "area": { "type": "single", "size": 0 },
   "cooldown": 0,
   "action_cost": "standard",
+  "timing_constraint": "any",
   "effects": [],
   "tags": ["basic", "melee"],
   "description": "基础近战斩击。"
