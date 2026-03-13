@@ -23,6 +23,13 @@ Read `02-Development/Tasks/Phase{N}-Tasks.md`, update `[ ]` → `[x]` for comple
 ### Step 4: Verify
 `obsidian_get_file_contents("03-AI-Context/Active-Context/current-session.md")` — confirm under 100 lines.
 
+### Step 5: Git Sync (Mandatory)
+Execute KB repo git-sync per `03-AI-Context/Handoffs/git-sync-procedure.md` "KB Repository Sync" section.
+- **Trigger**: "Before session end → Mandatory → Main Agent" (git-sync-procedure.md Trigger Timing)
+- Scope: `D:\ShipOfTheseus\ShipOfTheseus-KB\` — all files modified during this session
+- Message format: `session: close {session-id}`
+- This step is a **precondition** for session closure — see `acceptance-workflow.md` Git Sync Rule.
+
 ## Critical Rules
 
 1. **NEVER append** — always full replace. Appending = unbounded growth.
