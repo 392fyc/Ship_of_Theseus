@@ -978,13 +978,29 @@ func _update_forecast(forecast_variant: Variant, is_enemy_mode: bool) -> void:
 		_forecast_panel.visible = false
 		return
 
+	var terrain_parts: PackedStringArray = []
+	var terrain_evade_bonus: int = int(forecast.get("terrain_evade_bonus", 0))
+	var terrain_def_bonus: int = int(forecast.get("terrain_def_bonus", 0))
+	var terrain_res_bonus: int = int(forecast.get("terrain_res_bonus", 0))
+	if terrain_evade_bonus > 0:
+		terrain_parts.append("回避+%d" % terrain_evade_bonus)
+	if terrain_def_bonus > 0:
+		terrain_parts.append("防御+%d" % terrain_def_bonus)
+	if terrain_res_bonus > 0:
+		terrain_parts.append("魔防+%d" % terrain_res_bonus)
+	var terrain_summary: String = "无加成"
+	if not terrain_parts.is_empty():
+		terrain_summary = " ".join(terrain_parts)
+
 	_forecast_panel.visible = true
-	_forecast_body.text = "%s\n命中 %d%%  暴击 %d%%\n预计伤害 %d  预计反击 %s" % [
+	_forecast_body.text = "%s\n命中 %d%%  暴击 %d%%\n预计伤害 %d  预计反击 %s\n地形 %s  %s" % [
 		str(forecast.get("target_name", "")),
 		int(forecast.get("hit_percent", 0)),
 		int(forecast.get("crit_percent", 0)),
 		int(forecast.get("damage", 0)),
 		"是" if bool(forecast.get("counter_expected", false)) else "否",
+		str(forecast.get("terrain_name", "PLAIN")),
+		terrain_summary,
 	]
 
 

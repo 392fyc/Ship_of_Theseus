@@ -1,0 +1,33 @@
+{
+  "id": "basic_weapon_profiles",
+  "profiles": {
+    "physical_melee": {
+      "weapon_might": 5,
+      "weapon_hit": 90,
+      "weapon_crit": 0,
+      "damage_type": "physical",
+      "basic_attack_range": { "min": 1, "max": 1 }
+    },
+    "physical_ranged": {
+      "weapon_might": 4,
+      "weapon_hit": 85,
+      "weapon_crit": 5,
+      "damage_type": "physical",
+      "basic_attack_range": { "min": 2, "max": 4 }
+    },
+    "magical_ranged": {
+      "weapon_might": 5,
+      "weapon_hit": 90,
+      "weapon_crit": 0,
+      "damage_type": "magical",
+      "basic_attack_range": { "min": 1, "max": 3 }
+    },
+    "holy_ranged": {
+      "weapon_might": 4,
+      "weapon_hit": 92,
+      "weapon_crit": 0,
+      "damage_type": "holy",
+      "basic_attack_range": { "min": 1, "max": 3 }
+    }
+  }
+}

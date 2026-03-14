@@ -1095,16 +1095,21 @@ func _build_attack_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 	if target == null or target.faction == current_unit.faction:
 		return {}
 	var action: GameAction = GameAction.make_attack(current_unit, target)
-	var preview: Dictionary = DamageCalculator.preview_attack(
+	var preview_data: Dictionary = _build_hostile_action_context(
 		current_unit, target, action.data)
+	var preview: Dictionary = DamageCalculator.preview_attack(
+		current_unit, target, preview_data)
 	return {
 		"visible": true,
 		"target_name": target.unit_name,
 		"hit_percent": int(preview.get("hit_percent", 0)),
 		"crit_percent": int(preview.get("crit_percent", 0)),
 		"damage": int(preview.get("damage", 0)),
-		"counter_expected": bool(preview.get("counter_expected", false))
-			and _is_adjacent(target, current_unit),
+		"counter_expected": _can_counterattack(preview_data, target, current_unit),
+		"terrain_name": str(preview.get("terrain_name", "PLAIN")),
+		"terrain_evade_bonus": int(preview.get("terrain_evade_bonus", 0)),
+		"terrain_def_bonus": int(preview.get("terrain_def_bonus", 0)),
+		"terrain_res_bonus": int(preview.get("terrain_res_bonus", 0)),
 	}
 
 # ── Action execution ─────────────────────────────────
@@ -1266,11 +1271,15 @@ func _can_execute_hostile_action(attacker: Unit, defender: Unit) -> bool:
 
 func _execute_hostile_action(attacker: Unit, defender: Unit,
 		data: Dictionary) -> void:
-	var damage_type: String = data.get("damage_type", "physical")
+	var action_data: Dictionary = _build_hostile_action_context(attacker, defender, data)
+	var damage_type: String = str(action_data.get("damage_type", "physical"))
+	var defender_disabled_before_attack: bool = defender.has_buff("stun") \
+		or defender.has_buff("freeze")
 	defender.handle_attacked()
 
 	# Main attack: calculate → popup → apply
-	var result := DamageCalculator.resolve_attack(attacker, defender, data)
+	var result: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(
+		attacker, defender, action_data)
 	_log_attack(attacker, defender, result, "")
 	if result.hit:
 		DamagePopup.spawn(popup_layer, defender.position,
@@ -1285,23 +1294,20 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 	if result.defender_died:
 		return
 
-	# Counter-attack (melee range only)
-	var allow_counter: bool = data.get("allow_counter", true)
-	if allow_counter and result.hit \
-			and defender.stats.is_alive() \
-			and _is_adjacent(defender, attacker):
-		var counter_data := {
-			"damage_type": "physical",
-			"skill_multiplier": 1.0,
-			"terrain_multiplier": 1.0,
-		}
-		var counter_result := DamageCalculator.resolve_attack(
+	# Counter-attack
+	if _can_counterattack(action_data, defender, attacker, defender_disabled_before_attack):
+		var counter_data: Dictionary = _build_basic_attack_action_data(defender, attacker, {
+			"allow_counter": false,
+			"allow_pursuit": false,
+		})
+		var counter_result: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(
 			defender, attacker, counter_data)
 		_log_attack(defender, attacker, counter_result, "Counterattack")
 		if counter_result.hit:
+			var counter_damage_type: String = str(counter_data.get("damage_type", "physical"))
 			DamagePopup.spawn(popup_layer, attacker.position,
-				counter_result.damage, "physical", counter_result.crit)
-			attacker.take_damage(counter_result.damage, "physical")
+				counter_result.damage, counter_damage_type, counter_result.crit)
+			attacker.take_damage(counter_result.damage, counter_damage_type)
 		else:
 			DamagePopup.spawn_miss(popup_layer, attacker.position)
 		if counter_result.defender_died:
@@ -1309,23 +1315,22 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 			return
 
 	# Pursuit
-	var allow_pursuit: bool = data.get("allow_pursuit", true)
+	var allow_pursuit: bool = bool(action_data.get("allow_pursuit", true))
 	if allow_pursuit and result.hit \
 			and attacker.stats.is_alive() and defender.stats.is_alive():
-		var pursuit_chance := clampf(
+		var pursuit_chance: float = clampf(
 			(attacker.get_effective_stat("SPD") - defender.get_effective_stat("SPD")) * 0.1,
 			0.0, 1.0)
 		if randf() < pursuit_chance:
-			var pursuit_data := {
-				"damage_type": data.get("damage_type", "physical"),
-				"skill_multiplier": 1.0,
-				"terrain_multiplier": 1.0,
-			}
-			var pursuit_result := DamageCalculator.resolve_attack(
+			var pursuit_data: Dictionary = _build_basic_attack_action_data(attacker, defender, {
+				"allow_counter": false,
+				"allow_pursuit": false,
+			})
+			var pursuit_result: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(
 				attacker, defender, pursuit_data)
 			_log_attack(attacker, defender, pursuit_result, "Pursuit")
 			if pursuit_result.hit:
-				var p_type: String = pursuit_data.get("damage_type", "physical")
+				var p_type: String = str(pursuit_data.get("damage_type", "physical"))
 				DamagePopup.spawn(popup_layer, defender.position,
 					pursuit_result.damage, p_type, pursuit_result.crit)
 				defender.take_damage(pursuit_result.damage, p_type)
@@ -1537,7 +1542,7 @@ func _refresh_attack_cells() -> void:
 	else:
 		var basic_pattern: Dictionary = {
 			"type": "diamond",
-			"min": 1,
+			"min": current_unit.attack_min_range,
 			"max": current_unit.attack_range,
 		}
 		var basic_cells: Array[Vector2i] = RangeCalculator.calculate_cells(
@@ -1595,6 +1600,7 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 	var affected_cells: Array[Vector2i] = AreaCalculator.calculate_cells(
 		grid, target_pos, area_data, area_direction)
 	var is_area_skill: bool = area_type != "single"
+	var basic_attack_profile: Dictionary = _get_unit_basic_attack_profile(user)
 	var payload: Dictionary = {
 		"skill_name": str(skill_data.get("name", _selected_skill_id)),
 		"action_cost": str(skill_data.get("action_cost", "standard")),
@@ -1602,10 +1608,14 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		"swift_limit": int(skill_data.get("swift_limit", 1)),
 		"cooldown": int(skill_data.get("cooldown", 0)),
 		"damage_type": str(skill_data.get("damage_type", "physical")),
+		"attack_type": str(skill_data.get("attack_type", "melee")),
 		"skill_multiplier": float(skill_data.get("power", 100)) / 100.0,
 		"terrain_multiplier": 1.0,
-		"weapon_hit": 90 + int(skill_data.get("hit_bonus", 0)),
-		"weapon_crit": int(skill_data.get("crit_bonus", 0)),
+		"weapon_might": int(basic_attack_profile.get("weapon_might", 0)),
+		"weapon_hit": int(basic_attack_profile.get("weapon_hit", 0))
+			+ int(skill_data.get("hit_bonus", 0)),
+		"weapon_crit": int(basic_attack_profile.get("weapon_crit", 0))
+			+ int(skill_data.get("crit_bonus", 0)),
 		"range_type": str(skill_data.get("range", {}).get("type", "diamond")),
 		"area_type": area_type,
 		"effect_timing": str(skill_data.get("effect_timing", "after_damage")),
@@ -1677,9 +1687,166 @@ func _is_supported_runtime_skill(skill_data: Dictionary) -> bool:
 
 
 func _is_adjacent(a: Unit, b: Unit) -> bool:
-	var dist := absi(a.grid_position.x - b.grid_position.x) \
+	var dist: int = absi(a.grid_position.x - b.grid_position.x) \
 			  + absi(a.grid_position.y - b.grid_position.y)
 	return dist <= 1
+
+
+func _build_hostile_action_context(attacker: Unit, defender: Unit,
+		base_data: Dictionary) -> Dictionary:
+	var action_data: Dictionary = base_data.duplicate(true)
+	var basic_attack_profile: Dictionary = _get_unit_basic_attack_profile(attacker)
+	var terrain_context: Dictionary = _get_unit_terrain_context(defender)
+	if not action_data.has("weapon_might"):
+		action_data["weapon_might"] = int(basic_attack_profile.get("weapon_might", 0))
+	if not action_data.has("weapon_hit"):
+		action_data["weapon_hit"] = int(basic_attack_profile.get("weapon_hit", 0))
+	if not action_data.has("weapon_crit"):
+		action_data["weapon_crit"] = int(basic_attack_profile.get("weapon_crit", 0))
+	if str(action_data.get("damage_type", "")) == "":
+		action_data["damage_type"] = str(basic_attack_profile.get("damage_type", "physical"))
+	if str(action_data.get("attack_type", "")) == "":
+		action_data["attack_type"] = str(basic_attack_profile.get("attack_type", "melee"))
+	action_data["terrain_evade_bonus"] = int(terrain_context.get("terrain_evade_bonus", 0))
+	action_data["terrain_def_bonus"] = int(terrain_context.get("terrain_def_bonus", 0))
+	action_data["terrain_res_bonus"] = int(terrain_context.get("terrain_res_bonus", 0))
+	action_data["defender_terrain_name"] = str(terrain_context.get("terrain_name", "PLAIN"))
+	return action_data
+
+
+func _build_basic_attack_action_data(attacker: Unit, defender: Unit,
+		extra_data: Dictionary = {}) -> Dictionary:
+	var basic_attack_profile: Dictionary = _get_unit_basic_attack_profile(attacker)
+	var action_data: Dictionary = {
+		"damage_type": str(basic_attack_profile.get("damage_type", "physical")),
+		"attack_type": str(basic_attack_profile.get("attack_type", "melee")),
+		"skill_multiplier": 1.0,
+		"terrain_multiplier": 1.0,
+		"relic_multiplier": 1.0,
+		"final_multiplier": 1.0,
+		"weapon_might": int(basic_attack_profile.get("weapon_might", 0)),
+		"weapon_hit": int(basic_attack_profile.get("weapon_hit", 0)),
+		"weapon_crit": int(basic_attack_profile.get("weapon_crit", 0)),
+		"pure_atk_source": str(basic_attack_profile.get("pure_atk_source", "phys")),
+		"allow_counter": true,
+		"allow_pursuit": true,
+	}
+	for key_value: Variant in extra_data.keys():
+		var key: String = str(key_value)
+		action_data[key] = extra_data[key]
+	return _build_hostile_action_context(attacker, defender, action_data)
+
+
+func _get_unit_basic_attack_profile(unit: Unit) -> Dictionary:
+	var source_data: Dictionary = _get_unit_source_data(unit)
+	var fallback_profiles: Dictionary = _get_basic_attack_profile_defaults()
+	var fallback_key: String = _get_basic_attack_profile_key(source_data)
+	var fallback_profile: Dictionary = fallback_profiles.get(fallback_key, {})
+	var range_data: Dictionary = source_data.get("basic_attack_range", fallback_profile.get(
+		"basic_attack_range", {"min": 1, "max": 1}))
+	var attack_type: String = "melee" if int(range_data.get("max", 1)) <= 1 else "ranged"
+	return {
+		"weapon_might": int(source_data.get("weapon_might", fallback_profile.get("weapon_might", 0))),
+		"weapon_hit": int(source_data.get("weapon_hit", fallback_profile.get("weapon_hit", 0))),
+		"weapon_crit": int(source_data.get("weapon_crit", fallback_profile.get("weapon_crit", 0))),
+		"damage_type": str(source_data.get("damage_type", fallback_profile.get("damage_type", "physical"))),
+		"pure_atk_source": str(source_data.get("pure_atk_source", fallback_profile.get(
+			"pure_atk_source", "phys"))),
+		"attack_type": attack_type,
+		"basic_attack_range": {
+			"min": maxi(1, int(range_data.get("min", 1))),
+			"max": maxi(1, int(range_data.get("max", 1))),
+		},
+	}
+
+
+func _get_unit_source_data(unit: Unit) -> Dictionary:
+	if unit == null:
+		return {}
+	var class_data: Dictionary = DataLoader.classes.get(unit.unit_id, {})
+	if not class_data.is_empty():
+		return class_data
+	return DataLoader.enemies.get(unit.unit_id, {})
+
+
+func _get_basic_attack_profile_defaults() -> Dictionary:
+	var defaults_entry: Dictionary = DataLoader.classes.get("basic_weapon_profiles", {})
+	return defaults_entry.get("profiles", {})
+
+
+func _get_basic_attack_profile_key(source_data: Dictionary) -> String:
+	var attack_type: String = str(source_data.get("attack_type", "melee"))
+	var damage_type: String = str(source_data.get("damage_type", ""))
+	if damage_type == "":
+		damage_type = _infer_damage_type_from_skills(source_data)
+	if damage_type == "":
+		damage_type = "physical"
+	return "%s_%s" % [damage_type, attack_type]
+
+
+func _infer_damage_type_from_skills(source_data: Dictionary) -> String:
+	var skill_ids: Array = source_data.get("skill_ids", [])
+	for skill_id_value: Variant in skill_ids:
+		var skill_id: String = str(skill_id_value)
+		var skill_data: Dictionary = DataLoader.skills.get(skill_id, {})
+		if skill_data.is_empty():
+			continue
+		if _is_support_skill(skill_data):
+			continue
+		return str(skill_data.get("damage_type", ""))
+	return ""
+
+
+func _get_unit_terrain_context(unit: Unit) -> Dictionary:
+	if unit == null or grid == null:
+		return {
+			"terrain_name": "PLAIN",
+			"terrain_evade_bonus": 0,
+			"terrain_def_bonus": 0,
+			"terrain_res_bonus": 0,
+		}
+	var cell: Cell = grid.get_cell(unit.grid_position)
+	if cell == null:
+		return {
+			"terrain_name": "PLAIN",
+			"terrain_evade_bonus": 0,
+			"terrain_def_bonus": 0,
+			"terrain_res_bonus": 0,
+		}
+	var combat_modifiers: Dictionary = cell.get_combat_modifiers()
+	return {
+		"terrain_name": str(combat_modifiers.get("terrain_name", "PLAIN")),
+		"terrain_evade_bonus": int(combat_modifiers.get("evade_bonus", 0)),
+		"terrain_def_bonus": int(combat_modifiers.get("def_bonus", 0)),
+		"terrain_res_bonus": int(combat_modifiers.get("res_bonus", 0)),
+	}
+
+
+func _can_counterattack(action_data: Dictionary, defender: Unit, attacker: Unit,
+		defender_disabled: bool = false) -> bool:
+	if not bool(action_data.get("allow_counter", true)):
+		return false
+	if str(action_data.get("attack_type", "melee")) == "area":
+		return false
+	if defender == null or attacker == null:
+		return false
+	if not defender.stats.is_alive():
+		return false
+	if defender_disabled:
+		return false
+	if defender.has_buff("stun") or defender.has_buff("freeze"):
+		return false
+	return _is_within_basic_attack_range(defender, attacker.grid_position)
+
+
+func _is_within_basic_attack_range(unit: Unit, target_pos: Vector2i) -> bool:
+	var basic_attack_profile: Dictionary = _get_unit_basic_attack_profile(unit)
+	var range_data: Dictionary = basic_attack_profile.get("basic_attack_range", {})
+	var min_range: int = maxi(1, int(range_data.get("min", 1)))
+	var max_range: int = maxi(min_range, int(range_data.get("max", min_range)))
+	var distance: int = absi(unit.grid_position.x - target_pos.x) \
+		+ absi(unit.grid_position.y - target_pos.y)
+	return distance >= min_range and distance <= max_range
 
 
 func _log_attack(attacker: Unit, defender: Unit,
