@@ -30,6 +30,7 @@ var input_state: InputState = InputState.IDLE
 var current_unit: Unit = null
 var selected_unit: Unit = null
 var _move_range: Dictionary = {}
+var _skill_range_cells: Array[Vector2i] = []
 var _attack_cells: Array[Vector2i] = []
 var _area_preview_cells: Array[Vector2i] = []
 var _direction_selector_cells: Array[Vector2i] = []
@@ -468,8 +469,14 @@ func _end_turn_from_attack_select() -> void:
 
 const HIGHLIGHT_MOVE_FILL      := Color(0.24, 0.47, 1.00, 0.35)
 const HIGHLIGHT_MOVE_BORDER    := Color(0.40, 0.70, 1.00, 0.90)
-const HIGHLIGHT_RANGE_FILL     := Color(0.12, 0.68, 0.92, 0.30)
-const HIGHLIGHT_RANGE_BORDER   := Color(0.44, 0.90, 1.00, 0.92)
+const HIGHLIGHT_ATTACK_RANGE_FILL := Color(0.92, 0.18, 0.18, 0.20)
+const HIGHLIGHT_ATTACK_RANGE_BORDER := Color(1.00, 0.42, 0.28, 0.90)
+const HIGHLIGHT_SUPPORT_RANGE_FILL := Color(0.18, 0.72, 0.28, 0.20)
+const HIGHLIGHT_SUPPORT_RANGE_BORDER := Color(0.52, 0.94, 0.56, 0.90)
+const HIGHLIGHT_ATTACK_TARGET_FILL := Color(1.00, 0.24, 0.24, 0.40)
+const HIGHLIGHT_ATTACK_TARGET_BORDER := Color(1.00, 0.60, 0.36, 0.98)
+const HIGHLIGHT_SUPPORT_TARGET_FILL := Color(0.18, 0.78, 0.34, 0.42)
+const HIGHLIGHT_SUPPORT_TARGET_BORDER := Color(0.62, 1.00, 0.70, 0.98)
 const HIGHLIGHT_AREA_FILL      := Color(1.00, 0.30, 0.22, 0.32)
 const HIGHLIGHT_AREA_BORDER    := Color(1.00, 0.65, 0.28, 0.94)
 const HIGHLIGHT_SELECTOR_FILL  := Color(0.10, 0.78, 0.88, 0.24)
@@ -597,14 +604,24 @@ func _refresh_highlights() -> void:
 				_add_highlight(cell_pos, HIGHLIGHT_MOVE_FILL, HIGHLIGHT_MOVE_BORDER)
 			if _path_preview.size() > 1:
 				_add_path_preview(_path_preview)
-		InputState.SKILL_TARGETING, InputState.ATTACK_TARGETING:
+		InputState.SKILL_TARGETING:
+			var range_fill: Color = _get_skill_range_fill_color()
+			var range_border: Color = _get_skill_range_border_color()
+			var target_fill: Color = _get_skill_target_fill_color()
+			var target_border: Color = _get_skill_target_border_color()
 			for cell_pos: Vector2i in _direction_selector_cells:
 				_add_highlight(
 					cell_pos, HIGHLIGHT_SELECTOR_FILL, HIGHLIGHT_SELECTOR_BORDER)
+			for cell_pos: Vector2i in _skill_range_cells:
+				_add_highlight(cell_pos, range_fill, range_border)
 			for cell_pos: Vector2i in _attack_cells:
-				_add_highlight(cell_pos, HIGHLIGHT_RANGE_FILL, HIGHLIGHT_RANGE_BORDER)
+				_add_highlight(cell_pos, target_fill, target_border)
 			for cell_pos: Vector2i in _area_preview_cells:
 				_add_highlight(cell_pos, HIGHLIGHT_AREA_FILL, HIGHLIGHT_AREA_BORDER)
+		InputState.ATTACK_TARGETING:
+			for cell_pos: Vector2i in _attack_cells:
+				_add_highlight(
+					cell_pos, HIGHLIGHT_ATTACK_TARGET_FILL, HIGHLIGHT_ATTACK_TARGET_BORDER)
 	if _has_hover_cell and grid.is_valid(_hover_cell):
 		_add_highlight(_hover_cell, HIGHLIGHT_HOVER_FILL, HIGHLIGHT_HOVER_BORDER)
 
@@ -659,6 +676,7 @@ func _clear_selected_skill() -> void:
 
 
 func _clear_targeting_buffers() -> void:
+	_skill_range_cells = []
 	_attack_cells = []
 	_area_preview_cells = []
 	_direction_selector_cells = []
@@ -1412,7 +1430,44 @@ func _make_status_effect_entry(user: Unit, target_unit: Unit,
 	}
 
 
+func _get_skill_range_fill_color() -> Color:
+	if _selected_skill_id == "":
+		return HIGHLIGHT_ATTACK_RANGE_FILL
+	var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
+	if _is_support_skill(skill_data):
+		return HIGHLIGHT_SUPPORT_RANGE_FILL
+	return HIGHLIGHT_ATTACK_RANGE_FILL
+
+
+func _get_skill_range_border_color() -> Color:
+	if _selected_skill_id == "":
+		return HIGHLIGHT_ATTACK_RANGE_BORDER
+	var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
+	if _is_support_skill(skill_data):
+		return HIGHLIGHT_SUPPORT_RANGE_BORDER
+	return HIGHLIGHT_ATTACK_RANGE_BORDER
+
+
+func _get_skill_target_fill_color() -> Color:
+	if _selected_skill_id == "":
+		return HIGHLIGHT_ATTACK_TARGET_FILL
+	var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
+	if _is_support_skill(skill_data):
+		return HIGHLIGHT_SUPPORT_TARGET_FILL
+	return HIGHLIGHT_ATTACK_TARGET_FILL
+
+
+func _get_skill_target_border_color() -> Color:
+	if _selected_skill_id == "":
+		return HIGHLIGHT_ATTACK_TARGET_BORDER
+	var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
+	if _is_support_skill(skill_data):
+		return HIGHLIGHT_SUPPORT_TARGET_BORDER
+	return HIGHLIGHT_ATTACK_TARGET_BORDER
+
+
 func _refresh_attack_cells() -> void:
+	_skill_range_cells = []
 	_attack_cells = []
 	_area_preview_cells = []
 	_direction_selector_cells = []
@@ -1428,6 +1483,7 @@ func _refresh_attack_cells() -> void:
 			return
 		var candidate_cells: Array[Vector2i] = RangeCalculator.calculate_cells(
 			grid, current_unit.grid_position, range_data, _targeting_direction)
+		_skill_range_cells = candidate_cells
 		_attack_cells = _filter_targetable_cells(candidate_cells, skill_data)
 	else:
 		var basic_pattern: Dictionary = {
