@@ -31,11 +31,14 @@ var current_unit: Unit = null
 var selected_unit: Unit = null
 var _move_range: Dictionary = {}
 var _attack_cells: Array[Vector2i] = []
+var _area_preview_cells: Array[Vector2i] = []
+var _direction_selector_cells: Array[Vector2i] = []
 var _path_preview: Array[Vector2i] = []
 var _hover_cell: Vector2i = Vector2i.ZERO
 var _has_hover_cell: bool = false
 var _attack_mode: String = ATTACK_MODE_BASIC
 var _selected_skill_id: String = ""
+var _targeting_direction: Vector2i = Vector2i.ZERO
 var _skill_bar_expanded: bool = false
 var _inspected_unit: Unit = null
 var _pre_move_position: Vector2i = Vector2i.ZERO
@@ -130,9 +133,11 @@ func request_skill_selection(skill_id: String) -> void:
 
 	_selected_skill_id = skill_id
 	_skill_bar_expanded = true
+	_clear_targeting_buffers()
 	var range_data: Dictionary = skill_data.get("range", {})
 	if str(range_data.get("type", "")) == "self":
-		var action: GameAction = _build_skill_action(unit, unit.grid_position, unit)
+		var action: GameAction = _build_skill_action(
+			unit, unit.grid_position, grid.get_unit_at(unit.grid_position))
 		if action != null:
 			_execute_skill_from_input(action)
 		return
@@ -158,6 +163,7 @@ func request_attack_targeting() -> void:
 	_inspected_unit = null
 	_skill_bar_expanded = false
 	_selected_skill_id = ""
+	_clear_targeting_buffers()
 	_attack_mode = ATTACK_MODE_BASIC
 	_targeting_origin_state = input_state
 	input_state = InputState.ATTACK_TARGETING
@@ -373,8 +379,19 @@ func _handle_click(grid_pos: Vector2i) -> void:
 			if unit != null:
 				_show_unit_info(unit)
 		InputState.SKILL_TARGETING:
-			if unit != null and grid_pos in _attack_cells:
-				var skill_action: GameAction = _build_skill_action(current_unit, grid_pos, unit)
+			if _is_waiting_for_line_direction():
+				if grid_pos in _direction_selector_cells:
+					_targeting_direction = RangeCalculator.direction_from_to(
+						current_unit.grid_position, grid_pos)
+					_refresh_attack_cells()
+					_recalculate_hover_artifacts()
+					_show_attack_highlights()
+					_emit_dashboard_state_changed()
+				else:
+					_cancel_targeting()
+			elif _can_confirm_skill_target(grid_pos):
+				var skill_action: GameAction = _build_skill_action(
+					current_unit, grid_pos, unit)
 				if skill_action != null:
 					_execute_skill_from_input(skill_action)
 			else:
@@ -401,6 +418,7 @@ func _select_unit(unit: Unit) -> void:
 	_skill_bar_expanded = false
 	_attack_mode = ATTACK_MODE_BASIC
 	_selected_skill_id = ""
+	_clear_targeting_buffers()
 	_combat_forecast = {}
 	input_state = InputState.MOVE_PHASE
 	_pre_move_position = unit.grid_position
@@ -415,7 +433,7 @@ func _deselect_unit() -> void:
 	selected_unit = null
 	input_state = InputState.IDLE
 	_move_range = {}
-	_attack_cells = []
+	_clear_targeting_buffers()
 	_path_preview = []
 	_attack_mode = ATTACK_MODE_BASIC
 	_selected_skill_id = ""
@@ -431,6 +449,7 @@ func _enter_attack_select() -> void:
 	if not _can_enter_attack_targeting():
 		return
 	_move_range = {}
+	_clear_targeting_buffers()
 	input_state = InputState.ATTACK_TARGETING
 	_attack_mode = ATTACK_MODE_BASIC
 	_selected_skill_id = ""
@@ -447,14 +466,18 @@ func _end_turn_from_attack_select() -> void:
 
 # ── Highlight colors（方案B — GBA经典明亮）─────────────
 
-const HIGHLIGHT_MOVE_FILL    := Color(0.24, 0.47, 1.00, 0.35)
-const HIGHLIGHT_MOVE_BORDER  := Color(0.40, 0.70, 1.00, 0.90)
-const HIGHLIGHT_ATK_FILL     := Color(1.00, 0.24, 0.24, 0.35)
-const HIGHLIGHT_ATK_BORDER   := Color(1.00, 0.50, 0.30, 0.90)
-const HIGHLIGHT_HOVER_FILL   := Color(1.00, 0.94, 0.24, 0.35)
-const HIGHLIGHT_HOVER_BORDER := Color(1.00, 1.00, 0.60, 0.90)
-const PATH_PREVIEW_COLOR     := Color(1.00, 0.98, 0.65, 0.95)
-const HIGHLIGHT_BORDER_WIDTH := 2.0
+const HIGHLIGHT_MOVE_FILL      := Color(0.24, 0.47, 1.00, 0.35)
+const HIGHLIGHT_MOVE_BORDER    := Color(0.40, 0.70, 1.00, 0.90)
+const HIGHLIGHT_RANGE_FILL     := Color(0.12, 0.68, 0.92, 0.30)
+const HIGHLIGHT_RANGE_BORDER   := Color(0.44, 0.90, 1.00, 0.92)
+const HIGHLIGHT_AREA_FILL      := Color(1.00, 0.30, 0.22, 0.32)
+const HIGHLIGHT_AREA_BORDER    := Color(1.00, 0.65, 0.28, 0.94)
+const HIGHLIGHT_SELECTOR_FILL  := Color(0.10, 0.78, 0.88, 0.24)
+const HIGHLIGHT_SELECTOR_BORDER := Color(0.52, 0.98, 1.00, 0.96)
+const HIGHLIGHT_HOVER_FILL     := Color(1.00, 0.94, 0.24, 0.35)
+const HIGHLIGHT_HOVER_BORDER   := Color(1.00, 1.00, 0.60, 0.90)
+const PATH_PREVIEW_COLOR       := Color(1.00, 0.98, 0.65, 0.95)
+const HIGHLIGHT_BORDER_WIDTH   := 2.0
 
 
 func _show_move_highlights() -> void:
@@ -502,6 +525,7 @@ func _update_hover(grid_pos: Vector2i) -> void:
 func _clear_hover_state() -> void:
 	_has_hover_cell = false
 	_path_preview = []
+	_area_preview_cells = []
 	_refresh_highlights()
 
 
@@ -542,6 +566,7 @@ func _handle_cancel_action() -> void:
 func _recalculate_hover_artifacts() -> void:
 	_path_preview = []
 	_combat_forecast = {}
+	_area_preview_cells = []
 	if not _has_hover_cell or not grid.is_valid(_hover_cell):
 		_emit_dashboard_state_changed()
 		return
@@ -552,6 +577,15 @@ func _recalculate_hover_artifacts() -> void:
 			grid, selected_unit.grid_position, _hover_cell, selected_unit.faction)
 	elif input_state == InputState.ATTACK_TARGETING:
 		_combat_forecast = _build_attack_forecast_for_hover(_hover_cell)
+	elif input_state == InputState.SKILL_TARGETING \
+			and not _is_waiting_for_line_direction() \
+			and _hover_cell in _attack_cells:
+		var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
+		var area_data: Dictionary = skill_data.get("area", {})
+		var area_direction: Vector2i = _get_skill_area_direction(
+			current_unit.grid_position, _hover_cell, skill_data)
+		_area_preview_cells = AreaCalculator.calculate_cells(
+			grid, _hover_cell, area_data, area_direction)
 	_emit_dashboard_state_changed()
 
 
@@ -564,8 +598,13 @@ func _refresh_highlights() -> void:
 			if _path_preview.size() > 1:
 				_add_path_preview(_path_preview)
 		InputState.SKILL_TARGETING, InputState.ATTACK_TARGETING:
+			for cell_pos: Vector2i in _direction_selector_cells:
+				_add_highlight(
+					cell_pos, HIGHLIGHT_SELECTOR_FILL, HIGHLIGHT_SELECTOR_BORDER)
 			for cell_pos: Vector2i in _attack_cells:
-				_add_highlight(cell_pos, HIGHLIGHT_ATK_FILL, HIGHLIGHT_ATK_BORDER)
+				_add_highlight(cell_pos, HIGHLIGHT_RANGE_FILL, HIGHLIGHT_RANGE_BORDER)
+			for cell_pos: Vector2i in _area_preview_cells:
+				_add_highlight(cell_pos, HIGHLIGHT_AREA_FILL, HIGHLIGHT_AREA_BORDER)
 	if _has_hover_cell and grid.is_valid(_hover_cell):
 		_add_highlight(_hover_cell, HIGHLIGHT_HOVER_FILL, HIGHLIGHT_HOVER_BORDER)
 
@@ -583,21 +622,20 @@ func _add_path_preview(path: Array[Vector2i]) -> void:
 
 
 func _get_attack_range(origin: Vector2i, atk_range: int = 1) -> Array[Vector2i]:
-	return _get_attack_range_band(origin, 1, atk_range)
+	return RangeCalculator.calculate_cells(grid, origin, {
+		"type": "diamond",
+		"min": 1,
+		"max": atk_range,
+	})
 
 
 func _get_attack_range_band(origin: Vector2i, min_range: int = 1,
 		max_range: int = 1) -> Array[Vector2i]:
-	var result: Array[Vector2i] = []
-	for dy in range(-max_range, max_range + 1):
-		for dx in range(-max_range, max_range + 1):
-			var dist: int = absi(dx) + absi(dy)
-			if dist < min_range or dist > max_range:
-				continue
-			var pos: Vector2i = origin + Vector2i(dx, dy)
-			if grid.is_valid(pos):
-				result.append(pos)
-	return result
+	return RangeCalculator.calculate_cells(grid, origin, {
+		"type": "diamond",
+		"min": min_range,
+		"max": max_range,
+	})
 
 
 func _refresh_move_range(unit: Unit) -> void:
@@ -612,11 +650,19 @@ func _refresh_move_range(unit: Unit) -> void:
 func _clear_selected_skill() -> void:
 	_selected_skill_id = ""
 	_attack_mode = ATTACK_MODE_BASIC
+	_clear_targeting_buffers()
 	if input_state == InputState.SKILL_TARGETING:
 		_refresh_attack_cells()
 		_recalculate_hover_artifacts()
 		_show_attack_highlights()
 	_emit_dashboard_state_changed()
+
+
+func _clear_targeting_buffers() -> void:
+	_attack_cells = []
+	_area_preview_cells = []
+	_direction_selector_cells = []
+	_targeting_direction = Vector2i.ZERO
 
 
 func _restore_action_phase_state() -> void:
@@ -628,7 +674,7 @@ func _restore_action_phase_state() -> void:
 	input_state = InputState.ACTION_PHASE
 	_attack_mode = ATTACK_MODE_BASIC
 	_selected_skill_id = ""
-	_attack_cells = []
+	_clear_targeting_buffers()
 	_path_preview = []
 	_combat_forecast = {}
 	_skill_bar_expanded = false
@@ -666,26 +712,6 @@ func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 	return entry
 
 
-func _apply_self_skill_effects(user: Unit, skill_data: Dictionary) -> void:
-	for effect_value: Variant in skill_data.get("effects", []):
-		if not (effect_value is Dictionary):
-			continue
-		var effect_data: Dictionary = effect_value
-		user.add_status_effect({
-			"id": "%s_%s" % [
-				str(skill_data.get("id", "skill")),
-				str(effect_data.get("type", "buff")),
-			],
-			"name": str(effect_data.get("type", "buff")),
-			"kind": "buff",
-			"icon": "+",
-			"duration": int(effect_data.get("duration", 1)),
-			"effect_type": str(effect_data.get("type", "buff")),
-			"value": int(effect_data.get("value", 0)),
-			"trigger": "manual",
-		})
-
-
 func _get_skill_entries() -> Array[Dictionary]:
 	var unit: Unit = _get_player_dashboard_unit()
 	var entries: Array[Dictionary] = []
@@ -706,6 +732,7 @@ func _prepare_player_turn(unit: Unit) -> void:
 	_skill_bar_expanded = false
 	_attack_mode = ATTACK_MODE_BASIC
 	_selected_skill_id = ""
+	_clear_targeting_buffers()
 	_combat_forecast = {}
 	_pre_move_position = unit.grid_position
 	_move_committed = false
@@ -719,7 +746,7 @@ func _prepare_player_turn(unit: Unit) -> void:
 func _clear_dashboard_state() -> void:
 	selected_unit = null
 	_move_range = {}
-	_attack_cells = []
+	_clear_targeting_buffers()
 	_path_preview = []
 	_attack_mode = ATTACK_MODE_BASIC
 	_selected_skill_id = ""
@@ -803,6 +830,8 @@ func _get_dashboard_hint_text() -> String:
 		InputState.ACTION_PHASE:
 			return "可攻击、用技能，或右键/ESC 撤销移动"
 		InputState.SKILL_TARGETING:
+			if _is_waiting_for_line_direction():
+				return "先选择施法方向，再选择目标格"
 			return "选择合法目标，右键或 ESC 取消"
 		InputState.ATTACK_TARGETING:
 			return "悬停敌人查看预测，左键确认攻击"
@@ -834,7 +863,7 @@ func _complete_move_phase(moved: bool) -> void:
 		_move_committed = false
 	selected_unit = current_unit
 	_inspected_unit = null
-	_attack_cells = []
+	_clear_targeting_buffers()
 	_move_range = {}
 	_path_preview = []
 	_attack_mode = ATTACK_MODE_BASIC
@@ -859,7 +888,7 @@ func _undo_move() -> void:
 	current_unit.restore_movement_resource()
 	current_unit.refresh_status_icons()
 	selected_unit = current_unit
-	_attack_cells = []
+	_clear_targeting_buffers()
 	_selected_skill_id = ""
 	_skill_bar_expanded = false
 	_inspected_unit = null
@@ -875,7 +904,7 @@ func _undo_move() -> void:
 func _cancel_targeting() -> void:
 	var origin_state: InputState = _targeting_origin_state
 	var keep_skill_bar_open: bool = input_state == InputState.SKILL_TARGETING
-	_attack_cells = []
+	_clear_targeting_buffers()
 	_selected_skill_id = ""
 	_attack_mode = ATTACK_MODE_BASIC
 	_combat_forecast = {}
@@ -927,7 +956,7 @@ func _resolve_post_action_phase() -> void:
 	if current_unit.standard_used:
 		if _has_available_swift_skill(current_unit):
 			input_state = InputState.SWIFT_PHASE
-			_attack_cells = []
+			_clear_targeting_buffers()
 			_move_range = {}
 			_path_preview = []
 			_attack_mode = ATTACK_MODE_BASIC
@@ -967,7 +996,7 @@ func _handle_post_skill_execution(previous_state: InputState,
 				_:
 					input_state = InputState.ACTION_PHASE
 					_skill_bar_expanded = false
-					_attack_cells = []
+					_clear_targeting_buffers()
 					_recalculate_hover_artifacts()
 					_refresh_highlights()
 					_emit_dashboard_state_changed()
@@ -1069,7 +1098,7 @@ func _execute_attack_from_input(action: GameAction) -> void:
 	var previous_state: InputState = input_state
 	input_state = InputState.ANIMATING
 	_clear_highlights()
-	_attack_cells = []
+	_clear_targeting_buffers()
 	_combat_forecast = {}
 	var executed: bool = _execute_attack_action(action)
 	if current_unit and current_unit.stats.is_alive() \
@@ -1087,7 +1116,7 @@ func _execute_skill_from_input(action: GameAction) -> void:
 	var previous_state: InputState = input_state
 	input_state = InputState.ANIMATING
 	_clear_highlights()
-	_attack_cells = []
+	_clear_targeting_buffers()
 	_combat_forecast = {}
 	var executed: bool = _execute_skill_action(action)
 	if current_unit and current_unit.stats.is_alive() \
@@ -1120,7 +1149,6 @@ func _execute_attack_action(action: GameAction) -> bool:
 
 func _execute_skill_action(action: GameAction) -> bool:
 	var user: Unit = action.actor
-	var target: Unit = action.target_unit
 	var data: Dictionary = action.data
 	if user == null:
 		return false
@@ -1136,11 +1164,21 @@ func _execute_skill_action(action: GameAction) -> bool:
 		print("[Skill] %s blocked: %s" % [skill_id, str(validation.get("reason", ""))])
 		return false
 
-	var range_data: Dictionary = skill_data.get("range", {})
-	var range_type: String = str(range_data.get("type", ""))
-	if range_type == "self":
-		target = user
-	elif not _can_execute_hostile_action(user, target):
+	var target_pos: Vector2i = action.target_pos
+	if not grid.is_valid(target_pos):
+		return false
+	var area_direction: Vector2i = _deserialize_vector2i(
+		data.get("target_direction", {}))
+	var area_cells: Array[Vector2i] = _extract_cells_from_payload(
+		data.get("affected_cells", []))
+	if area_cells.is_empty():
+		area_direction = _get_skill_area_direction(
+			user.grid_position, target_pos, skill_data)
+		area_cells = AreaCalculator.calculate_cells(
+			grid, target_pos, skill_data.get("area", {}), area_direction)
+	var target_units: Array[Unit] = _get_units_in_skill_area(
+		user, skill_data, area_cells)
+	if not _is_ground_target_skill(skill_data) and target_units.is_empty():
 		return false
 
 	var action_cost: String = str(skill_data.get("action_cost", "standard"))
@@ -1152,17 +1190,34 @@ func _execute_skill_action(action: GameAction) -> bool:
 	var cooldown_turns: int = int(data.get("cooldown", 0))
 	user.consume_skill(skill_id, cooldown_turns)
 	user.refresh_status_icons()
-	if range_type == "self":
-		print("[Skill] %s uses %s" % [
+	var skill_name: String = str(data.get("skill_name", skill_id))
+	if _is_support_skill(skill_data):
+		print("[Skill] %s uses %s (%d target(s))" % [
 			user.unit_name,
-			str(data.get("skill_name", skill_id))])
-		_apply_self_skill_effects(user, skill_data)
-	else:
+			skill_name,
+			target_units.size(),
+		])
+		_apply_support_skill(user, skill_data, target_units)
+		return true
+
+	var hostile_payload: Dictionary = data.duplicate(true)
+	if target_units.is_empty():
+		print("[Skill] %s uses %s on empty area %s" % [
+			user.unit_name,
+			skill_name,
+			target_pos,
+		])
+		return true
+
+	for target_unit: Unit in target_units:
+		if not _can_execute_hostile_action(user, target_unit):
+			continue
 		print("[Skill] %s uses %s on %s" % [
 			user.unit_name,
-			str(data.get("skill_name", skill_id)),
-			target.unit_name])
-		_execute_hostile_action(user, target, data)
+			skill_name,
+			target_unit.unit_name,
+		])
+		_execute_hostile_action(user, target_unit, hostile_payload)
 	return true
 
 
@@ -1238,30 +1293,203 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 				DamagePopup.spawn_miss(popup_layer, defender.position)
 
 
+func _is_waiting_for_line_direction() -> bool:
+	if input_state != InputState.SKILL_TARGETING or _selected_skill_id == "":
+		return false
+	var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
+	var range_data: Dictionary = skill_data.get("range", {})
+	return str(range_data.get("type", "")) == "line" \
+		and _targeting_direction == Vector2i.ZERO
+
+
+func _can_confirm_skill_target(grid_pos: Vector2i) -> bool:
+	if current_unit == null or _selected_skill_id == "":
+		return false
+	if grid_pos not in _attack_cells:
+		return false
+	var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
+	if _is_ground_target_skill(skill_data):
+		return true
+	var target_unit: Unit = grid.get_unit_at(grid_pos)
+	return _matches_target_relation(
+		current_unit, target_unit, _get_skill_target_relation(skill_data))
+
+
+func _get_units_in_skill_area(user: Unit, skill_data: Dictionary,
+		area_cells: Array[Vector2i]) -> Array[Unit]:
+	var relation: String = _get_skill_target_relation(skill_data)
+	var units_by_id: Dictionary = {}
+	for cell_pos: Vector2i in area_cells:
+		var target_unit: Unit = grid.get_unit_at(cell_pos)
+		if _matches_target_relation(user, target_unit, relation):
+			units_by_id[target_unit.get_instance_id()] = target_unit
+	var units_in_area: Array[Unit] = []
+	for unit_value: Variant in units_by_id.values():
+		if unit_value is Unit:
+			units_in_area.append(unit_value)
+	return units_in_area
+
+
+func _get_skill_target_relation(skill_data: Dictionary) -> String:
+	var range_data: Dictionary = skill_data.get("range", {})
+	if str(range_data.get("type", "")) == "self":
+		return "self"
+	if _is_support_skill(skill_data):
+		return "ally"
+	return "enemy"
+
+
+func _matches_target_relation(user: Unit, target_unit: Unit,
+		relation: String) -> bool:
+	if user == null or target_unit == null or not target_unit.stats.is_alive():
+		return false
+	match relation:
+		"self":
+			return target_unit == user
+		"ally":
+			return target_unit.faction == user.faction
+		"enemy":
+			return target_unit.faction != user.faction
+		_:
+			return false
+
+
+func _is_support_skill(skill_data: Dictionary) -> bool:
+	return int(skill_data.get("power", 0)) <= 0
+
+
+func _is_ground_target_skill(skill_data: Dictionary) -> bool:
+	var range_data: Dictionary = skill_data.get("range", {})
+	if str(range_data.get("type", "")) == "self":
+		return false
+	var area_data: Dictionary = skill_data.get("area", {})
+	return str(area_data.get("type", "single")) != "single"
+
+
+func _apply_support_skill(user: Unit, skill_data: Dictionary,
+		target_units: Array[Unit]) -> void:
+	for target_unit: Unit in target_units:
+		for effect_value: Variant in skill_data.get("effects", []):
+			if not (effect_value is Dictionary):
+				continue
+			_apply_skill_effect_to_unit(
+				user, target_unit, skill_data, effect_value as Dictionary)
+
+
+func _apply_skill_effect_to_unit(user: Unit, target_unit: Unit,
+		skill_data: Dictionary, effect_data: Dictionary) -> void:
+	var effect_type: String = str(effect_data.get("type", ""))
+	var effect_value: int = int(effect_data.get("value", 0))
+	match effect_type:
+		"heal":
+			if effect_value > 0:
+				target_unit.heal(effect_value)
+		"damage", "dot":
+			if effect_value > 0:
+				target_unit.take_damage(effect_value, "pure")
+		_:
+			target_unit.add_status_effect(_make_status_effect_entry(
+				user, target_unit, skill_data, effect_data))
+
+
+func _make_status_effect_entry(user: Unit, target_unit: Unit,
+		skill_data: Dictionary, effect_data: Dictionary) -> Dictionary:
+	var effect_type: String = str(effect_data.get("type", "buff"))
+	var is_buff: bool = target_unit.faction == user.faction
+	return {
+		"id": "%s_%s_%s" % [
+			str(skill_data.get("id", "skill")),
+			effect_type,
+			str(target_unit.get_instance_id()),
+		],
+		"name": effect_type,
+		"kind": "buff" if is_buff else "debuff",
+		"icon": "+" if is_buff else "-",
+		"duration": int(effect_data.get("duration", 1)),
+		"effect_type": effect_type,
+		"value": int(effect_data.get("value", 0)),
+		"trigger": "manual",
+	}
+
+
 func _refresh_attack_cells() -> void:
+	_attack_cells = []
+	_area_preview_cells = []
+	_direction_selector_cells = []
 	if current_unit == null:
-		_attack_cells = []
 		return
 	if _attack_mode == ATTACK_MODE_SKILL and _selected_skill_id != "":
-		var skill_data := _get_skill_data(_selected_skill_id)
+		var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
 		var range_data: Dictionary = skill_data.get("range", {})
-		var min_range: int = int(range_data.get("min", 1))
-		var max_range: int = int(range_data.get("max", 1))
-		_attack_cells = _get_attack_range_band(
-			current_unit.grid_position, min_range, max_range)
+		if str(range_data.get("type", "")) == "line" \
+				and _targeting_direction == Vector2i.ZERO:
+			_direction_selector_cells = RangeCalculator.get_line_selector_cells(
+				grid, current_unit.grid_position, range_data)
+			return
+		var candidate_cells: Array[Vector2i] = RangeCalculator.calculate_cells(
+			grid, current_unit.grid_position, range_data, _targeting_direction)
+		_attack_cells = _filter_targetable_cells(candidate_cells, skill_data)
 	else:
-		_attack_cells = _get_attack_range(
-			current_unit.grid_position, current_unit.attack_range)
+		var basic_pattern: Dictionary = {
+			"type": "diamond",
+			"min": 1,
+			"max": current_unit.attack_range,
+		}
+		var basic_cells: Array[Vector2i] = RangeCalculator.calculate_cells(
+			grid, current_unit.grid_position, basic_pattern)
+		_attack_cells = _filter_enemy_target_cells(basic_cells)
+
+
+func _filter_targetable_cells(candidate_cells: Array[Vector2i],
+		skill_data: Dictionary) -> Array[Vector2i]:
+	if current_unit == null:
+		return []
+	if _is_ground_target_skill(skill_data):
+		return candidate_cells
+	var filtered_cells: Array[Vector2i] = []
+	var relation: String = _get_skill_target_relation(skill_data)
+	for cell_pos: Vector2i in candidate_cells:
+		var target_unit: Unit = grid.get_unit_at(cell_pos)
+		if _matches_target_relation(current_unit, target_unit, relation):
+			filtered_cells.append(cell_pos)
+	return filtered_cells
+
+
+func _filter_enemy_target_cells(candidate_cells: Array[Vector2i]) -> Array[Vector2i]:
+	if current_unit == null:
+		return []
+	var filtered_cells: Array[Vector2i] = []
+	for cell_pos: Vector2i in candidate_cells:
+		var target_unit: Unit = grid.get_unit_at(cell_pos)
+		if target_unit != null and target_unit.faction != current_unit.faction:
+			filtered_cells.append(cell_pos)
+	return filtered_cells
+
+
+func _get_skill_area_direction(origin: Vector2i, target_pos: Vector2i,
+		skill_data: Dictionary) -> Vector2i:
+	var area_data: Dictionary = skill_data.get("area", {})
+	if str(area_data.get("type", "")) == "line" \
+			and _targeting_direction != Vector2i.ZERO:
+		return _targeting_direction
+	return RangeCalculator.direction_from_to(origin, target_pos)
 
 
 func _build_skill_action(user: Unit, target_pos: Vector2i,
 		target: Unit) -> GameAction:
 	if user == null or _selected_skill_id == "":
 		return null
-	var skill_data := _get_skill_data(_selected_skill_id)
+	var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
 	if skill_data.is_empty():
 		return null
-	var payload := {
+	var area_data: Dictionary = skill_data.get("area", {})
+	var area_type: String = str(area_data.get("type", "single"))
+	var area_direction: Vector2i = _get_skill_area_direction(
+		user.grid_position, target_pos, skill_data)
+	var affected_cells: Array[Vector2i] = AreaCalculator.calculate_cells(
+		grid, target_pos, area_data, area_direction)
+	var is_area_skill: bool = area_type != "single"
+	var payload: Dictionary = {
 		"skill_name": str(skill_data.get("name", _selected_skill_id)),
 		"action_cost": str(skill_data.get("action_cost", "standard")),
 		"timing_constraint": str(skill_data.get("timing_constraint", "any")),
@@ -1272,10 +1500,44 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		"terrain_multiplier": 1.0,
 		"weapon_hit": 90 + int(skill_data.get("hit_bonus", 0)),
 		"weapon_crit": int(skill_data.get("crit_bonus", 0)),
-		"allow_counter": true,
-		"allow_pursuit": true,
+		"range_type": str(skill_data.get("range", {}).get("type", "diamond")),
+		"area_type": area_type,
+		"target_direction": _serialize_vector2i(area_direction),
+		"affected_cells": _serialize_cells(affected_cells),
+		"allow_counter": not is_area_skill,
+		"allow_pursuit": not is_area_skill,
 	}
 	return GameAction.make_skill(user, _selected_skill_id, target_pos, target, payload)
+
+
+func _serialize_cells(cells: Array[Vector2i]) -> Array[Dictionary]:
+	var serialized_cells: Array[Dictionary] = []
+	for cell_pos: Vector2i in cells:
+		serialized_cells.append(_serialize_vector2i(cell_pos))
+	return serialized_cells
+
+
+func _serialize_vector2i(cell_pos: Vector2i) -> Dictionary:
+	return {"x": cell_pos.x, "y": cell_pos.y}
+
+
+func _deserialize_vector2i(value: Variant) -> Vector2i:
+	if value is Vector2i:
+		return value
+	if value is Dictionary:
+		return Vector2i(int(value.get("x", 0)), int(value.get("y", 0)))
+	return Vector2i.ZERO
+
+
+func _extract_cells_from_payload(value: Variant) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	if not (value is Array):
+		return cells
+	for cell_value: Variant in value:
+		var cell_pos: Vector2i = _deserialize_vector2i(cell_value)
+		if grid.is_valid(cell_pos):
+			cells.append(cell_pos)
+	return cells
 
 
 func _get_skill_data(skill_id: String) -> Dictionary:
@@ -1285,20 +1547,25 @@ func _get_skill_data(skill_id: String) -> Dictionary:
 func _is_supported_runtime_skill(skill_data: Dictionary) -> bool:
 	if skill_data.is_empty():
 		return false
+	var action_cost: String = str(skill_data.get("action_cost", "standard"))
+	if action_cost not in ["move", "standard", "swift"]:
+		return false
 	var range_data: Dictionary = skill_data.get("range", {})
-	if str(range_data.get("type", "")) == "self":
-		return true
-	if str(skill_data.get("action_cost", "")) != "standard":
-		return false
-	if int(skill_data.get("power", 0)) <= 0:
-		return false
-	var damage_type: String = str(skill_data.get("damage_type", ""))
-	if damage_type not in ["physical", "magical", "pure", "hybrid"]:
-		return false
-	if str(range_data.get("type", "")) != "diamond":
+	if str(range_data.get("type", "")) not in [
+		"diamond", "line", "cross", "square", "self",
+	]:
 		return false
 	var area_data: Dictionary = skill_data.get("area", {})
-	return str(area_data.get("type", "single")) == "single"
+	if str(area_data.get("type", "single")) not in [
+		"single", "diamond", "line", "cross", "square",
+	]:
+		return false
+	if _is_support_skill(skill_data):
+		return true
+	var damage_type: String = str(skill_data.get("damage_type", ""))
+	if damage_type not in ["physical", "magical", "pure", "hybrid", "holy"]:
+		return false
+	return int(skill_data.get("power", 0)) > 0
 
 
 func _is_adjacent(a: Unit, b: Unit) -> bool:

@@ -4,12 +4,12 @@
   "damage_type": "physical",
   "power": 95,
   "hit_bonus": 0,
-  "range": { "type": "line", "min": 2, "max": 4 },
-  "area": { "type": "line", "size": 4 },
+  "range": { "type": "line", "min": 2, "max": 5 },
+  "area": { "type": "line", "size": 2 },
   "cooldown": 2,
   "action_cost": "standard",
   "timing_constraint": "any",
   "effects": [],
   "tags": ["ranged", "pierce"],
-  "description": "沿直线贯穿多个目标的箭矢。"
+  "description": "沿直线射出可继续穿透后方目标的箭矢。"
 }

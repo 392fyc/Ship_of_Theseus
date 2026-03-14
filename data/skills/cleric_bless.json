@@ -4,7 +4,7 @@
   "damage_type": "holy",
   "power": 0,
   "hit_bonus": 0,
-  "range": { "type": "diamond", "min": 0, "max": 2 },
+  "range": { "type": "square", "min": 0, "max": 2 },
   "area": { "type": "diamond", "size": 1 },
   "cooldown": 3,
   "action_cost": "swift",
@@ -15,5 +15,5 @@
     { "type": "resistance_up", "chance": 100, "duration": 2, "value": 10 }
   ],
   "tags": ["buff", "aura"],
-  "description": "为小范围友军施加增益祝福。"
+  "description": "为周围区域内的小范围友军施加增益祝福。"
 }
