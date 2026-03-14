@@ -10,6 +10,7 @@ var priority: int = 0  # initiative tie-breaker (0/+1/+2)
 # ── 数据 ────────────────────────────────────────────
 var stats: UnitStats = null
 var buffs: Array[BuffEffect] = []
+var attack_min_range: int = 1
 var attack_range: int = 1
 var skill_ids: Array[String] = []
 var skill_cooldowns: Dictionary = {}
@@ -90,8 +91,14 @@ func setup(class_data: Dictionary) -> void:
 	stats.load_from_dict(stat_dict)
 	if class_data.has("growth_rates"):
 		stats.load_growth_rates(class_data["growth_rates"])
-	var atk_type: String = str(class_data.get("attack_type", "melee"))
-	attack_range = 2 if atk_type == "ranged" else 1
+	var basic_attack_range: Dictionary = class_data.get("basic_attack_range", {})
+	if basic_attack_range.is_empty():
+		var atk_type: String = str(class_data.get("attack_type", "melee"))
+		attack_min_range = 1
+		attack_range = 2 if atk_type == "ranged" else 1
+	else:
+		attack_min_range = maxi(1, int(basic_attack_range.get("min", 1)))
+		attack_range = maxi(attack_min_range, int(basic_attack_range.get("max", attack_min_range)))
 	_update_health_bar()
 	_apply_visuals()
 	_rebuild_status_icons()

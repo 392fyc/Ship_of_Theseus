@@ -8,6 +8,7 @@ extends RefCounted
 static func decide_actions(unit: Unit, grid: Grid,
 		all_units: Array) -> Array[GameAction]:
 	var actions: Array[GameAction] = []
+	var atk_min_range: int = unit.attack_min_range
 	var atk_range: int = unit.attack_range
 
 	var targets: Array[Unit] = []
@@ -20,7 +21,7 @@ static func decide_actions(unit: Unit, grid: Grid,
 
 	# 1. Already in attack range → attack immediately
 	var target_in_range: Unit = _find_target_in_range(
-		unit.grid_position, targets, atk_range)
+		unit.grid_position, targets, atk_min_range, atk_range)
 	if target_in_range:
 		actions.append(GameAction.make_attack(unit, target_in_range))
 		return actions
@@ -40,7 +41,7 @@ static func decide_actions(unit: Unit, grid: Grid,
 			continue
 		for target in targets:
 			var dist: int = _manhattan(move_pos, target.grid_position)
-			if dist >= 1 and dist <= atk_range:
+			if dist >= atk_min_range and dist <= atk_range:
 				var target_dist: int = _manhattan(
 					unit.grid_position, target.grid_position)
 				if best_target == null or target_dist < best_dist:
@@ -68,13 +69,13 @@ static func decide_actions(unit: Unit, grid: Grid,
 # ── Helpers ──────────────────────────────────────────
 
 static func _find_target_in_range(origin: Vector2i,
-		targets: Array[Unit], atk_range: int) -> Unit:
+		targets: Array[Unit], atk_min_range: int, atk_range: int) -> Unit:
 	## Pick the lowest-HP target within attack range (focus fire).
 	var best: Unit = null
 	var best_hp: int = 99999
 	for target in targets:
 		var dist: int = _manhattan(origin, target.grid_position)
-		if dist >= 1 and dist <= atk_range:
+		if dist >= atk_min_range and dist <= atk_range:
 			if target.stats.hp < best_hp:
 				best_hp = target.stats.hp
 				best = target

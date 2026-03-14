@@ -23,6 +23,11 @@
   "MOV": 3,
   "VIS": 3,
   "attack_type": "melee",
+  "weapon_might": 5,
+  "weapon_hit": 90,
+  "weapon_crit": 0,
+  "damage_type": "physical",
+  "basic_attack_range": { "min": 1, "max": 1 },
   "skill_ids": [
     "soldier_slash",
     "soldier_shield_bash",
