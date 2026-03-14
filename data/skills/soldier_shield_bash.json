@@ -10,8 +10,7 @@
   "action_cost": "standard",
   "timing_constraint": "any",
   "effects": [
-    { "type": "knockback", "chance": 100, "distance": 1 },
-    { "type": "stun", "chance": 40, "duration": 1, "value": 1 }
+    { "effect_id": "stun", "chance": 40, "duration": 1, "value": 0 }
   ],
   "tags": ["control", "melee"],
   "description": "沿十字方向猛击目标并尝试击晕。"

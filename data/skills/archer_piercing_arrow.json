@@ -9,7 +9,9 @@
   "cooldown": 2,
   "action_cost": "standard",
   "timing_constraint": "any",
-  "effects": [],
+  "effects": [
+    { "effect_id": "defense_down", "chance": 50, "duration": 3, "value": -3 }
+  ],
   "tags": ["ranged", "pierce"],
-  "description": "沿直线射出可继续穿透后方目标的箭矢。"
+  "description": "沿直线射出可继续穿透后方目标的箭矢，并有概率削弱防御。"
 }

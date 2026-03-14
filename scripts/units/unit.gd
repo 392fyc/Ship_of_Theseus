@@ -2,14 +2,14 @@ class_name Unit
 extends Node2D
 
 # ── 身份 ────────────────────────────────────────────
-@export var unit_id:    String = ""
-@export var unit_name:  String = "Unit"
-@export var faction:    String = "player"  # "player" | "enemy"
+@export var unit_id: String = ""
+@export var unit_name: String = "Unit"
+@export var faction: String = "player"  # "player" | "enemy"
 var priority: int = 0  # initiative tie-breaker (0/+1/+2)
 
 # ── 数据 ────────────────────────────────────────────
 var stats: UnitStats = null
-var buffs: Array = []
+var buffs: Array[BuffEffect] = []
 var attack_range: int = 1
 var skill_ids: Array[String] = []
 var skill_cooldowns: Dictionary = {}
@@ -18,8 +18,8 @@ var skill_cooldowns: Dictionary = {}
 var grid_position: Vector2i = Vector2i.ZERO
 
 # ── 行动资源（Milestone 8 Action Economy）───────────
-var has_moved:      bool = false
-var has_attacked:   bool = false
+var has_moved: bool = false
+var has_attacked: bool = false
 var has_used_swift: bool = false
 var movement_used: bool = false
 var standard_used: bool = false
@@ -30,35 +30,39 @@ var reaction_available: bool = true
 signal damage_taken(amount: int, damage_type: String)
 signal unit_died
 signal moved(from: Vector2i, to: Vector2i)
+signal buffs_changed(unit: Unit)
 
 # ── 阵营颜色 ─────────────────────────────────────────
 const FACTION_COLORS: Dictionary = {
 	"player": Color(0.30, 0.55, 1.00),
-	"enemy":  Color(1.00, 0.30, 0.30),
+	"enemy": Color(1.00, 0.30, 0.30),
 }
 
 const UNIT_LABELS: Dictionary = {
-	"soldier":       "兵",
-	"archer":        "弓",
-	"knight":        "骑",
-	"mage":          "法",
-	"cleric":        "僧",
-	"goblin_melee":  "哥战",
+	"soldier": "兵",
+	"archer": "弓",
+	"knight": "骑",
+	"mage": "法",
+	"cleric": "僧",
+	"goblin_melee": "哥战",
 	"goblin_archer": "哥弓",
 	"goblin_shaman": "哥巫",
 }
 
 # ── HP Bar — Proposal B Classic TRPG ─────────────────
-const HP_FULL_COLOR  := Color(0.24, 0.68, 0.24)
-const HP_LOW_COLOR   := Color(0.82, 0.55, 0.15)
-const HP_CRIT_COLOR  := Color(0.82, 0.18, 0.18)
-const HP_BAR_BG      := Color(0.15, 0.15, 0.18)
-const HP_BAR_BORDER  := Color(0.06, 0.06, 0.08)
+const HP_FULL_COLOR := Color(0.24, 0.68, 0.24)
+const HP_LOW_COLOR := Color(0.82, 0.55, 0.15)
+const HP_CRIT_COLOR := Color(0.82, 0.18, 0.18)
+const HP_BAR_BG := Color(0.15, 0.15, 0.18)
+const HP_BAR_BORDER := Color(0.06, 0.06, 0.08)
 const UNIT_ICON_SCALE: Vector2 = Vector2(0.45, 0.45)
+const STATUS_BADGE_STEP: float = 18.0
+const STATUS_BADGE_Y: float = -58.0
+const ACTION_BADGE_Y: float = 20.0
 
 # ── 节点引用 ─────────────────────────────────────────
 @onready var sprite: AnimatedSprite2D = $Sprite
-@onready var health_bar: ProgressBar  = $HealthBar
+@onready var health_bar: ProgressBar = $HealthBar
 @onready var status_icons: Node2D = $StatusIcons
 var _unit_label: Label = null
 var _hp_label: Label = null
@@ -70,27 +74,28 @@ func _ready() -> void:
 
 
 func setup(class_data: Dictionary) -> void:
-	unit_id   = class_data.get("id", "")
-	unit_name = class_data.get("name", "Unit")
+	unit_id = str(class_data.get("id", ""))
+	unit_name = str(class_data.get("name", "Unit"))
+	priority = 0
 	stats = UnitStats.new()
-	skill_ids = []
-	for skill_id: Variant in class_data.get("skill_ids", []):
-		skill_ids.append(str(skill_id))
+	buffs.clear()
+	skill_ids.clear()
+	for skill_id_value: Variant in class_data.get("skill_ids", []):
+		skill_ids.append(str(skill_id_value))
 	skill_cooldowns.clear()
 	var stat_dict: Dictionary = class_data.get("base_stats", {}).duplicate()
-	# MOV and VIS are top-level fields in the JSON
 	for key: String in ["MOV", "VIS"]:
 		if class_data.has(key):
 			stat_dict[key] = class_data[key]
 	stats.load_from_dict(stat_dict)
-	# Load growth rates if present (class JSON has them, enemy JSON doesn't)
 	if class_data.has("growth_rates"):
 		stats.load_growth_rates(class_data["growth_rates"])
-	var atk_type: String = class_data.get("attack_type", "melee")
+	var atk_type: String = str(class_data.get("attack_type", "melee"))
 	attack_range = 2 if atk_type == "ranged" else 1
 	_update_health_bar()
 	_apply_visuals()
 	_rebuild_status_icons()
+	_emit_buffs_changed()
 
 
 # ── 战斗接口 ─────────────────────────────────────────
@@ -109,13 +114,162 @@ func heal(amount: int) -> void:
 	_update_health_bar()
 
 
+# ── Buff / Debuff 接口 ──────────────────────────────
+
+func add_buff(buff: BuffEffect) -> void:
+	if buff == null:
+		return
+	var existing: BuffEffect = get_buff(buff.buff_id)
+	if existing != null and not buff.stackable:
+		if buff.refresh_on_reapply:
+			existing.duration = buff.max_duration
+			existing.max_duration = buff.max_duration
+			existing.value = buff.value
+			existing.stat_key = buff.stat_key
+			existing.is_percentage = buff.is_percentage
+			existing.source_unit_id = buff.source_unit_id
+			existing.apply(self)
+			_emit_buffs_changed()
+		return
+	if buff.stackable:
+		var stack_count: int = count_buff_stacks(buff.buff_id)
+		if buff.max_stacks > 0 and stack_count >= buff.max_stacks:
+			return
+	buffs.append(buff)
+	buff.apply(self)
+	_emit_buffs_changed()
+
+
+func remove_buff(buff: BuffEffect) -> void:
+	if buff == null or buff not in buffs:
+		return
+	buff.unapply(self)
+	buffs.erase(buff)
+	_emit_buffs_changed()
+
+
+func get_buff(buff_id: String) -> BuffEffect:
+	for buff: BuffEffect in buffs:
+		if buff.buff_id == buff_id:
+			return buff
+	return null
+
+
+func has_buff(buff_id: String) -> bool:
+	return get_buff(buff_id) != null
+
+
+func count_buff_stacks(buff_id: String) -> int:
+	var stack_count: int = 0
+	for buff: BuffEffect in buffs:
+		if buff.buff_id == buff_id:
+			stack_count += 1
+	return stack_count
+
+
+func process_turn_start_buffs() -> Dictionary:
+	var result: Dictionary = {"skip_turn": false}
+	var buff_snapshot: Array[BuffEffect] = buffs.duplicate()
+	for buff: BuffEffect in buff_snapshot:
+		if buff.trigger != "turn_start":
+			continue
+		var tick_result: Dictionary = buff.tick(self)
+		if bool(tick_result.get("skip_turn", false)):
+			result["skip_turn"] = true
+		if not stats.is_alive():
+			break
+	return result
+
+
+func process_turn_end_buffs() -> void:
+	var buff_snapshot: Array[BuffEffect] = buffs.duplicate()
+	var duration_changed: bool = false
+	for buff: BuffEffect in buff_snapshot:
+		if buff.duration > 0:
+			buff.duration -= 1
+			duration_changed = true
+		if buff.duration == 0:
+			remove_buff(buff)
+	if duration_changed:
+		_emit_buffs_changed()
+
+
+func handle_attacked() -> void:
+	var freeze_buff: BuffEffect = get_buff("freeze")
+	if freeze_buff != null:
+		remove_buff(freeze_buff)
+
+
+func get_effective_stat(stat_key: String) -> int:
+	var normalized_key: String = _normalize_stat_key(stat_key)
+	var base_value: int = _get_base_stat_value(normalized_key)
+	var flat_modifier: float = 0.0
+	var percentage_modifier: float = 0.0
+	for buff: BuffEffect in buffs:
+		if buff.effect_type != "stat_mod":
+			continue
+		if _normalize_stat_key(buff.stat_key) != normalized_key:
+			continue
+		if buff.is_percentage:
+			percentage_modifier += buff.value
+		else:
+			flat_modifier += buff.value
+	var effective_value: float = float(base_value) + flat_modifier
+	effective_value += float(base_value) * percentage_modifier / 100.0
+	return roundi(effective_value)
+
+
+func get_effective_priority() -> int:
+	return get_effective_stat("PRIORITY")
+
+
+func get_hit_value(weapon_hit: int = 90) -> int:
+	var effective_dex: int = get_effective_stat("DEX")
+	var effective_lck: int = get_effective_stat("LCK")
+	return weapon_hit + effective_dex * 2 + roundi(effective_lck * 0.5)
+
+
+func get_avoid_value(terrain_evade_bonus: int = 0) -> int:
+	var effective_spd: int = get_effective_stat("SPD")
+	var effective_lck: int = get_effective_stat("LCK")
+	return effective_spd * 2 + roundi(effective_lck * 0.5) + terrain_evade_bonus
+
+
+func get_crit_value(weapon_crit: int = 0) -> int:
+	var effective_dex: int = get_effective_stat("DEX")
+	return weapon_crit + int(effective_dex / 2.0)
+
+
+func get_crit_avoid_value() -> int:
+	return get_effective_stat("LCK")
+
+
+func get_status_resist_multiplier() -> float:
+	var effective_lck: int = get_effective_stat("LCK")
+	return maxf(0.1, 1.0 - float(effective_lck) / 100.0)
+
+
+func serialize_buffs() -> Array[Dictionary]:
+	var serialized: Array[Dictionary] = []
+	for buff: BuffEffect in buffs:
+		serialized.append(buff.to_dict())
+	return serialized
+
+
+func load_buffs_from_state(buff_state: Array[Dictionary]) -> void:
+	buffs.clear()
+	for buff_entry: Dictionary in buff_state:
+		buffs.append(BuffEffect.from_dict(buff_entry))
+	_emit_buffs_changed()
+
+
 # ── 移动动画 ─────────────────────────────────────────
 
 func move_to(target_pos: Vector2i, grid: Grid) -> void:
-	var world_target := grid.grid_to_world(target_pos)
-	var dir := target_pos - grid_position
+	var world_target: Vector2 = grid.grid_to_world(target_pos)
+	var dir: Vector2i = target_pos - grid_position
 	_set_walk_direction(dir)
-	var tween := create_tween()
+	var tween: Tween = create_tween()
 	tween.tween_property(self, "position", world_target, 0.25)
 	await tween.finished
 	sprite.play("idle")
@@ -137,7 +291,7 @@ func mark_done() -> void:
 
 
 func get_short_label() -> String:
-	return UNIT_LABELS.get(unit_id, unit_name.left(2))
+	return str(UNIT_LABELS.get(unit_id, unit_name.left(2)))
 
 
 func get_action_status_summary() -> String:
@@ -227,31 +381,13 @@ func consume_skill(skill_id: String, cooldown_turns: int) -> void:
 		skill_cooldowns.erase(skill_id)
 
 
-func add_status_effect(effect: Dictionary) -> void:
-	var entry := effect.duplicate(true)
-	entry["kind"] = entry.get("kind", "buff")
-	entry["name"] = str(entry.get("name", entry.get("id", "FX")))
-	buffs.append(entry)
-	_rebuild_status_icons()
-
-
-func trigger_turn_start_effects() -> void:
-	_process_status_effects("turn_start")
-
-
-func trigger_turn_end_effects() -> void:
-	_process_status_effects("turn_end")
-	_tick_status_durations()
-
-
 # ── 私有方法 ─────────────────────────────────────────
 
 func _apply_visuals() -> void:
 	sprite.self_modulate = FACTION_COLORS.get(faction, Color.WHITE)
 	sprite.scale = UNIT_ICON_SCALE
 
-	# B-style HP bar: dark bg with border
-	var bg_style := StyleBoxFlat.new()
+	var bg_style: StyleBoxFlat = StyleBoxFlat.new()
 	bg_style.bg_color = HP_BAR_BG
 	bg_style.border_width_left = 2
 	bg_style.border_width_top = 2
@@ -261,7 +397,6 @@ func _apply_visuals() -> void:
 	health_bar.add_theme_stylebox_override("background", bg_style)
 	_update_health_bar()
 
-	# HP number overlay centered on bar
 	_hp_label = Label.new()
 	_hp_label.name = "HPLabel"
 	_hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -278,7 +413,7 @@ func _apply_visuals() -> void:
 
 	_unit_label = Label.new()
 	_unit_label.name = "UnitLabel"
-	_unit_label.text = UNIT_LABELS.get(unit_id, unit_name.left(2))
+	_unit_label.text = str(UNIT_LABELS.get(unit_id, unit_name.left(2)))
 	_unit_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_unit_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_unit_label.position = Vector2(-32, -14)
@@ -297,9 +432,9 @@ func _update_health_bar() -> void:
 	if health_bar == null or stats == null:
 		return
 	health_bar.max_value = stats.max_hp
-	health_bar.value     = stats.hp
+	health_bar.value = stats.hp
 
-	var ratio := float(stats.hp) / float(stats.max_hp) if stats.max_hp > 0 else 0.0
+	var ratio: float = float(stats.hp) / float(stats.max_hp) if stats.max_hp > 0 else 0.0
 	var fill_color: Color
 	if ratio > 0.6:
 		fill_color = HP_FULL_COLOR
@@ -307,11 +442,11 @@ func _update_health_bar() -> void:
 		fill_color = HP_LOW_COLOR
 	else:
 		fill_color = HP_CRIT_COLOR
-	var fill_style := StyleBoxFlat.new()
+	var fill_style: StyleBoxFlat = StyleBoxFlat.new()
 	fill_style.bg_color = fill_color
 	health_bar.add_theme_stylebox_override("fill", fill_style)
 
-	if _hp_label:
+	if _hp_label != null:
 		_hp_label.text = "%d / %d" % [stats.hp, stats.max_hp]
 
 
@@ -334,83 +469,56 @@ func _on_death() -> void:
 	queue_free()
 
 
-func _process_status_effects(phase: String) -> void:
-	for effect_data: Dictionary in buffs:
-		if str(effect_data.get("trigger", "")) != phase:
-			continue
-		var amount: int = int(effect_data.get("value", 0))
-		match str(effect_data.get("effect_type", "")):
-			"heal":
-				if amount > 0:
-					heal(amount)
-			"damage", "dot":
-				if amount > 0:
-					take_damage(amount, str(effect_data.get("damage_type", "pure")))
-
-
-func _tick_status_durations() -> void:
-	var remaining_effects: Array = []
-	for effect_data: Dictionary in buffs:
-		var copy: Dictionary = effect_data.duplicate(true)
-		var duration: int = int(copy.get("duration", -1))
-		if duration > 0:
-			duration -= 1
-			copy["duration"] = duration
-		if duration != 0:
-			remaining_effects.append(copy)
-	buffs = remaining_effects
-	_rebuild_status_icons()
-
-
 func _tick_skill_cooldowns() -> void:
 	var next_cooldowns: Dictionary = {}
-	for skill_id: Variant in skill_cooldowns.keys():
+	for skill_id_value: Variant in skill_cooldowns.keys():
+		var skill_id: String = str(skill_id_value)
 		var turns_left: int = maxi(0, int(skill_cooldowns.get(skill_id, 0)) - 1)
 		if turns_left > 0:
-			next_cooldowns[str(skill_id)] = turns_left
+			next_cooldowns[skill_id] = turns_left
 	skill_cooldowns = next_cooldowns
 
 
 func _rebuild_status_icons() -> void:
 	if status_icons == null:
 		return
-	for child in status_icons.get_children():
+	for child: Node in status_icons.get_children():
 		child.queue_free()
 
-	var action_badges := [
+	var action_badges: Array[Dictionary] = [
 		{"text": "M", "spent": movement_used, "color": Color(0.40, 0.70, 1.00)},
 		{"text": "A", "spent": standard_used, "color": Color(1.00, 0.50, 0.30)},
 		{"text": "S", "spent": swift_used, "color": Color(1.00, 0.90, 0.35)},
 	]
-	for i in action_badges.size():
-		var action_badge: Dictionary = action_badges[i]
-		var action_label := _make_badge(
+	for index: int in range(action_badges.size()):
+		var action_badge: Dictionary = action_badges[index]
+		var action_label: Label = _make_badge(
 			str(action_badge["text"]),
-			Vector2(-18 + i * 18, 20),
+			Vector2(-18.0 + float(index) * STATUS_BADGE_STEP, ACTION_BADGE_Y),
 			action_badge["color"],
 			bool(action_badge["spent"]))
 		status_icons.add_child(action_label)
 
-	for i in mini(3, buffs.size()):
-		var effect_data: Dictionary = buffs[i]
-		var is_debuff: bool = str(effect_data.get("kind", "buff")) == "debuff"
-		var icon_text: String = str(effect_data.get("icon", "")).strip_edges()
+	var total_statuses: int = buffs.size()
+	var start_x: float = -0.5 * STATUS_BADGE_STEP * float(maxi(total_statuses - 1, 0))
+	for index: int in range(total_statuses):
+		var buff: BuffEffect = buffs[index]
+		var icon_text: String = buff.icon.strip_edges()
 		if icon_text == "":
-			icon_text = "-" if is_debuff else "+"
-		var duration_text := ""
-		var duration: int = int(effect_data.get("duration", -1))
-		if duration > 0:
-			duration_text = str(duration)
-		var effect_label := _make_badge(
+			icon_text = buff.buff_id.left(2).to_upper()
+		var duration_text: String = ""
+		if buff.duration > 0:
+			duration_text = str(buff.duration)
+		var effect_label: Label = _make_badge(
 			icon_text + duration_text,
-			Vector2(-18 + i * 18, -58),
-			Color(0.95, 0.30, 0.30) if is_debuff else Color(0.30, 0.85, 0.45),
+			Vector2(start_x + float(index) * STATUS_BADGE_STEP, STATUS_BADGE_Y),
+			Color(0.95, 0.30, 0.30) if buff.is_debuff() else Color(0.30, 0.85, 0.45),
 			false)
 		status_icons.add_child(effect_label)
 
 
 func _make_badge(text: String, pos: Vector2, color: Color, spent: bool) -> Label:
-	var label := Label.new()
+	var label: Label = Label.new()
 	label.text = text
 	label.position = pos
 	label.size = Vector2(18, 14)
@@ -429,3 +537,55 @@ func _sync_legacy_action_flags() -> void:
 	has_moved = movement_used
 	has_attacked = standard_used
 	has_used_swift = swift_used
+
+
+func _emit_buffs_changed() -> void:
+	_rebuild_status_icons()
+	buffs_changed.emit(self)
+
+
+func _normalize_stat_key(stat_key: String) -> String:
+	var normalized: String = stat_key.strip_edges().to_upper()
+	match normalized:
+		"PHYS_ATK":
+			return "STR"
+		"MAG_ATK":
+			return "MAG"
+		"SPEED":
+			return "SPD"
+		"PHYSICAL_DEFENSE":
+			return "DEF"
+		"MAGICAL_DEFENSE":
+			return "RES"
+		"MOVE":
+			return "MOV"
+		"VISION":
+			return "VIS"
+	return normalized
+
+
+func _get_base_stat_value(stat_key: String) -> int:
+	match stat_key:
+		"HP":
+			return stats.max_hp
+		"STR":
+			return stats.str_attr
+		"MAG":
+			return stats.mag
+		"DEX":
+			return stats.dex
+		"SPD":
+			return stats.spd
+		"LCK":
+			return stats.lck
+		"DEF":
+			return stats.def_attr
+		"RES":
+			return stats.res
+		"MOV":
+			return stats.mov
+		"VIS":
+			return stats.vis
+		"PRIORITY":
+			return priority
+	return 0

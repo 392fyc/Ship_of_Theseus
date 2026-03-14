@@ -11,9 +11,8 @@
   "swift_limit": 1,
   "timing_constraint": "any",
   "effects": [
-    { "type": "attack_up", "chance": 100, "duration": 2, "value": 4 },
-    { "type": "hit_up", "chance": 100, "duration": 2, "value": 10 }
+    { "effect_id": "haste", "chance": 100, "duration": 2, "value": 2 }
   ],
   "tags": ["buff", "self"],
-  "description": "鼓舞自身及周围友军，短时间提升攻击与命中。"
+  "description": "鼓舞自身及周围友军，短时间提升速度。"
 }

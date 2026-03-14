@@ -1,0 +1,16 @@
+{
+  "id": "defense_up",
+  "display_name": "Defense Up",
+  "icon": "DF",
+  "duration": 3,
+  "max_duration": 3,
+  "effect_type": "stat_mod",
+  "stat_key": "DEF",
+  "value": 3,
+  "is_percentage": false,
+  "trigger": "permanent",
+  "source_unit_id": "",
+  "stackable": false,
+  "max_stacks": 1,
+  "refresh_on_reapply": true
+}

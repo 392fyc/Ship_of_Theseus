@@ -258,8 +258,22 @@ func _on_turn_started(unit: Unit) -> void:
 		return
 	current_unit = unit
 	unit.reset_turn_state()
-	unit.trigger_turn_start_effects()
+	var turn_start_result: Dictionary = unit.process_turn_start_buffs()
+	if not battle_active or turn_manager.current_unit != unit:
+		return
+	if not unit.stats.is_alive():
+		return
 	print("[TurnManager] Turn: %s (%s)" % [unit.unit_name, unit.faction])
+	if bool(turn_start_result.get("skip_turn", false)):
+		print("[Buff] %s skips turn due to control effect" % unit.unit_name)
+		if unit.faction != "player":
+			_clear_hover_state()
+			_clear_dashboard_state()
+			_emit_dashboard_state_changed()
+		else:
+			_deselect_unit()
+		turn_manager.end_current_turn.call_deferred()
+		return
 	if unit.faction != "player":
 		_clear_hover_state()
 		_clear_dashboard_state()
@@ -270,7 +284,7 @@ func _on_turn_started(unit: Unit) -> void:
 
 
 func _on_turn_ended(unit: Unit) -> void:
-	unit.trigger_turn_end_effects()
+	unit.process_turn_end_buffs()
 	_deselect_unit()
 
 
@@ -1253,6 +1267,7 @@ func _can_execute_hostile_action(attacker: Unit, defender: Unit) -> bool:
 func _execute_hostile_action(attacker: Unit, defender: Unit,
 		data: Dictionary) -> void:
 	var damage_type: String = data.get("damage_type", "physical")
+	defender.handle_attacked()
 
 	# Main attack: calculate → popup → apply
 	var result := DamageCalculator.resolve_attack(attacker, defender, data)
@@ -1263,6 +1278,9 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 		defender.take_damage(result.damage, damage_type)
 	else:
 		DamagePopup.spawn_miss(popup_layer, defender.position)
+
+	if result.hit and defender.stats.is_alive():
+		_apply_hostile_skill_effects(attacker, defender, data)
 
 	if result.defender_died:
 		return
@@ -1295,7 +1313,8 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 	if allow_pursuit and result.hit \
 			and attacker.stats.is_alive() and defender.stats.is_alive():
 		var pursuit_chance := clampf(
-			(attacker.stats.spd - defender.stats.spd) * 0.1, 0.0, 1.0)
+			(attacker.get_effective_stat("SPD") - defender.get_effective_stat("SPD")) * 0.1,
+			0.0, 1.0)
 		if randf() < pursuit_chance:
 			var pursuit_data := {
 				"damage_type": data.get("damage_type", "physical"),
@@ -1353,7 +1372,9 @@ func _get_units_in_skill_area(user: Unit, skill_data: Dictionary,
 
 func _get_skill_target_relation(skill_data: Dictionary) -> String:
 	var range_data: Dictionary = skill_data.get("range", {})
-	if str(range_data.get("type", "")) == "self":
+	var area_data: Dictionary = skill_data.get("area", {})
+	if str(range_data.get("type", "")) == "self" \
+			and str(area_data.get("type", "single")) == "single":
 		return "self"
 	if _is_support_skill(skill_data):
 		return "ally"
@@ -1394,12 +1415,25 @@ func _apply_support_skill(user: Unit, skill_data: Dictionary,
 			if not (effect_value is Dictionary):
 				continue
 			_apply_skill_effect_to_unit(
-				user, target_unit, skill_data, effect_value as Dictionary)
+				user, target_unit, effect_value as Dictionary, false)
+
+
+func _apply_hostile_skill_effects(user: Unit, target_unit: Unit,
+		action_data: Dictionary) -> void:
+	var effect_entries: Variant = action_data.get("effects", [])
+	if not (effect_entries is Array):
+		return
+	for effect_value: Variant in effect_entries:
+		if not (effect_value is Dictionary):
+			continue
+		_apply_skill_effect_to_unit(
+			user, target_unit, effect_value as Dictionary, true)
 
 
 func _apply_skill_effect_to_unit(user: Unit, target_unit: Unit,
-		skill_data: Dictionary, effect_data: Dictionary) -> void:
-	var effect_type: String = str(effect_data.get("type", ""))
+		effect_data: Dictionary, is_hostile: bool) -> void:
+	var effect_type: String = str(
+		effect_data.get("effect_id", effect_data.get("type", "")))
 	var effect_value: int = int(effect_data.get("value", 0))
 	match effect_type:
 		"heal":
@@ -1409,28 +1443,40 @@ func _apply_skill_effect_to_unit(user: Unit, target_unit: Unit,
 			if effect_value > 0:
 				target_unit.take_damage(effect_value, "pure")
 		_:
-			target_unit.add_status_effect(_make_status_effect_entry(
-				user, target_unit, skill_data, effect_data))
+			if not _roll_effect_application(target_unit, effect_data, is_hostile):
+				return
+			var buff: BuffEffect = _make_buff_effect_instance(user, effect_data)
+			if buff != null:
+				target_unit.add_buff(buff)
 
 
-func _make_status_effect_entry(user: Unit, target_unit: Unit,
-		skill_data: Dictionary, effect_data: Dictionary) -> Dictionary:
-	var effect_type: String = str(effect_data.get("type", "buff"))
-	var is_buff: bool = target_unit.faction == user.faction
-	return {
-		"id": "%s_%s_%s" % [
-			str(skill_data.get("id", "skill")),
-			effect_type,
-			str(target_unit.get_instance_id()),
-		],
-		"name": effect_type,
-		"kind": "buff" if is_buff else "debuff",
-		"icon": "+" if is_buff else "-",
-		"duration": int(effect_data.get("duration", 1)),
-		"effect_type": effect_type,
-		"value": int(effect_data.get("value", 0)),
-		"trigger": "manual",
-	}
+func _roll_effect_application(target_unit: Unit, effect_data: Dictionary,
+		is_hostile: bool) -> bool:
+	var base_chance: float = float(effect_data.get("chance", 100))
+	if base_chance <= 0.0:
+		return false
+	var actual_percent: float = base_chance
+	if is_hostile:
+		actual_percent *= target_unit.get_status_resist_multiplier()
+	return randf() <= clampf(actual_percent / 100.0, 0.0, 1.0)
+
+
+func _make_buff_effect_instance(user: Unit,
+		effect_data: Dictionary) -> BuffEffect:
+	var effect_id: String = str(
+		effect_data.get("effect_id", effect_data.get("type", "")))
+	var template_data: Dictionary = DataLoader.buffs.get(effect_id, {})
+	if template_data.is_empty():
+		return null
+	var buff_payload: Dictionary = template_data.duplicate(true)
+	if effect_data.has("duration"):
+		var duration_value: int = int(effect_data.get("duration", buff_payload.get("duration", -1)))
+		buff_payload["duration"] = duration_value
+		buff_payload["max_duration"] = duration_value
+	if effect_data.has("value"):
+		buff_payload["value"] = float(effect_data.get("value", buff_payload.get("value", 0)))
+	buff_payload["source_unit_id"] = user.unit_id
+	return BuffEffect.from_dict(buff_payload)
 
 
 func _get_skill_range_fill_color() -> Color:
@@ -1562,6 +1608,8 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		"weapon_crit": int(skill_data.get("crit_bonus", 0)),
 		"range_type": str(skill_data.get("range", {}).get("type", "diamond")),
 		"area_type": area_type,
+		"effect_timing": str(skill_data.get("effect_timing", "after_damage")),
+		"effects": skill_data.get("effects", []).duplicate(true),
 		"target_direction": _serialize_vector2i(area_direction),
 		"affected_cells": _serialize_cells(affected_cells),
 		"allow_counter": not is_area_skill,

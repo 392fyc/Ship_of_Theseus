@@ -1,0 +1,16 @@
+{
+  "id": "burn",
+  "display_name": "Burn",
+  "icon": "BR",
+  "duration": 3,
+  "max_duration": 3,
+  "effect_type": "dot",
+  "stat_key": "",
+  "value": 10,
+  "is_percentage": false,
+  "trigger": "turn_start",
+  "source_unit_id": "",
+  "stackable": false,
+  "max_stacks": 1,
+  "refresh_on_reapply": true
+}

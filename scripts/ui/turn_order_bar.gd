@@ -134,7 +134,7 @@ func _create_entry(unit: Unit, is_current: bool) -> PanelContainer:
 	text_box.add_child(status_lbl)
 
 	var init_lbl := Label.new()
-	init_lbl.text = "Init %d" % unit.stats.spd
+	init_lbl.text = "Init %d" % unit.get_effective_stat("SPD")
 	init_lbl.add_theme_font_size_override("font_size", FONT_INIT)
 	init_lbl.add_theme_color_override("font_color", INIT_COLOR)
 	init_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT

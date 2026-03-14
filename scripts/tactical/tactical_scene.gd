@@ -57,6 +57,7 @@ func _ready() -> void:
 	$UILayer.add_child(_turn_order_bar)
 	_bottom_dashboard = _bottom_dashboard_scene.instantiate()
 	$UILayer.add_child(_bottom_dashboard)
+	tactical_manager.turn_manager.queue_changed.connect(_refresh_turn_order)
 	tactical_manager.turn_manager.turn_started.connect(_on_turn_changed)
 	tactical_manager.turn_manager.turn_ended.connect(_on_turn_changed)
 	tactical_manager.dashboard_state_changed.connect(_refresh_dashboard)
