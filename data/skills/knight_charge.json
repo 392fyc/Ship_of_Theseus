@@ -4,7 +4,7 @@
   "damage_type": "physical",
   "power": 110,
   "hit_bonus": 5,
-  "range": { "type": "line", "min": 2, "max": 3 },
+  "range": { "type": "line", "min": 1, "max": 3 },
   "area": { "type": "single", "size": 0 },
   "cooldown": 2,
   "action_cost": "move",

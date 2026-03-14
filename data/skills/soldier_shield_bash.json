@@ -4,7 +4,7 @@
   "damage_type": "physical",
   "power": 85,
   "hit_bonus": 0,
-  "range": { "type": "diamond", "min": 1, "max": 1 },
+  "range": { "type": "cross", "min": 1, "max": 2 },
   "area": { "type": "single", "size": 0 },
   "cooldown": 2,
   "action_cost": "standard",
@@ -14,5 +14,5 @@
     { "type": "stun", "chance": 40, "duration": 1, "value": 1 }
   ],
   "tags": ["control", "melee"],
-  "description": "盾击目标并尝试击晕。"
+  "description": "沿十字方向猛击目标并尝试击晕。"
 }

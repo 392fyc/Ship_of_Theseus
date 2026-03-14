@@ -1,0 +1,26 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "github-copilot/claude-opus-4.6",
+  "small_model": "github-copilot/gpt-5.3-codex",
+  "instructions": ["OPENCODE.md"],
+  "mcp": {
+    "obsidian": {
+      "type": "local",
+      "command": ["uvx", "mcp-obsidian"],
+      "environment": {
+        "OBSIDIAN_API_KEY": "***REMOVED***",
+        "OBSIDIAN_HOST": "http://localhost:27123"
+      },
+      "enabled": true
+    },
+    "godot": {
+      "type": "local",
+      "command": ["node", "D:\\ShipOfTheseus\\Ship_of_Theseus\\addons\\godot_mcp\\godot_mcp_lazy_server.mjs"],
+      "environment": {
+        "GODOT_PROJECT_PATH": "D:\\ShipOfTheseus\\Ship_of_Theseus",
+        "GODOT_MCP_PACKAGE_VERSION": "2.16.0"
+      },
+      "enabled": true
+    }
+  }
+}

@@ -127,7 +127,7 @@ static func _calc_base_damage(attacker: Unit, defender: Unit,
 		"physical":
 			base = float(attacker.stats.str_attr + weapon_might \
 				 - defender.stats.def_attr)
-		"magical":
+		"magical", "holy":
 			base = float(attacker.stats.mag + weapon_might \
 				 - defender.stats.res)
 		"pure":
