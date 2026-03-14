@@ -30,7 +30,7 @@ var input_state: InputState = InputState.IDLE
 var current_unit: Unit = null
 var selected_unit: Unit = null
 var _move_range: Dictionary = {}
-var _skill_range_cells: Array[Vector2i] = []
+var _range_display_cells: Array[Vector2i] = []
 var _attack_cells: Array[Vector2i] = []
 var _area_preview_cells: Array[Vector2i] = []
 var _direction_selector_cells: Array[Vector2i] = []
@@ -612,13 +612,16 @@ func _refresh_highlights() -> void:
 			for cell_pos: Vector2i in _direction_selector_cells:
 				_add_highlight(
 					cell_pos, HIGHLIGHT_SELECTOR_FILL, HIGHLIGHT_SELECTOR_BORDER)
-			for cell_pos: Vector2i in _skill_range_cells:
+			for cell_pos: Vector2i in _range_display_cells:
 				_add_highlight(cell_pos, range_fill, range_border)
 			for cell_pos: Vector2i in _attack_cells:
 				_add_highlight(cell_pos, target_fill, target_border)
 			for cell_pos: Vector2i in _area_preview_cells:
 				_add_highlight(cell_pos, HIGHLIGHT_AREA_FILL, HIGHLIGHT_AREA_BORDER)
 		InputState.ATTACK_TARGETING:
+			for cell_pos: Vector2i in _range_display_cells:
+				_add_highlight(
+					cell_pos, HIGHLIGHT_ATTACK_RANGE_FILL, HIGHLIGHT_ATTACK_RANGE_BORDER)
 			for cell_pos: Vector2i in _attack_cells:
 				_add_highlight(
 					cell_pos, HIGHLIGHT_ATTACK_TARGET_FILL, HIGHLIGHT_ATTACK_TARGET_BORDER)
@@ -676,7 +679,7 @@ func _clear_selected_skill() -> void:
 
 
 func _clear_targeting_buffers() -> void:
-	_skill_range_cells = []
+	_range_display_cells = []
 	_attack_cells = []
 	_area_preview_cells = []
 	_direction_selector_cells = []
@@ -1467,7 +1470,7 @@ func _get_skill_target_border_color() -> Color:
 
 
 func _refresh_attack_cells() -> void:
-	_skill_range_cells = []
+	_range_display_cells = []
 	_attack_cells = []
 	_area_preview_cells = []
 	_direction_selector_cells = []
@@ -1483,7 +1486,7 @@ func _refresh_attack_cells() -> void:
 			return
 		var candidate_cells: Array[Vector2i] = RangeCalculator.calculate_cells(
 			grid, current_unit.grid_position, range_data, _targeting_direction)
-		_skill_range_cells = candidate_cells
+		_range_display_cells = candidate_cells
 		_attack_cells = _filter_targetable_cells(candidate_cells, skill_data)
 	else:
 		var basic_pattern: Dictionary = {
@@ -1493,6 +1496,7 @@ func _refresh_attack_cells() -> void:
 		}
 		var basic_cells: Array[Vector2i] = RangeCalculator.calculate_cells(
 			grid, current_unit.grid_position, basic_pattern)
+		_range_display_cells = basic_cells
 		_attack_cells = _filter_enemy_target_cells(basic_cells)
 
 
