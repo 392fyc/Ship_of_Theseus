@@ -33,8 +33,8 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	# ── Step 1: Hit determination ───────────────────────
 	# Hit = weapon_hit + DEX×2 + LCK×0.5
 	# Avoid = SPD×2 + LCK×0.5 + terrain_evade
-	var hit_value: int = attacker.stats.get_hit(weapon_hit)
-	var avoid_value: int = defender.stats.get_avoid(terrain_evade_bonus)
+	var hit_value: int = attacker.get_hit_value(weapon_hit)
+	var avoid_value: int = defender.get_avoid_value(terrain_evade_bonus)
 	var hit_rate: float = clampf((hit_value - avoid_value) / 100.0, 0.2, 1.0)
 	if randf() > hit_rate:
 		return result  # miss → hit=false
@@ -48,8 +48,8 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	if is_pure and not action_data.get("enable_pure_crit", false):
 		allow_crit = false
 	if allow_crit:
-		var crit_value: int = attacker.stats.get_crit(weapon_crit)
-		var dodge_value: int = defender.stats.get_crit_avoid()
+		var crit_value: int = attacker.get_crit_value(weapon_crit)
+		var dodge_value: int = defender.get_crit_avoid_value()
 		var crit_rate: float = maxf(0.0, (crit_value - dodge_value) / 100.0)
 		if randf() < crit_rate:
 			result.crit = true
@@ -90,15 +90,15 @@ static func preview_attack(attacker: Unit, defender: Unit,
 	var weapon_crit: int = action_data.get("weapon_crit", 0)
 	var terrain_evade_bonus: int = action_data.get("terrain_evade_bonus", 0)
 
-	var hit_value: int = attacker.stats.get_hit(weapon_hit)
-	var avoid_value: int = defender.stats.get_avoid(terrain_evade_bonus)
+	var hit_value: int = attacker.get_hit_value(weapon_hit)
+	var avoid_value: int = defender.get_avoid_value(terrain_evade_bonus)
 	var hit_rate: float = clampf((hit_value - avoid_value) / 100.0, 0.2, 1.0)
 
 	var crit_rate: float = 0.0
 	var is_pure: bool = (damage_type == "pure")
 	if not (is_pure and not action_data.get("enable_pure_crit", false)):
-		var crit_value: int = attacker.stats.get_crit(weapon_crit)
-		var dodge_value: int = defender.stats.get_crit_avoid()
+		var crit_value: int = attacker.get_crit_value(weapon_crit)
+		var dodge_value: int = defender.get_crit_avoid_value()
 		crit_rate = maxf(0.0, (crit_value - dodge_value) / 100.0)
 
 	var base_damage: float = _calc_base_damage(
@@ -125,26 +125,28 @@ static func _calc_base_damage(attacker: Unit, defender: Unit,
 	var base: float = 0.0
 	match damage_type:
 		"physical":
-			base = float(attacker.stats.str_attr + weapon_might \
-				 - defender.stats.def_attr)
+			base = float(attacker.get_effective_stat("STR") + weapon_might \
+				 - defender.get_effective_stat("DEF"))
 		"magical", "holy":
-			base = float(attacker.stats.mag + weapon_might \
-				 - defender.stats.res)
+			base = float(attacker.get_effective_stat("MAG") + weapon_might \
+				 - defender.get_effective_stat("RES"))
 		"pure":
 			var raw: float = 0.0
 			match pure_atk_source:
 				"phys":
-					raw = float(attacker.stats.str_attr)
+					raw = float(attacker.get_effective_stat("STR"))
 				"mag":
-					raw = float(attacker.stats.mag)
+					raw = float(attacker.get_effective_stat("MAG"))
 				"sum":
-					raw = float(attacker.stats.str_attr + attacker.stats.mag)
+					raw = float(
+						attacker.get_effective_stat("STR") + attacker.get_effective_stat("MAG"))
 			base = raw + float(weapon_might)
 			return base  # pure ignores defense, no max(1) floor needed
 		"hybrid":
 			# ⚠️ TBD — placeholder per ADR-005 §4.2. Awaiting ADR-006.
-			var both_atk: float = float(attacker.stats.str_attr + attacker.stats.mag)
+			var both_atk: float = float(
+				attacker.get_effective_stat("STR") + attacker.get_effective_stat("MAG"))
 			var weaker_def: float = float(mini(
-				defender.stats.def_attr, defender.stats.res))
+				defender.get_effective_stat("DEF"), defender.get_effective_stat("RES")))
 			base = both_atk + float(weapon_might) - weaker_def
 	return maxf(1.0, base)

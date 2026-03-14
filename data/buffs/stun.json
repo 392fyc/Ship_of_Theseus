@@ -1,0 +1,16 @@
+{
+  "id": "stun",
+  "display_name": "Stun",
+  "icon": "ST",
+  "duration": 1,
+  "max_duration": 1,
+  "effect_type": "control",
+  "stat_key": "",
+  "value": 0,
+  "is_percentage": false,
+  "trigger": "turn_start",
+  "source_unit_id": "",
+  "stackable": false,
+  "max_stacks": 1,
+  "refresh_on_reapply": true
+}

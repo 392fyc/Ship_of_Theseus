@@ -9,7 +9,9 @@
   "cooldown": 1,
   "action_cost": "standard",
   "timing_constraint": "any",
-  "effects": [],
+  "effects": [
+    { "effect_id": "poison", "chance": 35, "duration": 4, "value": 6 }
+  ],
   "tags": ["ranged", "precision"],
-  "description": "高命中的远程单体射击。"
+  "description": "高命中的远程单体射击，并有概率附加中毒。"
 }

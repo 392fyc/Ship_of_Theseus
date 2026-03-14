@@ -1,0 +1,16 @@
+{
+  "id": "poison",
+  "display_name": "Poison",
+  "icon": "PS",
+  "duration": 4,
+  "max_duration": 4,
+  "effect_type": "dot",
+  "stat_key": "",
+  "value": 6,
+  "is_percentage": false,
+  "trigger": "turn_start",
+  "source_unit_id": "",
+  "stackable": false,
+  "max_stacks": 1,
+  "refresh_on_reapply": true
+}

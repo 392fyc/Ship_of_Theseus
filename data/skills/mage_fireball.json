@@ -10,8 +10,8 @@
   "action_cost": "standard",
   "timing_constraint": "any",
   "effects": [
-    { "type": "burn", "chance": 35, "duration": 2, "value": 8 }
+    { "effect_id": "burn", "chance": 30, "duration": 3, "value": 10 }
   ],
   "tags": ["magic", "aoe", "fire"],
-  "description": "投掷火球并在小范围内爆炸。"
+  "description": "投掷火球并在小范围内爆炸，命中后有概率施加燃烧。"
 }

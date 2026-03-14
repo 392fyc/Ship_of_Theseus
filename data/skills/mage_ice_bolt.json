@@ -10,8 +10,9 @@
   "action_cost": "standard",
   "timing_constraint": "any",
   "effects": [
-    { "type": "slow", "chance": 60, "duration": 2, "value": 2 }
+    { "effect_id": "slow", "chance": 40, "duration": 2, "value": -2 },
+    { "effect_id": "freeze", "chance": 25, "duration": 2, "value": 0 }
   ],
   "tags": ["magic", "control", "ice"],
-  "description": "单体冰弹，命中后有概率减速。"
+  "description": "单体冰弹，命中后可能减速或冻结目标。"
 }

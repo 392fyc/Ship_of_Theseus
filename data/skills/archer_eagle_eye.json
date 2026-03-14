@@ -11,9 +11,8 @@
   "swift_limit": 1,
   "timing_constraint": "before_attack",
   "effects": [
-    { "type": "vision_up", "chance": 100, "duration": 2, "value": 1 },
-    { "type": "hit_up", "chance": 100, "duration": 2, "value": 15 }
+    { "effect_id": "priority_up", "chance": 100, "duration": 2, "value": 5 }
   ],
   "tags": ["buff", "passive_like"],
-  "description": "短时间提升视野与命中。"
+  "description": "短时间集中精神，显著提高后续回合的行动顺位。"
 }

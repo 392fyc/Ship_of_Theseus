@@ -1,0 +1,16 @@
+{
+  "id": "priority_up",
+  "display_name": "Priority Up",
+  "icon": "PR",
+  "duration": 2,
+  "max_duration": 2,
+  "effect_type": "stat_mod",
+  "stat_key": "SPD",
+  "value": 5,
+  "is_percentage": false,
+  "trigger": "permanent",
+  "source_unit_id": "",
+  "stackable": false,
+  "max_stacks": 1,
+  "refresh_on_reapply": true
+}

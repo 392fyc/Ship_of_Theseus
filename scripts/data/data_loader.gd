@@ -2,6 +2,7 @@ extends Node
 
 var classes:   Dictionary = {}
 var skills:    Dictionary = {}
+var buffs:     Dictionary = {}
 var enemies:   Dictionary = {}
 var maps:      Dictionary = {}
 var relics:    Dictionary = {}
@@ -16,13 +17,14 @@ func _ready() -> void:
 func load_all() -> void:
 	_load_directory("res://data/classes/", classes)
 	_load_directory("res://data/skills/", skills)
+	_load_directory("res://data/buffs/", buffs)
 	_load_directory("res://data/enemies/", enemies)
 	_load_directory("res://data/maps/", maps)
 	_load_directory("res://data/relics/", relics)
 	_load_directory("res://data/buildings/", buildings)
 	_load_directory("res://data/events/", events)
-	print("[DataLoader] Loaded: %d classes, %d skills, %d enemies, %d maps" \
-		% [classes.size(), skills.size(), enemies.size(), maps.size()])
+	print("[DataLoader] Loaded: %d classes, %d skills, %d buffs, %d enemies, %d maps" \
+		% [classes.size(), skills.size(), buffs.size(), enemies.size(), maps.size()])
 
 
 func _load_directory(path: String, target: Dictionary) -> void:

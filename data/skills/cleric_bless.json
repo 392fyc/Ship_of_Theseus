@@ -11,9 +11,8 @@
   "swift_limit": 1,
   "timing_constraint": "any",
   "effects": [
-    { "type": "attack_up", "chance": 100, "duration": 2, "value": 3 },
-    { "type": "resistance_up", "chance": 100, "duration": 2, "value": 10 }
+    { "effect_id": "defense_up", "chance": 100, "duration": 3, "value": 3 }
   ],
   "tags": ["buff", "aura"],
-  "description": "为周围区域内的小范围友军施加增益祝福。"
+  "description": "为周围区域内的小范围友军施加防御强化。"
 }
