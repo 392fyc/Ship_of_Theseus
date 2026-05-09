@@ -9,6 +9,10 @@
 战棋RPG + Roguelite + 城镇建设, Godot 4.6 (GDScript), JSON驱动, GameAction指令架构。
 KB 正本: Obsidian Vault `D:\ShipOfTheseus\ShipOfTheseus-KB\` (`obsidian_*` MCP)
 
+## DO NOT — Security
+
+- **禁止**在版本控制文件中硬编码 API Key / Secret。配置文件含密钥时必须加入 `.gitignore`（ref: ISSUE-SEC-001）
+
 ## DO NOT — GDScript
 
 - class_name 与 autoload 同名 → autoload 脚本**移除 class_name**

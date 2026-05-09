@@ -14,6 +14,10 @@
 - `/sot-session-start` → 开始会话 | `/sot-session-end` → 结束会话 | `/sot-kb-write` → KB写入
 - 游戏规则、公式、ADR、任务追踪 → 查 KB，不在此文件复述
 
+## DO NOT — Security
+
+- **禁止**在版本控制文件中硬编码 API Key / Secret。配置文件含密钥时必须加入 `.gitignore`，值使用环境变量引用（ref: ISSUE-SEC-001）
+
 ## DO NOT — GDScript
 
 - class_name 与 autoload 同名 → autoload 脚本**移除 class_name**
