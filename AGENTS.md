@@ -1,6 +1,7 @@
 # AGENTS.md
 
-> 面向 Codex CLI 及其他 Sub Agent。
+> 面向 Codex CLI 及其他**外部** Sub Agent。
+> **⚠ 工作模式（2026-06-16 起）**：默认在 Claude Code 内部用 subagent / agent team 执行（**含 GDScript 代码**）；**本文件仅在用户特殊声明派发外部工具时适用**。Task Bundle / `implementation_receipt` 模板已弃用（见文末）。
 
 ## Language
 
@@ -28,7 +29,7 @@ KB 正本: Obsidian Vault `D:\ShipOfTheseus\ShipOfTheseus-KB\` (`obsidian_*` MCP
 - 格挡和暴击 → **互斥**
 - pure伤害格挡 → **无视**；pure暴击 → **固定1.5x，不受加成**
 - hybrid → **phys_atk + mag_atk 同时生效**，武器倍率取平均
-- 反击/追击 → **不触发**连锁；area攻击 → **不触发**反击
+- 反击 → **不触发**连锁（**追击系统已移除**，R1.4 / 速度方案2）；area攻击 → **不触发**反击
 - 建筑耐久 → **固定扣减**；建筑摧毁 → **变废墟**
 - 距离 → **无衰减**
 - ZOC → **不叠加**固定-2，仅从控制区离开时触发
@@ -37,14 +38,11 @@ KB 正本: Obsidian Vault `D:\ShipOfTheseus\ShipOfTheseus-KB\` (`obsidian_*` MCP
 
 - **禁止**用训练数据判断版本号。版本查询必须先搜索再作答
 
-## Sub Agent Rules
+## Sub Agent Rules（仅外部工具，用户特殊声明派发时适用）
 
-- Git 分支: `{agent}/{task-name}`，完成后通知 Main Agent
-- Sub Agent 只在 `allowed_write_scope` 内实现，不改 registry/KB
-- 交付物: 填写 Task Bundle 的 `implementation_receipt`，不自行推进状态
+- Git 分支: `{agent}/{task-name}`，完成后通知 Main Agent；**不操作 `develop` / `main`**
+- Sub Agent 只在指定写入范围内实现，不改 KB / registry
 
-## Task Receipt
+## Task Receipt（已弃用）
 
-- 任务实现完成后，按 `.claude/skills/sot-task-receipt/SKILL.md` 或 `.cursor/rules/task-receipt.mdc` 回填 `implementation_receipt`。
-- 必填字段: `implementer`, `branch`, `summary`, `changed_files`, `evidence`, `docs_updated`, `residual_risks`, `completed_at`。
-- 默认只填写当前 Task Bundle 的 receipt，不改 registry、session 文件或 acceptance bundles。
+- **Task Bundle / `implementation_receipt` 模板已于 2026-06 弃用**——新工作模式默认在 Claude Code 内部用 subagent / team 执行，不再回填 receipt。`.claude/skills/sot-task-receipt/` 仅作历史参考保留。
