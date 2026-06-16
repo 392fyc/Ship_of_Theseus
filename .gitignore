@@ -33,3 +33,7 @@ opencode.json
 
 # Windows reserved device names
 nul
+
+# handoff skill — local KB-pointer marker + fallback handoff dir (transient, never commit)
+.handoff-config
+.handoff/
