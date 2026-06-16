@@ -1298,7 +1298,6 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 	if _can_counterattack(action_data, defender, attacker, defender_disabled_before_attack):
 		var counter_data: Dictionary = _build_basic_attack_action_data(defender, attacker, {
 			"allow_counter": false,
-			"allow_pursuit": false,
 		})
 		var counter_result: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(
 			defender, attacker, counter_data)
@@ -1313,29 +1312,6 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 		if counter_result.defender_died:
 			result.attacker_died = true
 			return
-
-	# Pursuit
-	var allow_pursuit: bool = bool(action_data.get("allow_pursuit", true))
-	if allow_pursuit and result.hit \
-			and attacker.stats.is_alive() and defender.stats.is_alive():
-		var pursuit_chance: float = clampf(
-			(attacker.get_effective_stat("SPD") - defender.get_effective_stat("SPD")) * 0.1,
-			0.0, 1.0)
-		if randf() < pursuit_chance:
-			var pursuit_data: Dictionary = _build_basic_attack_action_data(attacker, defender, {
-				"allow_counter": false,
-				"allow_pursuit": false,
-			})
-			var pursuit_result: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(
-				attacker, defender, pursuit_data)
-			_log_attack(attacker, defender, pursuit_result, "Pursuit")
-			if pursuit_result.hit:
-				var p_type: String = str(pursuit_data.get("damage_type", "physical"))
-				DamagePopup.spawn(popup_layer, defender.position,
-					pursuit_result.damage, p_type, pursuit_result.crit)
-				defender.take_damage(pursuit_result.damage, p_type)
-			else:
-				DamagePopup.spawn_miss(popup_layer, defender.position)
 
 
 func _is_waiting_for_line_direction() -> bool:
@@ -1623,7 +1599,6 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		"target_direction": _serialize_vector2i(area_direction),
 		"affected_cells": _serialize_cells(affected_cells),
 		"allow_counter": not is_area_skill,
-		"allow_pursuit": not is_area_skill,
 	}
 	return GameAction.make_skill(user, _selected_skill_id, target_pos, target, payload)
 
@@ -1729,7 +1704,6 @@ func _build_basic_attack_action_data(attacker: Unit, defender: Unit,
 		"weapon_crit": int(basic_attack_profile.get("weapon_crit", 0)),
 		"pure_atk_source": str(basic_attack_profile.get("pure_atk_source", "phys")),
 		"allow_counter": true,
-		"allow_pursuit": true,
 	}
 	for key_value: Variant in extra_data.keys():
 		var key: String = str(key_value)

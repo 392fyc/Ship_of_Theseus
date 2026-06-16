@@ -1,8 +1,8 @@
 class_name UnitStats
 extends Resource
 ## ADR-005: 10-attribute system (STR/MAG/DEX/SPD/LCK/DEF/RES/HP/MOV/VIS)
-## Growth attributes (7): HP, STR, MAG, DEX, LCK, DEF, RES
-## Fixed attributes (3): SPD, MOV, VIS
+## Growth attributes (6): HP, STR, MAG, DEX, DEF, RES
+## Fixed attributes (4): SPD, LCK, MOV, VIS
 
 # ── Core attributes ─────────────────────────────────
 @export var max_hp:    int = 20
@@ -10,8 +10,8 @@ extends Resource
 @export var str_attr:  int = 8   # STR — physical attack power
 @export var mag:       int = 3   # MAG — magical attack power
 @export var dex:       int = 6   # DEX — hit/crit derivation
-@export var spd:       int = 5   # SPD — turn order / avoid / pursuit (no growth)
-@export var lck:       int = 3   # LCK — crit avoid + status resist + minor hit
+@export var spd:       int = 5   # SPD — turn order / avoid (no growth)
+@export var lck:       int = 3   # LCK — crit avoid + status resist + minor hit (fixed, no growth)
 @export var def_attr:  int = 4   # DEF — physical defense
 @export var res:       int = 2   # RES — magical defense
 
@@ -20,7 +20,7 @@ extends Resource
 @export var vis:       int = 3   # VIS — vision range
 
 # ── Growth system ───────────────────────────────────
-# growth_rates: percentage chance per attribute on level-up (HP/STR/MAG/DEX/LCK/DEF/RES)
+# growth_rates: percentage chance per attribute on level-up (HP/STR/MAG/DEX/DEF/RES)
 var growth_rates: Dictionary = {}
 # Pity counters: tracks consecutive failures per attribute
 var _pity_counts: Dictionary = {}
@@ -43,7 +43,7 @@ func load_from_dict(d: Dictionary) -> void:
 func load_growth_rates(rates: Dictionary) -> void:
 	growth_rates = rates
 	_pity_counts = {}
-	for key: String in ["HP", "STR", "MAG", "DEX", "LCK", "DEF", "RES"]:
+	for key: String in ["HP", "STR", "MAG", "DEX", "DEF", "RES"]:
 		_pity_counts[key] = 0
 
 
@@ -79,7 +79,7 @@ func level_up() -> Dictionary:
 	## Roll growth for each growable attribute. Returns dict of increases.
 	## Uses pity: after N consecutive failures, force +1.
 	var gains: Dictionary = {}
-	for key: String in ["HP", "STR", "MAG", "DEX", "LCK", "DEF", "RES"]:
+	for key: String in ["HP", "STR", "MAG", "DEX", "DEF", "RES"]:
 		var rate: float = growth_rates.get(key, 0) / 100.0
 		var grew: bool = false
 		if rate > 0.0:
@@ -118,8 +118,6 @@ func _apply_growth(key: String) -> void:
 			mag += 1
 		"DEX":
 			dex += 1
-		"LCK":
-			lck += 1
 		"DEF":
 			def_attr += 1
 		"RES":

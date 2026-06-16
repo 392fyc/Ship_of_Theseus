@@ -35,7 +35,6 @@ static func make_attack(attacker: Unit, target: Unit,
 		"skill_multiplier": 1.0,
 		"terrain_multiplier": 1.0,
 		"allow_counter": true,
-		"allow_pursuit": true,
 	}
 	return a
 
