@@ -111,6 +111,10 @@ func get_dashboard_data() -> Dictionary:
 		"selected_skill_id": _selected_skill_id,
 		"forecast": _combat_forecast.duplicate(true),
 		"hint_text": _get_dashboard_hint_text(),
+		# ── 剑圣专属资源（非剑圣单位：sword_qi=-1 隐藏显示）──
+		"sword_qi": info_unit.sword_qi if info_unit._qi_max > 0 else -1,
+		"sword_qi_max": info_unit._qi_max,
+		"marks": info_unit.marks.duplicate() if info_unit._qi_max > 0 else {},
 	}
 
 
@@ -743,6 +747,15 @@ func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 	if not _is_supported_runtime_skill(skill_data):
 		entry["reason"] = "当前战斗原型暂不支持此技能范围/目标"
 		return entry
+	# ── 剑圣资源条件检查 ─────────────────────────────────
+	var qi_cost: int = int(skill_data.get("qi_cost", 0))
+	if qi_cost > 0 and unit.sword_qi < qi_cost:
+		entry["reason"] = "剑气不足（需要 %d，当前 %d）" % [qi_cost, unit.sword_qi]
+		return entry
+	var requires_marks: int = int(skill_data.get("requires_marks", 0))
+	if requires_marks > 0 and unit.get_mark_count() < requires_marks:
+		entry["reason"] = "印记不足（需要 %d 个，当前 %d）" % [requires_marks, unit.get_mark_count()]
+		return entry
 	entry["available"] = true
 	return entry
 
@@ -753,7 +766,12 @@ func _get_skill_entries() -> Array[Dictionary]:
 	if unit == null:
 		return entries
 	for skill_id: String in unit.skill_ids:
-		entries.append(_build_skill_entry(unit, skill_id))
+		# ── 槽位替换：招架 → 拔刀（当印记满时）──────────────
+		var display_id: String = unit.get_visible_skill_id(skill_id)
+		var entry: Dictionary = _build_skill_entry(unit, display_id)
+		# 保留原始槽位 ID 以便取消时恢复（附加字段，UI 可忽略）
+		entry["slot_origin_id"] = skill_id
+		entries.append(entry)
 	return entries
 
 
@@ -1227,6 +1245,14 @@ func _execute_skill_action(action: GameAction) -> bool:
 	if action_cost in ["move", "standard", "swift"]:
 		_move_committed = true
 
+	# ── 剑圣资源消耗（施放时）────────────────────────────
+	var qi_cost: int = int(skill_data.get("qi_cost", 0))
+	if qi_cost > 0:
+		user.set_sword_qi(user.sword_qi - qi_cost)
+	var mark_cost: int = int(skill_data.get("mark_cost", 0))
+	if mark_cost > 0:
+		user.clear_marks()
+
 	var cooldown_turns: int = int(data.get("cooldown", 0))
 	user.consume_skill(skill_id, cooldown_turns)
 	user.refresh_status_icons()
@@ -1290,6 +1316,9 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 
 	if result.hit and defender.stats.is_alive():
 		_apply_hostile_skill_effects(attacker, defender, data)
+
+	# ── 剑圣资源：命中得气、击杀得气+减CD+得印记 ──────────
+	_apply_sword_qi_on_hit(attacker, result, action_data)
 
 	if result.defender_died:
 		return
@@ -1599,6 +1628,15 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		"target_direction": _serialize_vector2i(area_direction),
 		"affected_cells": _serialize_cells(affected_cells),
 		"allow_counter": not is_area_skill,
+		# ── 剑圣专属字段（缺省安全，非剑圣技能此处为 0/false）──
+		"skill_id": _selected_skill_id,
+		"guaranteed_hit": bool(skill_data.get("guaranteed_hit", false)),
+		"guaranteed_crit": bool(skill_data.get("guaranteed_crit", false)),
+		"crit_damage_bonus": float(skill_data.get("crit_damage_bonus", 0.0)),
+		"qi_gain_on_hit": int(skill_data.get("qi_gain_on_hit", 0)),
+		"qi_gain_on_kill": int(skill_data.get("qi_gain_on_kill", 0)),
+		"mark_gain": int(skill_data.get("mark_gain", 0)),
+		"ki_on_kill_cd_reduction": int(skill_data.get("ki_on_kill_cd_reduction", 0)),
 	}
 	return GameAction.make_skill(user, _selected_skill_id, target_pos, target, payload)
 
@@ -1905,3 +1943,45 @@ func _diamond_points(center: Vector2) -> PackedVector2Array:
 		center + Vector2(0.0, hh),
 		center + Vector2(-hw, 0.0),
 	])
+
+
+# ── 剑圣资源：命中/击杀后的气与印记结算 ─────────────────
+
+func _apply_sword_qi_on_hit(attacker: Unit,
+		result: DamageCalculator.AttackResult,
+		action_data: Dictionary) -> void:
+	# 仅在命中时触发；普通攻击 action_data 无此字段，缺省为 0/false
+	if not result.hit:
+		return
+	# 命中得气（如斩击 qi_gain_on_hit=1）
+	var qi_on_hit: int = int(action_data.get("qi_gain_on_hit", 0))
+	if qi_on_hit > 0:
+		attacker.set_sword_qi(attacker.sword_qi + qi_on_hit)
+		print("[SwordQi] %s +%d qi on hit → %d" % [
+			attacker.unit_name, qi_on_hit, attacker.sword_qi])
+	# 命中后得印记（如居合 mark_gain=1，命中即结算）
+	var mark_gain: int = int(action_data.get("mark_gain", 0))
+	if mark_gain > 0:
+		var gained_mark: String = attacker.gain_random_mark()
+		if gained_mark != "":
+			print("[SwordMark] %s gained mark 「%s」 on hit, total=%d" % [
+				attacker.unit_name, gained_mark, attacker.get_mark_count()])
+	# 击杀触发：得气 + 技能 CD 减少
+	if not result.defender_died:
+		return
+	var qi_on_kill: int = int(action_data.get("qi_gain_on_kill", 0))
+	if qi_on_kill > 0:
+		attacker.set_sword_qi(attacker.sword_qi + qi_on_kill)
+		print("[SwordQi] %s +%d qi on kill → %d" % [
+			attacker.unit_name, qi_on_kill, attacker.sword_qi])
+	var cd_reduce: int = int(action_data.get("ki_on_kill_cd_reduction", 0))
+	var origin_skill_id: String = str(action_data.get("skill_id", ""))
+	if cd_reduce > 0 and origin_skill_id != "":
+		var current_cd: int = attacker.get_skill_cooldown(origin_skill_id)
+		var new_cd: int = maxi(0, current_cd - cd_reduce)
+		if new_cd == 0:
+			attacker.skill_cooldowns.erase(origin_skill_id)
+		else:
+			attacker.skill_cooldowns[origin_skill_id] = new_cd
+		print("[SwordQi] %s %s CD %d→%d on kill" % [
+			attacker.unit_name, origin_skill_id, current_cd, new_cd])

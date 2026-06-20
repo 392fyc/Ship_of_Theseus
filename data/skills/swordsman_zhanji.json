@@ -1,0 +1,23 @@
+{
+  "id": "swordsman_zhanji",
+  "name": "斩击",
+  "damage_type": "physical",
+  "power": 100,
+  "hit_bonus": 0,
+  "range": { "type": "diamond", "min": 1, "max": 1 },
+  "area": { "type": "single", "size": 0 },
+  "cooldown": 0,
+  "action_cost": "standard",
+  "timing_constraint": "any",
+  "effects": [],
+  "tags": ["basic", "melee", "sword_qi", "mark"],
+  "qi_cost": 0,
+  "qi_gain_on_hit": 1,
+  "qi_gain_on_kill": 0,
+  "mark_gain": 0,
+  "mark_cost": 0,
+  "requires_marks": 0,
+  "guaranteed_crit": false,
+  "guaranteed_hit": false,
+  "description": "距1，100%物理。命中+1剑气。转职后命中随机获得一个未持有印记（转职功能暂未实装，见qi_gain_on_hit注释）。"
+}

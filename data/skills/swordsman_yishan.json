@@ -1,0 +1,23 @@
+{
+  "id": "swordsman_yishan",
+  "name": "一闪",
+  "damage_type": "physical",
+  "power": 50,
+  "hit_bonus": 0,
+  "range": { "type": "line", "min": 1, "max": 4 },
+  "area": { "type": "line", "size": 1 },
+  "cooldown": 3,
+  "action_cost": "move",
+  "timing_constraint": "any",
+  "effects": [],
+  "tags": ["mobility", "sword", "area"],
+  "qi_cost": 1,
+  "qi_gain_on_hit": 0,
+  "qi_gain_on_kill": 0,
+  "mark_gain": 0,
+  "mark_cost": 0,
+  "requires_marks": 0,
+  "guaranteed_crit": false,
+  "guaranteed_hit": false,
+  "description": "移动·位移最远4格，途经敌受50%物理（区域）。施放消耗1剑气（qi_cost=1）。位移的完整行为待引擎扩展（当前用直线区域攻击近似）。"
+}

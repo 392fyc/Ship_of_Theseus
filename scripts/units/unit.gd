@@ -27,6 +27,27 @@ var standard_used: bool = false
 var swift_used: bool = false
 var reaction_available: bool = true
 
+# ── 战斗派生值修正钩子（来源：天赋 L2 / 装备 L4 / 符文 L5 / 肉鸽）──
+# 默认 0，不绑武器；由上层写入修正系数（暴击回避等）。
+var crit_avoid_bonus: int = 0
+# 暴击率加法钩子（同源；心眼被动写入此字段，其他天赋/符文也可叠加）
+var crit_bonus: int = 0
+
+# ── 剑圣专属资源（仅在 unit_id == "swordsman" 时初始化/有意义）─
+# 剑气：整数 0~qi_max（从 swordsman.json sword_qi_config 读取）
+var sword_qi: int = 0
+var _qi_max: int = 0
+# 印记：三个离散布尔值，键名对应印记类型
+var marks: Dictionary = {"心": false, "道": false, "势": false}
+# 心眼参数缓存（从 JSON 读取后存放此处，避免重复查表）
+var _xinyan_crit_per_qi: int = 0
+var _xinyan_speed_threshold: int = 0
+var _xinyan_speed_bonus: int = 0
+# 印记属性加成缓存
+var _mark_dex_bonus: int = 0
+var _mark_lck_bonus: int = 0
+var _mark_str_bonus: int = 0
+
 # ── 信号 ────────────────────────────────────────────
 signal damage_taken(amount: int, damage_type: String)
 signal unit_died
@@ -91,6 +112,8 @@ func setup(class_data: Dictionary) -> void:
 	stats.load_from_dict(stat_dict)
 	if class_data.has("growth_rates"):
 		stats.load_growth_rates(class_data["growth_rates"])
+	# ── 剑圣专属资源初始化 ─────────────────────────────────
+	_init_sword_qi_resource(class_data)
 	var basic_attack_range: Dictionary = class_data.get("basic_attack_range", {})
 	if basic_attack_range.is_empty():
 		var atk_type: String = str(class_data.get("attack_type", "melee"))
@@ -223,6 +246,17 @@ func get_effective_stat(stat_key: String) -> int:
 			flat_modifier += buff.value
 	var effective_value: float = float(base_value) + flat_modifier
 	effective_value += float(base_value) * percentage_modifier / 100.0
+	# ── 剑圣心眼：速度阈值加成（仅 SPD 键）─────────────────
+	if normalized_key == "SPD" and _xinyan_speed_threshold > 0 \
+			and sword_qi >= _xinyan_speed_threshold:
+		effective_value += float(_xinyan_speed_bonus)
+	# ── 印记属性加成（心/道/势）───────────────────────────
+	if normalized_key == "DEX" and bool(marks.get("心", false)):
+		effective_value += float(_mark_dex_bonus)
+	if normalized_key == "LCK" and bool(marks.get("道", false)):
+		effective_value += float(_mark_lck_bonus)
+	if normalized_key == "STR" and bool(marks.get("势", false)):
+		effective_value += float(_mark_str_bonus)
 	return roundi(effective_value)
 
 
@@ -244,11 +278,13 @@ func get_avoid_value(terrain_evade_bonus: int = 0) -> int:
 
 func get_crit_value(weapon_crit: int = 0) -> int:
 	var effective_dex: int = get_effective_stat("DEX")
-	return weapon_crit + int(effective_dex / 2.0)
+	# crit_bonus: 加法钩子，心眼被动 sword_qi × crit_per_qi 写入此处
+	return weapon_crit + int(effective_dex / 2.0) + crit_bonus
 
 
 func get_crit_avoid_value() -> int:
-	return get_effective_stat("LCK")
+	# LCK + 通用修正钩子（来源：天赋/装备/肉鸽；不绑武器）
+	return get_effective_stat("LCK") + crit_avoid_bonus
 
 
 func get_status_resist_multiplier() -> float:
@@ -386,6 +422,56 @@ func consume_skill(skill_id: String, cooldown_turns: int) -> void:
 		skill_cooldowns[skill_id] = cooldown_turns
 	else:
 		skill_cooldowns.erase(skill_id)
+
+
+# ── 剑圣专属资源 API ─────────────────────────────────
+
+func get_mark_count() -> int:
+	var count: int = 0
+	for mark_held: Variant in marks.values():
+		if bool(mark_held):
+			count += 1
+	return count
+
+
+func is_marks_full() -> bool:
+	return get_mark_count() >= 3
+
+
+## 返回此槽位当前应显示的技能 ID。
+## 若 skill_id == "swordsman_zhaojia" 且印记满3，则显示拔刀槽；否则返回原 ID。
+func get_visible_skill_id(skill_id: String) -> String:
+	if skill_id == "swordsman_zhaojia" and is_marks_full():
+		return "swordsman_badao"
+	return skill_id
+
+
+## 修改剑气值并更新心眼被动。
+func set_sword_qi(new_qi: int) -> void:
+	if _qi_max <= 0:
+		return
+	sword_qi = clampi(new_qi, 0, _qi_max)
+	_apply_xinyan_passive()
+
+
+## 得到一个未持有的随机印记；返回印记名称，如果已满则返回 ""。
+func gain_random_mark() -> String:
+	var available_marks: Array[String] = []
+	for mark_key: String in ["心", "道", "势"]:
+		if not bool(marks.get(mark_key, false)):
+			available_marks.append(mark_key)
+	if available_marks.is_empty():
+		return ""
+	var chosen: String = available_marks[randi() % available_marks.size()]
+	marks[chosen] = true
+	return chosen
+
+
+## 清空所有印记。
+func clear_marks() -> void:
+	marks["心"] = false
+	marks["道"] = false
+	marks["势"] = false
 
 
 # ── 私有方法 ─────────────────────────────────────────
@@ -596,3 +682,29 @@ func _get_base_stat_value(stat_key: String) -> int:
 		"PRIORITY":
 			return priority
 	return 0
+
+
+## 剑圣资源初始化：从 class_data["sword_qi_config"] 读取参数。
+## 非剑圣单位调用此函数后字段保持零值，不影响其他职业。
+func _init_sword_qi_resource(class_data: Dictionary) -> void:
+	var cfg: Dictionary = class_data.get("sword_qi_config", {})
+	if cfg.is_empty():
+		return
+	_qi_max = int(cfg.get("qi_max", 10))
+	sword_qi = clampi(int(cfg.get("qi_initial", 0)), 0, _qi_max)
+	marks = {"心": false, "道": false, "势": false}
+	_xinyan_crit_per_qi = int(cfg.get("crit_per_qi", 1))
+	_xinyan_speed_threshold = int(cfg.get("speed_threshold", 7))
+	_xinyan_speed_bonus = int(cfg.get("speed_bonus", 1))
+	_mark_dex_bonus = int(cfg.get("mark_dex_bonus", 2))
+	_mark_lck_bonus = int(cfg.get("mark_lck_bonus", 2))
+	_mark_str_bonus = int(cfg.get("mark_str_bonus", 2))
+	_apply_xinyan_passive()
+
+
+## 心眼被动更新：将 sword_qi × crit_per_qi 写入 crit_bonus 钩子。
+## SPD 阈值加成通过 get_effective_stat 实时计算，不需要此处写入。
+func _apply_xinyan_passive() -> void:
+	if _xinyan_crit_per_qi <= 0:
+		return
+	crit_bonus = sword_qi * _xinyan_crit_per_qi

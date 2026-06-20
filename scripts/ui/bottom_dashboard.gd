@@ -279,6 +279,11 @@ var _item_popup: Control = null
 var _item_popup_panel: PanelContainer = null
 var _item_popup_list: VBoxContainer = null
 
+# ── 剑圣资源显示（sword_qi + marks）────────────────────
+var _sword_qi_row: HBoxContainer = null
+var _sword_qi_label: Label = null
+var _mark_labels: Dictionary = {}
+
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -344,6 +349,7 @@ func update_state(state: Dictionary) -> void:
 		_set_item_popup_visible(false)
 
 	_update_forecast(state.get("forecast", {}), is_enemy_mode)
+	_update_sword_qi_display(state)
 	_layout_dashboard()
 
 
@@ -519,6 +525,42 @@ func _build_stats_area(parent: VBoxContainer) -> void:
 	var stat_keys_2: Array = [["DEF", 0], ["RES", 0], ["LCK", 0], ["MOV", 0]]
 	for stat_pair: Array in stat_keys_2:
 		_build_stat_cell(grid2, stat_pair)
+
+	# ── 剑圣专属资源行（剑气 + 印记）────────────────────
+	_sword_qi_row = HBoxContainer.new()
+	_sword_qi_row.add_theme_constant_override("separation", 4)
+	_sword_qi_row.visible = false
+	parent.add_child(_sword_qi_row)
+
+	var qi_abbr: Label = Label.new()
+	qi_abbr.text = "剑气"
+	qi_abbr.add_theme_font_size_override("font_size", 9)
+	qi_abbr.add_theme_color_override("font_color", COLOR_STAT_ABBR)
+	_sword_qi_row.add_child(qi_abbr)
+
+	_sword_qi_label = Label.new()
+	_sword_qi_label.text = "0/10"
+	_sword_qi_label.add_theme_font_size_override("font_size", 9)
+	_sword_qi_label.add_theme_color_override("font_color", COLOR_TEXT_MAIN)
+	_sword_qi_row.add_child(_sword_qi_label)
+
+	var mark_sep: Control = Control.new()
+	mark_sep.custom_minimum_size = Vector2(6.0, 0.0)
+	_sword_qi_row.add_child(mark_sep)
+
+	var mark_abbr: Label = Label.new()
+	mark_abbr.text = "印"
+	mark_abbr.add_theme_font_size_override("font_size", 9)
+	mark_abbr.add_theme_color_override("font_color", COLOR_STAT_ABBR)
+	_sword_qi_row.add_child(mark_abbr)
+
+	for mark_key: String in ["心", "道", "势"]:
+		var mark_lbl: Label = Label.new()
+		mark_lbl.text = mark_key
+		mark_lbl.add_theme_font_size_override("font_size", 9)
+		mark_lbl.add_theme_color_override("font_color", Color(0.45, 0.46, 0.50, 1.0))
+		_sword_qi_row.add_child(mark_lbl)
+		_mark_labels[mark_key] = mark_lbl
 
 
 func _build_stat_cell(parent: GridContainer, stat: Array) -> void:
@@ -1143,6 +1185,26 @@ func _on_hide_finished() -> void:
 func _on_item_popup_hidden() -> void:
 	if not _item_popup_open:
 		_item_popup.visible = false
+
+
+func _update_sword_qi_display(state: Dictionary) -> void:
+	if _sword_qi_row == null or _sword_qi_label == null:
+		return
+	var sword_qi: int = int(state.get("sword_qi", -1))
+	var sword_qi_max: int = int(state.get("sword_qi_max", 0))
+	if sword_qi < 0 or sword_qi_max <= 0:
+		_sword_qi_row.visible = false
+		return
+	_sword_qi_row.visible = true
+	_sword_qi_label.text = "%d/%d" % [sword_qi, sword_qi_max]
+	var marks_data: Dictionary = state.get("marks", {})
+	for mark_key: String in ["心", "道", "势"]:
+		var lbl: Label = _mark_labels.get(mark_key, null) as Label
+		if lbl == null:
+			continue
+		var held: bool = bool(marks_data.get(mark_key, false))
+		lbl.add_theme_color_override("font_color",
+			Color(0.88, 0.75, 0.28, 1.0) if held else Color(0.45, 0.46, 0.50, 1.0))
 
 
 func _make_shell_style(bg_color: Color, border_color: Color) -> StyleBoxFlat:

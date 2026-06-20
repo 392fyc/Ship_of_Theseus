@@ -1,0 +1,16 @@
+{
+  "id": "swordsman_parry_stance",
+  "display_name": "招架架势",
+  "icon": "招",
+  "duration": 1,
+  "max_duration": 1,
+  "effect_type": "special",
+  "stat_key": "",
+  "value": 0,
+  "is_percentage": false,
+  "trigger": "permanent",
+  "source_unit_id": "",
+  "stackable": false,
+  "max_stacks": 1,
+  "refresh_on_reapply": true
+}

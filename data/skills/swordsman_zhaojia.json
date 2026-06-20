@@ -1,0 +1,28 @@
+{
+  "id": "swordsman_zhaojia",
+  "name": "招架",
+  "damage_type": "physical",
+  "power": 0,
+  "hit_bonus": 0,
+  "range": { "type": "self", "min": 0, "max": 0 },
+  "area": { "type": "single", "size": 0 },
+  "cooldown": 1,
+  "action_cost": "swift",
+  "swift_limit": 1,
+  "timing_constraint": "any",
+  "effects": [
+    { "effect_id": "swordsman_parry_stance", "chance": 100, "duration": 1 }
+  ],
+  "tags": ["sword", "stance", "reaction"],
+  "qi_cost": 1,
+  "qi_gain_on_hit": 0,
+  "qi_gain_on_kill": 0,
+  "mark_gain": 0,
+  "mark_cost": 0,
+  "requires_marks": 0,
+  "guaranteed_crit": false,
+  "guaranteed_hit": false,
+  "slot_swap_trigger": "marks_full",
+  "slot_swap_target": "swordsman_badao",
+  "description": "迅捷·进入招架架势（自我施放）。消耗1剑气。集满3印记时，此槽位显示为拔刀（slot_swap_trigger=marks_full）。招架反应减伤效果待深度实装。"
+}

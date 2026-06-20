@@ -34,26 +34,35 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	# ── Step 1: Hit determination ───────────────────────
 	# Hit = weapon_hit + DEX×2 + LCK×0.5
 	# Avoid = SPD×2 + LCK×0.5 + terrain_evade
-	var hit_value: int = attacker.get_hit_value(weapon_hit)
-	var avoid_value: int = defender.get_avoid_value(terrain_evade_bonus)
-	var hit_rate: float = clampf((hit_value - avoid_value) / 100.0, 0.2, 1.0)
-	if randf() > hit_rate:
-		return result  # miss → hit=false
-
-	result.hit = true
+	# guaranteed_hit（居合）：绕过命中判定，直接命中。
+	var guaranteed_hit: bool = bool(action_data.get("guaranteed_hit", false))
+	if guaranteed_hit:
+		result.hit = true
+	else:
+		var hit_value: int = attacker.get_hit_value(weapon_hit)
+		var avoid_value: int = defender.get_avoid_value(terrain_evade_bonus)
+		var hit_rate: float = clampf((hit_value - avoid_value) / 100.0, 0.01, 1.0)
+		if randf() > hit_rate:
+			return result  # miss → hit=false
+		result.hit = true
 
 	# ── Step 2: Crit determination ──────────────────────
-	# Crit = weapon_crit + DEX/2;  Dodge = LCK
+	# Crit = weapon_crit + DEX/2 + crit_bonus;  Dodge = LCK
+	# guaranteed_crit（居合）：跳过随机判定直接暴击（pure伤害仍受限）。
 	var is_pure: bool = (damage_type == "pure")
 	var allow_crit: bool = true
 	if is_pure and not action_data.get("enable_pure_crit", false):
 		allow_crit = false
 	if allow_crit:
-		var crit_value: int = attacker.get_crit_value(weapon_crit)
-		var dodge_value: int = defender.get_crit_avoid_value()
-		var crit_rate: float = maxf(0.0, (crit_value - dodge_value) / 100.0)
-		if randf() < crit_rate:
+		var guaranteed_crit: bool = bool(action_data.get("guaranteed_crit", false))
+		if guaranteed_crit:
 			result.crit = true
+		else:
+			var crit_value: int = attacker.get_crit_value(weapon_crit)
+			var dodge_value: int = defender.get_crit_avoid_value()
+			var crit_rate: float = maxf(0.0, (crit_value - dodge_value) / 100.0)
+			if randf() < crit_rate:
+				result.crit = true
 
 	# ── Step 3: Base damage (additive, FE-style) ────────
 	var base_damage: float = _calc_base_damage(
@@ -66,7 +75,8 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	if result.crit:
 		var crit_mult: float = 1.5
 		if not is_pure:
-			crit_mult += action_data.get("crit_damage_bonus", 0.0)
+			# crit_damage_bonus：拔刀额外暴击倍率（叠加到 1.5x 基础上）
+			crit_mult += float(action_data.get("crit_damage_bonus", 0.0))
 		final_dmg *= crit_mult
 
 	final_dmg *= relic_multiplier * final_multiplier
@@ -93,16 +103,23 @@ static func preview_attack(attacker: Unit, defender: Unit,
 	var terrain_def_bonus: int = action_data.get("terrain_def_bonus", 0)
 	var terrain_res_bonus: int = action_data.get("terrain_res_bonus", 0)
 
-	var hit_value: int = attacker.get_hit_value(weapon_hit)
-	var avoid_value: int = defender.get_avoid_value(terrain_evade_bonus)
-	var hit_rate: float = clampf((hit_value - avoid_value) / 100.0, 0.2, 1.0)
+	var guaranteed_hit: bool = bool(action_data.get("guaranteed_hit", false))
+	var hit_rate: float = 1.0
+	if not guaranteed_hit:
+		var hit_value: int = attacker.get_hit_value(weapon_hit)
+		var avoid_value: int = defender.get_avoid_value(terrain_evade_bonus)
+		hit_rate = clampf((hit_value - avoid_value) / 100.0, 0.01, 1.0)
 
 	var crit_rate: float = 0.0
 	var is_pure: bool = (damage_type == "pure")
 	if not (is_pure and not action_data.get("enable_pure_crit", false)):
-		var crit_value: int = attacker.get_crit_value(weapon_crit)
-		var dodge_value: int = defender.get_crit_avoid_value()
-		crit_rate = maxf(0.0, (crit_value - dodge_value) / 100.0)
+		var guaranteed_crit: bool = bool(action_data.get("guaranteed_crit", false))
+		if guaranteed_crit:
+			crit_rate = 1.0
+		else:
+			var crit_value: int = attacker.get_crit_value(weapon_crit)
+			var dodge_value: int = defender.get_crit_avoid_value()
+			crit_rate = maxf(0.0, (crit_value - dodge_value) / 100.0)
 
 	var base_damage: float = _calc_base_damage(
 		attacker, defender, damage_type, weapon_might, pure_atk_source,

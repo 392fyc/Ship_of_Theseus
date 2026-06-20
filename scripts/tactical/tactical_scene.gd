@@ -22,6 +22,7 @@ signal battle_ended(result: String)
 # ── Spawn configuration ──────────────────────────────
 
 const PLAYER_UNITS: Array[Dictionary] = [
+	{"class_id": "swordsman", "pos": Vector2i(1, 2)},
 	{"class_id": "soldier",  "pos": Vector2i(1, 3)},
 	{"class_id": "soldier",  "pos": Vector2i(1, 4)},
 	{"class_id": "archer",   "pos": Vector2i(2, 2)},
