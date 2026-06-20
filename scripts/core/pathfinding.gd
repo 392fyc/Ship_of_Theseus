@@ -3,18 +3,21 @@ extends RefCounted
 
 const _MAX_COST := 9999
 
+# ZOC 移动惩罚（暂定 -1，观察中；小棋盘+低移动力+地形消耗叠加下 -2 易卡死，待并入平衡配置 JSON）
+const ZOC_MOVE_PENALTY := 1
+
 
 # ── BFS 移动范围 ─────────────────────────────────────
 # 返回 Dictionary{ Vector2i: int }，value = 到达该格后剩余移动力
 # ZOC 规则（设计文档 02-grid-and-map）：
-#   仅在移动开始时一次性扣除 -2，不是每经过 ZOC 格都扣
-#   即：起始位置处于敌方 ZOC → 总移动力 -2 后再 BFS 展开
+#   仅在移动开始时一次性扣除 ZOC_MOVE_PENALTY（暂定 -1），不是每经过 ZOC 格都扣
+#   即：起始位置处于敌方 ZOC → 总移动力按惩罚扣除后再 BFS 展开
 
 static func get_move_range(grid: Grid, start: Vector2i,
 		move_points: int, unit_faction: String) -> Dictionary:
 	var effective_mp := move_points
 	if _in_enemy_zoc(grid, start, unit_faction):
-		effective_mp = maxi(0, effective_mp - 2)
+		effective_mp = maxi(0, effective_mp - ZOC_MOVE_PENALTY)
 
 	var reachable: Dictionary = {start: effective_mp}
 	var queue: Array = [{"pos": start, "mp": effective_mp}]
