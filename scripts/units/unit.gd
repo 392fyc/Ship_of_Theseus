@@ -438,11 +438,18 @@ func is_marks_full() -> bool:
 	return get_mark_count() >= 3
 
 
-## 返回此槽位当前应显示的技能 ID。
-## 若 skill_id == "swordsman_zhaojia" 且印记满3，则显示拔刀槽；否则返回原 ID。
-func get_visible_skill_id(skill_id: String) -> String:
-	if skill_id == "swordsman_zhaojia" and is_marks_full():
-		return "swordsman_badao"
+## 返回此槽位当前应显示的技能 ID（数据驱动：替换规则由技能 JSON 的
+## slot_swap_trigger / slot_swap_target 声明，本函数只按触发类型求值，不硬编码技能 ID）。
+## 触发类型 marks_full = 印记满 3 时切换到 slot_swap_target（如招架→拔刀）。
+## 未来多种技能替换 / 印记改写天赋可新增触发类型而无需改动调用方。
+func get_visible_skill_id(skill_id: String, slot_swap_trigger: String = "",
+		slot_swap_target: String = "") -> String:
+	if slot_swap_target == "":
+		return skill_id
+	match slot_swap_trigger:
+		"marks_full":
+			if is_marks_full():
+				return slot_swap_target
 	return skill_id
 
 

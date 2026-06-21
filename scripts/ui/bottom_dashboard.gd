@@ -335,7 +335,7 @@ func update_state(state: Dictionary) -> void:
 	_xp_bar.xp_max = xp_max_value
 	_xp_bar.queue_redraw()
 	_xp_label.text = "XP %d" % xp_value
-	_update_stat_labels(state.get("stats", {}))
+	_update_stat_labels(state.get("stats", {}), state.get("stats_delta", {}))
 
 	_action_shell.visible = show_actions
 	if not show_actions:
@@ -954,11 +954,18 @@ func _extract_skill_entries(entries_variant: Variant) -> Array[Dictionary]:
 	return entries
 
 
-func _update_stat_labels(stats: Variant) -> void:
+func _update_stat_labels(stats: Variant, deltas: Variant = {}) -> void:
 	var stat_dict: Dictionary = stats if stats is Dictionary else {}
+	var delta_dict: Dictionary = deltas if deltas is Dictionary else {}
 	var keys: Array = ["str", "mag", "dex", "spd", "def", "res", "lck", "mov"]
 	for i: int in range(mini(keys.size(), _stat_value_labels.size())):
-		_stat_value_labels[i].text = str(int(stat_dict.get(keys[i], 0)))
+		# 基础值 + 括号加成（如 "9 (+2)"）；无加成时只显示基础值
+		var base_v: int = int(stat_dict.get(keys[i], 0))
+		var delta_v: int = int(delta_dict.get(keys[i], 0))
+		var txt: String = str(base_v)
+		if delta_v != 0:
+			txt += " (%+d)" % delta_v
+		_stat_value_labels[i].text = txt
 
 
 func _build_avatar_text(unit_name: String, unit_label: String) -> String:

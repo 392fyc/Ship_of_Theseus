@@ -122,7 +122,7 @@ func _test_data_layer(dl: Object) -> void:
 	_eq("拔刀 requires_marks==3", badao.get("requires_marks"), 3)
 	_eq("拔刀 mark_cost==3", badao.get("mark_cost"), 3)
 	_eq("拔刀 qi_cost==2", badao.get("qi_cost"), 2)
-	_eq("拔刀 crit_damage_bonus==0.5", badao.get("crit_damage_bonus"), 0.5)
+	_eq("拔刀 crit_damage_bonus==1.5", badao.get("crit_damage_bonus"), 1.5)
 	_eq("拔刀 slot_swap_provider==true", badao.get("slot_swap_provider"), true)
 	_eq("拔刀 power==180", badao.get("power"), 180)
 
@@ -195,10 +195,14 @@ func _test_mark_attributes(dl: Object) -> void:
 # ── 5. 印记计数 + 满3→拔刀槽位替换 ───────────────────
 
 func _test_slot_swap(dl: Object) -> void:
-	print("\n[5] 印记计数 + 招架→拔刀槽位替换")
+	print("\n[5] 印记计数 + 招架→拔刀槽位替换（数据驱动，替换规则读 JSON）")
 	var u: Unit = _make_unit(dl.classes["swordsman"])
+	# 替换规则来自招架技能 JSON（slot_swap_trigger / slot_swap_target），不在代码硬编码
+	var zj: Dictionary = dl.skills["swordsman_zhaojia"]
+	var trig: String = str(zj.get("slot_swap_trigger", ""))
+	var tgt: String = str(zj.get("slot_swap_target", ""))
 	# 未满印记：招架槽显示招架
-	_eq("印记0 招架槽→招架", u.get_visible_skill_id("swordsman_zhaojia"), "swordsman_zhaojia")
+	_eq("印记0 招架槽→招架", u.get_visible_skill_id("swordsman_zhaojia", trig, tgt), "swordsman_zhaojia")
 	# gain_random_mark ×3 → 满
 	u.gain_random_mark()
 	u.gain_random_mark()
@@ -206,13 +210,13 @@ func _test_slot_swap(dl: Object) -> void:
 	_eq("gain×3 → 印记数==3", u.get_mark_count(), 3)
 	_check("印记满 is_marks_full()==true", u.is_marks_full())
 	_eq("第4次 gain 返回空串", u.gain_random_mark(), "")
-	# 满印记：招架槽显示拔刀
-	_eq("印记满 招架槽→拔刀", u.get_visible_skill_id("swordsman_zhaojia"), "swordsman_badao")
-	# 其它技能 ID 不受影响
-	_eq("斩击槽不替换", u.get_visible_skill_id("swordsman_zhanji"), "swordsman_zhanji")
+	# 满印记：招架槽按 JSON 声明替换为拔刀
+	_eq("印记满 招架槽→拔刀", u.get_visible_skill_id("swordsman_zhaojia", trig, tgt), "swordsman_badao")
+	# 无 slot_swap 声明的技能不替换
+	_eq("斩击槽不替换", u.get_visible_skill_id("swordsman_zhanji", "", ""), "swordsman_zhanji")
 	# 清印记后恢复招架
 	u.clear_marks()
-	_eq("clear后 招架槽→招架", u.get_visible_skill_id("swordsman_zhaojia"), "swordsman_zhaojia")
+	_eq("clear后 招架槽→招架", u.get_visible_skill_id("swordsman_zhaojia", trig, tgt), "swordsman_zhaojia")
 	u.free()
 
 
@@ -299,18 +303,18 @@ func _test_damage_formulas(dl: Object) -> void:
 	_check("暴击基线 1.5x (base20→30)", r_crit.crit and r_crit.damage == 30,
 		"crit=%s dmg=%d" % [str(r_crit.crit), r_crit.damage])
 
-	# 7h. 拔刀 crit_damage_bonus=0.5 → 2.0x：base 20 → 40
+	# 7h. 拔刀 crit_damage_bonus=1.5 → 3.0x：base 20 → 60（基础1.5x + 1.5）
 	var r_badao: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(atk, dft,
 		{"damage_type": "physical", "weapon_might": 0, "skill_multiplier": 1.0,
-		 "guaranteed_hit": true, "guaranteed_crit": true, "crit_damage_bonus": 0.5})
-	_eq("拔刀 2.0x (base20→40)", r_badao.damage, 40)
+		 "guaranteed_hit": true, "guaranteed_crit": true, "crit_damage_bonus": 1.5})
+	_eq("拔刀 3.0x (base20→60)", r_badao.damage, 60)
 
 	# 7i. pure 暴击固定 1.5x，不受 crit_damage_bonus 影响：base 20 → 30
 	var r_pure: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(atk, dft,
 		{"damage_type": "pure", "pure_atk_source": "phys", "weapon_might": 0,
 		 "skill_multiplier": 1.0, "guaranteed_hit": true, "guaranteed_crit": true,
-		 "enable_pure_crit": true, "crit_damage_bonus": 0.5})
-	_eq("pure 暴击固定1.5x (base20→30, 不吃+0.5)", r_pure.damage, 30)
+		 "enable_pure_crit": true, "crit_damage_bonus": 1.5})
+	_eq("pure 暴击固定1.5x (base20→30, 不吃+1.5)", r_pure.damage, 30)
 
 	# ── 基础伤害公式（非暴击；crit_rate=0 由目标高 LCK 保证）──
 	dft.stats.lck = 50  # crit dodge 高 → 不会暴击

@@ -48,6 +48,7 @@ func _run() -> void:
 		_test_resource_gate(tm, sword)
 		_test_dashboard_stats(tm)
 
+	_test_dashboard_widget_format()
 	_test_zoc_functional()
 
 	scene.free()
@@ -201,22 +202,49 @@ func _test_resource_gate(tm: Object, sword: Unit) -> void:
 # ── D. 主属性面板 stats 接线（修复仪表盘全0显示）──────────
 
 func _test_dashboard_stats(tm: Object) -> void:
-	print("\n[D] get_dashboard_data 主属性 stats 接线")
+	print("\n[D] get_dashboard_data 主属性接线 (基础值 + 加成增量)")
 	var dd: Dictionary = tm.get_dashboard_data()
 	_check("dashboard 含 stats 字典", dd.has("stats") and dd.get("stats") is Dictionary)
+	_check("dashboard 含 stats_delta 字典", dd.has("stats_delta") and dd.get("stats_delta") is Dictionary)
 	var info: Unit = tm._get_dashboard_unit()
 	if info == null:
 		_check("存在信息单位", false)
 		return
 	var st: Dictionary = dd.get("stats", {})
-	# stats 取生效值，应与 unit.get_effective_stat 一致（含印记/心眼修正）
-	_eq("stats.str==生效STR", st.get("str"), info.get_effective_stat("STR"))
-	_eq("stats.spd==生效SPD", st.get("spd"), info.get_effective_stat("SPD"))
-	_eq("stats.dex==生效DEX", st.get("dex"), info.get_effective_stat("DEX"))
-	_eq("stats.mov==生效MOV", st.get("mov"), info.get_effective_stat("MOV"))
-	# 修复前的症状是全 0；真实单位 SPD 必 >0
-	_check("主属性非全0(spd>0)", int(st.get("spd", 0)) > 0,
-		"spd=%s" % str(st.get("spd")))
+	var delta: Dictionary = dd.get("stats_delta", {})
+	# stats 取基础值（unit.stats 原始字段）
+	_eq("stats.str==基础STR", st.get("str"), info.stats.str_attr)
+	_eq("stats.spd==基础SPD", st.get("spd"), info.stats.spd)
+	_eq("stats.dex==基础DEX", st.get("dex"), info.stats.dex)
+	_eq("stats.mov==基础MOV", st.get("mov"), info.stats.mov)
+	# stats_delta == 生效 − 基础（含印记/心眼/buff 修正）
+	_eq("delta.spd==生效−基础SPD", delta.get("spd"), info.get_effective_stat("SPD") - info.stats.spd)
+	_eq("delta.dex==生效−基础DEX", delta.get("dex"), info.get_effective_stat("DEX") - info.stats.dex)
+	# 修复前症状是全 0；真实单位基础 SPD 必 >0
+	_check("主属性非全0(基础spd>0)", int(st.get("spd", 0)) > 0, "spd=%s" % str(st.get("spd")))
+
+
+func _test_dashboard_widget_format() -> void:
+	print("\n[E] 仪表盘部件: 基础值+括号加成文本格式")
+	var dash: Control = load("res://scenes/tactical/bottom_dashboard.tscn").instantiate()
+	root.add_child(dash)
+	dash.update_state({
+		"visible": true, "mode": "player", "unit_name": "测试单位",
+		"hp": 20, "hp_max": 20,
+		"stats": {"str": 10, "mag": 2, "dex": 9, "spd": 8, "def": 5, "res": 4, "lck": 5, "mov": 4},
+		"stats_delta": {"str": 2, "mag": 0, "dex": 2, "spd": 1, "def": 0, "res": 0, "lck": 0, "mov": 0},
+	})
+	var labels: Array = dash._stat_value_labels
+	if labels.size() < 4:
+		_check("stat 标签已构建(>=4)", false, "labels=%d" % labels.size())
+		dash.free()
+		return
+	# 显示顺序: str, mag, dex, spd, ...
+	_eq("STR 有加成 → '10 (+2)'", labels[0].text, "10 (+2)")
+	_eq("MAG 无加成 → '2'", labels[1].text, "2")
+	_eq("DEX 有加成 → '9 (+2)'", labels[2].text, "9 (+2)")
+	_eq("SPD 心眼加成 → '8 (+1)'", labels[3].text, "8 (+1)")
+	dash.free()
 
 
 # ── C. Pathfinding.get_move_range 功能性 ZOC ────────────

@@ -111,16 +111,22 @@ func get_dashboard_data() -> Dictionary:
 		"selected_skill_id": _selected_skill_id,
 		"forecast": _combat_forecast.duplicate(true),
 		"hint_text": _get_dashboard_hint_text(),
-		# ── 主属性面板（生效值，含印记/心眼等修正，便于直观确认加成）──
+		# ── 主属性面板：基础值 + 括号加成（stats_delta=生效−基础，含印记/心眼/buff）──
 		"stats": {
-			"str": info_unit.get_effective_stat("STR"),
-			"mag": info_unit.get_effective_stat("MAG"),
-			"dex": info_unit.get_effective_stat("DEX"),
-			"spd": info_unit.get_effective_stat("SPD"),
-			"def": info_unit.get_effective_stat("DEF"),
-			"res": info_unit.get_effective_stat("RES"),
-			"lck": info_unit.get_effective_stat("LCK"),
-			"mov": info_unit.get_effective_stat("MOV"),
+			"str": info_unit.stats.str_attr, "mag": info_unit.stats.mag,
+			"dex": info_unit.stats.dex, "spd": info_unit.stats.spd,
+			"def": info_unit.stats.def_attr, "res": info_unit.stats.res,
+			"lck": info_unit.stats.lck, "mov": info_unit.stats.mov,
+		},
+		"stats_delta": {
+			"str": info_unit.get_effective_stat("STR") - info_unit.stats.str_attr,
+			"mag": info_unit.get_effective_stat("MAG") - info_unit.stats.mag,
+			"dex": info_unit.get_effective_stat("DEX") - info_unit.stats.dex,
+			"spd": info_unit.get_effective_stat("SPD") - info_unit.stats.spd,
+			"def": info_unit.get_effective_stat("DEF") - info_unit.stats.def_attr,
+			"res": info_unit.get_effective_stat("RES") - info_unit.stats.res,
+			"lck": info_unit.get_effective_stat("LCK") - info_unit.stats.lck,
+			"mov": info_unit.get_effective_stat("MOV") - info_unit.stats.mov,
 		},
 		# ── 剑圣专属资源（非剑圣单位：sword_qi=-1 隐藏显示）──
 		"sword_qi": info_unit.sword_qi if info_unit._qi_max > 0 else -1,
@@ -777,8 +783,11 @@ func _get_skill_entries() -> Array[Dictionary]:
 	if unit == null:
 		return entries
 	for skill_id: String in unit.skill_ids:
-		# ── 槽位替换：招架 → 拔刀（当印记满时）──────────────
-		var display_id: String = unit.get_visible_skill_id(skill_id)
+		# ── 槽位替换（数据驱动）：替换规则由技能 JSON 的 slot_swap_* 声明 ──
+		var slot_skill_data: Dictionary = _get_skill_data(skill_id)
+		var display_id: String = unit.get_visible_skill_id(skill_id,
+			str(slot_skill_data.get("slot_swap_trigger", "")),
+			str(slot_skill_data.get("slot_swap_target", "")))
 		var entry: Dictionary = _build_skill_entry(unit, display_id)
 		# 保留原始槽位 ID 以便取消时恢复（附加字段，UI 可忽略）
 		entry["slot_origin_id"] = skill_id
