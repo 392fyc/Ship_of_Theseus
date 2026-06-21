@@ -752,6 +752,9 @@ func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 		"available": false,
 		"reason": "",
 		"selected": skill_id == _selected_skill_id,
+		"qi_cost": int(skill_data.get("qi_cost", 0)),
+		"mark_cost": int(skill_data.get("mark_cost", 0)),
+		"requires_marks": int(skill_data.get("requires_marks", 0)),
 	}
 	var phase_reason: String = _get_phase_mismatch_reason(skill_data)
 	if phase_reason != "":
@@ -1143,6 +1146,11 @@ func _build_attack_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 		"hit_percent": int(preview.get("hit_percent", 0)),
 		"crit_percent": int(preview.get("crit_percent", 0)),
 		"damage": int(preview.get("damage", 0)),
+		"hit_count": int(preview.get("hit_count", 1)),
+		"per_hit_damage": int(preview.get("per_hit_damage", preview.get("damage", 0))),
+		"total_damage": int(preview.get("total_damage", preview.get("damage", 0))),
+		"damage_type": str(preview_data.get("damage_type", "physical")),
+		"is_heal": bool(preview.get("is_heal", false)),
 		"counter_expected": _can_counterattack(preview_data, target, current_unit),
 		"terrain_name": str(preview.get("terrain_name", "PLAIN")),
 		"terrain_evade_bonus": int(preview.get("terrain_evade_bonus", 0)),

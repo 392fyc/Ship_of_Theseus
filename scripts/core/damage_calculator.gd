@@ -127,15 +127,21 @@ static func preview_attack(attacker: Unit, defender: Unit,
 	var final_damage: float = base_damage * skill_multiplier * terrain_multiplier
 	final_damage *= relic_multiplier * final_multiplier
 
+	var dmg_int: int = maxi(0, roundi(final_damage))
 	return {
 		"hit_percent": clampi(roundi(hit_rate * 100.0), 0, 100),
 		"crit_percent": clampi(roundi(crit_rate * 100.0), 0, 100),
-		"damage": maxi(0, roundi(final_damage)),
+		"damage": dmg_int,
 		"counter_expected": bool(action_data.get("allow_counter", true)),
 		"terrain_name": str(action_data.get("defender_terrain_name", "PLAIN")),
 		"terrain_evade_bonus": terrain_evade_bonus,
 		"terrain_def_bonus": terrain_def_bonus,
 		"terrain_res_bonus": terrain_res_bonus,
+		"hit_count": 1,
+		"per_hit_damage": dmg_int,
+		"total_damage": dmg_int,
+		"damage_type": damage_type,
+		"is_heal": false,
 	}
 
 

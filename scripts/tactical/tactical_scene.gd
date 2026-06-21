@@ -37,6 +37,13 @@ var _bottom_dashboard_scene: PackedScene = preload("res://scenes/tactical/bottom
 
 
 func _ready() -> void:
+	for slot_index: int in range(1, 5):
+		var action_name: String = "skill_slot_%d" % slot_index
+		if not InputMap.has_action(action_name):
+			InputMap.add_action(action_name)
+			var ev: InputEventKey = InputEventKey.new()
+			ev.physical_keycode = KEY_1 + (slot_index - 1)
+			InputMap.action_add_event(action_name, ev)
 	_setup_camera()
 	tactical_manager.initialize_battle("forest_01")
 
@@ -133,6 +140,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		if mouse_event.button_index == MOUSE_BUTTON_MIDDLE and not mouse_event.pressed:
 			_is_panning = false
 			_pan_button = -1
+	for slot_index: int in range(1, 5):
+		if event.is_action_pressed("skill_slot_%d" % slot_index):
+			_try_trigger_skill_slot(slot_index)
+			get_viewport().set_input_as_handled()
+			return
 
 
 # ── Victory / Defeat ─────────────────────────────────
@@ -229,6 +241,24 @@ func _on_end_move_requested() -> void:
 
 func _on_cancel_requested() -> void:
 	tactical_manager.request_cancel_action()
+
+
+func _try_trigger_skill_slot(slot_index: int) -> void:
+	var data: Dictionary = tactical_manager.get_dashboard_data()
+	if not bool(data.get("visible", false)):
+		return
+	if str(data.get("mode", "player")) != "player":
+		return
+	if not bool(data.get("show_actions", false)):
+		return
+	var entries: Array = data.get("skills", [])
+	var idx: int = slot_index - 1
+	if idx < 0 or idx >= entries.size():
+		return
+	var entry: Dictionary = entries[idx]
+	if not bool(entry.get("available", false)):
+		return
+	_on_skill_selected(str(entry.get("skill_id", "")))
 
 
 func _setup_camera() -> void:
