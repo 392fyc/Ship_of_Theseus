@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>剑圣底部信息操作栏 视觉稿 v3</title>
+<style>
+  :root{
+    /* ── 调色板（与 bottom_dashboard.gd / skill_bar.gd / damage_popup.gd 既有常量对齐）── */
+    --bg-page:#070810;
+    --panel-bg:#0a0c17;          /* COLOR_PANEL_BG 0.04,0.05,0.10 */
+    --panel-bg-alt:#0f0f1f;
+    --panel-border:#9c8347;      /* COLOR_PANEL_BORDER 金色边 */
+    --gold:#b8942f;              /* COLOR_GOLD 0.72,0.58,0.28 */
+    --gold-bright:#e0bf48;       /* 印记持有金 0.88,0.75,0.28 */
+    --text-main:#e6dbc7;         /* COLOR_TEXT_MAIN */
+    --text-sub:#8c8f99;          /* COLOR_TEXT_SUB */
+    --text-mute:#73757f;         /* COLOR_TEXT_MUTE */
+    --text-dim:#5c5c66;          /* TEXT_DIM 置灰文本 */
+    --slot-bg:#11091a;           /* 技能槽底 */
+    --slot-bg-disabled:#0d0a14;
+    --cost-standard:#fa730f;     /* COST standard 0.98,0.45,0.10 橙 */
+    --cost-move:#3b82f5;         /* COST move 0.23,0.51,0.96 蓝 */
+    --cost-swift:#10b884;        /* COST swift 0.06,0.72,0.51 绿 */
+    /* 剑气条颜色突变：<7 淡蓝 → ≥7 紫（达标态） */
+    --qi-low:#5fa8d8;            /* 剑气 <7 淡蓝 */
+    --qi-low-dim:#3a6e8f;        /* 淡蓝暗档（填充格） */
+    --qi-high:#a855f7;           /* 剑气 ≥7 达标紫 */
+    --qi-high-glow:#c98bff;      /* 达标紫亮档 */
+    --qi-track:#0c1320;          /* 剑气槽底 */
+    --qi-cell-empty:#0a1019;     /* v3 新增：未充满空格的底色 */
+    --qi-cell-edge:#314257;      /* v3 新增：空格始终可见的细边框 */
+    --qi-cell-edge-high:#5b3f7a; /* v3 新增：达标态空格细边框（偏紫） */
+    --mark-held:#e0bf48;
+    --mark-empty:#5c5c66;
+    --red:#e02e2e;               /* 结束/危险 */
+    --selected:#e0bf48;
+    /* ── v3 新增：暗黑哥特区域框（参考 Diablo IV 面板质感）── */
+    --frame-outer:#080a12;       /* 框外缘（最暗，制造凹陷） */
+    --frame-inner-1:#141621;     /* 框内壁渐变上端 */
+    --frame-inner-2:#0c0e18;     /* 框内壁渐变下端 */
+    --frame-edge-metal:#6b5a32;  /* 金属/石质描边主色（暗金，比 panel-border 更哑光） */
+    --frame-edge-hi:#9c8347;     /* 描边高光（顶/左受光边） */
+    --frame-edge-lo:#3a3018;     /* 描边阴影（底/右背光边） */
+    --frame-noise:#1a1d2a;       /* 微噪点/纹理叠色 */
+    --frame-corner:#b8942f;      /* 框四角金属铆钉/角饰 */
+    /* ── v3 伤害预测器：复用 damage_popup.gd 既有四类配色，不另发明 ── */
+    --dmg-phys:#ffffff;          /* COLOR_PHYS 物理 白 */
+    --dmg-magic:#aa88ff;         /* COLOR_MAGIC 魔法 #AA88FF */
+    --dmg-pure:#ffd700;          /* COLOR_PURE 纯 #FFD700 */
+    --dmg-hybrid:#ff8c00;        /* COLOR_HYBRID 混合 #FF8C00 */
+    --dmg-heal:#4ce64c;          /* COLOR_HEAL 治疗 0.30,0.90,0.30 */
+    --dmg-miss:#999999;          /* COLOR_MISS */
+    /* 参考色（仅图例对比，证明不撞色）：HP 红 / 护盾蓝 / XP 紫 */
+    --hp-red:#cc2626;
+    --shield-blue:#5ba0eb;
+    --xp-purple:#6647b3;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;background:var(--bg-page);color:var(--text-main);
+    font-family:"Segoe UI","Microsoft YaHei",sans-serif;
+    font-size:13px;line-height:1.5;
+    image-rendering:pixelated;
+    padding:28px 32px 64px;
+  }
+  h1{font-size:20px;color:var(--gold-bright);font-weight:600;margin:0 0 4px;}
+  h2{font-size:15px;color:var(--gold);font-weight:600;margin:36px 0 12px;
+     border-left:3px solid var(--gold);padding-left:10px;}
+  h3{font-size:12.5px;color:var(--text-main);font-weight:600;margin:20px 0 8px;}
+  .sub{color:var(--text-sub);font-size:12px;margin:0 0 6px;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:10px 0 4px;font-size:11px;color:var(--text-sub);}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .chip{width:11px;height:11px;border-radius:2px;display:inline-block;}
+  .grid{display:flex;flex-wrap:wrap;gap:26px;align-items:flex-start;margin-top:6px;}
+  .case{display:flex;flex-direction:column;gap:7px;}
+  .case .caption{font-size:11px;color:var(--text-sub);text-align:center;max-width:200px;}
+  .case .caption b{color:var(--text-main);font-weight:600;}
+  .full-bar-wrap{margin-top:8px;overflow-x:auto;padding-bottom:8px;}
+  .note{background:var(--panel-bg-alt);border:1px solid #2a2433;border-radius:5px;
+        padding:10px 14px;margin:14px 0;font-size:12px;color:var(--text-sub);max-width:1040px;}
+  .note b{color:var(--text-main);}
+  code{background:#15101f;color:#cdb6e0;padding:1px 5px;border-radius:3px;font-size:11px;}
+  .pixel-divider{height:1px;background:linear-gradient(90deg,transparent,var(--panel-border),transparent);
+        opacity:.5;margin:8px 0 0;}
+  table.spec{border-collapse:collapse;font-size:11.5px;margin:8px 0;max-width:1040px;}
+  table.spec th,table.spec td{border:1px solid #2a2433;padding:4px 9px;text-align:left;}
+  table.spec th{background:#13101e;color:var(--gold);font-weight:600;}
+  table.spec td{color:var(--text-sub);}
+  table.spec td b{color:var(--text-main);}
+</style>
+</head>
+<body>
+
+<h1>剑圣 底部信息操作栏 — 视觉稿 v3</h1>
+<p class="sub">
+左→右硬布局：个人信息 → 资源栏（剑气+印记，加宽）→ 技能栏（居中，4 主动 + 被动心眼）→ 物品栏（2×3 缩小，紧贴技能右）→ 结束回合（最右）·
+每区独立「暗黑哥特边框面板」（参考 Diablo IV 金属/石质描边）· 物品图标缩小、资源栏增宽 · 暗色像素风 · 仅设计稿（不含代码改动）
+</p>
+
+<div class="legend">
+  <span><i class="chip" style="background:var(--cost-standard)"></i>标准·橙（斩击/居合/拔刀）</span>
+  <span><i class="chip" style="background:var(--cost-move)"></i>移动·蓝（一闪）</span>
+  <span><i class="chip" style="background:var(--cost-swift)"></i>迅捷·绿（招架）</span>
+  <span><i class="chip" style="background:var(--qi-low)"></i>剑气 &lt;7 淡蓝</span>
+  <span><i class="chip" style="background:var(--qi-high)"></i>剑气 ≥7 紫·达标</span>
+  <span><i class="chip" style="background:var(--mark-held)"></i>印记持有</span>
+  <span><i class="chip" style="background:var(--mark-empty)"></i>印记未持有</span>
+</div>
+<div class="legend">
+  <span style="opacity:.75">伤害类型（复用飘字配色 damage_popup.gd）→</span>
+  <span><i class="chip" style="background:var(--dmg-phys);border:1px solid #555"></i>物理 白</span>
+  <span><i class="chip" style="background:var(--dmg-magic)"></i>魔法 #AA88FF</span>
+  <span><i class="chip" style="background:var(--dmg-pure)"></i>纯 #FFD700</span>
+  <span><i class="chip" style="background:var(--dmg-hybrid)"></i>混合 #FF8C00</span>
+  <span><i class="chip" style="background:var(--dmg-heal)"></i>治疗 绿</span>
+</div>
+<div class="legend">
+  <span style="opacity:.75">不撞色对照 →</span>
+  <span><i class="chip" style="background:var(--hp-red)"></i>HP 红</span>
+  <span><i class="chip" style="background:var(--shield-blue)"></i>护盾蓝</span>
+  <span><i class="chip" style="background:var(--xp-purple)"></i>XP 暗紫</span>
+  <span style="opacity:.75">剑气淡蓝/达标紫均与上三者错开</span>
+</div>
+
+<!-- =========================================================
+     v3 最终排版：单条底栏，从左到右五区，每区独立暗黑哥特边框面板。
+     ① 个人信息 │ ② 资源栏(加宽) │ ③ 技能栏(居中) │ ④ 物品 2×3(缩小) │ ⑤ 结束
+     ========================================================= -->
+
+<h2>一、最终排版总览（L→R 五区，各区独立暗黑哥特框）</h2>
+<p class="sub">
+五区各自一块「带质感的框（panel/frame）」：暗底 + 渐变 + 微噪点 + 金属/石质双色描边（顶/左受光亮、底/右背光暗）+ 四角金属角饰。
+所有可点方格（主动 4 + 物品 6）与各框统一坐在同一槽基线上。物品图标比被动技能图标更小，资源栏比 v2 加宽以容纳更舒展的剑气条 + 印记。
+</p>
+
+<div class="full-bar-wrap">
+<svg width="1320" height="150" viewBox="0 0 1320 150" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 暗黑哥特框：内壁竖直渐变（上亮下暗，模拟受光） -->
+    <linearGradient id="frameInner" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#141621"/>
+      <stop offset="0.5" stop-color="#0e1019"/>
+      <stop offset="1" stop-color="#0a0c14"/>
+    </linearGradient>
+    <!-- 微噪点/纹理：稀疏点阵叠在框底，制造石质颗粒感（像素风克制版） -->
+    <pattern id="frameNoise" width="6" height="6" patternUnits="userSpaceOnUse">
+      <rect width="6" height="6" fill="none"/>
+      <rect x="0" y="0" width="1" height="1" fill="#1a1d2a" opacity="0.5"/>
+      <rect x="3" y="2" width="1" height="1" fill="#1a1d2a" opacity="0.35"/>
+      <rect x="1" y="4" width="1" height="1" fill="#0e1018" opacity="0.4"/>
+    </pattern>
+    <!-- 槽内淡蓝/紫填充（剑气格） -->
+    <linearGradient id="qiHigh" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c98bff"/><stop offset="1" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ╔══════════════════════════════════════════════════════════════╗
+       区域框宏：每个 <g class="goth-frame"> 用 4 矩形叠出暗黑哥特质感
+       1) 外缘暗矩形（凹陷）2) 内壁渐变 3) 噪点叠层 4) 双色描边(高光顶左/阴影底右)
+       ╚══════════════════════════════════════════════════════════════╝ -->
+
+  <!-- ════════ ① 个人信息框（最左） ════════ -->
+  <g>
+    <rect x="6"  y="14" width="232" height="118" rx="5" fill="#080a12"/>
+    <rect x="8"  y="16" width="228" height="114" rx="4" fill="url(#frameInner)"/>
+    <rect x="8"  y="16" width="228" height="114" rx="4" fill="url(#frameNoise)"/>
+    <!-- 双色描边：高光（顶+左）-->
+    <path d="M8 130 L8 20 Q8 16 12 16 L232 16" fill="none" stroke="#9c8347" stroke-opacity=".55" stroke-width="1"/>
+    <!-- 双色描边：阴影（底+右）-->
+    <path d="M236 20 L236 126 Q236 130 232 130 L12 130" fill="none" stroke="#3a3018" stroke-opacity=".9" stroke-width="1"/>
+    <!-- 四角金属角饰 -->
+    <rect x="9"   y="17"  width="5" height="5" fill="#b8942f" opacity=".7"/>
+    <rect x="230" y="17"  width="5" height="5" fill="#7a6428" opacity=".6"/>
+    <rect x="9"   y="124" width="5" height="5" fill="#7a6428" opacity=".6"/>
+    <rect x="230" y="124" width="5" height="5" fill="#4a3c18" opacity=".6"/>
+
+    <!-- 头像 -->
+    <rect x="18" y="26" width="56" height="74" rx="3" fill="#05070d" stroke="#b8942f" stroke-width="1.4"/>
+    <text x="46" y="70" fill="#b8942f" font-size="26" text-anchor="middle" font-family="sans-serif">武</text>
+    <!-- 名 / 等级 -->
+    <text x="84" y="36" fill="#e6dbc7" font-size="12" font-family="sans-serif">武藏</text>
+    <text x="84" y="50" fill="#8c8f99" font-size="9" font-family="sans-serif">Lv.12 剑圣</text>
+    <!-- HP 条 -->
+    <rect x="84" y="56" width="142" height="11" rx="2" fill="#0a0c12" stroke="#3a3018" stroke-opacity=".8"/>
+    <rect x="85" y="57" width="100" height="9" fill="#3fae54"/>
+    <text x="155" y="65" fill="#e6dbc7" font-size="8" text-anchor="middle" font-family="sans-serif">HP 30/42</text>
+    <!-- 属性 2×4 略缩 -->
+    <g font-size="8" font-family="sans-serif">
+      <text x="84"  y="82" fill="#b8942f">STR</text><text x="116" y="82" fill="#e6dbc7">14</text>
+      <text x="140" y="82" fill="#b8942f">DEX</text><text x="172" y="82" fill="#e6dbc7">16</text>
+      <text x="84"  y="94" fill="#b8942f">SPD</text><text x="116" y="94" fill="#e6dbc7">15</text>
+      <text x="140" y="94" fill="#b8942f">LCK</text><text x="172" y="94" fill="#e6dbc7">9</text>
+      <text x="196" y="82" fill="#b8942f">DEF</text><text x="220" y="82" fill="#e6dbc7">8</text>
+      <text x="196" y="94" fill="#b8942f">MOV</text><text x="222" y="94" fill="#e6dbc7">5</text>
+    </g>
+    <text x="122" y="125" fill="#73757f" font-size="9" text-anchor="middle" font-family="sans-serif">个人信息</text>
+  </g>
+
+  <!-- ════════ ② 资源栏框（加宽：剑气条 + 印记更舒展） ════════ -->
+  <g>
+    <rect x="246" y="14" width="216" height="118" rx="5" fill="#080a12"/>
+    <rect x="248" y="16" width="212" height="114" rx="4" fill="url(#frameInner)"/>
+    <rect x="248" y="16" width="212" height="114" rx="4" fill="url(#frameNoise)"/>
+    <path d="M248 130 L248 20 Q248 16 252 16 L456 16" fill="none" stroke="#9c8347" stroke-opacity=".55" stroke-width="1"/>
+    <path d="M460 20 L460 126 Q460 130 456 130 L252 130" fill="none" stroke="#3a3018" stroke-opacity=".9" stroke-width="1"/>
+    <rect x="249" y="17"  width="5" height="5" fill="#b8942f" opacity=".7"/>
+    <rect x="454" y="17"  width="5" height="5" fill="#7a6428" opacity=".6"/>
+    <rect x="249" y="124" width="5" height="5" fill="#7a6428" opacity=".6"/>
+    <rect x="454" y="124" width="5" height="5" fill="#4a3c18" opacity=".6"/>
+
+    <!-- 剑气标签 + 数值（同行）-->
+    <text x="262" y="38" fill="#b8942f" font-size="11" font-family="sans-serif">剑气</text>
+    <text x="444" y="38" fill="#c98bff" font-size="11" text-anchor="end" font-family="sans-serif">7 / 10</text>
+    <!-- 10 格分段条（加宽到 182px，达标态紫；空格始终有可见细边）-->
+    <g transform="translate(262,44)">
+      <rect x="0" y="0" width="182" height="16" rx="2" fill="#100a1c" stroke="#a855f7" stroke-opacity=".55" stroke-width="1"/>
+      <!-- 10 格，每格步进 18.2px。前 7 填充紫（第7亮），后 3 空格但有细边 -->
+      <!-- 填充 6 紫 -->
+      <rect x="2"      y="2" width="15.2" height="12" fill="#a855f7"/>
+      <rect x="20.2"  y="2" width="15.2" height="12" fill="#a855f7"/>
+      <rect x="38.4"  y="2" width="15.2" height="12" fill="#a855f7"/>
+      <rect x="56.6"  y="2" width="15.2" height="12" fill="#a855f7"/>
+      <rect x="74.8"  y="2" width="15.2" height="12" fill="#a855f7"/>
+      <rect x="93"    y="2" width="15.2" height="12" fill="#a855f7"/>
+      <!-- 第7格亮紫（刚跨档）-->
+      <rect x="111.2" y="2" width="15.2" height="12" fill="#c98bff"/>
+      <!-- 空格 8/9/10：暗底 + 细可见边（达标态偏紫边）-->
+      <rect x="129.4" y="2" width="15.2" height="12" fill="#0a1019" stroke="#5b3f7a" stroke-width="1"/>
+      <rect x="147.6" y="2" width="15.2" height="12" fill="#0a1019" stroke="#5b3f7a" stroke-width="1"/>
+      <rect x="165.8" y="2" width="15.2" height="12" fill="#0a1019" stroke="#5b3f7a" stroke-width="1"/>
+      <!-- 阈值线：第7格右缘 x≈126.4，达标金实线 + 箭头 -->
+      <line x1="126.4" y1="-5" x2="126.4" y2="21" stroke="#e0bf48" stroke-width="1.4"/>
+      <polygon points="126.4,-5 122.4,-10 130.4,-10" fill="#e0bf48"/>
+    </g>
+    <text x="392" y="40" fill="#e0bf48" font-size="9" font-family="sans-serif">速度+1</text>
+
+    <!-- 印记三态（加大到 22px，更舒展）心(持) 道(持) 势(未) -->
+    <g transform="translate(262,76)">
+      <text x="0" y="32" fill="#b8942f" font-size="11" font-family="sans-serif">印记</text>
+      <g transform="translate(34,16)">
+        <rect x="0" y="0" width="24" height="24" rx="3" fill="#1a1410" stroke="#e0bf48" stroke-width="1.2"/>
+        <text x="12" y="17" fill="#e0bf48" font-size="13" text-anchor="middle" font-family="sans-serif">心</text>
+      </g>
+      <g transform="translate(64,16)">
+        <rect x="0" y="0" width="24" height="24" rx="3" fill="#1a1410" stroke="#e0bf48" stroke-width="1.2"/>
+        <text x="12" y="17" fill="#e0bf48" font-size="13" text-anchor="middle" font-family="sans-serif">道</text>
+      </g>
+      <g transform="translate(94,16)">
+        <rect x="0" y="0" width="24" height="24" rx="3" fill="#0d0a14" stroke="#5c5c66" stroke-width="1.2"/>
+        <text x="12" y="17" fill="#5c5c66" font-size="13" text-anchor="middle" font-family="sans-serif">势</text>
+      </g>
+      <text x="130" y="33" fill="#73757f" font-size="8" font-family="sans-serif">2/3</text>
+    </g>
+    <text x="354" y="125" fill="#73757f" font-size="9" text-anchor="middle" font-family="sans-serif">资源栏（加宽）</text>
+  </g>
+
+  <!-- ════════ ③ 技能栏框（居中：4 主动 1-4 + 被动心眼略小无键位） ════════ -->
+  <g>
+    <rect x="470" y="14" width="360" height="118" rx="5" fill="#080a12"/>
+    <rect x="472" y="16" width="356" height="114" rx="4" fill="url(#frameInner)"/>
+    <rect x="472" y="16" width="356" height="114" rx="4" fill="url(#frameNoise)"/>
+    <path d="M472 130 L472 20 Q472 16 476 16 L824 16" fill="none" stroke="#9c8347" stroke-opacity=".55" stroke-width="1"/>
+    <path d="M828 20 L828 126 Q828 130 824 130 L476 130" fill="none" stroke="#3a3018" stroke-opacity=".9" stroke-width="1"/>
+    <rect x="473" y="17"  width="5" height="5" fill="#b8942f" opacity=".7"/>
+    <rect x="822" y="17"  width="5" height="5" fill="#7a6428" opacity=".6"/>
+    <rect x="473" y="124" width="5" height="5" fill="#7a6428" opacity=".6"/>
+    <rect x="822" y="124" width="5" height="5" fill="#4a3c18" opacity=".6"/>
+
+    <!-- 槽 1 斩击（=基础攻击，橙，0气 → +1气）-->
+    <g transform="translate(484,30)">
+      <rect x="0" y="0" width="56" height="56" rx="4" fill="#11091a" stroke="#fa730f" stroke-opacity=".55" stroke-width="1"/>
+      <line x1="16" y1="40" x2="42" y2="14" stroke="#e8e2d4" stroke-width="2.4"/>
+      <line x1="18" y1="42" x2="24" y2="46" stroke="#c79a52" stroke-width="2"/>
+      <rect x="0" y="0" width="14" height="13" rx="2" fill="#0a0c17" stroke="#fa730f" stroke-opacity=".6"/>
+      <text x="7" y="10" fill="#e6dbc7" font-size="9" text-anchor="middle" font-family="sans-serif">1</text>
+      <rect x="30" y="44" width="26" height="12" rx="2" fill="#0a0c17" fill-opacity=".85"/>
+      <text x="43" y="53" fill="#5fa8d8" font-size="8" text-anchor="middle" font-family="sans-serif">+1气</text>
+    </g>
+    <text x="512" y="98" fill="#8c8f99" font-size="9" text-anchor="middle" font-family="sans-serif">斩击·攻击</text>
+
+    <!-- 槽 2 一闪（移动/蓝，1气，cd3）-->
+    <g transform="translate(546,30)">
+      <rect x="0" y="0" width="56" height="56" rx="4" fill="#11091a" stroke="#3b82f5" stroke-opacity=".55" stroke-width="1"/>
+      <line x1="14" y1="42" x2="40" y2="16" stroke="#bcd4ff" stroke-width="2.4"/>
+      <polygon points="40,16 34,17 39,22" fill="#bcd4ff"/>
+      <line x1="16" y1="30" x2="26" y2="40" stroke="#3b82f5" stroke-width="1.4" stroke-opacity=".7"/>
+      <rect x="0" y="0" width="14" height="13" rx="2" fill="#0a0c17" stroke="#3b82f5" stroke-opacity=".6"/>
+      <text x="7" y="10" fill="#e6dbc7" font-size="9" text-anchor="middle" font-family="sans-serif">2</text>
+      <rect x="32" y="44" width="24" height="12" rx="2" fill="#0a0c17" fill-opacity=".85"/>
+      <text x="44" y="53" fill="#5fa8d8" font-size="8" text-anchor="middle" font-family="sans-serif">1气</text>
+    </g>
+    <text x="574" y="98" fill="#8c8f99" font-size="9" text-anchor="middle" font-family="sans-serif">一闪</text>
+
+    <!-- 槽 3 招架（迅捷/绿，1气，cd1，self）-->
+    <g transform="translate(608,30)">
+      <rect x="0" y="0" width="56" height="56" rx="4" fill="#11091a" stroke="#10b884" stroke-opacity=".55" stroke-width="1"/>
+      <path d="M28 14 L40 19 L40 30 Q40 40 28 45 Q16 40 16 30 L16 19 Z" fill="none" stroke="#7fe6c4" stroke-width="1.8"/>
+      <line x1="22" y1="29" x2="34" y2="29" stroke="#10b884" stroke-width="1.6"/>
+      <rect x="0" y="0" width="14" height="13" rx="2" fill="#0a0c17" stroke="#10b884" stroke-opacity=".6"/>
+      <text x="7" y="10" fill="#e6dbc7" font-size="9" text-anchor="middle" font-family="sans-serif">3</text>
+      <rect x="32" y="44" width="24" height="12" rx="2" fill="#0a0c17" fill-opacity=".85"/>
+      <text x="44" y="53" fill="#5fa8d8" font-size="8" text-anchor="middle" font-family="sans-serif">1气</text>
+    </g>
+    <text x="636" y="98" fill="#8c8f99" font-size="9" text-anchor="middle" font-family="sans-serif">招架</text>
+
+    <!-- 槽 4 居合（标准/橙，6气，cd3，必中必暴）-->
+    <g transform="translate(670,30)">
+      <rect x="0" y="0" width="56" height="56" rx="4" fill="#1a0f08" stroke="#fa730f" stroke-opacity=".8" stroke-width="1.4"/>
+      <line x1="14" y1="44" x2="44" y2="14" stroke="#ffe6a0" stroke-width="2.8"/>
+      <line x1="20" y1="20" x2="30" y2="14" stroke="#ffffff" stroke-width="1.2"/>
+      <line x1="36" y1="40" x2="44" y2="34" stroke="#ffffff" stroke-width="1.2"/>
+      <rect x="0" y="0" width="14" height="13" rx="2" fill="#0a0c17" stroke="#fa730f" stroke-opacity=".7"/>
+      <text x="7" y="10" fill="#e6dbc7" font-size="9" text-anchor="middle" font-family="sans-serif">4</text>
+      <rect x="30" y="44" width="26" height="12" rx="2" fill="#0a0c17" fill-opacity=".9"/>
+      <text x="43" y="53" fill="#5fa8d8" font-size="8" text-anchor="middle" font-family="sans-serif">6气</text>
+    </g>
+    <text x="698" y="98" fill="#e6dbc7" font-size="9" text-anchor="middle" font-family="sans-serif">居合</text>
+
+    <!-- 细分隔（主动 | 被动）-->
+    <line x1="738" y1="28" x2="738" y2="90" stroke="#6b5a32" stroke-opacity=".5" stroke-width="1"/>
+
+    <!-- 被动·心眼（48px，无键位，居中于槽区）-->
+    <g transform="translate(752,34)">
+      <rect x="0" y="0" width="48" height="48" rx="4" fill="#11091a" stroke="#b8942f" stroke-opacity=".55" stroke-width="1"/>
+      <ellipse cx="24" cy="24" rx="15" ry="9" fill="none" stroke="#e0bf48" stroke-width="1.6"/>
+      <circle cx="24" cy="24" r="4.4" fill="#e0bf48"/>
+      <circle cx="22.4" cy="22.4" r="1.3" fill="#11091a"/>
+      <rect x="0" y="0" width="13" height="11" rx="2" fill="#0a0c17" stroke="#9c8347" stroke-opacity=".5"/>
+      <text x="6.5" y="9" fill="#8c8f99" font-size="8" text-anchor="middle" font-family="sans-serif">P</text>
+    </g>
+    <text x="776" y="98" fill="#8c8f99" font-size="9" text-anchor="middle" font-family="sans-serif">心眼</text>
+
+    <text x="650" y="125" fill="#73757f" font-size="9" text-anchor="middle" font-family="sans-serif">技能栏（居中）</text>
+  </g>
+
+  <!-- ════════ ④ 物品栏框（紧贴技能右侧，2 行 × 3 列，图标比被动更小=38px） ════════ -->
+  <g>
+    <rect x="838"  y="14" width="166" height="118" rx="5" fill="#080a12"/>
+    <rect x="840"  y="16" width="162" height="114" rx="4" fill="url(#frameInner)"/>
+    <rect x="840"  y="16" width="162" height="114" rx="4" fill="url(#frameNoise)"/>
+    <path d="M840 130 L840 20 Q840 16 844 16 L998 16" fill="none" stroke="#9c8347" stroke-opacity=".55" stroke-width="1"/>
+    <path d="M1002 20 L1002 126 Q1002 130 998 130 L844 130" fill="none" stroke="#3a3018" stroke-opacity=".9" stroke-width="1"/>
+    <rect x="841" y="17"  width="5" height="5" fill="#b8942f" opacity=".7"/>
+    <rect x="996" y="17"  width="5" height="5" fill="#7a6428" opacity=".6"/>
+    <rect x="841" y="124" width="5" height="5" fill="#7a6428" opacity=".6"/>
+    <rect x="996" y="124" width="5" height="5" fill="#4a3c18" opacity=".6"/>
+
+    <text x="852" y="30" fill="#b8942f" font-size="9" font-family="sans-serif">道具</text>
+    <!-- 2 行 × 3 列 = 6 格；格 38px（< 被动 48），间距 6px。
+         行1 col1-3：药剂x2 / 卷轴x1 / 空；行2 col1-3：净化x1 / 空 / 空 -->
+    <!-- 行1 col1 药剂 x2 -->
+    <g transform="translate(852,34)">
+      <rect x="0" y="0" width="38" height="38" rx="3" fill="#15110c" stroke="#dcc7ad" stroke-opacity=".42" stroke-width="1"/>
+      <rect x="13" y="9" width="12" height="16" rx="2" fill="none" stroke="#dcc7ad" stroke-width="1.4"/>
+      <rect x="15" y="16" width="8" height="7" fill="#2eae56"/>
+      <rect x="24" y="27" width="13" height="11" rx="2" fill="#0a0c17" fill-opacity=".85"/>
+      <text x="30.5" y="36" fill="#e6dbc7" font-size="7" text-anchor="middle" font-family="sans-serif">x2</text>
+    </g>
+    <!-- 行1 col2 卷轴 x1 -->
+    <g transform="translate(896,34)">
+      <rect x="0" y="0" width="38" height="38" rx="3" fill="#15110c" stroke="#dcc7ad" stroke-opacity=".42" stroke-width="1"/>
+      <rect x="12" y="10" width="14" height="17" rx="2" fill="none" stroke="#d8c39c" stroke-width="1.3"/>
+      <line x1="15" y1="15" x2="23" y2="15" stroke="#b89a64" stroke-width="1"/>
+      <line x1="15" y1="19" x2="23" y2="19" stroke="#b89a64" stroke-width="1"/>
+      <line x1="15" y1="23" x2="20" y2="23" stroke="#b89a64" stroke-width="1"/>
+      <rect x="24" y="27" width="13" height="11" rx="2" fill="#0a0c17" fill-opacity=".85"/>
+      <text x="30.5" y="36" fill="#e6dbc7" font-size="7" text-anchor="middle" font-family="sans-serif">x1</text>
+    </g>
+    <!-- 行1 col3 空 -->
+    <g transform="translate(940,34)"><rect x="0" y="0" width="38" height="38" rx="3" fill="#0c0a12" stroke="#3a3640" stroke-opacity=".7" stroke-width="1" stroke-dasharray="3 3"/><circle cx="19" cy="19" r="2" fill="#3a3640"/></g>
+    <!-- 行2 col1 净化瓶 x1 -->
+    <g transform="translate(852,78)">
+      <rect x="0" y="0" width="38" height="38" rx="3" fill="#15110c" stroke="#dcc7ad" stroke-opacity=".42" stroke-width="1"/>
+      <rect x="13" y="9" width="12" height="16" rx="2" fill="none" stroke="#dcc7ad" stroke-width="1.4"/>
+      <rect x="15" y="16" width="8" height="7" fill="#3b82f5"/>
+      <rect x="24" y="27" width="13" height="11" rx="2" fill="#0a0c17" fill-opacity=".85"/>
+      <text x="30.5" y="36" fill="#e6dbc7" font-size="7" text-anchor="middle" font-family="sans-serif">x1</text>
+    </g>
+    <!-- 行2 col2 空 -->
+    <g transform="translate(896,78)"><rect x="0" y="0" width="38" height="38" rx="3" fill="#0c0a12" stroke="#3a3640" stroke-opacity=".7" stroke-width="1" stroke-dasharray="3 3"/><circle cx="19" cy="19" r="2" fill="#3a3640"/></g>
+    <!-- 行2 col3 空 -->
+    <g transform="translate(940,78)"><rect x="0" y="0" width="38" height="38" rx="3" fill="#0c0a12" stroke="#3a3640" stroke-opacity=".7" stroke-width="1" stroke-dasharray="3 3"/><circle cx="19" cy="19" r="2" fill="#3a3640"/></g>
+
+    <text x="920" y="125" fill="#73757f" font-size="9" text-anchor="middle" font-family="sans-serif">物品 2×3（缩小）</text>
+  </g>
+
+  <!-- ════════ ⑤ 结束回合框（最右） ════════ -->
+  <g>
+    <rect x="1012" y="14" width="84" height="118" rx="5" fill="#0a0608"/>
+    <rect x="1014" y="16" width="80" height="114" rx="4" fill="#120a0c"/>
+    <rect x="1014" y="16" width="80" height="114" rx="4" fill="url(#frameNoise)"/>
+    <path d="M1014 130 L1014 20 Q1014 16 1018 16 L1090 16" fill="none" stroke="#e02e2e" stroke-opacity=".45" stroke-width="1"/>
+    <path d="M1094 20 L1094 126 Q1094 130 1090 130 L1018 130" fill="none" stroke="#4a1416" stroke-opacity=".9" stroke-width="1"/>
+    <rect x="1015" y="17"  width="5" height="5" fill="#e02e2e" opacity=".6"/>
+    <rect x="1088" y="124" width="5" height="5" fill="#4a1416" opacity=".7"/>
+
+    <g transform="translate(1028,40)">
+      <rect x="0" y="0" width="52" height="52" rx="4" fill="#241213" stroke="#e02e2e" stroke-opacity=".42" stroke-width="1"/>
+      <rect x="18" y="18" width="16" height="16" rx="3" fill="#e02e2e"/>
+    </g>
+    <text x="1054" y="106" fill="#e6dbc7" font-size="9" text-anchor="middle" font-family="sans-serif">结束回合</text>
+    <text x="1054" y="125" fill="#73757f" font-size="9" text-anchor="middle" font-family="sans-serif">结束（最右）</text>
+  </g>
+
+  <!-- ════════ 伤害预测器：浮于「目标单位上方」示意（选中技能 + 指向目标时显示） ════════ -->
+  <g transform="translate(1130,8)">
+    <rect x="0" y="0" width="180" height="78" rx="5" fill="#0a0608"/>
+    <rect x="2" y="2" width="176" height="74" rx="4" fill="url(#frameInner)"/>
+    <path d="M2 76 L2 6 Q2 2 6 2 L178 2" fill="none" stroke="#9c8347" stroke-opacity=".55" stroke-width="1"/>
+    <path d="M178 6 L178 72 Q178 76 174 76 L6 76" fill="none" stroke="#3a3018" stroke-opacity=".9" stroke-width="1"/>
+    <!-- 指向目标的小三角（锚到目标头顶）-->
+    <polygon points="90,76 84,76 90,84 96,76" fill="#0e1019" stroke="#3a3018" stroke-width="1"/>
+    <text x="12" y="18" fill="#b8942f" font-size="10" font-family="sans-serif">伤害预测</text>
+    <!-- 伤害类型徽标（物理=白点+「物」）+ 数值 -->
+    <circle cx="20" cy="34" r="5" fill="#ffffff" stroke="#888"/>
+    <text x="32" y="38" fill="#ffffff" font-size="12" font-family="sans-serif">物理 · 24</text>
+    <text x="12" y="58" fill="#8c8f99" font-size="9" font-family="sans-serif">命中 92%</text>
+    <text x="92" y="58" fill="#fa730f" font-size="9" font-family="sans-serif">暴击 35%</text>
+    <text x="14" y="73" fill="#5c5c66" font-size="7.5" font-family="sans-serif">（浮于目标上方·示意位置）</text>
+  </g>
+</svg>
+</div>
+
+<div class="note">
+<b>读图（v3 改动要点）：</b>
+① <b>L→R 五区硬布局</b>：个人信息 → 资源栏 → 技能栏（居中）→ 物品 2×3 → 结束（最右），顺序固定。
+② <b>物品缩小、资源加宽</b>：物品格从 56px 降到 <b>38px</b>（比被动 48 更小），物品区总宽收窄；省下的宽度给资源栏（剑气条加宽到 182px、印记加大到 22px）。
+③ <b>每区独立暗黑哥特框</b>：暗底 + 内壁渐变 + 微噪点 + 双色金属/石质描边（顶左受光亮 #9c8347、底右背光暗 #3a3018）+ 四角金属角饰；不再用单纯细线分隔。
+④ <b>剑气格更鲜明</b>：填充格紫（第7亮紫），<b>空格 8/9/10 也有可见细边框</b>（暗底 #0a1019 + 细边 #5b3f7a），始终能数出 10 段。
+⑤ <b>新增伤害预测器</b>（右上示意）：伤害类型徽标（颜色复用飘字配色）+ 数值，下面保留命中%/暴击%；浮于目标单位上方（带指向小三角）。多段 x×y 见第六节。
+</div>
+
+<h2>二、单槽全状态并排对照</h2>
+<p class="sub">以主动槽 56px 为基准。互斥优先级：冷却中 &gt; 不可用 &gt; 选中 &gt; 常态。被动 48px、物品 38px（v3 缩小）。</p>
+
+<div class="grid">
+
+  <!-- A 常态可用 -->
+  <div class="case">
+    <svg width="64" height="80" viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="2" width="56" height="56" rx="4" fill="#11091a" stroke="#fa730f" stroke-opacity=".55" stroke-width="1"/>
+      <line x1="20" y1="42" x2="46" y2="16" stroke="#e8e2d4" stroke-width="2.4"/>
+      <rect x="4" y="2" width="14" height="13" rx="2" fill="#0a0c17" stroke="#fa730f" stroke-opacity=".6"/>
+      <text x="11" y="12" fill="#e6dbc7" font-size="9" text-anchor="middle">1</text>
+      <rect x="34" y="46" width="26" height="12" rx="2" fill="#0a0c17" fill-opacity=".85"/>
+      <text x="47" y="55" fill="#5fa8d8" font-size="8" text-anchor="middle">+1气</text>
+      <text x="32" y="74" fill="#8c8f99" font-size="9" text-anchor="middle">斩击·攻击</text>
+    </svg>
+    <div class="caption"><b>A 常态可用</b><br>橙边 · 键位亮 · 图标全亮 · 角标淡蓝</div>
+  </div>
+
+  <!-- B 冷却中 -->
+  <div class="case">
+    <svg width="64" height="80" viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="2" width="56" height="56" rx="4" fill="#11091a" stroke="#fa730f" stroke-opacity=".4" stroke-width="1"/>
+      <line x1="20" y1="42" x2="46" y2="16" stroke="#7a7468" stroke-width="2.4"/>
+      <rect x="4" y="2" width="56" height="56" rx="4" fill="#060910" fill-opacity=".66"/>
+      <text x="32" y="36" fill="#fa730f" font-size="22" text-anchor="middle" font-weight="bold">3</text>
+      <text x="32" y="50" fill="#e6dbc7" font-size="9" text-anchor="middle">回合</text>
+      <rect x="4" y="2" width="14" height="13" rx="2" fill="#0a0c17" stroke="#fa730f" stroke-opacity=".4"/>
+      <text x="11" y="12" fill="#8c8f99" font-size="9" text-anchor="middle">4</text>
+      <text x="32" y="74" fill="#73757f" font-size="9" text-anchor="middle">居合</text>
+    </svg>
+    <div class="caption"><b>B 冷却中</b><br>暗遮罩 + 大号剩余回合 + 「回合」</div>
+  </div>
+
+  <!-- C 不可用置灰 -->
+  <div class="case">
+    <svg width="64" height="80" viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="2" width="56" height="56" rx="4" fill="#0d0a14" stroke="#46474d" stroke-opacity=".5" stroke-width="1"/>
+      <line x1="20" y1="42" x2="46" y2="16" stroke="#5c5c66" stroke-width="2.4"/>
+      <rect x="4" y="2" width="56" height="56" rx="4" fill="#0a0c12" fill-opacity=".45"/>
+      <rect x="4" y="2" width="14" height="13" rx="2" fill="#0a0c17" stroke="#46474d" stroke-opacity=".5"/>
+      <text x="11" y="12" fill="#5c5c66" font-size="9" text-anchor="middle">4</text>
+      <rect x="34" y="46" width="26" height="12" rx="2" fill="#1a0808" fill-opacity=".9"/>
+      <text x="47" y="55" fill="#e02e2e" font-size="8" text-anchor="middle">6气</text>
+      <text x="32" y="74" fill="#5c5c66" font-size="9" text-anchor="middle">居合</text>
+    </svg>
+    <div class="caption"><b>C 不可用置灰</b><br>整体去饱和 · 缺口资源角标变红</div>
+  </div>
+
+  <!-- D 满印记 → 招架变拔刀 -->
+  <div class="case">
+    <svg width="64" height="80" viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="2" width="56" height="56" rx="4" fill="#1a0f08" stroke="#fa730f" stroke-opacity=".75" stroke-width="1.2"/>
+      <line x1="16" y1="44" x2="48" y2="16" stroke="#ffd98a" stroke-width="2.6"/>
+      <line x1="18" y1="24" x2="46" y2="42" stroke="#fa730f" stroke-width="1.4" stroke-opacity=".7"/>
+      <rect x="4" y="2" width="14" height="13" rx="2" fill="#0a0c17" stroke="#fa730f" stroke-opacity=".7"/>
+      <text x="11" y="12" fill="#e6dbc7" font-size="9" text-anchor="middle">3</text>
+      <rect x="4" y="46" width="14" height="12" rx="2" fill="#3a1e06" stroke="#e0bf48" stroke-opacity=".7"/>
+      <text x="11" y="55" fill="#e0bf48" font-size="8" text-anchor="middle">换</text>
+      <rect x="20" y="46" width="40" height="12" rx="2" fill="#0a0c17" fill-opacity=".9"/>
+      <text x="40" y="55" fill="#e0bf48" font-size="7.5" text-anchor="middle">3印+2气</text>
+      <text x="32" y="74" fill="#e6dbc7" font-size="9" text-anchor="middle">拔刀</text>
+    </svg>
+    <div class="caption"><b>D 印记满→拔刀</b><br>槽 3 swap：金「换」角标 + 双资源角标</div>
+  </div>
+
+  <!-- E 选中高亮 -->
+  <div class="case">
+    <svg width="64" height="80" viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="0" width="60" height="60" rx="5" fill="none" stroke="#e0bf48" stroke-opacity=".35" stroke-width="3"/>
+      <rect x="4" y="2" width="56" height="56" rx="4" fill="#1c1409" stroke="#e0bf48" stroke-width="1.6"/>
+      <line x1="20" y1="42" x2="46" y2="16" stroke="#fff2cf" stroke-width="2.4"/>
+      <rect x="4" y="2" width="14" height="13" rx="2" fill="#0a0c17" stroke="#e0bf48"/>
+      <text x="11" y="12" fill="#fff2cf" font-size="9" text-anchor="middle">1</text>
+      <rect x="34" y="46" width="26" height="12" rx="2" fill="#0a0c17" fill-opacity=".85"/>
+      <text x="47" y="55" fill="#5fa8d8" font-size="8" text-anchor="middle">+1气</text>
+      <text x="32" y="74" fill="#e0bf48" font-size="9" text-anchor="middle">斩击·攻击</text>
+    </svg>
+    <div class="caption"><b>E 选中高亮</b><br>金加粗边 + 外发光 · 显示伤害预测器</div>
+  </div>
+
+  <!-- F 被动小图标 -->
+  <div class="case">
+    <svg width="64" height="80" viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="8" y="6" width="48" height="48" rx="4" fill="#11091a" stroke="#b8942f" stroke-opacity=".55" stroke-width="1"/>
+      <ellipse cx="32" cy="30" rx="15" ry="9" fill="none" stroke="#e0bf48" stroke-width="1.6"/>
+      <circle cx="32" cy="30" r="4.4" fill="#e0bf48"/>
+      <circle cx="30.4" cy="28.4" r="1.3" fill="#11091a"/>
+      <rect x="8" y="6" width="13" height="11" rx="2" fill="#0a0c17" stroke="#9c8347" stroke-opacity=".5"/>
+      <text x="14.5" y="15" fill="#8c8f99" font-size="8" text-anchor="middle">P</text>
+      <text x="32" y="70" fill="#8c8f99" font-size="9" text-anchor="middle">心眼</text>
+    </svg>
+    <div class="caption"><b>F 被动·心眼</b><br>48px（比主动小 8）· 角标 P · 无键位 · 不可点</div>
+  </div>
+
+</div>
+
+<div class="pixel-divider"></div>
+
+<h2>三、区域框质感规范（暗黑哥特 / Diablo IV 参考）</h2>
+<p class="sub">
+每个功能区一块独立框，<b>用四层叠出质感</b>：① 外缘最暗矩形（凹陷感）② 内壁竖直渐变（上 <code>#141621</code> → 下 <code>#0a0c14</code>，模拟受光）③ 微噪点纹理（稀疏点阵 <code>#1a1d2a</code>，石质颗粒，像素风克制版）④ 双色金属/石质描边：受光边（顶 + 左）<code>#9c8347</code>、背光边（底 + 右）<code>#3a3018</code>；四角嵌金属角饰 <code>#b8942f</code>（左上最亮，向右下递暗）。落在「清晰像素画风」框架内——有限调色板、像素化描边，不糊成拟真。
+</p>
+
+<div class="grid">
+  <!-- 框质感大样：单区放大 -->
+  <div class="case">
+    <svg width="240" height="120" viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="frameInner2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#141621"/><stop offset="0.5" stop-color="#0e1019"/><stop offset="1" stop-color="#0a0c14"/>
+        </linearGradient>
+        <pattern id="frameNoise2" width="6" height="6" patternUnits="userSpaceOnUse">
+          <rect x="0" y="0" width="1" height="1" fill="#1a1d2a" opacity="0.5"/>
+          <rect x="3" y="2" width="1" height="1" fill="#1a1d2a" opacity="0.35"/>
+          <rect x="1" y="4" width="1" height="1" fill="#0e1018" opacity="0.4"/>
+        </pattern>
+      </defs>
+      <rect x="8" y="8" width="224" height="104" rx="6" fill="#080a12"/>
+      <rect x="11" y="11" width="218" height="98" rx="5" fill="url(#frameInner2)"/>
+      <rect x="11" y="11" width="218" height="98" rx="5" fill="url(#frameNoise2)"/>
+      <path d="M11 109 L11 16 Q11 11 16 11 L229 11" fill="none" stroke="#9c8347" stroke-opacity=".6" stroke-width="1.4"/>
+      <path d="M229 16 L229 104 Q229 109 224 109 L16 109" fill="none" stroke="#3a3018" stroke-width="1.4"/>
+      <rect x="13" y="13" width="7" height="7" fill="#b8942f"/>
+      <rect x="220" y="13" width="7" height="7" fill="#7a6428"/>
+      <rect x="13" y="102" width="7" height="7" fill="#7a6428"/>
+      <rect x="220" y="102" width="7" height="7" fill="#4a3c18"/>
+      <text x="120" y="64" fill="#8c8f99" font-size="11" text-anchor="middle">区域框质感大样</text>
+    </svg>
+    <div class="caption"><b>暗黑哥特框（放大）</b><br>外缘暗 + 内壁渐变 + 噪点 + 双色描边 + 四角金属角饰</div>
+  </div>
+</div>
+
+<table class="spec">
+  <tr><th>层</th><th>值</th><th>说明</th></tr>
+  <tr><td><b>外缘</b></td><td>fill <code>#080a12</code></td><td>最暗矩形，比内壁大 2px，制造凹陷/嵌入感</td></tr>
+  <tr><td><b>内壁渐变</b></td><td>上 <code>#141621</code> → 中 <code>#0e1019</code> → 下 <code>#0a0c14</code></td><td>竖直方向，模拟自上而下受光</td></tr>
+  <tr><td><b>噪点纹理</b></td><td><code>#1a1d2a</code> 稀疏点阵（6px 周期，3 点）</td><td>石质颗粒；像素风克制，密度低不糊</td></tr>
+  <tr><td><b>受光描边</b></td><td>顶 + 左 <code>#9c8347</code>（透明 .55）</td><td>金属/石质高光边</td></tr>
+  <tr><td><b>背光描边</b></td><td>底 + 右 <code>#3a3018</code>（透明 .9）</td><td>金属/石质阴影边</td></tr>
+  <tr><td><b>四角角饰</b></td><td>5×5 方块，左上 <code>#b8942f</code> → 右下 <code>#4a3c18</code></td><td>金属铆钉/角饰，按受光方向递暗</td></tr>
+  <tr><td><b>内边距</b></td><td>各区 10px（框内壁到内容）</td><td>结束区窄，内容居中即可</td></tr>
+  <tr><td><b>结束区变体</b></td><td>受光边 <code>#e02e2e</code>(.45)、背光边 <code>#4a1416</code></td><td>同结构换红描边，强调「危险/终结」</td></tr>
+</table>
+
+<h2>四、剑气资源条 — 空格始终可见边框（v3 强化）+ 颜色突变</h2>
+<p class="sub">
+10 格分段条。<b>&lt; 7 整条淡蓝</b>（<code>#5fa8d8</code>），<b>≥ 7 整条突变紫</b>（<code>#a855f7</code>，刚跨那格亮紫 <code>#c98bff</code>）。
+<b>v3 核心强化：未充满的空格也始终有可见细边框</b>（暗底 <code>#0a1019</code> + 细边：未达标 <code>#314257</code> / 达标偏紫 <code>#5b3f7a</code>），任何状态都能一眼数出 10 段。
+</p>
+
+<div class="grid">
+  <!-- 剑气 0 空：10 个空格都有边 -->
+  <div class="case">
+    <svg width="210" height="58" viewBox="0 0 210 58" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="12" fill="#b8942f" font-size="11">剑气</text>
+      <text x="182" y="12" fill="#8c8f99" font-size="11" text-anchor="end">0 / 10</text>
+      <rect x="0" y="20" width="182" height="16" rx="2" fill="#0c1320" stroke="#314257" stroke-opacity=".7"/>
+      <!-- 10 空格全有细边 -->
+      <g>
+        <rect x="2"      y="22" width="15.2" height="12" fill="#0a1019" stroke="#314257" stroke-width="1"/>
+        <rect x="20.2"  y="22" width="15.2" height="12" fill="#0a1019" stroke="#314257" stroke-width="1"/>
+        <rect x="38.4"  y="22" width="15.2" height="12" fill="#0a1019" stroke="#314257" stroke-width="1"/>
+        <rect x="56.6"  y="22" width="15.2" height="12" fill="#0a1019" stroke="#314257" stroke-width="1"/>
+        <rect x="74.8"  y="22" width="15.2" height="12" fill="#0a1019" stroke="#314257" stroke-width="1"/>
+        <rect x="93"    y="22" width="15.2" height="12" fill="#0a1019" stroke="#314257" stroke-width="1"/>
+        <rect x="111.2" y="22" width="15.2" height="12" fill="#0a1019" stroke="#314257" stroke-width="1"/>
+        <rect x="129.4" y="22" width="15.2" height="12" fill="#0a1019" stroke="#314257" stroke-width="1"/>
+        <rect x="147.6" y="22" width="15.2" height="12" fill="#0a1019" stroke="#314257" stroke-width="1"/>
+        <rect x="165.8" y="22" width="15.2" height="12" fill="#0a1019" stroke="#314257" stroke-width="1"/>
+      </g>
+      <line x1="126.4" y1="16" x2="126.4" y2="40" stroke="#46474d" stroke-width="1" stroke-dasharray="2 2"/>
+      <text x="129" y="51" fill="#5c5c66" font-size="9">阈值 7</text>
+    </svg>
+    <div class="caption"><b>剑气 空（0）</b><br>10 空格全有细边（#314257）· 始终可数</div>
+  </div>
+
+  <!-- 剑气 4 → 淡蓝（4 填充 + 6 空格有边）-->
+  <div class="case">
+    <svg width="210" height="58" viewBox="0 0 210 58" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="12" fill="#b8942f" font-size="11">剑气</text>
+      <text x="182" y="12" fill="#5fa8d8" font-size="11" text-anchor="end">4 / 10</text>
+      <rect x="0" y="20" width="182" height="16" rx="2" fill="#0c1320" stroke="#314257" stroke-opacity=".7"/>
+      <!-- 4 填充淡蓝 -->
+      <rect x="2"      y="22" width="15.2" height="12" fill="#5fa8d8"/>
+      <rect x="20.2"  y="22" width="15.2" height="12" fill="#5fa8d8"/>
+      <rect x="38.4"  y="22" width="15.2" height="12" fill="#5fa8d8"/>
+      <rect x="56.6"  y="22" width="15.2" height="12" fill="#5fa8d8"/>
+      <!-- 6 空格有细边 -->
+      <rect x="74.8"  y="22" width="15.2" height="12" fill="#0a1019" stroke="#314257" stroke-width="1"/>
+      <rect x="93"    y="22" width="15.2" height="12" fill="#0a1019" stroke="#314257" stroke-width="1"/>
+      <rect x="111.2" y="22" width="15.2" height="12" fill="#0a1019" stroke="#314257" stroke-width="1"/>
+      <rect x="129.4" y="22" width="15.2" height="12" fill="#0a1019" stroke="#314257" stroke-width="1"/>
+      <rect x="147.6" y="22" width="15.2" height="12" fill="#0a1019" stroke="#314257" stroke-width="1"/>
+      <rect x="165.8" y="22" width="15.2" height="12" fill="#0a1019" stroke="#314257" stroke-width="1"/>
+      <line x1="126.4" y1="16" x2="126.4" y2="40" stroke="#46474d" stroke-width="1" stroke-dasharray="2 2"/>
+      <text x="129" y="51" fill="#5c5c66" font-size="9">阈值 7</text>
+    </svg>
+    <div class="caption"><b>剑气 半（4）淡蓝</b><br>4 填充淡蓝 + 6 空格有边 · 未达标灰虚线</div>
+  </div>
+
+  <!-- 剑气 7 → 刚达标突变紫（7 填充 + 3 空格偏紫边）-->
+  <div class="case">
+    <svg width="210" height="58" viewBox="0 0 210 58" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="12" fill="#b8942f" font-size="11">剑气</text>
+      <text x="182" y="12" fill="#c98bff" font-size="11" text-anchor="end">7 / 10</text>
+      <rect x="0" y="20" width="182" height="16" rx="2" fill="#100a1c" stroke="#a855f7" stroke-opacity=".55"/>
+      <rect x="2"      y="22" width="15.2" height="12" fill="#a855f7"/>
+      <rect x="20.2"  y="22" width="15.2" height="12" fill="#a855f7"/>
+      <rect x="38.4"  y="22" width="15.2" height="12" fill="#a855f7"/>
+      <rect x="56.6"  y="22" width="15.2" height="12" fill="#a855f7"/>
+      <rect x="74.8"  y="22" width="15.2" height="12" fill="#a855f7"/>
+      <rect x="93"    y="22" width="15.2" height="12" fill="#a855f7"/>
+      <rect x="111.2" y="22" width="15.2" height="12" fill="#c98bff"/>
+      <!-- 3 空格：达标态偏紫边 -->
+      <rect x="129.4" y="22" width="15.2" height="12" fill="#0a1019" stroke="#5b3f7a" stroke-width="1"/>
+      <rect x="147.6" y="22" width="15.2" height="12" fill="#0a1019" stroke="#5b3f7a" stroke-width="1"/>
+      <rect x="165.8" y="22" width="15.2" height="12" fill="#0a1019" stroke="#5b3f7a" stroke-width="1"/>
+      <line x1="126.4" y1="14" x2="126.4" y2="40" stroke="#e0bf48" stroke-width="1.4"/>
+      <polygon points="126.4,14 122,9 130,9" fill="#e0bf48"/>
+      <text x="129" y="51" fill="#e0bf48" font-size="9">速度+1</text>
+    </svg>
+    <div class="caption"><b>剑气 7 达标·突变紫</b><br>7 填充紫 + 3 空格偏紫边 · 金实线 + 箭头</div>
+  </div>
+
+  <!-- 剑气 10 满 -->
+  <div class="case">
+    <svg width="210" height="58" viewBox="0 0 210 58" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="12" fill="#b8942f" font-size="11">剑气</text>
+      <text x="182" y="12" fill="#c98bff" font-size="11" text-anchor="end">10 / 10</text>
+      <rect x="0" y="20" width="182" height="16" rx="2" fill="#100a1c" stroke="#a855f7" stroke-opacity=".7"/>
+      <rect x="2"      y="22" width="15.2" height="12" fill="#c98bff"/>
+      <rect x="20.2"  y="22" width="15.2" height="12" fill="#c98bff"/>
+      <rect x="38.4"  y="22" width="15.2" height="12" fill="#c98bff"/>
+      <rect x="56.6"  y="22" width="15.2" height="12" fill="#c98bff"/>
+      <rect x="74.8"  y="22" width="15.2" height="12" fill="#c98bff"/>
+      <rect x="93"    y="22" width="15.2" height="12" fill="#c98bff"/>
+      <rect x="111.2" y="22" width="15.2" height="12" fill="#c98bff"/>
+      <rect x="129.4" y="22" width="15.2" height="12" fill="#c98bff"/>
+      <rect x="147.6" y="22" width="15.2" height="12" fill="#c98bff"/>
+      <rect x="165.8" y="22" width="15.2" height="12" fill="#c98bff"/>
+      <line x1="126.4" y1="14" x2="126.4" y2="40" stroke="#e0bf48" stroke-width="1.4"/>
+      <polygon points="126.4,14 122,9 130,9" fill="#e0bf48"/>
+      <text x="129" y="51" fill="#e0bf48" font-size="9">速度+1</text>
+    </svg>
+    <div class="caption"><b>剑气 满（10）紫</b><br>满槽全亮紫 · 阈值线常驻金</div>
+  </div>
+</div>
+
+<div class="note">
+<b>v3 剑气格规范：</b>条宽 182px、10 格，每格内宽 15.2px、步进 18.2px。
+<b>填充格</b>：&lt;7 淡蓝 <code>#5fa8d8</code>；≥7 紫 <code>#a855f7</code>，当前最高格亮紫 <code>#c98bff</code>。
+<b>空格（始终绘制）</b>：底 <code>#0a1019</code> + 1px 细边（未达标 <code>#314257</code> / 达标 <code>#5b3f7a</code>）——这是 v3 相对 v2 的关键改动：v2 空格无边、只靠槽底，v3 给每个空格独立细边，任意填充量下都能数清 10 段。
+</div>
+
+<h2>五、印记三态（v3 加大）</h2>
+<div class="grid">
+  <div class="case">
+    <svg width="130" height="48" viewBox="0 0 130 48" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="30" fill="#b8942f" font-size="11">印记</text>
+      <g transform="translate(34,12)"><rect width="24" height="24" rx="3" fill="#1a1410" stroke="#e0bf48" stroke-width="1.2"/><text x="12" y="17" fill="#e0bf48" font-size="13" text-anchor="middle">心</text></g>
+      <g transform="translate(64,12)"><rect width="24" height="24" rx="3" fill="#0d0a14" stroke="#5c5c66" stroke-width="1.2"/><text x="12" y="17" fill="#5c5c66" font-size="13" text-anchor="middle">道</text></g>
+      <g transform="translate(94,12)"><rect width="24" height="24" rx="3" fill="#0d0a14" stroke="#5c5c66" stroke-width="1.2"/><text x="12" y="17" fill="#5c5c66" font-size="13" text-anchor="middle">势</text></g>
+    </svg>
+    <div class="caption"><b>持 1（心）</b><br>持有=金框金字，未持=灰框灰字（24px）</div>
+  </div>
+  <div class="case">
+    <svg width="130" height="48" viewBox="0 0 130 48" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="30" fill="#b8942f" font-size="11">印记</text>
+      <g transform="translate(34,12)"><rect width="24" height="24" rx="3" fill="#1a1410" stroke="#e0bf48" stroke-width="1.2"/><text x="12" y="17" fill="#e0bf48" font-size="13" text-anchor="middle">心</text></g>
+      <g transform="translate(64,12)"><rect width="24" height="24" rx="3" fill="#1a1410" stroke="#e0bf48" stroke-width="1.2"/><text x="12" y="17" fill="#e0bf48" font-size="13" text-anchor="middle">道</text></g>
+      <g transform="translate(94,12)"><rect width="24" height="24" rx="3" fill="#0d0a14" stroke="#5c5c66" stroke-width="1.2"/><text x="12" y="17" fill="#5c5c66" font-size="13" text-anchor="middle">势</text></g>
+    </svg>
+    <div class="caption"><b>持 2（心·道）</b></div>
+  </div>
+  <div class="case">
+    <svg width="130" height="48" viewBox="0 0 130 48" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="30" fill="#b8942f" font-size="11">印记</text>
+      <g transform="translate(34,8)"><rect width="24" height="28" rx="3" fill="#2a200e" stroke="#e0bf48" stroke-width="1.6"/><text x="12" y="19" fill="#fff2cf" font-size="13" text-anchor="middle">心</text></g>
+      <g transform="translate(64,8)"><rect width="24" height="28" rx="3" fill="#2a200e" stroke="#e0bf48" stroke-width="1.6"/><text x="12" y="19" fill="#fff2cf" font-size="13" text-anchor="middle">道</text></g>
+      <g transform="translate(94,8)"><rect width="24" height="28" rx="3" fill="#2a200e" stroke="#e0bf48" stroke-width="1.6"/><text x="12" y="19" fill="#fff2cf" font-size="13" text-anchor="middle">势</text></g>
+    </svg>
+    <div class="caption"><b>持 3 满</b><br>三框微亮 + 加粗 → 拔刀就绪</div>
+  </div>
+</div>
+
+<h2>六、伤害预测器 — 单段 / 多段 x×y 两态（v3 新增）</h2>
+<p class="sub">
+技能选中 + 指向目标单位时显示。包含：<b>伤害类型</b>（颜色 + 文字徽标，复用 <code>damage_popup.gd</code> 四类配色，不另发明）+ <b>预计伤害数值</b>；
+<b>多段标 x × y（总数值）</b>（x=段数/命中数，y=单段伤害，括号总值），单段直接显数值；下方保留<b>命中% / 暴击%</b>。
+位置二选一（见本节末说明）：本稿默认<b>浮于目标单位上方</b>（带指向小三角），并给出「并入现有 forecast 面板」的备选样式。
+</p>
+
+<div class="grid">
+  <!-- 单段（物理）浮于目标上方 -->
+  <div class="case">
+    <svg width="190" height="100" viewBox="0 0 190 100" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="2" width="182" height="78" rx="5" fill="#080a12"/>
+      <rect x="6" y="4" width="178" height="74" rx="4" fill="#0e1019"/>
+      <path d="M6 78 L6 8 Q6 4 10 4 L184 4" fill="none" stroke="#9c8347" stroke-opacity=".55" stroke-width="1"/>
+      <path d="M184 8 L184 74 Q184 78 180 78 L10 78" fill="none" stroke="#3a3018" stroke-width="1"/>
+      <polygon points="95,80 88,80 95,90 102,80" fill="#0e1019" stroke="#3a3018" stroke-width="1"/>
+      <text x="16" y="22" fill="#b8942f" font-size="10">伤害预测</text>
+      <circle cx="22" cy="40" r="5" fill="#ffffff" stroke="#777"/>
+      <text x="34" y="44" fill="#ffffff" font-size="13">物理 · 24</text>
+      <text x="16" y="64" fill="#8c8f99" font-size="9">命中 92%</text>
+      <text x="100" y="64" fill="#fa730f" font-size="9">暴击 35%</text>
+    </svg>
+    <div class="caption"><b>单段（物理）</b><br>白点徽标 + 「物理 · 24」· 单段直接显数值</div>
+  </div>
+
+  <!-- 多段（物理）x×y -->
+  <div class="case">
+    <svg width="190" height="100" viewBox="0 0 190 100" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="2" width="182" height="78" rx="5" fill="#080a12"/>
+      <rect x="6" y="4" width="178" height="74" rx="4" fill="#0e1019"/>
+      <path d="M6 78 L6 8 Q6 4 10 4 L184 4" fill="none" stroke="#9c8347" stroke-opacity=".55" stroke-width="1"/>
+      <path d="M184 8 L184 74 Q184 78 180 78 L10 78" fill="none" stroke="#3a3018" stroke-width="1"/>
+      <polygon points="95,80 88,80 95,90 102,80" fill="#0e1019" stroke="#3a3018" stroke-width="1"/>
+      <text x="16" y="22" fill="#b8942f" font-size="10">伤害预测</text>
+      <circle cx="22" cy="40" r="5" fill="#ffffff" stroke="#777"/>
+      <!-- 3 × 12（36）：x 段数白、× 暗、y 单段亮、括号总值金 -->
+      <text x="34" y="44" fill="#ffffff" font-size="13">物理 </text>
+      <text x="78" y="44" fill="#e6dbc7" font-size="13">3</text>
+      <text x="90" y="44" fill="#8c8f99" font-size="12">×</text>
+      <text x="100" y="44" fill="#ffffff" font-size="13">12</text>
+      <text x="120" y="44" fill="#e0bf48" font-size="12">(36)</text>
+      <text x="16" y="64" fill="#8c8f99" font-size="9">命中 92%</text>
+      <text x="100" y="64" fill="#fa730f" font-size="9">暴击 35%</text>
+    </svg>
+    <div class="caption"><b>多段（物理）3 × 12（36）</b><br>x=段数 · y=单段 · 括号=总值（金）</div>
+  </div>
+
+  <!-- 多段（魔法）x×y -->
+  <div class="case">
+    <svg width="190" height="100" viewBox="0 0 190 100" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="2" width="182" height="78" rx="5" fill="#080a12"/>
+      <rect x="6" y="4" width="178" height="74" rx="4" fill="#0e1019"/>
+      <path d="M6 78 L6 8 Q6 4 10 4 L184 4" fill="none" stroke="#9c8347" stroke-opacity=".55" stroke-width="1"/>
+      <path d="M184 8 L184 74 Q184 78 180 78 L10 78" fill="none" stroke="#3a3018" stroke-width="1"/>
+      <polygon points="95,80 88,80 95,90 102,80" fill="#0e1019" stroke="#3a3018" stroke-width="1"/>
+      <text x="16" y="22" fill="#b8942f" font-size="10">伤害预测</text>
+      <circle cx="22" cy="40" r="5" fill="#aa88ff"/>
+      <text x="34" y="44" fill="#aa88ff" font-size="13">魔法 </text>
+      <text x="78" y="44" fill="#e6dbc7" font-size="13">2</text>
+      <text x="90" y="44" fill="#8c8f99" font-size="12">×</text>
+      <text x="100" y="44" fill="#aa88ff" font-size="13">9</text>
+      <text x="116" y="44" fill="#e0bf48" font-size="12">(18)</text>
+      <text x="16" y="64" fill="#8c8f99" font-size="9">命中 100%</text>
+      <text x="100" y="64" fill="#fa730f" font-size="9">暴击 0%</text>
+    </svg>
+    <div class="caption"><b>多段（魔法）2 × 9（18）</b><br>魔法紫徽标 #AA88FF · 必中 100%</div>
+  </div>
+
+  <!-- 治疗（单段，绿）-->
+  <div class="case">
+    <svg width="190" height="100" viewBox="0 0 190 100" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="2" width="182" height="78" rx="5" fill="#080a12"/>
+      <rect x="6" y="4" width="178" height="74" rx="4" fill="#0e1019"/>
+      <path d="M6 78 L6 8 Q6 4 10 4 L184 4" fill="none" stroke="#9c8347" stroke-opacity=".55" stroke-width="1"/>
+      <path d="M184 8 L184 74 Q184 78 180 78 L10 78" fill="none" stroke="#3a3018" stroke-width="1"/>
+      <polygon points="95,80 88,80 95,90 102,80" fill="#0e1019" stroke="#3a3018" stroke-width="1"/>
+      <text x="16" y="22" fill="#b8942f" font-size="10">效果预测</text>
+      <circle cx="22" cy="40" r="5" fill="#4ce64c"/>
+      <text x="34" y="44" fill="#4ce64c" font-size="13">治疗 · +16</text>
+      <text x="16" y="64" fill="#8c8f99" font-size="9">必定生效</text>
+    </svg>
+    <div class="caption"><b>治疗（单段）+16</b><br>绿徽标 · 治疗用 +N · 无命中/暴击</div>
+  </div>
+</div>
+
+<h3>备选样式：并入现有 forecast 面板（不浮于目标上方）</h3>
+<div class="grid">
+  <div class="case">
+    <svg width="240" height="110" viewBox="0 0 240 110" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="2" width="232" height="100" rx="5" fill="#080a12"/>
+      <rect x="6" y="4" width="228" height="96" rx="4" fill="#0e1019"/>
+      <path d="M6 100 L6 8 Q6 4 10 4 L234 4" fill="none" stroke="#9c8347" stroke-opacity=".55" stroke-width="1"/>
+      <path d="M234 8 L234 96 Q234 100 230 100 L10 100" fill="none" stroke="#3a3018" stroke-width="1"/>
+      <text x="16" y="22" fill="#b8942f" font-size="11">战斗预测</text>
+      <text x="16" y="40" fill="#e6dbc7" font-size="10">敌·哥布林</text>
+      <!-- 伤害行：类型徽标 + x×y -->
+      <circle cx="22" cy="56" r="5" fill="#ffffff" stroke="#777"/>
+      <text x="34" y="60" fill="#ffffff" font-size="11">物理 3 × 12 </text>
+      <text x="118" y="60" fill="#e0bf48" font-size="11">(36)</text>
+      <text x="16" y="78" fill="#8c8f99" font-size="9">命中 92%   暴击 35%   反击 是</text>
+      <text x="16" y="93" fill="#73757f" font-size="8.5">地形 林  回避+15</text>
+    </svg>
+    <div class="caption"><b>备选：并入 forecast 面板</b><br>把伤害类型徽标 + x×y 插入现有「预计伤害」行</div>
+  </div>
+</div>
+
+<div class="note">
+<b>位置抉择（设计建议，待用户拍板）：</b>
+推荐<b>主用「浮于目标单位上方」</b>（带指向小三角）——选目标时玩家视线在目标格，预测器就近显示最省眼动，符合战棋手感；现有 <code>_forecast_panel</code>（左下、固定位）可保留为「鼠标悬停敌方信息」的次要展示，二者不冲突。
+若实现成本高（需世界坐标→屏幕坐标跟随），可退而采用<b>备选「并入现有 forecast 面板」</b>——零新增定位逻辑，只把伤害类型徽标 + x×y 文案插进 <code>_update_forecast</code> 现有「预计伤害」行。
+<br><b>x×y 文案规则：</b><code>hit_count==1</code> → 直接 <code>"%d" % per_hit_damage</code>（即单段=总值）；<code>hit_count>1</code> → <code>"%d × %d（%d）" % [hit_count, per_hit_damage, hit_count*per_hit_damage]</code>。治疗类用 <code>"+%d"</code>，无命中/暴击行。
+</div>
+
+<h2>七、对齐网格与间距规范（速览）</h2>
+<table class="spec">
+  <tr><th>规范项</th><th>值</th><th>说明</th></tr>
+  <tr><td><b>L→R 区序</b></td><td>个人信息 → 资源栏 → 技能栏 → 物品 2×3 → 结束</td><td>硬布局，顺序固定不重排</td></tr>
+  <tr><td><b>主动技能槽</b></td><td>56 × 56</td><td>4 槽，键 1-4</td></tr>
+  <tr><td><b>被动槽（心眼）</b></td><td>48 × 48</td><td>比主动小 8，无键位，居中于槽区</td></tr>
+  <tr><td><b>物品格（v3 缩小）</b></td><td>38 × 38</td><td>比被动 48 更小；2 行 × 3 列 = 6 格</td></tr>
+  <tr><td><b>物品格间距</b></td><td>6px（行/列同）</td><td>2×3 紧凑网格</td></tr>
+  <tr><td><b>剑气条（v3 加宽）</b></td><td>182 × 16，10 格</td><td>每格内宽 15.2 / 步进 18.2；空格始终有边</td></tr>
+  <tr><td><b>印记方块（v3 加大）</b></td><td>24 × 24（满态 28 高）</td><td>比 v2 的 18 更舒展</td></tr>
+  <tr><td><b>结束按钮</b></td><td>52 × 52</td><td>红框区内居中，最右</td></tr>
+  <tr><td><b>区域框内边距</b></td><td>10px</td><td>框内壁到内容</td></tr>
+  <tr><td><b>伤害预测器</b></td><td>~180 × 78（浮窗）</td><td>浮于目标上方，带指向三角</td></tr>
+</table>
+
+<div class="note">
+<b>设计意图小结（v3）：</b>
+v3 在 v2「即点即放横排技能栏」基础上，按用户反馈做三件事——
+① <b>重排为 L→R 五区</b>（个人信息 → 资源栏 → 技能居中 → 物品 → 结束），把资源栏从被动旁挪到个人信息与技能之间，独立成区并加宽；
+② <b>分隔语言升级</b>：每区一块暗黑哥特边框面板（Diablo IV 式金属/石质双色描边 + 噪点 + 角饰），取代 v2 的细线分隔，区域感更强、更耐看；
+③ <b>比例再平衡</b>：物品缩到 38px、收窄物品区，腾出宽度给资源栏，呼应「资源是剑圣核心读屏对象」；剑气空格补上始终可见的细边，任何充能量下都能数清 10 段；
+④ <b>新增伤害预测器</b>：选技指敌时显示伤害类型（复用飘字配色）+ 数值，多段用 x×y（总值），保留命中/暴击%——把「这一刀打多少、打几下」前置给玩家，是战棋决策的关键信息。
+</div>
+
+</body>
+</html>
