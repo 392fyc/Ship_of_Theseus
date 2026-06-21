@@ -22,10 +22,8 @@ signal battle_ended(result: String)
 # ── Spawn configuration ──────────────────────────────
 
 const PLAYER_UNITS: Array[Dictionary] = [
+	# 测试场景：仅剑圣，便于专注验证剑气/印记/技能手感
 	{"class_id": "swordsman", "pos": Vector2i(1, 2)},
-	{"class_id": "soldier",  "pos": Vector2i(1, 3)},
-	{"class_id": "soldier",  "pos": Vector2i(1, 4)},
-	{"class_id": "archer",   "pos": Vector2i(2, 2)},
 ]
 
 const ENEMY_UNITS: Array[Dictionary] = [

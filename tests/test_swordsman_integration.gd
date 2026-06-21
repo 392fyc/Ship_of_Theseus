@@ -47,6 +47,7 @@ func _run() -> void:
 		_test_on_hit_wiring(tm, sword)
 		_test_resource_gate(tm, sword)
 		_test_dashboard_stats(tm)
+		_test_basic_attack_qi(tm, sword)
 
 	_test_dashboard_widget_format()
 	_test_zoc_functional()
@@ -197,6 +198,30 @@ func _test_resource_gate(tm: Object, sword: Unit) -> void:
 	_check("拔刀 3印记 → 印记门槛通过(原因不含「印记」)",
 		not ("印记" in str(e_m3.get("reason", ""))),
 		"available=%s reason=%s" % [str(e_m3.get("available")), str(e_m3.get("reason"))])
+
+
+# ── F. 基础攻击产气（剑圣普攻命中 +1 剑气，数据驱动 basic_attack_qi_gain）──
+
+func _test_basic_attack_qi(tm: Object, sword: Unit) -> void:
+	print("\n[F] 基础攻击产气（剑圣普攻命中 +1 剑气）")
+	var enemy: Unit = null
+	for u: Unit in tm.units:
+		if u.faction == "enemy":
+			enemy = u
+			break
+	if enemy == null:
+		_check("存在敌方单位", false)
+		return
+	# 让命中必然发生且目标不死
+	enemy.stats.spd = 0
+	enemy.stats.lck = 0
+	enemy.stats.max_hp = 999
+	enemy.stats.hp = 999
+	sword.set_sword_qi(0)
+	sword.clear_marks()
+	# 空 data 模拟基础攻击 payload；_build_hostile_action_context 应按职业补 qi_gain_on_hit
+	tm._execute_hostile_action(sword, enemy, {})
+	_eq("剑圣普攻命中 → sword_qi==1（基础攻击产气）", sword.sword_qi, 1)
 
 
 # ── D. 主属性面板 stats 接线（修复仪表盘全0显示）──────────

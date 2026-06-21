@@ -2,8 +2,8 @@
   "id": "goblin_archer",
   "name": "哥布林弓手",
   "base_stats": {
-    "HP": 18,
-    "STR": 5,
+    "HP": 80,
+    "STR": 2,
     "MAG": 2,
     "DEX": 5,
     "SPD": 7,

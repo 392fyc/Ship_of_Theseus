@@ -1740,6 +1740,10 @@ func _build_hostile_action_context(attacker: Unit, defender: Unit,
 		action_data["damage_type"] = str(basic_attack_profile.get("damage_type", "physical"))
 	if str(action_data.get("attack_type", "")) == "":
 		action_data["attack_type"] = str(basic_attack_profile.get("attack_type", "melee"))
+	# 基础攻击（普攻/反击，无 skill 的 qi 字段）按职业基础攻击产气量补默认值；
+	# 技能动作已带 qi_gain_on_hit，不会被覆盖。
+	if not action_data.has("qi_gain_on_hit"):
+		action_data["qi_gain_on_hit"] = int(basic_attack_profile.get("basic_attack_qi_gain", 0))
 	action_data["terrain_evade_bonus"] = int(terrain_context.get("terrain_evade_bonus", 0))
 	action_data["terrain_def_bonus"] = int(terrain_context.get("terrain_def_bonus", 0))
 	action_data["terrain_res_bonus"] = int(terrain_context.get("terrain_res_bonus", 0))
@@ -1785,6 +1789,9 @@ func _get_unit_basic_attack_profile(unit: Unit) -> Dictionary:
 		"pure_atk_source": str(source_data.get("pure_atk_source", fallback_profile.get(
 			"pure_atk_source", "phys"))),
 		"attack_type": attack_type,
+		# 剑圣等职业：基础攻击（普攻/反击）命中产气，数值从职业 JSON 读，非剑圣缺省 0
+		"basic_attack_qi_gain": int(source_data.get("basic_attack_qi_gain",
+			fallback_profile.get("basic_attack_qi_gain", 0))),
 		"basic_attack_range": {
 			"min": maxi(1, int(range_data.get("min", 1))),
 			"max": maxi(1, int(range_data.get("max", 1))),

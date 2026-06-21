@@ -2,8 +2,8 @@
   "id": "goblin_melee",
   "name": "哥布林战士",
   "base_stats": {
-    "HP": 22,
-    "STR": 6,
+    "HP": 80,
+    "STR": 2,
     "MAG": 2,
     "DEX": 3,
     "SPD": 5,
