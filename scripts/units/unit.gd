@@ -39,6 +39,8 @@ var sword_qi: int = 0
 var _qi_max: int = 0
 # 印记：三个离散布尔值，键名对应印记类型
 var marks: Dictionary = {"心": false, "道": false, "势": false}
+# 印记上限（0=未初始化/非剑圣）；从 sword_qi_config.mark_max 读，默认=印记类型数
+var _mark_max: int = 0
 # 心眼参数缓存（从 JSON 读取后存放此处，避免重复查表）
 var _xinyan_crit_per_qi: int = 0
 var _xinyan_speed_threshold: int = 0
@@ -435,7 +437,8 @@ func get_mark_count() -> int:
 
 
 func is_marks_full() -> bool:
-	return get_mark_count() >= 3
+	# 上限从 JSON 配置（_mark_max）读，默认=印记类型数；非剑圣 _mark_max==0 → 永远 false
+	return _mark_max > 0 and get_mark_count() >= _mark_max
 
 
 ## 返回此槽位当前应显示的技能 ID（数据驱动：替换规则由技能 JSON 的
@@ -479,6 +482,19 @@ func clear_marks() -> void:
 	marks["心"] = false
 	marks["道"] = false
 	marks["势"] = false
+
+
+## 按数量扣减已持有的印记（默认按印记字典顺序 心→道→势 扣减），返回实际扣除数。
+## 用于按量消耗（如 mark_cost）；count >= 持有数时等价于全清。
+func spend_marks(count: int) -> int:
+	var removed: int = 0
+	for mark_key: String in marks.keys():
+		if removed >= count:
+			break
+		if bool(marks[mark_key]):
+			marks[mark_key] = false
+			removed += 1
+	return removed
 
 
 # ── 私有方法 ─────────────────────────────────────────
@@ -700,6 +716,7 @@ func _init_sword_qi_resource(class_data: Dictionary) -> void:
 	_qi_max = int(cfg.get("qi_max", 10))
 	sword_qi = clampi(int(cfg.get("qi_initial", 0)), 0, _qi_max)
 	marks = {"心": false, "道": false, "势": false}
+	_mark_max = int(cfg.get("mark_max", marks.size()))
 	_xinyan_crit_per_qi = int(cfg.get("crit_per_qi", 1))
 	_xinyan_speed_threshold = int(cfg.get("speed_threshold", 7))
 	_xinyan_speed_bonus = int(cfg.get("speed_bonus", 1))

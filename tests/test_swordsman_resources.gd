@@ -93,6 +93,7 @@ func _test_data_layer(dl: Object) -> void:
 	_eq("sword_qi_config.mark_dex_bonus==2", cfg.get("mark_dex_bonus"), 2)
 	_eq("sword_qi_config.mark_lck_bonus==2", cfg.get("mark_lck_bonus"), 2)
 	_eq("sword_qi_config.mark_str_bonus==2", cfg.get("mark_str_bonus"), 2)
+	_eq("sword_qi_config.mark_max==3", cfg.get("mark_max"), 3)
 	_eq("skill_ids 长度==5", (cls.get("skill_ids", []) as Array).size(), 5)
 
 	var zhanji: Dictionary = dl.skills.get("swordsman_zhanji", {})
@@ -217,6 +218,16 @@ func _test_slot_swap(dl: Object) -> void:
 	# 清印记后恢复招架
 	u.clear_marks()
 	_eq("clear后 招架槽→招架", u.get_visible_skill_id("swordsman_zhaojia", trig, tgt), "swordsman_zhaojia")
+	# 印记上限来自 JSON（mark_max），不再硬编码 3
+	_eq("_mark_max==3 (来自 JSON mark_max)", u._mark_max, 3)
+	# spend_marks 按量扣减（非全清）
+	u.marks["心"] = true
+	u.marks["道"] = true
+	u.marks["势"] = true
+	_eq("spend_marks(1) 返回扣除数1", u.spend_marks(1), 1)
+	_eq("spend 1 后 印记数==2", u.get_mark_count(), 2)
+	_eq("spend_marks(5) 超量 → 返回剩余2", u.spend_marks(5), 2)
+	_eq("全扣后 印记数==0", u.get_mark_count(), 0)
 	u.free()
 
 

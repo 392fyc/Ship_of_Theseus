@@ -1271,7 +1271,7 @@ func _execute_skill_action(action: GameAction) -> bool:
 		user.set_sword_qi(user.sword_qi - qi_cost)
 	var mark_cost: int = int(skill_data.get("mark_cost", 0))
 	if mark_cost > 0:
-		user.clear_marks()
+		user.spend_marks(mark_cost)
 
 	var cooldown_turns: int = int(data.get("cooldown", 0))
 	user.consume_skill(skill_id, cooldown_turns)

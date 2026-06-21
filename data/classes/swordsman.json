@@ -37,6 +37,7 @@
   "sword_qi_config": {
     "qi_max": 10,
     "qi_initial": 0,
+    "mark_max": 3,
     "crit_per_qi": 1,
     "speed_threshold": 7,
     "speed_bonus": 1,
