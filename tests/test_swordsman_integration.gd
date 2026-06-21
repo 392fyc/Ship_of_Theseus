@@ -1,0 +1,234 @@
+extends SceneTree
+## 剑圣资源引擎 headless 集成测试（批次2：tactical_manager 运行时接线 + 功能性 ZOC）
+##
+## 批次1 覆盖真理源代码（unit.gd / damage_calculator.gd）+ JSON 数据层；
+## 本批次补足「运行时接线」与「功能性寻路」：
+##   A. tactical_manager._apply_sword_qi_on_hit 真实接线（命中产气/击杀返气/mark_gain/cd-1/未命中不产气）
+##   B. tactical_manager._build_skill_entry 真实可用性门槛（剑气不足 / 印记不足）
+##   C. Pathfinding.get_move_range 真实 ZOC 惩罚（-1，且不随相邻敌人数叠加）
+##
+## 施放扣气（_execute_skill_action:1249-1254 的 set_sword_qi(-qi_cost)/clear_marks）
+## 需完整目标选择流程才能端到端触发；其扣减原语已在批次1验证(set_sword_qi/clear_marks)，
+## 门槛读取 skill_data.qi_cost 的路径由本批次 B 段（同样读 skill_data）间接佐证。
+##
+## 运行：<Godot_console.exe> --headless --path D:/ShipOfTheseus/Ship_of_Theseus \
+##   --script res://tests/test_swordsman_integration.gd
+## 退出码 0=全过，1=有失败。
+
+var _pass: int = 0
+var _fail: int = 0
+var _fails: Array[String] = []
+var _ran: bool = false
+
+
+func _initialize() -> void:
+	print("=== test_swordsman_integration (批次2) ===")
+
+
+func _process(_delta: float) -> bool:
+	if _ran:
+		return true
+	_ran = true
+	_run()
+	return true
+
+
+func _run() -> void:
+	# 完整实例化战斗场景（_ready 自动 spawn 单位 + start_battle）
+	var scene: Node = load("res://scenes/tactical/TacticalScene.tscn").instantiate()
+	root.add_child(scene)
+	var tm: Object = scene.tactical_manager
+	var sword: Unit = _find_swordsman(tm)
+
+	if sword == null:
+		_check("场景中存在剑圣单位", false, "tm.units 未找到 unit_id==swordsman")
+	else:
+		_check("场景中存在剑圣单位", true)
+		_test_on_hit_wiring(tm, sword)
+		_test_resource_gate(tm, sword)
+
+	_test_zoc_functional()
+
+	scene.free()
+
+	print("\n--- 结果：%d 过 / %d 失败 ---" % [_pass, _fail])
+	if _fail > 0:
+		print("失败项：")
+		for f: String in _fails:
+			print("  ✗ " + f)
+	quit(0 if _fail == 0 else 1)
+
+
+# ── 断言工具 ─────────────────────────────────────────
+
+func _check(name: String, cond: bool, detail: String = "") -> void:
+	if cond:
+		_pass += 1
+		print("  ✓ " + name)
+	else:
+		_fail += 1
+		_fails.append(name + ("  [" + detail + "]" if detail != "" else ""))
+		print("  ✗ " + name + ("  [" + detail + "]" if detail != "" else ""))
+
+
+func _eq(name: String, actual: Variant, expected: Variant) -> void:
+	_check(name, actual == expected, "期望 %s 实际 %s" % [str(expected), str(actual)])
+
+
+func _find_swordsman(tm: Object) -> Unit:
+	for u: Unit in tm.units:
+		if u.unit_id == "swordsman":
+			return u
+	return null
+
+
+func _make_result(hit: bool, killed: bool) -> DamageCalculator.AttackResult:
+	var r: DamageCalculator.AttackResult = DamageCalculator.AttackResult.new()
+	r.hit = hit
+	r.defender_died = killed
+	return r
+
+
+# ── A. _apply_sword_qi_on_hit 真实接线 ──────────────────
+
+func _test_on_hit_wiring(tm: Object, sword: Unit) -> void:
+	print("\n[A] tactical_manager._apply_sword_qi_on_hit 接线")
+
+	# A1 斩击命中 +1 气
+	sword.set_sword_qi(0)
+	tm._apply_sword_qi_on_hit(sword, _make_result(true, false), {"qi_gain_on_hit": 1})
+	_eq("斩击命中 → +1 气", sword.sword_qi, 1)
+
+	# A2 未命中不产气
+	sword.set_sword_qi(2)
+	tm._apply_sword_qi_on_hit(sword, _make_result(false, false), {"qi_gain_on_hit": 1})
+	_eq("未命中 → 不产气(仍2)", sword.sword_qi, 2)
+
+	# A3 居合击杀返 3 气
+	sword.set_sword_qi(0)
+	tm._apply_sword_qi_on_hit(sword, _make_result(true, true), {"qi_gain_on_kill": 3})
+	_eq("击杀 → 返3气", sword.sword_qi, 3)
+
+	# A4 命中但未击杀，不返击杀气
+	sword.set_sword_qi(0)
+	tm._apply_sword_qi_on_hit(sword, _make_result(true, false), {"qi_gain_on_kill": 3})
+	_eq("命中未击杀 → 不返击杀气(0)", sword.sword_qi, 0)
+
+	# A5 mark_gain 命中得 1 印记
+	sword.clear_marks()
+	tm._apply_sword_qi_on_hit(sword, _make_result(true, false), {"mark_gain": 1})
+	_eq("命中 mark_gain → 印记数1", sword.get_mark_count(), 1)
+
+	# A6 居合击杀 cd-1
+	sword.skill_cooldowns["swordsman_juhe"] = 3
+	tm._apply_sword_qi_on_hit(sword, _make_result(true, true),
+		{"ki_on_kill_cd_reduction": 1, "skill_id": "swordsman_juhe"})
+	_eq("居合击杀 → cd 3→2", sword.get_skill_cooldown("swordsman_juhe"), 2)
+
+	# A7 cd 减到 0 则移除冷却条目
+	sword.skill_cooldowns["swordsman_juhe"] = 1
+	tm._apply_sword_qi_on_hit(sword, _make_result(true, true),
+		{"ki_on_kill_cd_reduction": 1, "skill_id": "swordsman_juhe"})
+	_check("cd 减到0 → 移除冷却条目",
+		sword.get_skill_cooldown("swordsman_juhe") == 0 \
+		and not sword.skill_cooldowns.has("swordsman_juhe"))
+
+	# A8 居合完整结算（命中+击杀同次：返气 + 得印记 + cd-1）
+	sword.set_sword_qi(0)
+	sword.clear_marks()
+	sword.skill_cooldowns["swordsman_juhe"] = 3
+	tm._apply_sword_qi_on_hit(sword, _make_result(true, true), {
+		"qi_gain_on_hit": 0, "qi_gain_on_kill": 3, "mark_gain": 1,
+		"ki_on_kill_cd_reduction": 1, "skill_id": "swordsman_juhe",
+	})
+	_eq("居合完整: 返3气", sword.sword_qi, 3)
+	_eq("居合完整: 得1印记", sword.get_mark_count(), 1)
+	_eq("居合完整: cd 3→2", sword.get_skill_cooldown("swordsman_juhe"), 2)
+
+
+# ── B. _build_skill_entry 真实可用性门槛 ────────────────
+
+func _test_resource_gate(tm: Object, sword: Unit) -> void:
+	print("\n[B] tactical_manager._build_skill_entry 资源门槛")
+	# 进入行动阶段（否则移动阶段会拦截 standard 技能，无法触达资源门槛）。
+	# 用整数序号：从 --script 主循环引用全局类 TacticalManager 会触发早期类缓存编译失败，
+	# 故直接赋 InputState.ACTION_PHASE 的序号（enum: IDLE=0, MOVE_PHASE=1, ACTION_PHASE=2）。
+	tm.input_state = 2
+	# 复位行动经济 + 冷却 + 资源，隔离资源门槛
+	sword.standard_used = false
+	sword.movement_used = false
+	sword.swift_used = false
+	sword.skill_cooldowns.clear()
+
+	# B1 居合剑气门槛：0 气不可用且原因为剑气不足
+	sword.set_sword_qi(0)
+	sword.clear_marks()
+	var e_qi0: Dictionary = tm._build_skill_entry(sword, "swordsman_juhe")
+	_check("居合 0气 → 不可用 且 原因含「剑气」",
+		not bool(e_qi0.get("available", false)) and ("剑气" in str(e_qi0.get("reason", ""))),
+		"available=%s reason=%s" % [str(e_qi0.get("available")), str(e_qi0.get("reason"))])
+
+	# B2 居合剑气满足：6 气可用（居合单体，上游检查应通过）
+	sword.set_sword_qi(6)
+	sword.standard_used = false
+	var e_qi6: Dictionary = tm._build_skill_entry(sword, "swordsman_juhe")
+	_check("居合 6气 → 可用",
+		bool(e_qi6.get("available", false)),
+		"available=%s reason=%s" % [str(e_qi6.get("available")), str(e_qi6.get("reason"))])
+
+	# B3 拔刀印记门槛：0 印记原因含印记不足
+	sword.clear_marks()
+	sword.set_sword_qi(10)
+	sword.standard_used = false
+	var e_m0: Dictionary = tm._build_skill_entry(sword, "swordsman_badao")
+	_check("拔刀 0印记 → 原因含「印记」",
+		"印记" in str(e_m0.get("reason", "")),
+		"available=%s reason=%s" % [str(e_m0.get("available")), str(e_m0.get("reason"))])
+
+	# B4 拔刀印记满足：3 印记后印记门槛通过（原因不再含印记不足；
+	#    其余范围/目标支持性不在本断言范围内）
+	sword.marks["心"] = true
+	sword.marks["道"] = true
+	sword.marks["势"] = true
+	sword.standard_used = false
+	var e_m3: Dictionary = tm._build_skill_entry(sword, "swordsman_badao")
+	_check("拔刀 3印记 → 印记门槛通过(原因不含「印记」)",
+		not ("印记" in str(e_m3.get("reason", ""))),
+		"available=%s reason=%s" % [str(e_m3.get("available")), str(e_m3.get("reason"))])
+
+
+# ── C. Pathfinding.get_move_range 功能性 ZOC ────────────
+
+func _test_zoc_functional() -> void:
+	print("\n[C] Pathfinding ZOC 功能性（合成棋盘）")
+	var mp: int = 4
+
+	# 5x1 全平原，敌人在 (1,0)
+	var grid: Grid = Grid.new()
+	grid.initialize({"id": "zoc_line", "width": 5, "height": 1, "terrain": [[0, 0, 0, 0, 0]]})
+	var enemy: Unit = Unit.new()
+	enemy.faction = "enemy"
+	grid.get_cell(Vector2i(1, 0)).occupant = enemy
+
+	# 起点 (0,0) 相邻敌人 → 有效移动力 = mp-1
+	var r_adj: Dictionary = Pathfinding.get_move_range(grid, Vector2i(0, 0), mp, "player")
+	_eq("起点相邻敌 → 有效移动==mp-1", r_adj.get(Vector2i(0, 0)), mp - 1)
+	# 起点 (4,0) 不相邻敌人 → 有效移动力 = mp（无惩罚）
+	var r_far: Dictionary = Pathfinding.get_move_range(grid, Vector2i(4, 0), mp, "player")
+	_eq("起点无相邻敌 → 有效移动==mp", r_far.get(Vector2i(4, 0)), mp)
+	enemy.free()
+
+	# 3x3 全平原，起点 (1,1) 相邻两个敌人 → 仍只 -1（不叠加）
+	var grid2: Grid = Grid.new()
+	grid2.initialize({"id": "zoc_box", "width": 3, "height": 3,
+		"terrain": [[0, 0, 0], [0, 0, 0], [0, 0, 0]]})
+	var e1: Unit = Unit.new()
+	e1.faction = "enemy"
+	var e2: Unit = Unit.new()
+	e2.faction = "enemy"
+	grid2.get_cell(Vector2i(0, 1)).occupant = e1
+	grid2.get_cell(Vector2i(2, 1)).occupant = e2
+	var r_two: Dictionary = Pathfinding.get_move_range(grid2, Vector2i(1, 1), mp, "player")
+	_eq("相邻2敌 → 仍只-1(不叠加)", r_two.get(Vector2i(1, 1)), mp - 1)
+	e1.free()
+	e2.free()
