@@ -46,6 +46,7 @@ func _run() -> void:
 		_check("场景中存在剑圣单位", true)
 		_test_on_hit_wiring(tm, sword)
 		_test_resource_gate(tm, sword)
+		_test_dashboard_stats(tm)
 
 	_test_zoc_functional()
 
@@ -195,6 +196,27 @@ func _test_resource_gate(tm: Object, sword: Unit) -> void:
 	_check("拔刀 3印记 → 印记门槛通过(原因不含「印记」)",
 		not ("印记" in str(e_m3.get("reason", ""))),
 		"available=%s reason=%s" % [str(e_m3.get("available")), str(e_m3.get("reason"))])
+
+
+# ── D. 主属性面板 stats 接线（修复仪表盘全0显示）──────────
+
+func _test_dashboard_stats(tm: Object) -> void:
+	print("\n[D] get_dashboard_data 主属性 stats 接线")
+	var dd: Dictionary = tm.get_dashboard_data()
+	_check("dashboard 含 stats 字典", dd.has("stats") and dd.get("stats") is Dictionary)
+	var info: Unit = tm._get_dashboard_unit()
+	if info == null:
+		_check("存在信息单位", false)
+		return
+	var st: Dictionary = dd.get("stats", {})
+	# stats 取生效值，应与 unit.get_effective_stat 一致（含印记/心眼修正）
+	_eq("stats.str==生效STR", st.get("str"), info.get_effective_stat("STR"))
+	_eq("stats.spd==生效SPD", st.get("spd"), info.get_effective_stat("SPD"))
+	_eq("stats.dex==生效DEX", st.get("dex"), info.get_effective_stat("DEX"))
+	_eq("stats.mov==生效MOV", st.get("mov"), info.get_effective_stat("MOV"))
+	# 修复前的症状是全 0；真实单位 SPD 必 >0
+	_check("主属性非全0(spd>0)", int(st.get("spd", 0)) > 0,
+		"spd=%s" % str(st.get("spd")))
 
 
 # ── C. Pathfinding.get_move_range 功能性 ZOC ────────────

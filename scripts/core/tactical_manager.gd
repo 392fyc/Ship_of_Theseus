@@ -111,6 +111,17 @@ func get_dashboard_data() -> Dictionary:
 		"selected_skill_id": _selected_skill_id,
 		"forecast": _combat_forecast.duplicate(true),
 		"hint_text": _get_dashboard_hint_text(),
+		# ── 主属性面板（生效值，含印记/心眼等修正，便于直观确认加成）──
+		"stats": {
+			"str": info_unit.get_effective_stat("STR"),
+			"mag": info_unit.get_effective_stat("MAG"),
+			"dex": info_unit.get_effective_stat("DEX"),
+			"spd": info_unit.get_effective_stat("SPD"),
+			"def": info_unit.get_effective_stat("DEF"),
+			"res": info_unit.get_effective_stat("RES"),
+			"lck": info_unit.get_effective_stat("LCK"),
+			"mov": info_unit.get_effective_stat("MOV"),
+		},
 		# ── 剑圣专属资源（非剑圣单位：sword_qi=-1 隐藏显示）──
 		"sword_qi": info_unit.sword_qi if info_unit._qi_max > 0 else -1,
 		"sword_qi_max": info_unit._qi_max,
