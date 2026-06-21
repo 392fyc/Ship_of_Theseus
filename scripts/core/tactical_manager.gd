@@ -1293,18 +1293,37 @@ func _execute_skill_action(action: GameAction) -> bool:
 			skill_name,
 			target_pos,
 		])
-		return true
+	else:
+		for target_unit: Unit in target_units:
+			if not _can_execute_hostile_action(user, target_unit):
+				continue
+			print("[Skill] %s uses %s on %s" % [
+				user.unit_name,
+				skill_name,
+				target_unit.unit_name,
+			])
+			_execute_hostile_action(user, target_unit, hostile_payload)
 
-	for target_unit: Unit in target_units:
-		if not _can_execute_hostile_action(user, target_unit):
-			continue
-		print("[Skill] %s uses %s on %s" % [
-			user.unit_name,
-			skill_name,
-			target_unit.unit_name,
-		])
-		_execute_hostile_action(user, target_unit, hostile_payload)
+	# ── 位移技能（如一闪）：施放后落在所选目标格 ──
+	if bool(skill_data.get("displacement", false)):
+		_apply_skill_displacement(user, target_pos)
 	return true
+
+
+## 位移技能落点：把 user 移动到 landing 格（落在所选目标格规则）。
+## 目标格越界 / 不可通行 / 已被占用 → 不位移（安全跳过）。
+func _apply_skill_displacement(user: Unit, landing: Vector2i) -> void:
+	if user == null or not grid.is_valid(landing):
+		return
+	if landing == user.grid_position:
+		return
+	var cell: Cell = grid.get_cell(landing)
+	if cell == null or not cell.is_passable() or cell.occupant != null:
+		return
+	var from: Vector2i = user.grid_position
+	grid.move_unit(user, from, landing)
+	user.position = grid.grid_to_world(landing)
+	print("[Skill] %s 位移 %s → %s" % [user.unit_name, from, landing])
 
 
 func _can_execute_hostile_action(attacker: Unit, defender: Unit) -> bool:

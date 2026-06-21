@@ -17,7 +17,8 @@
   "mark_gain": 0,
   "mark_cost": 0,
   "requires_marks": 0,
+  "displacement": true,
   "guaranteed_crit": false,
   "guaranteed_hit": false,
-  "description": "移动·位移最远4格，途经敌受50%物理（区域）。施放消耗1剑气（qi_cost=1）。位移的完整行为待引擎扩展（当前用直线区域攻击近似）。"
+  "description": "移动·位移最远4格，途经敌受50%物理（区域）。施放消耗1剑气（qi_cost=1）。施放后剑圣落在所选目标格（displacement=true；目标格被占/不可通行则不位移）。"
 }

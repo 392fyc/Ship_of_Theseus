@@ -48,6 +48,7 @@ func _run() -> void:
 		_test_resource_gate(tm, sword)
 		_test_dashboard_stats(tm)
 		_test_basic_attack_qi(tm, sword)
+		_test_skill_displacement(tm, sword)
 
 	_test_dashboard_widget_format()
 	_test_zoc_functional()
@@ -222,6 +223,34 @@ func _test_basic_attack_qi(tm: Object, sword: Unit) -> void:
 	# 空 data 模拟基础攻击 payload；_build_hostile_action_context 应按职业补 qi_gain_on_hit
 	tm._execute_hostile_action(sword, enemy, {})
 	_eq("剑圣普攻命中 → sword_qi==1（基础攻击产气）", sword.sword_qi, 1)
+
+
+# ── G. 一闪位移（落在所选目标格）──────────────────────────
+
+func _test_skill_displacement(tm: Object, sword: Unit) -> void:
+	print("\n[G] 一闪位移 _apply_skill_displacement（落在所选目标格）")
+	var start: Vector2i = sword.grid_position
+	var landing: Vector2i = Vector2i(-1, -1)
+	for nb: Vector2i in tm.grid.get_neighbors(start):
+		var c: Cell = tm.grid.get_cell(nb)
+		if c != null and c.is_passable() and c.occupant == null:
+			landing = nb
+			break
+	if landing == Vector2i(-1, -1):
+		_check("找到可落地空邻格", false)
+		return
+	tm._apply_skill_displacement(sword, landing)
+	_eq("位移到目标空格", sword.grid_position, landing)
+	# 目标格被占 → 不位移
+	var enemy: Unit = null
+	for u: Unit in tm.units:
+		if u.faction == "enemy":
+			enemy = u
+			break
+	if enemy != null:
+		var before: Vector2i = sword.grid_position
+		tm._apply_skill_displacement(sword, enemy.grid_position)
+		_eq("目标格被占 → 不位移", sword.grid_position, before)
 
 
 # ── D. 主属性面板 stats 接线（修复仪表盘全0显示）──────────
