@@ -35,6 +35,21 @@ var _battle_over: bool = false
 var _turn_order_scene: PackedScene = preload("res://scenes/tactical/TurnOrderBar.tscn")
 var _bottom_dashboard_scene: PackedScene = preload("res://scenes/tactical/bottom_dashboard.tscn")
 
+# ── 调试 harness（默认开启于测试场景；纯加法、不影响正式战斗逻辑）──────
+## 是否启用调试 harness（快捷键 + overlay）。本测试场景默认 true；
+## 正式战斗场景若复用此脚本，可在实例化后置 false 关闭。
+@export var debug_harness_enabled: bool = true
+var _debug_overlay: CanvasLayer = null
+var _debug_status_label: Label = null
+var _debug_state_label: Label = null
+# 调试快捷键 InputMap 动作名（物理键码避让 1-4/鼠标中键）。
+const DEBUG_ACTIONS: Dictionary = {
+	"debug_soft_reset":   KEY_R,
+	"debug_determinism":  KEY_F,
+	"debug_crit_cycle":   KEY_C,
+	"debug_dummy_cycle":  KEY_B,
+}
+
 
 func _ready() -> void:
 	for slot_index: int in range(1, 5):
@@ -44,6 +59,9 @@ func _ready() -> void:
 			var ev: InputEventKey = InputEventKey.new()
 			ev.physical_keycode = KEY_1 + (slot_index - 1)
 			InputMap.action_add_event(action_name, ev)
+	if debug_harness_enabled:
+		_register_debug_actions()
+		tactical_manager.debug_harness_active = true
 	_setup_camera()
 	tactical_manager.initialize_battle("forest_01")
 
@@ -81,6 +99,10 @@ func _ready() -> void:
 
 	_refresh_dashboard()
 	tactical_manager.start_battle()
+
+	if debug_harness_enabled:
+		_build_debug_overlay()
+		_refresh_debug_overlay()
 
 
 func _input(event: InputEvent) -> void:
@@ -140,6 +162,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		if mouse_event.button_index == MOUSE_BUTTON_MIDDLE and not mouse_event.pressed:
 			_is_panning = false
 			_pan_button = -1
+	if debug_harness_enabled and _handle_debug_input(event):
+		get_viewport().set_input_as_handled()
+		return
 	for slot_index: int in range(1, 5):
 		if event.is_action_pressed("skill_slot_%d" % slot_index):
 			_try_trigger_skill_slot(slot_index)
@@ -271,3 +296,159 @@ func _setup_camera() -> void:
 func _should_ignore_board_pointer() -> bool:
 	var hovered_control: Control = get_viewport().gui_get_hovered_control()
 	return hovered_control != null
+
+
+# ── 调试 harness ─────────────────────────────────────
+# 纯加法调试增项：键盘驱动，默认仅在 debug_harness_enabled 下生效。
+# 键位避让 1-4(skill_slot) / 鼠标中键(平移)：
+#   R=软重置  F=确定性开关  C=暴击态循环  B=木桩行为循环
+
+const DEBUG_OVERLAY_LAYER: int = 50
+const DEBUG_PANEL_POS: Vector2 = Vector2(12.0, 12.0)
+const DEBUG_PANEL_MIN_SIZE: Vector2 = Vector2(232.0, 0.0)
+const DEBUG_FONT_SIZE: int = 12
+const DEBUG_HELP_TEXT: String = "[调试 Harness]  R 软重置  F 确定性  C 暴击态  B 木桩行为"
+
+
+func _register_debug_actions() -> void:
+	for action_value: Variant in DEBUG_ACTIONS.keys():
+		var action_name: String = str(action_value)
+		if InputMap.has_action(action_name):
+			continue
+		InputMap.add_action(action_name)
+		var ev: InputEventKey = InputEventKey.new()
+		ev.physical_keycode = int(DEBUG_ACTIONS[action_name])
+		InputMap.action_add_event(action_name, ev)
+
+
+func _handle_debug_input(event: InputEvent) -> bool:
+	if _battle_over:
+		return false
+	if event.is_action_pressed("debug_soft_reset"):
+		tactical_manager.debug_soft_reset()
+		_refresh_debug_overlay()
+		return true
+	if event.is_action_pressed("debug_determinism"):
+		var on: bool = tactical_manager.debug_toggle_deterministic()
+		print("[Debug] deterministic = %s" % str(on))
+		_refresh_debug_overlay()
+		return true
+	if event.is_action_pressed("debug_crit_cycle"):
+		tactical_manager.debug_cycle_crit_mode()
+		print("[Debug] crit mode = %s" % tactical_manager.debug_crit_mode_label())
+		_refresh_debug_overlay()
+		return true
+	if event.is_action_pressed("debug_dummy_cycle"):
+		tactical_manager.debug_cycle_dummy_behavior()
+		print("[Debug] dummy behavior = %s" % tactical_manager.debug_get_status().get("dummy_behavior", ""))
+		_refresh_debug_overlay()
+		return true
+	return false
+
+
+func _build_debug_overlay() -> void:
+	if _debug_overlay != null:
+		return
+	_debug_overlay = CanvasLayer.new()
+	_debug_overlay.layer = DEBUG_OVERLAY_LAYER
+	add_child(_debug_overlay)
+
+	var panel: PanelContainer = PanelContainer.new()
+	panel.position = DEBUG_PANEL_POS
+	panel.custom_minimum_size = DEBUG_PANEL_MIN_SIZE
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var bg: StyleBoxFlat = StyleBoxFlat.new()
+	bg.bg_color = Color(0.05, 0.05, 0.08, 0.82)
+	bg.set_content_margin_all(8.0)
+	bg.set_corner_radius_all(4)
+	panel.add_theme_stylebox_override("panel", bg)
+	_debug_overlay.add_child(panel)
+
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 4)
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(vbox)
+
+	var help: Label = _make_debug_label(DEBUG_HELP_TEXT, Color(1.0, 0.92, 0.45))
+	vbox.add_child(help)
+
+	_debug_state_label = _make_debug_label("", Color(0.62, 0.92, 1.0))
+	vbox.add_child(_debug_state_label)
+
+	_debug_status_label = _make_debug_label("", Color(0.82, 0.86, 0.92))
+	vbox.add_child(_debug_status_label)
+
+
+func _make_debug_label(text: String, color: Color) -> Label:
+	var label: Label = Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", DEBUG_FONT_SIZE)
+	label.add_theme_color_override("font_color", color)
+	label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
+	label.add_theme_constant_override("outline_size", 2)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return label
+
+
+func _process(_delta: float) -> void:
+	if debug_harness_enabled and _debug_overlay != null and not _battle_over:
+		_refresh_debug_overlay()
+
+
+func _refresh_debug_overlay() -> void:
+	if _debug_state_label == null or _debug_status_label == null:
+		return
+	var status: Dictionary = tactical_manager.debug_get_status()
+	var det_text: String = "开" if bool(status.get("deterministic", false)) else "关"
+	_debug_state_label.text = "确定性: %s   暴击: %s   木桩: %s" % [
+		det_text,
+		str(status.get("crit_mode", "随机")),
+		str(status.get("dummy_behavior", "不动")),
+	]
+	_debug_status_label.text = _build_debug_unit_status()
+
+
+func _build_debug_unit_status() -> String:
+	var unit: Unit = tactical_manager.debug_get_focus_unit()
+	if unit == null:
+		return "(无聚焦单位)"
+	var lines: PackedStringArray = []
+	lines.append("%s  HP %d/%d" % [unit.unit_name, unit.stats.hp, unit.stats.max_hp])
+	if unit._qi_max > 0:
+		lines.append("剑气 %d/%d   印记 %s" % [
+			unit.sword_qi, unit._qi_max, _format_marks(unit)])
+	lines.append("Buff: " + _format_buffs(unit))
+	lines.append("冷却: " + _format_cooldowns(unit))
+	return "\n".join(lines)
+
+
+func _format_marks(unit: Unit) -> String:
+	var held: PackedStringArray = []
+	for mark_key: String in ["心", "道", "势"]:
+		if bool(unit.marks.get(mark_key, false)):
+			held.append(mark_key)
+	if held.is_empty():
+		return "无"
+	return "".join(held)
+
+
+func _format_buffs(unit: Unit) -> String:
+	if unit.buffs.is_empty():
+		return "无"
+	var parts: PackedStringArray = []
+	for buff: BuffEffect in unit.buffs:
+		if buff.duration > 0:
+			parts.append("%s(%d)" % [buff.buff_id, buff.duration])
+		else:
+			parts.append(buff.buff_id)
+	return ", ".join(parts)
+
+
+func _format_cooldowns(unit: Unit) -> String:
+	if unit.skill_cooldowns.is_empty():
+		return "无"
+	var parts: PackedStringArray = []
+	for skill_id_value: Variant in unit.skill_cooldowns.keys():
+		var skill_id: String = str(skill_id_value)
+		parts.append("%s:%d" % [skill_id, int(unit.skill_cooldowns[skill_id])])
+	return ", ".join(parts)

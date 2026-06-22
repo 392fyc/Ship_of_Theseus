@@ -47,6 +47,18 @@ var _move_committed: bool = false
 var _combat_forecast: Dictionary = {}
 var _targeting_origin_state: InputState = InputState.IDLE
 
+# ── 调试 harness（测试场景专用，默认全关，不影响正式战斗）──────────
+# 确定性开关：开时所有敌对结算强制命中 + 暴击三态可控。
+enum CritMode { RANDOM, FORCE, DISABLE }
+enum DummyBehavior { IDLE, COUNTER_ONLY, AUTO }
+## 总开关：仅测试场景在 _ready 置 true；false 时所有调试行为 inert，正式战斗不受影响。
+var debug_harness_active: bool = false
+var debug_deterministic: bool = false
+var debug_crit_mode: CritMode = CritMode.RANDOM
+var debug_dummy_behavior: DummyBehavior = DummyBehavior.IDLE
+# 记录初始站位，供软重置回位（spawn 时填充）。
+var _debug_spawn_positions: Dictionary = {}
+
 
 func _ready() -> void:
 	turn_manager.turn_started.connect(_on_turn_started)
@@ -254,6 +266,8 @@ func spawn_unit(class_id: String, spawn_pos: Vector2i,
 	unit.position = grid.grid_to_world(spawn_pos)
 	grid.place_unit(unit, spawn_pos)
 	units.append(unit)
+	# 记录初始站位（调试软重置回位用），不影响正式流程。
+	_debug_spawn_positions[unit.get_instance_id()] = spawn_pos
 	unit.unit_died.connect(_on_unit_died.bind(unit))
 	return unit
 
@@ -316,6 +330,17 @@ func _on_round_ended() -> void:
 func _do_enemy_turn(unit: Unit) -> void:
 	await get_tree().create_timer(0.3).timeout
 	if not battle_active or turn_manager.current_unit != unit:
+		return
+
+	# ── 调试木桩行为开关：仅 AUTO 走正式敌方 AI；IDLE / COUNTER_ONLY 不主动行动 ──
+	# （反击仍由 _execute_hostile_action 的现有机制处理，不受此开关影响。）
+	# 门控：debug_harness_active=false（正式战斗）时跳过木桩逻辑，直接走敌方 AI。
+	if debug_harness_active and debug_dummy_behavior != DummyBehavior.AUTO:
+		print("[AI] %s: dummy behavior=%s (no proactive action)" % [
+			unit.unit_name, _debug_dummy_behavior_label()])
+		if battle_active and unit.stats.is_alive() \
+				and turn_manager.current_unit == unit:
+			turn_manager.end_current_turn()
 		return
 
 	var actions: Array[GameAction] = EnemyAI.decide_actions(unit, grid, units)
@@ -1775,7 +1800,27 @@ func _build_hostile_action_context(attacker: Unit, defender: Unit,
 	action_data["terrain_def_bonus"] = int(terrain_context.get("terrain_def_bonus", 0))
 	action_data["terrain_res_bonus"] = int(terrain_context.get("terrain_res_bonus", 0))
 	action_data["defender_terrain_name"] = str(terrain_context.get("terrain_name", "PLAIN"))
+	_apply_debug_determinism(action_data)
 	return action_data
+
+
+## 调试确定性开关注入（默认关 → 原样返回，不影响正式战斗）。
+## 开时：强制命中 + 暴击三态。复用 damage_calculator 现有 guaranteed_hit/
+## guaranteed_crit/disable_crit 字段，与 headless 确定性一致。
+func _apply_debug_determinism(action_data: Dictionary) -> void:
+	if not debug_harness_active or not debug_deterministic:
+		return
+	action_data["guaranteed_hit"] = true
+	match debug_crit_mode:
+		CritMode.FORCE:
+			action_data["guaranteed_crit"] = true
+			action_data["disable_crit"] = false
+		CritMode.DISABLE:
+			action_data["guaranteed_crit"] = false
+			action_data["disable_crit"] = true
+		_:
+			# RANDOM：不改写暴击字段，保留技能原有 guaranteed_crit（如居合）。
+			pass
 
 
 func _build_basic_attack_action_data(attacker: Unit, defender: Unit,
@@ -2039,3 +2084,136 @@ func _apply_sword_qi_on_hit(attacker: Unit,
 			attacker.skill_cooldowns[origin_skill_id] = new_cd
 		print("[SwordQi] %s %s CD %d→%d on kill" % [
 			attacker.unit_name, origin_skill_id, current_cd, new_cd])
+
+
+# ── 调试 harness 公开 API（测试场景调用，正式战斗不触达）────────────
+
+## 一键软重置：复位所有单位（满血/资源/印记/buff/冷却/站位）+ 回合状态，
+## 比 reload_current_scene 快（不重新加载场景/不重建节点）。
+func debug_soft_reset() -> void:
+	# 1) 清交互与高亮，回到 IDLE
+	_clear_hover_state()
+	_clear_highlights()
+	_clear_dashboard_state()
+	# 2) 逐单位复位
+	for u in units:
+		_debug_reset_unit(u)
+	# 3) 重置回合队列并从头开始（玩家回合开始）
+	if battle_active:
+		turn_manager.stop()
+		var typed_units: Array[Unit] = []
+		for u in units:
+			typed_units.append(u)
+		turn_manager.add_units(typed_units)
+		turn_manager.start()
+	_emit_dashboard_state_changed()
+	print("[Debug] soft reset done (%d units)" % units.size())
+
+
+## 复位单个单位：HP 满 / 剑气回职业初始 / 清印记 / 清 buff / 清冷却 / 回初始站位。
+func _debug_reset_unit(unit: Unit) -> void:
+	if unit == null or unit.stats == null:
+		return
+	# HP 满
+	unit.stats.hp = unit.stats.max_hp
+	# 行动经济复位
+	unit.reset_action_resources()
+	# 清冷却
+	unit.skill_cooldowns.clear()
+	# 清 buff（逐个 remove_buff，触发 unapply 还原属性修正）
+	var buff_snapshot: Array[BuffEffect] = unit.buffs.duplicate()
+	for buff: BuffEffect in buff_snapshot:
+		unit.remove_buff(buff)
+	# 剑圣资源：剑气回职业初始值 + 清印记（非剑圣 _qi_max==0，set_sword_qi 安全空操作）
+	if unit._qi_max > 0:
+		unit.clear_marks()
+		var initial_qi: int = _debug_get_initial_qi(unit)
+		unit.set_sword_qi(initial_qi)
+	# 回初始站位
+	_debug_restore_spawn_position(unit)
+	unit.modulate = Color.WHITE
+	unit.refresh_status_icons()
+	unit._update_health_bar()
+
+
+## 从职业 JSON 的 sword_qi_config.qi_initial 读初始剑气（不硬编码）。
+func _debug_get_initial_qi(unit: Unit) -> int:
+	var source_data: Dictionary = _get_unit_source_data(unit)
+	var cfg: Dictionary = source_data.get("sword_qi_config", {})
+	return clampi(int(cfg.get("qi_initial", 0)), 0, unit._qi_max)
+
+
+## 把单位移回 spawn 时记录的初始格（格子被占则跳过，避免覆盖）。
+func _debug_restore_spawn_position(unit: Unit) -> void:
+	var key: int = unit.get_instance_id()
+	if not _debug_spawn_positions.has(key):
+		return
+	var spawn_pos: Vector2i = _debug_spawn_positions[key]
+	if not grid.is_valid(spawn_pos):
+		return
+	var from: Vector2i = unit.grid_position
+	if from == spawn_pos:
+		return
+	var dest_cell: Cell = grid.get_cell(spawn_pos)
+	if dest_cell != null and dest_cell.occupant != null and dest_cell.occupant != unit:
+		return
+	grid.move_unit(unit, from, spawn_pos)
+	unit.position = grid.grid_to_world(spawn_pos)
+
+
+## 切换确定性开关（开/关），返回新状态。
+func debug_toggle_deterministic() -> bool:
+	debug_deterministic = not debug_deterministic
+	return debug_deterministic
+
+
+## 循环切换暴击三态（随机 → 必暴 → 不暴 → 随机），返回新态。
+func debug_cycle_crit_mode() -> CritMode:
+	debug_crit_mode = ((debug_crit_mode + 1) % 3) as CritMode
+	return debug_crit_mode
+
+
+## 循环切换木桩行为（不动 → 只反击 → 自动攻击 → 不动），返回新态。
+func debug_cycle_dummy_behavior() -> DummyBehavior:
+	debug_dummy_behavior = ((debug_dummy_behavior + 1) % 3) as DummyBehavior
+	return debug_dummy_behavior
+
+
+func debug_crit_mode_label() -> String:
+	match debug_crit_mode:
+		CritMode.FORCE:
+			return "必暴"
+		CritMode.DISABLE:
+			return "不暴"
+		_:
+			return "随机"
+
+
+func _debug_dummy_behavior_label() -> String:
+	match debug_dummy_behavior:
+		DummyBehavior.COUNTER_ONLY:
+			return "只反击"
+		DummyBehavior.AUTO:
+			return "自动攻击"
+		_:
+			return "不动"
+
+
+## 汇总当前调试开关状态（供 overlay 显示）。
+func debug_get_status() -> Dictionary:
+	return {
+		"deterministic": debug_deterministic,
+		"crit_mode": debug_crit_mode_label(),
+		"dummy_behavior": _debug_dummy_behavior_label(),
+	}
+
+
+## 当前应在 overlay 详细展示的单位（行动/选中/检视单位，缺省 null）。
+func debug_get_focus_unit() -> Unit:
+	if _inspected_unit != null and _inspected_unit.stats.is_alive():
+		return _inspected_unit
+	if selected_unit != null and selected_unit.stats.is_alive():
+		return selected_unit
+	if current_unit != null and current_unit.stats.is_alive():
+		return current_unit
+	return null

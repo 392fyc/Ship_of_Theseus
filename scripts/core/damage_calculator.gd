@@ -53,6 +53,9 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	var allow_crit: bool = true
 	if is_pure and not action_data.get("enable_pure_crit", false):
 		allow_crit = false
+	# disable_crit（调试确定性开关「不暴」态）：纯加法分支，默认 false 不影响正式战斗。
+	if bool(action_data.get("disable_crit", false)):
+		allow_crit = false
 	if allow_crit:
 		var guaranteed_crit: bool = bool(action_data.get("guaranteed_crit", false))
 		if guaranteed_crit:
@@ -112,7 +115,9 @@ static func preview_attack(attacker: Unit, defender: Unit,
 
 	var crit_rate: float = 0.0
 	var is_pure: bool = (damage_type == "pure")
-	if not (is_pure and not action_data.get("enable_pure_crit", false)):
+	var crit_blocked: bool = (is_pure and not action_data.get("enable_pure_crit", false)) \
+		or bool(action_data.get("disable_crit", false))
+	if not crit_blocked:
 		var guaranteed_crit: bool = bool(action_data.get("guaranteed_crit", false))
 		if guaranteed_crit:
 			crit_rate = 1.0
