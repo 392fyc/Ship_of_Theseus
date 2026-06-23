@@ -307,7 +307,7 @@ const DEBUG_OVERLAY_LAYER: int = 50
 const DEBUG_PANEL_POS: Vector2 = Vector2(12.0, 12.0)
 const DEBUG_PANEL_MIN_SIZE: Vector2 = Vector2(232.0, 0.0)
 const DEBUG_FONT_SIZE: int = 12
-const DEBUG_HELP_TEXT: String = "[调试 Harness]  R 软重置  F 确定性  C 暴击态  B 木桩行为"
+const DEBUG_HELP_TEXT: String = "[调试 Harness]  R 软重置  F 确定性  C 暴击态  B 木桩行为｜技能 1-4 选中后点目标格执行"
 
 
 func _register_debug_actions() -> void:
@@ -450,5 +450,12 @@ func _format_cooldowns(unit: Unit) -> String:
 	var parts: PackedStringArray = []
 	for skill_id_value: Variant in unit.skill_cooldowns.keys():
 		var skill_id: String = str(skill_id_value)
-		parts.append("%s:%d" % [skill_id, int(unit.skill_cooldowns[skill_id])])
+		var skill_name: String = _skill_display_name(skill_id)
+		parts.append("%s:%d" % [skill_name, int(unit.skill_cooldowns[skill_id])])
 	return ", ".join(parts)
+
+
+## 把裸 skill_id 映射为技能中文名（从技能数据读 name，不硬编码）。
+func _skill_display_name(skill_id: String) -> String:
+	var skill_data: Dictionary = tactical_manager._get_skill_data(skill_id)
+	return str(skill_data.get("name", skill_id))

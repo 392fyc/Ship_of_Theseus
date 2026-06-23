@@ -84,6 +84,10 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 
 	final_dmg *= relic_multiplier * final_multiplier
 
+	# ── 区域溅射衰减（如拔刀 splash_damage_pct）──────────
+	# area_damage_multiplier 默认 1.0（向后兼容），溅射目标由调用方设为 0.5 等。
+	final_dmg *= float(action_data.get("area_damage_multiplier", 1.0))
+
 	# ── Step 5: Calculate final damage (caller applies) ─
 	result.damage = maxi(0, roundi(final_dmg))
 	result.defender_died = defender.stats.hp <= result.damage
@@ -131,6 +135,8 @@ static func preview_attack(attacker: Unit, defender: Unit,
 		terrain_def_bonus, terrain_res_bonus)
 	var final_damage: float = base_damage * skill_multiplier * terrain_multiplier
 	final_damage *= relic_multiplier * final_multiplier
+	# 区域溅射衰减（与 resolve_attack 一致，保证 forecast == 实际伤害）。
+	final_damage *= float(action_data.get("area_damage_multiplier", 1.0))
 
 	var dmg_int: int = maxi(0, roundi(final_damage))
 	return {

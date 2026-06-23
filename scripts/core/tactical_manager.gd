@@ -648,11 +648,11 @@ func _recalculate_hover_artifacts() -> void:
 			and not _is_waiting_for_line_direction() \
 			and _hover_cell in _attack_cells:
 		var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
-		var area_data: Dictionary = skill_data.get("area", {})
 		var area_direction: Vector2i = _get_skill_area_direction(
 			current_unit.grid_position, _hover_cell, skill_data)
-		_area_preview_cells = AreaCalculator.calculate_cells(
-			grid, _hover_cell, area_data, area_direction)
+		_area_preview_cells = _compute_skill_area_cells(
+			current_unit, skill_data, _hover_cell, area_direction)
+		_combat_forecast = _build_skill_forecast_for_hover(_hover_cell)
 	_emit_dashboard_state_changed()
 
 
@@ -1183,6 +1183,112 @@ func _build_attack_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 		"terrain_res_bonus": int(preview.get("terrain_res_bonus", 0)),
 	}
 
+
+## 技能瞄准 forecast：对 area 内每个敌方单位跑 preview_attack，按项⑤溅射规则汇总。
+## 字段集与 _build_attack_forecast_for_hover 完全同名 → 现有 dashboard 渲染零改动吃下。
+func _build_skill_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
+	if current_unit == null or input_state != InputState.SKILL_TARGETING:
+		return {}
+	if _selected_skill_id == "" or _is_waiting_for_line_direction():
+		return {}
+	if grid_pos not in _attack_cells:
+		return {}
+	var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
+	if skill_data.is_empty():
+		return {}
+	# self / 支援（招架等）技能不做伤害 forecast。
+	if _is_support_skill(skill_data) \
+			or str(skill_data.get("range", {}).get("type", "")) == "self":
+		return {}
+
+	var area_direction: Vector2i = _get_skill_area_direction(
+		current_unit.grid_position, grid_pos, skill_data)
+	var area_cells: Array[Vector2i] = _compute_skill_area_cells(
+		current_unit, skill_data, grid_pos, area_direction)
+	var target_units: Array[Unit] = _get_units_in_skill_area(
+		current_unit, skill_data, area_cells)
+	if target_units.is_empty():
+		return {}
+
+	var splash_pct: int = int(skill_data.get("splash_damage_pct", 100))
+	# 用 _build_skill_action 构造 payload，保证 forecast 与执行字段一致。
+	var action: GameAction = _build_skill_action(current_unit, grid_pos, null)
+	if action == null:
+		return {}
+	var base_payload: Dictionary = action.data
+
+	var total_damage: int = 0
+	var hit_count: int = 0
+	var primary_name: String = ""
+	var primary_per_hit: int = 0
+	var primary_hit_percent: int = 0
+	var primary_crit_percent: int = 0
+	var primary_counter: bool = false
+	var primary_terrain_name: String = "PLAIN"
+	var primary_terrain_evade: int = 0
+	var primary_terrain_def: int = 0
+	var primary_terrain_res: int = 0
+	var first_per_hit: int = 0
+	var has_first: bool = false
+
+	for target_unit: Unit in target_units:
+		var per_target: Dictionary = base_payload.duplicate(true)
+		if target_unit.grid_position == grid_pos:
+			per_target["area_damage_multiplier"] = 1.0
+		else:
+			per_target["area_damage_multiplier"] = float(splash_pct) / 100.0
+		var preview_data: Dictionary = _build_hostile_action_context(
+			current_unit, target_unit, per_target)
+		var preview: Dictionary = DamageCalculator.preview_attack(
+			current_unit, target_unit, preview_data)
+		var dmg: int = int(preview.get("damage", 0))
+		total_damage += dmg
+		hit_count += 1
+		if not has_first:
+			has_first = true
+			first_per_hit = dmg
+			primary_name = target_unit.unit_name
+			primary_per_hit = dmg
+			primary_hit_percent = int(preview.get("hit_percent", 0))
+			primary_crit_percent = int(preview.get("crit_percent", 0))
+			primary_counter = _can_counterattack(preview_data, target_unit, current_unit)
+			primary_terrain_name = str(preview.get("terrain_name", "PLAIN"))
+			primary_terrain_evade = int(preview.get("terrain_evade_bonus", 0))
+			primary_terrain_def = int(preview.get("terrain_def_bonus", 0))
+			primary_terrain_res = int(preview.get("terrain_res_bonus", 0))
+		if target_unit.grid_position == grid_pos:
+			# 主目标覆盖首项展示（命中/暴击/per_hit 以主目标为准）。
+			primary_name = target_unit.unit_name
+			primary_per_hit = dmg
+			primary_hit_percent = int(preview.get("hit_percent", 0))
+			primary_crit_percent = int(preview.get("crit_percent", 0))
+			primary_counter = _can_counterattack(preview_data, target_unit, current_unit)
+			primary_terrain_name = str(preview.get("terrain_name", "PLAIN"))
+			primary_terrain_evade = int(preview.get("terrain_evade_bonus", 0))
+			primary_terrain_def = int(preview.get("terrain_def_bonus", 0))
+			primary_terrain_res = int(preview.get("terrain_res_bonus", 0))
+
+	if primary_per_hit == 0 and not has_first:
+		primary_per_hit = first_per_hit
+
+	return {
+		"visible": true,
+		"target_name": primary_name,
+		"hit_percent": primary_hit_percent,
+		"crit_percent": primary_crit_percent,
+		"damage": total_damage,
+		"hit_count": hit_count,
+		"per_hit_damage": primary_per_hit,
+		"total_damage": total_damage,
+		"damage_type": str(base_payload.get("damage_type", "physical")),
+		"is_heal": false,
+		"counter_expected": primary_counter,
+		"terrain_name": primary_terrain_name,
+		"terrain_evade_bonus": primary_terrain_evade,
+		"terrain_def_bonus": primary_terrain_def,
+		"terrain_res_bonus": primary_terrain_res,
+	}
+
 # ── Action execution ─────────────────────────────────
 
 func _execute_move(unit: Unit, target: Vector2i) -> void:
@@ -1285,11 +1391,16 @@ func _execute_skill_action(action: GameAction) -> bool:
 	if area_cells.is_empty():
 		area_direction = _get_skill_area_direction(
 			user.grid_position, target_pos, skill_data)
-		area_cells = AreaCalculator.calculate_cells(
-			grid, target_pos, skill_data.get("area", {}), area_direction)
+		area_cells = _compute_skill_area_cells(
+			user, skill_data, target_pos, area_direction)
 	var target_units: Array[Unit] = _get_units_in_skill_area(
 		user, skill_data, area_cells)
 	if not _is_ground_target_skill(skill_data) and target_units.is_empty():
+		return false
+
+	# 位移技能落点二次校验（双保险）：消耗资源前拦截无效落点 → 零消耗。
+	if bool(skill_data.get("displacement", false)) \
+			and not _is_displacement_landing_valid(user, target_pos):
 		return false
 
 	var action_cost: String = str(skill_data.get("action_cost", "standard"))
@@ -1327,6 +1438,7 @@ func _execute_skill_action(action: GameAction) -> bool:
 			target_pos,
 		])
 	else:
+		var splash_pct: int = int(skill_data.get("splash_damage_pct", 100))
 		for target_unit: Unit in target_units:
 			if not _can_execute_hostile_action(user, target_unit):
 				continue
@@ -1335,7 +1447,13 @@ func _execute_skill_action(action: GameAction) -> bool:
 				skill_name,
 				target_unit.unit_name,
 			])
-			_execute_hostile_action(user, target_unit, hostile_payload)
+			# 主目标（落点格单位）吃满；其余溅射目标按 splash_damage_pct 衰减（JSON 驱动）。
+			var per_target_payload: Dictionary = hostile_payload.duplicate(true)
+			if target_unit.grid_position == target_pos:
+				per_target_payload["area_damage_multiplier"] = 1.0
+			else:
+				per_target_payload["area_damage_multiplier"] = float(splash_pct) / 100.0
+			_execute_hostile_action(user, target_unit, per_target_payload)
 
 	# ── 位移技能（如一闪）：施放后落在所选目标格 ──
 	if bool(skill_data.get("displacement", false)):
@@ -1430,6 +1548,9 @@ func _can_confirm_skill_target(grid_pos: Vector2i) -> bool:
 	if grid_pos not in _attack_cells:
 		return false
 	var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
+	# 位移技能（如一闪）：落点必须可落，否则不允许释放（点击无反应、不扣资源）。
+	if bool(skill_data.get("displacement", false)):
+		return _is_displacement_landing_valid(current_unit, grid_pos)
 	if _is_ground_target_skill(skill_data):
 		return true
 	var target_unit: Unit = grid.get_unit_at(grid_pos)
@@ -1663,6 +1784,51 @@ func _get_skill_area_direction(origin: Vector2i, target_pos: Vector2i,
 	return RangeCalculator.direction_from_to(origin, target_pos)
 
 
+## 位移技能（如一闪）的受伤格：从 origin 到 landing 沿笛卡尔直线的途经格。
+## 不含起点；含中途格；含落点。一闪 range=line→方向为 cardinal，路径为直线段。
+func _get_displacement_path_cells(origin: Vector2i, landing: Vector2i) -> Array[Vector2i]:
+	var path_cells: Array[Vector2i] = []
+	if origin == landing:
+		return path_cells
+	var delta: Vector2i = landing - origin
+	var step: Vector2i = Vector2i(signi(delta.x), signi(delta.y))
+	if step == Vector2i.ZERO:
+		return path_cells
+	var cursor: Vector2i = origin + step
+	# 安全上界：以曼哈顿/切比雪夫距离为界，避免非共线导致死循环。
+	var guard: int = absi(delta.x) + absi(delta.y) + 1
+	while guard > 0:
+		if grid != null and grid.is_valid(cursor):
+			path_cells.append(cursor)
+		if cursor == landing:
+			break
+		cursor += step
+		guard -= 1
+	return path_cells
+
+
+## 统一计算技能受伤格：displacement 技能用位移路径替换 AreaCalculator，
+## 其余按 area 形状（拔刀菱形/居合 single）。三处调用方共用此函数避免分叉。
+func _compute_skill_area_cells(user: Unit, skill_data: Dictionary,
+		target_pos: Vector2i, direction: Vector2i) -> Array[Vector2i]:
+	if user != null and bool(skill_data.get("displacement", false)):
+		return _get_displacement_path_cells(user.grid_position, target_pos)
+	return AreaCalculator.calculate_cells(
+		grid, target_pos, skill_data.get("area", {}), direction)
+
+
+## displacement 技能落点有效性：复用 _apply_skill_displacement 的同条件。
+func _is_displacement_landing_valid(user: Unit, landing: Vector2i) -> bool:
+	if user == null or not grid.is_valid(landing):
+		return false
+	if landing == user.grid_position:
+		return false
+	var cell: Cell = grid.get_cell(landing)
+	if cell == null or not cell.is_passable() or cell.occupant != null:
+		return false
+	return true
+
+
 func _build_skill_action(user: Unit, target_pos: Vector2i,
 		target: Unit) -> GameAction:
 	if user == null or _selected_skill_id == "":
@@ -1674,8 +1840,8 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 	var area_type: String = str(area_data.get("type", "single"))
 	var area_direction: Vector2i = _get_skill_area_direction(
 		user.grid_position, target_pos, skill_data)
-	var affected_cells: Array[Vector2i] = AreaCalculator.calculate_cells(
-		grid, target_pos, area_data, area_direction)
+	var affected_cells: Array[Vector2i] = _compute_skill_area_cells(
+		user, skill_data, target_pos, area_direction)
 	var is_area_skill: bool = area_type != "single"
 	var basic_attack_profile: Dictionary = _get_unit_basic_attack_profile(user)
 	var payload: Dictionary = {

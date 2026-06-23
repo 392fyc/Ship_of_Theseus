@@ -14,10 +14,10 @@
   "qi_cost": 0,
   "qi_gain_on_hit": 1,
   "qi_gain_on_kill": 0,
-  "mark_gain": 0,
+  "mark_gain": 1,
   "mark_cost": 0,
   "requires_marks": 0,
   "guaranteed_crit": false,
   "guaranteed_hit": false,
-  "description": "距1，100%物理。命中+1剑气。转职后命中随机获得一个未持有印记（转职功能暂未实装，见qi_gain_on_hit注释）。"
+  "description": "距1，100%物理。命中+1剑气，并随机获得一枚当前未持有的印记（剑圣为转职后职业，斩击=印记蓄势起点；已满3印记时不再获得）。"
 }
