@@ -43,6 +43,25 @@ func _run() -> void:
 		_finish()
 		return
 
+	# 项A：测试场改 test_arena 全空地 → 抽样若干格 terrain 均为 PLAIN(0)，特殊地形为空
+	var grid: Object = tm.grid
+	_check("grid 存在", grid != null)
+	if grid != null and grid.width > 0 and grid.height > 0:
+		var all_plain: bool = true
+		var no_special: bool = true
+		for sample: Vector2i in [
+			Vector2i(0, 0), Vector2i(3, 3), Vector2i(7, 7), Vector2i(0, 7), Vector2i(7, 0),
+		]:
+			var c: Object = grid.get_cell(sample)
+			if c == null:
+				continue
+			if int(c.terrain) != 0:
+				all_plain = false
+			if not (c.special_terrain as Dictionary).is_empty():
+				no_special = false
+		_check("test_arena → 抽样格 terrain 全 PLAIN(0)", all_plain)
+		_check("test_arena → 抽样格无特殊地形", no_special)
+
 	# 调试 API 存在性
 	_check("debug_soft_reset 方法存在", tm.has_method("debug_soft_reset"))
 	_check("debug_toggle_deterministic 方法存在", tm.has_method("debug_toggle_deterministic"))

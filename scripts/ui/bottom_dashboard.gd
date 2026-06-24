@@ -164,6 +164,56 @@ class XPBar extends Control:
 		draw_rect(Rect2(0.0, 0.0, w, h), XP_BORDER_C, false, 1.0)
 
 
+## 印记方块（心/道/势）：持有→金框金字、未持→灰；满 3 态微放大 28px（对齐 spec §8.2）。
+class MarkBlock extends Control:
+	var key_text: String = "心"
+	var held: bool = false
+	var full_state: bool = false
+
+	const W: float = 24.0
+	const H_NORMAL: float = 24.0
+	const H_FULL: float = 28.0
+	const C_HELD_BG: Color = Color(0.102, 0.078, 0.063, 1.0)       # #1a1410
+	const C_HELD_BG_FULL: Color = Color(0.165, 0.125, 0.055, 1.0)  # #2a200e
+	const C_EMPTY_BG: Color = Color(0.051, 0.039, 0.078, 1.0)      # #0d0a14
+	const C_GOLD_BRIGHT: Color = Color(0.878, 0.749, 0.282, 1.0)
+	const C_TEXT_DIM: Color = Color(0.361, 0.361, 0.400, 1.0)
+	const C_TEXT_BRIGHT: Color = Color(1.0, 0.949, 0.812, 1.0)
+
+	func _ready() -> void:
+		refresh()
+
+	## 持有/满态变化后调用：更新尺寸（满 3 态高 28）并重绘。
+	func refresh() -> void:
+		var h: float = H_FULL if (full_state and held) else H_NORMAL
+		custom_minimum_size = Vector2(W, h)
+		queue_redraw()
+
+	func _draw() -> void:
+		var h: float = H_FULL if (full_state and held) else H_NORMAL
+		var r: Rect2 = Rect2(0.0, 0.0, W, h)
+		var bg: Color
+		var edge: Color
+		var txt_col: Color
+		var edge_w: float
+		if held:
+			bg = C_HELD_BG_FULL if full_state else C_HELD_BG
+			edge = C_GOLD_BRIGHT
+			txt_col = C_TEXT_BRIGHT if full_state else C_GOLD_BRIGHT
+			edge_w = 1.6 if full_state else 1.2
+		else:
+			bg = C_EMPTY_BG
+			edge = C_TEXT_DIM
+			txt_col = C_TEXT_DIM
+			edge_w = 1.2
+		draw_rect(r, bg)
+		draw_rect(r, edge, false, edge_w)
+		var fnt: Font = ThemeDB.fallback_font
+		var fs: int = 13
+		var tw: float = fnt.get_string_size(key_text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		draw_string(fnt, Vector2((W - tw) * 0.5, h * 0.5 + 5.0), key_text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, txt_col)
+
+
 const PORTRAIT_W: float = 78.0
 const PORTRAIT_H: float = 104.0
 const RELIC_PANEL_W: float = 96.0
@@ -280,9 +330,15 @@ var _item_popup_panel: PanelContainer = null
 var _item_popup_list: VBoxContainer = null
 
 # ── 剑圣资源显示（sword_qi + marks）────────────────────
+# v3：剑气纯文本 → SwordQiBar 分段条；印记 Label → MarkBlock 方块（24/28px）。
+# 用 preload 引用 SwordQiBar（headless --script 不刷新全局 class_name 缓存）。
+const SwordQiBarScript: GDScript = preload("res://scripts/ui/sword_qi_bar.gd")
+const SWORD_QI_DEFAULT_THRESHOLD: int = 7  # state 缺省时回退（逻辑值优先从 state 读）
 var _sword_qi_row: HBoxContainer = null
-var _sword_qi_label: Label = null
-var _mark_labels: Dictionary = {}
+var _sword_qi_label: Label = null         # 数值标签 "0/10"（保留：条上方右对齐）
+var _sword_qi_bar: Control = null         # SwordQiBar 实例（v3 分段条）
+var _mark_blocks: Dictionary = {}         # mark_key -> MarkBlock 方块
+var _mark_labels: Dictionary = {}         # 兼容保留（不再使用，避免外部潜在引用断裂）
 
 
 func _ready() -> void:
@@ -526,41 +582,64 @@ func _build_stats_area(parent: VBoxContainer) -> void:
 	for stat_pair: Array in stat_keys_2:
 		_build_stat_cell(grid2, stat_pair)
 
-	# ── 剑圣专属资源行（剑气 + 印记）────────────────────
+	# ── 剑圣专属资源区（v3：剑气分段条 + 印记方块）────────────────
+	# 外层仍是 _sword_qi_row（HBoxContainer，对外可见性入口不变），
+	# 内部改竖排：① 剑气标题+数值行 ② SwordQiBar 分段条 ③ 印记标题+方块行。
 	_sword_qi_row = HBoxContainer.new()
-	_sword_qi_row.add_theme_constant_override("separation", 4)
+	_sword_qi_row.add_theme_constant_override("separation", 0)
 	_sword_qi_row.visible = false
 	parent.add_child(_sword_qi_row)
 
+	var qi_col: VBoxContainer = VBoxContainer.new()
+	qi_col.add_theme_constant_override("separation", 2)
+	qi_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_sword_qi_row.add_child(qi_col)
+
+	# ① 剑气标题（左）+ 数值（右），同一行
+	var head_row: HBoxContainer = HBoxContainer.new()
+	head_row.add_theme_constant_override("separation", 4)
+	head_row.custom_minimum_size = Vector2(SwordQiBarScript.BAR_W, 0.0)
+	qi_col.add_child(head_row)
+
 	var qi_abbr: Label = Label.new()
 	qi_abbr.text = "剑气"
+	qi_abbr.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	qi_abbr.add_theme_font_size_override("font_size", 9)
 	qi_abbr.add_theme_color_override("font_color", COLOR_STAT_ABBR)
-	_sword_qi_row.add_child(qi_abbr)
+	head_row.add_child(qi_abbr)
 
 	_sword_qi_label = Label.new()
 	_sword_qi_label.text = "0/10"
+	_sword_qi_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_sword_qi_label.add_theme_font_size_override("font_size", 9)
 	_sword_qi_label.add_theme_color_override("font_color", COLOR_TEXT_MAIN)
-	_sword_qi_row.add_child(_sword_qi_label)
+	head_row.add_child(_sword_qi_label)
 
-	var mark_sep: Control = Control.new()
-	mark_sep.custom_minimum_size = Vector2(6.0, 0.0)
-	_sword_qi_row.add_child(mark_sep)
+	# ② 剑气分段条（SwordQiBar 自绘：10 格 + 阈值线 + <7淡蓝/≥7紫 颜色突变）
+	_sword_qi_bar = SwordQiBarScript.new()
+	_sword_qi_bar.custom_minimum_size = Vector2(
+		SwordQiBarScript.BAR_W, SwordQiBarScript.BAR_H + 14.0)
+	_sword_qi_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	qi_col.add_child(_sword_qi_bar)
+
+	# ③ 印记标题（左）+ 心/道/势 方块（右）
+	var mark_row: HBoxContainer = HBoxContainer.new()
+	mark_row.add_theme_constant_override("separation", 5)
+	qi_col.add_child(mark_row)
 
 	var mark_abbr: Label = Label.new()
-	mark_abbr.text = "印"
+	mark_abbr.text = "印记"
+	mark_abbr.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	mark_abbr.add_theme_font_size_override("font_size", 9)
 	mark_abbr.add_theme_color_override("font_color", COLOR_STAT_ABBR)
-	_sword_qi_row.add_child(mark_abbr)
+	mark_row.add_child(mark_abbr)
 
 	for mark_key: String in ["心", "道", "势"]:
-		var mark_lbl: Label = Label.new()
-		mark_lbl.text = mark_key
-		mark_lbl.add_theme_font_size_override("font_size", 9)
-		mark_lbl.add_theme_color_override("font_color", Color(0.45, 0.46, 0.50, 1.0))
-		_sword_qi_row.add_child(mark_lbl)
-		_mark_labels[mark_key] = mark_lbl
+		var block: MarkBlock = MarkBlock.new()
+		block.key_text = mark_key
+		block.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		mark_row.add_child(block)
+		_mark_blocks[mark_key] = block
 
 
 func _build_stat_cell(parent: GridContainer, stat: Array) -> void:
@@ -672,14 +751,14 @@ func _build_action_shell() -> PanelContainer:
 	row.add_theme_constant_override("separation", ACTION_BAR_GAP)
 	margin.add_child(row)
 
-	_attack_button = _build_action_button("attack")
+	# 攻击按钮已删（B2）：攻击入口改由斩击槽(键1) + 点敌直接普攻路径承接。
+	# _attack_button 保持 null；attack_requested 信号声明保留（红线）。
 	_skill_button = _build_action_button("skill")
 	_skill_button.toggle_mode = true
 	_item_button = _build_action_button("item")
 	_item_button.toggle_mode = true
 	_end_button = _build_action_button("end")
 
-	row.add_child(_attack_button)
 	row.add_child(_skill_button)
 	row.add_child(_item_button)
 
@@ -694,12 +773,10 @@ func _build_action_shell() -> PanelContainer:
 
 	row.add_child(_end_button)
 
-	_button_nodes["attack"] = _attack_button
 	_button_nodes["skill"] = _skill_button
 	_button_nodes["item"] = _item_button
 	_button_nodes["end"] = _end_button
 
-	_attack_button.pressed.connect(_on_attack_pressed)
 	_skill_button.pressed.connect(_on_skill_button_pressed)
 	_item_button.pressed.connect(_on_item_button_pressed)
 	_end_button.pressed.connect(_on_end_button_pressed)
@@ -977,24 +1054,21 @@ func _build_avatar_text(unit_name: String, unit_label: String) -> String:
 
 
 func _update_buttons(buttons: Dictionary, show_skills: bool) -> void:
-	var attack_visible: bool = bool(buttons.get("attack_visible", true))
+	# 攻击按钮已删（B2）：attack_visible/attack_disabled/attack_reason 不再驱动 UI 节点。
 	var skill_visible: bool = bool(buttons.get("skill_visible", true))
 	var item_visible: bool = bool(buttons.get("item_visible", true))
 	var end_turn_visible: bool = bool(buttons.get("end_turn_visible", false))
 	var end_move_visible: bool = bool(buttons.get("end_move_visible", false))
 
-	_attack_button.visible = attack_visible
 	_skill_button.visible = skill_visible
 	_item_button.visible = item_visible
 	_end_button.visible = end_turn_visible or end_move_visible
 	_end_divider.visible = _end_button.visible
 
-	_attack_button.disabled = bool(buttons.get("attack_disabled", false))
 	_skill_button.disabled = bool(buttons.get("skill_disabled", false))
 	_item_button.disabled = false
 	_end_button.disabled = _get_end_button_disabled(buttons)
 
-	_attack_button.tooltip_text = str(buttons.get("attack_reason", ""))
 	_skill_button.tooltip_text = str(buttons.get("skill_reason", ""))
 	_item_button.tooltip_text = str(buttons.get("item_reason", ""))
 	_end_button.tooltip_text = _get_end_button_tooltip(buttons)
@@ -1087,12 +1161,12 @@ func _layout_dashboard() -> void:
 		maxf(PANEL_MARGIN, _relic_panel.position.x + RELIC_PANEL_W - FORECAST_PANEL_SIZE.x),
 		info_pos.y - FORECAST_PANEL_SIZE.y - FORECAST_GAP_Y)
 
-	# Skill popup: above action shell, shifted left
+	# B1 技能栏：屏幕底部水平居中常驻（横排方槽平铺，不再贴 action shell 弹出）。
 	var skill_sz: Vector2 = _skill_bar.get_combined_minimum_size()
 	_skill_bar.size = skill_sz
-	var popup_x: float = clampf(action_pos.x - 96.0, PANEL_MARGIN, vp_w - skill_sz.x - PANEL_MARGIN)
-	var popup_y: float = action_pos.y - skill_sz.y - POPUP_GAP_Y
-	_skill_bar.position = Vector2(popup_x, popup_y)
+	var skill_x: float = clampf(vp_w * 0.5 - skill_sz.x * 0.5, PANEL_MARGIN, vp_w - skill_sz.x - PANEL_MARGIN)
+	var skill_y: float = vp_h - skill_sz.y - PANEL_MARGIN + offset_y
+	_skill_bar.position = Vector2(skill_x, skill_y)
 
 	# Item popup: above action shell
 	_item_popup.position = Vector2(
@@ -1199,19 +1273,42 @@ func _update_sword_qi_display(state: Dictionary) -> void:
 		return
 	var sword_qi: int = int(state.get("sword_qi", -1))
 	var sword_qi_max: int = int(state.get("sword_qi_max", 0))
+	# 非剑圣单位（sword_qi<0 或 max<=0）→ 整区隐藏（沿用现逻辑）。
 	if sword_qi < 0 or sword_qi_max <= 0:
 		_sword_qi_row.visible = false
 		return
 	_sword_qi_row.visible = true
+
+	# 阈值（速度+1）从 state 读，缺省回退 SWORD_QI_DEFAULT_THRESHOLD（逻辑值不硬编码优先）。
+	var qi_cfg: Dictionary = state.get("sword_qi_config", {})
+	var threshold: int = int(qi_cfg.get("speed_threshold", SWORD_QI_DEFAULT_THRESHOLD))
+
+	# 数值标签（条上方右对齐）：达标紫亮 / 未达标主色。
+	var reached: bool = sword_qi >= threshold
 	_sword_qi_label.text = "%d/%d" % [sword_qi, sword_qi_max]
+	_sword_qi_label.add_theme_color_override("font_color",
+		SwordQiBarScript.QI_HIGH_GLOW if reached else COLOR_TEXT_MAIN)
+
+	# 分段条
+	if _sword_qi_bar != null:
+		_sword_qi_bar.sword_qi = sword_qi
+		_sword_qi_bar.sword_qi_max = sword_qi_max
+		_sword_qi_bar.threshold = threshold
+
+	# 印记方块：满 3 态微放大；按持有刷新金框/灰。
 	var marks_data: Dictionary = state.get("marks", {})
+	var held_count: int = 0
 	for mark_key: String in ["心", "道", "势"]:
-		var lbl: Label = _mark_labels.get(mark_key, null) as Label
-		if lbl == null:
+		if bool(marks_data.get(mark_key, false)):
+			held_count += 1
+	var full: bool = held_count >= 3
+	for mark_key: String in ["心", "道", "势"]:
+		var block: MarkBlock = _mark_blocks.get(mark_key, null) as MarkBlock
+		if block == null:
 			continue
-		var held: bool = bool(marks_data.get(mark_key, false))
-		lbl.add_theme_color_override("font_color",
-			Color(0.88, 0.75, 0.28, 1.0) if held else Color(0.45, 0.46, 0.50, 1.0))
+		block.held = bool(marks_data.get(mark_key, false))
+		block.full_state = full
+		block.refresh()
 
 
 func _make_shell_style(bg_color: Color, border_color: Color) -> StyleBoxFlat:

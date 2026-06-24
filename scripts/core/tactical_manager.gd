@@ -118,7 +118,8 @@ func get_dashboard_data() -> Dictionary:
 		"phase_text": _get_phase_text(),
 		"show_actions": not is_enemy_info and _is_player_turn_active(),
 		"buttons": _build_primary_button_state(),
-		"skills_visible": _skill_bar_expanded and not is_enemy_info and _is_player_turn_active(),
+		# B1：技能栏玩家回合常驻（去掉 _skill_bar_expanded 闸；施放后不再自动隐藏）。
+		"skills_visible": not is_enemy_info and _is_player_turn_active(),
 		"skills": _get_skill_entries(),
 		"selected_skill_id": _selected_skill_id,
 		"forecast": _combat_forecast.duplicate(true),
@@ -144,7 +145,25 @@ func get_dashboard_data() -> Dictionary:
 		"sword_qi": info_unit.sword_qi if info_unit._qi_max > 0 else -1,
 		"sword_qi_max": info_unit._qi_max,
 		"marks": info_unit.marks.duplicate() if info_unit._qi_max > 0 else {},
+		# 剑气分段条阈值（速度+1）供 UI 读，纯加法（缺省由 UI 侧回退 7）。
+		"sword_qi_config": {
+			"speed_threshold": info_unit._xinyan_speed_threshold,
+		} if info_unit._qi_max > 0 else {},
 	}
+
+
+## 当前悬停格的世界坐标（供浮窗定位）。纯只读 helper、纯加法。
+## 无有效悬停格时返回 has=false；调用方据此隐藏浮窗。
+func get_hover_world_pos() -> Dictionary:
+	if not _has_hover_cell or not grid.is_valid(_hover_cell):
+		return {"has": false, "world": Vector2.ZERO}
+	return {"has": true, "world": grid.grid_to_world(_hover_cell)}
+
+
+## 是否处于攻击/技能瞄准态（供浮窗只在瞄准时显示）。纯只读 helper。
+func is_targeting_active() -> bool:
+	return input_state == InputState.ATTACK_TARGETING \
+		or input_state == InputState.SKILL_TARGETING
 
 
 func request_skill_selection(skill_id: String) -> void:

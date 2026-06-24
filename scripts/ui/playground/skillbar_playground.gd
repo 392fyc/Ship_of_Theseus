@@ -20,7 +20,7 @@ extends Control
 # 新组件用 preload 引用（headless --script 不刷新全局 class_name 缓存；
 # class_name 仍在各自文件里声明，编辑器内/批 4 可全局引用）。
 const GothFrameScript: GDScript = preload("res://scripts/ui/playground/goth_frame.gd")
-const SwordQiBarScript: GDScript = preload("res://scripts/ui/playground/sword_qi_bar.gd")
+const SwordQiBarScript: GDScript = preload("res://scripts/ui/sword_qi_bar.gd")
 
 # ── 五区框尺寸（对齐 mockup SVG 坐标，整条高 ~118）──
 const BAR_H: float = 118.0

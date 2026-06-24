@@ -6,8 +6,17 @@ extends Node2D
 @onready var result_label: Label = $UILayer/ResultLabel
 @onready var return_button: Button = $UILayer/ReturnButton
 
+# 伤害预测浮窗脚本用 preload 引用（headless --script 不刷新全局 class_name 缓存；
+# class_name DamageForecaster 仍在文件内声明，编辑器/真机可全局引用）。
+const DamageForecasterScript: GDScript = preload("res://scripts/ui/damage_forecaster.gd")
+
 var _turn_order_bar: TurnOrderBar = null
 var _bottom_dashboard: BottomDashboard = null
+# 伤害预测浮窗（v3）：浮于悬停目标格上方，独立 CanvasLayer 宿主（屏幕空间）。
+var _forecaster_layer: CanvasLayer = null
+var _damage_forecaster: Control = null
+# 浮窗锚到目标格上方的纵向间距（格中心上方留出 ~半格 + 浮窗高 + 三角）。
+const FORECASTER_ANCHOR_OFFSET_Y: float = 36.0
 var _camera: Camera2D = null
 var _is_panning: bool = false
 var _pan_button: int = -1
@@ -63,7 +72,7 @@ func _ready() -> void:
 		_register_debug_actions()
 		tactical_manager.debug_harness_active = true
 	_setup_camera()
-	tactical_manager.initialize_battle("forest_01")
+	tactical_manager.initialize_battle("test_arena")
 
 	for cfg: Dictionary in PLAYER_UNITS:
 		var pos: Vector2i = cfg["pos"]
@@ -81,6 +90,7 @@ func _ready() -> void:
 	$UILayer.add_child(_turn_order_bar)
 	_bottom_dashboard = _bottom_dashboard_scene.instantiate()
 	$UILayer.add_child(_bottom_dashboard)
+	_build_damage_forecaster()
 	tactical_manager.turn_manager.queue_changed.connect(_refresh_turn_order)
 	tactical_manager.turn_manager.turn_started.connect(_on_turn_changed)
 	tactical_manager.turn_manager.turn_ended.connect(_on_turn_changed)
@@ -191,6 +201,58 @@ func _refresh_dashboard() -> void:
 	if _bottom_dashboard == null:
 		return
 	_bottom_dashboard.update_state(tactical_manager.get_dashboard_data())
+	_update_damage_forecaster()
+
+
+# ── 伤害预测浮窗（浮于悬停目标格上方）─────────────────────
+# 宿主独立 CanvasLayer（屏幕空间），仅瞄准态 + forecast.visible 时显示；
+# 位置 = 悬停格世界坐标 → 经相机 canvas 变换转屏幕坐标。
+
+func _build_damage_forecaster() -> void:
+	_forecaster_layer = CanvasLayer.new()
+	# 在 UILayer 之上，确保浮窗压住战场但不挡底栏交互（浮窗自身 mouse ignore）。
+	_forecaster_layer.layer = 6
+	add_child(_forecaster_layer)
+	_damage_forecaster = DamageForecasterScript.new()
+	_damage_forecaster.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_damage_forecaster.visible = false
+	_forecaster_layer.add_child(_damage_forecaster)
+
+
+func _update_damage_forecaster() -> void:
+	if _damage_forecaster == null:
+		return
+	var data: Dictionary = tactical_manager.get_dashboard_data()
+	var forecast: Dictionary = data.get("forecast", {})
+	var show: bool = tactical_manager.is_targeting_active() \
+		and bool(forecast.get("visible", false))
+	if not show:
+		_damage_forecaster.visible = false
+		return
+	var hover: Dictionary = tactical_manager.get_hover_world_pos()
+	if not bool(hover.get("has", false)):
+		_damage_forecaster.visible = false
+		return
+
+	_damage_forecaster.set_forecast(forecast)
+	var world: Vector2 = hover.get("world", Vector2.ZERO)
+	var screen: Vector2 = _world_to_screen(world)
+	# 锚到目标格上方：x 居中浮窗、底部三角尖对准格中心上方。
+	var panel_size: Vector2 = DamageForecasterScript.PANEL_SIZE
+	var pos: Vector2 = Vector2(
+		screen.x - panel_size.x * 0.5,
+		screen.y - FORECASTER_ANCHOR_OFFSET_Y - panel_size.y - DamageForecasterScript.TRIANGLE_H)
+	# 夹在视口内，避免出界（顶端/左右）。
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	pos.x = clampf(pos.x, 4.0, maxf(4.0, vp.x - panel_size.x - 4.0))
+	pos.y = maxf(4.0, pos.y)
+	_damage_forecaster.position = pos
+	_damage_forecaster.visible = true
+
+
+## 世界坐标 → 屏幕坐标（经视口 canvas 变换，含相机平移/缩放）。
+func _world_to_screen(world_pos: Vector2) -> Vector2:
+	return get_viewport().get_canvas_transform() * world_pos
 
 
 func _on_unit_killed(unit: Unit) -> void:
