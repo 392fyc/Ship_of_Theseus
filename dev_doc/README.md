@@ -1,67 +1,31 @@
-> ⚠️ **归档说明**：本目录（`dev_doc/`）已归档。设计文档的正本已迁移至 Obsidian 知识库：
-> `D:\ShipOfTheseus\ShipOfTheseus-KB\01-Game-Design\`（GitHub: `392fyc/Ship_of_Theseus-KB`）
-> 此目录保留用于 git 历史追溯，请勿在此继续更新文档。
+# dev_doc — 设计文档已迁移至 KB（单一真源）
 
-# 战棋Roguelite — 游戏设计总纲
+> **2026-06-24 起，本目录的设计文档（01–12 / game-design-doc / design-roadmap / class-system / module-relations 等）已移除。**
+> 设计**正本（canonical）**统一在 Obsidian KB Vault：`D:\ShipOfTheseus\ShipOfTheseus-KB\`
+> 移除前经**逐文件审计**确认：KB 是这些 dev_doc 的 canonical 超集/等价，原 dev_doc 的"独有"内容均为**已被 KB 主动取代的旧设计**（旧属性模型 / holy→pure / 格挡乘区 / 追击 / 魔法师旧四系等），无有效内容丢失。
 
-## 项目概览
+## 正本位置（KB 相对路径）
 
-| 项目属性 | 决策 |
-|---------|------|
-| 类型 | 战棋RPG + Roguelite |
-| 引擎 | Godot 4 (GDScript) |
-| 玩家人数 | 单机1人 / 联机1-4人 |
-| 画风 | GBA像素（初期跳过，先搭系统） |
-| 开发方式 | Vibe Coding + AI素材生成 |
+| 主题 | KB 路径 |
+|---|---|
+| 回合系统 | `01-Game-Design/Core-Systems/turn-system.md` |
+| 网格与地图 | `01-Game-Design/Core-Systems/grid-and-map.md` |
+| 战斗计算 | `01-Game-Design/Core-Systems/battle-calculation.md` |
+| 敌人与 AI | `01-Game-Design/Core-Systems/enemy-and-ai.md` |
+| 技能与射程 | `01-Game-Design/skills-and-range.md` |
+| 职业系统 | `01-Game-Design/Characters/class-system.md` |
+| 天赋树 | `01-Game-Design/Characters/talent-tree.md`（设计源已转 **Codex 卡片工具** sot.fyc-space.uk / NAS DB）|
+| Run 循环 | `01-Game-Design/Progression/run-loop.md` |
+| 城镇建设 | `01-Game-Design/Progression/town-building.md` |
+| 数据架构 | `01-Game-Design/Technical/data-architecture.md` |
+| 联机 | `01-Game-Design/Technical/network.md` |
+| 里程碑 | `02-Development/Milestones/current-milestone.md` |
+| 路线图 | `02-Development/design-roadmap.md` |
+| 游戏设计总纲 | `01-Game-Design/game-design-doc.md` |
+| 模块关系 | `03-AI-Context/module-relations.md` |
 
-## 核心设计决策
+KB 读写走 `obsidian_*` MCP 或 `/sot-kb-write`（禁 PowerShell 写入，BOM 问题）。
 
-- **网格**：正方形网格，地图≤10×10
-- **回合制**：速度轮动制（CTB），每个单位按速度轮流行动
-- **联机**：每人控制1个角色，轮动操作，同一时刻只有1个单位行动
-- **核心循环**：杀戮尖塔式一次Run打多关
-- **核心机制**：武器/技能射程与范围、职业/Build多样性、地形效果
+## 仍保留在 repo 的
 
----
-
-## 产品目录
-
-以下为各系统的详细设计文档：
-
-### 核心战斗系统
-| 文档 | 内容 | 状态 |
-|------|------|------|
-| [01-回合系统](./01-turn-system.md) | CT轮动制、行动顺序、CT消耗权衡 | ✅ 初稿 |
-| [02-网格与地图](./02-grid-and-map.md) | 网格定义、地形、高低差、寻路 | ✅ 初稿 |
-| [03-战斗计算](./03-battle-calculation.md) | 属性体系、伤害公式、命中判定 | ✅ 初稿 |
-| [04-技能与射程](./04-skills-and-range.md) | 武器/技能定义、射程模式、AOE范围 | ✅ 初稿 |
-
-### 角色与成长
-| 文档 | 内容 | 状态 |
-|------|------|------|
-| [05-职业系统](./05-class-system.md) | 职业定义、基础职业、Build构成 | ✅ 初稿 |
-| [06-敌人与AI](./06-enemy-and-ai.md) | AI行为模式、决策流程、分批入场 | ✅ 初稿 |
-
-### Roguelite框架
-| 文档 | 内容 | 状态 |
-|------|------|------|
-| [07-Run循环](./07-run-loop.md) | Run流程、路径选择、奖励系统、Meta进度 | ✅ 初稿 |
-
-### 技术架构
-| 文档 | 内容 | 状态 |
-|------|------|------|
-| [08-联机架构](./08-network.md) | 指令同步模型、GameAction驱动、联机适配 | ✅ 初稿 |
-| [09-数据架构](./09-data-architecture.md) | 数据驱动设计、JSON结构规范、项目目录 | ✅ 初稿 |
-
-### 开发计划
-| 文档 | 内容 | 状态 |
-|------|------|------|
-| [10-开发里程碑](./10-milestones.md) | 分阶段开发计划、任务清单 | ✅ 初稿 |
-
----
-
-## 文档维护说明
-
-- 各分文档独立维护，修改时更新本文档对应状态
-- 状态标记：📋 规划中 → ✅ 初稿 → 🔄 迭代中 → ✅ 定稿
-- 开发过程中新增系统时，在此目录添加新条目
+- `skillbar-design/` —— 剑圣技能栏 v3 UI 设计稿（`skillbar-spec.md` + `skillbar-mockup.html`），批4 锁定参考，KB 暂无对应。
