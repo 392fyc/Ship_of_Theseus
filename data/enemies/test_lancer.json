@@ -1,0 +1,25 @@
+{
+  "id": "test_lancer",
+  "name": "枪兵",
+  "base_stats": {
+    "HP": 26,
+    "STR": 8,
+    "MAG": 2,
+    "DEX": 6,
+    "SPD": 6,
+    "LCK": 3,
+    "DEF": 7,
+    "RES": 3
+  },
+  "MOV": 4,
+  "VIS": 3,
+  "attack_type": "melee",
+  "weapon_might": 6,
+  "weapon_hit": 85,
+  "weapon_crit": 0,
+  "damage_type": "physical",
+  "basic_attack_range": { "min": 1, "max": 1 },
+  "skill_ids": [],
+  "ai_behavior": "AGGRESSIVE",
+  "description": "测试用·火纹枪兵：近战物理，均衡偏肉，逼近后贴脸攻击。数值为测试占位（可调）。"
+}

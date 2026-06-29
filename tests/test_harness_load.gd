@@ -69,6 +69,30 @@ func _run() -> void:
 	_check("debug_cycle_dummy_behavior 方法存在", tm.has_method("debug_cycle_dummy_behavior"))
 	_check("debug_get_status 方法存在", tm.has_method("debug_get_status"))
 
+	# 受击场景敌人列表：火纹三系（枪兵/弓箭手/法师）spawn + 攻击距离档校验
+	var enemy_list: Array = []
+	for u in tm.units:
+		if u.faction == "enemy":
+			enemy_list.append(u)
+	_eq("敌人列表 spawn 5 个（含两木桩）", enemy_list.size(), 5)
+	var by_id: Dictionary = {}
+	for u in enemy_list:
+		by_id[u.unit_id] = u
+	_check("敌人含 枪兵 test_lancer", by_id.has("test_lancer"))
+	_check("敌人含 弓箭手 test_archer", by_id.has("test_archer"))
+	_check("敌人含 法师 test_mage", by_id.has("test_mage"))
+	_check("敌人含 不灭木桩 test_dummy_regen", by_id.has("test_dummy_regen"))
+	_check("敌人含 复活木桩 test_dummy_revive", by_id.has("test_dummy_revive"))
+	if by_id.has("test_lancer"):
+		_eq("枪兵 近战距 min1", int(by_id["test_lancer"].attack_min_range), 1)
+		_eq("枪兵 近战距 max1", int(by_id["test_lancer"].attack_range), 1)
+	if by_id.has("test_archer"):
+		_eq("弓箭手 远程距 min2", int(by_id["test_archer"].attack_min_range), 2)
+		_eq("弓箭手 远程距 max3", int(by_id["test_archer"].attack_range), 3)
+	if by_id.has("test_mage"):
+		_eq("法师 距 min1", int(by_id["test_mage"].attack_min_range), 1)
+		_eq("法师 距 max2", int(by_id["test_mage"].attack_range), 2)
+
 	# 软重置：先扰动单位状态，再 reset 应复位
 	var sword: Unit = _find_swordsman(tm)
 	if sword != null:

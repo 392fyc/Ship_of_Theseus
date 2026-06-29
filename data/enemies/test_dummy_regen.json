@@ -1,0 +1,26 @@
+{
+  "id": "test_dummy_regen",
+  "name": "不灭木桩",
+  "base_stats": {
+    "HP": 999,
+    "STR": 2,
+    "MAG": 0,
+    "DEX": 2,
+    "SPD": 1,
+    "LCK": 0,
+    "DEF": 2,
+    "RES": 2
+  },
+  "MOV": 1,
+  "VIS": 1,
+  "attack_type": "melee",
+  "weapon_might": 1,
+  "weapon_hit": 50,
+  "weapon_crit": 0,
+  "damage_type": "physical",
+  "basic_attack_range": { "min": 1, "max": 1 },
+  "skill_ids": [],
+  "ai_behavior": "IDLE",
+  "dummy_mode": "regen",
+  "description": "测试用·不灭木桩：HP 999，每回合末自动回满血，用于持续输出/资源回复持续性测试。AI 不主动逼近。"
+}

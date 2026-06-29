@@ -1,0 +1,25 @@
+{
+  "id": "test_mage",
+  "name": "法师",
+  "base_stats": {
+    "HP": 20,
+    "STR": 2,
+    "MAG": 9,
+    "DEX": 5,
+    "SPD": 5,
+    "LCK": 4,
+    "DEF": 3,
+    "RES": 7
+  },
+  "MOV": 3,
+  "VIS": 3,
+  "attack_type": "ranged",
+  "weapon_might": 5,
+  "weapon_hit": 88,
+  "weapon_crit": 0,
+  "damage_type": "magical",
+  "basic_attack_range": { "min": 1, "max": 2 },
+  "skill_ids": [],
+  "ai_behavior": "AGGRESSIVE",
+  "description": "测试用·火纹法师：魔法伤害（距1-2，近远兼可），低物防高魔抗。数值为测试占位（可调）。"
+}

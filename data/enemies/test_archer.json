@@ -1,0 +1,25 @@
+{
+  "id": "test_archer",
+  "name": "弓箭手",
+  "base_stats": {
+    "HP": 22,
+    "STR": 7,
+    "MAG": 2,
+    "DEX": 8,
+    "SPD": 8,
+    "LCK": 4,
+    "DEF": 4,
+    "RES": 3
+  },
+  "MOV": 4,
+  "VIS": 4,
+  "attack_type": "ranged",
+  "weapon_might": 5,
+  "weapon_hit": 85,
+  "weapon_crit": 5,
+  "damage_type": "physical",
+  "basic_attack_range": { "min": 2, "max": 3 },
+  "skill_ids": [],
+  "ai_behavior": "AGGRESSIVE",
+  "description": "测试用·火纹弓箭手：远程物理（距2-3），玻璃炮；近身（距1）无法攻击/反击。数值为测试占位（可调）。"
+}
