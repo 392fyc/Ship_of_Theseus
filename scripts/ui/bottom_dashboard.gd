@@ -228,12 +228,10 @@ const STAT_CELL_W: float = 44.0
 const STAT_CELL_H: float = 16.0
 const STAT_GRID_SEP: int = 1
 const STATS_SECTION_SEP: int = 3
-const FORECAST_PANEL_SIZE: Vector2 = Vector2(220.0, 80.0)
 const ITEM_POPUP_SIZE: Vector2 = Vector2(330.0, 284.0)
 const PANEL_MARGIN: float = 12.0
 const PANEL_PAD: int = 8
 const POPUP_GAP_Y: float = 8.0
-const FORECAST_GAP_Y: float = 8.0
 const SHOW_ANIM_TIME: float = 0.25
 const HIDE_ANIM_TIME: float = 0.20
 const DASH_OFFSET_Y: float = 24.0
@@ -249,8 +247,6 @@ const COLOR_TEXT_MUTE: Color = Color(0.45, 0.46, 0.50, 1.0)
 const COLOR_HP_LABEL: Color = Color(0.50, 0.78, 0.55, 1.0)
 const COLOR_SHIELD_LABEL: Color = Color(0.50, 0.72, 0.90, 1.0)
 const COLOR_HP_BG: Color = Color(0.04, 0.05, 0.10, 1.0)
-const COLOR_FORECAST_BG: Color = Color(0.06, 0.06, 0.12, 0.94)
-const COLOR_FORECAST_BORDER: Color = Color(0.72, 0.58, 0.28, 0.70)
 const COLOR_PORTRAIT_BG: Color = Color(0.02, 0.03, 0.07, 1.0)
 const COLOR_PORTRAIT_BORDER: Color = Color(0.72, 0.58, 0.28, 1.0)
 const COLOR_POPUP_BG: Color = Color(0.09, 0.06, 0.14, 0.88)
@@ -312,9 +308,6 @@ var _hp_bar: HPShieldBar = null
 var _stat_value_labels: Array[Label] = []
 
 var _relic_panel: PanelContainer = null
-var _forecast_panel: PanelContainer = null
-var _forecast_title: Label = null
-var _forecast_body: Label = null
 
 var _action_shell: PanelContainer = null
 var _attack_button: Button = null
@@ -404,7 +397,6 @@ func update_state(state: Dictionary) -> void:
 	if show_skills and _item_popup_open:
 		_set_item_popup_visible(false)
 
-	_update_forecast(state.get("forecast", {}), is_enemy_mode)
 	_update_sword_qi_display(state)
 	_layout_dashboard()
 
@@ -415,9 +407,6 @@ func _build_ui() -> void:
 
 	_relic_panel = _build_relic_panel()
 	add_child(_relic_panel)
-
-	_forecast_panel = _build_forecast_panel()
-	add_child(_forecast_panel)
 
 	_action_shell = _build_action_shell()
 	add_child(_action_shell)
@@ -698,39 +687,6 @@ func _build_relic_panel() -> PanelContainer:
 		mark.add_theme_font_size_override("font_size", 12)
 		mark.add_theme_color_override("font_color", COLOR_TEXT_SUB)
 		slot_center.add_child(mark)
-
-	return panel
-
-
-func _build_forecast_panel() -> PanelContainer:
-	var panel: PanelContainer = PanelContainer.new()
-	panel.visible = false
-	panel.custom_minimum_size = FORECAST_PANEL_SIZE
-	panel.size = FORECAST_PANEL_SIZE
-	panel.add_theme_stylebox_override("panel", _make_forecast_style())
-
-	var margin: MarginContainer = MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 8)
-	margin.add_theme_constant_override("margin_right", 8)
-	margin.add_theme_constant_override("margin_top", 7)
-	margin.add_theme_constant_override("margin_bottom", 7)
-	panel.add_child(margin)
-
-	var column: VBoxContainer = VBoxContainer.new()
-	column.add_theme_constant_override("separation", 3)
-	margin.add_child(column)
-
-	_forecast_title = Label.new()
-	_forecast_title.text = "战斗预测"
-	_forecast_title.add_theme_font_size_override("font_size", 11)
-	_forecast_title.add_theme_color_override("font_color", COLOR_GOLD)
-	column.add_child(_forecast_title)
-
-	_forecast_body = Label.new()
-	_forecast_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_forecast_body.add_theme_font_size_override("font_size", 9)
-	_forecast_body.add_theme_color_override("font_color", COLOR_TEXT_MAIN)
-	column.add_child(_forecast_body)
 
 	return panel
 
@@ -1091,46 +1047,10 @@ func _get_end_button_tooltip(buttons: Dictionary) -> String:
 	return str(buttons.get("end_turn_reason", ""))
 
 
-func _update_forecast(forecast_variant: Variant, is_enemy_mode: bool) -> void:
-	if is_enemy_mode or not (forecast_variant is Dictionary):
-		_forecast_panel.visible = false
-		return
-
-	var forecast: Dictionary = forecast_variant
-	if not bool(forecast.get("visible", false)):
-		_forecast_panel.visible = false
-		return
-
-	var terrain_parts: PackedStringArray = []
-	var terrain_evade_bonus: int = int(forecast.get("terrain_evade_bonus", 0))
-	var terrain_def_bonus: int = int(forecast.get("terrain_def_bonus", 0))
-	var terrain_res_bonus: int = int(forecast.get("terrain_res_bonus", 0))
-	if terrain_evade_bonus > 0:
-		terrain_parts.append("回避+%d" % terrain_evade_bonus)
-	if terrain_def_bonus > 0:
-		terrain_parts.append("防御+%d" % terrain_def_bonus)
-	if terrain_res_bonus > 0:
-		terrain_parts.append("魔防+%d" % terrain_res_bonus)
-	var terrain_summary: String = "无加成"
-	if not terrain_parts.is_empty():
-		terrain_summary = " ".join(terrain_parts)
-
-	_forecast_panel.visible = true
-	_forecast_body.text = "%s\n命中 %d%%  暴击 %d%%\n预计伤害 %d  预计反击 %s\n地形 %s  %s" % [
-		str(forecast.get("target_name", "")),
-		int(forecast.get("hit_percent", 0)),
-		int(forecast.get("crit_percent", 0)),
-		int(forecast.get("damage", 0)),
-		"是" if bool(forecast.get("counter_expected", false)) else "否",
-		str(forecast.get("terrain_name", "PLAIN")),
-		terrain_summary,
-	]
-
-
 func _layout_dashboard() -> void:
 	if not is_node_ready():
 		return
-	if _info_panel == null or _relic_panel == null or _action_shell == null or _skill_bar == null or _item_popup == null or _forecast_panel == null:
+	if _info_panel == null or _relic_panel == null or _action_shell == null or _skill_bar == null or _item_popup == null:
 		return
 
 	var vp_h: float = size.y
@@ -1156,11 +1076,6 @@ func _layout_dashboard() -> void:
 	var action_pos: Vector2 = Vector2(vp_w - action_sz.x - PANEL_MARGIN, vp_h - action_sz.y - PANEL_MARGIN + offset_y)
 	_action_shell.position = action_pos
 
-	# Forecast: above the relic/info area
-	_forecast_panel.position = Vector2(
-		maxf(PANEL_MARGIN, _relic_panel.position.x + RELIC_PANEL_W - FORECAST_PANEL_SIZE.x),
-		info_pos.y - FORECAST_PANEL_SIZE.y - FORECAST_GAP_Y)
-
 	# B1 技能栏：屏幕底部水平居中常驻（横排方槽平铺，不再贴 action shell 弹出）。
 	var skill_sz: Vector2 = _skill_bar.get_combined_minimum_size()
 	_skill_bar.size = skill_sz
@@ -1172,6 +1087,16 @@ func _layout_dashboard() -> void:
 	_item_popup.position = Vector2(
 		clampf(action_pos.x - 96.0, PANEL_MARGIN, vp_w - ITEM_POPUP_SIZE.x - PANEL_MARGIN),
 		action_pos.y - ITEM_POPUP_SIZE.y - POPUP_GAP_Y)
+
+
+## 浮动浮窗避让用：底栏内容区最高顶边 Y（取可见底部面板的最小 position.y）。
+## tactical_scene 的伤害预测浮窗据此上移，避免压住人物属性栏（反馈 2026-06-29）。
+func get_content_top_y() -> float:
+	var result: float = size.y
+	for p: Control in [_info_panel, _relic_panel, _action_shell, _skill_bar]:
+		if p != null and p.visible:
+			result = minf(result, p.position.y)
+	return result
 
 
 func _set_dashboard_visible(should_show: bool) -> void:
@@ -1344,18 +1269,6 @@ func _make_relic_slot_style() -> StyleBoxFlat:
 	style.set_corner_radius_all(14)
 	style.shadow_color = Color(0.0, 0.0, 0.0, 0.18)
 	style.shadow_size = 3
-	return style
-
-
-func _make_forecast_style() -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = COLOR_FORECAST_BG
-	style.border_color = COLOR_FORECAST_BORDER
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(4)
-	style.shadow_color = COLOR_PANEL_SHADOW
-	style.shadow_size = 8
-	style.shadow_offset = Vector2(0.0, 3.0)
 	return style
 
 

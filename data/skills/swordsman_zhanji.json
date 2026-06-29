@@ -19,5 +19,5 @@
   "requires_marks": 0,
   "guaranteed_crit": false,
   "guaranteed_hit": false,
-  "description": "距1，100%物理。命中+1剑气，并随机获得一枚当前未持有的印记（剑圣为转职后职业，斩击=印记蓄势起点；已满3印记时不再获得）。"
+  "description": "距离 1，造成 100% 物理伤害。命中后获得 1 点剑气，并随机获得一枚尚未持有的剑意印记（已集满 3 枚时不再获得）。"
 }

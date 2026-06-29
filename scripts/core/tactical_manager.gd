@@ -793,6 +793,8 @@ func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 		"timing_constraint": str(skill_data.get("timing_constraint", "any")),
 		"swift_limit": int(skill_data.get("swift_limit", 1)),
 		"cooldown": cooldown_turns,
+		"cooldown_max": int(skill_data.get("cooldown", 0)),
+		"description": str(skill_data.get("description", "")),
 		"available": false,
 		"reason": "",
 		"selected": skill_id == _selected_skill_id,
@@ -829,9 +831,17 @@ func _get_skill_entries() -> Array[Dictionary]:
 	var entries: Array[Dictionary] = []
 	if unit == null:
 		return entries
+	# ── 被动技能（心眼）置于技能栏最左侧（仅剑气类单位=剑圣；不可点/无键位/无冷却）──
+	var passive_entry: Dictionary = _build_passive_entry(unit)
+	if not passive_entry.is_empty():
+		entries.append(passive_entry)
 	for skill_id: String in unit.skill_ids:
-		# ── 槽位替换（数据驱动）：替换规则由技能 JSON 的 slot_swap_* 声明 ──
 		var slot_skill_data: Dictionary = _get_skill_data(skill_id)
+		# ── 槽位提供者（如拔刀 slot_swap_provider）不独立列槽：仅作其 provider 槽
+		#    （招架）满印记时的替换形态，避免一开始就常驻为第 5 个技能。──
+		if bool(slot_skill_data.get("slot_swap_provider", false)):
+			continue
+		# ── 槽位替换（数据驱动）：替换规则由技能 JSON 的 slot_swap_* 声明 ──
 		var display_id: String = unit.get_visible_skill_id(skill_id,
 			str(slot_skill_data.get("slot_swap_trigger", "")),
 			str(slot_skill_data.get("slot_swap_target", "")))
@@ -840,6 +850,29 @@ func _get_skill_entries() -> Array[Dictionary]:
 		entry["slot_origin_id"] = skill_id
 		entries.append(entry)
 	return entries
+
+
+## 心眼被动条目：技能栏最左侧、不可点、无键位、无冷却（仅剑气类=剑圣）。
+## 描述只放效果本体（名字由 UI 的悬停标题补「【心眼】（被动）」）。
+func _build_passive_entry(unit: Unit) -> Dictionary:
+	if unit._qi_max <= 0:
+		return {}
+	var desc: String = "每点剑气 +%d%% 暴击率；剑气达到 %d 时速度 +%d。" % [
+		unit._xinyan_crit_per_qi, unit._xinyan_speed_threshold, unit._xinyan_speed_bonus]
+	return {
+		"skill_id": "swordsman_xinyan",
+		"name": "心眼",
+		"is_passive": true,
+		"available": true,
+		"description": desc,
+		"reason": "",
+		"cooldown": 0,
+		"cooldown_max": 0,
+		"action_cost": "",
+		"qi_cost": 0,
+		"mark_cost": 0,
+		"slot_origin_id": "swordsman_xinyan",
+	}
 
 
 func _emit_dashboard_state_changed() -> void:
@@ -1184,22 +1217,52 @@ func _build_attack_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 		current_unit, target, action.data)
 	var preview: Dictionary = DamageCalculator.preview_attack(
 		current_unit, target, preview_data)
+	var dmg: int = int(preview.get("damage", 0))
+	var hit_pct: int = int(preview.get("hit_percent", 0))
+	var crit_pct: int = int(preview.get("crit_percent", 0))
+	var dtype: String = str(preview_data.get("damage_type", "physical"))
+	var counter: bool = _can_counterattack(preview_data, target, current_unit)
+	# 反击预算（目标→我方方向逆向计算）
+	var counter_dmg: int = 0
+	var counter_hit: int = 0
+	var counter_crit: int = 0
+	if counter:
+		var c_action: GameAction = GameAction.make_attack(target, current_unit)
+		var c_ctx: Dictionary = _build_hostile_action_context(target, current_unit, c_action.data)
+		var c_prev: Dictionary = DamageCalculator.preview_attack(target, current_unit, c_ctx)
+		counter_dmg = int(c_prev.get("damage", 0))
+		counter_hit = int(c_prev.get("hit_percent", 0))
+		counter_crit = int(c_prev.get("crit_percent", 0))
 	return {
 		"visible": true,
 		"target_name": target.unit_name,
-		"hit_percent": int(preview.get("hit_percent", 0)),
-		"crit_percent": int(preview.get("crit_percent", 0)),
-		"damage": int(preview.get("damage", 0)),
+		"hit_percent": hit_pct,
+		"crit_percent": crit_pct,
+		"damage": dmg,
 		"hit_count": int(preview.get("hit_count", 1)),
 		"per_hit_damage": int(preview.get("per_hit_damage", preview.get("damage", 0))),
 		"total_damage": int(preview.get("total_damage", preview.get("damage", 0))),
-		"damage_type": str(preview_data.get("damage_type", "physical")),
+		"damage_type": dtype,
 		"is_heal": bool(preview.get("is_heal", false)),
-		"counter_expected": _can_counterattack(preview_data, target, current_unit),
+		"counter_expected": counter,
 		"terrain_name": str(preview.get("terrain_name", "PLAIN")),
 		"terrain_evade_bonus": int(preview.get("terrain_evade_bonus", 0)),
 		"terrain_def_bonus": int(preview.get("terrain_def_bonus", 0)),
 		"terrain_res_bonus": int(preview.get("terrain_res_bonus", 0)),
+		# 新增：头顶数字 + FE 浮窗所需字段
+		"targets": [{
+			"world": grid.grid_to_world(target.grid_position),
+			"damage": dmg,
+			"damage_type": dtype,
+			"hit_percent": hit_pct,
+			"crit_percent": crit_pct,
+			"is_primary": true,
+		}],
+		"target_hp": target.stats.hp,
+		"target_hp_max": target.stats.max_hp,
+		"counter_damage": counter_dmg,
+		"counter_hit_percent": counter_hit,
+		"counter_crit_percent": counter_crit,
 	}
 
 
@@ -1249,10 +1312,14 @@ func _build_skill_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 	var primary_terrain_res: int = 0
 	var first_per_hit: int = 0
 	var has_first: bool = false
+	# 新增：每受影响目标独立条目（头顶数字 + FE 浮窗用）
+	var targets_list: Array[Dictionary] = []
+	var primary_target_unit: Unit = null
 
 	for target_unit: Unit in target_units:
 		var per_target: Dictionary = base_payload.duplicate(true)
-		if target_unit.grid_position == grid_pos:
+		var is_primary_cell: bool = target_unit.grid_position == grid_pos
+		if is_primary_cell:
 			per_target["area_damage_multiplier"] = 1.0
 		else:
 			per_target["area_damage_multiplier"] = float(splash_pct) / 100.0
@@ -1263,32 +1330,57 @@ func _build_skill_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 		var dmg: int = int(preview.get("damage", 0))
 		total_damage += dmg
 		hit_count += 1
+		var t_hit: int = int(preview.get("hit_percent", 0))
+		var t_crit: int = int(preview.get("crit_percent", 0))
+		targets_list.append({
+			"world": grid.grid_to_world(target_unit.grid_position),
+			"damage": dmg,
+			"damage_type": str(preview_data.get("damage_type", "physical")),
+			"hit_percent": t_hit,
+			"crit_percent": t_crit,
+			"is_primary": is_primary_cell,
+		})
 		if not has_first:
 			has_first = true
 			first_per_hit = dmg
 			primary_name = target_unit.unit_name
 			primary_per_hit = dmg
-			primary_hit_percent = int(preview.get("hit_percent", 0))
-			primary_crit_percent = int(preview.get("crit_percent", 0))
+			primary_hit_percent = t_hit
+			primary_crit_percent = t_crit
 			primary_counter = _can_counterattack(preview_data, target_unit, current_unit)
 			primary_terrain_name = str(preview.get("terrain_name", "PLAIN"))
 			primary_terrain_evade = int(preview.get("terrain_evade_bonus", 0))
 			primary_terrain_def = int(preview.get("terrain_def_bonus", 0))
 			primary_terrain_res = int(preview.get("terrain_res_bonus", 0))
-		if target_unit.grid_position == grid_pos:
+		if is_primary_cell:
 			# 主目标覆盖首项展示（命中/暴击/per_hit 以主目标为准）。
 			primary_name = target_unit.unit_name
 			primary_per_hit = dmg
-			primary_hit_percent = int(preview.get("hit_percent", 0))
-			primary_crit_percent = int(preview.get("crit_percent", 0))
+			primary_hit_percent = t_hit
+			primary_crit_percent = t_crit
 			primary_counter = _can_counterattack(preview_data, target_unit, current_unit)
 			primary_terrain_name = str(preview.get("terrain_name", "PLAIN"))
 			primary_terrain_evade = int(preview.get("terrain_evade_bonus", 0))
 			primary_terrain_def = int(preview.get("terrain_def_bonus", 0))
 			primary_terrain_res = int(preview.get("terrain_res_bonus", 0))
+			primary_target_unit = target_unit
 
 	if primary_per_hit == 0 and not has_first:
 		primary_per_hit = first_per_hit
+
+	# 反击预算（主目标→我方方向逆向计算）
+	var counter_dmg: int = 0
+	var counter_hit: int = 0
+	var counter_crit: int = 0
+	if primary_counter and primary_target_unit != null:
+		var c_action: GameAction = GameAction.make_attack(primary_target_unit, current_unit)
+		var c_ctx: Dictionary = _build_hostile_action_context(
+			primary_target_unit, current_unit, c_action.data)
+		var c_prev: Dictionary = DamageCalculator.preview_attack(
+			primary_target_unit, current_unit, c_ctx)
+		counter_dmg = int(c_prev.get("damage", 0))
+		counter_hit = int(c_prev.get("hit_percent", 0))
+		counter_crit = int(c_prev.get("crit_percent", 0))
 
 	return {
 		"visible": true,
@@ -1306,6 +1398,13 @@ func _build_skill_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 		"terrain_evade_bonus": primary_terrain_evade,
 		"terrain_def_bonus": primary_terrain_def,
 		"terrain_res_bonus": primary_terrain_res,
+		# 新增：头顶数字 + FE 浮窗所需字段
+		"targets": targets_list,
+		"target_hp": primary_target_unit.stats.hp if primary_target_unit != null else 0,
+		"target_hp_max": primary_target_unit.stats.max_hp if primary_target_unit != null else 1,
+		"counter_damage": counter_dmg,
+		"counter_hit_percent": counter_hit,
+		"counter_crit_percent": counter_crit,
 	}
 
 # ── Action execution ─────────────────────────────────

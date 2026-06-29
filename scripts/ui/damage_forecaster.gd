@@ -18,7 +18,7 @@ extends Control
 ##   - 治疗（is_heal）：「治疗 · +N」无命中/暴击行
 ##   - 下方 命中%（灰）/ 暴击%（橙）；命中 0% 或不可用数值置灰
 
-const PANEL_SIZE: Vector2 = Vector2(180.0, 78.0)
+const PANEL_SIZE: Vector2 = Vector2(180.0, 104.0)
 const TRIANGLE_H: float = 8.0
 
 # ── 框色（对齐 spec.md §3 / mockup 预测器）──
@@ -42,6 +42,13 @@ var _hit_percent: int = 92
 var _crit_percent: int = 35
 var _is_heal: bool = false
 var _heal_amount: int = 16
+# 新增：FE 式目标 HP + 反击行
+var _target_name: String = ""
+var _target_hp: int = 0
+var _target_hp_max: int = 1
+var _counter_damage: int = 0
+var _counter_hit_percent: int = 0
+var _counter_crit_percent: int = 0
 
 
 func _ready() -> void:
@@ -65,6 +72,13 @@ func set_forecast(forecast: Dictionary) -> void:
 		_type_color = DamagePopup.COLOR_HEAL
 		_type_name = "治疗"
 		_heal_amount = int(forecast.get("damage", forecast.get("total_damage", 0)))
+	# FE 式扩展字段
+	_target_name = str(forecast.get("target_name", ""))
+	_target_hp = int(forecast.get("target_hp", 0))
+	_target_hp_max = maxi(int(forecast.get("target_hp_max", 1)), 1)
+	_counter_damage = int(forecast.get("counter_damage", 0))
+	_counter_hit_percent = int(forecast.get("counter_hit_percent", 0))
+	_counter_crit_percent = int(forecast.get("counter_crit_percent", 0))
 	queue_redraw()
 
 
@@ -122,20 +136,29 @@ func _draw() -> void:
 	draw_line(tri[1], tri[2], EDGE_LO, 1.0)
 
 	var fnt: Font = ThemeDB.fallback_font
-	# 标题
+	# 标题行：目标名（右对齐省略） + 「伤害预测」标签
 	var title: String = "效果预测" if _is_heal else "伤害预测"
 	draw_string(fnt, Vector2(12.0, 20.0), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, C_GOLD)
+	if _target_name != "":
+		draw_string(fnt, Vector2(w - 80.0, 20.0), _target_name, HORIZONTAL_ALIGNMENT_LEFT, 76, 9, C_TEXT_SUB)
+
+	# HP 行：「HP 当前/最大」
+	var hp_text: String = "HP %d/%d" % [_target_hp, _target_hp_max]
+	draw_string(fnt, Vector2(12.0, 33.0), hp_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, C_TEXT_SUB)
+
 	# 类型徽标（小圆点）
-	draw_circle(Vector2(20.0, 36.0), 5.0, _type_color)
+	draw_circle(Vector2(20.0, 48.0), 5.0, _type_color)
 	if _type_color == DamagePopup.COLOR_PHYS:
 		# 物理白点描灰圈，避免与暗底糊在一起
-		draw_arc(Vector2(20.0, 36.0), 5.0, 0.0, TAU, 16, Color(0.5, 0.5, 0.5, 1.0), 1.0, true)
+		draw_arc(Vector2(20.0, 48.0), 5.0, 0.0, TAU, 16, Color(0.5, 0.5, 0.5, 1.0), 1.0, true)
 
 	# 数值行
 	if _is_heal:
-		draw_string(fnt, Vector2(32.0, 40.0), "%s · +%d" % [_type_name, _heal_amount], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, _type_color)
+		draw_string(fnt, Vector2(32.0, 52.0), "%s · +%d" % [_type_name, _heal_amount], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, _type_color)
 		# 治疗无命中/暴击行
-		draw_string(fnt, Vector2(12.0, 62.0), "必定生效", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, C_TEXT_SUB)
+		draw_string(fnt, Vector2(12.0, 70.0), "必定生效", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, C_TEXT_SUB)
+		# 反击行不适用（治疗技能）
+		draw_string(fnt, Vector2(12.0, 86.0), "无反击", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, C_TEXT_DIM)
 		return
 
 	# 命中 0% 或总伤为 0（不可用）→ 数值置灰
@@ -144,23 +167,32 @@ func _draw() -> void:
 
 	if _hit_count <= 1:
 		# 单段：直接显「类型 · 数值」
-		draw_string(fnt, Vector2(32.0, 40.0), "%s · %d" % [_type_name, _per_hit], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, value_col)
+		draw_string(fnt, Vector2(32.0, 52.0), "%s · %d" % [_type_name, _per_hit], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, value_col)
 	else:
 		# 多段：类型 x × y（总值）— x/y 类型色、× 灰、总值金
 		var sep_col: Color = C_TEXT_DIM if unavailable else C_TEXT_SUB
 		var total_col: Color = C_TEXT_DIM if unavailable else C_GOLD_BRIGHT
 		var x_pos: float = 32.0
-		x_pos = _draw_run(fnt, x_pos, 40.0, _type_name + " ", 13, value_col)
-		x_pos = _draw_run(fnt, x_pos, 40.0, str(_hit_count), 13, value_col)
-		x_pos = _draw_run(fnt, x_pos + 3.0, 40.0, "×", 12, sep_col)
-		x_pos = _draw_run(fnt, x_pos + 3.0, 40.0, str(_per_hit), 13, value_col)
-		x_pos = _draw_run(fnt, x_pos + 4.0, 40.0, "(%d)" % _total, 12, total_col)
+		x_pos = _draw_run(fnt, x_pos, 52.0, _type_name + " ", 13, value_col)
+		x_pos = _draw_run(fnt, x_pos, 52.0, str(_hit_count), 13, value_col)
+		x_pos = _draw_run(fnt, x_pos + 3.0, 52.0, "×", 12, sep_col)
+		x_pos = _draw_run(fnt, x_pos + 3.0, 52.0, str(_per_hit), 13, value_col)
+		x_pos = _draw_run(fnt, x_pos + 4.0, 52.0, "(%d)" % _total, 12, total_col)
 
 	# 命中 / 暴击行（命中灰 / 暴击橙；不可用整体偏暗）
 	var hit_col: Color = C_TEXT_DIM if unavailable else C_TEXT_SUB
 	var crit_col: Color = C_TEXT_DIM if unavailable else C_CRIT
-	draw_string(fnt, Vector2(12.0, 62.0), "命中 %d%%" % _hit_percent, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, hit_col)
-	draw_string(fnt, Vector2(96.0, 62.0), "暴击 %d%%" % _crit_percent, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, crit_col)
+	draw_string(fnt, Vector2(12.0, 70.0), "命中 %d%%" % _hit_percent, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, hit_col)
+	draw_string(fnt, Vector2(96.0, 70.0), "暴击 %d%%" % _crit_percent, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, crit_col)
+
+	# 反击行（FE 式：有反击→显伤害/命中/暴击；无反击→灰显「无反击」）
+	if _counter_damage > 0 or _counter_hit_percent > 0:
+		var c_type_col: Color = DamagePopup.COLOR_PHYS  # 反击伤害用白色（物理基础攻击）
+		draw_string(fnt, Vector2(12.0, 86.0),
+			"反击 %d  命中%d%%  暴击%d%%" % [_counter_damage, _counter_hit_percent, _counter_crit_percent],
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 9, c_type_col)
+	else:
+		draw_string(fnt, Vector2(12.0, 86.0), "无反击", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, C_TEXT_DIM)
 
 
 ## 画一段文本并返回下一段起始 x（用于多段拼色）。

@@ -54,8 +54,10 @@ class SkillSlot extends Control:
 	var accent: Color = Color.WHITE  # 资源色（边框）
 	var cost_text: String = ""       # 右下消耗角标
 	var cooldown: int = 0
+	var cooldown_max: int = 0
 	var disabled: bool = false
 	var selected: bool = false
+	var is_passive: bool = false
 
 	const C_SLOT_BG: Color = Color(0.067, 0.035, 0.102, 1.0)
 	const C_SLOT_BG_DISABLED: Color = Color(0.051, 0.039, 0.078, 1.0)
@@ -74,12 +76,34 @@ class SkillSlot extends Control:
 		mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 	func _gui_input(event: InputEvent) -> void:
-		if disabled or cooldown > 0 or skill_id == "":
+		if disabled or cooldown > 0 or skill_id == "" or is_passive:
 			return
 		if event is InputEventMouseButton:
 			var mb: InputEventMouseButton = event
 			if mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed:
 				pressed.emit(skill_id)
+
+	## 自定义悬停卡片：限宽换行（避免文本横向铺满屏幕）。
+	func _make_custom_tooltip(for_text: String) -> Object:
+		var panel: PanelContainer = PanelContainer.new()
+		var sb: StyleBoxFlat = StyleBoxFlat.new()
+		sb.bg_color = Color(0.07, 0.05, 0.11, 0.97)
+		sb.border_color = Color(0.45, 0.38, 0.22, 0.70)
+		sb.set_border_width_all(1)
+		sb.set_corner_radius_all(4)
+		sb.content_margin_left = 9.0
+		sb.content_margin_right = 9.0
+		sb.content_margin_top = 7.0
+		sb.content_margin_bottom = 7.0
+		panel.add_theme_stylebox_override("panel", sb)
+		var lbl: Label = Label.new()
+		lbl.text = for_text
+		lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		lbl.custom_minimum_size = Vector2(248.0, 0.0)
+		lbl.add_theme_font_size_override("font_size", 12)
+		lbl.add_theme_color_override("font_color", Color(0.90, 0.86, 0.78, 1.0))
+		panel.add_child(lbl)
+		return panel
 
 	func _draw() -> void:
 		var s: float = 56.0
@@ -118,19 +142,28 @@ class SkillSlot extends Control:
 			icon_col = Color(1.0, 0.949, 0.812, 1.0)
 		_draw_icon(Vector2(s, s) * 0.5, icon_col)
 
-		# 冷却遮罩 + 中心回合数
+		# 冷却：径向转圈（剩余比例暗扇区，自正上方顺时针）+ 中心数字（去「回合」字样）
 		if state_cooldown:
-			draw_rect(slot, C_OVERLAY)
+			draw_rect(slot, Color(0.024, 0.035, 0.055, 0.45))
+			var cd_center: Vector2 = Vector2(s * 0.5, s * 0.5)
+			var cd_radius: float = s * 0.5 - 1.0
+			var cd_frac: float = clampf(float(cooldown) / maxf(float(cooldown_max), 1.0), 0.0, 1.0)
+			if cd_frac > 0.0:
+				var fan: PackedVector2Array = PackedVector2Array([cd_center])
+				var seg: int = maxi(2, int(ceil(cd_frac * 40.0)))
+				for k: int in range(seg + 1):
+					var a: float = -PI * 0.5 + TAU * cd_frac * (float(k) / float(seg))
+					fan.append(cd_center + Vector2(cos(a), sin(a)) * cd_radius)
+				draw_colored_polygon(fan, Color(0.016, 0.024, 0.043, 0.82))
+			draw_arc(cd_center, cd_radius, 0.0, TAU, 32, Color(accent, 0.5), 1.0, true)
 			var ctxt: String = str(cooldown)
 			var fnt: Font = ThemeDB.fallback_font
-			var fs: int = 20
+			var fs: int = 22
 			var tw: float = fnt.get_string_size(ctxt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-			var tp: Vector2 = Vector2(s * 0.5 - tw * 0.5, s * 0.5 + 2.0)
+			var tp: Vector2 = Vector2(s * 0.5 - tw * 0.5, s * 0.5 + float(fs) * 0.36)
 			for off: Vector2 in [Vector2(-1, 0), Vector2(1, 0), Vector2(0, -1), Vector2(0, 1)]:
 				draw_string(fnt, tp + off, ctxt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(0, 0, 0, 0.9))
-			draw_string(fnt, tp, ctxt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, accent)
-			var rw: float = fnt.get_string_size("回合", HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
-			draw_string(fnt, Vector2(s * 0.5 - rw * 0.5, s * 0.5 + 18.0), "回合", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, C_TEXT_MAIN)
+			draw_string(fnt, tp, ctxt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(1.0, 0.95, 0.85, 1.0))
 
 		# 左上键位角标
 		if key_text != "":
@@ -207,8 +240,15 @@ func update_entries(entries: Array[Dictionary], selected_skill_id: String) -> vo
 		return
 
 	_empty_label.visible = false
+	# 键位 1-4 仅分配给「主动」技能（被动如心眼不占键位）。
+	var active_idx: int = 0
 	for i: int in range(_current_entries.size()):
-		_list.add_child(_build_skill_slot(_current_entries[i], selected_skill_id, i))
+		var entry: Dictionary = _current_entries[i]
+		if not bool(entry.get("is_passive", false)):
+			if active_idx < 4 and not entry.has("hotkey"):
+				entry["hotkey"] = str(active_idx + 1)
+			active_idx += 1
+		_list.add_child(_build_skill_slot(entry, selected_skill_id, i))
 	_refresh_size()
 
 
@@ -251,16 +291,17 @@ func _build_ui() -> void:
 	_list.add_child(_empty_label)
 
 
-func _build_skill_slot(entry: Dictionary, selected_skill_id: String, index: int) -> Control:
+func _build_skill_slot(entry: Dictionary, selected_skill_id: String, _index: int) -> Control:
 	var skill_id: String = str(entry.get("skill_id", ""))
 	var skill_name: String = str(entry.get("name", skill_id))
 	var action_cost: String = str(entry.get("action_cost", "standard"))
 	var cooldown_turns: int = int(entry.get("cooldown", 0))
 	var available: bool = bool(entry.get("available", false))
-	# 键位角标：前 4 槽显 1-4（对齐技能槽键位 1-4），其余无角标。
+	var is_passive: bool = bool(entry.get("is_passive", false))
+	# 键位角标：主动技能由 update_entries 注入 1-4；被动显 "P" 标记。
 	var hotkey: String = str(entry.get("hotkey", "")) if entry.has("hotkey") else ""
-	if hotkey == "" and index < 4:
-		hotkey = str(index + 1)
+	if is_passive:
+		hotkey = "P"
 	var cost_text: String = _build_cost_text(entry, action_cost)
 	var accent: Color = _get_cost_color(action_cost)
 
@@ -271,11 +312,29 @@ func _build_skill_slot(entry: Dictionary, selected_skill_id: String, index: int)
 	slot.accent = accent
 	slot.cost_text = cost_text
 	slot.cooldown = cooldown_turns
-	slot.disabled = not available or skill_id == ""
-	slot.selected = skill_id == selected_skill_id and skill_id != ""
-	slot.tooltip_text = str(entry.get("reason", ""))
+	slot.cooldown_max = int(entry.get("cooldown_max", cooldown_turns))
+	slot.is_passive = is_passive
+	slot.disabled = (not available or skill_id == "") and not is_passive
+	slot.selected = skill_id == selected_skill_id and skill_id != "" and not is_passive
+	slot.tooltip_text = _compose_tooltip(entry, available, is_passive)
 	slot.pressed.connect(_on_slot_pressed)
 	return slot
+
+
+## 悬停介绍：无论技能是否可用都显示「技能名 + 描述」；不可用时附原因。
+func _compose_tooltip(entry: Dictionary, available: bool, is_passive: bool) -> String:
+	var parts: PackedStringArray = []
+	var nm: String = str(entry.get("name", ""))
+	if nm != "":
+		parts.append("【%s】%s" % [nm, "（被动）" if is_passive else ""])
+	var desc: String = str(entry.get("description", ""))
+	if desc != "":
+		parts.append(desc)
+	if not is_passive and not available:
+		var reason: String = str(entry.get("reason", ""))
+		if reason != "":
+			parts.append("✗ " + reason)
+	return "\n".join(parts)
 
 
 func _refresh_size() -> void:

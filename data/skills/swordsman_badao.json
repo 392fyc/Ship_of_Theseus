@@ -22,5 +22,5 @@
   "crit_damage_bonus": 1.5,
   "splash_damage_pct": 50,
   "slot_swap_provider": true,
-  "description": "标准。距1-2，180%物理，暴击倍率达3.0x（crit_damage_bonus=1.5叠加到基础1.5x，即该次暴击伤害翻倍至300%）。满3印记才可用（requires_marks=3），施放消耗3印记+2剑气（mark_cost=3，qi_cost=2）。主目标吃满，周围1格溅射目标吃50%实际伤害（splash_damage_pct=50，JSON驱动）。满印记时取代招架槽，消耗后变回招架（slot_swap_provider）。"
+  "description": "距离 1-2，造成 180% 物理伤害，暴击时伤害提升至 3.0 倍；主目标全额承伤，周围 1 格内的目标受到 50% 溅射伤害。需集满 3 枚印记，施放消耗 3 枚印记与 2 点剑气。施放后印记清空，槽位变回招架。"
 }

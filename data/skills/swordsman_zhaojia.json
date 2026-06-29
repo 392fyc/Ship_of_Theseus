@@ -24,5 +24,5 @@
   "guaranteed_hit": false,
   "slot_swap_trigger": "marks_full",
   "slot_swap_target": "swordsman_badao",
-  "description": "迅捷·进入招架架势（自我施放）。消耗1剑气。集满3印记时，此槽位显示为拔刀（slot_swap_trigger=marks_full）。招架反应减伤效果待深度实装。"
+  "description": "迅捷·进入招架架势。消耗 1 点剑气。集满 3 枚印记时，此槽位变为「拔刀」。（招架的反应减伤效果待后续实装。）"
 }

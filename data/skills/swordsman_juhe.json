@@ -20,5 +20,5 @@
   "guaranteed_crit": true,
   "guaranteed_hit": true,
   "ki_on_kill_cd_reduction": 1,
-  "description": "标准·奥义。距1，300%物理。必定命中（guaranteed_hit）且必定暴击（guaranteed_crit）。消耗6剑气（qi_cost=6）；击杀返3气（qi_gain_on_kill=3）且本技能cd-1（ki_on_kill_cd_reduction=1）；结算后得1印记（mark_gain=1）。"
+  "description": "奥义·距离 1，造成 300% 物理伤害，必定命中且必定暴击。消耗 6 点剑气；击杀目标可返还 3 点剑气并使本技能冷却减 1；施放后获得 1 枚印记。"
 }
