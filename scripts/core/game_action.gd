@@ -101,6 +101,19 @@ static func validate_skill_usage(unit: Unit, skill_data: Dictionary,
 			"reason": "Cooldown: %d turn(s)" % unit.get_skill_cooldown(skill_id),
 		}
 
+	# ── 资源门槛（修复 P0-①）──────────────────────────────
+	# 此前执行路径不校验资源 → 居合可无视剑气门槛刷冷却。数据驱动：仅当技能 JSON
+	# 声明 qi_cost / requires_marks / mark_cost 时生效（sword_qi、get_mark_count 在
+	# Unit 基类恒存在且默认 0，非剑圣技能不声明这些字段 → 门槛不触发，符合资源每职业独立）。
+	var qi_cost: int = int(skill_data.get("qi_cost", 0))
+	if qi_cost > 0 and unit.sword_qi < qi_cost:
+		return {"ok": false, "reason": "剑气不足：需 %d / 现 %d" % [qi_cost, unit.sword_qi]}
+	var marks_needed: int = maxi(
+		int(skill_data.get("requires_marks", 0)), int(skill_data.get("mark_cost", 0)))
+	if marks_needed > 0 and unit.get_mark_count() < marks_needed:
+		return {"ok": false,
+			"reason": "印记不足：需 %d / 现 %d" % [marks_needed, unit.get_mark_count()]}
+
 	var action_cost: String = str(skill_data.get("action_cost", "standard"))
 	var swift_limit: int = int(skill_data.get("swift_limit", 1))
 	var action_cost_result: Dictionary = validate_action_cost(

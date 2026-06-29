@@ -1527,13 +1527,15 @@ func _execute_skill_action(action: GameAction) -> bool:
 	if action_cost in ["move", "standard", "swift"]:
 		_move_committed = true
 
-	# ── 剑圣资源消耗（施放时）────────────────────────────
+	# ── 剑圣资源消耗 ────────────────────────────────────
+	# 剑气在施放时扣（心眼暴击的剑气时序不在本次修复范围内）。
 	var qi_cost: int = int(skill_data.get("qi_cost", 0))
 	if qi_cost > 0:
 		user.set_sword_qi(user.sword_qi - qi_cost)
+	# 修复 P0-②：印记消耗推迟到伤害结算之后再执行（见下方 _spend_skill_marks）。
+	# 否则拔刀在 spend_marks 之后才结算伤害，吃不到自己正在消耗的势(STR+2)印记加成
+	# （实测非暴击对 DEF2 木桩 = 25 而非应有的 29，对 30 血脆敌非暴击打不死）。
 	var mark_cost: int = int(skill_data.get("mark_cost", 0))
-	if mark_cost > 0:
-		user.spend_marks(mark_cost)
 
 	var cooldown_turns: int = int(data.get("cooldown", 0))
 	user.consume_skill(skill_id, cooldown_turns)
@@ -1546,6 +1548,7 @@ func _execute_skill_action(action: GameAction) -> bool:
 			target_units.size(),
 		])
 		_apply_support_skill(user, skill_data, target_units)
+		_spend_skill_marks(user, mark_cost)
 		return true
 
 	var hostile_payload: Dictionary = data.duplicate(true)
@@ -1573,10 +1576,20 @@ func _execute_skill_action(action: GameAction) -> bool:
 				per_target_payload["area_damage_multiplier"] = float(splash_pct) / 100.0
 			_execute_hostile_action(user, target_unit, per_target_payload)
 
+	# 伤害结算完成后才扣印记（修复 P0-②：使拔刀吃到自身消耗的势加成）。
+	_spend_skill_marks(user, mark_cost)
 	# ── 位移技能（如一闪）：施放后落在所选目标格 ──
 	if bool(skill_data.get("displacement", false)):
 		_apply_skill_displacement(user, target_pos)
 	return true
+
+
+## 在伤害结算之后扣减技能的印记消耗（修复 P0-②；mark_cost<=0 时空操作）。
+func _spend_skill_marks(user: Unit, mark_cost: int) -> void:
+	if user == null or mark_cost <= 0:
+		return
+	user.spend_marks(mark_cost)
+	user.refresh_status_icons()
 
 
 ## 位移技能落点：把 user 移动到 landing 格（落在所选目标格规则）。
