@@ -14,7 +14,7 @@
 | 敌人与 AI | `01-Game-Design/Core-Systems/enemy-and-ai.md` |
 | 技能与射程 | `01-Game-Design/skills-and-range.md` |
 | 职业系统 | `01-Game-Design/Characters/class-system.md` |
-| 天赋树 | `01-Game-Design/Characters/talent-tree.md`（设计源已转 **Codex 卡片工具** sot.fyc-space.uk / NAS DB）|
+| 天赋树 | `01-Game-Design/Characters/talent-tree.md`（设计源已转 **SoT 设计库** sot.fyc-space.uk / NAS DB）|
 | Run 循环 | `01-Game-Design/Progression/run-loop.md` |
 | 城镇建设 | `01-Game-Design/Progression/town-building.md` |
 | 数据架构 | `01-Game-Design/Technical/data-architecture.md` |
