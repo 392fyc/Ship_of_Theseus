@@ -1,0 +1,906 @@
+{
+  "summary": "SoT run-loop 奖励模型 + 地图分支设计提案：并行夯实 SoT 真源 + 调研成熟肉鸽范式(Hades/杀戮尖塔/梦之形) → 综合扎根 SoT 的提案 → 对抗评审",
+  "agentCount": 7,
+  "logs": [
+    "调研夯实完成：5/5"
+  ],
+  "result": {
+    "grounding": {
+      "summary": "已通读 SoT 内部真源（KB 01-Game-Design 全量 + 03-AI-Context 5 层架构正本 + 仓库 data/ 现状），产出「可作为奖励发放的东西」映射到 5 层的清单，并澄清「遗物 Relic」与「符文 Rune」的关系。核心发现：(1) 可发奖励维度已定 4 大类（金币 Gold / 经验 EXP→L3 / 天赋点 Talent Points→L2 / 战利品 Loot=装备 L4+技能+符文·遗物 L5），Boss 额外给传奇 + 进入下一幕——这些 decided，出处 run-loop.md/class-system.md。(2) 关键术语冲突：架构正本 architecture-consensus-v2.md（2026-05-10，consensus_locked，用户确认，是最新权威）把 build-defining 的 roguelite 拾取物定义为「L5 符文 Rune 6 槽」，并在 Δ-2 明写『旧 relic 概念：D5 决定并入或弃用』；但 run-loop.md/class-system.md/GDD/data-architecture.md（更旧或未同步）仍全程用「遗物 Relic」。二者极可能是同一物的新旧命名，但这次「并入 vs 弃用」的裁决（D5 stream）从未落地——KB 里没有 runes-system.md，也没有 equipment.md。这是必须由用户拍板的真源缺口，不能自行断言二者相等。(3) 6 槽符文获取：L1 每 run 起始赠 1 枚 + 城镇经济兑换 + run 内事件；reroll/稀有度/兑换成本曲线全是 D5 open question 未定。(4) 代码/数据层：data/relics、events、waves、talent-tree、buildings 全空（仅 .gitkeep），只有 classes/skills/enemies/maps/buffs/terrain 有内容——奖励与地图系统是从零起。(5) 结构冲突待记：GDD 仍写 3×10 关，run-loop.md（2026-06-30 最新）已改 3×8，以 run-loop 为准。设计奖励/地图时须尊重的硬约束：meta 只横向不纵向、便利升级只限经济+情报层、L2 天赋每 run 全重置、L4 装备不构筑不 build-defining、L5 符文才是 build-defining、资源系统每职业隔离（禁跨职业资源类道具）、每层独立可玩、城镇 v1 本期不做。",
+      "systems": [
+        {
+          "name": "Run 结构 3 幕 × 8 关",
+          "status": "decided",
+          "detail": "每 run = 3 Acts，每 Act 8 Stages（含幕末 Boss = 7 常规/精英/事件 + 1 Boss）。每关 = 准备阶段 Prep → 战斗阶段 Battle，胜利给奖励。注意 GDD game-design-doc.md 仍写旧值 3×10，已被 run-loop.md（2026-06-30 用户裁决）覆盖为 3×8，以 run-loop 为准。",
+          "source": "D:/ShipOfTheseus/ShipOfTheseus-KB/01-Game-Design/Progression/run-loop.md; 冲突源 game-design-doc.md 第16行"
+        },
+        {
+          "name": "关卡类型配比",
+          "status": "pending",
+          "detail": "类型=常规 Normal(约6-7/幕) / 精英 Elite(约2-3/幕) / Boss(1/幕) / 特殊事件 Special Event(约1-2/幕)。run-loop.md 明确标注：频次是旧 ~10 关的占位，须按 8 关重新配比，且待『奖励+地图分支设计预案』细化。",
+          "source": "run-loop.md 第78-97行 Stage Types + 作者批注"
+        },
+        {
+          "name": "奖励选择机制 A/B/C 三选一",
+          "status": "pending",
+          "detail": "胜利后奖励呈现方式未定：A=固定掉落+三选一奖励；B=全部三选一；C=固定金币+随机战利品掉落。标注 pending decision，需提案定夺。多人模式各自独立选、有时限。",
+          "source": "run-loop.md 第117-126行 Reward Selection"
+        },
+        {
+          "name": "5 层架构（build 深度骨架）",
+          "status": "decided",
+          "detail": "L1 全局(永久, 横向解锁 + run 起始赠 1 符文) / L2 局内职业天赋树(每 run 完全清零从 Lv1 重来, 用天赋点) / L3 人物成长(类固定成长曲线, 转职改 growth rate, 受经济类符文加成) / L4 装备(武器+防具, run-reset, 随机捡, 不 build-defining) / L5 符文 6 槽(build-defining, 经济类+流派类)。consensus_locked, 用户确认。",
+          "source": "D:/ShipOfTheseus/ShipOfTheseus-KB/03-AI-Context/Active-Context/architecture-consensus-v2.md 第26-36行"
+        },
+        {
+          "name": "战斗奖励 4 维度",
+          "status": "decided",
+          "detail": "金币 Gold / 经验 EXP(升级=加成长值, 每 run 约 3-5 级) / 天赋点 Talent Points(解锁天赋节点, 每 run 重置) / 战利品 Loot(装备/技能/消耗品/遗物, 按关卡类型定)。常规给 1 天赋点+基础装备技能; 精英给 1-2 天赋点+稀有装备技能遗物; Boss 给 2 天赋点+传奇装备技能遗物 + 进入下一幕。",
+          "source": "run-loop.md 第104-116行 Reward System 表"
+        },
+        {
+          "name": "特殊事件结构",
+          "status": "decided",
+          "detail": "Event{id,title,description,choices[]}; EventChoice{text,outcomes[]}; EventOutcome{weight,effects[],description}。effects 已有具体 type 例：lose_hp_percent / gain_relic(rarity) / gain_skill(rarity) / debuff。范例事件：神秘商人(高价卖稀有)、废弃矿洞(探索得金或触发伏击)、祝福祭坛(耗金/HP 换永久 buff)。",
+          "source": "run-loop.md 第129-155行; data-architecture.md 第137-185行 Event schema"
+        },
+        {
+          "name": "难度递增（固定倍率）",
+          "status": "decided",
+          "detail": "敌 HP x1.0/1.5/2.0、敌攻 x1.0/1.3/1.6、波数 1-2/2-3/2-3、精英遭遇 2/2-3/3、金币奖励 x1.0/1.3/1.6（Act1/2/3）。",
+          "source": "run-loop.md 第159-166行 Difficulty Scaling"
+        },
+        {
+          "name": "Meta 跨 run 持久化（只横向）",
+          "status": "decided",
+          "detail": "MetaProgress 只做横向解锁：unlocked_classes(职业) / unlocked_talent_areas(天赋区) / unlocked_relics(遗物池扩展) / unlocked_buildings(建筑种类) / unlocked_building_levels(建筑等级上限) / convenience_upgrades。硬规则:绝不纵向数值变强;便利升级只限经济+情报层(起始金币+10/级 max3、商店折扣-5%/级 max2、额外 reroll+1/级 max2、地图预览)，明禁起始 HP/攻击等战力项。",
+          "source": "run-loop.md 第170-271行 Meta Progression"
+        },
+        {
+          "name": "符文 6 槽获取与档位",
+          "status": "pending",
+          "detail": "L1 每 run 起始赠 1 枚(可选 vs 随机=D1 open question)+ 城镇经济稳定后兑换 + run 内事件获得。是否有 6 槽外 reroll、是否有稀有度 tier、城镇兑换 cost curve、流派类符文 vs 流派类 L2 节点如何不冲突——全是 D5 未决 open question。经济类符文/流派类符文两 archetype 已 locked。",
+          "source": "architecture-consensus-v2.md 第30-34行/第178-186行 Open Questions D5"
+        },
+        {
+          "name": "装备系统（L4 demo）",
+          "status": "context",
+          "detail": "槽位：主手(双手武器 剑/弓/法书, 按职业限制) / 副手(仅剑圣 Kensei 双持天赋后) / 防具 / 饰品(TBD)。装备加成按关卡进度参考表(前中后期 +2~18 ATK)。硬约束:装备不承担 build-defining、run-reset、随机捡到、决策密度低。KB 未立独立 equipment.md（架构 Δ-3 要求新立, 未落地）。",
+          "source": "class-system.md 第446-479行 Equipment System - Demo; architecture-consensus-v2.md Δ-3"
+        },
+        {
+          "name": "技能作为奖励",
+          "status": "decided",
+          "detail": "UnitBuild.active_skills = 天赋解锁 + 随机获取(半随机)。战斗奖励/商店/事件(gain_skill)可给额外主动技能, 扩展可用技能池。属『战利品 Loot』一支, 非独立层。",
+          "source": "class-system.md 第219-249行 Build Composition + 第242行 Random Skill Rewards; data-architecture.md gain_skill effect"
+        },
+        {
+          "name": "城镇建设（本期不做）",
+          "status": "context",
+          "detail": "功能建筑(武器/防具/药水店/训练场/酒馆)+ 战场建筑(哨塔/要塞/路障/生命泉/弩台/魔法塔)，统一用金币建造/升级/修复，Lv1-3。建筑解锁/等级上限是 META 横向奖励(非 per-battle 奖励); 战斗内金币是即时资源用于准备阶段建造。run-loop.md 与 CLAUDE 上下文均标注城镇 v1 本期不做。",
+          "source": "D:/ShipOfTheseus/ShipOfTheseus-KB/01-Game-Design/Progression/town-building.md; run-loop.md 第7行批注"
+        },
+        {
+          "name": "数据/代码层现状",
+          "status": "context",
+          "detail": "仓库 data/ 中 relics、events、waves、talent-tree、buildings 全空(仅 .gitkeep); classes(7)/skills(20)/enemies/maps(4)/buffs(10)/terrain 有内容。KB Core-Systems 无 runes-system.md、无 equipment.md（架构 Δ-2/Δ-3 要求新立均未落地）。奖励与地图分支系统实质从零起。",
+          "source": "D:/ShipOfTheseus/Ship_of_Theseus/data/ 目录清点; KB 01-Game-Design/Core-Systems/ 目录清点"
+        }
+      ],
+      "reward_sources": [
+        {
+          "reward": "金币 Gold",
+          "layer": "跨层经济(准备阶段与商店/建造/修复共用统一货币)",
+          "note": "decided。每关必给, 按幕 x1.0/1.3/1.6。出处 run-loop.md 奖励表 + town-building.md 统一货币。"
+        },
+        {
+          "reward": "经验 EXP",
+          "layer": "L3 人物成长(升级=加成长值曲线)",
+          "note": "decided。每 run 约 3-5 级; SPD/MOV/VIS 不随级成长; 转职后 growth rate 变。出处 run-loop.md + class-system.md Leveling and Growth。"
+        },
+        {
+          "reward": "天赋点 Talent Points",
+          "layer": "L2 局内天赋树(每 run 全重置)",
+          "note": "decided。常规 1 / 精英 1-2 / Boss 2。用于解锁天赋节点(被动/主动技/转职节点)。出处 run-loop.md 奖励表。"
+        },
+        {
+          "reward": "装备 Equipment(武器/防具/饰品)",
+          "layer": "L4 装备(run-reset, 随机, 不 build-defining)",
+          "note": "decided 作为奖励维度, 但装备明确不构筑核心 build。饰品 TBD。出处 class-system.md Equipment Demo + architecture-consensus-v2.md L4 约束。"
+        },
+        {
+          "reward": "技能 Skill(额外主动技)",
+          "layer": "active_skills 槽(半随机, 天赋解锁之外的来源)",
+          "note": "decided。战斗奖励/商店/事件 gain_skill 给。属战利品 Loot 一支。出处 class-system.md Build Diversity Sources + data-architecture.md gain_skill。"
+        },
+        {
+          "reward": "符文 Rune / 遗物 Relic",
+          "layer": "L5 符文 6 槽(build-defining, 经济类+流派类) — 与旧『遗物』命名待并合",
+          "note": "作为『Roguelite 核心随机 build-defining 拾取物』的地位 decided; 但『符文 Rune=遗物 Relic 是否同一物、旧 relic 并入还是弃用』是 pending(架构 Δ-2 交 D5 决定, 从未落地)。data-architecture.md 有 Relic schema{id,name,rarity,effect{type,value,trigger}}; 架构正本称之为 Rune 6 槽。获取=L1 起始赠1+城镇兑换+事件。"
+        },
+        {
+          "reward": "消耗品 Potion/Consumable",
+          "layer": "背包/准备阶段消耗(非构筑层)",
+          "note": "context。作为 Loot 与商店商品出现(恢复/buff 药水)。出处 run-loop.md Loot + town-building.md Potion Shop。"
+        },
+        {
+          "reward": "永久 buff(事件祝福)",
+          "layer": "run 内角色状态(经由特殊事件, 非常规战斗奖励)",
+          "note": "decided 机制存在。例:祝福祭坛耗金/HP 换永久 buff。出处 run-loop.md Special Events + data-architecture.md event effects。"
+        },
+        {
+          "reward": "建筑解锁/等级上限",
+          "layer": "L1 Meta 横向解锁(跨 run, 非 per-battle 战斗奖励)",
+          "note": "context。注意区分:战斗内只发金币, 玩家在准备阶段花金币建造; 『解锁新建筑种类/等级上限』是 meta 层横向奖励。城镇 v1 本期不做。出处 run-loop.md Meta + town-building.md。"
+        },
+        {
+          "reward": "职业解锁 / 天赋区解锁 / 遗物池扩展",
+          "layer": "L1 Meta 横向解锁(跨 run 完成条件)",
+          "note": "context。仅横向扩宽选项, 绝不纵向变强。例:剑圣=首次通关解锁; 每职业双转职通常 1 次通关全解锁。出处 run-loop.md Meta Unlock Categories。"
+        },
+        {
+          "reward": "便利升级(起始金币/商店折扣/额外 reroll/地图预览)",
+          "layer": "L1 Meta 便利层(仅经济+情报, 用跨 run 货币)",
+          "note": "decided 且有硬边界:明禁起始 HP/攻击等战力项。extra_reroll 直接关系奖励三选一的 reroll 次数; map_preview 直接支撑用户要的『下一节点奖励类型预览』。出处 run-loop.md Convenience Upgrades。"
+        }
+      ],
+      "terminology_flags": [
+        "遗物 Relic vs 符文 Rune 是本任务最大真源冲突：architecture-consensus-v2.md(2026-05-10, consensus_locked, 用户确认, 最新权威)定义 build-defining 拾取物为『L5 符文 Rune 6 槽』, 且 Δ-2 明写『旧 relic 概念:D5 决定并入或弃用』; 但 run-loop.md/class-system.md/game-design-doc.md/data-architecture.md(更旧或未同步)全程仍用『遗物 Relic』。二者极可能是同一物的新旧命名, 但『并入 vs 弃用』的裁决(D5 stream)从未在 KB 落地——不能自行断言相等, 须用户拍板。设计奖励文案与地图预览类型标签必须先统一这一术语。",
+        "架构正本要求新立但从未落地的两份文档:runes-system.md(Δ-2, 6 槽机制/经济类·流派类 archetype/与 L4 边界/与 L2 耦合)、equipment.md(Δ-3, L4 装备非 build-defining 硬边界)。KB Core-Systems 目录确认二者均不存在。",
+        "关卡总数:GDD game-design-doc.md 仍写『3 acts × 10 stages』, 已被 run-loop.md(2026-06-30)覆盖为『3×8』。设计时以 run-loop.md 为准, GDD 是待同步的陈旧值。",
+        "class-system.md 顶部自带 2026-06-16 变更警告:追击系统已移除(速度第二效果改出手顺序)、幸运 LCK 改固定无成长。该文档 Myrmidon/Kensei 的『追击深度专精』等段落已作废, 引用职业设计时须注意。",
+        "『建筑解锁』不是 per-battle 战斗奖励:战斗内只发金币, 建筑解锁是 L1 Meta 跨 run 横向奖励, 建造行为发生在准备阶段花金币。奖励模型设计不要把 building 直接塞进战后三选一。"
+      ],
+      "open_questions": [
+        "奖励呈现机制 A/B/C 未定(A=固定掉落+三选一 / B=全三选一 / C=固定金币+随机掉落)——用户要『奖励驱动 Hades 式』通常倾向 A 或 B(三选一才产生被奖励牵引的选择), 但需用户拍板。出处 run-loop.md。",
+        "遗物 Relic 与符文 Rune 是否同一物、旧 relic 池并入 L5 还是弃用另做——D5 stream 未落地, 是设计奖励/掉落表前必须先解决的前置裁决。",
+        "关卡类型按 8 关的新配比(常规/精英/事件/Boss 具体数量与排布)未定, run-loop 现有例子是旧 10 关占位。",
+        "6 槽符文的获取细节:起始 1 枚是玩家可选还是随机(D1)? 是否有稀有度 tier? 城镇兑换 cost curve? 是否有 6 槽外 reroll? 流派类符文与流派类 L2 天赋节点如何不冲突(D5)?——全未定, 直接影响『符文作为奖励』如何进奖励池。",
+        "用户点名的两个特性(奖励驱动、下一节点奖励类型预览)在 KB 现状里只有 map_preview 便利升级这一处间接支撑; 地图分支结构(节点图/多路径/预览标签)在 KB 完全没有设计——属全新提案空间, 需确认是否引入类 StS/梦之形 的地图节点图(SoT 现有 run-loop 是线性 8 关 + 局部分支例子, 非全局节点图)。",
+        "装备/技能/符文之外是否还有饰品 Accessory 作为独立奖励维度(class-system 标 TBD)。"
+      ]
+    },
+    "research": [
+      {
+        "dimension": "Hades 奖励驱动与节点预览设计机制调研（为 SoT run-loop 奖励模型设计提供参考）",
+        "summary": "Hades（黑帝斯）的核心设计要义是「先看到奖励，再去战斗兑现」——每扇房间大门上方悬挂图标，明确告知清除该房间后能得到哪一类奖励（哪位神的恩赐/金币/锤子/生命/黑暗值等），玩家的动力来源始终是「门口那个图标对应的奖励」而非「战斗本身」。全程约 35 个奖励房间（4 区域：Tartarus 约 14 间 → Asphodel 约 10 间 → Elysium 约 11 间 → Styx 终局），每局约 15–20 分钟，天然符合短局高密度的奖励节奏。Slay the Spire 则是另一极：在进入每个节点前，全幕地图上所有节点类型图标均可见，玩家可做跨 Act 的长期路线规划。两种模式都基于同一原则：「让玩家在选择前，知道每条路的奖励类型」。SoT（3 幕 × 8 关）处于两者之间——幕内关卡数量比 Hades 每区间更少，路线分支比 StS 更简单，可结合两者取长：幕内 8 关以图标全部可见（StS 式），但只有当前 + 相邻关才展示奖励的具体细节（Hades 式），实现短期冲动 + 中期规划并存。",
+        "findings": [
+          {
+            "claim": "Hades 的「门口图标系统」：每扇大门悬挂奖励类型图标，进入前可见",
+            "detail": "Hades 1 中，每扇通往下一房间的大门正上方都显示一个图标，代表清除该房间后能获得的奖励类型。图标以「月桂花圈」作外框装饰，分两色类：蓝色月桂 = 持久资源（Darkness 黑暗值/冥界钥匙/宝石/花蜜 Nectar，跨局可用于永久升级镜子/武器/好感）；金色月桂 = 本局资源（金幣/恩赐 Boon/生命/锤子/石榴）。每位神祇有专属图标：Poseidon 蓝三叉戟、Zeus 黄闪电、Ares 红剑、Aphrodite 粉心形、Artemis 绿弓等。骷髅头标记悬于图标下方 = 该房间战斗难度更高，但给出双倍奖励或精英级奖励。特殊房间另有专属图标：骷髅带钱袋 = Charon 商店（非战斗），白色感叹号 = NPC 剧情。Hades 2 在此基础上进一步细化为 6 大类别：恩赐、升级、资源、守卫 Boss、路线、特殊事件。",
+            "sources": [
+              "https://gamerant.com/hades-door-symbol-guide/",
+              "https://hades-2.game-vault.net/wiki/Doors",
+              "https://game8.co/games/Hades-2/archives/453727",
+              "https://www.inverse.com/gaming/hades-symbol-meaning-guide-hera-dionysus-apollo-ares-aphrodite"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "「奖励承诺在前，战斗兑现在后」是 Hades 核心前进动力机制",
+            "detail": "Supergiant 的设计原则是：玩家永远有「即将到手的某件东西」。每次清除一间房间后，玩家立刻看到下一扇门的图标，此时「奖励承诺」已完成，促使其进入下一房间去打。战斗与奖励之间只有「几秒钟的战斗」——这是刻意设计的短暂延迟，而非阻碍。失去一局时，元进展（永久解锁）立刻介入，确保损失感被「获得感」迅速覆盖。分析者将这称为「delayed gratification loop」：看到奖励 → 战斗 → 拿到奖励 → 立刻看到下一个奖励。相较 Slay the Spire 要在全幕地图上规划整条路线，Hades 更偏向即时满足，但两扇门可选时也提供即时的路线决策点。",
+            "sources": [
+              "https://bottomfeeder.substack.com/p/some-scattered-thoughts-about-hades",
+              "https://merrygoroundmagazine.com/hades-proves-roguelikes-dont-have-to-be-about-getting-good/",
+              "https://goombastomp.com/hades-supergiant-review/"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "恩赐（Boon）三选一系统：神祇专属 + 稀有度分级 + 可定向操控",
+            "detail": "清除一间「恩赐类」房间后，游戏展示 3 个选项，全部来自该门图标指定的单一神祇（Zeus 门 = 3 个 Zeus 恩赐），玩家选其一。稀有度分 4 档：普通（Common）→ 稀有（Rare）→ 史诗（Epic）→ 英雄（Heroic），同一恩赐在更高稀有度下基础数值更高（举例：普通版基础 50 伤害，稀有版 75）。标有骷髅的精英房间提供更高稀有度的恩赐概率。此外有两类特殊恩赐：传奇恩赐（Legendary Boon）= 需先拥有同神祇若干指定恩赐才可解锁；双神恩赐（Duo Boon）= 需同时拥有两位特定神祇的恩赐才可出现。石榴（Pom of Power）房间 = 升级已有恩赐的稀有度或等级，而非新增。全局一局约可拿 18–23 个恩赐。",
+            "sources": [
+              "https://mygamingtutorials.com/2025/06/10/hades-beginners-guide-mastering-boons-and-builds/",
+              "https://www.dbltap.com/posts/hades-boon-rarity-guide-to-standard-and-special-boons-01ek30qqebzt",
+              "https://www.zleague.gg/theportal/hades-boon-level-vs-rarity-which-matters-more/"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "构筑方向牵引机制：Keepsake 饰品 + 神祇池限制 + 双神恩赐目标感",
+            "detail": "玩家可在出发前装备一个 Keepsake（饰品），保证该局第一个恩赐来自指定神祇，用于在开局就建立构筑方向。一旦池中有 4 位奥林匹斯神，后续不再新增新神（Hades 2 规则，Hades 1 机制类似），倒逼玩家专注于已选择的几位神。集中于 2 位神时，双神恩赐出现频率约为分散 4–5 位神时的 2 倍。这创造出「目标感涌现」：玩家看到 Zeus 门会想「我已经有 Zeus 攻击和 Zeus 施放，只差一个 Zeus 冲刺就能解锁 Duo Boon」，此时那扇门有强烈的主观价值，哪怕对面是锤子或生命。Keepsake 可在不同区域切换，允许中途调整方向。",
+            "sources": [
+              "https://www.dtgre.com/2025/10/hades-2-build-guide-god-pools-keepsakes-arcana-winning-runs.html",
+              "https://mobalytics.gg/hades-2/tier-lists/keepsakes",
+              "https://mygamingtutorials.com/2025/06/10/hades-beginners-guide-mastering-boons-and-builds/"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "奖励分配袋机制（Reward Bag）：不同房间类型有奖励资格限制",
+            "detail": "Hades 的奖励并非完全随机，而是从加权「奖励袋」中抽取：袋中各类奖励有各自的副本数量（决定出现频率），抽出无资格的奖励则放回袋中再抽，直到找到符合当前房间类型资格的奖励。房间类型决定奖励资格：精英小 Boss 房间（mini-boss）只能给恩赐 Boon；主 Boss 房间只给赏金（该武器/当前难度下的特定 Bounty）或大量黑暗值（已拿过赏金则替换）；普通房间来自通用池。多出口房间的不同门不能出现相同奖励（恩赐类除外），若两扇门都是恩赐，则必须来自不同神祇。此机制确保奖励分布节奏可控，同时维持随机感。",
+            "sources": [
+              "https://hades-2.game-vault.net/wiki/Doors",
+              "https://game8.co/games/Hades-2/archives/453727"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "Hades 一局节奏：约 35 个房间、31 个奖励选择、15–20 分钟",
+            "detail": "Hades 1 全程固定区域顺序：Tartarus（约 14 间）→ Asphodel（约 10 间）→ Elysium（约 11 间）→ Styx（终局）。总战斗房间约 35 间，奖励房间约 31 个（Tartarus 13 + Asphodel 8 + Elysium 10，不含商店和 NPC 剧情间）。平均一局 15–20 分钟，快速速通可缩短至 10 分钟以内。Asphodel 无路线分支（单线通过）；Elysium 通常有 2 条并行选项。每位神祇在一局内平均贡献约 3–6 个恩赐机会，全局约 18–23 个恩赐总选择。这意味着每约 1.5 间房能拿一次恩赐，其余间以资源类奖励填充，节奏始终密集。",
+            "sources": [
+              "https://hades.fandom.com/wiki/Chambers_and_Encounters",
+              "https://hades.fandom.com/wiki/Tartarus",
+              "https://hades.fandom.com/wiki/Asphodel",
+              "https://hades.fandom.com/wiki/Elysium"
+            ],
+            "evidence_strength": "medium"
+          },
+          {
+            "claim": "Slay the Spire 的节点预览是「全幕可见」模式，与 Hades「仅相邻门可见」形成设计光谱的两极",
+            "detail": "Slay the Spire 进入每一幕前，会展示整幕所有节点及其类型图标（怪物/精英/宝箱/商店/休息点/事件/?随机），玩家可在走第一步前就规划全幕最优路线。这支持长期策略：「这幕有 2 个精英 + 1 个商店，我在第 3 节点必须通过休息点恢复血量才能安全打精英」。Hades 则只展示当前房间已清除后的相邻出口（1-2 扇门），强调即时决策和短期冲动。调研结论：SoT 每幕 8 关，比 Hades 每区域 10–14 间更少，但比 StS 每幕 10–15 节点更接近。SoT 适合「全幕图标可见（类 StS）+ 相邻节点才展示奖励具体内容（类 Hades）」的中间方案，既能让玩家提前知道每关类型，又保留部分悬念激励实际进入。",
+            "sources": [
+              "https://slaythespire.wiki.gg/wiki/Map_Locations",
+              "https://www.switchbladegaming.com/strategy-games/roguelike-vs-roguelite-explained/",
+              "https://slaythespire-2.com/guides/map-navigation-guide"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "Meta 进展（跨局持久化）与一局内奖励分开处理，两个层次互不干涉但互相强化",
+            "detail": "Hades 的持久化层面（Mirror of Night / 武器解锁 / 好感度）全部由「蓝色月桂」资源（Darkness/Keys/Gems/Nectar）推动，与本局构筑完全隔离。每局结束（无论成败），玩家必然拿到一批蓝色资源，代入下一局前在 House of Hades 消费。这设计确保失败的一局也留下「已收获持久进展」的满足感，削弱挫败情绪。本局内奖励（恩赐/金币/锤子）随死亡清零，保持挑战感。两个层次各有其驱动弧：蓝色层 = 跨局解锁弧；金色层 = 单局构筑弧。SoT 已定的「横向扩展 meta」（解锁职业/遗物池/建筑，禁止纵向数值增强）与此原则高度对齐。",
+            "sources": [
+              "https://merrygoroundmagazine.com/hades-proves-roguelikes-dont-have-to-be-about-getting-good/",
+              "https://goombastomp.com/hades-supergiant-review/",
+              "https://bottomfeeder.substack.com/p/some-scattered-thoughts-about-hades"
+            ],
+            "evidence_strength": "high"
+          }
+        ],
+        "takeaways_for_sot": [
+          "【节点图标系统（直接对应用户要求②）】每幕地图上，所有 8 个 Stage 节点均以图标形式展示关卡类型（常规战斗/精英/Boss/事件），玩家进入该幕即可看到全幕节点分布（类 StS 全幕可见）。但奖励的具体内容（拿天赋点还是天赋点数量/哪类战利品）仅在相邻节点（已清除当前关后的下一关出口处）展示，不提前透明全程（类 Hades 相邻门预览）。这一方案满足「能规划类型但不完全剧透具体奖励」的中间设计，同时与现有 Stage 数据结构中的 preview 字段直接对应。",
+          "【奖励双色分层（对应持久化 vs 本局）】参考 Hades 的蓝色月桂（持久）vs 金色月桂（本局）视觉语言。SoT 提案：本局奖励（天赋点 TP/当局装备/当局符文）使用暖色系图标；元进展奖励（解锁新职业/遗物池/建筑图纸）使用冷色系图标。两者在选路界面以颜色直观区分，玩家一眼判断「这关的奖励让我当局更强，还是扩展我的下一局选项」。",
+          "【房间类型与奖励质量硬绑定（对应配比提案）】借鉴 Hades 的资格限制机制：常规关给金币 + 随机奖励三选一（来自通用池）；精英关硬保证给天赋点（不可被随机掉落替代）+ 额外高品质战利品一件；Boss 关硬保证传奇战利品（Legendary tier）+ 天赋点 + 进入下一幕。事件关给随机 EventOutcome（可能是金币/装备/特殊 buff/惩罚）。这一绑定让玩家在地图上看到「精英图标」时就知道必然有天赋点，产生 Hades 式「那扇有价值图标的门」的牵引感。",
+          "【8 关配比建议（基于 Hades 奖励密度参照）】每幕 8 关，提案如下：常规关 4 个（第 1/2/4/6 关）；精英关 2 个（第 3/5 关，难度高但天赋点保底）；事件关 1 个（第 7 关，Boss 前缓冲/情报节点）；Boss 关 1 个（第 8 关）。参照 Hades 每 1.5 间房给一次「高价值奖励」的密度，SoT 8 关中精英 2 + Boss 1 = 3 个「高价值保底」约合每 2.7 关一次，但因 SoT 每关有完整战棋战斗，节奏本就比 Hades 单个房间慢，此密度应足够。第 3/5 关安排精英也符合「中段加速预期」的运动感。（此为调研提案，用户最终拍板）",
+          "【三选一模式与天赋点结合（对应奖励方案 B 的细化）】Hades 的三选一系统（恩赐 3 选 1）在 SoT 中对应天赋点消费时的选项展示，而非奖励本身。建议将「奖励三选一」和「天赋消费时的构筑选择」分开：战斗后给奖励时，对天赋点以固定金额给出（非选一）；消费天赋点解锁天赋树节点时才出现三选一（类似 Hades 的 Pom of Power 或特定恩赐）。若要在「奖励阶段」直接做三选一，建议仅在精英/Boss 关用于高品质战利品（Hades 精英/Boss 才给 Boon），常规关维持固定奖励 + 一件随机战利品，避免每场战斗后都有选择疲劳。",
+          "【构筑方向牵引（类 Keepsake + Duo Boon 机制）】SoT 的「天赋树 per class 独立 + 每 run 重置」天然适合建立构筑方向感。提案：早期解锁的天赋节点（如剑圣的「居合路线」第一个天赋）触发「构筑信号」，后续精英关奖励池优先给同路线的配套天赋出现；若满足多节点跨路线条件，解锁隐藏「融合天赋」（类 Duo Boon）。这给玩家「我再拿一个同方向的奖励就能激活更强效果」的前进感。注意此为 SoT 提案方向，需用户裁决是否实装。",
+          "【「遗物 Relic」vs「符文 runes（L5）」术语需澄清】run-loop.md 中「战利品 Loot = 装备/技能/遗物 Relic」，5 层架构中「L5 = runes 符文，构筑定义」——两者关系不明：Relic 是否即 L5 符文，还是 Relic 是装备物品（L4）？Hades 的区分是：持久类奖励（宝石/Keys）= 永久 meta 货币；本局内强力奖励（恩赐/锤子）= run 内用完消失。SoT 的「遗物」如果是 run 内单局有效，则更像 Hades 的「锤子 Daedalus Hammer」（改变单件武器的行为，本局有效）；如果 Relic 跨 run 持久，则更像 meta 解锁层。建议在 run-loop 设计中明确此项，否则奖励展示图标的颜色/分类将难以准确落地。"
+        ],
+        "sources": [
+          "https://gamerant.com/hades-door-symbol-guide/",
+          "https://hades-2.game-vault.net/wiki/Doors",
+          "https://game8.co/games/Hades-2/archives/453727",
+          "https://www.inverse.com/gaming/hades-symbol-meaning-guide-hera-dionysus-apollo-ares-aphrodite",
+          "https://hades.fandom.com/wiki/Chambers_and_Encounters",
+          "https://hades.fandom.com/wiki/Boons",
+          "https://mygamingtutorials.com/2025/06/10/hades-beginners-guide-mastering-boons-and-builds/",
+          "https://www.dbltap.com/posts/hades-boon-rarity-guide-to-standard-and-special-boons-01ek30qqebzt",
+          "https://www.zleague.gg/theportal/hades-boon-level-vs-rarity-which-matters-more/",
+          "https://mobalytics.gg/hades-2/tier-lists/keepsakes",
+          "https://www.dtgre.com/2025/10/hades-2-build-guide-god-pools-keepsakes-arcana-winning-runs.html",
+          "https://slaythespire.wiki.gg/wiki/Map_Locations",
+          "https://www.switchbladegaming.com/strategy-games/roguelike-vs-roguelite-explained/",
+          "https://slaythespire-2.com/guides/map-navigation-guide",
+          "https://merrygoroundmagazine.com/hades-proves-roguelikes-dont-have-to-be-about-getting-good/",
+          "https://goombastomp.com/hades-supergiant-review/",
+          "https://bottomfeeder.substack.com/p/some-scattered-thoughts-about-hades",
+          "https://dotesports.com/hades/news/all-hades-2-door-symbols-explained",
+          "https://hades.fandom.com/wiki/Tartarus",
+          "https://hades.fandom.com/wiki/Asphodel",
+          "https://hades.fandom.com/wiki/Elysium"
+        ],
+        "open_questions": [
+          "SoT 中「遗物 Relic」与「L5 符文 runes」是否同一物？前者是 run 内消耗品还是跨 run 持久装备？这决定奖励图标颜色分类（本局金色 vs 持久蓝色）。",
+          "8 关配比（4 常规 + 2 精英 + 1 事件 + 1 Boss）是否固定，还是允许每幕随机生成不同比例的配比？固定配比更可预期但复玩重复感高；随机配比可预期性低但新鲜感更强。",
+          "幕内关卡的路线分支方式：是否允许同一幕内有「岔路」可选（玩家只走 8 关中的某几关），还是全 8 关强制按序通过（类 Hades Asphodel 单线）？有无分支会根本改变预览系统的设计复杂度。",
+          "「奖励三选一」是仅限精英/Boss 关（保证高质量内容才三选一），还是每场胜利都三选一（方案 B）？密度影响选择疲劳 vs 前进感的平衡。",
+          "SoT 的准备阶段 Prep 中，玩家已能看到下一关奖励预览；这个预览是应该在 Prep 开始就展示，还是在 Prep 确认后（类似 Hades「清空前一间房后才看到门」）才展示？时机影响玩家对 Prep 的利用策略。",
+          "天赋点的消费是否发生在 Prep 阶段（下一关前装配），还是在奖励阶段（拿到天赋点后立刻选择）？Hades 式是「拿到即用」（选恩赐后立刻生效），而 SoT 如果需要在 Prep 阶段消费，则节奏截然不同。"
+        ]
+      },
+      {
+        "dimension": "杀戮尖塔（Slay the Spire）分支地图拓扑与节点结构——面向 SoT 3幕×8关的改造分析",
+        "summary": "杀戮尖塔每幕生成一张**全程可见的分支重合图**（branching-reconverging graph），共 15 层可走楼层（+ Boss 层 + 宝箱层 = 17 层总计），每层最多 6 个节点，由 6 条独立生成路径交叉编织而成。玩家在踏出第一步之前便能看到整幕地图，从而做出基于奖励/风险的多步路线规划——这是\"奖励驱动前进\"的核心机制。Hades 则在「清关后看到 1-4 扇出口门」的更紧凑结构中，通过门上图标预览**下一房间奖励类型**（而非精确内容），两者共同构成奖励牵引路线决策的两种经典实现。SoT 的 3幕×8关结构远比杀戮尖塔压缩，但核心机制（锚点节点、分支选路、节点类型预览）均可移植：建议保留 3 个固定锚点节点（Stage 1 强制普通战/Stage 5 保底宝物/Stage 7 保底前 Boss 回补），在 Stage 2-6 设置 2-3 个真实分叉点（每叉 2-3 条路，每路显示节点类型+奖励类型图标），同时确保精英不在前两关出现，且同路上精英-精英不相邻。",
+        "findings": [
+          {
+            "claim": "杀戮尖塔每幕地图全程可见，玩家在落第一步前即可规划整幕路线",
+            "detail": "地图在进入幕时一次性生成并完全展示给玩家。官方策略建议「先滚过整张地图再点第一个节点」，识别精英、商店、篝火和宝箱位置，从 Boss 节点向前倒推出最优路径。这意味着地图不是走一步看一步，而是一次性战略决策。玩家的核心规划清单：每幕至少1精英、精英后1商店（用金币换遗物/卡牌）、Boss 前 1 篝火。这种全图可见性直接把「想要哪类奖励」转化为路线选择行为。",
+            "sources": [
+              "https://steamcommunity.com/sharedfiles/filedetails/?id=2830078257",
+              "https://bossdown.com/guides/slay-the-spire-2-map-pathing-guide/"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "地图拓扑：6条生成路径构成分支重合图，每层 1-6 节点，玩家每步从当前节点选 1-3 条出路",
+            "detail": "生成算法：在 7×15 不规则等距网格上生成 6 条独立向上路径，每条路径从第 1 层随机起点出发，每步连向上层最近 3 个节点之一，禁止路径交叉。移除孤立节点后，每层平均剩余 2-6 个节点，任意节点有 1-3 条入路和 1-3 条出路（顶底层除外）。路径在不同楼层分叉再汇聚，形成菱形分合结构。对于玩家而言，实际遇到「真正分叉选择」（两路节点类型不同）的时机约 4-6 次/幕，不是每层都有选择。",
+            "sources": [
+              "https://slaythespire.wiki.gg/wiki/Map_Generation",
+              "https://steamcommunity.com/sharedfiles/filedetails/?id=2830078257"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "三个锚点楼层（固定节点类型）提供幕内节奏骨架",
+            "detail": "以第 1 幕（17 层）为例，三处楼层类型被硬锁定：第 1 层全部为普通战斗（简单怪物池，安全入场）；第 9 层（中段）全部为宝箱房（保底中途遗物）；第 15 层（Boss 前一层）全部为篝火（保证在任意路径下 Boss 前都有机会回血/升卡）。Boss 固定在第 16 层。第 2、3 幕以相同规则位移：对应楼层 18/26/32-33 和 35/43/49-50。这三个锚点的设计意义：①安全起点消除开局焦虑；②中段保底奖励维持强化动力；③Boss 前必有回补，降低「已无路可退」的体验崩溃。",
+            "sources": [
+              "https://slaythespire.wiki.gg/wiki/Map_Generation",
+              "https://kosgames.com/slay-the-spire-map-generation-guide-26769/"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "节点类型概率分布（基准难度）：普通战斗 53% / 事件 22% / 精英 8% / 商店 5-10% / 宝箱 7% / 篝火 2%",
+            "detail": "以上为非锚点楼层的随机分配概率。高难度（Ascension 1+）下精英概率升至 16%，普通战斗降至 45%，其余类型补偿分配。「未知房间（?）」是 Slay the Spire 第一代的特殊机制：进入后从怪物/商店/宝箱/事件中随机确定，且每次触发该类型后该类型权重临时降低（自适应袋子机制），防止连续触发同一类型。这个自适应机制与 Hades 的「奖励袋」思想一致。",
+            "sources": [
+              "https://steamcommunity.com/sharedfiles/filedetails/?id=2830078257",
+              "https://slaythespire.wiki.gg/wiki/Map_Generation"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "四条邻接硬规则防止节点类型扎堆，强制路线内有节奏变化",
+            "detail": "规则一：精英和篝火不能出现在第 6 层以下（前 5 层无精英，保障安全爬坡期）。规则二：篝火不能出现在第 14 层（第 15 层已全部保底篝火，避免连续两个篝火浪费）。规则三：精英、商店、篝火三类节点不能在同一路径上相邻出现（互斥连续）。规则四：同一节点向外有 2 条以上路径时，所有出路的节点类型必须各不相同（分叉点强制差异化，让玩家面对真实选择而非假选择）。若随机分配违反任一规则，系统重新分配直至满足约束。",
+            "sources": [
+              "https://slaythespire.wiki.gg/wiki/Map_Generation",
+              "https://steamcommunity.com/sharedfiles/filedetails/?id=2830078257"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "Hades 的门图标系统：「节点类型预览」的另一种轻量实现——出口门上显示下一房间奖励类型图标",
+            "detail": "Hades 结构更线性（每个房间 1-4 扇出口门），但奖励预览逻辑完整：清关后每扇门上显示下一房间的奖励类型图标（Boon 祝福=对应神祇图标、心脏=最大血量+25%、锤子=武器改造、金币=购物货币、钥匙=永久进度资源等）。图标只揭示类型，不揭示具体内容（例如只知道是「Zeus 祝福」不知道具体是哪个技能）。同一房间多扇出口门不允许显示相同奖励类型（Boon 除外，但不同 Boon 必须来自不同神祇）。该系统的反重复机制：跳过的奖励从「奖励袋」移除，下次出现概率降低直至袋子重填。这让玩家面对「类型已知、具体内容随机」的决策，既有规划感又保留惊喜。",
+            "sources": [
+              "https://hades-2.game-vault.net/wiki/Doors",
+              "https://gamerant.com/hades-door-symbol-guide/",
+              "https://sts2.gg/guides/map-routing-guide"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "精英节点是「战术风险换遗物」的核心驱动器：路线决策多围绕「何时打精英 + 精英后去篝火恢复」展开",
+            "detail": "精英房是杀戮尖塔中获取遗物的主要途径（必然掉落1件遗物），同时也是最高战斗难度节点，与普通战斗拉开显著奖励差距。策略分析共识：每幕应打至少1个精英；精英后若 HP 偏低应优先走篝火而非继续打精英。「精英 → 篝火」序列是标准最优节奏。由此引出路线规划的核心矛盾：精英位置和篝火位置往往不在同一路，玩家需要找到能串联两者的路径。这个「高风险节点 + 恢复节点串联」的设计模式，对 SoT 的精英战斗 + 准备阶段资源补给节奏有直接参考价值。",
+            "sources": [
+              "https://bossdown.com/guides/slay-the-spire-2-map-pathing-guide/",
+              "https://slaythespire.wiki.gg/wiki/Map_Locations"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "SoT 3幕×8关下的分支地图适配方案：2列双轨 + 3个真实分叉点 + 3个锚点",
+            "detail": "8关/幕约为杀戮尖塔 15 可走楼层的一半，因此建议以下压缩适配：\n\n【锚点节点——固定类型，不参与分叉】\n- Stage 1：强制普通战斗（简单怪物池，安全入场）\n- Stage 5：强制宝物关（保底中途装备/遗物，对应 StS Floor 9 宝箱）\n- Stage 7：强制「加强准备阶段」（额外资源补给/更充裕 Prep 选项，对应 StS Floor 15 篝火）\n- Stage 8：强制 Boss\n\n【分叉区——Stage 2-4 与 Stage 6，共3个真实选择点】\n每个选择点：2-3 条路，每条路显示「节点类型图标 + 奖励类型图标」双层预览。\n- 选择点A（Stage 2-3 段）：普通战斗 vs 随机事件 vs 商人\n- 选择点B（Stage 3-4 段）：精英战斗 vs 普通战斗 vs 事件\n- 选择点C（Stage 6 段）：精英战斗 vs 事件（Boss 前最后选择）\n\n【节点类型与奖励类型的双层预览（对应用户需求②）】\n节点图标：⚔普通战/💀精英战/❓事件/🛒商人/宝箱\n奖励图标：金币/天赋点/装备/遗物（Relic）/技能\n每个可见的前向节点同时显示两类图标，玩家「我需要天赋点 → 选精英路」或「我需要回复 → 选事件路（可能有治疗事件）」\n\n【邻接约束（从 StS 移植）】\n- 精英不出现在 Stage 1-2（前两关安全期）\n- 同一路径上两个精英不相邻（精英后必须有非精英节点间隔）\n- 分叉点的多条出路节点类型必须各不相同",
+            "sources": [
+              "https://slaythespire.wiki.gg/wiki/Map_Generation",
+              "https://hades-2.game-vault.net/wiki/Doors",
+              "https://steamcommunity.com/sharedfiles/filedetails/?id=2830078257"
+            ],
+            "evidence_strength": "medium"
+          }
+        ],
+        "takeaways_for_sot": [
+          "【锚点三件套——移植价值最高】StS 的 Floor 1/9/15 三锚点设计（安全入场/中段保底/Boss 前回补）可以在 SoT 的 8 关结构中精确对应 Stage 1/5/7。这三个固定节点不参与分叉，保证任意路线都能拿到中段宝物和 Boss 前补给，消除「走错路什么也没拿到」的绝望感。",
+          "【分叉强制差异化规则——防止假选择】StS 硬规则「同一节点的多条出路必须节点类型各不相同」直接可以移植：Stage 2/4/6 每个分叉点，所有出路的节点类型（普通/精英/事件/商人）必须互不重复，确保玩家面对有实质意义的选择，而非两条路都是普通战斗的假分叉。",
+          "【双层图标预览——满足用户需求②】建议在地图节点上叠加两层图标：第一层=节点类型（战斗/精英/事件/商人）；第二层=该节点奖励类型（金币/天赋点/装备/遗物），两层图标均在走到该节点之前就可见。这融合了 StS（节点类型全图可见）和 Hades（奖励类型门图标）的两种预览模式，让玩家能把「我当前 run 缺什么资源」直接映射为「走哪条路」。",
+          "【精英节点的战术意义定位】StS 精英=「必得遗物」的确定性高奖励锚点，这对 SoT 精英节点的设计有明确指向：精英战斗应该给出比普通战斗显著更高质量的确定性奖励（建议：精英必得一件稀有装备/遗物，而非随机提升概率），使「打精英」成为玩家主动追求的目标，而非「因为地图只有这条路」。",
+          "【精英 → 回补节奏保护】StS 的「精英后必经篝火」不是硬规则，而是玩家通过路线规划自行保障的目标——但设计层面精英和篝火的位置分布使这种组合在多数路线上可实现。SoT 的对应设计：Stage 6 精英战斗后，Stage 7 是固定加强 Prep 节点（充裕补给），这意味着选了 Stage 6 精英路的玩家自动获得 Stage 7 回补，不需要玩家自行规划。",
+          "【奖励袋防重复机制——选项多样性保证】Hades 和 StS 的「未知房间」都使用自适应权重防止连续重复。SoT 在事件节点的奖励选项池中可以采用同样机制：同一 run 内已触发过的奖励类型临时降权，防止连续三场战斗都只给金币。配合「三选一 vs 固定掉落」机制选择（用户待定的 A/B/C 方案），自适应袋子机制适合 B 方案（全部三选一），A 方案（固定+三选一）则可对三选一池做防重复处理。",
+          "【SoT 的 Prep 阶段与 StS 篝火的关键差异】StS 篝火是「专用恢复节点」；SoT 每个 Stage 都有 Prep 阶段，理论上每关都能做一定程度准备。这意味着 SoT 的「节点类型」分类不应该有独立的「休息节点」——休息/准备功能内嵌于每个 Stage 的 Prep 阶段。SoT 需要差异化的是「Prep 阶段的丰富程度」：普通战前的 Prep 基础配置，精英战前 Prep 可以有额外情报或强化选项，Stage 7（锚点）的 Prep 则给予最充裕的资源（类似篝火的专属回补能力）。",
+          "【3幕结构下的难度递进与节点类型配比建议】已定的难度递进（敌 HP x1.0/1.5/2.0）建议同步体现在节点配比上：Act 1 精英出现 1 次（Stage 4 或 6 二选一），Act 2 精英出现 1-2 次（Stage 3/6 各有精英选项），Act 3 精英出现 2 次（Stage 3 和 Stage 6 均可选精英，且精英本身难度更高）。这样三幕精英数量递增，与 StS 高难度下精英概率从 8% 提升至 16% 的设计思路一致。"
+        ],
+        "sources": [
+          "https://slaythespire.wiki.gg/wiki/Map_Generation",
+          "https://steamcommunity.com/sharedfiles/filedetails/?id=2830078257",
+          "https://slaythespire.wiki.gg/wiki/Map_Locations",
+          "https://kosgames.com/slay-the-spire-map-generation-guide-26769/",
+          "https://hades-2.game-vault.net/wiki/Doors",
+          "https://gamerant.com/hades-door-symbol-guide/",
+          "https://bossdown.com/guides/slay-the-spire-2-map-pathing-guide/",
+          "https://arxiv.org/html/2504.03918v1",
+          "https://sts2.gg/guides/map-routing-guide"
+        ],
+        "open_questions": [
+          "SoT 地图分支在哪个屏幕上呈现？是独立的「幕内地图」全图，还是「只看到当前节点相邻的下一层节点」的局部视野？这直接影响预览深度（全图可见=StS 模式，局部可见=Hades 模式），两者的认知负担和决策深度差距显著。",
+          "「遗物 Relic」与 L5 符文（runes，6槽构筑定义）是否是同一物？KB 待澄清——如果精英战斗掉落的是符文/遗物（构筑定义层），则精英节点的战略地位极高，分支地图应该让精英路清晰可见；如果是不同系统则节点奖励类型图标需要区分。",
+          "SoT 的 Prep 阶段（准备阶段）在「地图节点」UI 上如何表达？玩家是否在看地图时就已经进入 Prep？还是先选了节点，才进入 Prep 再进入战斗？这影响「Stage 7 加强 Prep 锚点」的具体实现方式。",
+          "三选一奖励机制（用户待定的 A/B/C 方案）与分支地图是否是正交设计？建议分支地图（选哪条路）和战后三选一（从本关掉落里选什么）是两个独立决策层——地图分支决定奖励类型范围，三选一决定具体条目。用户是否同意这个解耦？",
+          "8关/幕的分叉点数量（提案 3 个真实分叉点）是否符合项目「单关约 25-35 分钟战棋战斗」的时长预期？如果每局 run 只有 24 关+3 Boss，分叉路线是否够玩家产生足够的「选择记忆」和 run 差异感？"
+        ]
+      },
+      {
+        "dimension": "奖励驱动型肉鸽设计范式调研（含梦之形、Hades、STS、短 run 经济）",
+        "summary": "本次调研覆盖四个子维度：① 核实\"梦之形\"身份及其奖励/推进机制；② Hades 门符号预览系统与奖励密度；③ Slay the Spire 节点分布与固定-随机奖励经济；④ 24 关短 run 下如何避免通胀与奖励饥饿。结合 SoT KB 真源（run-loop.md 已定框架），给出节点配比、奖励机制选型、预览系统设计与经济节奏的具体提案方向。",
+        "findings": [
+          {
+            "claim": "「梦之形」= Shape of Dreams（Steam App 2444750），2025年9月上线的韩国动作肉鸽，非战棋类",
+            "detail": "由韩国4人工作室 Lizard Smoothie 开发，Steam 超1.1万评测，好评率87%。核心机制是「记忆编辑」：Memories（主动技能，最多4个槽，可随时找/换/卖）+ Essences（技能修饰符，每个 Memory 最多叠3个，功能类似 Hades 的神赐——改变技能行为而非纯数值加成）。元进度用 Stardust 解锁3棵星座树（破坏/生命/想象）及角色专属树。游戏结构：玩家在「The Rapids」连续清区域，可在商店改变下一张地图，再打 Boss。无明确「选路节点预览地图」描述——更接近走廊式（选扑路线）而非 STS 式显式节点图。与SoT的关联性：Memories+Essences 双层体系（主动技能+修饰符）与 SoT 的天赋节点+符文槽两层构筑逻辑在设计原理上类似，均强调「组合涌现而非堆数值」。",
+            "sources": [
+              "https://store.steampowered.com/app/2444750/Shape_of_Dreams/?l=schinese",
+              "https://www.ign.com.cn/shape-of-dreams/57376/interview/meng-zhi-xing-zhi-zuo-tuan-dui-fang-tan-gan-chu-lai-de-jie-zuo-ign-zhong-guo",
+              "https://www.indie-games.eu/shape-of-dreams-deep-and-rewarding-roguelite/",
+              "https://games.gg/shape-of-dreams/guides/shape-of-dreams-ultimate-beginners-guide/"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "Hades 的「门符号」系统是「奖励预览驱动选路」的经典范例：进房间前完全知道奖励类型，但不知道具体内容",
+            "detail": "每个房间出口上方显示符号图标，对应一种奖励类型，约73个房间/run。预览图标体系如下：神赐 = 对应神明的专属彩色符号（粉心=Aphrodite / 红剑=Ares / 绿弓=Artemis / 黄盾=Athena 等）；铁锤 = 武器强化（Daedalus Hammer）；黑暗（Darkness）= 永久升级货币；金币（Obols）= 当轮货币；Centaur 心 = 最大HP+25；Pom = 已有神赐升级；骷髅标记 = 精英/Boss 遭遇；Charon 符号（钱袋） = 商店；白色感叹号 = NPC 剧情。金色月桂=临时奖励（当 run）；蓝色月桂=永久资源（跨 run）。骷髅+奖励图标叠加=带更高奖励的高难遭遇。关键设计逻辑：玩家在选择哪扇门时，「看到了奖励类型」但「不知道是哪个神赐的哪个具体效果」，制造了「可计划的不确定性」——知道拿锤子还是拿神赐，但不知道是哪种强化，保留兴奋感。",
+            "sources": [
+              "https://www.inverse.com/gaming/hades-symbol-meaning-guide-hera-dionysus-apollo-ares-aphrodite",
+              "https://primagames.com/tips/hades-door-symbols-guide-boons-artifacts",
+              "https://gamerant.com/hades-door-symbol-guide/"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "Slay the Spire 的节点图标系统：7种节点全可见，每幕约15层，有固定楼层保底，节点分布比例有数据",
+            "detail": "地图节点类型与基础概率（A20难度，直接分配概率）：战斗节点53%、精英节点8%（Ascension 1+升至16%）、事件节点(?)15%、宝箱节点10%、商店节点10%、营火4%。固定楼层保底：第9层全为宝箱，第15层全为营火。精英+营火不能出现在第1-5层（前5层只有战斗/事件）。地图选路的关键数字：战斗节点约给金币20-30+三选一卡牌奖励；精英节点必给遗物掉落（概率：50%普通/33%稀有/17%史诗）；每幕约1-2个商店；精英遭遇后暂时跳过难度检查。事件节点（?）有内部二次权重随机：战斗10%/宝箱2%/商店3%/精英20%（这些概率在未触发时累积叠加，保底机制）。整体run约3幕×15层 = 45+层，比SoT的24关密度高约一倍，因此单关奖励设计可以略比STS更充裕。",
+            "sources": [
+              "https://steamcommunity.com/sharedfiles/filedetails/?id=2830078257",
+              "https://slay-the-spire.fandom.com/wiki/Map_locations",
+              "https://arxiv.org/html/2504.03918v1"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "Dead Cells、Monster Train、Into the Breach 三款参考游戏的奖励密度数据点",
+            "detail": "Dead Cells：每个生物群落约2-4个成长卷轴（HP/攻击永久升级）；蓝图掉落率极低（普通10%/稀有1.7%/传说0.4%），蓝图靠随机分配给特定敌人，需击杀该敌人触发。精英模式金币翻倍。强调「每run内成长缓慢但可感知，跨run积累蓝图解锁武器池」。Monster Train：每场战斗后固定给：金币+卡牌选择（有时给单位选择）；起始50金币，商店用金币升级卡牌；「跳过奖励」可以得金币（设计意图：奖励有机会成本价值）；卡牌升级永久保留至run结束。Into the Breach：每座岛完成后三选一：新武器/新飞行员/+2电网；任务奖励最多3个反应堆核心+声誉；每座岛约4-10声誉收入；反应堆核心=最有价值（3声誉），电网=最弱，飞行员可卖2声誉。3个游戏共同特征：奖励选择在战斗结束后立即出现，没有额外等待；有明确「货币/消耗品」与「构筑材料」区分；精英/Boss 额外保障高品质奖励。",
+            "sources": [
+              "https://deadcells.fandom.com/wiki/Blueprints",
+              "https://monster-train.fandom.com/wiki/Gold",
+              "https://intothebreach.fandom.com/wiki/Grid_Power",
+              "https://gamefaqs.gamespot.com/pc/205477-into-the-breach/faqs/76363/perfect-island-reward"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "短 run（约20-30分钟、20-30场战斗）的奖励节奏设计原则：前期构筑窗口要慷慨，中期收缩，后期侧重「完成」而非「重塑」",
+            "detail": "研究表明20-30分钟是最优run长度，在此窗口内需要「好的能力-难度曲线：从简单开始，很快进入有趣的复杂性，到后期玩家已积累足够强力能力应对指数增长的敌人难度」。针对SoT的24关（3幕×8关）短run建议：Act 1（关1-8）=慷慨构筑窗口：前3关必须让玩家看到构筑方向，奖励优先给天赋点和方向性装备；Act 2（关9-16）=收缩期：普通战斗奖励质量降低，但精英和事件奖励强化，玩家此时应已确定构筑方向；Act 3（关17-24）=完成期：奖励集中于「补完构筑」而非「开新方向」，精英/Boss 给传说级，普通战斗给消耗品/金币。通胀风险：24关如每关给1天赋点，Act结束时有24点，可能过强——需要设计总量上限或按Act分段供给。饥饿风险：如果运气差，连续普通战斗没拿到核心构筑材料会导致15关后仍无构筑形态。",
+            "sources": [
+              "https://medium.com/@todorovicnik2/video-games-roguelite-restart-length-of-a-perfect-run-ef8078c76495",
+              "https://entaltostudios.com/5-essential-tips-to-make-your-roguelite-game-work/"
+            ],
+            "evidence_strength": "medium"
+          },
+          {
+            "claim": "奖励透明度（可见奖励类型）是驱动「再来一局」心理的核心机制，而非纯随机惊喜",
+            "detail": "心理研究表明：多巴胺在「不确定奖励的预期阶段」峰值最高，而非收到奖励时。但「不确定性要在可控范围内」——「当进度可见且运气上限存在时，不确定性才是可承受的」。对设计的含义：完全透明（固定奖励）= 无惊喜，无驱动力；完全随机 = 无规划感，易产生受害者心态；最优解 = 类型可见+内容随机（Hades模式：知道是神赐，不知道是哪个）或概率可感知（STS模式：知道精英节点必有遗物，不知道是哪个）。横向进步（解锁新机制）比纵向进步（数值变强）更能保持长期复玩性，且不会让新玩家感到「数值追赶」压力。",
+            "sources": [
+              "https://yukaichou.com/advanced-gamification/decoding-the-mystery-box-a-dive-into-the-intricacies-of-reward-design/",
+              "https://retrostylegames.com/blog/why-are-roguelike-games-so-engaging/",
+              "https://entaltostudios.com/5-essential-tips-to-make-your-roguelite-game-work/"
+            ],
+            "evidence_strength": "medium"
+          },
+          {
+            "claim": "KB 正本 run-loop.md 中存在一处术语重叠未定：「遗物 Relic」与 5层架构 L5「符文 Runes」可能指同一物，需用户裁决",
+            "detail": "run-loop.md 说「战利品 Loot = 装备/技能/遗物 Relic」，并在奖励表中列出「精英战斗给稀有装备/技能/遗物 Relic，Boss 给传奇装备/技能/遗物 Relic」。5层架构（架构共识v2）说「L5 = 符文 runes，6槽，构筑定义」。两种可能：(a) 同名不同物——遗物是独立于符文之外的第三类构筑物品，类似 STS 里遗物(Relic)≠卡牌，构成独立构筑维度；(b) 同物异名——遗物即符文，run 中掉落的「遗物」就是 L5 符文槽的装填内容。两种解读对设计影响不同：若为(a)，run-loop 需同时维护装备槽(L4)+符文槽(L5)+遗物槽3个维度；若为(b)，L5符文通过「在战斗中掉落的遗物」来装填，设计更简洁。这一歧义无法从现有KB文本中单独确定，需用户明确裁决。",
+            "sources": [
+              "D:\\ShipOfTheseus\\ShipOfTheseus-KB\\01-Game-Design\\Progression\\run-loop.md"
+            ],
+            "evidence_strength": "high"
+          }
+        ],
+        "takeaways_for_sot": [
+          "【梦之形核实】梦之形 = Shape of Dreams，动作肉鸽，非战棋，无显式节点预览地图。其 Memories+Essences 双层体系（技能+修饰符组合涌现）与 SoT 天赋+符文的设计哲学同源，可作为「单节点设计简单可组合」的参照，但其地图/预览机制不可直接套用。",
+          "【奖励预览实现方向】仿 Hades 门符号 + STS 节点图标双参照：每个关卡在地图UI上显示节点类型图标（战斗/精英/事件/Boss）+ 主奖励类型标签（天赋点 / 遗物 / 装备 / 金币加成 / 特殊事件）。KB 已有 Stage.preview 字段，可存储此类型标签。预览颗粒度：「类型可见、具体内容随机」——玩家知道「这关必给遗物」但不知道是哪个，保留兴奋感。便利升级 map_preview 可区别于基础预览（基础=节点类型免费，详细=具体奖励池提示需解锁）。",
+          "【节点配比提案（8关/幕）】参考 STS（战斗53%/精英8-16%/事件15%/宝箱10%/商店10%/营火4%）并缩放至8关：Act1=[常规→常规→精英→事件→常规→精英→常规→Boss]（常规4/精英2/事件1/Boss1）；Act2=[常规→精英→常规→事件→精英→常规→精英→Boss]（常规3/精英3/事件1/Boss1，与 KB 难度递增精英由2→2-3→3 吻合）；Act3=[精英→常规→精英→事件→常规→精英→精英→FinalBoss]（常规2/精英4/事件1/Boss1）。此配比下精英占比随幕提升（25%→37.5%→50%），符合已定难度设计意图。",
+          "【奖励机制选型建议】推荐方案A变体（固定基础+三选一核心奖励）：固定给「少量金币+EXP」（稳定两条成长线，防饥饿）；三选一专注于「当轮最重要的构筑决策」（天赋点 / 装备 / 遗物/符文）。理由：24关中每关做完整三选一（方案B）认知负担过重；纯固定（方案C）缺乏「奖励牵引」驱动力；A方案三选一只聚焦一个构筑维度，清晰且有决策感。精英关可给「固定基础+两次三选一（一次装备、一次遗物）」强化精英价值差异感。",
+          "【奖励节奏曲线（三幕梯度）】Act1前3关奖励应慷慨（必有天赋点或方向性装备），让玩家在Act1结束前看到构筑方向；Act2中期开始收缩普通战斗奖励质量，但精英/事件保持或强化；Act3普通战斗给消耗品/金币为主，精英/Boss给传说级稀有，强化「收获感」而非「重塑感」。",
+          "【避免通胀的3个手段】① 天赋点总量控制：建议整个run总天赋点供给不超过天赋树可解锁节点的70%（保留「不能全拿」的稀缺感）；② L5符文/遗物槽位硬上限（已定6槽）使多余遗物有机会成本（只能换不能加）；③ 金币设计沉没成本——建筑修缮/建造消耗金币，给金币一个持续的排水渠，防止末期金币堆积失去意义。",
+          "【避免饥饿的2个手段】① 保底机制参考 STS 事件节点累积概率：如果连续N关普通战斗未给稀有奖励，下一关普通战斗奖励池质量提升（可用加权抽取实现，不需要硬编码保底）；② 特殊事件作为「补救窗口」设计——祝福祭坛类事件可以让玩家花金币「定向选取」构筑缺失维度的奖励，而非纯随机，防止差运气锁死构筑。",
+          "【必须裁决的开放问题】遗物(Relic) 与 L5符文(Runes) 是同一物还是两个独立系统？两种答案对奖励系统设计影响截然不同，需用户在开始详细设计前明确。"
+        ],
+        "sources": [
+          "https://store.steampowered.com/app/2444750/Shape_of_Dreams/?l=schinese",
+          "https://www.ign.com.cn/shape-of-dreams/57376/interview/meng-zhi-xing-zhi-zuo-tuan-dui-fang-tan-gan-chu-lai-de-jie-zuo-ign-zhong-guo",
+          "https://www.indie-games.eu/shape-of-dreams-deep-and-rewarding-roguelite/",
+          "https://games.gg/shape-of-dreams/guides/shape-of-dreams-ultimate-beginners-guide/",
+          "https://www.inverse.com/gaming/hades-symbol-meaning-guide-hera-dionysus-apollo-ares-aphrodite",
+          "https://primagames.com/tips/hades-door-symbols-guide-boons-artifacts",
+          "https://gamerant.com/hades-door-symbol-guide/",
+          "https://hades.fandom.com/wiki/Boons",
+          "https://steamcommunity.com/sharedfiles/filedetails/?id=2830078257",
+          "https://slay-the-spire.fandom.com/wiki/Map_locations",
+          "https://arxiv.org/html/2504.03918v1",
+          "https://deadcells.fandom.com/wiki/Blueprints",
+          "https://monster-train.fandom.com/wiki/Gold",
+          "https://intothebreach.fandom.com/wiki/Grid_Power",
+          "https://gamefaqs.gamespot.com/pc/205477-into-the-breach/faqs/76363/perfect-island-reward",
+          "https://entaltostudios.com/5-essential-tips-to-make-your-roguelite-game-work/",
+          "https://medium.com/@todorovicnik2/video-games-roguelite-restart-length-of-a-perfect-run-ef8078c76495",
+          "https://yukaichou.com/advanced-gamification/decoding-the-mystery-box-a-dive-into-the-intricacies-of-reward-design/",
+          "https://retrostylegames.com/blog/why-are-roguelike-games-so-engaging/",
+          "D:\\ShipOfTheseus\\ShipOfTheseus-KB\\01-Game-Design\\Progression\\run-loop.md"
+        ],
+        "open_questions": [
+          "遗物(Relic) vs 符文(Runes) 术语裁决：两者是同一物（符文通过战斗掉落的遗物装填）还是两个独立设计层？此问题直接影响奖励系统要维护几个维度。",
+          "天赋点总量预算：整个run玩家最多能获得多少天赋点？需要与天赋树节点总数对比，确保稀缺感（建议：可解锁节点数 × 0.6~0.75 为合理供给上限）。",
+          "特殊事件配比是否应与战斗完全分开（独立节点）或是否允许战斗附带事件选择？KB 当前设计是独立节点，但部分肉鸽（如Into the Breach的任务附加目标）支持战斗+事件融合。",
+          "是否需要在 Act 之间（两幕之间）设计额外的补给/选择节点（类似 STS 的幕间宝箱/商店层），还是直接从 Boss 结算跳到下一幕 Prep？",
+          "地图分支结构深度：8关是否每关都是单线推进，还是局部存在分叉（类似STS每层可选2-3条路）？分叉存在则节点预览意义更大，但需要更多节点设计资产。"
+        ]
+      },
+      {
+        "dimension": "run-loop 地图分支拓扑选型 + 奖励预览驱动路由设计分析",
+        "summary": "针对 SoT 的 3 幕 × 8 关（7 个常规/精英/事件 + 1 Boss）战棋肉鸽循环，对四种地图拓扑进行了实证对比分析，并给出拓扑推荐与奖励类型预览的嵌入方案。同时发现 run-loop.md 中的\"遗物 Relic\"与架构共识 v2 中的 L5\"符文 Rune（6 格）\"存在术语冲突，需要用户澄清。核心推荐：采用「压缩轻地图 + 单步奖励预览」混合方案，介于杀戮尖塔全图模式与 Hades 当步门选模式之间，最符合 SoT 战棋重战斗 + 单人开发的约束。",
+        "findings": [
+          {
+            "claim": "SoT 已定结构确认：3 幕 × 8 关，频次配比待定",
+            "detail": "KB 正本 run-loop.md（2026-06-30 用户裁决）已确认每幕 8 关，含 1 Boss。Stage 类型频次表（常规 6-7/幕，精英 2-3/幕，Boss 1/幕，特殊事件 1-2/幕）是旧约 10 关的占位，文档明确注记「待奖励+地图分支设计预案按 8 关重新配比」，属于 SoT 已知待定项，不是错误。",
+            "sources": [
+              "D:\\ShipOfTheseus\\ShipOfTheseus-KB\\01-Game-Design\\Progression\\run-loop.md 第 76-96 行"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "「遗物 Relic」与「符文 Rune（L5 6 格）」术语冲突，需用户澄清",
+            "detail": "run-loop.md 将战利品 Loot 分类为「装备/技能/遗物 Relic」，精英/Boss 额外掉落「传奇 Relic」。但 architecture-consensus-v2（2026-05-10 用户确认）建立了 L5「符文 Rune 6 格」机制，分经济类与流派类，并在 D1 stream 文档中使用「Rune Pool」而非「Relic Pool」。两者之间存在三种可能：(A) Relic = Rune（术语演化，run-loop.md 未同步更新）；(B) Relic 是单独的被动物品槽（类 STS Relic），Rune 是 6 格构筑槽，两者并行；(C) Relic 概念被 architecture-consensus-v2 注释「D5 决定并入或弃用」，事实上已被符文体系取代。architecture-consensus-v2 §7 名词表的注释「旧 relic 概念：D5 决定并入或弃用」倾向于 (C)，但 D5 stream 尚未正式落地。不应在未澄清前将两者混用。",
+            "sources": [
+              "D:\\ShipOfTheseus\\ShipOfTheseus-KB\\01-Game-Design\\Progression\\run-loop.md 第 107-112 行",
+              "D:\\ShipOfTheseus\\ShipOfTheseus-KB\\03-AI-Context\\Active-Context\\architecture-consensus-v2.md §7 名词表"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "拓扑选型 A：线性 + 偶发岔路——最简单但奖励牵引感最弱",
+            "detail": "8 个关卡基本按顺序推进，在少数节点（如第 2、4 关）提供「走这条路还是那条路」的二选一。玩家每次仅能看到当前和下一个节点的奖励类型。优势：实现极简，Stage 数组加 branch_choices 字段即可；叙事流畅，不需要额外地图 UI。劣势：玩家感受不到路线决策，失去战略深度；Roguelite 的「被下一步奖励牵引前进」感弱（每次只有一个分叉，且选完就没了）；3 幕 × 8 关里面，7 关中如果只有 1-2 个分叉点，玩家大部分时间是被动接收而非主动选择。参考：Cobalt Core 颜色分类节点，有时分支完全相同属于「虚假决策」，被评为设计弱点。",
+            "sources": [
+              "https://thehexagarden.com/blog/lets-make-a-map-1"
+            ],
+            "evidence_strength": "medium"
+          },
+          {
+            "claim": "拓扑选型 B：杀戮尖塔式多列有向图——规模与节点数不匹配，6 倍以上节点才能发挥优势",
+            "detail": "Slay the Spire（1 代和 2 代）的地图：7 列 × 15 行 = 约 90 个潜在位置，6 条路径穿越，每路径 15 步，玩家在地图顶端向下俯瞰整幕，可预规划整条路线。节点类型以小图标显示，奖励类型在地图上全部可见（全图无迷雾）。优势：长线规划感强，「我第 8 关前要攒够天赋点/金币去商店」的策略性; 社区评价「失败感觉是自己选路不当而非随机」。劣势：① STS 效果来源于 15 层 × 多条路径的路径组合数，在 SoT 的 7 个非 Boss 关的尺度下，多列图只能放 2-3 个有效分叉，视觉上显得稀疏空洞；② STS 地图小图标可读性差，已被社区批评（STS2 仍有此问题，有 mod 补色），意味着需要专门的视觉设计精力；③ 算法实现需要：路径生成、交叉检测、节点类型分配带约束，对单人开发而言是中等复杂度额外工作；④ 单场战棋战斗时间长，经历 7 关后玩家更关注每一关收益而非全幕路线，对地图拓扑的感知会低于卡牌游戏。适用场景：节点数 ≥ 20、战斗较轻、路线组合数量足够多时效果最好。SoT 的 7 关不在此范围内。",
+            "sources": [
+              "https://steamcommunity.com/sharedfiles/filedetails/?id=2830078257",
+              "https://slaythespire.wiki.gg/wiki/Map_Generation",
+              "https://thehexagarden.com/blog/lets-make-a-map-1",
+              "https://bossdown.com/guides/slay-the-spire-2-map-pathing-guide/"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "拓扑选型 C：Hades 式「每步在 2-3 扇门之间选，门上显示奖励类型」——最符合用户点名的奖励驱动感，但牺牲跨关计划性",
+            "detail": "Hades 1 和 Hades 2 的结构：每间房间清敌后，出口有 2-3 扇门，每扇门门上显示奖励类型符号（Boon 图标/资源/锤子升级等），玩家立即选择下一间。没有「总地图」可以查看，玩家无法提前规划「第 5 关去精英」。Hades 2 有 31 种门符号类型，可区分主要奖励与次要奖励（银边框 vs 绿流苏），部分门有 2-3 个符号（多重奖励）。优势：① 这正是用户点名的「梦之形/Hades 式奖励驱动牵引」体验——每场战斗结束后，玩家立即被下一扇门的奖励类型吸引；② 实现极简：只需每次战斗结束后从奖励池中随机生成 2-3 个选项，用图标展示，无需独立地图屏；③ 视觉设计集中在「门图标」而非地图全局。劣势：① 玩家无法做跨关计划（比如「还差 1 个精英 = +2 天赋点才能解锁转职节点」），对于战棋玩家来说是有损失的——战棋玩家比动作游戏玩家更依赖前置推算；② 8 关对 Hades 的 10-12 间房来说已经很接近，但 SoT 每关战斗时间长（可能 30 分钟+），纯即时门选会让玩家感觉「我完全不知道自己在往哪走」；③ 没有「本幕进度感」，不知道自己距离 Boss 还有几关；④ Darkest Dungeon 2 早期版本也是基本隐藏路线，后来加了 Watch Tower 用于揭示地图（2023 年「Redemption Road」补丁），说明完全隐藏的信息系统会导致玩家迷失。",
+            "sources": [
+              "https://game8.co/games/Hades-2/archives/453727",
+              "https://hades-2.game-vault.net/wiki/Doors",
+              "https://darkestdungeon2.wiki.fextralife.com/Locations"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "拓扑选型 D：节点网格/星图（自由探索）——与战棋肉鸽不匹配，排除",
+            "detail": "节点网格允许玩家在二维平面自由选择下一个目的地（类似地图探索），常见于开放世界 Roguelite（如 Rogue Legacy 2 的地城探索）。在 SoT 的固定幕次结构（有线性进度要求）中，自由网格会打破「每幕向 Boss 推进」的叙事节奏；此外 SoT 本身战棋地图已经是 10×10 格子，再加一层「城镇地图格子」会在视觉和心智上形成混淆。单人开发实现成本也较高（空间索引、路径合法性验证等）。此选型不推荐。",
+            "sources": [
+              "D:\\ShipOfTheseus\\ShipOfTheseus-KB\\01-Game-Design\\Progression\\run-loop.md"
+            ],
+            "evidence_strength": "medium"
+          },
+          {
+            "claim": "推荐拓扑：「压缩轻地图 + 单步奖励预览」混合方案",
+            "detail": "结合 SoT 约束（7 个非 Boss 关/幕、战棋重战斗、单人开发、用户明确想要奖励驱动 + 奖励预览）的最优方案：\n\n【结构】每幕生成一张「轻地图」，展示本幕全部 8 个节点（含 Boss），节点间以有向边连接，形成 2-3 个有意义的分叉点（不是 STS 的 6 列多路径，而是更简洁的小树形）。玩家一进入新幕即可看到全幕结构。\n\n【奖励预览规则】\n- 当前节点出发可以直接到达的下一层节点（1 步之内）：显示具体奖励类型图标（精英=天赋点图标、事件=问号、商人=金币袋、普通战=剑图标等）\n- 再远 1 步的节点（2 步之外）：只显示节点类型（普通/精英/事件/Boss），不显示奖励细节\n- Boss 节点：全程可见（总是标注在地图末尾，给玩家心理锚点）\n\n【叉路点设计建议（按 8 关配比）】\n- 位置 1（关 2 之后）：第一个分叉，普通战 vs 事件——低风险分叉\n- 位置 2（关 4 之后）：中段分叉，普通战 vs 精英——资源/风险权衡，天赋点决策\n- 位置 3（关 6 之后）：最后分叉，事件 vs 精英——最后一次路线调整，离 Boss 只有 1-2 关\n- 关 7→Boss（关 8）：强制汇合，无分叉\n\n这样每幕固定 7 个非 Boss 关，其中 2-3 个有意义的选路点，其余为顺序推进。分叉总数控制在 2-3 个，避免「多到决策疲劳」也避免「少到没有感觉」。\n\n【与 Across the Obelisk 的异同】Across the Obelisk 在幕间用三色传送门选下一幕（宏观路线），幕内节点图可自由选路。SoT 可以简化：幕内结构固定（轻地图），幕间是否加「通往下一幕的分支选择」（如两条 Act 2 可选路线）留作扩展项。",
+            "sources": [
+              "https://ato.fandom.com/wiki/Nodes",
+              "https://thehexagarden.com/blog/lets-make-a-map-1",
+              "https://game8.co/games/Hades-2/archives/453727",
+              "https://slaythespire.wiki.gg/wiki/Map_Generation"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "可见范围（全图 vs 仅相邻 vs 迷雾）对策略性与紧张感的影响",
+            "detail": "从业界证据归纳三种模式的设计效果：\n\n① 全图可见（STS 模式）：优点=玩家可全程规划路线，失败感归因于自身决策而非运气（社区普遍评价积极）；缺点=在节点少时地图显得「空旷」，节点图标可读性要求高（STS1 因图标小被批评）。\n\n② 仅相邻节点可见（Hades 门选模式）：优点=每次选择都是即时的「被下一步奖励吸引」，节奏感强；缺点=缺乏计划感，无「本幕进度锚点」，Darkest Dungeon 2 的经验表明完全隐藏路线会让玩家迷失，最终在 2023 补丁加回了揭示地图的 Watch Tower 机制。\n\n③ 全幕可见 + 仅当步奖励类型（推荐给 SoT 的混合方案）：玩家看得到全幕结构（心里有数距 Boss 还几关、分叉在哪），但只有走到旁边才知道精确奖励类型。这保留了 Hades 式的「当前步骤奖励牵引」同时提供了战棋玩家需要的「前置推算空间」。Cobalt Core 的颜色编码节点方向（颜色区分类型，但不预告具体内容）是同类实践的参考。",
+            "sources": [
+              "https://thehexagarden.com/blog/lets-make-a-map-1",
+              "https://darkestdungeon2.wiki.fextralife.com/Locations",
+              "https://slaythespire.wiki.gg/wiki/Map_Generation"
+            ],
+            "evidence_strength": "high"
+          },
+          {
+            "claim": "奖励选择机制（A/B/C 三选一）对奖励驱动感的影响——推荐混合方向",
+            "detail": "三个选项的对比：\n- 选项 A（固定掉落 + 三选一奖励）：提供基础保障（玩家知道 EXP 和 Gold 一定有），三选一给策略感。问题：固定部分不产生路由驱动（不管走哪条路都一样）。\n- 选项 B（全部三选一）：最大化路由驱动——因为每条路可能有不同的三选一奖励包，加上地图上提前看到奖励类型，玩家会被「哪条路的三选一更好」驱动。Hades 门选几乎等同于此模式（每门一种奖励，本质上是 1 选 1 逐扇门加权选择）。STS 的卡牌奖励也是接近此模式（每场战斗选 3 选 1 卡牌）。\n- 选项 C（固定金币 + 随机掉落）：最低路由驱动感，玩家到哪路都差不多，不符合用户明确的「被下一步奖励牵引」目标。\n\n结合 SoT 的战棋长战斗特性（玩家投入大量精力打完一场），推荐偏向选项 A 变体：「基础保障（EXP + Gold，自动结算）+ 三选一战利品（装备/技能/符文）」。原因：① 战棋玩家在完成一场重战斗后不希望什么都不保证拿到；② 三选一的战利品（L4 装备 + L5 符文）是最能驱动路由预期的维度；③ 奖励类型预览在地图上只需展示「三选一池的类别（装备/符文/天赋点bonus）」即可，不需要展示具体内容。精英和 Boss 的三选一池质量更高，这正是玩家会被精英节点「吸引」绕路的核心动力。",
+            "sources": [
+              "D:\\ShipOfTheseus\\ShipOfTheseus-KB\\01-Game-Design\\Progression\\run-loop.md 第 117-126 行",
+              "https://game8.co/games/Hades-2/archives/453727",
+              "D:\\ShipOfTheseus\\ShipOfTheseus-KB\\03-AI-Context\\Research\\sot-viability-2026-04-22\\B1.2-talent-roguelite-decoupling.md"
+            ],
+            "evidence_strength": "medium"
+          },
+          {
+            "claim": "单人开发可实现性评估——推荐方案在实现成本上处于合理区间",
+            "detail": "四种拓扑的 Godot GDScript 实现复杂度估计：\n- 线性 + 偶发岔路：最低。Stage 数组 + 每个 Stage 的 branch_to 字段。地图 UI = 几个按钮节点。约 1-2 天实现。\n- 压缩轻地图（推荐）：低中。每幕预生成一棵小树（约 8 节点 + 10 条边），可在 run 初始化时用脚本生成，也可直接在 JSON 静态定义（初期静态 + 后期随机化）。地图 UI = 节点图标 + 边连线，Godot 的 GraphEdit 或自绘 Control 节点均可实现。约 3-5 天实现（含地图 UI）。\n- STS 式多列图：中高。需要实现路径生成算法（交叉检测、节点类型分配约束）+ 完整地图渲染。已有开源参考实现（github.com/silverua/slay-the-spire-map-in-unity，非 Godot 但可参考算法）。约 1-2 周实现。\n- Hades 门选：最低之一，但需要「战斗结束后弹出 2-3 扇门」的 UI 流程，与 SoT 已有的 Prep 阶段衔接需要设计确认。约 1-3 天实现门选 UI。\n\n推荐的「压缩轻地图」方案初期可用静态 JSON 定义地图结构（每幕一个固定树），后期再加随机化，逐步迭代，符合单人开发的渐进式原则。",
+            "sources": [
+              "https://github.com/silverua/slay-the-spire-map-in-unity",
+              "https://forum.gdevelop.io/t/slay-the-spire-style-map-waypoints/37704"
+            ],
+            "evidence_strength": "medium"
+          },
+          {
+            "claim": "备选方案：纯 Hades 门选 + 进度条，适合 MVP 阶段快速验证",
+            "detail": "如果短期内需要最快上线 run-loop 结构进行玩法验证，纯 Hades 门选方案是最低成本的备选。设计方案：战斗结束后弹出 2-3 个选项卡（每个显示下一关的类型图标 + 预期奖励类型），玩家点击选择，进入下一关的 Prep 阶段。屏幕顶部显示「幕数 / 关卡进度」（如「Act 1 — 关卡 3/7」）作为进度感替代品，弥补没有全幕地图的缺失感。此方案可在 1-2 天内实现，用于验证「被奖励类型牵引的路由决策感受」是否符合用户预期，然后再决定是否升级为完整轻地图。",
+            "sources": [
+              "https://hades-2.game-vault.net/wiki/Doors",
+              "https://game8.co/games/Hades-2/archives/453727"
+            ],
+            "evidence_strength": "medium"
+          }
+        ],
+        "takeaways_for_sot": [
+          "推荐拓扑：「压缩轻地图 + 单步奖励预览」。每幕生成/定义 8 节点小树（2-3 个分叉点），幕初即显示全幕结构，但奖励类型图标只显示在「当前节点可直接抵达的下一层节点」上，再远的节点只显示类型（普通/精英/事件/Boss）。",
+          "分叉点位置建议（按 7 个非 Boss 关配比）：关 2 后第一叉（低风险：普通 vs 事件）、关 4 后第二叉（核心叉：普通 vs 精英，天赋点决策）、关 6 后第三叉（最后机会：事件 vs 精英），关 7→Boss 汇合无叉。最多 3 个有效决策点，避免过多分叉导致节点稀疏。",
+          "奖励选择机制建议偏向选项 A 变体：「基础 EXP + Gold 自动结算」+ 「三选一战利品（L4 装备 / L5 符文 / 单次技能）」。精英三选一池质量高于普通、Boss 额外出传奇，这是玩家被精英节点吸引绕路的核心动力。",
+          "「遗物 Relic」与「符文 Rune L5 6 格」术语冲突：architecture-consensus-v2 §7 注释「旧 relic 概念：D5 决定并入或弃用」，倾向于 Relic 已被 Rune 体系取代，但 D5 stream 未正式落地。建议用户明确裁决：两者是否等同（只是命名演化），或者 Relic = 独立被动槽而 Rune = 6 格构筑槽。此裁决影响 run-loop.md 的奖励维度定义和地图节点上奖励类型图标的分类。",
+          "每幕频次重新配比建议（8 关版本，供用户参考）：普通战 4 个（关 1/3/4/6 或类似分布）+ 精英 2 个（关 3 和 6 附近，作为主分叉选项之一）+ 特殊事件 1 个（关 5 或作为分叉另一侧）+ Boss 1 个（关 8）。总共 4+2+1+1 = 8 关，精英占比 25%，低于旧约 10 关下的 2-3/10 = 20-30%，处于合理区间。",
+          "单人开发分阶段实现路径：Phase 1 = 静态 JSON 定义每幕地图树（固定结构，快速验证路由感受）；Phase 2 = 节点 UI（图标 + 连线，Godot Control 节点实现）+ 奖励类型标注仅当步显示；Phase 3 = 随机化幕内树生成（在固定分叉点位基础上随机分配节点类型）。不需要实现 STS 式复杂路径算法。",
+          "备选 MVP 方案：纯 Hades 门选（2-3 个奖励类型图标，战后弹出）+ 顶栏进度条（Act X — 关 N/7），约 1-2 天可实现，用于快速验证奖励驱动感受后再决定是否升级为完整轻地图。"
+        ],
+        "sources": [
+          "D:\\ShipOfTheseus\\ShipOfTheseus-KB\\01-Game-Design\\Progression\\run-loop.md",
+          "D:\\ShipOfTheseus\\ShipOfTheseus-KB\\03-AI-Context\\Active-Context\\architecture-consensus-v2.md",
+          "D:\\ShipOfTheseus\\ShipOfTheseus-KB\\03-AI-Context\\Research\\architecture-stage2-2026-05-10\\D1-global-meta.md",
+          "D:\\ShipOfTheseus\\ShipOfTheseus-KB\\03-AI-Context\\Research\\sot-viability-2026-04-22\\B3.2-lastspell-and-tactical-roguelite-samples.md",
+          "D:\\ShipOfTheseus\\ShipOfTheseus-KB\\03-AI-Context\\Research\\sot-viability-2026-04-22\\B1.2-talent-roguelite-decoupling.md",
+          "D:\\ShipOfTheseus\\ShipOfTheseus-KB\\01-Game-Design\\game-design-doc.md",
+          "https://steamcommunity.com/sharedfiles/filedetails/?id=2830078257 (STS 地图生成规则详解)",
+          "https://slaythespire.wiki.gg/wiki/Map_Generation (STS 地图生成 wiki)",
+          "https://game8.co/games/Hades-2/archives/453727 (Hades 2 门符号奖励预览系统)",
+          "https://hades-2.game-vault.net/wiki/Doors (Hades 2 Doors wiki)",
+          "https://thehexagarden.com/blog/lets-make-a-map-1 (肉鸽地图设计哲学分析，含 STS vs Hades vs Cobalt Core 对比)",
+          "https://darkestdungeon2.wiki.fextralife.com/Locations (Darkest Dungeon 2 路线与节点结构)",
+          "https://bossdown.com/guides/slay-the-spire-2-map-pathing-guide/ (STS2 地图规划指南)",
+          "https://github.com/silverua/slay-the-spire-map-in-unity (STS 地图 Unity 实现参考算法)"
+        ],
+        "open_questions": [
+          "「遗物 Relic」与「符文 Rune（L5 6 格）」是否等同？如果两者并行存在，奖励维度中 Relic 的槽位和 L5 符文格是什么关系？（这直接影响地图节点上展示的奖励类型图标分类）",
+          "8 关的频次配比最终拍板：精英几个、普通几个、事件几个？（建议基准 4普通+2精英+1事件+1Boss，但需用户确认）",
+          "地图结构是「每幕 1 张静态轻地图（固定模板，每 run 可做少量随机调整）」还是「每 run 每幕完全随机生成」？单人开发期建议先静态，稳定后再随机化。",
+          "奖励选择机制（A/B/C）用户拍板方向？本报告建议 A 变体（基础 EXP+Gold 自动 + 三选一战利品），但最终需用户裁决。",
+          "准备阶段（Prep Phase）与地图导航屏幕的衔接流程：是「先在地图选节点 → 然后进 Prep → 然后进战斗」还是「战斗结束后 Prep → Prep 阶段内弹出路线选择」？两种流程对 UI 设计影响较大。",
+          "幕间路线是否加入「分支选择」（类 Across the Obelisk 的三色传送门，选择两条 Act 2 路线之一）？这是未来扩展项，但如果要做轻地图 UI，初期就需要决定 UI 框架是否预留幕间选择入口。"
+        ]
+      }
+    ],
+    "synthesis": {
+      "map_model": {
+        "topology": "",
+        "rationale": "",
+        "node_types": [],
+        "branching_rule": "",
+        "act_structure": ""
+      },
+      "reward_model": {
+        "selection_mechanism": "",
+        "selection_rationale": "",
+        "reward_categories": [],
+        "reroll": "",
+        "pacing": "",
+        "layer_mapping": ""
+      },
+      "stage_proportion_8": "placeholder",
+      "reward_preview": {
+        "mechanism": "",
+        "what_is_shown": "",
+        "drives": "",
+        "fog_of_war": ""
+      },
+      "data_structures": [],
+      "grounding_notes": [],
+      "open_questions_for_user": [],
+      "recommendation": "placeholder"
+    },
+    "critique": {
+      "verdict": "Reject — 提案内容全为占位符（所有字段为空字符串、空数组或\"placeholder\"），无可审查实体。以下 6 条风险均基于背景上下文与外部证据推导，待提案实体补完后重新提交评审流程。",
+      "risks": [
+        {
+          "risk": "提案实体缺失：所有字段为空或占位符",
+          "severity": "high",
+          "why": "提交的 JSON 中，map_model 全部字段为空字符串，reward_model 全部字段为空字符串，stage_proportion_8 = \"placeholder\"，data_structures / grounding_notes / open_questions_for_user 均为空数组，recommendation = \"placeholder\"。评审流程无法对拓扑结构、奖励曲线、关卡配比或数据格式作任何具体判断。这条本身即封锁后续所有评审步骤——研究员/分析师阶段未完成交付。",
+          "mitigation": "研究员/分析师必须先补完提案实体（至少：拓扑图类型、节点类型列表、每幕 8 关配比、奖励机制 A/B/C 三选一的具体推荐、layer_mapping、数据结构草稿），再重新提交评审。当前提交无效。"
+        },
+        {
+          "risk": "24 场战斗单轮时长过重：战棋内循环太慢，叠加准备阶段后单轮预计 6-10 小时",
+          "severity": "high",
+          "why": "对比证据：Into the Breach 每岛 4 次区域任务 + 1 次企业总部决战，典型全程（2-3 岛）约 10-15 场，运行时长 1-1.5 小时，单场约 5-8 分钟；Cobalt Core 单轮 30-45 分钟。Gordian Quest 是最接近 SoT 的参照——战棋规模 + 多职业 + 多幕结构——其单轮约 4 小时，Steam 社区反馈集中于「Act 2 开始感觉重复和无聊」「战斗变成例行公事」「开发者后来补加了压缩节奏的 Gauntlet 模式」（Steam 讨论：app/981430/discussions/0/2919976282217051454）。SoT 每场额外叠加准备阶段（建筑修复/商店/战场布置/情报查看），保守估计单场 15-25 分钟，24 场合计 6-10 小时。这已超过大多数玩家单次游玩上限，且每幕末尾的节奏陷阱（Act 2 疲劳）将在第 16-17 关时以放大形式出现。",
+          "mitigation": "在锁定 24 关结构前，先实装 1 幕 × 8 关线性原型，测量真实单关耗时；若超过 20 分钟/关，考虑将每幕常规关压缩至 5-6 关，精英关 1 个，Boss 1 个，合计 21 关；或给玩家「提前结束当幕」的选项（类 Into the Breach 的「两岛后直跳决战」机制）。"
+        },
+        {
+          "risk": "三选一奖励 + 分支选路 + 预览图标三层叠加：每场战斗前后的决策量可能超过战斗本身",
+          "severity": "high",
+          "why": "Keith Burgun（2019，keithburgun.net/pick-1-of-3-is-a-missed-game-design-opportunity）论证：三选一在高耦合状态下退化为「最优必选」（无真实选择），在低耦合状态下退化为「随机赌博」（选择无意义），两种情况下都不产生真正的策略深度。Slay the Spire 能支撑三选一是因为其牌库内循环极快（单间约 5 分钟），全图可见的地图提供全局规划感，两者形成互补。SoT 的战棋内循环重得多（单场 15-25 分钟），若再叠加「战前：看分支地图 + 看奖励预览 + 选路线」「战后：三选一奖励 + reroll 判断」两个决策节点，玩家在每关花费在非战斗决策上的时间可能达到 5-10 分钟，认知负担与战斗本身形成竞争，而非互补。这个问题在 Gordian Quest 的负面评价中以「leveling 界面频繁弹出打断节奏」的变体出现（Steam 社区反馈）。",
+          "mitigation": "v1 只实装奖励预览（节点图标，仅显示奖励类型，不显示具体内容），去掉三选一，改为固定掉落 + 幕间商店（全局一处）；先测「知道下一关给什么类型」是否已足够产生路线决策驱动感，再决定是否引入三选一复杂度。"
+        },
+        {
+          "risk": "单人开发范围极危：提案隐含 6+ 个独立子系统，当前代码基础为零",
+          "severity": "high",
+          "why": "当前资产状态（已明确）：scripts/scenes/roguelite 空、data/events 空、data/relics 空、data/waves 空，仅有 4 张地图 JSON。本提案若落地需要：① 分支拓扑地图生成与渲染，② 节点预览 UI（类型图标 + 悬停展示），③ 事件系统（JSON 驱动，已有数据结构草稿但代码为零），④ 遗物/符文掉落池管理，⑤ 三选一奖励分配逻辑与 reroll，⑥ 准备阶段 UI（商店/建筑修复/战场布置/情报）。Against the Storm 是城镇建设 + 肉鸽融合的最成功案例，由 4-5 人团队历时 3 年开发；即便 SoT 的城镇维度轻得多，6 个子系统对单人开发者而言已属于 v1.5 甚至 v2 范畴。",
+          "mitigation": "v1 范围硬限制：线性序列（无分支拓扑），固定奖励（无三选一），1 个幕间商店，3-5 种事件，零准备阶段（或准备阶段仅剩「查看下一关情报 + 确认出发」两个按钮）。分支地图、三选一、完整准备阶段全部列入 v2 功能，待单关体验验证后再加。"
+        },
+        {
+          "risk": "「遗物 Relic」与「符文 Rune」术语冲突未澄清：两套系统还是一套？",
+          "severity": "medium",
+          "why": "KB 自身已标注冲突：run-loop.md 说战利品含「遗物 Relic」，5 层架构文档说 L5 是「符文 Runes（6 槽，构筑定义）」，并注明「术语可能重叠，需澄清是否同一物」。提案未处理此冲突。若 Relic ≠ Rune，则存在两套构筑定义掉落层，奖励模型需支持双轨投放，实装复杂度翻倍，且玩家会对两套系统产生概念混淆；若 Relic = Rune（即 6 槽符文），则 run-loop.md 与架构文档之间存在命名错误，会在实装时引发字段命名混乱（`relic_id` vs `rune_id`）和文档维护分歧。无论哪种情况，不澄清就实装奖励逻辑都会产生技术债。",
+          "mitigation": "用户裁决优先级最高：Relic 与 Rune 是同一物还是两个独立系统？裁决后写入 ADR，run-loop.md 与架构文档统一术语，再实装任何奖励分配逻辑。"
+        },
+        {
+          "risk": "Meta「横向只扩展」设计纪律难以守住：起始金币等「便利升级」实质是软性纵向变强",
+          "severity": "medium",
+          "why": "KB 已定：Meta 只做横向，便利升级仅限「起始金币/商店折扣/额外 reroll/地图预览」。但起始金币 = 第一关前的数值优势，在没有 meta 进度时第一关商店购买力为 X，有 meta 进度时为 X+Y，Y 是无需游玩技巧即可获得的战力增益，实质是纵向变强的软化版本。Hades 1 镜子系统中的「暗影血量」加成受到同类批评（Steam 社区帖子 4358999171576511867：「没磨镜子就无法通关，早期跑完全靠 stat check」）。SoT 若照搬「起始金币」类 meta，历史证据显示玩家会将此感知为「必须磨 meta 才能通关」的门槛，而非「可选便利」，与 KB 设计意图相悖。",
+          "mitigation": "「起始金币」类 meta 升级上限应严格设置（例：不超过第一关第一个商店单件最低价格物品的 50%），并在设计文档中明确写明「0 meta 进度下运行应可通关」为硬性验收条件；每新增一个 meta 项目前，用「是否改变玩家行为决策」而非「是否增加数值」作为判断标准（参考 Bugnet Blog 的 meta-progression 设计准则）。"
+        }
+      ],
+      "scope_check": "v1 最小可玩应保留：\n1. 3幕×8关「线性序列」（无分支拓扑，单一路径），验证 24 场战斗的实际体验时长与节奏\n2. 战斗固定奖励（金币+EXP+1件掉落），不做三选一，先验证「知道下一关给什么类型」是否已产生驱动感\n3. 节点奖励类型预览（图标层，不显示具体内容），满足用户点名要求且实现成本最低\n4. 幕间商店（每幕 1 个固定节点，购买装备/技能），替代三选一的构筑决策入口\n5. 3-5 种事件（已有 JSON 结构，补完代码层即可）\n6. 敌方难度倍率（已定，实现成本低）\n\nv1 应推迟到 v2：\n- 分支拓扑地图（最耗前端工作量，且在线性结构未验证前无意义）\n- 三选一奖励与 reroll 系统\n- 遗物/符文完整掉落池（先用「装备」单一类型验证掉落感）\n- Meta 持久化全功能（v1 可只做「解锁职业」单一 meta 项，其余全推迟）\n- 准备阶段完整 UI（建筑修复/战场布置/情报查看压缩为「确认出发」单按钮）\n\n直接砍掉（不进 v2 除非专项讨论）：\n- 城镇建设（KB已明确「城镇v1不做」，但准备阶段中的「城镇修复」已悄悄把城镇建设的子集带回来，需显式移除）",
+      "top_fixes": [
+        "【封锁项，优先级 0】补完提案实体：当前提交的 JSON 全为占位符，评审流程无法继续。研究员/分析师需至少补完：地图拓扑类型（线性/分支/混合）、节点类型列表与每幕 8 关配比方案、奖励机制 A/B/C 的具体推荐及理由、layer_mapping（每类奖励对应哪一架构层）、至少一份数据结构草稿。",
+        "【封锁项，优先级 1】用户裁决 Relic vs Rune 术语冲突：Relic=Rune（6 槽符文）还是两套独立系统？裁决写入 ADR，统一 run-loop.md 与架构文档术语，再动任何奖励实装代码。",
+        "【高优先级】v1 范围硬限制写成文档并锁定：线性序列（无分支地图）+ 固定奖励（无三选一）+ 幕间单一商店，作为本轮开发边界。分支地图、三选一、reroll 显式列入 v2 功能列表，防止范围在实装过程中悄悄蔓延。",
+        "【高优先级】实装前先做单关时长测量：用 1 幕 × 4 关线性原型（无准备阶段或最简准备阶段）测量真实单关耗时；若平均超过 20 分钟，立即重新讨论 24 关结构是否可行，再进行任何 run-loop 系统实装。",
+        "【中优先级】Meta 横向纪律写成可验收条件：在设计文档中明确「0 meta 进度下首次运行可通关」为硬性验收标准；对每一个 meta unlock 项目（包括起始金币）写明上限数值，防止便利升级滑向隐性纵向变强。"
+      ]
+    }
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "调研夯实"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "综合"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 3,
+      "title": "评审"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "SoT真源夯实",
+      "phaseIndex": 1,
+      "phaseTitle": "调研夯实",
+      "agentId": "a6a1e0aa4b3b20193",
+      "agentType": "general-purpose",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1782918813303,
+      "queuedAt": 1782918813271,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "已通读 SoT 内部真源（KB 01-Game-Design 全量 + 03-AI-Context…",
+      "promptPreview": "项目背景：SoT 是战棋RPG + 肉鸽 Roguelite + 城镇建设，Godot 4.6 GDScript，单人开发。本任务=为 run-loop 产出「奖励模型 + 地图分支结构」设计提案（用户最终裁决，我只做扎根真源的提案）。\n\n已在 KB 正本 run-loop.md 读到、作为地基的事实（decided=已定，pending=待细化）：\n- [decided] run-loop 结构：3 幕 Acts × 8 关 Stages（每幕含幕末 Boss）。每幕 = 7 个常规/精英/事件关 + 1 Boss。原 ~10 关因「预期等级下调 + 时间成本」降为 8。\n- [decided] 每关流程：准备阶段 Prep（城镇建设/修复/购物/技能调整/战场布置/查看情报/确认出发）→ 战斗阶段 Battle（胜利给奖励）。\n- [pending] 关卡类型：常规(6-7/幕) / …",
+      "lastProgressAt": 1782919040697,
+      "tokens": 77284,
+      "toolCalls": 15,
+      "durationMs": 227393,
+      "resultPreview": "{\"summary\":\"已通读 SoT 内部真源（KB 01-Game-Design 全量 + 03-AI-Context 5 层架构正本 + 仓库 data/ 现状），产出「可作为奖励发放的东西」映射到 5 层的清单，并澄清「遗物 Relic」与「符文 Rune」的关系。核心发现：(1) 可发奖励维度已定 4 大类（金币 Gold / 经验 EXP→L3 / 天赋点 Talent Points→L2 / 战利品 Loot=装备 L4+技能+符文·遗物 L5），Boss 额外给传奇 + 进入下一幕——这些 decided，出处 run-loop.md/class-system.md。(2) 关键术语冲突：架构正本 architecture-consensus-v2.md（2026-05-10，consensus_locked，用户确认，是最新权威）把 build-defining 的 ro…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "Hades奖励预览",
+      "phaseIndex": 1,
+      "phaseTitle": "调研夯实",
+      "agentId": "a2c7144b7ac8a4f1c",
+      "agentType": "research",
+      "model": "claude-sonnet-4-6",
+      "state": "done",
+      "startedAt": 1782918813327,
+      "queuedAt": 1782918813271,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Hades 奖励驱动与节点预览设计机制调研（为 SoT run-loop 奖励…",
+      "promptPreview": "项目背景：SoT 是战棋RPG + 肉鸽 Roguelite + 城镇建设，Godot 4.6 GDScript，单人开发。本任务=为 run-loop 产出「奖励模型 + 地图分支结构」设计提案（用户最终裁决，我只做扎根真源的提案）。\n\n已在 KB 正本 run-loop.md 读到、作为地基的事实（decided=已定，pending=待细化）：\n- [decided] run-loop 结构：3 幕 Acts × 8 关 Stages（每幕含幕末 Boss）。每幕 = 7 个常规/精英/事件关 + 1 Boss。原 ~10 关因「预期等级下调 + 时间成本」降为 8。\n- [decided] 每关流程：准备阶段 Prep（城镇建设/修复/购物/技能调整/战场布置/查看情报/确认出发）→ 战斗阶段 Battle（胜利给奖励）。\n- [pending] 关卡类型：常规(6-7/幕) / …",
+      "lastProgressAt": 1782919229740,
+      "tokens": 35225,
+      "toolCalls": 32,
+      "durationMs": 416412,
+      "resultPreview": "{\"dimension\":\"Hades 奖励驱动与节点预览设计机制调研（为 SoT run-loop 奖励模型设计提供参考）\",\"summary\":\"Hades（黑帝斯）的核心设计要义是「先看到奖励，再去战斗兑现」——每扇房间大门上方悬挂图标，明确告知清除该房间后能得到哪一类奖励（哪位神的恩赐/金币/锤子/生命/黑暗值等），玩家的动力来源始终是「门口那个图标对应的奖励」而非「战斗本身」。全程约 35 个奖励房间（4 区域：Tartarus 约 14 间 → Asphodel 约 10 间 → Elysium 约 11 间 → Styx 终局），每局约 15–20 分钟，天然符合短局高密度的奖励节奏。Slay the Spire 则是另一极：在进入每个节点前，全幕地图上所有节点类型图标均可见，玩家可做跨 Act 的长期路线规划。两种模式都基于同一原则：「让玩家在选择前，知道每条路的奖励类型」…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "杀戮尖塔分支地图",
+      "phaseIndex": 1,
+      "phaseTitle": "调研夯实",
+      "agentId": "a3ebe6bcc856adc05",
+      "agentType": "research",
+      "model": "claude-sonnet-4-6",
+      "state": "done",
+      "startedAt": 1782918813329,
+      "queuedAt": 1782918813271,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "杀戮尖塔（Slay the Spire）分支地图拓扑与节点结构——面向 SoT …",
+      "promptPreview": "项目背景：SoT 是战棋RPG + 肉鸽 Roguelite + 城镇建设，Godot 4.6 GDScript，单人开发。本任务=为 run-loop 产出「奖励模型 + 地图分支结构」设计提案（用户最终裁决，我只做扎根真源的提案）。\n\n已在 KB 正本 run-loop.md 读到、作为地基的事实（decided=已定，pending=待细化）：\n- [decided] run-loop 结构：3 幕 Acts × 8 关 Stages（每幕含幕末 Boss）。每幕 = 7 个常规/精英/事件关 + 1 Boss。原 ~10 关因「预期等级下调 + 时间成本」降为 8。\n- [decided] 每关流程：准备阶段 Prep（城镇建设/修复/购物/技能调整/战场布置/查看情报/确认出发）→ 战斗阶段 Battle（胜利给奖励）。\n- [pending] 关卡类型：常规(6-7/幕) / …",
+      "lastProgressAt": 1782919152176,
+      "tokens": 32549,
+      "toolCalls": 23,
+      "durationMs": 338846,
+      "resultPreview": "{\"dimension\":\"杀戮尖塔（Slay the Spire）分支地图拓扑与节点结构——面向 SoT 3幕×8关的改造分析\",\"summary\":\"杀戮尖塔每幕生成一张**全程可见的分支重合图**（branching-reconverging graph），共 15 层可走楼层（+ Boss 层 + 宝箱层 = 17 层总计），每层最多 6 个节点，由 6 条独立生成路径交叉编织而成。玩家在踏出第一步之前便能看到整幕地图，从而做出基于奖励/风险的多步路线规划——这是\\\"奖励驱动前进\\\"的核心机制。Hades 则在「清关后看到 1-4 扇出口门」的更紧凑结构中，通过门上图标预览**下一房间奖励类型**（而非精确内容），两者共同构成奖励牵引路线决策的两种经典实现。SoT 的 3幕×8关结构远比杀戮尖塔压缩，但核心机制（锚点节点、分支选路、节点类型预览）均可移植：建议保留 3 个固定锚点节…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "奖励驱动范式+梦之形",
+      "phaseIndex": 1,
+      "phaseTitle": "调研夯实",
+      "agentId": "a8e50357f967ebbce",
+      "agentType": "research",
+      "model": "claude-sonnet-4-6",
+      "state": "done",
+      "startedAt": 1782918813329,
+      "queuedAt": 1782918813271,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "奖励驱动型肉鸽设计范式调研（含梦之形、Hades、STS、短 run 经…",
+      "promptPreview": "项目背景：SoT 是战棋RPG + 肉鸽 Roguelite + 城镇建设，Godot 4.6 GDScript，单人开发。本任务=为 run-loop 产出「奖励模型 + 地图分支结构」设计提案（用户最终裁决，我只做扎根真源的提案）。\n\n已在 KB 正本 run-loop.md 读到、作为地基的事实（decided=已定，pending=待细化）：\n- [decided] run-loop 结构：3 幕 Acts × 8 关 Stages（每幕含幕末 Boss）。每幕 = 7 个常规/精英/事件关 + 1 Boss。原 ~10 关因「预期等级下调 + 时间成本」降为 8。\n- [decided] 每关流程：准备阶段 Prep（城镇建设/修复/购物/技能调整/战场布置/查看情报/确认出发）→ 战斗阶段 Battle（胜利给奖励）。\n- [pending] 关卡类型：常规(6-7/幕) / …",
+      "lastProgressAt": 1782919305879,
+      "tokens": 55709,
+      "toolCalls": 44,
+      "durationMs": 492549,
+      "resultPreview": "{\"dimension\":\"奖励驱动型肉鸽设计范式调研（含梦之形、Hades、STS、短 run 经济）\",\"summary\":\"本次调研覆盖四个子维度：① 核实\\\"梦之形\\\"身份及其奖励/推进机制；② Hades 门符号预览系统与奖励密度；③ Slay the Spire 节点分布与固定-随机奖励经济；④ 24 关短 run 下如何避免通胀与奖励饥饿。结合 SoT KB 真源（run-loop.md 已定框架），给出节点配比、奖励机制选型、预览系统设计与经济节奏的具体提案方向。\",\"findings\":[{\"claim\":\"「梦之形」= Shape of Dreams（Steam App 2444750），2025年9月上线的韩国动作肉鸽，非战棋类\",\"detail\":\"由韩国4人工作室 Lizard Smoothie 开发，Steam 超1.1万评测，好评率87%。核心机制是「记忆编辑…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 5,
+      "label": "地图拓扑与预览路由",
+      "phaseIndex": 1,
+      "phaseTitle": "调研夯实",
+      "agentId": "a88942acd4bcb3d6d",
+      "agentType": "research",
+      "model": "claude-sonnet-4-6",
+      "state": "done",
+      "startedAt": 1782918813330,
+      "queuedAt": 1782918813272,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "run-loop 地图分支拓扑选型 + 奖励预览驱动路由设计分析",
+      "promptPreview": "项目背景：SoT 是战棋RPG + 肉鸽 Roguelite + 城镇建设，Godot 4.6 GDScript，单人开发。本任务=为 run-loop 产出「奖励模型 + 地图分支结构」设计提案（用户最终裁决，我只做扎根真源的提案）。\n\n已在 KB 正本 run-loop.md 读到、作为地基的事实（decided=已定，pending=待细化）：\n- [decided] run-loop 结构：3 幕 Acts × 8 关 Stages（每幕含幕末 Boss）。每幕 = 7 个常规/精英/事件关 + 1 Boss。原 ~10 关因「预期等级下调 + 时间成本」降为 8。\n- [decided] 每关流程：准备阶段 Prep（城镇建设/修复/购物/技能调整/战场布置/查看情报/确认出发）→ 战斗阶段 Battle（胜利给奖励）。\n- [pending] 关卡类型：常规(6-7/幕) / …",
+      "lastProgressAt": 1782919253219,
+      "tokens": 77771,
+      "toolCalls": 33,
+      "durationMs": 439889,
+      "resultPreview": "{\"dimension\":\"run-loop 地图分支拓扑选型 + 奖励预览驱动路由设计分析\",\"summary\":\"针对 SoT 的 3 幕 × 8 关（7 个常规/精英/事件 + 1 Boss）战棋肉鸽循环，对四种地图拓扑进行了实证对比分析，并给出拓扑推荐与奖励类型预览的嵌入方案。同时发现 run-loop.md 中的\\\"遗物 Relic\\\"与架构共识 v2 中的 L5\\\"符文 Rune（6 格）\\\"存在术语冲突，需要用户澄清。核心推荐：采用「压缩轻地图 + 单步奖励预览」混合方案，介于杀戮尖塔全图模式与 Hades 当步门选模式之间，最符合 SoT 战棋重战斗 + 单人开发的约束。\",\"findings\":[{\"claim\":\"SoT 已定结构确认：3 幕 × 8 关，频次配比待定\",\"detail\":\"KB 正本 run-loop.md（2026-06-30 用户裁决）已确认每幕 …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 6,
+      "label": "项目背景：SoT 是战棋RPG + 肉鸽 Roguelite + 城镇建设，Godot 4.6 GDScript，单人开",
+      "phaseIndex": 2,
+      "phaseTitle": "综合",
+      "agentId": "aff04cce6bdc93462",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1782919305909,
+      "queuedAt": 1782919305882,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "placeholder",
+      "promptPreview": "项目背景：SoT 是战棋RPG + 肉鸽 Roguelite + 城镇建设，Godot 4.6 GDScript，单人开发。本任务=为 run-loop 产出「奖励模型 + 地图分支结构」设计提案（用户最终裁决，我只做扎根真源的提案）。\n\n已在 KB 正本 run-loop.md 读到、作为地基的事实（decided=已定，pending=待细化）：\n- [decided] run-loop 结构：3 幕 Acts × 8 关 Stages（每幕含幕末 Boss）。每幕 = 7 个常规/精英/事件关 + 1 Boss。原 ~10 关因「预期等级下调 + 时间成本」降为 8。\n- [decided] 每关流程：准备阶段 Prep（城镇建设/修复/购物/技能调整/战场布置/查看情报/确认出发）→ 战斗阶段 Battle（胜利给奖励）。\n- [pending] 关卡类型：常规(6-7/幕) / …",
+      "lastProgressAt": 1782919480352,
+      "tokens": 83589,
+      "toolCalls": 3,
+      "durationMs": 174443,
+      "resultPreview": "{\"map_model\":{\"topology\":\"\",\"rationale\":\"\",\"node_types\":[],\"branching_rule\":\"\",\"act_structure\":\"\"},\"reward_model\":{\"selection_mechanism\":\"\",\"selection_rationale\":\"\",\"reward_categories\":[],\"reroll\":\"\",\"pacing\":\"\",\"layer_mapping\":\"\"},\"stage_proportion_8\":\"placeholder\",\"reward_preview\":{\"mechanism\":\"\",\"what_is_shown\":\"\",\"drives\":\"\",\"fog_of_war\":\"\"},\"data_structures\":[],\"grounding_notes\":[],\"open_ques…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 7,
+      "label": "项目背景：SoT 是战棋RPG + 肉鸽 Roguelite + 城镇建设，Godot 4.6 GDScript，单人开",
+      "phaseIndex": 3,
+      "phaseTitle": "评审",
+      "agentId": "a451913d42489dfdf",
+      "agentType": "game-critic",
+      "model": "claude-sonnet-4-6",
+      "state": "done",
+      "startedAt": 1782919480380,
+      "queuedAt": 1782919480359,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Reject — 提案内容全为占位符（所有字段为空字符串、空数组或\"p…",
+      "promptPreview": "项目背景：SoT 是战棋RPG + 肉鸽 Roguelite + 城镇建设，Godot 4.6 GDScript，单人开发。本任务=为 run-loop 产出「奖励模型 + 地图分支结构」设计提案（用户最终裁决，我只做扎根真源的提案）。\n\n已在 KB 正本 run-loop.md 读到、作为地基的事实（decided=已定，pending=待细化）：\n- [decided] run-loop 结构：3 幕 Acts × 8 关 Stages（每幕含幕末 Boss）。每幕 = 7 个常规/精英/事件关 + 1 Boss。原 ~10 关因「预期等级下调 + 时间成本」降为 8。\n- [decided] 每关流程：准备阶段 Prep（城镇建设/修复/购物/技能调整/战场布置/查看情报/确认出发）→ 战斗阶段 Battle（胜利给奖励）。\n- [pending] 关卡类型：常规(6-7/幕) / …",
+      "lastProgressAt": 1782919772936,
+      "tokens": 32555,
+      "toolCalls": 16,
+      "durationMs": 292556,
+      "resultPreview": "{\"verdict\":\"Reject — 提案内容全为占位符（所有字段为空字符串、空数组或\\\"placeholder\\\"），无可审查实体。以下 6 条风险均基于背景上下文与外部证据推导，待提案实体补完后重新提交评审流程。\",\"risks\":[{\"risk\":\"提案实体缺失：所有字段为空或占位符\",\"severity\":\"high\",\"why\":\"提交的 JSON 中，map_model 全部字段为空字符串，reward_model 全部字段为空字符串，stage_proportion_8 = \\\"placeholder\\\"，data_structures / grounding_notes / open_questions_for_user 均为空数组，recommendation = \\\"placeholder\\\"。评审流程无法对拓扑结构、奖励曲线、关卡配比或数据格式作任何具体判断。这条…"
+    }
+  ],
+  "totalTokens": 394682,
+  "totalToolCalls": 166
+}

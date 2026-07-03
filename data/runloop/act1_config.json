@@ -1,0 +1,40 @@
+{
+  "_comment": "run-loop v0 门生成配置骨架（2026-07-02 第三轮门模式 schema，取代线性 MapGraph；2026-07-03 恢复配置挪至 run_config.json）。所有带 _note 临时占位 的数值均为临时占位，调参期替换。",
+  "act": 1,
+  "stage_count": 8,
+  "boss_stage": 8,
+  "boss": {
+    "map_id": "mountain_pass_01",
+    "enemy_config": "wave_act1_boss_01",
+    "reward": {
+      "fixed": { "gold": 120, "exp": 100 },
+      "package": [
+        { "kind": "gold", "rarity": null, "ref_id": null, "weight": 1 },
+        { "kind": "exp", "rarity": null, "ref_id": null, "weight": 1 },
+        { "kind": "equipment", "rarity": "epic", "ref_id": null, "weight": 1 },
+        { "kind": "relic", "rarity": "legendary", "ref_id": null, "weight": 1 }
+      ],
+      "_note": "Boss 固定包：金币+经验+装备+特殊遗物，品质概率高于精英。数值与品质为临时占位"
+    }
+  },
+  "door_gen": {
+    "_note": "类型权重、精英房权重、保底N、固定奖励、补偿、幕中商店定位——数值临时占位；门数下限2与保底按出现计数为 2026-07-03 用户裁决",
+    "door_count": { "min": 2, "max": 3 },
+    "type_weights": { "gold": 20, "exp": 20, "equipment": 20, "relic": 15, "event": 15 },
+    "elite_room_weight": 25,
+    "constraints": {
+      "events_non_consecutive": true,
+      "same_offer_types_distinct": true
+    },
+    "pity": { "relic_drought_stages": 3, "count_by": "appearance" },
+    "fixed_shops": { "mid_act_after_stage": 4, "pre_boss": true },
+    "battle_pools": {
+      "normal": ["wave_act1_normal_01", "wave_act1_normal_02", "wave_act1_normal_03"],
+      "elite": ["wave_act1_elite_01", "wave_act1_elite_02"]
+    },
+    "map_pool": ["forest_01", "lakeside_01", "mountain_pass_01"],
+    "event_pool": ["event_mysterious_merchant", "event_abandoned_mine", "event_blessing_altar"],
+    "fixed_reward_per_stage": { "gold": 40, "exp": 30 },
+    "party_size_bonus": { "gold_per_missing_member": 10 }
+  }
+}

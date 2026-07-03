@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Run-loop 奖励与门模式设计（第三轮·骨架定稿）</title>
+<style>
+  :root{--bg:#16161c;--surface:#1f1f28;--surface2:#262632;--line:#33333f;
+        --gold:#c9a23e;--gold-b:#e0bf48;--text:#e6dbc7;--sub:#9a94a6;--dim:#635f70;
+        --normal:#7f96b0;--elite:#d85a4a;--event:#a06fd0;--shop:#c9a23e;--boss:#e0483a;
+        --ok:#5fb56a;--warn:#d8a23a;--decide:#6f9bd8;--ph:#8a7fb0;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font-family:"Microsoft YaHei","Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.7;padding:30px 22px 80px}
+  .wrap{max-width:1040px;margin:0 auto}
+  h1{font-size:23px;color:var(--gold-b);margin:0 0 4px}
+  h2{font-size:17px;color:var(--gold);margin:36px 0 8px;border-left:3px solid var(--gold);padding-left:10px}
+  h3{font-size:14px;color:var(--text);margin:18px 0 6px}
+  p.sub{color:var(--sub);font-size:13px;margin:2px 0}
+  .meta{color:var(--dim);font-size:12px;margin:4px 0 14px}
+  code{background:#2a2436;color:#cdb6e0;padding:1px 6px;border-radius:3px;font-size:12px}
+  .tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:9px;border:1px solid var(--line);margin-left:4px}
+  .t-done{color:var(--ok);border-color:#2f5a34} .t-prop{color:var(--decide);border-color:#2c3f5a} .t-ph{color:var(--ph);border-color:#3d3556}
+  .banner{background:linear-gradient(180deg,#1a221b,#181f19);border:1px solid #2f5a34;border-left:4px solid var(--ok);
+          border-radius:6px;padding:13px 17px;margin:14px 0;font-size:13px}
+  .banner b{color:#8fd898}
+  table{border-collapse:collapse;font-size:12.5px;margin:10px 0;width:100%}
+  th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+  th{background:#211d2e;color:var(--gold)}
+  .stage-fig{background:#101015;border:1px solid var(--line);border-radius:8px;padding:16px 8px 8px;margin-top:10px;overflow-x:auto}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin:8px 2px}
+  .legend b{color:var(--text)}
+  .progress{display:flex;gap:6px;margin:12px 2px;align-items:center;font-size:12px}
+  .pcell{width:52px;height:34px;border:1px solid var(--line);border-radius:6px;background:var(--surface2);
+         display:flex;align-items:center;justify-content:center;font-size:15px;position:relative}
+  .pcell.cur{border-color:var(--gold-b);box-shadow:0 0 6px #e0bf4833}
+  .pcell.boss{border-color:var(--boss);background:#2a1614}
+  .pcell small{position:absolute;bottom:-17px;left:0;right:0;text-align:center;color:var(--dim);font-size:10px}
+  .tiers .tier{display:grid;grid-template-columns:120px 1fr 130px;gap:12px;align-items:center;
+        background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 14px;margin:6px 0}
+  .tiers .tname{font-weight:700}
+  .tiers .tdesc{font-size:12.5px;color:var(--sub)}
+  .chips{display:flex;gap:4px;justify-content:flex-end}
+  .chip{width:14px;height:14px;border-radius:3px;background:#3a3446;border:1px solid #4a4458}
+  .chip.on{background:var(--elite);border-color:#e07a6a}
+  .chip.maybe{background:#6a4a44;border-color:#8a5a50}
+  .chip.sp{background:#c9a23e;border-color:#e0bf48}
+  .bars{margin:10px 0}
+  .bar{display:grid;grid-template-columns:90px 1fr 150px;gap:10px;align-items:center;margin:6px 0;font-size:12.5px}
+  .bar .track{height:14px;background:var(--surface2);border:1px solid var(--line);border-radius:7px;overflow:hidden}
+  .bar .fill{height:100%;background:linear-gradient(90deg,#3f7a4a,#5fb56a);border-radius:7px}
+  .phase{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+  .pcol{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 15px}
+  .pcol.v1{border-top:3px solid var(--ok)} .pcol.v2{border-top:3px solid var(--dim)}
+  .pcol h3{margin-top:0} ul{margin:6px 0;padding-left:20px} li{margin:4px 0;font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Run-loop 奖励与门模式设计 · 第三轮骨架定稿</h1>
+<p class="sub">2026-07-02 门模式讨论裁决整合 · 取代第二轮线性方案 · KB run-loop.md / enemy-and-ai.md 已同步</p>
+<p class="meta">配对正本 runloop-reward-map-proposal.md · <span class="tag t-done">已定</span> <span class="tag t-prop">提案·待确认</span> <span class="tag t-ph">占位·临时数字</span> · <b style="color:#8fd898">本文已无待裁决项</b>（D-B 由门模式关闭）</p>
+
+<div class="banner">
+✅ <b>骨架三块拼图，全部已定</b>（2026-07-03 词条制+运输队修订＋验证后三裁决）：① <b>门模式</b>——每关结算后 <b>2–3 扇门</b>（下限暂定 2）、奖励类型前置预告，<b>五类门</b>（金币/经验/装备/遗物/事件），天赋点与技能退出掉落池（天赋点归等级提升、技能归职业模板/天赋/遗物）；<b>商店退出门池、改固定插入</b>——幕中＋Boss 前各一次、嵌入对应 Prep、不占门不占关（根治验证发现的重掷漏洞）；② <b>敌人词条制</b>——小精英 1–3、大精英 3–5、精英房头目=大精英规格+1 特殊词条（合计 4–6）；<b>特殊词条进房前可见、基础不可见、两池分开</b>；词条=类似人物被动的技能（非 buff/debuff）；③ <b>恢复并入 Prep</b>——量只随开局难度档变动（run 内恒定、不随幕变）、可按角色拒绝（背水流）；新增<b>运输队</b>大背包（非装备状态的装备/遗物，Prep 可换、战斗锁定）。每角色独立掉落；事件门不得连续；<b>遗物保底按出现计数</b>。
+</div>
+
+<h2>核心循环 <span class="tag t-done">已定</span></h2>
+<div class="stage-fig">
+<svg viewBox="0 0 880 250" width="880" height="250" font-family="'Microsoft YaHei',sans-serif">
+  <defs>
+    <marker id="arw" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#4a4656"/></marker>
+  </defs>
+  <!-- 战斗胜利 -->
+  <rect x="16" y="95" width="112" height="60" rx="8" fill="#20242c" stroke="#7f96b0" stroke-width="1.6"/>
+  <text x="72" y="120" font-size="13" fill="#e6dbc7" text-anchor="middle">战斗胜利</text>
+  <text x="72" y="140" font-size="10" fill="#9a94a6" text-anchor="middle">固定金币+经验</text>
+  <!-- 连线到三扇门 -->
+  <g stroke="#4a4656" stroke-width="1.6" fill="none" marker-end="url(#arw)">
+    <path d="M128,110 L192,52"/>
+    <path d="M128,125 L192,125"/>
+    <path d="M128,140 L192,198"/>
+  </g>
+  <!-- 门1 金币 普通房 -->
+  <g><rect x="196" y="24" width="150" height="56" rx="8" fill="#20242c" stroke="#c9a23e" stroke-width="1.6"/>
+    <text x="216" y="58" font-size="18">💰</text>
+    <text x="246" y="48" font-size="12" fill="#e6dbc7">金币门</text>
+    <text x="246" y="66" font-size="10" fill="#9a94a6">普通房</text></g>
+  <!-- 门2 遗物 精英房 -->
+  <g><rect x="196" y="97" width="150" height="56" rx="8" fill="#2a2020" stroke="#d85a4a" stroke-width="2"/>
+    <text x="216" y="131" font-size="18">💠</text>
+    <text x="246" y="121" font-size="12" fill="#e6dbc7">遗物门 <tspan fill="#d85a4a">💀精英房</tspan></text>
+    <text x="246" y="139" font-size="10" fill="#d88a80">特殊词条可见·品质更高</text></g>
+  <!-- 门3 事件 -->
+  <g><rect x="196" y="170" width="150" height="56" rx="8" fill="#241d2e" stroke="#a06fd0" stroke-width="1.6"/>
+    <text x="216" y="204" font-size="18">❓</text>
+    <text x="246" y="194" font-size="12" fill="#e6dbc7">事件门</text>
+    <text x="246" y="212" font-size="10" fill="#b98fe0">不得连续出现</text></g>
+  <!-- 汇合到 Prep -->
+  <g stroke="#4a4656" stroke-width="1.6" fill="none" marker-end="url(#arw)">
+    <path d="M346,52 L414,105"/>
+    <path d="M346,125 L414,122"/>
+    <path d="M346,198 L414,142"/>
+  </g>
+  <!-- Prep（含恢复+运输队换装，2026-07-03 并入） -->
+  <rect x="418" y="86" width="262" height="80" rx="8" fill="#1a221b" stroke="#5fb56a" stroke-width="1.6"/>
+  <text x="549" y="106" font-size="12.5" fill="#e6dbc7" text-anchor="middle">Prep（准备阶段）</text>
+  <text x="549" y="123" font-size="10" fill="#8fd898" text-anchor="middle">恢复〔可按角色拒绝·提案；量按开局难度档〕</text>
+  <text x="549" y="138" font-size="10" fill="#9a94a6" text-anchor="middle">运输队换装（装备·遗物；战斗内锁定）</text>
+  <text x="549" y="153" font-size="10" fill="#9a94a6" text-anchor="middle">查看情报 · 确认出发〔未恢复提示·提案〕</text>
+  <path d="M680,126 L744,126" stroke="#4a4656" stroke-width="1.6" fill="none" marker-end="url(#arw)"/>
+  <!-- 下一战 -->
+  <rect x="748" y="96" width="100" height="60" rx="8" fill="#2a2020" stroke="#d85a4a" stroke-width="1.6"/>
+  <text x="798" y="131" font-size="12.5" fill="#e6dbc7" text-anchor="middle">下一战</text>
+</svg>
+</div>
+<div class="legend">
+  <span>💰金币 ✨经验 🗡装备 💠遗物 ❓事件 = <b>五类奖励门</b>（类型前置可见；每组 2–3 扇、类型互不相同）</span>
+  <span><b style="color:#d85a4a">💀</b>=精英房修饰（与奖励类型正交；门上另显示头目的<b>特殊词条</b>）</span>
+  <span>🛒商店=<b>固定插入</b>：幕中＋Boss 前的 Prep 各一次（不占门、不占关，2026-07-03）</span>
+</div>
+
+<p class="sub" style="margin-top:12px"><b>幕进度条</b> <span class="tag t-prop">提案</span>：全幕地图不可见（Hades 式单步），但当前进度与 Boss 位置恒可见——示例（当前第 3 关）：</p>
+<div class="progress">
+  <div class="pcell"><small>1</small>✓</div>
+  <div class="pcell"><small>2</small>✓</div>
+  <div class="pcell cur"><small>3·当前</small>⚔</div>
+  <div class="pcell"><small>4</small>?</div>
+  <div class="pcell"><small>5</small>?</div>
+  <div class="pcell"><small>6</small>?</div>
+  <div class="pcell"><small>7</small>?</div>
+  <div class="pcell boss"><small>8·固定</small>👑</div>
+  <span style="margin-left:14px;color:var(--dim)">未走到的关卡内容由门决定，进度条只承诺「还有几关、Boss 在哪」</span>
+</div>
+
+<h2>敌人五层阶梯 · 词条制 <span class="tag t-done">已定</span><span class="meta" style="margin-left:8px">2026-07-03 修订：词条=类似人物被动的技能（非 buff/debuff）</span></h2>
+<div class="tiers">
+  <div class="tier"><span class="tname" style="color:#7f96b0">普通</span><span class="tdesc">各类战斗的基础单位，不具备词条</span><span class="chips"><span class="chip"></span><span class="chip"></span><span class="chip"></span><span class="chip"></span><span class="chip"></span><span class="chip"></span></span></div>
+  <div class="tier"><span class="tname" style="color:#a8b86a">小精英</span><span class="tdesc">频率不低，混编在波次中——普通房的日常变数（基础词条 <b>1–3</b>）</span><span class="chips"><span class="chip on"></span><span class="chip maybe"></span><span class="chip maybe"></span><span class="chip"></span><span class="chip"></span><span class="chip"></span></span></div>
+  <div class="tier"><span class="tname" style="color:#d8a23a">大精英</span><span class="tdesc">较稀有，多作为<b>普通房收尾敌人</b>出现（基础词条 <b>3–5</b>）</span><span class="chips"><span class="chip on"></span><span class="chip on"></span><span class="chip on"></span><span class="chip maybe"></span><span class="chip maybe"></span><span class="chip"></span></span></div>
+  <div class="tier"><span class="tname" style="color:#d85a4a">精英房头目</span><span class="tdesc"><b>仅精英房出现</b>——<b>大精英规格＋1 特殊词条</b>（合计 4–6）；特殊词条进房前可见、基础不可见</span><span class="chips"><span class="chip on"></span><span class="chip on"></span><span class="chip on"></span><span class="chip maybe"></span><span class="chip maybe"></span><span class="chip sp"></span></span></div>
+  <div class="tier"><span class="tname" style="color:#e0483a">幕 Boss</span><span class="tdesc"><b>传奇敌人 + 独有机制系统</b>；词条数随难度</span><span class="chips" style="font-size:11px;color:#e0483a">传奇</span></div>
+</div>
+<div class="legend"><span><span class="chip on" style="display:inline-block;vertical-align:-2px"></span>=必有基础词条 <span class="chip maybe" style="display:inline-block;vertical-align:-2px;margin-left:8px"></span>=区间上限（随难度取值） <span class="chip sp" style="display:inline-block;vertical-align:-2px;margin-left:8px"></span>=<b style="color:#e0bf48">特殊词条</b>（进房前可见）</span>
+<span><b>难度两轴</b>：开局难度档（类 Hades 热度，系统后置）× 幕数递进（Act1 取下限→Act3 取上限）</span>
+<span><b>两池分开</b>：基础池 v1 约 12–15 <span class="tag t-ph">占位</span>、特殊池 6–8 <span class="tag t-ph">占位</span>；v0 基础 5 个左右 + 特殊 1–2 个 <span class="tag t-ph">占位</span></span></div>
+<p class="sub"><b>可见性与可读性</b>：特殊词条在门上进房前可见 <span class="tag t-done">已定</span>（可在 Prep 经运输队针对性换装）；基础词条进房前不可见、入场后战斗内点选可读 <span class="tag t-prop">提案</span>——相性赌必须可对冲。<b>精英惩罚</b>=磨损（恢复不满额）+相性赌（基础词条不可见）；契约门（扛 N 关诅咒换永久增益）作后置扩展门类。</p>
+
+<h2>恢复模型 · Prep 内 <span class="tag t-done">已定</span><span class="meta" style="margin-left:8px">2026-07-03 修订：不随幕变动，只随开局难度档变动</span></h2>
+<div class="bars">
+  <div class="bar"><span>基础难度</span><div class="track"><div class="fill" style="width:50%"></div></div><span>约 50% 最大生命 <span class="tag t-ph">占位</span>（run 内恒定）</span></div>
+  <div class="bar"><span>更高热度档</span><div class="track"><div class="fill" style="width:30%;opacity:.55"></div></div><span>恢复更低（热度系统第一个旋钮，曲线 <span class="tag t-ph">占位</span>）</span></div>
+</div>
+<p class="sub">恢复是 <b>Prep 的一个主动动作</b>（与运输队换装、查看情报同屏）。幕间压力全部交给敌方成长轴（倍率+词条数），恢复压力交给玩家自选难度档——两轴解耦。恢复不满额 + HP 跨关继承 → 精英房血量代价仍跨关发酵（磨损）。<b>可主动拒绝</b>（背水流）；执行细节为 <span class="tag t-prop">提案</span>：按角色拒绝 / 出发时未恢复且非满血弹一次确认提示 / 拒绝不另给奖励 / 天赋·遗物池须含低血触发条目。</p>
+
+<h2>奖励 → 5 层映射（第三轮修订） <span class="tag t-done">已定骨架</span></h2>
+<table>
+  <tr><th>奖励</th><th>对应层</th><th>获取途径</th><th>备注</th></tr>
+  <tr><td>金币 Gold</td><td>跨层经济</td><td>每图固定 + 金币门 + 事件</td><td>排水渠=商店/药水</td></tr>
+  <tr><td>经验 EXP</td><td>L3 成长 + 间接驱动 L2</td><td>每图固定 + 经验门</td><td>升级给属性成长并产出天赋点</td></tr>
+  <tr><td>天赋点</td><td>L2（每 run 清零）</td><td><b>基本只来自等级提升</b>；经济类遗物可加成</td><td><b>退出掉落池</b>；与架构「L2 决策时机=每升级」一致</td></tr>
+  <tr><td>装备</td><td>L4（不构筑）</td><td>装备门 / 商店 / Boss 包</td><td><b>武器+防具两槽</b>·渐进品阶</td></tr>
+  <tr><td>技能</td><td>职业能力</td><td><b>不掉落</b>：职业模板 / 天赋 / 遗物</td><td>已定</td></tr>
+  <tr><td>遗物 Relic</td><td>L5 6槽/角色（构筑核心）</td><td>遗物门 / 商店 / 事件 / Boss 特殊遗物</td><td>池 20+ 起；每角色独立掉落</td></tr>
+  <tr><td>消耗品</td><td>背包</td><td>商店 / 事件</td><td>应急恢复+金币排水</td></tr>
+</table>
+<p class="sub"><b>结算规则</b>：每角色独立获得门奖励；每图固定金币+经验（按幕 ×1.0/1.3/1.6）；队伍不满 4 人有额外补偿 <span class="tag t-ph">数额占位</span>。<b>精英房</b>=品质更高或数量更多；<b>Boss</b>=固定包（金币+经验+装备+特殊遗物）且品质概率高于精英。连带待定：经验共享 vs 按角色独立（与补偿同天平，调参期定）。</p>
+
+<h2>v0 最小门循环（已同意先做一版）</h2>
+<p class="sub"><b>验证目标</b>：节奏与选择感（选门期待感 / 恢复压力 / 单场 ≤10 分钟）。<b>不验证构筑深度</b>——勿用 v0 体验评判构筑系统。</p>
+<div class="phase">
+  <div class="pcol v1">
+    <h3>v0 做</h3>
+    <ul>
+      <li>1 幕 × 8 关跑通（第 8 关替身 Boss=数值增强头目）</li>
+      <li>门 UI：2–3 扇 + 奖励图标 + 精英骷髅标；固定商店两次插入（幕中/Boss 前 Prep）</li>
+      <li>生成器 v0：类型权重 <span class="tag t-ph">占位</span> + 三硬约束（事件不连续 / 商店不计数 / Boss 固定）</li>
+      <li>敌阶 v0：普通 + 小精英（1–3 基础词条），基础词条池约 5 个 <span class="tag t-ph">占位</span>；精英房用替身头目（数值增强＋1 特殊词条，特殊池 1–2 个 <span class="tag t-ph">占位</span>）</li>
+      <li>Prep 含恢复（可拒绝，常数量 <span class="tag t-ph">占位</span>）+ 运输队最简版（存取/替换）</li>
+      <li>遗物 8–12 条 <span class="tag t-ph">占位</span> + 武器/防具各几件</li>
+      <li>每角色独立掉落 + 固定金币经验</li>
+    </ul>
+  </div>
+  <div class="pcol v2">
+    <h3>v0 不做（后续补）</h3>
+    <ul>
+      <li>二、三幕；3 个幕 Boss 独有机制（定制内容）</li>
+      <li>大精英/头目全量（基础 3–5 档）；基础池扩到 12–15 + 特殊池 6–8</li>
+      <li>保底规则全套（v0 至多做遗物保底一条）</li>
+      <li>热度系统（固定基础难度、留接口；热度奖励须过 meta 横向红线）</li>
+      <li>契约门；Meta（含 map_preview）；不满 4 人补偿细则；遗物替换限制旋钮（v0 先自由）</li>
+      <li>遗物池 20+ 与装备全品阶（渐进补）</li>
+    </ul>
+  </div>
+</div>
+<div class="banner">
+🔒 <b>硬性验收线（沿用）</b>：「0 meta 进度也能通关」。<b>前置内容依赖</b>：relics-system.md 与 equipment.md 两个 KB 缺口升级为实装前置（v0 可用最小池数据文件代替，正式版前须补）。
+</div>
+
+<h2>参数与待办（无待裁决项）</h2>
+<p class="sub"><b>[占位] 参数</b>：门组内分布细节（下限 2 已定暂定）/ 五类门权重与精英房权重 / 遗物保底 N（模拟显示 3 偏紧）/ 幕中商店插入定位 / 恢复量（按难度档常数+热度曲线）与基数 / 固定金币经验数额 / 不满4人补偿 / 词条数取值曲线（幕内区间×难度档）/ 基础池12–15与特殊池6–8条目数 / 三幕门权重梯度 / 遗物替换限制（自由/限次/成本，v0 先自由）。<br>
+<b>[提案] 待确认（不卡 v0）</b>：恢复执行细节（含出发确认提示）/ 幕进度条 / 高稀有档仅精英与Boss出 / 同组门类型互不相同 / 基础词条战斗内点选可读 / map_preview 情报内容（部分基础词条）/ 契约门后置。<br>
+<b>内容工作</b>：基础词条池 12–15 + 特殊词条池 6–8 / 3 个幕 Boss 机制 / 遗物 20+ / relics-system.md / equipment.md / 热度系统规格（后置）。</p>
+
+<p class="meta" style="margin-top:24px">出处：Hades（门符号预览·房间计数·Chaos 契约原型）/ 杀戮尖塔（精英风险回报·同叉不同类→同组门互斥）/ 火纹（战棋单关投入耐受·狂怒 Wrath 与背水的低血触发传统·运输队 Convoy）/ 梦之形=Shape of Dreams / 短run经济（Dead Cells·Monster Train·Into the Breach）。完整 URL 见 research-raw-2026-07-02.json。</p>
+
+</div>
+</body>
+</html>

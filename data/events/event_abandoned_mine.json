@@ -1,0 +1,65 @@
+{
+  "id": "event_abandoned_mine",
+  "title": "废弃矿洞",
+  "description": "山道旁有一处坍塌了一半的矿洞入口，坑木腐朽，铁轨锈蚀。洞里隐约反射出金属的光泽——也许还留着矿工们没来得及带走的东西，也许留下的是别的什么。",
+  "choices": [
+    {
+      "text": "深入矿洞探索",
+      "outcomes": [
+        {
+          "weight": 50,
+          "effects": [
+            { "type": "gold", "amount": 80 }
+          ],
+          "description": "你们在坑道深处找到一箱被遗忘的矿石，换算下来值 80 金币。"
+        },
+        {
+          "weight": 30,
+          "effects": [
+            { "type": "gold", "amount": 150 },
+            { "type": "item", "ref_id": "potion_mine_cache_placeholder" }
+          ],
+          "description": "运气极好——一条未被搬空的矿脉支道！你们满载而归，还捡到一瓶封存完好的药剂。"
+        },
+        {
+          "weight": 20,
+          "effects": [
+            { "type": "start_battle", "enemy_config": "wave_event_mine_ambush" }
+          ],
+          "description": "黑暗中传来窸窣声——洞里的东西早就盯上你们了。伏击！"
+        }
+      ]
+    },
+    {
+      "text": "只在入口附近搜刮",
+      "outcomes": [
+        {
+          "weight": 70,
+          "effects": [
+            { "type": "gold", "amount": 30 }
+          ],
+          "description": "你们在入口的工棚里翻出些零散工具和铜币，值 30 金币。"
+        },
+        {
+          "weight": 30,
+          "effects": [
+            { "type": "none" }
+          ],
+          "description": "入口附近早被人搜刮一空，只剩碎石和烂木头。"
+        }
+      ]
+    },
+    {
+      "text": "不冒险，绕道离开",
+      "outcomes": [
+        {
+          "weight": 1,
+          "effects": [
+            { "type": "none" }
+          ],
+          "description": "你们绕开矿洞继续赶路。身后的黑暗里似乎有什么东西轻轻动了一下。"
+        }
+      ]
+    }
+  ]
+}

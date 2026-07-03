@@ -1,0 +1,52 @@
+{
+  "id": "event_mysterious_merchant",
+  "title": "神秘商人",
+  "description": "一位披着斗篷的商人拦住了你们的去路。他掀开推车上的油布，里面是几件散发着微光的稀有物品。「都是好东西，」他压低声音说，「但好东西不便宜。」",
+  "choices": [
+    {
+      "text": "购买那件稀有装备（花费 120 金币）",
+      "outcomes": [
+        {
+          "weight": 1,
+          "effects": [
+            { "type": "gold", "amount": -120 },
+            { "type": "item", "ref_id": "equipment_merchant_rare_placeholder" }
+          ],
+          "description": "商人满意地收下金币，把装备递给你。「识货的客人。」"
+        }
+      ]
+    },
+    {
+      "text": "试着讨价还价",
+      "outcomes": [
+        {
+          "weight": 60,
+          "effects": [
+            { "type": "gold", "amount": -80 },
+            { "type": "item", "ref_id": "equipment_merchant_rare_placeholder" }
+          ],
+          "description": "一番拉锯之后，商人叹了口气：「算你狠。」你以 80 金币成交。"
+        },
+        {
+          "weight": 40,
+          "effects": [
+            { "type": "none" }
+          ],
+          "description": "商人脸色一沉，盖上油布推车走人：「不识货就别耽误我做生意。」"
+        }
+      ]
+    },
+    {
+      "text": "礼貌地拒绝并离开",
+      "outcomes": [
+        {
+          "weight": 1,
+          "effects": [
+            { "type": "none" }
+          ],
+          "description": "商人耸耸肩，目送你们离开。也许下次还会再见。"
+        }
+      ]
+    }
+  ]
+}

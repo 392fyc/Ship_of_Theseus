@@ -1,0 +1,45 @@
+{
+  "id": "event_blessing_altar",
+  "title": "祝福祭坛",
+  "description": "林间空地中央立着一座古老的石制祭坛，表面的符文仍在微微发光。碑文的意思大致可辨：「奉上你所珍视之物，得旅途相伴之佑。」",
+  "choices": [
+    {
+      "text": "献上金币（花费 60 金币）",
+      "outcomes": [
+        {
+          "weight": 1,
+          "effects": [
+            { "type": "gold", "amount": -60 },
+            { "type": "buff", "ref_id": "buff_altar_might_placeholder", "duration": "run" }
+          ],
+          "description": "金币沉入祭坛消失不见，一股暖流涌遍全身——本次旅途中，你的攻击将更加有力。"
+        }
+      ]
+    },
+    {
+      "text": "献上鲜血（失去当前生命值的 20%）",
+      "outcomes": [
+        {
+          "weight": 1,
+          "effects": [
+            { "type": "hp_cost_percent", "amount": 20 },
+            { "type": "buff", "ref_id": "buff_altar_keen_edge_placeholder", "duration": "run" }
+          ],
+          "description": "鲜血渗入石缝，符文骤然亮起。伤口很快愈合，但一种锐利的感觉留了下来——本次旅途中，你更容易击中要害。"
+        }
+      ]
+    },
+    {
+      "text": "保持敬畏，不作打扰",
+      "outcomes": [
+        {
+          "weight": 1,
+          "effects": [
+            { "type": "none" }
+          ],
+          "description": "你们向祭坛微微欠身，继续上路。符文的微光在身后静静闪烁。"
+        }
+      ]
+    }
+  ]
+}
