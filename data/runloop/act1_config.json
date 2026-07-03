@@ -36,5 +36,19 @@
     "event_pool": ["event_mysterious_merchant", "event_abandoned_mine", "event_blessing_altar"],
     "fixed_reward_per_stage": { "gold": 40, "exp": 30 },
     "party_size_bonus": { "gold_per_missing_member": 10 }
+  },
+  "progression": {
+    "_note": "[占位] 升级阈值与天赋点。_exp_threshold=round(base*pow(growth,level-1))；growth=1.0 为平坦占位（每级恒 base）；talent_point_per_level 每升一级得天赋点数。调参期替换。",
+    "exp_threshold_base": 100,
+    "exp_threshold_growth": 1.0,
+    "talent_point_per_level": 1
+  },
+  "door_rewards": {
+    "_note": "[占位] 门奖励数额与品质权重。gold 入共享账本；exp 每角色；equipment/relic 每角色独立抽取；精英房用 elite 品质权重（更高品质）；relic_per_drop 每次掉落个数。调参期替换。",
+    "gold": 30,
+    "exp": 25,
+    "equipment_rarity_weights": { "common": 70, "rare": 25, "epic": 5 },
+    "elite_equipment_rarity_weights": { "common": 40, "rare": 45, "epic": 15 },
+    "relic_per_drop": 1
   }
 }

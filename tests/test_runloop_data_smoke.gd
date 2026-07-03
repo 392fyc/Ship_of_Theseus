@@ -292,6 +292,10 @@ func _run() -> void:
 	_check_relic_files()          # d. 遗物 schema（≥10）
 	_check_equipment_files()      # e. 装备 schema（≥8）
 
+	# ── 7. 升级/门奖励配置（2026-07-04 run 骨架扩展） ────────
+	_check_progression(cfg)       # progression：升级阈值 + 天赋点
+	_check_door_rewards(cfg)      # door_rewards：门奖励数额 + 品质权重
+
 	_finish()
 
 
@@ -550,6 +554,54 @@ func _check_equipment_files() -> void:
 func _affix_file_exists(aid: String) -> bool:
 	return FileAccess.file_exists(AFFIX_BASE_DIR + "/" + aid + ".json") \
 		or FileAccess.file_exists(AFFIX_SPECIAL_DIR + "/" + aid + ".json")
+
+
+## 升级配置 schema（run 骨架用；数值为占位，只校验类型与合法区间）。
+func _check_progression(cfg: Dictionary) -> void:
+	var prog_v: Variant = cfg.get("progression")
+	_check("progression 为 Dictionary（升级阈值+天赋点占位）", prog_v is Dictionary)
+	if not (prog_v is Dictionary):
+		return
+	var prog: Dictionary = prog_v
+	_check("progression.exp_threshold_base > 0（占位）",
+		int(prog.get("exp_threshold_base", -1)) > 0,
+		"实际 %d" % int(prog.get("exp_threshold_base", -1)))
+	_check("progression.exp_threshold_growth >= 0（占位，1.0=平坦）",
+		float(prog.get("exp_threshold_growth", -1.0)) >= 0.0,
+		"实际 %s" % str(prog.get("exp_threshold_growth")))
+	_check("progression.talent_point_per_level >= 1（升级得天赋点，占位）",
+		int(prog.get("talent_point_per_level", -1)) >= 1,
+		"实际 %d" % int(prog.get("talent_point_per_level", -1)))
+
+
+## 门奖励配置 schema（数额+品质权重占位）。
+func _check_door_rewards(cfg: Dictionary) -> void:
+	var dr_v: Variant = cfg.get("door_rewards")
+	_check("door_rewards 为 Dictionary（门奖励数额+品质权重占位）", dr_v is Dictionary)
+	if not (dr_v is Dictionary):
+		return
+	var dr: Dictionary = dr_v
+	_check("door_rewards.gold > 0（共享账本，占位）",
+		int(dr.get("gold", -1)) > 0, "实际 %d" % int(dr.get("gold", -1)))
+	_check("door_rewards.exp > 0（每角色，占位）",
+		int(dr.get("exp", -1)) > 0, "实际 %d" % int(dr.get("exp", -1)))
+	_check("door_rewards.relic_per_drop >= 1（每次掉落个数，占位）",
+		int(dr.get("relic_per_drop", -1)) >= 1,
+		"实际 %d" % int(dr.get("relic_per_drop", -1)))
+	# 两组装备品质权重：键须在 rarity 枚举内、权重 > 0
+	for wkey: String in ["equipment_rarity_weights", "elite_equipment_rarity_weights"]:
+		var w_v: Variant = dr.get(wkey)
+		_check("door_rewards.%s 为 Dictionary" % wkey, w_v is Dictionary)
+		if w_v is Dictionary:
+			var w: Dictionary = w_v
+			_check("door_rewards.%s 非空" % wkey, not w.is_empty())
+			for rk_v: Variant in w.keys():
+				var rk: String = str(rk_v)
+				if rk.begins_with("_"):
+					continue
+				_check("%s 品质键 %s 在 rarity 枚举内" % [wkey, rk], RELIC_RARITIES.has(rk))
+				_check("%s.%s 权重 > 0" % [wkey, rk], float(w[rk_v]) > 0.0,
+					"权重 %s" % str(w[rk_v]))
 
 
 # ── 工具 ─────────────────────────────────────────────
