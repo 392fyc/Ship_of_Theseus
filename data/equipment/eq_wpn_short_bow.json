@@ -1,0 +1,10 @@
+{
+  "id": "eq_wpn_short_bow",
+  "name": "短弓",
+  "slot": "weapon",
+  "tier": 1,
+  "rarity": "common",
+  "stats": { "DEX": 2 },
+  "description": "轻便短弓，适合灵巧的射手。",
+  "_note": "[占位] v0 装备骨架，两槽渐进；equipment.md 正式规格 KB 缺口未补，数值待调"
+}

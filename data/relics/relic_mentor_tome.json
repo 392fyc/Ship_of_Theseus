@@ -1,0 +1,13 @@
+{
+  "id": "relic_mentor_tome",
+  "name": "导师之书",
+  "rarity": "epic",
+  "category": "economy",
+  "slot_cost": 1,
+  "effects": [
+    { "type": "talent_point_bonus", "value": 1 }
+  ],
+  "is_passive": true,
+  "description": "每次升级额外获得天赋点。",
+  "_note": "[占位] v0 遗物骨架，effects 为声明式（执行器后建），rarity/数值待调；relics-system.md 正式规格 KB 缺口未补"
+}

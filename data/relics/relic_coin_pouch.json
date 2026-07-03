@@ -1,0 +1,13 @@
+{
+  "id": "relic_coin_pouch",
+  "name": "钱袋",
+  "rarity": "common",
+  "category": "economy",
+  "slot_cost": 1,
+  "effects": [
+    { "type": "gold_gain_pct", "value": 20 }
+  ],
+  "is_passive": true,
+  "description": "获得的金币增加 20%。",
+  "_note": "[占位] v0 遗物骨架，effects 为声明式（执行器后建），rarity/数值待调；relics-system.md 正式规格 KB 缺口未补"
+}

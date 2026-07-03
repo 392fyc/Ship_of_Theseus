@@ -1,0 +1,10 @@
+{
+  "id": "eq_arm_chain_mail",
+  "name": "锁子甲",
+  "slot": "armor",
+  "tier": 2,
+  "rarity": "rare",
+  "stats": { "DEF": 4, "RES": 1 },
+  "description": "环环相扣的锁甲，兼顾物理与少量魔法防护。",
+  "_note": "[占位] v0 装备骨架，两槽渐进；equipment.md 正式规格 KB 缺口未补，数值待调"
+}

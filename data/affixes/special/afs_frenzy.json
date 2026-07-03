@@ -1,0 +1,13 @@
+{
+  "id": "afs_frenzy",
+  "name": "狂血",
+  "pool": "special",
+  "type": "stat_pct",
+  "params": {
+    "low_hp_threshold_pct": 50,
+    "damage_bonus_pct": 40
+  },
+  "is_passive": true,
+  "description": "自身血量低于阈值时提高造成的伤害。",
+  "_note": "[占位] v0 声明式骨架，效果执行器见任务#9（_apply_affixes 分发器），数值待调"
+}

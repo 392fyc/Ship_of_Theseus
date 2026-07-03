@@ -1,0 +1,10 @@
+{
+  "id": "eq_arm_cloth_robe",
+  "name": "布袍",
+  "slot": "armor",
+  "tier": 1,
+  "rarity": "common",
+  "stats": { "RES": 3 },
+  "description": "织有护符的布袍，偏重魔法抗性。",
+  "_note": "[占位] v0 装备骨架，两槽渐进；equipment.md 正式规格 KB 缺口未补，数值待调"
+}

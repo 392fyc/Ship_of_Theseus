@@ -1,0 +1,13 @@
+{
+  "id": "relic_lucky_clover",
+  "name": "幸运草",
+  "rarity": "common",
+  "category": "stat",
+  "slot_cost": 1,
+  "effects": [
+    { "type": "stat_flat", "stat_key": "LCK", "value": 4 }
+  ],
+  "is_passive": true,
+  "description": "幸运增加 4。",
+  "_note": "[占位] v0 遗物骨架，effects 为声明式（执行器后建），rarity/数值待调；relics-system.md 正式规格 KB 缺口未补"
+}

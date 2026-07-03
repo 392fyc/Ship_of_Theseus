@@ -1,0 +1,12 @@
+{
+  "id": "af_vanguard",
+  "name": "先手部署",
+  "pool": "base",
+  "type": "on_turn_start",
+  "params": {
+    "first_round_spd": 2
+  },
+  "is_passive": true,
+  "description": "首回合获得速度加成，抢占先手。",
+  "_note": "[占位] v0 声明式骨架，效果执行器见任务#9（_apply_affixes 分发器），数值待调"
+}

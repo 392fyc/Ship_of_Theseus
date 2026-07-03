@@ -1,0 +1,10 @@
+{
+  "id": "eq_wpn_iron_sword",
+  "name": "铁剑",
+  "slot": "weapon",
+  "tier": 1,
+  "rarity": "common",
+  "stats": { "STR": 2 },
+  "description": "最常见的入门单手剑，可靠但平庸。",
+  "_note": "[占位] v0 装备骨架，两槽渐进；equipment.md 正式规格 KB 缺口未补，数值待调"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "eq_wpn_oak_staff",
+  "name": "橡木法杖",
+  "slot": "weapon",
+  "tier": 1,
+  "rarity": "common",
+  "stats": { "MAG": 3 },
+  "description": "橡木雕成的法杖，增幅初级法术。",
+  "_note": "[占位] v0 装备骨架，两槽渐进；equipment.md 正式规格 KB 缺口未补，数值待调"
+}

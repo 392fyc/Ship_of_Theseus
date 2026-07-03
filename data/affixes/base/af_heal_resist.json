@@ -1,0 +1,12 @@
+{
+  "id": "af_heal_resist",
+  "name": "愈合迟滞",
+  "pool": "base",
+  "type": "aura",
+  "params": {
+    "incoming_heal_pct": -50
+  },
+  "is_passive": true,
+  "description": "自身受到的治疗效果减半。",
+  "_note": "[占位] v0 声明式骨架，效果执行器见任务#9（_apply_affixes 分发器），数值待调"
+}

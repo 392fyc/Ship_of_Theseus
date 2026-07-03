@@ -1,0 +1,13 @@
+{
+  "id": "relic_vampiric_fang",
+  "name": "吸血獠牙",
+  "rarity": "epic",
+  "category": "build",
+  "slot_cost": 1,
+  "effects": [
+    { "type": "lifesteal_pct", "value": 25 }
+  ],
+  "is_passive": true,
+  "description": "造成伤害的 25% 转化为治疗。",
+  "_note": "[占位] v0 遗物骨架，effects 为声明式（执行器后建），rarity/数值待调；relics-system.md 正式规格 KB 缺口未补"
+}

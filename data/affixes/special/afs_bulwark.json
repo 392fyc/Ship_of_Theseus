@@ -1,0 +1,12 @@
+{
+  "id": "afs_bulwark",
+  "name": "壁垒统御",
+  "pool": "special",
+  "type": "aura",
+  "params": {
+    "ally_damage_reduction_pct": 20
+  },
+  "is_passive": true,
+  "description": "为己方全体提供减伤光环。",
+  "_note": "[占位] v0 声明式骨架，效果执行器见任务#9（_apply_affixes 分发器），数值待调"
+}

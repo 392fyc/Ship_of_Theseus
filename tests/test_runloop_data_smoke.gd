@@ -39,6 +39,32 @@ const FORBIDDEN_KINDS: Array[String] = ["talent_point", "skill", "rune"]
 ## Boss 固定包必含的四类（金币+经验+装备+特殊遗物）
 const BOSS_PACKAGE_KINDS: Array[String] = ["gold", "exp", "equipment", "relic"]
 
+## ── 新建数据层目录（波次 / 词条 / 遗物 / 装备）──────────
+const WAVES_DIR: String = "res://data/waves"
+const AFFIX_BASE_DIR: String = "res://data/affixes/base"
+const AFFIX_SPECIAL_DIR: String = "res://data/affixes/special"
+const RELICS_DIR: String = "res://data/relics"
+const EQUIPMENT_DIR: String = "res://data/equipment"
+const EVENT_MINE_FILE: String = "res://data/events/event_abandoned_mine.json"
+
+## 7 个已知波次文件（无扩展名 id）
+const WAVE_FILES: Array[String] = [
+	"wave_act1_normal_01", "wave_act1_normal_02", "wave_act1_normal_03",
+	"wave_act1_elite_01", "wave_act1_elite_02", "wave_act1_boss_01",
+	"wave_event_mine_ambush",
+]
+## 敌人层级合法枚举（词条制敌人五层，v0 暂用四档）
+const ENEMY_TIERS: Array[String] = ["normal", "lesser_elite", "greater_elite", "elite_chief"]
+## 基础词条池 5 个 + 特殊词条池 2 个
+const AFFIX_BASE_FILES: Array[String] = [
+	"af_counter_boost", "af_vanguard", "af_heal_resist", "af_siege", "af_zone_expand",
+]
+const AFFIX_SPECIAL_FILES: Array[String] = ["afs_bulwark", "afs_frenzy"]
+## 遗物 / 装备合法枚举
+const RELIC_RARITIES: Array[String] = ["common", "rare", "epic", "legendary"]
+const RELIC_CATEGORIES: Array[String] = ["economy", "stat", "build"]
+const EQUIP_SLOTS: Array[String] = ["weapon", "armor"]
+
 var _pass: int = 0
 var _fail: int = 0
 var _fails: Array[String] = []
@@ -257,6 +283,15 @@ func _run() -> void:
 	_check("party_size_bonus 为 Dictionary（不满4人补偿占位）",
 		dg.get("party_size_bonus") is Dictionary)
 
+	# ── 6. 新建数据层：波次 / 词条 / 遗物 / 装备 ────────────
+	# （2026-07-04 接入 DataLoader 同批扩展；断言自行 FileAccess 读文件，
+	#  与既有风格一致，不经 DataLoader。）
+	_check_wave_references(cfg)   # a. 波次存在性升级：非空字符串 → 文件存在
+	_check_wave_files()           # b. 波次 schema
+	_check_affix_files()          # c. 词条 schema（base 5 + special 2）
+	_check_relic_files()          # d. 遗物 schema（≥10）
+	_check_equipment_files()      # e. 装备 schema（≥8）
+
 	_finish()
 
 
@@ -308,6 +343,213 @@ func _validate_event(short: String, ev: Dictionary) -> void:
 						and str((eff_v as Dictionary).get("type", "")) != "")
 			_check("%s → description 非空" % otag,
 				str(outcome.get("description", "")) != "")
+
+
+# ── 新建数据层 schema 校验 ───────────────────────────
+
+## a. 波次存在性升级：从「非空字符串」升级为「data/waves/<id>.json 文件存在」。
+##    覆盖 7 个已知波次文件、battle_pools.normal/elite、boss.enemy_config、
+##    以及 event_abandoned_mine 里 start_battle 的 enemy_config。
+func _check_wave_references(cfg: Dictionary) -> void:
+	# 逐一断言 7 个已知波次文件存在
+	for wid: String in WAVE_FILES:
+		_check("波次文件存在 (%s)" % wid,
+			FileAccess.file_exists(WAVES_DIR + "/" + wid + ".json"))
+
+	# battle_pools.normal/elite 引用的每个 waveId → 文件存在
+	var dg_v: Variant = cfg.get("door_gen")
+	if dg_v is Dictionary:
+		var bp_v: Variant = (dg_v as Dictionary).get("battle_pools")
+		if bp_v is Dictionary:
+			for pool_name: String in ["normal", "elite"]:
+				var pool_v: Variant = (bp_v as Dictionary).get(pool_name)
+				if pool_v is Array:
+					for wave_v: Variant in (pool_v as Array):
+						var wid2: String = str(wave_v)
+						_check("battle_pools.%s 波次文件存在 (%s)" % [pool_name, wid2],
+							FileAccess.file_exists(WAVES_DIR + "/" + wid2 + ".json"))
+
+	# boss.enemy_config → 波次文件存在
+	var boss_v: Variant = cfg.get("boss")
+	if boss_v is Dictionary:
+		var boss_wave: String = str((boss_v as Dictionary).get("enemy_config", ""))
+		_check("boss.enemy_config 波次文件存在 (%s)" % boss_wave,
+			FileAccess.file_exists(WAVES_DIR + "/" + boss_wave + ".json"))
+
+	# event_abandoned_mine 的 start_battle enemy_config → 波次文件存在
+	var mine_v: Variant = _load_json(EVENT_MINE_FILE)
+	_check("event_abandoned_mine 可解析", mine_v is Dictionary)
+	if mine_v is Dictionary:
+		var found_battle: bool = false
+		var choices_v: Variant = (mine_v as Dictionary).get("choices")
+		if choices_v is Array:
+			for choice_v: Variant in (choices_v as Array):
+				if not (choice_v is Dictionary):
+					continue
+				var outs_v: Variant = (choice_v as Dictionary).get("outcomes")
+				if not (outs_v is Array):
+					continue
+				for out_v: Variant in (outs_v as Array):
+					if not (out_v is Dictionary):
+						continue
+					var effs_v: Variant = (out_v as Dictionary).get("effects")
+					if not (effs_v is Array):
+						continue
+					for eff_v: Variant in (effs_v as Array):
+						if not (eff_v is Dictionary):
+							continue
+						if str((eff_v as Dictionary).get("type", "")) == "start_battle":
+							found_battle = true
+							var ec: String = str((eff_v as Dictionary).get("enemy_config", ""))
+							_check("event_abandoned_mine start_battle 波次文件存在 (%s)" % ec,
+								FileAccess.file_exists(WAVES_DIR + "/" + ec + ".json"))
+		_check("event_abandoned_mine 含 start_battle 战斗结局", found_battle)
+
+
+## b. 波次 schema：遍历 data/waves/*.json。
+func _check_wave_files() -> void:
+	var dir: DirAccess = DirAccess.open(WAVES_DIR)
+	_check("data/waves 目录可打开", dir != null)
+	if dir == null:
+		return
+	var count: int = 0
+	for fname: String in dir.get_files():
+		if not fname.ends_with(".json"):
+			continue
+		count += 1
+		var wid: String = fname.get_basename()
+		var parsed: Variant = _load_json(WAVES_DIR + "/" + fname)
+		_check("波次 %s 可解析为 Dictionary" % fname, parsed is Dictionary)
+		if not (parsed is Dictionary):
+			continue
+		var wave: Dictionary = parsed
+		_eq("波次 %s → id 与文件名一致" % fname, str(wave.get("id", "")), wid)
+		var enemies_v: Variant = wave.get("enemies")
+		_check("波次 %s → enemies 为非空 Array" % fname,
+			enemies_v is Array and not (enemies_v as Array).is_empty())
+		if not (enemies_v is Array):
+			continue
+		var ei: int = 0
+		for enemy_v: Variant in (enemies_v as Array):
+			ei += 1
+			var tag: String = "%s enemy#%d" % [wid, ei]
+			if not (enemy_v is Dictionary):
+				_check("%s → 为 Dictionary" % tag, false)
+				continue
+			var enemy: Dictionary = enemy_v
+			_check("%s → class_id 非空字符串" % tag, str(enemy.get("class_id", "")) != "")
+			# spawn_pos：2 元数组，x/y 在 0..7
+			var sp_v: Variant = enemy.get("spawn_pos")
+			var sp_ok: bool = sp_v is Array and (sp_v as Array).size() == 2
+			_check("%s → spawn_pos 为 2 元数组" % tag, sp_ok, "实际 %s" % str(sp_v))
+			if sp_ok:
+				var sx: int = int((sp_v as Array)[0])
+				var sy: int = int((sp_v as Array)[1])
+				_check("%s → spawn_pos x/y 在 0..7 (%d,%d)" % [tag, sx, sy],
+					sx >= 0 and sx <= 7 and sy >= 0 and sy <= 7)
+			# tier
+			var tier: String = str(enemy.get("tier", ""))
+			_check("%s → tier 合法枚举 (%s)" % [tag, tier], ENEMY_TIERS.has(tier))
+			# elite_chief 须含 special_affix 且能解析到文件
+			if tier == "elite_chief":
+				var sa: String = str(enemy.get("special_affix", ""))
+				_check("%s → elite_chief 含 special_affix (%s)" % [tag, sa], sa != "")
+				if sa != "":
+					_check("%s → special_affix 文件存在 (%s)" % [tag, sa],
+						_affix_file_exists(sa))
+			# affixes（若有）→ 每个 id 能在 base|special 找到文件
+			var af_v: Variant = enemy.get("affixes")
+			if af_v is Array:
+				for aid_v: Variant in (af_v as Array):
+					var aid: String = str(aid_v)
+					_check("%s → affix 文件存在 (%s)" % [tag, aid],
+						_affix_file_exists(aid))
+	_check("data/waves 至少 7 个 JSON（实际 %d）" % count, count >= 7)
+
+
+## c. 词条 schema：base 5 + special 2；pool 与所在子目录一致。
+func _check_affix_files() -> void:
+	for aid: String in AFFIX_BASE_FILES:
+		var path: String = AFFIX_BASE_DIR + "/" + aid + ".json"
+		_check("词条 base 文件存在 (%s)" % aid, FileAccess.file_exists(path))
+		_validate_affix_schema(path, aid, "base")
+	for aid2: String in AFFIX_SPECIAL_FILES:
+		var path2: String = AFFIX_SPECIAL_DIR + "/" + aid2 + ".json"
+		_check("词条 special 文件存在 (%s)" % aid2, FileAccess.file_exists(path2))
+		_validate_affix_schema(path2, aid2, "special")
+
+
+func _validate_affix_schema(path: String, aid: String, expect_pool: String) -> void:
+	var parsed: Variant = _load_json(path)
+	_check("词条 %s 可解析为 Dictionary" % aid, parsed is Dictionary)
+	if not (parsed is Dictionary):
+		return
+	var af: Dictionary = parsed
+	_eq("词条 %s → id 与文件名一致" % aid, str(af.get("id", "")), aid)
+	_check("词条 %s → name 非空" % aid, str(af.get("name", "")) != "")
+	_check("词条 %s → type 非空" % aid, str(af.get("type", "")) != "")
+	_check("词条 %s → is_passive 为 bool" % aid, typeof(af.get("is_passive")) == TYPE_BOOL)
+	_eq("词条 %s → pool 与子目录一致（%s）" % [aid, expect_pool],
+		str(af.get("pool", "")), expect_pool)
+
+
+## d. 遗物 schema：data/relics/*.json 至少 10 个。
+func _check_relic_files() -> void:
+	var dir: DirAccess = DirAccess.open(RELICS_DIR)
+	_check("data/relics 目录可打开", dir != null)
+	if dir == null:
+		return
+	var count: int = 0
+	for fname: String in dir.get_files():
+		if not fname.ends_with(".json"):
+			continue
+		count += 1
+		var rid: String = fname.get_basename()
+		var parsed: Variant = _load_json(RELICS_DIR + "/" + fname)
+		_check("遗物 %s 可解析为 Dictionary" % fname, parsed is Dictionary)
+		if not (parsed is Dictionary):
+			continue
+		var relic: Dictionary = parsed
+		_check("遗物 %s → id 非空" % rid, str(relic.get("id", "")) != "")
+		_check("遗物 %s → name 非空" % rid, str(relic.get("name", "")) != "")
+		var rar: String = str(relic.get("rarity", ""))
+		_check("遗物 %s → rarity 合法 (%s)" % [rid, rar], RELIC_RARITIES.has(rar))
+		var cat: String = str(relic.get("category", ""))
+		_check("遗物 %s → category 合法 (%s)" % [rid, cat], RELIC_CATEGORIES.has(cat))
+		_check("遗物 %s → effects 为数组" % rid, relic.get("effects") is Array)
+	_check("data/relics 至少 10 个 JSON（实际 %d）" % count, count >= 10)
+
+
+## e. 装备 schema：data/equipment/*.json 至少 8 个。
+func _check_equipment_files() -> void:
+	var dir: DirAccess = DirAccess.open(EQUIPMENT_DIR)
+	_check("data/equipment 目录可打开", dir != null)
+	if dir == null:
+		return
+	var count: int = 0
+	for fname: String in dir.get_files():
+		if not fname.ends_with(".json"):
+			continue
+		count += 1
+		var eid: String = fname.get_basename()
+		var parsed: Variant = _load_json(EQUIPMENT_DIR + "/" + fname)
+		_check("装备 %s 可解析为 Dictionary" % fname, parsed is Dictionary)
+		if not (parsed is Dictionary):
+			continue
+		var eq: Dictionary = parsed
+		_check("装备 %s → id 非空" % eid, str(eq.get("id", "")) != "")
+		_check("装备 %s → name 非空" % eid, str(eq.get("name", "")) != "")
+		var slot: String = str(eq.get("slot", ""))
+		_check("装备 %s → slot 合法 (%s)" % [eid, slot], EQUIP_SLOTS.has(slot))
+		_check("装备 %s → tier 存在" % eid, eq.has("tier"))
+		_check("装备 %s → rarity 非空" % eid, str(eq.get("rarity", "")) != "")
+		_check("装备 %s → stats 为 Dictionary" % eid, eq.get("stats") is Dictionary)
+	_check("data/equipment 至少 8 个 JSON（实际 %d）" % count, count >= 8)
+
+
+func _affix_file_exists(aid: String) -> bool:
+	return FileAccess.file_exists(AFFIX_BASE_DIR + "/" + aid + ".json") \
+		or FileAccess.file_exists(AFFIX_SPECIAL_DIR + "/" + aid + ".json")
 
 
 # ── 工具 ─────────────────────────────────────────────

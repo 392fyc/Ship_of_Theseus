@@ -1,0 +1,13 @@
+{
+  "id": "relic_berserker_totem",
+  "name": "狂战图腾",
+  "rarity": "epic",
+  "category": "build",
+  "slot_cost": 1,
+  "effects": [
+    { "type": "low_hp_damage_bonus_pct", "value": 40 }
+  ],
+  "is_passive": true,
+  "description": "生命值较低时造成的伤害增加 40%，适合背水流并配合拒绝恢复。",
+  "_note": "[占位] v0 遗物骨架，effects 为声明式（执行器后建），rarity/数值待调；relics-system.md 正式规格 KB 缺口未补"
+}

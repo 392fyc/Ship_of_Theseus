@@ -1,0 +1,12 @@
+{
+  "id": "af_siege",
+  "name": "攻城",
+  "pool": "base",
+  "type": "stat_pct",
+  "params": {
+    "damage_vs_building_pct": 50
+  },
+  "is_passive": true,
+  "description": "对建筑造成的伤害提升。",
+  "_note": "[占位] v0 声明式骨架，效果执行器见任务#9（_apply_affixes 分发器），数值待调"
+}
