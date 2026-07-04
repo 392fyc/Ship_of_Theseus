@@ -154,7 +154,12 @@ func _spawn_injected_units() -> void:
 			continue
 		var cfg: Dictionary = cfg_v
 		var pos: Vector2i = cfg.get("pos", Vector2i.ZERO)
-		tactical_manager.spawn_unit(str(cfg.get("class_id", "")), pos, "player")
+		var player_unit: Unit = tactical_manager.spawn_unit(
+			str(cfg.get("class_id", "")), pos, "player")
+		# HP 跨关继承（磨损模型 #8）：注入项带 hp 时按磨损/战死规则落地不满血入场。
+		# 无 hp 字段（首关或满血）→ 缺省满血，不改动。玩家不涉词条注入。
+		if player_unit != null and cfg.has("hp"):
+			_apply_injected_hp(player_unit, int(cfg.get("hp", 0)))
 	for cfg_v: Variant in injected_enemy_units:
 		if not (cfg_v is Dictionary):
 			continue
@@ -169,6 +174,24 @@ func _spawn_injected_units() -> void:
 		var special_affix: Variant = cfg.get("special_affix", null)
 		var stat_scale: float = float(cfg.get("stat_scale", 1.0))
 		enemy_unit.apply_affixes(affixes, special_affix, stat_scale, DataLoader.affixes)
+
+
+## 应用注入的继承 HP（磨损模型 #8）。规则：
+##   inj_hp <= 0        → hp=1 入场（[占位] v0 无永久死亡，战死角色以 1 血复出）。
+##   0 < inj_hp < max_hp → hp=inj_hp（不满血入场，体现磨损）。
+##   inj_hp >= max_hp   → 不改动（维持 spawn 后满血）。
+## 直接写 stats.hp 并刷新血条，不经 take_damage（避免触发受击飘字/死亡链）。
+func _apply_injected_hp(unit: Unit, inj_hp: int) -> void:
+	if unit.stats == null:
+		return
+	var max_hp: int = unit.stats.max_hp
+	if inj_hp <= 0:
+		unit.stats.hp = 1
+	elif inj_hp < max_hp:
+		unit.stats.hp = inj_hp
+	else:
+		return
+	unit._update_health_bar()
 
 
 func _input(event: InputEvent) -> void:

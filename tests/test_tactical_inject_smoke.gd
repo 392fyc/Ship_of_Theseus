@@ -18,6 +18,7 @@ extends SceneTree
 
 const INJECT_MAP: String = "forest_01"
 const INJECT_SCALE: float = 1.35
+const WORN_HP: int = 3  # 注入磨损 HP（swordsman base HP=28，3<28 → 不满血入场）
 
 var _pass: int = 0
 var _fail: int = 0
@@ -43,8 +44,9 @@ func _run() -> void:
 	scene.run_injected = true
 	scene.debug_harness_enabled = false
 	scene.injected_map_id = INJECT_MAP
+	# HP 继承注入（磨损模型 #8）：swordsman 带 hp=3（<max_hp=28）→ 应不满血入场（stats.hp==3）。
 	scene.injected_player_units = [
-		{"class_id": "swordsman", "pos": Vector2i(0, 2), "level": 1},
+		{"class_id": "swordsman", "pos": Vector2i(0, 2), "level": 1, "hp": WORN_HP},
 	]
 	# 缩放敌（含基础词条 + 特殊词条 + 数值增强）与 参照敌（无词条、scale=1.0）同 class。
 	scene.injected_enemy_units = [
@@ -87,6 +89,11 @@ func _run() -> void:
 			"unit_id=%s" % str(players[0].unit_id))
 		_check("玩家不注入词条（has_affix 为假）",
 			not players[0].has_affix("af_counter_boost"))
+		# HP 继承：注入 hp=3(<max_hp) → 玩家不满血入场，stats.hp==注入 hp。
+		_check("玩家单位 max_hp > 注入 hp（磨损前提）", players[0].stats.max_hp > WORN_HP,
+			"max_hp=%d" % players[0].stats.max_hp)
+		_eq("玩家注入 hp<max_hp → stats.hp==注入 hp（不满血入场）",
+			players[0].stats.hp, WORN_HP)
 
 	# 区分 缩放敌 vs 参照敌：缩放敌带 afs_bulwark 特殊词条。
 	var scaled: Unit = null
@@ -123,7 +130,37 @@ func _run() -> void:
 	_check("注入流程未崩（场景仍有效）", is_instance_valid(scene))
 
 	scene.free()
+
+	# ── HP 继承：战死角色（注入 hp<=0）以 hp=1 入场（[占位] v0 无永久死亡）──
+	_run_hp_dead_case()
+
 	_finish()
+
+
+## 独立场景验证：注入 hp=0 的玩家单位应以 hp=1 入场（战死简化复出）。
+func _run_hp_dead_case() -> void:
+	var scene2: Node = load("res://scenes/tactical/TacticalScene.tscn").instantiate()
+	scene2.run_injected = true
+	scene2.debug_harness_enabled = false
+	scene2.injected_map_id = INJECT_MAP
+	scene2.injected_player_units = [
+		{"class_id": "swordsman", "pos": Vector2i(0, 2), "level": 1, "hp": 0},
+	]
+	scene2.injected_enemy_units = [
+		{"class_id": "goblin_melee", "pos": Vector2i(6, 4)},
+	]
+	root.add_child(scene2)
+	var tm2: Object = scene2.tactical_manager
+	var dead_player: Unit = null
+	if tm2 != null:
+		for u: Unit in tm2.units:
+			if str(u.faction) == "player":
+				dead_player = u
+				break
+	_check("战死角色（注入 hp=0）单位存在", dead_player != null)
+	if dead_player != null:
+		_eq("注入 hp<=0 → 以 hp=1 入场（无永久死亡[占位]）", dead_player.stats.hp, 1)
+	scene2.free()
 
 
 func _finish() -> void:

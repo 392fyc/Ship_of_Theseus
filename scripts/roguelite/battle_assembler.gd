@@ -17,7 +17,8 @@ extends RefCounted
 ## wave_id      : data_pools.waves 的键（读 enemies）。
 ## player_roster: 玩家成员列表，元素可为 {class_id/id, level} 字典或纯 class_id 字符串。
 ## data_pools   : { "maps": DataLoader.maps, "waves": DataLoader.waves }。
-## 返回         : { map_id, player_units:[{class_id,pos,level}], enemy_units:[{...}] }。
+## 返回         : { map_id, player_units:[{class_id,pos,level,hp?}], enemy_units:[{...}] }。
+##                （player_units 的 hp 仅在成员磨损态时出现，见 _build_player_units）。
 static func build(map_id: String, wave_id: String, player_roster: Array,
 		data_pools: Dictionary) -> Dictionary:
 	var maps: Dictionary = data_pools.get("maps", {})
@@ -56,6 +57,9 @@ static func _build_enemy_units(wave_data: Dictionary) -> Array:
 
 ## 给 player_roster 每个成员分配站位（用地图 player_spawns）。
 ## 缺地图 / 地图无 player_spawns → 返回空清单（容错，不崩）。
+## HP 跨关继承（磨损模型 #8）：仅当成员处于「已知磨损」态才带 hp 字段——
+##   max_hp>0（真值已回填）且 0<=hp<max_hp。满血 / 未回填占位（hp==max_hp）不带 hp，
+##   注入层据缺省满血 spawn。首关 party 为占位（hp==max_hp），不带 hp → 满血入场。
 static func _build_player_units(map_data: Dictionary, player_roster: Array) -> Array:
 	var out: Array = []
 	var spawns: Array = map_data.get("player_spawns", [])
@@ -65,17 +69,25 @@ static func _build_player_units(map_data: Dictionary, player_roster: Array) -> A
 		var member_v: Variant = player_roster[i]
 		var class_id: String = ""
 		var level: int = 1
+		var hp: int = -1
+		var max_hp: int = -1
 		if member_v is Dictionary:
 			var member: Dictionary = member_v
 			class_id = str(member.get("class_id", member.get("id", "")))
 			level = int(member.get("level", 1))
+			hp = int(member.get("hp", -1))
+			max_hp = int(member.get("max_hp", -1))
 		else:
 			class_id = str(member_v)
-		out.append({
+		var entry: Dictionary = {
 			"class_id": class_id,
 			"pos": _assign_player_pos(spawns, i),
 			"level": level,
-		})
+		}
+		# 仅磨损态（含战死 hp=0）带 hp；满血 / 未回填占位不带 → 注入层满血 spawn。
+		if max_hp > 0 and hp >= 0 and hp < max_hp:
+			entry["hp"] = hp
+		out.append(entry)
 	return out
 
 
