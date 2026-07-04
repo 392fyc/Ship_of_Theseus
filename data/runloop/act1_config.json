@@ -50,5 +50,11 @@
     "equipment_rarity_weights": { "common": 70, "rare": 25, "epic": 5 },
     "elite_equipment_rarity_weights": { "common": 40, "rare": 45, "epic": 15 },
     "relic_per_drop": 1
+  },
+  "shop": {
+    "_note": "[占位] 固定商店（不占门不占关，固定插入幕中第4关后 + Boss 前两个 Prep）。stock_size=每次库存件数；price_by_rarity=按品质买入定价；sell_ratio=卖出回收比例（买价×比例）。数值临时占位，调参期替换。",
+    "stock_size": 4,
+    "price_by_rarity": { "common": 20, "rare": 50, "epic": 120, "legendary": 300 },
+    "sell_ratio": 0.5
   }
 }

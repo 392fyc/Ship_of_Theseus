@@ -8,11 +8,12 @@ extends SceneTree
 ##   - Event{id,title,description,choices[]} / EventChoice{text,outcomes[]}
 ##     / EventOutcome{weight,effects[],description}
 ##   - RunConfig{difficulty,recovery}（恢复只随难度档变动、run 内恒定、可拒绝）
-##   - ActConfig{act,stage_count,boss_stage,boss,door_gen}
+##   - ActConfig{act,stage_count,boss_stage,boss,door_gen,shop}
 ##     五类门 type_weights（商店已退出门池，2026-07-03）、生成约束、
 ##     遗物保底（按出现计数）、固定商店插入（幕中+Boss前）、门数 2-3、
 ##     资源池引用完整性、RewardDrop.kind 合法枚举（无 "talent_point"/"skill"/"rune"）、
-##     Boss 固定包含 金币+经验+装备+遗物。
+##     Boss 固定包含 金币+经验+装备+遗物、
+##     shop 固定商店配置（库存件数+按品质定价+回收比例，任务 #7）。
 ##
 ## 坑规避（--script 三大坑）：测试逻辑放 _process 首帧；不引用重全局 class_name；
 ## 纯 FileAccess+JSON 数据校验，不实例化场景。
@@ -296,6 +297,9 @@ func _run() -> void:
 	_check_progression(cfg)       # progression：升级阈值 + 天赋点
 	_check_door_rewards(cfg)      # door_rewards：门奖励数额 + 品质权重
 
+	# ── 8. 固定商店配置（2026-07-04 任务 #7：库存件数 + 按品质定价 + 回收比例） ──
+	_check_shop(cfg)
+
 	_finish()
 
 
@@ -554,6 +558,34 @@ func _check_equipment_files() -> void:
 func _affix_file_exists(aid: String) -> bool:
 	return FileAccess.file_exists(AFFIX_BASE_DIR + "/" + aid + ".json") \
 		or FileAccess.file_exists(AFFIX_SPECIAL_DIR + "/" + aid + ".json")
+
+
+## 固定商店配置 schema（任务 #7）：库存件数 + 按品质定价 + 回收比例（数值占位，只校验类型/区间）。
+func _check_shop(cfg: Dictionary) -> void:
+	var shop_v: Variant = cfg.get("shop")
+	_check("shop 为 Dictionary（固定商店配置占位）", shop_v is Dictionary)
+	if not (shop_v is Dictionary):
+		return
+	var shop: Dictionary = shop_v
+	_check("shop.stock_size > 0（库存件数占位）",
+		int(shop.get("stock_size", -1)) > 0, "实际 %d" % int(shop.get("stock_size", -1)))
+	# 按品质定价：非空、键在 rarity 枚举内、价格 > 0
+	var pbr_v: Variant = shop.get("price_by_rarity")
+	_check("shop.price_by_rarity 为 Dictionary", pbr_v is Dictionary)
+	if pbr_v is Dictionary:
+		var pbr: Dictionary = pbr_v
+		_check("shop.price_by_rarity 非空", not pbr.is_empty())
+		for rk_v: Variant in pbr.keys():
+			var rk: String = str(rk_v)
+			if rk.begins_with("_"):
+				continue
+			_check("shop.price_by_rarity 品质键 %s 在 rarity 枚举内" % rk, RELIC_RARITIES.has(rk))
+			_check("shop.price_by_rarity.%s 价格 > 0" % rk, int(pbr[rk_v]) > 0,
+				"价 %s" % str(pbr[rk_v]))
+	# 回收比例：0 < sell_ratio <= 1
+	var ratio: float = float(shop.get("sell_ratio", -1.0))
+	_check("shop.sell_ratio 在 (0,1]（回收比例占位）",
+		ratio > 0.0 and ratio <= 1.0, "实际 %s" % str(shop.get("sell_ratio")))
 
 
 ## 升级配置 schema（run 骨架用；数值为占位，只校验类型与合法区间）。

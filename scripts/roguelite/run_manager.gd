@@ -44,6 +44,11 @@ var _run_config: Dictionary = {}
 var _data_pools: Dictionary = {}   # { equipment, relics, waves, maps, events }
 var _boss_stage: int = 8
 var _stage_count: int = 8
+var _run_seed: int = 0              # 商店库存确定性派生用（不扰动共享 _rng 的门/战斗确定性）
+
+# 商店库存缓存（同一 Prep 库存稳定；按 state.stage 作键，进不同商店 Prep 才重掷）。
+var _shop_stock: Array = []
+var _shop_stock_key: int = -999
 
 
 func _init() -> void:
@@ -58,6 +63,9 @@ func start_run(run_config: Dictionary, act_config: Dictionary,
 	_act_config = act_config
 	_data_pools = data_pools
 	_rng = rng
+	_run_seed = int(rng.seed)  # 捕获 run 种子供商店库存确定性派生（不消耗共享 _rng）
+	_shop_stock = []
+	_shop_stock_key = -999
 	_stage_count = int(act_config.get("stage_count", 8))
 	_boss_stage = int(act_config.get("boss_stage", 8))
 
@@ -387,6 +395,220 @@ func is_run_failed() -> bool:
 
 func get_state() -> Object:
 	return state
+
+
+# ── 固定商店 v0（纯经济层，不占门不占关，不碰战斗）────────────
+# 真源：runloop-reward-map-proposal.md §7.4 商店固定插入 + KB run-loop.md。
+#   商店固定嵌入两个 Prep：幕中（fixed_shops.mid_act_after_stage 那关打完的 Prep）
+#   + Boss 前（fixed_shops.pre_boss 且下一关为 Boss 的 Prep）。
+#   裁决动机：根治「商店门重掷漏洞」——商店已退出门池，改固定插入。
+#   所有价格 / 库存件数 / 回收比例从 act_config.shop 读，缺省兜底为占位安全默认。
+
+## 当前 Prep 是否商店 Prep（phase=="prep" 且落在两个固定商店定位之一）。
+func is_shop_prep() -> bool:
+	if state == null or state.phase != "prep":
+		return false
+	var shops: Dictionary = _fixed_shops_config()
+	# 幕中商店：state.stage == mid_act_after_stage（该关打完选门后的 Prep，下一关=stage+1）
+	var mid: int = int(shops.get("mid_act_after_stage", -1))
+	if mid > 0 and state.stage == mid:
+		return true
+	# Boss 前商店：下一关（state.stage+1）为 Boss 的 Prep
+	if bool(shops.get("pre_boss", false)) and (state.stage + 1) == _boss_stage:
+		return true
+	return false
+
+
+## 当前商店库存 [占位]：从 equipment/relics 池确定性抽 stock_size 件，每件带买入价。
+## 同一 Prep 库存稳定（按 state.stage 缓存，买入后从缓存移除，进不同商店 Prep 才重掷）。
+## 非商店 Prep 返回空数组。返回 [{ kind, ref_id, rarity, name, price }]。
+func get_shop_stock() -> Array:
+	if not is_shop_prep():
+		return []
+	if _shop_stock_key != state.stage:
+		_shop_stock = _build_shop_stock(state.stage)
+		_shop_stock_key = state.stage
+	return _shop_stock
+
+
+## 买入：gold >= price 时扣 gold 并按 kind 入运输队（equipment/relics/potions[占位]），返回 true；
+## 金币不足 / 非法 kind / 负价 → 返回 false 且不扣。金币消耗＝经济排水渠。
+func buy_item(item: Dictionary) -> bool:
+	if state == null:
+		return false
+	var kind: String = str(item.get("kind", ""))
+	var ref_id: String = str(item.get("ref_id", ""))
+	var price: int = int(item.get("price", 0))
+	if kind != "equipment" and kind != "relic" and kind != "potion":
+		return false
+	if ref_id == "" or price < 0 or state.gold < price:
+		return false
+	var key: String = _convoy_key_for(kind)
+	var arr: Array = state.convoy.get(key, [])
+	arr.append(ref_id)
+	state.convoy[key] = arr
+	state.gold -= price
+	_remove_from_stock_cache(kind, ref_id)  # UI：同件不可重复买
+	return true
+
+
+## 卖出：从来源（from=="convoy" 或角色下标字符串）移除该 item → gold += sell_price
+## （= 买价 × sell_ratio [占位]）。无该 item → 返回 false 不加钱。
+func sell_item(kind: String, ref_id: String, from: String = "convoy") -> bool:
+	if state == null:
+		return false
+	if kind != "equipment" and kind != "relic" and kind != "potion":
+		return false
+	if not _remove_sold_item(kind, ref_id, from):
+		return false
+	state.gold += _sell_price_for(kind, ref_id)
+	return true
+
+
+## 卖出价预览（供 UI），= roundi(买价 × sell_ratio)。
+func get_sell_price(kind: String, ref_id: String) -> int:
+	return _sell_price_for(kind, ref_id)
+
+
+# ── 内部：商店 ───────────────────────────────────────
+
+func _shop_config() -> Dictionary:
+	var s_v: Variant = _act_config.get("shop")
+	return s_v if s_v is Dictionary else {}
+
+
+func _fixed_shops_config() -> Dictionary:
+	var fs_v: Variant = _door_gen_config().get("fixed_shops")
+	return fs_v if fs_v is Dictionary else {}
+
+
+## 确定性构造库存：local RNG（seed 派生自 run 种子 + stage_key，不动共享 _rng）
+## 对 equipment+relics 候选池洗牌取前 stock_size。
+func _build_shop_stock(stage_key: int) -> Array:
+	var shop: Dictionary = _shop_config()
+	var stock_size: int = int(shop.get("stock_size", 4))
+	var srng: RandomNumberGenerator = RandomNumberGenerator.new()
+	srng.seed = _run_seed ^ (stage_key * 0x9E3779B1)
+
+	var candidates: Array = []
+	var eq_pool: Dictionary = _data_pools.get("equipment") if _data_pools.get("equipment") is Dictionary else {}
+	for eid_v: Variant in eq_pool.keys():
+		var edef_v: Variant = eq_pool[eid_v]
+		if edef_v is Dictionary:
+			candidates.append({"kind": "equipment", "ref_id": str(eid_v), "def": edef_v})
+	var rl_pool: Dictionary = _data_pools.get("relics") if _data_pools.get("relics") is Dictionary else {}
+	for rid_v: Variant in rl_pool.keys():
+		var rdef_v: Variant = rl_pool[rid_v]
+		if rdef_v is Dictionary:
+			candidates.append({"kind": "relic", "ref_id": str(rid_v), "def": rdef_v})
+
+	# Fisher-Yates（srng），取前 stock_size 件
+	for i: int in range(candidates.size() - 1, 0, -1):
+		var j: int = srng.randi_range(0, i)
+		var tmp: Variant = candidates[i]
+		candidates[i] = candidates[j]
+		candidates[j] = tmp
+
+	var take: int = mini(stock_size, candidates.size())
+	var stock: Array = []
+	for k: int in range(take):
+		var c: Dictionary = candidates[k]
+		var cdef: Dictionary = c["def"]
+		var rarity: String = str(cdef.get("rarity", ""))
+		stock.append({
+			"kind": str(c["kind"]),
+			"ref_id": str(c["ref_id"]),
+			"rarity": rarity,
+			"name": str(cdef.get("name", c["ref_id"])),
+			"price": _price_for_rarity(rarity),
+		})
+	return stock
+
+
+## 买入价：按品质从 shop.price_by_rarity 读；表内无该品质 → 回退 common 价，再无 → 0（占位安全）。
+func _price_for_rarity(rarity: String) -> int:
+	var pbr_v: Variant = _shop_config().get("price_by_rarity")
+	var pbr: Dictionary = pbr_v if pbr_v is Dictionary else {}
+	if pbr.has(rarity):
+		return int(pbr[rarity])
+	if pbr.has("common"):
+		return int(pbr["common"])
+	return 0
+
+
+## 从数据池查 item 品质（potion 等无 rarity → 回退价）。
+func _rarity_of(kind: String, ref_id: String) -> String:
+	var pool_key: String = "equipment" if kind == "equipment" else ("relics" if kind == "relic" else "")
+	if pool_key == "":
+		return ""
+	var pool: Dictionary = _data_pools.get(pool_key) if _data_pools.get(pool_key) is Dictionary else {}
+	var d_v: Variant = pool.get(ref_id)
+	return str((d_v as Dictionary).get("rarity", "")) if d_v is Dictionary else ""
+
+
+func _buy_price_for(kind: String, ref_id: String) -> int:
+	return _price_for_rarity(_rarity_of(kind, ref_id))
+
+
+func _sell_price_for(kind: String, ref_id: String) -> int:
+	var ratio: float = float(_shop_config().get("sell_ratio", 0.5))
+	return roundi(float(_buy_price_for(kind, ref_id)) * ratio)
+
+
+## kind → 运输队库存键（potion 记 convoy.potions [占位]，效果执行器后续任务）。
+func _convoy_key_for(kind: String) -> String:
+	match kind:
+		"equipment": return "equipment"
+		"relic": return "relics"
+		"potion": return "potions"
+		_: return ""
+
+
+## 买入成功后从库存缓存移除该件（首个匹配 kind+ref_id）。
+func _remove_from_stock_cache(kind: String, ref_id: String) -> void:
+	for i: int in range(_shop_stock.size()):
+		var it_v: Variant = _shop_stock[i]
+		if it_v is Dictionary and str((it_v as Dictionary).get("kind", "")) == kind \
+				and str((it_v as Dictionary).get("ref_id", "")) == ref_id:
+			_shop_stock.remove_at(i)
+			return
+
+
+## 卖出时从来源移除该 item（from=="convoy" 或角色下标字符串）。返回是否移除成功。
+func _remove_sold_item(kind: String, ref_id: String, from: String) -> bool:
+	if from == "convoy":
+		var key: String = _convoy_key_for(kind)
+		if key == "":
+			return false
+		var arr: Array = state.convoy.get(key, [])
+		var idx: int = arr.find(ref_id)
+		if idx < 0:
+			return false
+		arr.remove_at(idx)
+		state.convoy[key] = arr
+		return true
+	# from 为角色下标字符串：从该角色遗物 / 装备槽卖出
+	if from.is_valid_int():
+		var mi: int = from.to_int()
+		if mi < 0 or mi >= state.party.size():
+			return false
+		var member: Dictionary = state.party[mi]
+		if kind == "relic":
+			var mr: Array = member.get("relics", [])
+			var ri: int = mr.find(ref_id)
+			if ri < 0:
+				return false
+			mr.remove_at(ri)
+			member["relics"] = mr
+			return true
+		if kind == "equipment":
+			var equip: Dictionary = member.get("equipment", {"weapon": "", "armor": ""})
+			for slot: String in ["weapon", "armor"]:
+				if str(equip.get(slot, "")) == ref_id:
+					equip[slot] = ""
+					member["equipment"] = equip
+					return true
+	return false
 
 
 # ── 内部 ─────────────────────────────────────────────

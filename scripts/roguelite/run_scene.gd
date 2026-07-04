@@ -285,13 +285,17 @@ func _build_intel_section() -> Control:
 	return box
 
 
-## 重建 Prep 主体（恢复区 + 运输队区）。切换恢复接受 / 运输队移动后调用刷新。
+## 重建 Prep 主体（[商店区] + 恢复区 + 运输队区）。切换恢复接受 / 买卖 / 运输队移动后刷新。
 func _rebuild_prep_body() -> void:
 	if _prep_body == null or not is_instance_valid(_prep_body):
 		return
 	for c: Node in _prep_body.get_children():
 		c.queue_free()
 	var st: Object = _run_manager.get_state()
+
+	# ── 商店区（仅商店 Prep：幕中第4关后 + Boss 前；不占门不占关）──
+	if _run_manager.is_shop_prep():
+		_prep_body.add_child(_build_shop_section(st))
 
 	# ── 恢复区 ──
 	var pct: int = roundi(_run_manager.get_recovery_percent())
@@ -444,6 +448,84 @@ func _on_relic_to_member(member_index: int, convoy_index: int) -> void:
 
 func _on_relic_to_convoy(member_index: int, relic_index: int) -> void:
 	_run_manager.move_relic_to_convoy(member_index, relic_index)
+	_rebuild_prep_body()
+
+
+# ── 商店区（v0：库存买入 + 运输队回收卖出 + 金币显示；纯经济层，不碰战斗）──
+# 真源：runloop-reward-map-proposal.md §7.4 商店固定插入；逻辑落在 RunManager。
+# 价格 / 库存 / sell_ratio 为 [占位]，从 act_config.shop 读。
+
+## 商店面板：当前金币 + 库存列表（买）+ 运输队可卖项（卖）。买卖后 _rebuild_prep_body 刷新。
+func _build_shop_section(st: Object) -> Control:
+	var box: VBoxContainer = VBoxContainer.new()
+	box.add_theme_constant_override("separation", 4)
+	box.add_child(_make_section_label(
+		"商店（固定插入：幕中第4关后 + Boss 前；不占门不占关；价格[占位]）"))
+
+	# 当前金币
+	var gold_lbl: Label = Label.new()
+	gold_lbl.text = "当前金币：%d" % int(st.gold)
+	gold_lbl.add_theme_font_size_override("font_size", 15)
+	gold_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
+	box.add_child(gold_lbl)
+
+	# 库存（买入）
+	box.add_child(_make_line_label("库存（买入）："))
+	var stock: Array = _run_manager.get_shop_stock()
+	if stock.is_empty():
+		box.add_child(_make_line_label("  （售罄）"))
+	for item_v: Variant in stock:
+		if not (item_v is Dictionary):
+			continue
+		var item: Dictionary = item_v
+		var price: int = int(item.get("price", 0))
+		var affordable: bool = int(st.gold) >= price
+		var row: HBoxContainer = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		row.add_child(_make_line_label("  %s [%s·%s]  价 %d" % [
+			str(item.get("name", "")), str(item.get("kind", "")),
+			str(item.get("rarity", "")), price]))
+		var bb: Button = _make_small_button("买入")
+		bb.disabled = not affordable
+		bb.pressed.connect(_on_shop_buy.bind(item))
+		row.add_child(bb)
+		box.add_child(row)
+
+	# 卖出（运输队回收）
+	box.add_child(_make_line_label("卖出（运输队回收，回收比例[占位]）："))
+	var convoy_eq: Array = st.convoy.get("equipment", [])
+	for ci: int in range(convoy_eq.size()):
+		box.add_child(_build_sell_row("equipment", str(convoy_eq[ci])))
+	var convoy_relics: Array = st.convoy.get("relics", [])
+	for cri: int in range(convoy_relics.size()):
+		box.add_child(_build_sell_row("relic", str(convoy_relics[cri])))
+	var convoy_potions: Array = st.convoy.get("potions", [])
+	for cpi: int in range(convoy_potions.size()):
+		box.add_child(_build_sell_row("potion", str(convoy_potions[cpi])))
+	if convoy_eq.is_empty() and convoy_relics.is_empty() and convoy_potions.is_empty():
+		box.add_child(_make_line_label("  （运输队无可卖物）"))
+	return box
+
+
+## 单个卖出行：物品名 + 卖价预览 + 卖按钮。
+func _build_sell_row(kind: String, ref_id: String) -> Control:
+	var row: HBoxContainer = HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	var sell_price: int = _run_manager.get_sell_price(kind, ref_id)
+	row.add_child(_make_line_label("  %s [%s]  卖价 %d" % [ref_id, kind, sell_price]))
+	var sb: Button = _make_small_button("卖出")
+	sb.pressed.connect(_on_shop_sell.bind(kind, ref_id))
+	row.add_child(sb)
+	return row
+
+
+func _on_shop_buy(item: Dictionary) -> void:
+	_run_manager.buy_item(item)
+	_rebuild_prep_body()
+
+
+func _on_shop_sell(kind: String, ref_id: String) -> void:
+	_run_manager.sell_item(kind, ref_id, "convoy")
 	_rebuild_prep_body()
 
 
