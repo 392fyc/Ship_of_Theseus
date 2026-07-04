@@ -55,9 +55,11 @@ func generate_group(door_gen: Dictionary, ctx: Dictionary,
 	var elite_room_weight: float = float(door_gen.get("elite_room_weight", 0))
 
 	var distinct: bool = true  # [提案] 同组门类型互不相同，做成开关，读配置默认 true
+	var guarantee_non_elite: bool = true  # [提案] 每门组 ≥1 非精英门，做成开关，读配置默认 true
 	var cons_v: Variant = door_gen.get("constraints")
 	if cons_v is Dictionary:
 		distinct = bool((cons_v as Dictionary).get("same_offer_types_distinct", true))
+		guarantee_non_elite = bool((cons_v as Dictionary).get("guarantee_non_elite_door", true))
 
 	var pity_stages: int = 0
 	var pity_v: Variant = door_gen.get("pity")
@@ -114,6 +116,15 @@ func generate_group(door_gen: Dictionary, ctx: Dictionary,
 			reward_type, elite_room_weight,
 			map_pool, event_pool, normal_pool, elite_pool, waves, rng))
 
+	# ── 硬约束：每门组至少 1 扇非精英门【提案，业界铁律，可配置】 ──
+	# 依据 dev_doc/runloop-design/runloop-pacing-benchmark.md §1.6 / 建议4：
+	# 门数下限 2 时若门组全为精英战斗门 → 4 人队被迫高风险/团灭。
+	# 事件门天然非精英；仅「全为精英战斗门」才违反。违反时降级最后一扇
+	# （改 elite_room=false + normal_pool 重掷敌人 + 清 special_affix；
+	#  保留 map_id、不动 reward_type，故保底/distinct 语义不受影响）。
+	if guarantee_non_elite:
+		_ensure_non_elite_door(doors, normal_pool, rng)
+
 	# ── 保底按出现计数【已定】 ──
 	# 只要门组里「出现」了 relic 门（无论玩家是否会选它）→ drought 归零；
 	# 否则 drought + 1。这是「按出现」与旧「按选中」的核心区别：
@@ -165,6 +176,33 @@ func _assemble_door(reward_type: String, elite_room_weight: float,
 			"special_affix": special_affix,
 		},
 	}
+
+
+## 硬约束：确保门组内至少 1 扇非精英门。全为精英门时降级最后一扇。
+## 仅改 elite_room / battle 敌人 / preview.special_affix，不动 reward_type
+## （保底/distinct 语义不变）；保留原 map_id，敌人改从 normal_pool 抽。
+func _ensure_non_elite_door(doors: Array[Dictionary], normal_pool: Array[String],
+		rng: RandomNumberGenerator) -> void:
+	for door: Dictionary in doors:
+		if not bool(door.get("elite_room", false)):
+			return  # 已有非精英门（事件门天然满足）→ 无需干预
+	if doors.is_empty():
+		return
+	# 全为精英门：降级最后一扇。
+	var target: Dictionary = doors[doors.size() - 1]
+	target["elite_room"] = false
+	var map_id: String = ""
+	var battle_v: Variant = target.get("battle")
+	if battle_v is Dictionary:
+		map_id = str((battle_v as Dictionary).get("map_id", ""))
+	var enemy_config: Variant = _uniform_pick(normal_pool, rng)
+	target["battle"] = {
+		"map_id": map_id,
+		"enemy_config": str(enemy_config) if enemy_config != null else "",
+	}
+	var preview_v: Variant = target.get("preview")
+	if preview_v is Dictionary:
+		(preview_v as Dictionary)["special_affix"] = null
 
 
 ## 构造候选类型池（复制权重字典，去掉排除项）。

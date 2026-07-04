@@ -24,7 +24,8 @@
     "elite_room_weight": 25,
     "constraints": {
       "events_non_consecutive": true,
-      "same_offer_types_distinct": true
+      "same_offer_types_distinct": true,
+      "guarantee_non_elite_door": true
     },
     "pity": { "relic_drought_stages": 3, "count_by": "appearance" },
     "fixed_shops": { "mid_act_after_stage": 4, "pre_boss": true },

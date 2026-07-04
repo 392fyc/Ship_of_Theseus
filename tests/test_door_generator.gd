@@ -85,6 +85,7 @@ func _run() -> void:
 	_test_aggregate_generation()
 	_test_pity_appearance_explicit()
 	_test_pity_counterexample()
+	_test_guarantee_non_elite()
 	_test_multi_act_flow()
 
 	_finish()
@@ -161,6 +162,7 @@ func _test_aggregate_generation() -> void:
 	var pity_noappear_violations: int = 0
 	var force_relic_violations: int = 0
 	var fallback_total: int = 0
+	var non_elite_violations: int = 0
 
 	var last_pool: Array[String] = ["", "gold", "exp", "equipment", "relic", "event"]
 
@@ -182,9 +184,12 @@ func _test_aggregate_generation() -> void:
 
 		var seen: Dictionary = {}
 		var has_relic: bool = false
+		var group_has_non_elite: bool = false
 		for door_v: Variant in doors:
 			var door: Dictionary = door_v
 			var rt: String = str(door.get("reward_type", ""))
+			if not bool(door.get("elite_room", false)):
+				group_has_non_elite = true
 			_type_appear[rt] = int(_type_appear.get(rt, 0)) + 1
 
 			# 2. 无 shop + 枚举内
@@ -234,6 +239,10 @@ func _test_aggregate_generation() -> void:
 						if preview.get("special_affix") != expected_affix:
 							affix_violations += 1
 
+		# 每门组 ≥1 非精英门（默认配置修复后应零违反）
+		if not group_has_non_elite:
+			non_elite_violations += 1
+
 		# 5b/5c. 保底按出现
 		var after: int = int(res.get("relic_drought_after", -999))
 		if has_relic:
@@ -280,6 +289,8 @@ func _test_aggregate_generation() -> void:
 		"缺失 %d 次（保底组 %d）" % [force_relic_violations, _pity_forced_groups])
 	_check("回退（池耗尽放宽 distinct）恒为 0（五类配置）", fallback_total == 0,
 		"触发 %d 次" % fallback_total)
+	_check("[新] 每门组 ≥1 非精英门（默认配置 elite=25%）", non_elite_violations == 0,
+		"违反 %d 次" % non_elite_violations)
 
 
 # ── 测试 5a：保底强制含 relic（确定性重复） ────────────
@@ -420,6 +431,75 @@ func _test_multi_act_flow() -> void:
 			% [float(elite_doors) / float(battle_doors) * 100.0, elite_doors,
 				battle_doors, str(float(_door_gen.get("elite_room_weight", 0)))])
 	print("  保底触发（drought>=阈值 %d）门组数：%d" % [_pity_stages, pity_triggers])
+
+
+# ── 测试：每门组 ≥1 非精英门硬约束（强制全精英场景 + 开关两态） ──
+
+func _test_guarantee_non_elite() -> void:
+	# 构造强制全精英场景：elite_room_weight=100（所有战斗门必精英）+
+	# type_weights 去 event（全战斗门）→ 无约束时每组必全精英。
+	var forced: Dictionary = _door_gen.duplicate(true)
+	forced["elite_room_weight"] = 100.0
+	forced["type_weights"] = {"gold": 20, "exp": 20, "equipment": 20, "relic": 15}
+	var cons_on: Dictionary = {}
+	if forced.get("constraints") is Dictionary:
+		cons_on = (forced["constraints"] as Dictionary).duplicate(true)
+	cons_on["guarantee_non_elite_door"] = true
+	forced["constraints"] = cons_on
+
+	var on_violations: int = 0
+	var degraded_bad: int = 0
+	var dup_after_degrade: int = 0
+	for _i: int in range(500):
+		var ctx: Dictionary = {"last_choice_type": "", "relic_drought": 0}
+		var res: Dictionary = _gen.generate_group(forced, ctx, _waves, _rng)
+		var doors: Array = res.get("doors", [])
+		var has_non_elite: bool = false
+		var seen: Dictionary = {}
+		for door_v: Variant in doors:
+			var door: Dictionary = door_v
+			var rt: String = str(door.get("reward_type", ""))
+			if seen.has(rt):
+				dup_after_degrade += 1
+			seen[rt] = true
+			if not bool(door.get("elite_room", false)):
+				has_non_elite = true
+				# 降级门：敌人应 ∈ normal_pool、无 special_affix
+				var battle_v: Variant = door.get("battle")
+				if battle_v is Dictionary:
+					var ec: String = str((battle_v as Dictionary).get("enemy_config", ""))
+					if ec != "" and not _normal_pool.has(ec):
+						degraded_bad += 1
+				var pv: Variant = door.get("preview")
+				if pv is Dictionary and (pv as Dictionary).get("special_affix") != null:
+					degraded_bad += 1
+		if not has_non_elite:
+			on_violations += 1
+	_check("[非精英] 强制全精英场景（elite=100%,无event）每组仍 ≥1 非精英门",
+		on_violations == 0, "违反 %d 次" % on_violations)
+	_check("[非精英] 降级门敌人 ∈ normal_pool 且 special_affix==null",
+		degraded_bad == 0, "异常 %d 次" % degraded_bad)
+	_check("[非精英] 降级不破坏 distinct（同组 reward_type 无重复）",
+		dup_after_degrade == 0, "重复 %d 次" % dup_after_degrade)
+
+	# 反向：关闭开关 → 允许全精英（证明开关有效 + 无此约束确会全精英）
+	var off: Dictionary = forced.duplicate(true)
+	var cons_off: Dictionary = (off["constraints"] as Dictionary).duplicate(true)
+	cons_off["guarantee_non_elite_door"] = false
+	off["constraints"] = cons_off
+	var all_elite_groups: int = 0
+	for _i: int in range(500):
+		var ctx: Dictionary = {"last_choice_type": "", "relic_drought": 0}
+		var res: Dictionary = _gen.generate_group(off, ctx, _waves, _rng)
+		var any_non_elite: bool = false
+		for door_v: Variant in res.get("doors", []):
+			if not bool((door_v as Dictionary).get("elite_room", false)):
+				any_non_elite = true
+		if not any_non_elite:
+			all_elite_groups += 1
+	# 强制场景完全确定（elite=100%+无event+开关off）→ 每组必全精英，用等号断言更强
+	_check("[非精英] 开关=false 时门组恒全精英（证明约束确实在起作用）",
+		all_elite_groups == 500, "全精英组 %d（期望 ==500）" % all_elite_groups)
 
 
 # ── 工具 ─────────────────────────────────────────────
