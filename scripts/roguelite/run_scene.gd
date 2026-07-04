@@ -44,12 +44,10 @@ var _prep_panel: Control = null
 var _end_panel: Control = null
 var _event_panel: Control = null
 
-# ── Prep v0 交互状态（恢复选择 / 运输队选中角色 / 出发提示一次）──
-var _prep_accepts: Array[bool] = []       # 每角色是否接受恢复（默认 true）
+# ── Prep v0 交互状态（恢复=点击即时 / 运输队选中角色）──
+var _prep_recovered: Array[bool] = []     # 每角色本次 Prep 是否已即时恢复（防重复点）
 var _prep_selected_member: int = 0        # 运输队面板当前操作的角色下标
-var _prep_warned: bool = false            # 出发时「有人拒绝恢复」提示是否已给过
-var _prep_body: VBoxContainer = null      # Prep 可刷新主体容器（切换恢复/运输队后重建）
-var _prep_warn_label: Label = null        # 出发提示标签
+var _prep_body: VBoxContainer = null      # Prep 可刷新主体容器（恢复/运输队操作后重建）
 
 
 func _ready() -> void:
@@ -190,13 +188,12 @@ func _on_door_chosen(index: int) -> void:
 
 # ── Prep 子视图（v0：查看情报 + 恢复 + 运输队 + 确认出发）────────
 # 真源：runloop-reward-map-proposal.md §5 恢复模型 + §7.5 Prep；逻辑落在 RunManager。
-# 本层纯 UI：读 RunManager 的情报/恢复量，调 recover_party / 运输队 move 方法。
+# 本层纯 UI：读 RunManager 的情报/恢复量，调 recover_member（点击即时恢复）/ 运输队 move 方法。
 
 func _show_prep() -> void:
 	_clear_prep()
 	var st: Object = _run_manager.get_state()
-	_prep_warned = false
-	_init_prep_accepts(st)
+	_init_prep_recovered(st)
 	if _prep_selected_member < 0 or _prep_selected_member >= st.party.size():
 		_prep_selected_member = 0
 
@@ -223,13 +220,6 @@ func _show_prep() -> void:
 	scroll.add_child(_prep_body)
 	_rebuild_prep_body()
 
-	_prep_warn_label = Label.new()
-	_prep_warn_label.text = ""
-	_prep_warn_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_prep_warn_label.add_theme_font_size_override("font_size", 13)
-	_prep_warn_label.add_theme_color_override("font_color", Color(1.0, 0.7, 0.35))
-	vbox.add_child(_prep_warn_label)
-
 	var btn: Button = Button.new()
 	btn.text = "确认出发"
 	btn.add_theme_font_size_override("font_size", 20)
@@ -246,15 +236,20 @@ func _clear_prep() -> void:
 		_prep_panel.queue_free()
 	_prep_panel = null
 	_prep_body = null
-	_prep_warn_label = null
 
 
-## 初始化每角色恢复接受标记（默认接受恢复[提案]）。
-func _init_prep_accepts(st: Object) -> void:
-	var accepts: Array[bool] = []
-	for _m: Variant in st.party:
-		accepts.append(true)
-	_prep_accepts = accepts
+## 初始化本次 Prep 每角色「已恢复」标记（全 false）。
+## declinable=false（强制恢复）时进 Prep 即自动恢复全体并标记；declinable=true 由玩家点击。
+func _init_prep_recovered(st: Object) -> void:
+	var recovered: Array[bool] = []
+	var forced: bool = not _run_manager.get_recovery_declinable()
+	for i: int in range(st.party.size()):
+		if forced:
+			_run_manager.recover_member(i)
+			recovered.append(true)
+		else:
+			recovered.append(false)
+	_prep_recovered = recovered
 
 
 ## 查看情报区（下一关地图/波次 + 精英/Boss + 特殊词条名；基础词条隐藏=相性赌）。
@@ -314,7 +309,8 @@ func _rebuild_prep_body() -> void:
 	_prep_body.add_child(_build_convoy_panel(st))
 
 
-## 单角色恢复行：HP x/max + 恢复量预览 + 恢复/拒绝切换。
+## 单角色恢复行：HP x/max + 状态 + 「恢复」按钮（点击即时恢复）。
+## 满血 / 已恢复 → 按钮禁用；拒绝 = 不点（背水流）。
 func _build_recovery_row(index: int, member: Dictionary) -> Control:
 	var row: HBoxContainer = HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
@@ -322,27 +318,38 @@ func _build_recovery_row(index: int, member: Dictionary) -> Control:
 	var max_hp: int = int(member.get("max_hp", 0))
 	var amount: int = _run_manager.get_recovery_amount(member)
 	var effective_gain: int = mini(amount, maxi(0, max_hp - hp))
-	var accept: bool = index < _prep_accepts.size() and _prep_accepts[index]
+	var recovered: bool = index < _prep_recovered.size() and _prep_recovered[index]
+	var full: bool = max_hp > 0 and hp >= max_hp
 
 	var lbl: Label = Label.new()
-	var preview: String = ("+%d" % effective_gain) if accept else "拒绝"
-	lbl.text = "%s  HP %d/%d  (%s)" % [str(member.get("class_id", "")), hp, max_hp, preview]
+	var status: String
+	if full:
+		status = "满血"
+	elif recovered:
+		status = "已恢复"
+	else:
+		status = "+%d 可恢复" % effective_gain
+	lbl.text = "%s  HP %d/%d  (%s)" % [str(member.get("class_id", "")), hp, max_hp, status]
 	lbl.add_theme_font_size_override("font_size", 14)
 	lbl.custom_minimum_size = Vector2(320.0, 0.0)
 	row.add_child(lbl)
 
-	var toggle: Button = Button.new()
-	toggle.text = "恢复" if accept else "拒绝"
-	toggle.add_theme_font_size_override("font_size", 13)
-	toggle.disabled = not _run_manager.get_recovery_declinable()
-	toggle.pressed.connect(_on_toggle_recovery.bind(index))
-	row.add_child(toggle)
+	var btn: Button = Button.new()
+	btn.text = "满血" if full else ("已恢复" if recovered else "恢复")
+	btn.add_theme_font_size_override("font_size", 13)
+	# 点击即时恢复；满血 / 已恢复 时禁用（避免重复恢复超额）。
+	btn.disabled = full or recovered
+	btn.pressed.connect(_on_recover_member.bind(index))
+	row.add_child(btn)
 	return row
 
 
-func _on_toggle_recovery(index: int) -> void:
-	if index >= 0 and index < _prep_accepts.size():
-		_prep_accepts[index] = not _prep_accepts[index]
+## 点击「恢复」→ 即时恢复该角色 + 标记已恢复 + 刷新（血量立即更新、按钮禁用）。
+func _on_recover_member(index: int) -> void:
+	if index < 0 or index >= _prep_recovered.size() or _prep_recovered[index]:
+		return
+	_run_manager.recover_member(index)
+	_prep_recovered[index] = true
 	_rebuild_prep_body()
 
 
@@ -532,36 +539,16 @@ func _on_shop_sell(kind: String, ref_id: String) -> void:
 	_rebuild_prep_body()
 
 
-## 确认出发：先按 accepts 应用恢复 → confirm_departure → 装配下一关（事件门走事件流程）。
-## 若有角色未满血且拒绝恢复 → 首次点击仅提示一次[提案]，再次点击才出发。
+## 确认出发：恢复已在 Prep 内点击即时应用（不再出发时判断）→ confirm_departure → 装配下一关。
+## 事件门 battle=null → 走事件流程占位（防 0 单位战斗 soft-lock）；否则正常装配战斗。
 func _on_confirm_departure() -> void:
-	var st: Object = _run_manager.get_state()
-	if not _prep_warned and _has_worn_declined(st):
-		_prep_warned = true
-		if _prep_warn_label != null and is_instance_valid(_prep_warn_label):
-			_prep_warn_label.text = "有角色未满血且拒绝恢复（背水流）。再次点击「确认出发」继续。"
-		return
-	_run_manager.recover_party(_prep_accepts)  # 先恢复再出发
 	_clear_prep()
 	_run_manager.confirm_departure()  # → stage += 1, phase=battle
-	# 事件门 battle=null，不打战斗，走事件流程占位（防 0 单位战斗 soft-lock）；否则正常装配战斗。
 	var entry: Variant = _run_manager.get_state().current_entry_door
 	if entry is Dictionary and str((entry as Dictionary).get("reward_type", "")) == "event":
 		_enter_event(entry as Dictionary)
 	else:
 		_enter_battle()
-
-
-## 是否存在「未满血且拒绝恢复」的角色（供出发提示一次判定）。
-func _has_worn_declined(st: Object) -> bool:
-	for i: int in range(st.party.size()):
-		var m: Dictionary = st.party[i]
-		var hp: int = int(m.get("hp", 0))
-		var max_hp: int = int(m.get("max_hp", 0))
-		var accept: bool = i < _prep_accepts.size() and _prep_accepts[i]
-		if max_hp > 0 and hp < max_hp and not accept:
-			return true
-	return false
 
 
 func _slot_text(item: String) -> String:

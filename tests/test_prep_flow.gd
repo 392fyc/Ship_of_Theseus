@@ -61,6 +61,7 @@ func _run() -> void:
 	_rng.seed = RNG_SEED
 
 	_test_recovery()
+	_test_recover_member()
 	_test_hp_inheritance()
 	_test_convoy_exchange()
 
@@ -153,6 +154,41 @@ func _test_recovery() -> void:
 	var placeholder_member: Dictionary = { "hp": 0, "max_hp": 0 }
 	_check("[1] max_hp<=0 → 恢复量 0（占位安全）",
 		rm.get_recovery_amount(placeholder_member) == 0)
+
+
+# ── 测试 1c：即时恢复 recover_member（点击即恢复模型）──────
+
+func _test_recover_member() -> void:
+	var rm: Object = _new_manager()
+	rm.start_run(_run_config, _act_config, _pools, _roster.duplicate(true), _rng)
+	var st: Object = rm.get_state()
+	var pct_cfg: float = float((_run_config.get("recovery") as Dictionary).get("percent_max_hp", 0))
+
+	# 0 号磨损 → recover_member 即时恢复该角色，返回恢复量
+	st.party[0]["hp"] = 10
+	var max_hp0: int = int(st.party[0].get("max_hp", 0))
+	var amount: int = roundi(float(max_hp0) * pct_cfg / 100.0)
+	var expected_hp: int = mini(max_hp0, 10 + amount)
+	var gained: int = rm.recover_member(0)
+	_check("[1c] recover_member(0) 即时恢复 hp=min(max_hp,hp+amount)",
+		int(st.party[0].get("hp", 0)) == expected_hp,
+		"hp=%d 期望 %d" % [int(st.party[0].get("hp", 0)), expected_hp])
+	_check("[1c] recover_member 返回实际恢复量",
+		gained == expected_hp - 10, "得 %d 期望 %d" % [gained, expected_hp - 10])
+
+	# 只恢复被点角色：1 号不点 → 不变（拒绝=不点恢复）
+	st.party[1]["hp"] = 10
+	_check("[1c] 未点角色 hp 不变（拒绝=不点恢复）",
+		int(st.party[1].get("hp", 0)) == 10, "hp=%d" % int(st.party[1].get("hp", 0)))
+
+	# 满血 recover_member → 返回 0，不超额（可安全重复调用）
+	st.party[2]["hp"] = int(st.party[2].get("max_hp", 0))
+	_check("[1c] 满血 recover_member 返回 0", rm.recover_member(2) == 0)
+	_check("[1c] 满血后 hp 仍 == max_hp",
+		int(st.party[2].get("hp", 0)) == int(st.party[2].get("max_hp", 0)))
+
+	# 越界索引安全返回 0
+	_check("[1c] recover_member 越界索引返回 0", rm.recover_member(99) == 0)
 
 
 # ── 测试 2：HP 跨关继承 ─────────────────────────────────

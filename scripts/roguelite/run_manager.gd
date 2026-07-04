@@ -392,6 +392,22 @@ func recover_party(accepts: Array) -> void:
 		member["hp"] = mini(max_hp, int(member.get("hp", 0)) + amount)
 
 
+## 单角色即时恢复（点击即恢复模型）：hp = min(max_hp, hp + 恢复量)，返回实际恢复量。
+## 已满血 / 无 max_hp → 返回 0（无副作用，可安全重复调用而不超额）。
+## 「拒绝/背水」= UI 层不调用本方法（不点恢复按钮）；不再出发时批量判断 accepts。
+func recover_member(index: int) -> int:
+	if state == null or index < 0 or index >= state.party.size():
+		return 0
+	var member: Dictionary = state.party[index]
+	var max_hp: int = int(member.get("max_hp", 0))
+	if max_hp <= 0:
+		return 0
+	var hp: int = int(member.get("hp", 0))
+	var new_hp: int = mini(max_hp, hp + get_recovery_amount(member))
+	member["hp"] = new_hp
+	return new_hp - hp
+
+
 ## 运输队装备 → 角色槽（slot ∈ weapon|armor）。若该槽原有装备则退回运输队（守恒）。
 ## v0 效果不生效（equipment 未接 stats），仅数据交换 [占位]。返回是否成功。
 func equip_from_convoy(member_index: int, convoy_index: int, slot: String) -> bool:
