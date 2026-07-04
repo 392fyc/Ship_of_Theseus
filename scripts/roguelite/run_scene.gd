@@ -201,7 +201,7 @@ func _show_prep() -> void:
 		_prep_selected_member = 0
 
 	var panel: Control = _build_center_panel()
-	var vbox: VBoxContainer = panel.get_node("VBox")
+	var vbox: VBoxContainer = panel.get_node("Center/VBox")
 
 	var title: Label = Label.new()
 	title.text = "备战 (Prep) — 下一关：stage %d" % (int(st.stage) + 1)
@@ -612,7 +612,7 @@ func _show_event_choices() -> void:
 	_clear_event_panel()
 	var st: Object = _run_manager.get_state()
 	var panel: Control = _build_center_panel()
-	var vbox: VBoxContainer = panel.get_node("VBox")
+	var vbox: VBoxContainer = panel.get_node("Center/VBox")
 	var event: Dictionary = _current_event()
 
 	if event.is_empty():
@@ -681,7 +681,7 @@ func _show_event_outcome(outcome: Dictionary, result: Dictionary) -> void:
 	_clear_event_panel()
 	var st: Object = _run_manager.get_state()
 	var panel: Control = _build_center_panel()
-	var vbox: VBoxContainer = panel.get_node("VBox")
+	var vbox: VBoxContainer = panel.get_node("Center/VBox")
 
 	var head: Label = Label.new()
 	head.text = "事件结果 · stage %d" % int(st.stage)
@@ -797,7 +797,7 @@ func _show_end_panel(completed: bool) -> void:
 	_clear_end_panel()
 	var st: Object = _run_manager.get_state()
 	var panel: Control = _build_center_panel()
-	var vbox: VBoxContainer = panel.get_node("VBox")
+	var vbox: VBoxContainer = panel.get_node("Center/VBox")
 
 	var label: Label = Label.new()
 	if completed:
@@ -858,6 +858,7 @@ func _build_center_panel() -> Control:
 	root_ctrl.add_child(bg)
 
 	var center: CenterContainer = CenterContainer.new()
+	center.name = "Center"  # VBox 挂其下；面板函数经 get_node("Center/VBox") 访问
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root_ctrl.add_child(center)
 
