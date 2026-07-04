@@ -62,7 +62,9 @@ var _debug_spawn_positions: Dictionary = {}
 # ── 敌人词条（affix）时机分发 —— 纯加法，无词条单位零影响 ─────────
 # v0 声明式占位词条 id（挂载但效果待后续时机 hook 实装；非静默，_notify 一次性提示）。
 # 说明：af_vanguard(on_turn_start) 由时机分发的占位分支覆盖，故不在此列表重复。
-const _AFFIX_V0_PLACEHOLDERS: Array[String] = ["af_zone_expand", "afs_bulwark", "af_siege"]
+# v0 仍为占位（无系统依赖可 hook）的词条。af_zone_expand→pathfinding ZOC 半径、
+# afs_bulwark→_build_hostile_action_context 防御乘区、af_vanguard→unit SPD 首回合态 均已实装并移出。
+const _AFFIX_V0_PLACEHOLDERS: Array[String] = ["af_siege"]
 # 占位提示去重（affix_id → 已提示），保证「未实装」显式可见但不刷屏。
 var _affix_placeholder_seen: Dictionary = {}
 # 已做过占位扫描的单位实例 id 集合（每单位仅扫描一次）。
@@ -356,6 +358,12 @@ func _on_turn_ended(unit: Unit) -> void:
 
 func _on_round_ended() -> void:
 	print("[TurnManager] === Round ended ===")
+	# 敌人词条 af_vanguard（先手部署）：首回合（round 1）结束后关闭速度加成。
+	# 无该词条单位 expire_vanguard() 为空操作 → 零影响。round 1 之后再触发亦幂等无害。
+	for u_variant: Variant in units:
+		var u: Unit = u_variant as Unit
+		if u != null:
+			u.expire_vanguard()
 
 
 func _do_enemy_turn(unit: Unit) -> void:
@@ -2122,6 +2130,10 @@ func _build_hostile_action_context(attacker: Unit, defender: Unit,
 	action_data["terrain_def_bonus"] = int(terrain_context.get("terrain_def_bonus", 0))
 	action_data["terrain_res_bonus"] = int(terrain_context.get("terrain_res_bonus", 0))
 	action_data["defender_terrain_name"] = str(terrain_context.get("terrain_name", "PLAIN"))
+	# ── 敌人词条 afs_bulwark（壁垒统御）：防御方己方减伤光环 → 防御乘区（真实生效 hook）。
+	# forecast（preview）与执行（resolve）共用本上下文，保证预告==实际伤害。
+	# 无光环时乘区==1.0 → 与 damage_calculator 默认一致（无词条零影响）。
+	action_data["affix_defense_multiplier"] = _affix_bulwark_multiplier(defender)
 	_apply_debug_determinism(action_data)
 	return action_data
 
@@ -2431,22 +2443,17 @@ func _apply_affixes(unit: Unit, timing: String, context: Dictionary) -> void:
 func _execute_affix_effect(unit: Unit, affix: Dictionary, _context: Dictionary) -> void:
 	var affix_id: String = str(affix.get("id", ""))
 	match affix_id:
-		"af_vanguard":
-			# [占位] 首回合速度加成需回合序号 hook（首回合判定）；v0 未实装。
-			_affix_placeholder_notice(affix_id, "首回合速度加成待回合序号 hook")
-		"af_zone_expand":
-			# [占位] 控制区（ZOC）扩域需 ZOC 计算 hook；v0 未实装。
-			_affix_placeholder_notice(affix_id, "ZOC 扩域待 ZOC 计算 hook")
-		"afs_bulwark":
-			# [占位] 己方减伤光环需范围伤害 hook；v0 未实装。
-			_affix_placeholder_notice(affix_id, "己方减伤光环待范围伤害 hook")
 		"af_siege":
-			# [占位] 攻城对建筑增伤需建筑伤害 hook；v0 未实装。
-			_affix_placeholder_notice(affix_id, "攻城对建筑增伤待建筑伤害 hook")
+			# [占位] 攻城对建筑增伤：依赖「建筑作为可攻击战斗目标」系统（当前不存在）。
+			# Cell.building 仅地图数据（无 HP / 无战斗接线），resolve_attack 仅接受 defender: Unit。
+			# 注：af_siege 类型为 stat_pct，不经时机分发触达此处；真实占位提示走
+			# _notify_affix_placeholders 扫描（_AFFIX_V0_PLACEHOLDERS）。此分支为防御性文档。
+			_affix_placeholder_notice(affix_id, "对建筑增伤依赖建筑战斗目标系统（未实装）")
 		_:
-			# 已在别处真实生效（af_heal_resist→heal()/afs_frenzy→damage_calc/
-			# af_counter_boost→反击 hook/stat_flat·stat_pct 常驻→get_effective_stat）
-			# 或未知词条 → 分发器不重复执行。
+			# 已实装词条在各自 hook 真实生效，分发器不重复执行：
+			#   af_vanguard→unit SPD 首回合态（round_ended 清）/ af_zone_expand→pathfinding ZOC 半径 /
+			#   afs_bulwark→_build_hostile_action_context 防御乘区 / af_heal_resist→heal() /
+			#   afs_frenzy→damage_calc 输出乘区 / af_counter_boost→反击乘区 / stat_flat·stat_pct→get_effective_stat。
 			pass
 
 
@@ -2461,6 +2468,35 @@ func _affix_counter_multiplier(unit: Unit) -> float:
 		var params: Dictionary = affix.get("params", {})
 		mult *= (1.0 + float(params.get("damage_pct", 0)) / 100.0)
 	return mult
+
+
+## afs_bulwark（壁垒统御）：防御方所属阵营存在存活的携该词条单位 → 返回减伤乘区，否则 1.0。
+## 数据定义为「为己方全体提供减伤光环」（params 仅含 ally_damage_reduction_pct，无半径字段）
+## → 采「己方全队生效」，忠于词条数据（不臆造半径常量）。收集防御方阵营单位后交纯函数结算。
+func _affix_bulwark_multiplier(defender: Unit) -> float:
+	if defender == null:
+		return 1.0
+	var allies: Array = []
+	for u_variant: Variant in units:
+		var u: Unit = u_variant as Unit
+		if u != null and u.faction == defender.faction:
+			allies.append(u)
+	return _compute_bulwark_multiplier(allies)
+
+
+## 纯函数（可单测）：给定一组己方单位，任一存活单位携 afs_bulwark → 返回 1 - pct/100（下限 0）。
+## 无携带 → 1.0（零影响）。数值 pct 从 affix params.ally_damage_reduction_pct 读。
+static func _compute_bulwark_multiplier(allies: Array) -> float:
+	for ally_variant: Variant in allies:
+		var ally: Unit = ally_variant as Unit
+		if ally == null or ally.stats == null or not ally.stats.is_alive():
+			continue
+		for affix: Dictionary in ally.get_affixes():
+			if str(affix.get("id", "")) != "afs_bulwark":
+				continue
+			var pct: float = float(affix.get("params", {}).get("ally_damage_reduction_pct", 0))
+			return maxf(0.0, 1.0 - pct / 100.0)
+	return 1.0
 
 
 ## 一次性提示单位携带的 v0 占位词条（挂载但效果待后续实装；非静默）。每单位仅扫描一次。

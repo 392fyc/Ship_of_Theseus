@@ -64,6 +64,11 @@ var _affix_stat_flat: Dictionary = {}
 var _affix_stat_pct: Dictionary = {}
 # 伤害增强乘区（供 damage_calculator 读）；1.0 = 无增强（无词条单位恒为 1.0）。
 var affix_damage_mult: float = 1.0
+# af_vanguard（先手部署）首回合速度加成：挂载即激活（战斗从 round 1 开始），
+# tactical_manager 在 round_ended（round 1 结束）调 expire_vanguard() 关闭。
+# 无该词条单位下列两字段恒为 0/false → SPD 计算零影响。
+var _affix_vanguard_spd_bonus: int = 0
+var _affix_vanguard_active: bool = false
 
 # ── 信号 ────────────────────────────────────────────
 signal damage_taken(amount: int, damage_type: String)
@@ -272,6 +277,10 @@ func get_effective_stat(stat_key: String) -> int:
 	if normalized_key == "SPD" and _xinyan_speed_threshold > 0 \
 			and sword_qi >= _xinyan_speed_threshold:
 		effective_value += float(_xinyan_speed_bonus)
+	# ── 敌人词条 af_vanguard：首回合（round 1）速度加成（仅 SPD 键）──────────
+	# 无该词条单位 _affix_vanguard_active 恒 false → 零影响。
+	if normalized_key == "SPD" and _affix_vanguard_active:
+		effective_value += float(_affix_vanguard_spd_bonus)
 	# ── 印记属性加成（心/道/势）───────────────────────────
 	if normalized_key == "DEX" and bool(marks.get("心", false)):
 		effective_value += float(_mark_dex_bonus)
@@ -809,6 +818,11 @@ func apply_affixes(affix_ids: Array, special_affix_id: Variant,
 					var k_pct: String = _normalize_stat_key(str(params["stat_key"]))
 					_affix_stat_pct[k_pct] = float(_affix_stat_pct.get(k_pct, 0)) \
 						+ float(params.get("value", 0))
+		# af_vanguard（先手部署）：首回合速度加成，挂载即激活（战斗从 round 1 开始）。
+		# 数值从 params.first_round_spd 读取；round 1 结束由 expire_vanguard() 关闭。
+		if aid == "af_vanguard":
+			_affix_vanguard_spd_bonus = int(params.get("first_round_spd", 0))
+			_affix_vanguard_active = true
 
 	# 数值增强系数（HP + 输出乘区）。
 	_affix_stat_scale = stat_scale
@@ -831,6 +845,13 @@ func has_affix(affix_id: String) -> bool:
 ## 返回已挂载的词条定义列表（供 UI / 时机分发 / 门预告 / 测试读取）。
 func get_affixes() -> Array[Dictionary]:
 	return _affixes
+
+
+## af_vanguard（先手部署）首回合结束（round 1 end）关闭速度加成。
+## 无该词条单位为空操作（_affix_vanguard_active 本就 false）→ 零影响。
+## 由 tactical_manager 在 turn_manager.round_ended 时对全场单位调用。
+func expire_vanguard() -> void:
+	_affix_vanguard_active = false
 
 
 ## af_heal_resist（愈合迟滞）：按 incoming_heal_pct 折算受治疗量。无该词条 → 原样返回。

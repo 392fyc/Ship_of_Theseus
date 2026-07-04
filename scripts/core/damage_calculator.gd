@@ -92,6 +92,10 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	# area_damage_multiplier 默认 1.0（向后兼容），溅射目标由调用方设为 0.5 等。
 	final_dmg *= float(action_data.get("area_damage_multiplier", 1.0))
 
+	# ── 敌人词条 afs_bulwark 防御乘区（己方减伤光环）─────────
+	# 由 tactical_manager._build_hostile_action_context 注入；默认 1.0（无光环 → 零影响）。
+	final_dmg *= float(action_data.get("affix_defense_multiplier", 1.0))
+
 	# ── Step 5: Calculate final damage (caller applies) ─
 	result.damage = maxi(0, roundi(final_dmg))
 	result.defender_died = defender.stats.hp <= result.damage
@@ -143,6 +147,8 @@ static func preview_attack(attacker: Unit, defender: Unit,
 	final_damage *= _affix_attack_multiplier(attacker)
 	# 区域溅射衰减（与 resolve_attack 一致，保证 forecast == 实际伤害）。
 	final_damage *= float(action_data.get("area_damage_multiplier", 1.0))
+	# afs_bulwark 防御乘区（与 resolve_attack 一致，保证 forecast == 实际伤害）。
+	final_damage *= float(action_data.get("affix_defense_multiplier", 1.0))
 
 	var dmg_int: int = maxi(0, roundi(final_damage))
 	return {

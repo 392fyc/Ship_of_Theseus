@@ -139,11 +139,41 @@ static func check_attack_line(grid: Grid,
 # ── 辅助函数 ─────────────────────────────────────────
 
 static func _in_enemy_zoc(grid: Grid, pos: Vector2i, faction: String) -> bool:
+	# 基础 ZOC（半径 1，相邻敌方单位）—— 与引入词条前逐格一致，零改动。
 	for nb in grid.get_neighbors(pos):
 		var unit = grid.get_unit_at(nb)
 		if unit != null and unit.faction != faction:
 			return true
+	# 敌人词条 af_zone_expand（控域）：携带此词条的敌方单位 ZOC 半径 = 1 + zoc_radius_bonus，
+	# 覆盖 distance≥2 的格子。无任何敌方携带该词条 → 下方扫描恒 false（等价旧行为，零影响）。
+	return _in_expanded_enemy_zoc(grid, pos, faction)
+
+
+# af_zone_expand 扩域 ZOC：扫描全场敌方单位，按各自 ZOC 半径判定（仅 distance≥2；
+# distance≤1 已由基础 ZOC 覆盖）。非词条敌方 radius==1 → 恒不满足 distance≤radius → 返回 false。
+static func _in_expanded_enemy_zoc(grid: Grid, pos: Vector2i, faction: String) -> bool:
+	for y in grid.height:
+		for x in grid.width:
+			var dist: int = absi(pos.x - x) + absi(pos.y - y)
+			if dist < 2:
+				continue
+			var unit = grid.get_unit_at(Vector2i(x, y))
+			if unit == null or unit.faction == faction:
+				continue
+			if dist <= _enemy_zoc_radius(unit):
+				return true
 	return false
+
+
+# 单位 ZOC 半径：基础 1 + af_zone_expand 的 zoc_radius_bonus（从 affix params 读）。
+# 非词条单位 / 无 get_affixes 的占位 → 返回 1（与相邻 ZOC 一致）。
+static func _enemy_zoc_radius(unit) -> int:
+	var radius: int = 1
+	if unit != null and unit.has_method("get_affixes"):
+		for affix in unit.get_affixes():
+			if str(affix.get("id", "")) == "af_zone_expand":
+				radius += int(affix.get("params", {}).get("zoc_radius_bonus", 0))
+	return radius
 
 
 static func _heuristic(a: Vector2i, b: Vector2i) -> int:

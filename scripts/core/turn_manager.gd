@@ -40,6 +40,11 @@ func start() -> void:
 	_advance()
 
 
+## 当前回合序号（1-based；start() 后为 1）。供敌人词条 af_vanguard 判首回合等外部逻辑读取。
+func get_round_number() -> int:
+	return _round_number
+
+
 func force_advance() -> void:
 	_advance()
 
