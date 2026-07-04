@@ -812,7 +812,7 @@ func apply_affixes(affix_ids: Array, special_affix_id: Variant,
 						+ float(params.get("value", 0))
 			"stat_pct":
 				# 仅「常驻属性百分比」（带 stat_key）进入常驻叠加；
-				# 条件性(afs_frenzy)/特化(af_siege 对建筑) 无 stat_key → 留 _affixes 交
+				# 条件性(afs_frenzy) 无 stat_key → 留 _affixes 交
 				# damage_calculator / 时机分发处理，不常驻。
 				if params.has("stat_key"):
 					var k_pct: String = _normalize_stat_key(str(params["stat_key"]))

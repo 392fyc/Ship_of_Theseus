@@ -130,7 +130,7 @@ func _test_mount(dl: Object) -> void:
 	_check("has_affix(af_zone_expand)", u.has_affix("af_zone_expand"))
 	_check("special afs_bulwark 并入 _affixes", u.has_affix("afs_bulwark"))
 	_eq("_affixes 数量==4(3基础+1特殊)", u.get_affixes().size(), 4)
-	_check("未挂载词条 has_affix==false", not u.has_affix("af_siege"))
+	_check("未挂载词条 has_affix==false", not u.has_affix("af_nonexistent_probe"))
 	u.free()
 
 

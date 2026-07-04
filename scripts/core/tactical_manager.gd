@@ -61,10 +61,10 @@ var _debug_spawn_positions: Dictionary = {}
 
 # ── 敌人词条（affix）时机分发 —— 纯加法，无词条单位零影响 ─────────
 # v0 声明式占位词条 id（挂载但效果待后续时机 hook 实装；非静默，_notify 一次性提示）。
-# 说明：af_vanguard(on_turn_start) 由时机分发的占位分支覆盖，故不在此列表重复。
-# v0 仍为占位（无系统依赖可 hook）的词条。af_zone_expand→pathfinding ZOC 半径、
-# afs_bulwark→_build_hostile_action_context 防御乘区、af_vanguard→unit SPD 首回合态 均已实装并移出。
-const _AFFIX_V0_PLACEHOLDERS: Array[String] = ["af_siege"]
+# af_zone_expand→pathfinding ZOC 半径、afs_bulwark→_build_hostile_action_context 防御乘区、
+# af_vanguard→unit SPD 首回合态 均已实装并移出；其余占位词条已随所依赖系统废弃而移除。
+# 当前无占位词条，列表为空（机制对空数组安全，扫描空转）。
+const _AFFIX_V0_PLACEHOLDERS: Array[String] = []
 # 占位提示去重（affix_id → 已提示），保证「未实装」显式可见但不刷屏。
 var _affix_placeholder_seen: Dictionary = {}
 # 已做过占位扫描的单位实例 id 集合（每单位仅扫描一次）。
@@ -2440,15 +2440,10 @@ func _apply_affixes(unit: Unit, timing: String, context: Dictionary) -> void:
 
 
 ## 单个词条效果执行。v0：占位词条走显式提示分支；已在别处生效的词条走 default（不重复执行）。
+## 当前无占位型时机词条（原占位词条已随其依赖系统废弃移除），所有词条均走 default。
 func _execute_affix_effect(unit: Unit, affix: Dictionary, _context: Dictionary) -> void:
 	var affix_id: String = str(affix.get("id", ""))
 	match affix_id:
-		"af_siege":
-			# [占位] 攻城对建筑增伤：依赖「建筑作为可攻击战斗目标」系统（当前不存在）。
-			# Cell.building 仅地图数据（无 HP / 无战斗接线），resolve_attack 仅接受 defender: Unit。
-			# 注：af_siege 类型为 stat_pct，不经时机分发触达此处；真实占位提示走
-			# _notify_affix_placeholders 扫描（_AFFIX_V0_PLACEHOLDERS）。此分支为防御性文档。
-			_affix_placeholder_notice(affix_id, "对建筑增伤依赖建筑战斗目标系统（未实装）")
 		_:
 			# 已实装词条在各自 hook 真实生效，分发器不重复执行：
 			#   af_vanguard→unit SPD 首回合态（round_ended 清）/ af_zone_expand→pathfinding ZOC 半径 /

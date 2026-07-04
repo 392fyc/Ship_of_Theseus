@@ -1,11 +1,10 @@
 extends SceneTree
-## 敌人词条（affix）效果执行器 v0 —— 迭代#13：4 个声明式占位词条的真实生效验证。
+## 敌人词条（affix）效果执行器 v0 —— 迭代#13：3 个声明式词条的真实生效验证。
 ##
-## 覆盖本迭代把「占位」升级为「真实生效」的三条 hook + 一条诚实占位：
+## 覆盖本迭代把「占位」升级为「真实生效」的三条 hook：
 ##   - af_vanguard（先手部署）：unit.gd 首回合速度加成态（round_ended 关闭）——已实装。
 ##   - af_zone_expand（控域）：pathfinding.gd ZOC 半径 = 1 + zoc_radius_bonus——已实装。
 ##   - afs_bulwark（壁垒统御）：damage_calculator 防御乘区 + tactical_manager 己方全队光环——已实装。
-##   - af_siege（攻城）：无「建筑作为可攻击战斗目标」系统 —— 保持诚实占位（不测生效，见说明）。
 ##
 ## 每条已实装词条均附「无词条零影响对照」，证明纯加法门控（无词条单位行为逐位不变）。
 ##
@@ -39,7 +38,6 @@ func _run() -> void:
 	_test_vanguard(dl)
 	_test_zone_expand(dl)
 	_test_bulwark(dl)
-	_test_siege_placeholder(dl)
 	_test_global_zero_impact(dl)
 
 	dl.free()
@@ -208,36 +206,10 @@ func _test_bulwark(dl: Object) -> void:
 	bulwark_ally.free()
 
 
-# ── 4. af_siege：诚实占位（无建筑战斗目标系统，不测真实生效）──
-
-func _test_siege_placeholder(dl: Object) -> void:
-	print("\n[4] af_siege 攻城（保持占位 · 系统依赖）")
-	# 词条仍可正常挂载（声明式骨架不缺失），但战斗中无建筑目标 → 效果不生效，属诚实占位。
-	var u: Unit = _make_unit(dl.enemies["goblin_melee"], "enemy")
-	u.apply_affixes(["af_siege"], null, 1.0, dl.affixes)
-	_check("af_siege 可挂载（声明式骨架完整）", u.has_affix("af_siege"))
-	# 对单位（非建筑）攻击不因 af_siege 增伤：damage_calculator 无建筑目标分支 → 输出乘区仍 1.0。
-	var dft: Unit = _make_unit(dl.enemies["goblin_melee"], "player")
-	dft.stats.def_attr = 0
-	dft.stats.lck = 5
-	dft.stats.max_hp = 999
-	dft.stats.hp = 999
-	u.stats.str_attr = 20
-	u.stats.dex = 0
-	var pv: Dictionary = DamageCalculator.preview_attack(u, dft,
-		{"damage_type": "physical", "weapon_might": 0, "guaranteed_hit": true})
-	_eq("af_siege 对普通单位无增伤==20（对建筑增伤依赖未实装的建筑战斗目标系统）",
-		pv["damage"], 20)
-	print("  · 说明：af_siege 保持占位——Cell.building 仅地图数据（无 HP/无战斗接线），")
-	print("    resolve_attack 仅接受 defender: Unit，战斗中无「建筑作为可攻击目标」概念。")
-	u.free()
-	dft.free()
-
-
-# ── 5. 全局无词条零影响：get_effective_stat / damage_calculator 逐位不变 ──
+# ── 4. 全局无词条零影响：get_effective_stat / damage_calculator 逐位不变 ──
 
 func _test_global_zero_impact(dl: Object) -> void:
-	print("\n[5] 全局无词条零影响对照")
+	print("\n[4] 全局无词条零影响对照")
 	var g: Unit = _make_unit(dl.enemies["goblin_melee"], "enemy")
 	# 无词条单位各属性与引入前一致（含新加的 vanguard SPD 分支不触发）。
 	_eq("无词条 SPD==5", g.get_effective_stat("SPD"), 5)

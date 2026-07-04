@@ -133,7 +133,7 @@ act1_config 现有 6 个悬空波次 id（3 normal + 2 elite + 1 boss）+ 事件
 
 | 目录/文件 | 内容 | 数量 | 标注 |
 |---|---|---|---|
-| `data/affixes/base/*.json` | 基础词条（被动技能）：反击强化/先手部署/受治疗减半/拆建筑/控制区扩大方向 | 5 个左右 | [占位] |
+| `data/affixes/base/*.json` | 基础词条（被动技能）：反击强化/先手部署/受治疗减半/控制区扩大方向（拆建筑随城镇 v1 不做移除） | 5 个左右 | [占位] |
 | `data/affixes/special/*.json` | 特殊词条（房间签名级） | 1–2 个 | [占位] |
 | `data/waves/*.json` | 6 波次（3 normal + 2 elite + 1 boss）+ 1 事件伏击 | 7 | [工程] spawn_pos [占位] |
 | `data/relics/*.json` | 简单遗物条目（经济类 + 数值类方向） | 8–12 | [占位] |
