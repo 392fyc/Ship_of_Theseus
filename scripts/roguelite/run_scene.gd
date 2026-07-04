@@ -34,6 +34,8 @@ const RUN_SEED: int = 20260704
 var _run_manager: Object = null
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _data_pools: Dictionary = {}
+var _act_config: Dictionary = {}          # 缓存 act1_config（伏击地图 [占位] 取 door_gen.map_pool[0]）
+var _event_id: String = ""                # 当前事件门的 event_id（choices → outcome → effects 流程共用）
 
 var _ui_layer: CanvasLayer = null
 var _battle_view: Node = null
@@ -68,6 +70,7 @@ func _ready() -> void:
 
 	var act_config: Dictionary = _load_json(ACT_CONFIG_FILE)
 	var run_config: Dictionary = _load_json(RUN_CONFIG_FILE)
+	_act_config = act_config
 	_rng.seed = RUN_SEED
 
 	_run_manager = RunManagerScript.new()
@@ -592,40 +595,187 @@ func _make_small_button(text: String) -> Button:
 	return btn
 
 
-# ── 事件子视图（v0 占位：不打战斗，事件效果执行器待建）─────
+# ── 事件子视图（v0：choices → 加权抽 outcome → 应用 effects → 伏击战斗或推进）─────
+# 真源：data/events/*.json + 迭代 #12 规格。事件门 soft-lock 修复保留：事件门不当普通战斗
+# 装配（confirm_departure 后 current_battle 无 map → _on_confirm_departure 走本流程）。
+# 无战斗 outcome → 「继续」视为无战斗胜利推进；start_battle outcome → 装配伏击战斗（复用注入路径）。
 
-## 事件关：显示事件占位 → 继续 → 视为无战斗完成推进。
-## RunManager 对事件门 reward_type=="event" 只结算固定金币经验、跳过门奖励
-## （run_manager.gd on_battle_resolved 内 event 分支），并推进下一关。
+## 事件关入口：清战斗视图，记 event_id，显示 choices 面板。
 func _enter_event(door: Dictionary) -> void:
 	_clear_battle_view()
-	var event_id: String = str(door.get("event_id", ""))
+	_event_id = str(door.get("event_id", ""))
+	_show_event_choices()
+
+
+## 显示事件 title + description + 每个 choice 一个按钮。缺事件数据 → 占位「继续」兜底（防 soft-lock）。
+func _show_event_choices() -> void:
+	_clear_event_panel()
+	var st: Object = _run_manager.get_state()
+	var panel: Control = _build_center_panel()
+	var vbox: VBoxContainer = panel.get_node("VBox")
+	var event: Dictionary = _current_event()
+
+	if event.is_empty():
+		push_warning("[RunScene] 事件数据缺失: %s，回退占位继续" % _event_id)
+		var miss: Label = Label.new()
+		miss.text = "事件 · stage %d\n[数据缺失] %s" % [int(st.stage), _event_id]
+		miss.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		miss.add_theme_font_size_override("font_size", 20)
+		vbox.add_child(miss)
+		var cbtn: Button = Button.new()
+		cbtn.text = "继续"
+		cbtn.custom_minimum_size = Vector2(160.0, 42.0)
+		cbtn.pressed.connect(_on_event_continue)
+		vbox.add_child(cbtn)
+		_ui_layer.add_child(panel)
+		_event_panel = panel
+		return
+
+	var title: Label = Label.new()
+	title.text = "事件 · stage %d — %s" % [int(st.stage), str(event.get("title", _event_id))]
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 24)
+	vbox.add_child(title)
+
+	var desc: Label = Label.new()
+	desc.text = str(event.get("description", ""))
+	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc.custom_minimum_size = Vector2(560.0, 0.0)
+	desc.add_theme_font_size_override("font_size", 14)
+	desc.add_theme_color_override("font_color", Color(0.82, 0.86, 0.92))
+	vbox.add_child(desc)
+
+	var choices: Array = event.get("choices", []) if event.get("choices") is Array else []
+	for ci: int in range(choices.size()):
+		if not (choices[ci] is Dictionary):
+			continue
+		var choice: Dictionary = choices[ci]
+		var btn: Button = Button.new()
+		btn.text = str(choice.get("text", "选项 %d" % (ci + 1)))
+		btn.add_theme_font_size_override("font_size", 16)
+		btn.custom_minimum_size = Vector2(440.0, 40.0)
+		btn.pressed.connect(_on_event_choice.bind(ci))
+		vbox.add_child(btn)
+
+	_ui_layer.add_child(panel)
+	_event_panel = panel
+
+
+## 选中 choice：加权抽 outcome → 应用 effects → 显示结果面板。缺数据兜底继续（防卡）。
+func _on_event_choice(choice_index: int) -> void:
+	var event: Dictionary = _current_event()
+	var choices: Array = event.get("choices", []) if event.get("choices") is Array else []
+	if choice_index < 0 or choice_index >= choices.size() or not (choices[choice_index] is Dictionary):
+		_on_event_continue()
+		return
+	var choice: Dictionary = choices[choice_index]
+	var outcome: Dictionary = _run_manager.pick_event_outcome(choice, _rng)
+	var result: Dictionary = _run_manager.apply_event_outcome(outcome)
+	_show_event_outcome(outcome, result)
+
+
+## 显示 outcome.description + effect 日志（金币/血量变化可见）+ 当前金币 +
+## 「迎战伏击」（battle_triggered）或「继续」按钮。
+func _show_event_outcome(outcome: Dictionary, result: Dictionary) -> void:
+	_clear_event_panel()
 	var st: Object = _run_manager.get_state()
 	var panel: Control = _build_center_panel()
 	var vbox: VBoxContainer = panel.get_node("VBox")
 
-	var label: Label = Label.new()
-	label.text = "事件 · stage %d\n%s" % [int(st.stage), event_id]
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", 22)
-	vbox.add_child(label)
+	var head: Label = Label.new()
+	head.text = "事件结果 · stage %d" % int(st.stage)
+	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	head.add_theme_font_size_override("font_size", 22)
+	vbox.add_child(head)
 
-	var hint: Label = Label.new()
-	hint.text = "[v0 占位] 事件效果执行器待建；本关不打战斗，仅结算固定金币经验"
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.add_theme_font_size_override("font_size", 13)
-	hint.add_theme_color_override("font_color", Color(0.7, 0.75, 0.82))
-	vbox.add_child(hint)
+	var desc: Label = Label.new()
+	desc.text = str(outcome.get("description", ""))
+	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc.custom_minimum_size = Vector2(560.0, 0.0)
+	desc.add_theme_font_size_override("font_size", 15)
+	desc.add_theme_color_override("font_color", Color(0.85, 0.9, 0.95))
+	vbox.add_child(desc)
+
+	var logs: Array = result.get("logs", []) if result.get("logs") is Array else []
+	if not logs.is_empty():
+		var lines: PackedStringArray = []
+		for l_v: Variant in logs:
+			lines.append(str(l_v))
+		var log_lbl: Label = Label.new()
+		log_lbl.text = "\n".join(lines)
+		log_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		log_lbl.add_theme_font_size_override("font_size", 13)
+		log_lbl.add_theme_color_override("font_color", Color(0.72, 0.86, 0.72))
+		vbox.add_child(log_lbl)
+
+	var gold_lbl: Label = Label.new()
+	gold_lbl.text = "当前金币：%d" % int(st.gold)
+	gold_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	gold_lbl.add_theme_font_size_override("font_size", 15)
+	gold_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
+	vbox.add_child(gold_lbl)
 
 	var btn: Button = Button.new()
-	btn.text = "继续"
 	btn.add_theme_font_size_override("font_size", 20)
-	btn.custom_minimum_size = Vector2(160.0, 42.0)
-	btn.pressed.connect(_on_event_continue)
+	btn.custom_minimum_size = Vector2(180.0, 44.0)
+	if bool(result.get("battle_triggered", false)):
+		btn.text = "迎战伏击"
+		btn.pressed.connect(_on_event_start_battle.bind(str(result.get("enemy_config", ""))))
+	else:
+		btn.text = "继续"
+		btn.pressed.connect(_on_event_continue)
 	vbox.add_child(btn)
 
 	_ui_layer.add_child(panel)
 	_event_panel = panel
+
+
+## 伏击战斗：用事件 effect 的 enemy_config + 占位地图装配，复用 #6 注入路径（不改战斗核心）。
+## 胜利 → battle_ended → _on_battle_ended 正常结算推进（事件门在 RunManager 内跳过门奖励）。
+func _on_event_start_battle(enemy_config: String) -> void:
+	_clear_event_panel()
+	_clear_battle_view()
+	var st: Object = _run_manager.get_state()
+	var map_id: String = _ambush_map_id()
+	var assembled: Dictionary = BattleAssemblerScript.build(
+		map_id, enemy_config, st.party, _data_pools)
+
+	var inst: Node = TacticalSceneScene.instantiate()
+	inst.run_injected = true
+	inst.debug_harness_enabled = false
+	inst.injected_map_id = str(assembled.get("map_id", map_id))
+	inst.injected_player_units = assembled.get("player_units", [])
+	inst.injected_enemy_units = assembled.get("enemy_units", [])
+	inst.battle_ended.connect(_on_battle_ended)
+	_battle_view = inst
+	add_child(inst)
+	print("[RunScene] 事件伏击战斗：map=%s wave=%s（玩家 %d / 敌人 %d）" % [
+		inst.injected_map_id, enemy_config,
+		(inst.injected_player_units as Array).size(),
+		(inst.injected_enemy_units as Array).size()])
+
+
+## 伏击地图 [占位]：事件门 battle=null 无 map，取 act_config.door_gen.map_pool[0]（数据驱动，
+## 非硬编码 id）；缺配置回退首张已加载地图。
+func _ambush_map_id() -> String:
+	var dg_v: Variant = _act_config.get("door_gen")
+	if dg_v is Dictionary:
+		var mp_v: Variant = (dg_v as Dictionary).get("map_pool")
+		if mp_v is Array and not (mp_v as Array).is_empty():
+			return str((mp_v as Array)[0])
+	var maps: Dictionary = _data_pools.get("maps") if _data_pools.get("maps") is Dictionary else {}
+	for k: Variant in maps.keys():
+		return str(k)
+	return ""
+
+
+## 取当前事件门的 Event 数据字典（缺失返回 {}）。
+func _current_event() -> Dictionary:
+	var events: Dictionary = _data_pools.get("events") if _data_pools.get("events") is Dictionary else {}
+	var event_v: Variant = events.get(_event_id)
+	return event_v if event_v is Dictionary else {}
 
 
 func _clear_event_panel() -> void:
@@ -634,7 +784,8 @@ func _clear_event_panel() -> void:
 	_event_panel = null
 
 
-## 事件「继续」：视为无战斗胜利，复用结算+切视图入口（事件门在 RunManager 内跳过门奖励）。
+## 事件「继续」（无战斗 outcome）：视为无战斗胜利，复用结算+切视图入口
+## （事件门在 RunManager 内跳过门奖励，只结算固定金币经验）。
 func _on_event_continue() -> void:
 	_clear_event_panel()
 	_on_battle_ended("victory")

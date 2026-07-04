@@ -185,6 +185,131 @@ func confirm_departure() -> void:
 	stage_advanced.emit(state.stage)
 
 
+# ── 事件效果执行器 v0（纯逻辑，操作 state；由 RunScene 事件门流程调用）────
+# 真源：data/events/*.json（Event{choices[].outcomes[].effects[]}）+ 迭代 #12 规格。
+# effect 数值一律从 effect 读，禁硬编码；buff/item 为占位（依赖遗物/装备/buff 系统，
+# push_warning 非静默）。事件门不结算门奖励（on_battle_resolved 内 event 分支已跳过），
+# 本执行器只应用 outcome 的 effects 到账本（gold/hp 立即生效；伏击战斗单独装配）。
+
+## 按 weight 加权从 choice.outcomes 抽一个 outcome（轮盘）。
+##   单 outcome 直接返回；空 outcomes 返回 {}；全零/负权重兜底返回首个 Dictionary。
+func pick_event_outcome(choice: Dictionary, rng: RandomNumberGenerator) -> Dictionary:
+	var outcomes_v: Variant = choice.get("outcomes")
+	var outcomes: Array = outcomes_v if outcomes_v is Array else []
+	if outcomes.is_empty():
+		return {}
+	if outcomes.size() == 1:
+		return outcomes[0] if outcomes[0] is Dictionary else {}
+	var total: float = 0.0
+	for o_v: Variant in outcomes:
+		if o_v is Dictionary:
+			total += maxf(0.0, float((o_v as Dictionary).get("weight", 0)))
+	if total <= 0.0 or rng == null:
+		# 全零/负权重（或缺 rng）兜底：返回首个 Dictionary
+		return _first_dict(outcomes)
+	var roll: float = rng.randf() * total
+	var acc: float = 0.0
+	for o_v2: Variant in outcomes:
+		if not (o_v2 is Dictionary):
+			continue
+		acc += maxf(0.0, float((o_v2 as Dictionary).get("weight", 0)))
+		if roll < acc:
+			return o_v2
+	# 浮点误差兜底：返回末个 Dictionary
+	for k: int in range(outcomes.size() - 1, -1, -1):
+		if outcomes[k] is Dictionary:
+			return outcomes[k]
+	return {}
+
+
+## 应用一个事件 outcome 的所有 effects 到 state。逐 effect 记一条 log。
+## 返回 { battle_triggered:bool, enemy_config:String, logs:Array[String] }。
+##   gold           : state.gold = maxi(0, gold + amount)（amount 可负；下限 0）
+##   hp_cost_percent: 每角色 hp = maxi(1, hp - roundi(max_hp*amount/100))（[占位] 无永久死亡）
+##   none           : 无操作
+##   start_battle   : battle_triggered=true + enemy_config（供 RunScene 装配伏击）
+##   buff           : [占位] 记 state.run_buffs + push_warning（run 级 buff 执行器待建，不生效）
+##   item           : [占位] 只记 log + push_warning（依赖装备/遗物系统，未发放）
+func apply_event_outcome(outcome: Dictionary) -> Dictionary:
+	var result: Dictionary = {
+		"battle_triggered": false,
+		"enemy_config": "",
+		"logs": [],
+	}
+	if state == null:
+		return result
+	var logs: Array = result["logs"]
+	var effects_v: Variant = outcome.get("effects")
+	var effects: Array = effects_v if effects_v is Array else []
+	for eff_v: Variant in effects:
+		if not (eff_v is Dictionary):
+			continue
+		var eff: Dictionary = eff_v
+		var etype: String = str(eff.get("type", ""))
+		match etype:
+			"gold":
+				var amount: int = int(eff.get("amount", 0))
+				var before: int = int(state.gold)
+				state.gold = maxi(0, state.gold + amount)
+				logs.append("金币 %+d（%d → %d）" % [amount, before, int(state.gold)])
+			"hp_cost_percent":
+				var pct: int = int(eff.get("amount", 0))
+				var affected: int = _apply_hp_cost_percent(pct)
+				logs.append("全队献血：按最大生命 %d%% 扣血（%d 名角色，下限 1）" % [pct, affected])
+			"none":
+				logs.append("无额外效果")
+			"start_battle":
+				result["battle_triggered"] = true
+				result["enemy_config"] = str(eff.get("enemy_config", ""))
+				logs.append("触发伏击战斗：%s" % str(eff.get("enemy_config", "")))
+			"buff":
+				var buff_ref: String = str(eff.get("ref_id", ""))
+				_append_run_buff(buff_ref)
+				push_warning("[事件效果][占位] run 级 buff 执行器待建：buff '%s' 已记入 run_buffs 但不真实生效（依赖 buff 系统）" % buff_ref)
+				logs.append("[占位] 获得 run buff：%s（执行器待建，未生效）" % buff_ref)
+			"item":
+				var item_ref: String = str(eff.get("ref_id", ""))
+				push_warning("[事件效果][占位] 物品发放依赖装备/遗物系统（等设计库）：item '%s' 未真实发放" % item_ref)
+				logs.append("[占位] 获得物品：%s（依赖装备/遗物系统，未发放）" % item_ref)
+			_:
+				push_warning("[事件效果] 未知 effect type: '%s'（已跳过）" % etype)
+				logs.append("[未知效果] %s（已跳过）" % etype)
+	return result
+
+
+## hp_cost_percent 效果：每角色 hp -= roundi(max_hp * pct/100)，下限 1（[占位] 无永久死亡）。
+## 注：按「最大生命」百分比扣（引擎占位口径）；事件文案的「当前生命」差异待正式伤害系统统一。
+## max_hp<=0（占位未回填）跳过。返回受影响角色数。
+func _apply_hp_cost_percent(pct: int) -> int:
+	var affected: int = 0
+	for i: int in range(state.party.size()):
+		var member: Dictionary = state.party[i]
+		var max_hp: int = int(member.get("max_hp", 0))
+		if max_hp <= 0:
+			continue
+		var cost: int = roundi(float(max_hp) * float(pct) / 100.0)
+		member["hp"] = maxi(1, int(member.get("hp", 0)) - cost)
+		affected += 1
+	return affected
+
+
+## [占位] 记录一个 run 级 buff ref_id 到 state.run_buffs（不真实生效，执行器待建）。
+func _append_run_buff(ref_id: String) -> void:
+	if state == null or ref_id == "":
+		return
+	var buffs: Array[String] = state.run_buffs
+	buffs.append(ref_id)
+	state.run_buffs = buffs
+
+
+## 返回数组中首个 Dictionary 元素，无则 {}。
+func _first_dict(arr: Array) -> Dictionary:
+	for e: Variant in arr:
+		if e is Dictionary:
+			return e
+	return {}
+
+
 # ── Prep v0：HP 跨关继承 / 恢复 / 运输队 / 情报 ────────────
 # 真源：runloop-reward-map-proposal.md §5 恢复模型 + §7.5 Prep
 #       + v0-implementation-plan.md。所有数值从 run_config / act_config 读，禁硬编码。

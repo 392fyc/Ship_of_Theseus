@@ -27,6 +27,7 @@ var talent_points: int = 0              # 全队合计镜像（权威值在 part
 var party: Array[Dictionary] = []       # 每角色一份数据账本
 var convoy: Dictionary = {}             # { "equipment": Array[String], "relics": Array[String] }
 var relic_drought: int = 0
+var run_buffs: Array[String] = []       # run 级 buff ref_id 列表（[占位] 执行器待建；事件 buff effect 记此，不真实生效）
 var last_choice_type: String = ""       # 上一关推进所选门的 reward_type（首关 ""）
 var current_entry_door: Variant = null  # Dictionary|null：进入当前关所选的门
 var current_battle: Dictionary = {}     # 当前关的 { "map_id":String, "enemy_config":String }
@@ -90,6 +91,7 @@ func to_dict() -> Dictionary:
 		"party": party.duplicate(true),
 		"convoy": convoy.duplicate(true),
 		"relic_drought": relic_drought,
+		"run_buffs": run_buffs.duplicate(),
 		"last_choice_type": last_choice_type,
 		"current_entry_door": current_entry_door,
 		"current_battle": current_battle.duplicate(true),
@@ -118,6 +120,11 @@ static func from_dict(d: Dictionary) -> RefCounted:
 	if d.get("convoy") is Dictionary:
 		s.convoy = (d.get("convoy") as Dictionary).duplicate(true)
 	s.relic_drought = int(d.get("relic_drought", 0))
+	var buffs_in: Array[String] = []
+	if d.get("run_buffs") is Array:
+		for b: Variant in (d.get("run_buffs") as Array):
+			buffs_in.append(str(b))
+	s.run_buffs = buffs_in
 	s.last_choice_type = str(d.get("last_choice_type", ""))
 	s.current_entry_door = d.get("current_entry_door")
 	if d.get("current_battle") is Dictionary:
