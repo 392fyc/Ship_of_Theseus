@@ -34,6 +34,17 @@ const PAN_DRAG_THRESHOLD: float = 8.0
 
 signal battle_ended(result: String)
 
+# ── run-loop 注入模式（纯加法门控；run_injected=false 时行为完全不变）──────
+## 由 RunScene 宿主在实例化后（add_child 前）置 true：跳过 PLAYER_UNITS/ENEMY_UNITS
+## 硬编码清单，改用下方注入字段 spawn，并为敌人注入词条（玩家不注入）。
+## 注入模式下 ReturnButton 不 reload，改由宿主经 battle_ended 信号接管流转。
+@export var run_injected: bool = false
+var injected_map_id: String = ""
+## 元素 Dictionary：{ class_id:String, pos:Vector2i, level?:int }
+var injected_player_units: Array = []
+## 元素 Dictionary：{ class_id:String, pos:Vector2i, affixes?:Array, special_affix?, stat_scale?:float }
+var injected_enemy_units: Array = []
+
 # ── Spawn configuration ──────────────────────────────
 
 const PLAYER_UNITS: Array[Dictionary] = [
@@ -88,15 +99,18 @@ func _ready() -> void:
 		tactical_manager.debug_harness_active = true
 		tactical_manager.turn_manager.round_ended.connect(_process_test_dummies)
 	_setup_camera()
-	tactical_manager.initialize_battle("test_arena")
+	if run_injected:
+		_spawn_injected_units()
+	else:
+		tactical_manager.initialize_battle("test_arena")
 
-	for cfg: Dictionary in PLAYER_UNITS:
-		var pos: Vector2i = cfg["pos"]
-		tactical_manager.spawn_unit(cfg["class_id"], pos, "player")
+		for cfg: Dictionary in PLAYER_UNITS:
+			var pos: Vector2i = cfg["pos"]
+			tactical_manager.spawn_unit(cfg["class_id"], pos, "player")
 
-	for cfg: Dictionary in ENEMY_UNITS:
-		var pos: Vector2i = cfg["pos"]
-		tactical_manager.spawn_unit(cfg["class_id"], pos, "enemy")
+		for cfg: Dictionary in ENEMY_UNITS:
+			var pos: Vector2i = cfg["pos"]
+			tactical_manager.spawn_unit(cfg["class_id"], pos, "enemy")
 
 	print("[TacticalScene] Units spawned: %d" % tactical_manager.units.size())
 
@@ -129,6 +143,32 @@ func _ready() -> void:
 	if debug_harness_enabled:
 		_build_debug_overlay()
 		_refresh_debug_overlay()
+
+
+## 注入模式 spawn（仅 run_injected 时调用）：读注入清单走正式 spawn_unit 路径；
+## 敌人 spawn 后调 apply_affixes 注入词条与数值增强（玩家不注入词条）。纯加法。
+func _spawn_injected_units() -> void:
+	tactical_manager.initialize_battle(injected_map_id)
+	for cfg_v: Variant in injected_player_units:
+		if not (cfg_v is Dictionary):
+			continue
+		var cfg: Dictionary = cfg_v
+		var pos: Vector2i = cfg.get("pos", Vector2i.ZERO)
+		tactical_manager.spawn_unit(str(cfg.get("class_id", "")), pos, "player")
+	for cfg_v: Variant in injected_enemy_units:
+		if not (cfg_v is Dictionary):
+			continue
+		var cfg: Dictionary = cfg_v
+		var pos: Vector2i = cfg.get("pos", Vector2i.ZERO)
+		var enemy_unit: Unit = tactical_manager.spawn_unit(
+			str(cfg.get("class_id", "")), pos, "enemy")
+		if enemy_unit == null:
+			continue
+		var affixes_v: Variant = cfg.get("affixes", [])
+		var affixes: Array = affixes_v if affixes_v is Array else []
+		var special_affix: Variant = cfg.get("special_affix", null)
+		var stat_scale: float = float(cfg.get("stat_scale", 1.0))
+		enemy_unit.apply_affixes(affixes, special_affix, stat_scale, DataLoader.affixes)
 
 
 func _input(event: InputEvent) -> void:
@@ -384,6 +424,9 @@ func _end_battle(result: String) -> void:
 
 
 func _on_return_pressed() -> void:
+	if run_injected:
+		# 注入模式：宿主(RunScene)经 battle_ended 信号接管流转，不自行 reload。
+		return
 	get_tree().reload_current_scene()
 
 
