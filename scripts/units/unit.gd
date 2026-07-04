@@ -50,6 +50,20 @@ var _mark_dex_bonus: int = 0
 var _mark_lck_bonus: int = 0
 var _mark_str_bonus: int = 0
 
+# ── 敌人词条（affix）系统 v0 —— 纯加法，无词条单位零影响 ─────────
+# 与「心眼」同构（spawn 后注入 → 缓存字段 → get_effective_stat/damage 读），不走 BuffEffect。
+# 无词条单位下列字段恒为初始值，行为/数值与引入前完全一致。
+# 挂载的词条定义（base + special 合并），每项为完整 affix 字典（含 id/type/params）。
+var _affixes: Array[Dictionary] = []
+# 数值增强系数（HP + 输出乘区）；1.0 = 无增强（无词条单位恒为 1.0）。
+var _affix_stat_scale: float = 1.0
+# 常驻平铺属性加值累积（normalized stat_key → 累积加值），供 get_effective_stat 叠加。
+var _affix_stat_flat: Dictionary = {}
+# 常驻百分比属性加值累积（normalized stat_key → 百分比），供 get_effective_stat 叠加。
+var _affix_stat_pct: Dictionary = {}
+# 伤害增强乘区（供 damage_calculator 读）；1.0 = 无增强（无词条单位恒为 1.0）。
+var affix_damage_mult: float = 1.0
+
 # ── 信号 ────────────────────────────────────────────
 signal damage_taken(amount: int, damage_type: String)
 signal unit_died
@@ -142,7 +156,12 @@ func take_damage(amount: int, damage_type: String = "physical") -> void:
 
 
 func heal(amount: int) -> void:
-	stats.heal(amount)
+	# 敌人词条 af_heal_resist（愈合迟滞）：受治疗量按 incoming_heal_pct 打折。
+	# 无词条单位 _affixes 为空 → final_amount == amount（零影响）。
+	var final_amount: int = amount
+	if not _affixes.is_empty():
+		final_amount = _apply_affix_heal_resist(amount)
+	stats.heal(final_amount)
 	_update_health_bar()
 
 
@@ -259,6 +278,12 @@ func get_effective_stat(stat_key: String) -> int:
 		effective_value += float(_mark_lck_bonus)
 	if normalized_key == "STR" and bool(marks.get("势", false)):
 		effective_value += float(_mark_str_bonus)
+	# ── 敌人词条常驻数值加成（无词条单位两 dict 均空 → 零影响）────────
+	if not _affix_stat_flat.is_empty():
+		effective_value += float(_affix_stat_flat.get(normalized_key, 0))
+	if not _affix_stat_pct.is_empty():
+		effective_value += float(base_value) \
+			* float(_affix_stat_pct.get(normalized_key, 0)) / 100.0
 	return roundi(effective_value)
 
 
@@ -732,3 +757,81 @@ func _apply_xinyan_passive() -> void:
 	if _xinyan_crit_per_qi <= 0:
 		return
 	crit_bonus = sword_qi * _xinyan_crit_per_qi
+
+
+# ── 敌人词条（affix）公开接口 ─────────────────────────
+# 挂载路径：spawn_unit(class_id,...) 之后由上层（BattleAssembler → 运行时）调用 apply_affixes。
+# 与「心眼」同构：数值类立即写入缓存，触发类（on_hit/on_kill/on_turn_start/on_counter/aura）
+# 保留在 _affixes 供 tactical_manager 按时机分发。纯加法：无词条单位不调用即零影响。
+
+## 注入词条。affix_ids: 基础词条 id 列表；special_affix_id: 特殊词条 id（可为 null/""）；
+## stat_scale: 数值增强系数（HP + 输出乘区，1.0=无增强）；affix_pool: id→定义（=DataLoader.affixes）。
+func apply_affixes(affix_ids: Array, special_affix_id: Variant,
+		stat_scale: float, affix_pool: Dictionary) -> void:
+	# 合并 base + special 的 id 列表（special 可能为 null / 空串）。
+	var all_ids: Array[String] = []
+	for aid_value: Variant in affix_ids:
+		all_ids.append(str(aid_value))
+	var special_id: String = ""
+	if special_affix_id != null:
+		special_id = str(special_affix_id)
+	if special_id != "":
+		all_ids.append(special_id)
+
+	# 逐 id 查定义并挂载；数值类立即结算，触发类留 _affixes。
+	for aid: String in all_ids:
+		var affix_def: Dictionary = affix_pool.get(aid, {})
+		if affix_def.is_empty():
+			push_warning("[Affix] 未找到词条定义（跳过）: " + aid)
+			continue
+		_affixes.append(affix_def)
+		var affix_type: String = str(affix_def.get("type", ""))
+		var params: Dictionary = affix_def.get("params", {})
+		match affix_type:
+			"stat_flat":
+				# 常驻平铺属性（须带 params.stat_key）；无 stat_key 的特化型不常驻。
+				if params.has("stat_key"):
+					var k_flat: String = _normalize_stat_key(str(params["stat_key"]))
+					_affix_stat_flat[k_flat] = float(_affix_stat_flat.get(k_flat, 0)) \
+						+ float(params.get("value", 0))
+			"stat_pct":
+				# 仅「常驻属性百分比」（带 stat_key）进入常驻叠加；
+				# 条件性(afs_frenzy)/特化(af_siege 对建筑) 无 stat_key → 留 _affixes 交
+				# damage_calculator / 时机分发处理，不常驻。
+				if params.has("stat_key"):
+					var k_pct: String = _normalize_stat_key(str(params["stat_key"]))
+					_affix_stat_pct[k_pct] = float(_affix_stat_pct.get(k_pct, 0)) \
+						+ float(params.get("value", 0))
+
+	# 数值增强系数（HP + 输出乘区）。
+	_affix_stat_scale = stat_scale
+	affix_damage_mult = stat_scale
+	if stat_scale != 1.0 and stats != null:
+		var base_max_hp: int = stats.max_hp
+		stats.max_hp = roundi(float(base_max_hp) * stat_scale)
+		stats.hp = stats.max_hp
+		_update_health_bar()
+
+
+## 是否携带指定词条。
+func has_affix(affix_id: String) -> bool:
+	for affix: Dictionary in _affixes:
+		if str(affix.get("id", "")) == affix_id:
+			return true
+	return false
+
+
+## 返回已挂载的词条定义列表（供 UI / 时机分发 / 门预告 / 测试读取）。
+func get_affixes() -> Array[Dictionary]:
+	return _affixes
+
+
+## af_heal_resist（愈合迟滞）：按 incoming_heal_pct 折算受治疗量。无该词条 → 原样返回。
+func _apply_affix_heal_resist(amount: int) -> int:
+	for affix: Dictionary in _affixes:
+		if str(affix.get("id", "")) != "af_heal_resist":
+			continue
+		var params: Dictionary = affix.get("params", {})
+		var pct: float = float(params.get("incoming_heal_pct", 0))
+		return maxi(0, roundi(float(amount) * (1.0 + pct / 100.0)))
+	return amount

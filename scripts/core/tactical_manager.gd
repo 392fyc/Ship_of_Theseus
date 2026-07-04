@@ -59,6 +59,15 @@ var debug_dummy_behavior: DummyBehavior = DummyBehavior.IDLE
 # 记录初始站位，供软重置回位（spawn 时填充）。
 var _debug_spawn_positions: Dictionary = {}
 
+# ── 敌人词条（affix）时机分发 —— 纯加法，无词条单位零影响 ─────────
+# v0 声明式占位词条 id（挂载但效果待后续时机 hook 实装；非静默，_notify 一次性提示）。
+# 说明：af_vanguard(on_turn_start) 由时机分发的占位分支覆盖，故不在此列表重复。
+const _AFFIX_V0_PLACEHOLDERS: Array[String] = ["af_zone_expand", "afs_bulwark", "af_siege"]
+# 占位提示去重（affix_id → 已提示），保证「未实装」显式可见但不刷屏。
+var _affix_placeholder_seen: Dictionary = {}
+# 已做过占位扫描的单位实例 id 集合（每单位仅扫描一次）。
+var _affix_swept_units: Dictionary = {}
+
 
 func _ready() -> void:
 	turn_manager.turn_started.connect(_on_turn_started)
@@ -317,6 +326,9 @@ func _on_turn_started(unit: Unit) -> void:
 		return
 	if not unit.stats.is_alive():
 		return
+	# 敌人词条：回合开始时机分发 + 一次性占位提示（纯加法：无词条 get_affixes() 空即 return）。
+	_apply_affixes(unit, "on_turn_start", {})
+	_notify_affix_placeholders(unit)
 	print("[TurnManager] Turn: %s (%s)" % [unit.unit_name, unit.faction])
 	if bool(turn_start_result.get("skip_turn", false)):
 		print("[Buff] %s skips turn due to control effect" % unit.unit_name)
@@ -1641,6 +1653,12 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 	# ── 剑圣资源：命中得气、击杀得气+减CD+得印记 ──────────
 	_apply_sword_qi_on_hit(attacker, result, action_data)
 
+	# ── 敌人词条：命中 / 击杀时机分发（纯加法，无词条 get_affixes() 空即 return）──
+	if result.hit:
+		_apply_affixes(attacker, "on_hit", {"defender": defender, "result": result})
+	if result.defender_died:
+		_apply_affixes(attacker, "on_kill", {"defender": defender, "result": result})
+
 	if result.defender_died:
 		return
 
@@ -1649,6 +1667,13 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 		var counter_data: Dictionary = _build_basic_attack_action_data(defender, attacker, {
 			"allow_counter": false,
 		})
+		# ── 敌人词条 af_counter_boost：反击伤害提升（真实生效 hook）──
+		# 无该词条时乘区==1.0 → 反击伤害与引入前一致。
+		var counter_boost: float = _affix_counter_multiplier(defender)
+		if counter_boost != 1.0:
+			counter_data["final_multiplier"] = \
+				float(counter_data.get("final_multiplier", 1.0)) * counter_boost
+			_apply_affixes(defender, "on_counter", {"target": attacker})
 		var counter_result: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(
 			defender, attacker, counter_data)
 		_log_attack(defender, attacker, counter_result, "Counterattack")
@@ -2381,6 +2406,87 @@ func _apply_sword_qi_on_hit(attacker: Unit,
 			attacker.skill_cooldowns[origin_skill_id] = new_cd
 		print("[SwordQi] %s %s CD %d→%d on kill" % [
 			attacker.unit_name, origin_skill_id, current_cd, new_cd])
+
+
+# ── 敌人词条时机分发器（触发类词条）──────────────────────
+# 纯加法：无词条单位 get_affixes() 为空 → 立即 return，正式战斗零影响。
+# 数值类词条（stat_scale/stat_flat/stat_pct 常驻/afs_frenzy/af_heal_resist/af_counter_boost）
+# 已在 unit.gd / damage_calculator.gd / 反击 hook 处生效；本分发器负责状态型触发时机
+# 与 v0 占位词条的显式提示（不静默）。
+
+## 时机分发：遍历 unit 的词条，type==timing 者执行效果。
+func _apply_affixes(unit: Unit, timing: String, context: Dictionary) -> void:
+	if unit == null:
+		return
+	var affixes: Array[Dictionary] = unit.get_affixes()
+	if affixes.is_empty():
+		return
+	for affix: Dictionary in affixes:
+		if str(affix.get("type", "")) != timing:
+			continue
+		_execute_affix_effect(unit, affix, context)
+
+
+## 单个词条效果执行。v0：占位词条走显式提示分支；已在别处生效的词条走 default（不重复执行）。
+func _execute_affix_effect(unit: Unit, affix: Dictionary, _context: Dictionary) -> void:
+	var affix_id: String = str(affix.get("id", ""))
+	match affix_id:
+		"af_vanguard":
+			# [占位] 首回合速度加成需回合序号 hook（首回合判定）；v0 未实装。
+			_affix_placeholder_notice(affix_id, "首回合速度加成待回合序号 hook")
+		"af_zone_expand":
+			# [占位] 控制区（ZOC）扩域需 ZOC 计算 hook；v0 未实装。
+			_affix_placeholder_notice(affix_id, "ZOC 扩域待 ZOC 计算 hook")
+		"afs_bulwark":
+			# [占位] 己方减伤光环需范围伤害 hook；v0 未实装。
+			_affix_placeholder_notice(affix_id, "己方减伤光环待范围伤害 hook")
+		"af_siege":
+			# [占位] 攻城对建筑增伤需建筑伤害 hook；v0 未实装。
+			_affix_placeholder_notice(affix_id, "攻城对建筑增伤待建筑伤害 hook")
+		_:
+			# 已在别处真实生效（af_heal_resist→heal()/afs_frenzy→damage_calc/
+			# af_counter_boost→反击 hook/stat_flat·stat_pct 常驻→get_effective_stat）
+			# 或未知词条 → 分发器不重复执行。
+			pass
+
+
+## af_counter_boost（反击强化）：返回反击伤害乘区。无该词条 → 1.0。
+func _affix_counter_multiplier(unit: Unit) -> float:
+	if unit == null:
+		return 1.0
+	var mult: float = 1.0
+	for affix: Dictionary in unit.get_affixes():
+		if str(affix.get("id", "")) != "af_counter_boost":
+			continue
+		var params: Dictionary = affix.get("params", {})
+		mult *= (1.0 + float(params.get("damage_pct", 0)) / 100.0)
+	return mult
+
+
+## 一次性提示单位携带的 v0 占位词条（挂载但效果待后续实装；非静默）。每单位仅扫描一次。
+func _notify_affix_placeholders(unit: Unit) -> void:
+	if unit == null:
+		return
+	var affixes: Array[Dictionary] = unit.get_affixes()
+	if affixes.is_empty():
+		return
+	var uid: int = unit.get_instance_id()
+	if bool(_affix_swept_units.get(uid, false)):
+		return
+	_affix_swept_units[uid] = true
+	for affix: Dictionary in affixes:
+		var affix_id: String = str(affix.get("id", ""))
+		if affix_id in _AFFIX_V0_PLACEHOLDERS:
+			_affix_placeholder_notice(affix_id, "v0 声明式占位，效果待后续时机 hook 实装")
+
+
+## 占位提示去重打印（push_warning + print，一 affix 仅提示一次）。
+func _affix_placeholder_notice(affix_id: String, reason: String) -> void:
+	if bool(_affix_placeholder_seen.get(affix_id, false)):
+		return
+	_affix_placeholder_seen[affix_id] = true
+	push_warning("[Affix][占位] %s 未实装：%s" % [affix_id, reason])
+	print("[Affix][占位] %s 未实装：%s" % [affix_id, reason])
 
 
 # ── 调试 harness 公开 API（测试场景调用，正式战斗不触达）────────────

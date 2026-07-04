@@ -84,6 +84,10 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 
 	final_dmg *= relic_multiplier * final_multiplier
 
+	# ── 敌人词条输出乘区（具名，独立于 relic/final）─────
+	# 无词条攻击方 affix_multiplier==1.0 → 伤害与引入词条前完全一致（回归零变化）。
+	final_dmg *= _affix_attack_multiplier(attacker)
+
 	# ── 区域溅射衰减（如拔刀 splash_damage_pct）──────────
 	# area_damage_multiplier 默认 1.0（向后兼容），溅射目标由调用方设为 0.5 等。
 	final_dmg *= float(action_data.get("area_damage_multiplier", 1.0))
@@ -135,6 +139,8 @@ static func preview_attack(attacker: Unit, defender: Unit,
 		terrain_def_bonus, terrain_res_bonus)
 	var final_damage: float = base_damage * skill_multiplier * terrain_multiplier
 	final_damage *= relic_multiplier * final_multiplier
+	# 敌人词条输出乘区（与 resolve_attack 一致，保证 forecast == 实际伤害）。
+	final_damage *= _affix_attack_multiplier(attacker)
 	# 区域溅射衰减（与 resolve_attack 一致，保证 forecast == 实际伤害）。
 	final_damage *= float(action_data.get("area_damage_multiplier", 1.0))
 
@@ -194,3 +200,24 @@ static func _calc_base_damage(attacker: Unit, defender: Unit,
 			var weaker_def: float = float(mini(defender_def, defender_res))
 			base = both_atk + float(weapon_might) - weaker_def
 	return maxf(1.0, base)
+
+
+## 敌人词条输出乘区：攻击方 stat_scale 增强（affix_damage_mult）× 条件触发词条。
+## 无词条攻击方 affix_damage_mult==1.0 且 _affixes 空 → 返回 1.0（回归零变化）。
+## v0 条件触发示范：afs_frenzy（低血增伤）——攻击方 hp/max_hp < 阈值时额外增伤。
+static func _affix_attack_multiplier(attacker: Unit) -> float:
+	if attacker == null:
+		return 1.0
+	var mult: float = attacker.affix_damage_mult
+	for affix: Dictionary in attacker.get_affixes():
+		if str(affix.get("id", "")) != "afs_frenzy":
+			continue
+		var params: Dictionary = affix.get("params", {})
+		var threshold_pct: float = float(params.get("low_hp_threshold_pct", 0))
+		var bonus_pct: float = float(params.get("damage_bonus_pct", 0))
+		if attacker.stats != null and attacker.stats.max_hp > 0:
+			var hp_ratio_pct: float = float(attacker.stats.hp) \
+				/ float(attacker.stats.max_hp) * 100.0
+			if hp_ratio_pct < threshold_pct:
+				mult *= (1.0 + bonus_pct / 100.0)
+	return mult
