@@ -55,6 +55,7 @@ var _mark_str_bonus: int = 0
 # 无词条单位下列字段恒为初始值，行为/数值与引入前完全一致。
 # 挂载的词条定义（base + special 合并），每项为完整 affix 字典（含 id/type/params）。
 var _affixes: Array[Dictionary] = []
+var _affixes_applied: bool = false  # 幂等守卫：apply_affixes 每单位仅注入一次
 # 数值增强系数（HP + 输出乘区）；1.0 = 无增强（无词条单位恒为 1.0）。
 var _affix_stat_scale: float = 1.0
 # 常驻平铺属性加值累积（normalized stat_key → 累积加值），供 get_effective_stat 叠加。
@@ -768,6 +769,12 @@ func _apply_xinyan_passive() -> void:
 ## stat_scale: 数值增强系数（HP + 输出乘区，1.0=无增强）；affix_pool: id→定义（=DataLoader.affixes）。
 func apply_affixes(affix_ids: Array, special_affix_id: Variant,
 		stat_scale: float, affix_pool: Dictionary) -> void:
+	# 幂等守卫：每单位仅注入一次（spawn 后注入契约）。已挂载词条则忽略重复调用，
+	# 防 HP 累乘 / 属性重复叠加（词条数值增强单位 _affixes 必非空）。
+	if _affixes_applied:
+		push_warning("[Affix] apply_affixes 重复调用已忽略（每单位仅注入一次）")
+		return
+	_affixes_applied = true
 	# 合并 base + special 的 id 列表（special 可能为 null / 空串）。
 	var all_ids: Array[String] = []
 	for aid_value: Variant in affix_ids:

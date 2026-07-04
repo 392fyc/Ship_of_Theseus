@@ -43,6 +43,8 @@ func _run() -> void:
 	_test_damage_mult(dl)
 	_test_assembler(dl, ba)
 	_test_regression_zero_impact(dl)
+	_test_idempotent(dl)
+	_test_heal_resist(dl)
 
 	dl.free()
 	print("\n--- 结果：%d 过 / %d 失败 ---" % [_pass, _fail])
@@ -78,6 +80,42 @@ func _make_unit(class_data: Dictionary) -> Unit:
 	root.add_child(u)
 	u.setup(class_data)
 	return u
+
+
+# ── 8. 幂等守卫：apply_affixes 每单位仅注入一次（防重复累乘/累加）──
+
+func _test_idempotent(dl: Object) -> void:
+	print("\n[8] 幂等守卫（apply_affixes 仅注入一次）")
+	var u: Unit = _make_unit(dl.enemies["goblin_melee"])
+	u.apply_affixes(["af_counter_boost"], null, 1.5, dl.affixes)
+	var after_first_hp: int = u.stats.max_hp
+	var after_first_count: int = u.get_affixes().size()
+	# 重复调用（不同参数）应被幂等守卫忽略
+	u.apply_affixes(["af_counter_boost", "af_vanguard"], "afs_bulwark", 2.0, dl.affixes)
+	_eq("重复 apply_affixes → max_hp 不再累乘（仍==首次）", u.stats.max_hp, after_first_hp)
+	_eq("重复 apply_affixes → _affixes 不重复累加", u.get_affixes().size(), after_first_count)
+	_feq("重复 apply_affixes → affix_damage_mult 不变(1.5)", u.affix_damage_mult, 1.5)
+	u.free()
+
+
+# ── 9. af_heal_resist：受治疗折损（存疑B 补真实生效词条护栏）──
+
+func _test_heal_resist(dl: Object) -> void:
+	print("\n[9] af_heal_resist 受治疗折损")
+	# 无词条对照：正常全额回血
+	var plain: Unit = _make_unit(dl.enemies["goblin_melee"])
+	plain.stats.hp = plain.stats.max_hp - 40
+	plain.heal(40)
+	_eq("无词条 → heal(40) 全额回满", plain.stats.hp, plain.stats.max_hp)
+	plain.free()
+	# 带 af_heal_resist(incoming_heal_pct=-50) → 回血减半
+	var u: Unit = _make_unit(dl.enemies["goblin_melee"])
+	u.apply_affixes(["af_heal_resist"], null, 1.0, dl.affixes)
+	var target_hp: int = u.stats.max_hp - 40
+	u.stats.hp = target_hp
+	u.heal(40)
+	_eq("af_heal_resist → heal(40) 只回 20（-50%）", u.stats.hp, target_hp + 20)
+	u.free()
 
 
 # ── 1. 挂载：apply_affixes 后 has_affix / _affixes / special 并入 ──
