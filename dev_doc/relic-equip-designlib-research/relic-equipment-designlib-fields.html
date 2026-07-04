@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>遗物/装备加入 SoT 设计库 — 字段规格研究</title>
+<style>
+  :root {
+    /* 基础暗主题（沿用 architecture-consensus-v2 同族） */
+    --bg: #16161c;
+    --surface: #1f1f28;
+    --surface-2: #2a2a36;
+    --surface-3: #20202a;
+    --text: #e8e8ec;
+    --muted: #8a8a96;
+    --border: #3a3a48;
+
+    /* 配色轴一：层（字段属于哪一层） */
+    --narr: #3fae9f;     /* 叙述层 青绿 */
+    --engine: #9a7fc8;   /* 引擎镜像层 紫 */
+    --derived: #6d8bb0;  /* 派生列 灰蓝 */
+    --meta: #8a8a96;     /* 元数据 灰 */
+    --status: #c8894a;   /* 状态 橙棕 */
+
+    /* 配色轴二：三态 badge */
+    --ts-done: #5fa869;  /* [已定] 绿 */
+    --ts-prop: #4a7fb8;  /* [提案] 蓝 */
+    --ts-ph: #a08a6a;    /* [占位] 橙灰 */
+
+    /* 配色轴三：数据流归属 */
+    --attr-godot: #c05a4a;  /* Godot权威→镜像（只读·锁·红调） */
+    --attr-edit: #5fa869;   /* 设计库可编辑（绿调） */
+    --attr-derive: #6d8bb0; /* 设计库自动派生（灰调） */
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    margin: 0;
+    padding: 30px 16px 60px;
+    line-height: 1.55;
+  }
+  main { max-width: 1080px; margin: 0 auto; }
+
+  header { border-bottom: 1px solid var(--border); padding-bottom: 18px; margin-bottom: 24px; }
+  header h1 { margin: 0 0 8px; font-size: 23px; font-weight: 600; letter-spacing: 0.2px; }
+  header .lead { color: #cdd0d8; font-size: 14px; margin: 4px 0 10px; max-width: 900px; }
+  header .meta { color: var(--muted); font-size: 12.5px; margin: 0; }
+  header .meta code { font-size: 12px; }
+
+  section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+            padding: 20px 24px; margin-bottom: 18px; }
+  h2 { margin: 0 0 14px; font-size: 17px; font-weight: 600; color: #f0f0f4;
+       display: flex; align-items: center; gap: 8px; }
+  h2 .sec-tag { font-size: 12px; color: var(--muted); font-weight: 400; }
+  h3 { margin: 18px 0 8px; font-size: 14px; font-weight: 600; color: #d8d8e0; }
+  h3.star::before { content: "★ "; color: #d4af37; }
+  p, li { font-size: 13.5px; }
+  .muted { color: var(--muted); }
+  .fs-sm { font-size: 12.5px; }
+  code { background: var(--surface-2); padding: 1px 6px; border-radius: 3px; font-size: 12.5px;
+         color: #d4af90; font-family: "Cascadia Code", "Consolas", monospace; }
+  .warn-mark { color: #d98a4a; font-weight: 600; }
+
+  /* 表格 + 响应式横向滚动容器 */
+  .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 8px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.8px; }
+  table.wide { min-width: 860px; }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.5px;
+       position: sticky; top: 0; background: var(--surface); }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  td code { font-size: 11.5px; }
+
+  /* 层左边框（配色轴一） */
+  tr.row-narr    > td:first-child { border-left: 3px solid var(--narr); }
+  tr.row-engine  > td:first-child { border-left: 3px solid var(--engine); }
+  tr.row-derived > td:first-child { border-left: 3px solid var(--derived); }
+  tr.row-meta    > td:first-child { border-left: 3px solid var(--meta); }
+  tr.row-status  > td:first-child { border-left: 3px solid var(--status); }
+
+  /* 层 chip（配色轴一） */
+  .chip { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px;
+          border: 1px solid; white-space: nowrap; line-height: 1.4; }
+  .chip.narr    { color: #5fd0c0; border-color: var(--narr);    background: rgba(63,174,159,0.12); }
+  .chip.engine  { color: #b79fe0; border-color: var(--engine);  background: rgba(154,127,200,0.12); }
+  .chip.derived { color: #9fb6d8; border-color: var(--derived); background: rgba(109,139,176,0.12); }
+  .chip.meta    { color: #b2b2bc; border-color: var(--meta);    background: rgba(138,138,150,0.12); }
+  .chip.status  { color: #dba86a; border-color: var(--status);  background: rgba(200,137,74,0.12); }
+
+  /* 三态 badge（配色轴二） */
+  .badge { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 600;
+           border: 1px solid; white-space: nowrap; margin: 1px 0; }
+  .badge.done { color: #7fc98a; border-color: var(--ts-done); background: rgba(95,168,105,0.16); }
+  .badge.prop { color: #7fa8d8; border-color: var(--ts-prop); background: rgba(74,127,184,0.16); }
+  .badge.ph   { color: #c8a878; border-color: var(--ts-ph);   background: rgba(160,138,106,0.18); }
+  .badge.gap  { color: #a8a8b2; border-color: #6a6a76; background: rgba(138,138,150,0.14); }
+  .badge.conf { color: #d98a7a; border-color: #c05a4a; background: rgba(192,90,74,0.16); }
+  .badge.park { color: #a89fc8; border-color: #7a6aa8; background: rgba(122,106,168,0.16); }
+
+  /* 数据流归属 chip（配色轴三） */
+  .attr { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 10px;
+          font-size: 11px; border: 1px solid; white-space: nowrap; line-height: 1.4; }
+  .attr.godot  { color: #e0937f; border-color: var(--attr-godot);  background: rgba(192,90,74,0.13); }
+  .attr.edit   { color: #7fc98a; border-color: var(--attr-edit);   background: rgba(95,168,105,0.13); }
+  .attr.derive { color: #9fb0c8; border-color: var(--attr-derive); background: rgba(109,139,176,0.13); }
+  .ic { width: 12px; height: 12px; flex: none; }
+
+  /* 图例（三配色轴） */
+  .legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 6px; }
+  .legend-group { background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; }
+  .legend-group .lg-title { font-size: 12px; font-weight: 600; color: #d8d8e0; margin-bottom: 8px; }
+  .legend-group .lg-title small { color: var(--muted); font-weight: 400; }
+  .legend-items { display: flex; flex-wrap: wrap; gap: 6px 8px; }
+
+  /* callout */
+  .callout { border-left: 3px solid; padding: 12px 15px; border-radius: 0 6px 6px 0; margin: 14px 0; font-size: 13px; }
+  .callout.key  { background: rgba(154,127,200,0.09); border-color: var(--engine); }
+  .callout.key b { color: #b79fe0; }
+  .callout.warn { background: rgba(200,137,74,0.09); border-color: var(--status); }
+  .callout.warn b { color: #dba86a; }
+  .callout.ok   { background: rgba(95,168,105,0.08); border-color: var(--ts-done); }
+  .callout.ok b { color: #7fc98a; }
+
+  /* 三层承载模式卡片 */
+  .tier-card { border-left: 4px solid; background: var(--surface-2); padding: 12px 16px; border-radius: 4px;
+               margin-bottom: 8px; display: grid; grid-template-columns: 150px 1fr; gap: 14px; align-items: start; }
+  .tier-card.t-narr   { border-color: var(--narr); }
+  .tier-card.t-engine { border-color: var(--engine); }
+  .tier-card.t-derived{ border-color: var(--derived); }
+  .tier-card .t-id { font-weight: 600; font-size: 14px; }
+  .tier-card.t-narr    .t-id { color: #5fd0c0; }
+  .tier-card.t-engine  .t-id { color: #b79fe0; }
+  .tier-card.t-derived .t-id { color: #9fb6d8; }
+  .tier-card .t-id small { display: block; color: var(--muted); font-size: 11px; font-weight: 400; margin-top: 3px; }
+  .tier-card .t-body { font-size: 12.8px; color: #c8c8d2; }
+  .tier-card .t-body code { font-size: 11.5px; }
+
+  /* 数据流 SVG 容器 */
+  .svg-wrap { overflow-x: auto; }
+  .svg-wrap svg { display: block; margin: 6px auto; min-width: 640px; }
+  .flow-notes { list-style: none; padding: 0; margin: 12px 0 0; }
+  .flow-notes li { position: relative; padding-left: 20px; margin-bottom: 6px; font-size: 12.8px; color: #cdd0d8; }
+  .flow-notes li::before { content: "★"; position: absolute; left: 0; color: #d4af37; }
+
+  /* 代码框（schema） */
+  pre.code { background: #14141a; border: 1px solid #2f2f3a; border-radius: 6px; padding: 14px 16px;
+             overflow-x: auto; font-family: "Cascadia Code", "Consolas", "SF Mono", monospace;
+             font-size: 12px; line-height: 1.55; color: #cdb894; margin: 8px 0; }
+  pre.code .cmt { color: #6f8f7a; font-style: italic; }
+  pre.code .key { color: #8fbce0; }
+  pre.code .pun { color: #7f7f8a; }
+
+  /* 裁决问题卡片 */
+  .q-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  .q-card { background: var(--surface-3); border: 1px solid var(--border); border-left: 4px solid var(--status);
+            border-radius: 6px; padding: 14px 16px; }
+  .q-head { display: flex; gap: 10px; align-items: baseline; margin-bottom: 8px; flex-wrap: wrap; }
+  .q-num { background: var(--status); color: #16161c; font-weight: 700; font-size: 12px; border-radius: 5px;
+           padding: 2px 9px; flex: none; }
+  .q-title { font-weight: 600; font-size: 13.5px; color: #f0e0d0; }
+  .q-q { font-size: 13px; color: #d0d0da; margin: 0 0 8px; }
+  .q-rec { background: rgba(95,168,105,0.08); border-left: 3px solid var(--ts-done); padding: 8px 12px;
+           border-radius: 0 4px 4px 0; font-size: 12.5px; color: #cdd0d8; }
+  .q-rec b { color: #7fc98a; }
+
+  /* 折叠占位清单 */
+  details { background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 4px 16px; }
+  details summary { cursor: pointer; font-size: 13.5px; font-weight: 600; color: #d8d8e0; padding: 8px 0; }
+  details[open] summary { border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+  details ul { margin: 4px 0 12px; padding-left: 20px; }
+  details li { margin-bottom: 6px; font-size: 12.6px; color: #c8c8d2; }
+
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 30px;
+           border-top: 1px solid var(--border); padding-top: 16px; }
+  footer a { color: #a8c0e0; }
+  footer .fm { margin: 4px 0; }
+
+  @media (max-width: 620px) {
+    .tier-card { grid-template-columns: 1fr; gap: 6px; }
+    section { padding: 16px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 一次性图标定义（数据流归属轴），供 <use> 复用，保持 self-contained -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="ic-lock" viewBox="0 0 16 16">
+      <path d="M5 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <rect x="3.4" y="7" width="9.2" height="6.6" rx="1.3" fill="currentColor"/>
+      <circle cx="8" cy="9.8" r="1" fill="#16161c"/>
+    </symbol>
+    <symbol id="ic-edit" viewBox="0 0 16 16">
+      <path d="M10.5 2.6l2.9 2.9-7.4 7.4-3.4 0.5 0.5-3.4z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+      <path d="M9.6 3.5l2.9 2.9" stroke="currentColor" stroke-width="1.3"/>
+    </symbol>
+    <symbol id="ic-derive" viewBox="0 0 16 16">
+      <circle cx="3.8" cy="8" r="1.7" fill="currentColor"/>
+      <circle cx="12.2" cy="3.8" r="1.5" fill="currentColor"/>
+      <circle cx="12.2" cy="12.2" r="1.5" fill="currentColor"/>
+      <path d="M5.3 7.1l5.4-2.6M5.3 8.9l5.4 2.6" stroke="currentColor" stroke-width="1.2" fill="none"/>
+    </symbol>
+  </defs>
+</svg>
+
+<main>
+
+<header>
+  <h1>遗物 / 装备加入 SoT 设计库 — 字段规格研究</h1>
+  <p class="lead">
+    遗物（Relic）与装备（Equipment）可照设计库现有 Skill / Talent 的承载模式加入：
+    <b>叙述层字段</b>（名 / 描述 / 稀有度标注 / 生效时机 / 标签）在设计库直接维护；
+    <b>引擎数值层 <code>engine_json</code></b> 照 <b>Talent 的只读镜像模式</b>（Godot 权威 → Mercury 回填，设计库不手编）。
+    字段清单、jsonschema 草图、软件改动面已给出；<b>9 个结构级冲突需用户裁决</b>。
+  </p>
+  <p class="meta">
+    SoT main（研究 + 字段结论）→ 交 Mercury（设计库软件实装）·
+    2026-07-05 · <span class="badge gap">research_deliverable</span>
+    权威边界：结构级裁决属用户 / 软件实装属 Mercury / 本文不写 KB 正式规格、不改设计库代码、不手编 <code>engine_json</code>
+  </p>
+</header>
+
+<!-- ============ 图例：三套配色轴 ============ -->
+<section id="legend">
+  <h2>配色图例 <span class="sec-tag">三套配色轴贯穿全文</span></h2>
+  <div class="legend">
+
+    <div class="legend-group">
+      <div class="lg-title">配色轴一 · 「层」 <small>字段属于哪一层（行左边框 + chip）</small></div>
+      <div class="legend-items">
+        <span class="chip narr">叙述层</span>
+        <span class="chip engine">引擎镜像层</span>
+        <span class="chip derived">派生列</span>
+        <span class="chip meta">元数据</span>
+        <span class="chip status">状态</span>
+      </div>
+    </div>
+
+    <div class="legend-group">
+      <div class="lg-title">配色轴二 · 「三态」 <small>KB 真源成熟度（小徽章）</small></div>
+      <div class="legend-items">
+        <span class="badge done">已定</span>
+        <span class="badge prop">提案</span>
+        <span class="badge ph">占位</span>
+        <span class="badge gap">缺口</span>
+        <span class="badge conf">冲突</span>
+        <span class="badge park">park 候选</span>
+      </div>
+      <p class="fs-sm muted" style="margin:8px 0 0;">
+        <b>已定</b>=KB 正本/用户裁决 · <b>提案</b>=方向建议待确认 · <b>占位</b>=数字纯填坑随时可换 ·（缺口/冲突/park 为补充状态标记）
+      </p>
+    </div>
+
+    <div class="legend-group">
+      <div class="lg-title">配色轴三 · 「数据流归属」 <small>谁能写这个字段</small></div>
+      <div class="legend-items">
+        <span class="attr godot"><svg class="ic"><use href="#ic-lock"/></svg>Godot权威→镜像</span>
+        <span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>设计库可编辑</span>
+        <span class="attr derive"><svg class="ic"><use href="#ic-derive"/></svg>设计库自动派生</span>
+      </div>
+      <p class="fs-sm muted" style="margin:8px 0 0;">
+        锁形红调=引擎数值只读镜像（设计库不手编）· 绿调=叙述层 CRUD · 灰调=派生列/时间戳自动生成
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ §0 边界 ============ -->
+<section id="boundary">
+  <h2>本研究的边界 <span class="sec-tag">§0 · 务必先读</span></h2>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th style="width:170px;">谁做什么</th><th>内容</th></tr></thead>
+      <tbody>
+        <tr><td><b>本研究（SoT main）做</b></td><td>回 KB 真源核对 + 读设计库/引擎代码 + 业界做法研究 → 产出字段规格 + 数据流结论 + 软件改动面参考</td></tr>
+        <tr><td><b>本研究不做</b></td><td>不改设计库代码（软件实装归 Mercury）；不写 KB 正式规格（<code>relics-system.md</code> / <code>equipment.md</code> 属设计裁决，需用户先拍板）；不手编设计库 <code>engine_json</code></td></tr>
+        <tr><td><span class="badge conf">用户裁决</span></td><td>第 10 节的 9 个结构级冲突</td></tr>
+        <tr><td><span class="attr edit" style="border:none;background:none;padding:0;">Mercury 实装</span></td><td>第 9 节的设计库软件改动（建表 / 枚举 / API / 校验 / 模板 / 回填配置）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ §1 三层承载模式 + 关键发现 ============ -->
+<section id="carrier">
+  <h2>设计库三层承载模式 <span class="sec-tag">§1 · 遗物/装备的参照模板</span></h2>
+  <p class="fs-sm">
+    设计库（<code>SoT-fyc-space</code>，FastAPI + SQLModel + SQLite）现有 7 实体：职业 / 标签 / 技能 / 天赋 / 规则 / 术语 / 评论。
+    <b>遗物、装备都不在其中</b>——这正是要新增的。Skill / Talent 的承载模式分三层：
+  </p>
+
+  <div class="tier-card t-narr">
+    <div class="t-id">叙述层 <small><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>设计库可编辑</span></small></div>
+    <div class="t-body">
+      <code>name</code> / <code>description</code> / <code>damage_type</code>(中文枚举) / <code>rarity</code> /
+      <code>trigger</code>(生效时机) / <code>effect</code> / <code>notes</code> / <code>tags</code>
+      —— 设计描述，走 CRUD 表单直接改（写门 <code>require_token</code>）。
+    </div>
+  </div>
+  <div class="tier-card t-engine">
+    <div class="t-id">引擎镜像层 <small><span class="attr godot"><svg class="ic"><use href="#ic-lock"/></svg>Godot权威→镜像</span></small></div>
+    <div class="t-body">
+      <code>engine_json</code>（完整 Godot 数值块 JSON 文本）—— 引擎数值，独立 taxonomy（英文枚举 + 职业专属字段），jsonschema 校验。
+    </div>
+  </div>
+  <div class="tier-card t-derived">
+    <div class="t-id">派生 / 元数据 / 状态 <small><span class="attr derive"><svg class="ic"><use href="#ic-derive"/></svg>设计库自动派生</span></small></div>
+    <div class="t-body">
+      <code>eng_*</code> 12 列 / <code>updated_at</code> / <code>status</code> / <code>shelf_state</code> / <code>trashed_at</code>
+      —— 派生列从 <code>engine_json</code> 自动拍平，供 SQL 查询/排序/离群初筛。
+    </div>
+  </div>
+
+  <h3 class="star">关键发现：Skill 与 Talent 的 engine_json 模式不同</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>实体</th><th>engine_json 可否库内手编</th><th>是否进写模型</th><th>校验</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>Skill</b></td>
+          <td><b>可手编</b>（<code>skills.html</code> textarea + <code>POST/PATCH</code>）</td>
+          <td>进 <code>SkillIn/SkillPatch</code></td>
+          <td>写路径过 <code>GODOT_SKILL_SCHEMA</code> 校验（HTTP 400 拒非法）</td>
+        </tr>
+        <tr>
+          <td><b>Talent</b></td>
+          <td><b>只读</b>（<code>talent_detail.html</code> 灰框展示「数值由 Godot 回填」）</td>
+          <td><b>刻意不进</b> <code>TalentIn/TalentPatch</code></td>
+          <td>格式未冻结 → DEFER 原样保存不校验</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout key">
+    <b>★ 结论</b>：遗物 / 装备应照 <b>Talent 的只读模式</b>（守数据流纪律「设计库不手编 engine_json」），<b>不照</b> Skill 的可手编模式。
+    Talent 的做法就是本研究声明的「只读镜像」纪律的正确范本。
+  </div>
+
+  <h3>engine_json 机制（4 个环节）</h3>
+  <ol class="fs-sm" style="padding-left:20px; margin:4px 0;">
+    <li><b>校验</b>：<code>app/validation/godot_export.py</code> 的 <code>GODOT_SKILL_SCHEMA</code>（jsonschema Draft 2020-12）。必填 10 字段 + 核心枚举严格（catch 拼写）+ 顶层 <code>additionalProperties</code> 限标量（容职业专属字段 <code>qi_cost</code>/<code>mark_cost</code> 等）。fail-closed。</li>
+    <li><b>派生列</b>：<code>derive_engine_columns()</code> 把通用标量字段拍平成 12 个 <code>eng_*</code> 列，安全降级不抛异常；数组（effects/tags）与职业专属字段不拍平、仍留 <code>engine_json</code>（避免 20+ 脆弱列）。</li>
+    <li><b>导出</b>：<code>GET /api/export/godot</code> 三分区（合法 skills / 空 skipped / 非法 errors），fail-closed 不喂脏数据给引擎。</li>
+    <li><b>回填</b>：<code>scripts/backfill_engine.py</code>，<b>配置驱动</b>、两段分离——
+      <code>snapshot</code>（仅开发机，有 Godot 仓）：读 Godot <code>data/skills/*.json</code> → 逐块校验 → 写镜像 <code>seed/engine_mirror.json</code>；
+      <code>apply</code>（NAS/本地均可，只读镜像文件）：对每个设计库行 <b>update-only</b> 幂等灌 <code>engine_json</code> + 派生列（覆盖 stale、行缺失只报告不新建、非法块跳过）。
+      <code>CLASS_MAP</code>（<code>swordsman→kensei</code>）是「Godot 扁平花名册 ↔ 设计库演化体系」的桥。</li>
+  </ol>
+</section>
+
+<!-- ============ §8 数据流 SVG（核心图） ============ -->
+<section id="dataflow">
+  <h2>数据流：单向回填闭环 <span class="sec-tag">§8 · 核心图</span></h2>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 720 660" width="100%" style="max-width:720px;" role="img"
+         aria-label="Godot 权威源经 snapshot 校验成镜像快照，再经 apply 幂等灌入设计库；设计库内 engine_json 为只读镜像、叙述层为可编辑，无写回 Godot 路径">
+      <defs>
+        <marker id="ah" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#c05a4a"/>
+        </marker>
+      </defs>
+
+      <!-- 无写回：左侧虚线括号 + ✕ -->
+      <path d="M120 430 L58 430 L58 78 L170 78" fill="none" stroke="#c05a4a" stroke-width="1.4"
+            stroke-dasharray="5 4" opacity="0.55"/>
+      <path d="M53 249 l10 10 M63 249 l-10 10" stroke="#c05a4a" stroke-width="2"/>
+      <text transform="translate(45,300) rotate(-90)" text-anchor="middle" fill="#d98a7a" font-size="10.5" font-weight="600">
+        ✕ 无「设计库→Godot」写回 · 闭环单向
+      </text>
+
+      <!-- Box 1: Godot 权威源 -->
+      <rect x="170" y="20" width="340" height="98" rx="8" fill="#2a2a36" stroke="#c05a4a" stroke-width="2"/>
+      <text x="340" y="44" text-anchor="middle" fill="#e0937f" font-size="14" font-weight="700">Godot 仓 · 单一权威源</text>
+      <text x="340" y="64" text-anchor="middle" fill="#c8c8d2" font-size="11.5" font-family="Consolas,monospace">data/relics/*.json + data/equipment/*.json</text>
+      <text x="340" y="83" text-anchor="middle" fill="#8a8a96" font-size="10.5">effects / stats / slot / tier / rarity /</text>
+      <text x="340" y="99" text-anchor="middle" fill="#8a8a96" font-size="10.5">slot_cost / category / is_passive 全由引擎权威定</text>
+
+      <!-- Arrow ① -->
+      <line x1="340" y1="118" x2="340" y2="182" stroke="#c05a4a" stroke-width="2" marker-end="url(#ah)"/>
+      <text x="524" y="132" fill="#e0937f" font-size="12" font-weight="700">① snapshot</text>
+      <text x="524" y="148" fill="#a8a8b2" font-size="10.5">仅开发机 · 有 Godot 仓</text>
+      <text x="524" y="164" fill="#a8a8b2" font-size="10.5">逐块 SCHEMA 校验</text>
+      <text x="524" y="180" fill="#8a8a96" font-size="10.5">（fail-closed）</text>
+
+      <!-- Box 2: 镜像快照 -->
+      <rect x="170" y="184" width="340" height="58" rx="8" fill="#241d24" stroke="#c05a4a" stroke-width="2" stroke-dasharray="5 4"/>
+      <text x="340" y="207" text-anchor="middle" fill="#c8c8d2" font-size="11.5" font-family="Consolas,monospace">seed/relic_mirror.json + equipment_mirror.json</text>
+      <text x="340" y="227" text-anchor="middle" fill="#8a8a96" font-size="10.5">随仓分发的只读镜像快照</text>
+
+      <!-- Arrow ② -->
+      <line x1="340" y1="242" x2="340" y2="306" stroke="#c05a4a" stroke-width="2" marker-end="url(#ah)"/>
+      <text x="524" y="258" fill="#e0937f" font-size="12" font-weight="700">② apply</text>
+      <text x="524" y="274" fill="#a8a8b2" font-size="10.5">NAS/本地均可 · 无需仓</text>
+      <text x="524" y="290" fill="#a8a8b2" font-size="10.5">update-only 幂等灌</text>
+      <text x="524" y="306" fill="#a8a8b2" font-size="10.5">engine_json + eng_*</text>
+
+      <!-- Box 3: 设计库表 -->
+      <rect x="120" y="316" width="440" height="300" rx="8" fill="#1f1f28" stroke="#3a3a48" stroke-width="1.5"/>
+      <text x="340" y="340" text-anchor="middle" fill="#f0f0f4" font-size="14" font-weight="700">设计库 · relic 表 / equipment 表</text>
+
+      <!-- Sub A: engine_json 只读镜像 -->
+      <rect x="142" y="358" width="196" height="238" rx="6" fill="#241d24" stroke="#c05a4a" stroke-width="1.5"/>
+      <use href="#ic-lock" x="185" y="374" width="18" height="18" style="color:#c05a4a"/>
+      <text x="252" y="388" fill="#e0937f" font-size="12.5" font-weight="700" font-family="Consolas,monospace">engine_json</text>
+      <text x="240" y="414" text-anchor="middle" fill="#d98a7a" font-size="12" font-weight="600">只读镜像</text>
+      <text x="240" y="438" text-anchor="middle" fill="#a8a8b2" font-size="10.5">照 Talent · 不进写模型</text>
+      <text x="240" y="454" text-anchor="middle" fill="#a8a8b2" font-size="10.5">（不进 RelicIn/RelicPatch）</text>
+      <text x="240" y="478" text-anchor="middle" fill="#e0937f" font-size="11" font-weight="600">★ 本方不手编</text>
+      <line x1="160" y1="498" x2="320" y2="498" stroke="#3a3a48" stroke-width="1" stroke-dasharray="3 3"/>
+      <use href="#ic-derive" x="176" y="514" width="14" height="14" style="color:#9fb0c8"/>
+      <text x="248" y="525" text-anchor="middle" fill="#9fb0c8" font-size="10.5">+ eng_* 派生列</text>
+      <text x="240" y="542" text-anchor="middle" fill="#8a8a96" font-size="10">（自动派生 · 灰）</text>
+      <text x="240" y="568" text-anchor="middle" fill="#8a8a96" font-size="10">不进写模型</text>
+
+      <!-- Sub B: 叙述层 CRUD -->
+      <rect x="352" y="358" width="186" height="238" rx="6" fill="#1c2620" stroke="#5fa869" stroke-width="1.5"/>
+      <use href="#ic-edit" x="396" y="374" width="18" height="18" style="color:#5fa869"/>
+      <text x="460" y="388" fill="#7fc98a" font-size="12.5" font-weight="700">叙述层</text>
+      <text x="445" y="414" text-anchor="middle" fill="#7fc98a" font-size="12" font-weight="600">CRUD 可编辑</text>
+      <text x="445" y="440" text-anchor="middle" fill="#a8a8b2" font-size="10.5">name · description</text>
+      <text x="445" y="457" text-anchor="middle" fill="#a8a8b2" font-size="10.5">rarity 标注 · archetype</text>
+      <text x="445" y="474" text-anchor="middle" fill="#a8a8b2" font-size="10.5">slot · trigger</text>
+      <text x="445" y="491" text-anchor="middle" fill="#a8a8b2" font-size="10.5">tag · status</text>
+      <line x1="372" y1="512" x2="518" y2="512" stroke="#3a3a48" stroke-width="1" stroke-dasharray="3 3"/>
+      <text x="445" y="533" text-anchor="middle" fill="#7fc98a" font-size="11" font-weight="600">写门 require_token</text>
+      <text x="445" y="556" text-anchor="middle" fill="#8a8a96" font-size="10">中文 taxonomy</text>
+      <text x="445" y="572" text-anchor="middle" fill="#8a8a96" font-size="10">与引擎英文分离</text>
+    </svg>
+  </div>
+  <ul class="flow-notes">
+    <li>无「设计库 → Godot」数值写回路径：叙述若需引擎数值化，由 Godot 侧新建/更新 <code>data/relics|equipment</code>（引擎权威）后再回填，<b>闭环单向</b>。</li>
+    <li>引擎层（英文 rarity/category/slot）与叙述层（中文 Rarity/archetype/slot）是<b>两套独立 taxonomy</b>，刻意分离、不互转不互校验（照 <code>damage_type</code> 中英分离先例）。</li>
+    <li><code>apply</code> 幂等细则：覆盖 stale · 行缺失只报 <code>not_found</code> 不新建 · 非法块跳过。</li>
+  </ul>
+</section>
+
+<!-- ============ §2 SoT v0 数据现状 ============ -->
+<section id="v0data">
+  <h2>SoT v0 遗物 / 装备数据现状 <span class="sec-tag">§2 · Godot 仓，已核</span></h2>
+
+  <h3>遗物 <code>data/relics/</code>（10 件，全 <span class="badge ph">占位</span> 骨架）</h3>
+  <p class="fs-sm">字段：<code>id</code> / <code>name</code> / <code>rarity</code> / <code>category</code> / <code>slot_cost</code> / <code>effects[]</code>（声明式）/ <code>is_passive</code> / <code>description</code> / <code>_note</code>。</p>
+  <pre class="code"><span class="cmt">// relic_iron_core.json（数值类）</span>
+{ <span class="key">"id"</span>:"relic_iron_core", <span class="key">"name"</span>:"铁芯", <span class="key">"rarity"</span>:"common", <span class="key">"category"</span>:"stat",
+  <span class="key">"slot_cost"</span>:1, <span class="key">"effects"</span>:[{ <span class="key">"type"</span>:"stat_flat", <span class="key">"stat_key"</span>:"DEF", <span class="key">"value"</span>:3 }],
+  <span class="key">"is_passive"</span>:true, <span class="key">"description"</span>:"防御力增加 3。" }
+<span class="cmt">// relic_vampiric_fang.json（背水/流派类）</span>
+{ <span class="key">"id"</span>:"relic_vampiric_fang", <span class="key">"name"</span>:"吸血獠牙", <span class="key">"rarity"</span>:"epic", <span class="key">"category"</span>:"build",
+  <span class="key">"slot_cost"</span>:1, <span class="key">"effects"</span>:[{ <span class="key">"type"</span>:"lifesteal_pct", <span class="key">"value"</span>:25 }], <span class="key">"is_passive"</span>:true }</pre>
+  <ul class="fs-sm" style="padding-left:20px; margin:6px 0;">
+    <li><b>rarity 实际取值</b>：<code>common</code> / <code>epic</code> / <code>legendary</code>（三档在用；<code>rare</code> 也在 RewardDrop 词表）。</li>
+    <li><b>category 实际取值</b>：<code>economy</code> / <code>stat</code> / <code>build</code>（<b>三分法</b>——与 KB 的两原型冲突，见 §4/§10）。</li>
+    <li><b>effects 9 类</b>（全声明式、无执行器、全 <span class="badge ph">占位</span>）：<code>gold_gain_pct</code> / <code>exp_gain_pct</code> / <code>talent_point_bonus</code>（经济 3）、<code>stat_flat</code> / <code>crit_bonus</code> / <code>move_bonus</code> / <code>damage_reduction_pct</code>（数值 4）、<code>lifesteal_pct</code> / <code>low_hp_damage_bonus_pct</code>（背水/流派 3）。</li>
+    <li><b>slot_cost</b> 恒 1 <span class="badge ph">占位</span>；<b>is_passive</b> 恒 true（主动/触发型遗物未设计）。</li>
+  </ul>
+
+  <h3>装备 <code>data/equipment/</code>（8 件，全 <span class="badge ph">占位</span> 骨架）</h3>
+  <p class="fs-sm">字段：<code>id</code> / <code>name</code> / <code>slot</code> / <code>tier</code> / <code>rarity</code> / <code>stats{}</code> / <code>description</code> / <code>_note</code>。</p>
+  <pre class="code">{ <span class="key">"id"</span>:"eq_wpn_iron_sword", <span class="key">"name"</span>:"铁剑", <span class="key">"slot"</span>:"weapon", <span class="key">"tier"</span>:1,
+  <span class="key">"rarity"</span>:"common", <span class="key">"stats"</span>:{ <span class="key">"STR"</span>:2 } }
+{ <span class="key">"id"</span>:"eq_arm_tower_shield", <span class="key">"name"</span>:"塔盾", <span class="key">"slot"</span>:"armor", <span class="key">"tier"</span>:2,
+  <span class="key">"rarity"</span>:"epic", <span class="key">"stats"</span>:{ <span class="key">"DEF"</span>:5, <span class="key">"max_hp"</span>:10 } }</pre>
+  <ul class="fs-sm" style="padding-left:20px; margin:6px 0;">
+    <li><b>slot</b>：<code>weapon</code> / <code>armor</code>（两槽 <span class="badge done">已定</span>）。</li>
+    <li><b>tier</b>：整数 <code>1</code> / <code>2</code>（品阶，与 rarity 是<b>两个维度</b>——见 §10）。</li>
+    <li><b>stats 键</b>：<code>STR</code> / <code>DEF</code> / <code>RES</code> / <code>max_hp</code> / <code>hit</code> 等（ADR-005 属性 + 派生量），值 flat 整数 <span class="badge ph">占位</span>。<span class="warn-mark">未接引擎</span>（<code>run_manager.gd:412</code> 明注 equipment 未接 stats）。</li>
+  </ul>
+
+  <h3>消费点（GDScript）</h3>
+  <ul class="fs-sm" style="padding-left:20px; margin:6px 0;">
+    <li><code>reward_resolver.gd</code>：装备/遗物按品质权重（rarity 分桶）入 convoy / 角色槽。</li>
+    <li><code>run_state.gd</code>：<code>party</code> 每角色 <code>relics≤6</code>（<code>RELIC_SLOT_MAX=6</code>）+ <code>equipment{weapon,armor}</code>；<code>convoy</code> 大背包。</li>
+    <li><span class="warn-mark">缺口</span>：<code>relics-system.md</code> / <code>equipment.md</code> KB 正式规格未落地；遗物/装备<b>效果执行器未建</b>（effects/stats 声明式占位）。</li>
+  </ul>
+</section>
+
+<!-- ============ §3 KB 真源定位 ============ -->
+<section id="kbsource">
+  <h2>KB 真源定位 <span class="sec-tag">§3 · 三态</span></h2>
+  <div class="tbl-wrap">
+    <table class="wide">
+      <thead><tr><th style="min-width:300px;">事实</th><th style="width:120px;">状态</th><th>出处</th></tr></thead>
+      <tbody>
+        <tr><td>L4 装备 = 武器+防具<b>两槽</b>、<b>非 build-defining</b>、run-reset、随机捡到</td><td><span class="badge done">已定</span> consensus_locked</td><td>architecture-consensus-v2.md:37 / run-loop.md:184</td></tr>
+        <tr><td>L5 遗物 Relic = <b>6 槽/角色硬上限</b>、<b>build-defining</b>、经济类+流派类两 archetype、L1 起始赠 1 遗物</td><td><span class="badge done">已定</span> consensus_locked</td><td>architecture-consensus-v2.md:38,173-177</td></tr>
+        <tr><td>Relic 为正典、Rune 废案；数据层 <code>data/relics/</code>、<code>RewardDrop.kind="relic"</code>、无 <code>rune</code></td><td><span class="badge done">已定</span> ADR-010</td><td>adr-2026-07-02</td></tr>
+        <tr><td>遗物来源 = Relic door / shop / Events / Boss 特殊 Relic；池 <b>20+ 起</b>（用户预期下限）</td><td><span class="badge done">已定</span> 意图 / <span class="badge ph">占位</span> 规模</td><td>run-loop.md:186</td></tr>
+        <tr><td>装备 = 渐进品阶、更高品阶替换、run-reset</td><td><span class="badge done">已定</span></td><td>run-loop.md:184,196</td></tr>
+        <tr><td>D4 装备词缀体系（9 武器+4 防具 type / 4 tier / 5 词缀大类 / 单词缀 ≤±15% 或 ≤1 触发 / 50 模板 / JSON schema 草案）</td><td><span class="badge prop">提案</span> stage2，<b>从未转 locked</b></td><td>D4-equipment-affix.md</td></tr>
+        <tr><td>遗物 rarity tier 是否设计 / reroll / 获取 cost curve / 流派类遗物 vs 流派类 L2 节点冲突</td><td><span class="badge gap">缺口</span> D5 open question 未执行</td><td>architecture-consensus-v2.md:190</td></tr>
+        <tr><td><code>relics-system.md</code>（Δ-2）/ <code>equipment.md</code>（Δ-3）正式规格</td><td><span class="badge gap">缺口</span> 从未落地</td><td>architecture-consensus-v2.md:109-121</td></tr>
+        <tr><td>装备 4 槽 Demo（Main Hand / Off Hand 剑圣双持 / Armor / Accessory-TBD）</td><td><span class="badge conf">冲突</span> 与两槽定稿不一致</td><td>class-system.md:448-455</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ §4 业界研究警示 ============ -->
+<section id="industry">
+  <h2>业界研究提炼 + 对抗验证警示 <span class="sec-tag">§4</span></h2>
+  <p class="fs-sm">
+    三条业界研究（roguelite 遗物 / 战棋装备 / 数据 schema）各经对抗验证（game-critic）。三条 critic 判定均为
+    <b>Hold（有条件保留）</b>——基础字段层可采纳，但有以下<b>必须吸收的警示</b>：
+  </p>
+  <div class="tbl-wrap">
+    <table class="wide">
+      <thead><tr><th style="min-width:260px;">警示</th><th style="width:90px;">来源</th><th>已采纳到字段规格的做法</th></tr></thead>
+      <tbody>
+        <tr><td><b>声明式 effects 数组「包打天下」被证伪</b>——Slay the Spire 每遗物是独立 Java 类、Hades 是过程式 Lua，JSON 只承载展示文本</td><td>R3 critic</td><td><code>effects[].type</code> 用<b>开放 string</b>（非闭枚举）= <b>脚本逃生舱口</b>：新机制 = 新 type + 新 GDScript 执行器，schema 不锁死</td></tr>
+        <tr><td><b>即时制 proc coefficient / 秒 duration 不可照搬</b>——战棋每回合每单位仅 1-2 次判定，样本量小两个数量级</td><td>R1 critic</td><td>trigger 若结构化，只用<b>回合制词表</b>（<code>on_turn_start</code>/<code>on_attack</code>/<code>on_kill</code>/<code>on_damage_taken</code>），<b>禁 proc coefficient / 秒 duration</b></td></tr>
+        <tr><td><b>业界对 build-defining 遗物侧覆盖不足</b>——取样偏动作 roguelite / 持久战役制战棋，缺回合制多角色队伍类先例</td><td>R1/R2 critic</td><td>遗物字段结论<b>不搬装备侧「纯升级」思路</b>；触发/协同/叠加字段全列 <span class="badge prop">提案</span> 待裁决</td></tr>
+        <tr><td><b>「武器三角 SoT 已拒绝」是过度断言</b>——实为 park 候选未经用户裁决</td><td>R2 critic</td><td>本文一律标 <span class="badge park">park 候选</span>，不写「已拒绝」</td></tr>
+        <tr><td><b>槽位模型（6 遗物槽 + 2 装备槽）已由用户裁决</b>，业界「shared pool 优于固定槽」建议不重开</td><td>R3 critic</td><td>槽位结构按 KB <span class="badge done">已定</span>，不列为 open question</td></tr>
+        <tr><td><b>稀有度/池权重解耦在 20+ 小池下可能过度设计</b></td><td>R3 critic</td><td>建议先用 <code>rarity</code> 分桶（<code>reward_resolver</code> 现状）跑通，独立 <code>pool_weight</code> 列为 <span class="badge prop">提案</span> 按需</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ §5 遗物字段规格 ============ -->
+<section id="relic-fields">
+  <h2>遗物字段规格结论 <span class="sec-tag">§5 · ★</span></h2>
+
+  <h3 class="star">核心字段（建议 v1 采纳）</h3>
+  <div class="tbl-wrap">
+    <table class="wide">
+      <thead><tr><th>字段</th><th>类型</th><th>层</th><th>归属</th><th>三态</th><th style="min-width:240px;">说明</th></tr></thead>
+      <tbody>
+        <tr class="row-meta">
+          <td><code>id</code></td><td>str PK（<code>relic_*</code>）</td>
+          <td><span class="chip meta">元数据</span></td>
+          <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
+          <td><span class="badge done">已定</span></td>
+          <td>稳定 join key；<b>无职业前缀</b>→ 库内外 id 一致、回填<b>无需</b>前缀映射（比 skill 简单）</td>
+        </tr>
+        <tr class="row-narr">
+          <td><code>name</code></td><td>str（中文名）</td>
+          <td><span class="chip narr">叙述层</span></td>
+          <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
+          <td><span class="badge done">已定</span></td>
+          <td>导出/回填时作权威 name 注入 engine_json</td>
+        </tr>
+        <tr class="row-narr">
+          <td><code>description</code></td><td>str（中文描述）</td>
+          <td><span class="chip narr">叙述层</span></td>
+          <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
+          <td><span class="badge done">已定</span></td>
+          <td><span class="warn-mark">⚠</span>含内嵌数字（如「20%」）与 engine_json 数值是两处表述，须人工随回填对齐</td>
+        </tr>
+        <tr class="row-narr">
+          <td><code>rarity</code></td><td>enum 中文（普通/稀有/史诗/传奇）</td>
+          <td><span class="chip narr">叙述层</span></td>
+          <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
+          <td><span class="badge done">已定</span>维度 / 归类<span class="badge ph">占位</span></td>
+          <td>复用现有 <code>Rarity</code> 枚举；与引擎英文 rarity 分离（两 taxonomy）</td>
+        </tr>
+        <tr class="row-narr">
+          <td><code>archetype</code></td><td>enum 中文（经济类/流派类）<span class="badge prop">新增枚举</span></td>
+          <td><span class="chip narr">叙述层</span></td>
+          <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
+          <td><span class="badge done">已定</span>两原型 / 分类法 open</td>
+          <td>KB 定两原型；但引擎用三分（economy/stat/build）→ <b>§10 待裁决</b></td>
+        </tr>
+        <tr class="row-narr">
+          <td><code>trigger</code></td><td>str（生效时机文本）</td>
+          <td><span class="chip narr">叙述层</span></td>
+          <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
+          <td><span class="badge done">已定</span></td>
+          <td>自由文本，照 Talent/Skill 现模式；是否升级结构化 timing 枚举 = open</td>
+        </tr>
+        <tr class="row-narr">
+          <td><code>notes</code></td><td>str</td>
+          <td><span class="chip narr">叙述层</span></td>
+          <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
+          <td><span class="badge done">已定</span></td>
+          <td>备注</td>
+        </tr>
+        <tr class="row-engine">
+          <td><code>engine_json</code></td><td>str（Godot 引擎块<b>只读镜像</b>）</td>
+          <td><span class="chip engine">引擎镜像层</span></td>
+          <td><span class="attr godot"><svg class="ic"><use href="#ic-lock"/></svg>Godot权威→镜像</span></td>
+          <td><span class="badge done">已定</span>纪律 / schema<span class="badge prop">提案</span></td>
+          <td>★照 <b>Talent 只读</b>（不进 <code>RelicIn/RelicPatch</code> 写模型）；Godot <code>data/relics</code> 格式未冻结→先 DEFER 不校验</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>派生列 / 状态 / 元数据（<span class="badge prop">提案</span> 按需，照 Talent 复用）</h3>
+  <div class="tbl-wrap">
+    <table class="wide">
+      <thead><tr><th>字段</th><th>层</th><th>归属</th><th>三态</th><th style="min-width:280px;">说明</th></tr></thead>
+      <tbody>
+        <tr class="row-derived">
+          <td><code>eng_rarity</code> / <code>eng_category</code> / <code>eng_slot_cost</code> / <code>eng_effect_count</code></td>
+          <td><span class="chip derived">派生列</span></td>
+          <td><span class="attr derive"><svg class="ic"><use href="#ic-derive"/></svg>自动派生</span></td>
+          <td><span class="badge prop">提案</span></td>
+          <td>从 engine_json 拍平，供 SQL 过滤/离群初筛；仅在需查询时建。<span class="warn-mark">⚠</span><code>is_passive</code> 是 bool，<code>_as_int</code> 排除 bool，若需列须另写降级——建议先不拍平</td>
+        </tr>
+        <tr class="row-narr">
+          <td><code>tags</code></td>
+          <td><span class="chip narr">叙述层</span>（新增 <code>relic_tag</code> 表）</td>
+          <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
+          <td><span class="badge prop">提案</span></td>
+          <td>复用 Tag 表；承载机制轴/流派轴筛选；遗物是 build-defining，标签价值高于装备</td>
+        </tr>
+        <tr class="row-status">
+          <td><code>status</code>（草稿/待审阅/锁定/待优化）</td>
+          <td><span class="chip status">状态</span></td>
+          <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
+          <td><span class="badge prop">提案</span></td>
+          <td>是否给遗物做审阅工作流待定</td>
+        </tr>
+        <tr class="row-status">
+          <td><code>shelf_state</code> / <code>trashed_at</code></td>
+          <td><span class="chip status">状态</span></td>
+          <td><span class="attr derive"><svg class="ic"><use href="#ic-derive"/></svg>自动派生</span></td>
+          <td><span class="badge prop">提案</span></td>
+          <td>上架/回收站正交，照 Talent 软删</td>
+        </tr>
+        <tr class="row-meta">
+          <td><code>updated_at</code> / <code>updated_by</code></td>
+          <td><span class="chip meta">元数据</span></td>
+          <td><span class="attr derive"><svg class="ic"><use href="#ic-derive"/></svg>自动派生</span></td>
+          <td><span class="badge prop">提案</span></td>
+          <td>自动时间戳 + CF Access 身份</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>提案候选字段（放 engine_json 内，待裁决）</h3>
+  <div class="tbl-wrap">
+    <table class="wide">
+      <thead><tr><th>字段</th><th>层</th><th>三态</th><th style="min-width:320px;">说明</th></tr></thead>
+      <tbody>
+        <tr class="row-engine">
+          <td><code>unique</code>（bool）</td>
+          <td><span class="chip engine">引擎镜像</span></td>
+          <td><span class="badge prop">提案</span><span class="badge gap">缺口</span></td>
+          <td>KB 零规定；「每角色独立掉落×4」下「唯一」语义歧义（跨角色互斥 vs 单角色池内）→ §10</td>
+        </tr>
+        <tr class="row-engine">
+          <td><code>stackable</code>（none/count/upgrade）</td>
+          <td><span class="chip engine">引擎镜像</span></td>
+          <td><span class="badge prop">提案</span><span class="badge gap">缺口</span></td>
+          <td>KB 零规定；取值与上限须裁决</td>
+        </tr>
+        <tr class="row-engine">
+          <td><code>pool_weight</code>（int）</td>
+          <td><span class="chip engine">引擎镜像</span></td>
+          <td><span class="badge prop">提案</span></td>
+          <td>独立掉落权重；20+ 小池下建议先用 rarity 分桶</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ §6 装备字段规格 ============ -->
+<section id="equip-fields">
+  <h2>装备字段规格结论 <span class="sec-tag">§6 · ★</span></h2>
+
+  <h3 class="star">核心字段（建议 v1 采纳）</h3>
+  <div class="tbl-wrap">
+    <table class="wide">
+      <thead><tr><th>字段</th><th>类型</th><th>层</th><th>归属</th><th>三态</th><th style="min-width:240px;">说明</th></tr></thead>
+      <tbody>
+        <tr class="row-meta">
+          <td><code>id</code></td><td>str PK（<code>eq_wpn_*</code>/<code>eq_arm_*</code>）</td>
+          <td><span class="chip meta">元数据</span></td>
+          <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
+          <td><span class="badge done">已定</span></td>
+          <td>无职业前缀，直接作回填对齐键</td>
+        </tr>
+        <tr class="row-narr">
+          <td><code>name</code></td><td>str（中文名）</td>
+          <td><span class="chip narr">叙述层</span></td>
+          <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
+          <td><span class="badge done">已定</span></td>
+          <td>—</td>
+        </tr>
+        <tr class="row-narr">
+          <td><code>description</code></td><td>str（中文描述）</td>
+          <td><span class="chip narr">叙述层</span></td>
+          <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
+          <td><span class="badge done">已定</span></td>
+          <td>—</td>
+        </tr>
+        <tr class="row-narr">
+          <td><code>slot</code></td><td>enum 中文（武器/防具）<span class="badge prop">新增枚举</span></td>
+          <td><span class="chip narr">叙述层</span></td>
+          <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
+          <td><span class="badge done">已定</span>两槽</td>
+          <td><span class="warn-mark">⚠</span> accessory/off-hand（剑圣双持）4 槽 Demo 未收敛 → §10</td>
+        </tr>
+        <tr class="row-narr">
+          <td><code>rarity</code></td><td>enum 中文（普通/稀有/史诗/传奇）</td>
+          <td><span class="chip narr">叙述层</span></td>
+          <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
+          <td><span class="badge done">已定</span>维度 / 归类<span class="badge ph">占位</span></td>
+          <td>复用 <code>Rarity</code>；供 <code>reward_resolver</code> 品质加权抽取</td>
+        </tr>
+        <tr class="row-narr">
+          <td><code>notes</code></td><td>str</td>
+          <td><span class="chip narr">叙述层</span></td>
+          <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
+          <td><span class="badge done">已定</span></td>
+          <td>—</td>
+        </tr>
+        <tr class="row-engine">
+          <td><code>engine_json</code></td><td>str（Godot 引擎块<b>只读镜像</b>）</td>
+          <td><span class="chip engine">引擎镜像层</span></td>
+          <td><span class="attr godot"><svg class="ic"><use href="#ic-lock"/></svg>Godot权威→镜像</span></td>
+          <td><span class="badge done">已定</span>纪律 / schema<span class="badge prop">提案</span></td>
+          <td>★照 Talent 只读；含 <code>slot</code>(en)/<code>tier</code>(int)/<code>rarity</code>(en)/<code>stats{}</code>；stats 现未接引擎</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>派生列 / 状态 / 元数据（<span class="badge prop">提案</span> 按需）</h3>
+  <div class="tbl-wrap">
+    <table class="wide">
+      <thead><tr><th>字段</th><th>层</th><th>归属</th><th>三态</th><th style="min-width:300px;">说明</th></tr></thead>
+      <tbody>
+        <tr class="row-derived">
+          <td><code>eng_slot</code> / <code>eng_tier</code> / <code>eng_rarity</code></td>
+          <td><span class="chip derived">派生列</span></td>
+          <td><span class="attr derive"><svg class="ic"><use href="#ic-derive"/></svg>自动派生</span></td>
+          <td><span class="badge prop">提案</span></td>
+          <td>供槽位/品阶/品质筛选排序</td>
+        </tr>
+        <tr class="row-derived">
+          <td><code>eng_stat_total</code></td>
+          <td><span class="chip derived">派生列</span></td>
+          <td><span class="attr derive"><svg class="ic"><use href="#ic-derive"/></svg>自动派生</span></td>
+          <td><span class="badge prop">提案</span></td>
+          <td><code>sum(stats.values())</code> 粗功率镜像，供跨 tier 数值离群初筛；stats 键动态不宜逐键拍平（脆弱），仅派生一个聚合列</td>
+        </tr>
+        <tr class="row-status">
+          <td><code>tags</code> / <code>status</code> / <code>shelf_state</code> / <code>trashed_at</code> / <code>updated_*</code></td>
+          <td><span class="chip narr">叙述</span> <span class="chip status">状态</span> <span class="chip meta">元数据</span></td>
+          <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span> / <span class="attr derive"><svg class="ic"><use href="#ic-derive"/></svg>派生</span></td>
+          <td><span class="badge prop">提案</span></td>
+          <td>照 Talent 复用；装备非 build-defining，标签需求弱于遗物</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>提案候选字段（放 engine_json 内，待裁决）</h3>
+  <div class="tbl-wrap">
+    <table class="wide">
+      <thead><tr><th>字段</th><th>三态</th><th style="min-width:340px;">说明</th></tr></thead>
+      <tbody>
+        <tr class="row-engine">
+          <td><code>affixes</code>（array）</td>
+          <td><span class="badge prop">提案</span>（D4 未采纳）</td>
+          <td>D4 完整词缀体系从未 locked。<span class="warn-mark">⚠ 澄清</span>：<code>data/affixes/</code> 目录是<b>敌人词条</b>系统（<code>af_</code>/<code>afs_</code> 前缀，run-loop 敌人分层），<b>与装备词缀无关</b>。是否引入 + 深度上限 → §10</td>
+        </tr>
+        <tr class="row-engine">
+          <td><code>requirements</code>（object：职业/等级限制）</td>
+          <td><span class="badge prop">提案</span></td>
+          <td>v0 无限制、KB 未规定；剑圣双持 off-hand 若保留会引入职业专属槽 → 与装备槽收敛绑定</td>
+        </tr>
+        <tr class="row-engine">
+          <td><code>tier</code> 归属</td>
+          <td><span class="badge done">已定</span>品阶方向 / 阈值<span class="badge ph">占位</span></td>
+          <td>tier 数值层在 engine_json（Godot 权威）；叙述层是否也暴露 tier 见 §10 品质维度对称问题</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ §7 engine_json schema 草图 ============ -->
+<section id="schema">
+  <h2>engine_json schema 草图 <span class="sec-tag">§7</span></h2>
+  <div class="callout warn">
+    照 <code>godot_export.GODOT_SKILL_SCHEMA</code> 风格，对齐已核 <code>data/relics</code> / <code>data/equipment</code> 真实格式。
+    <b>纪律</b>：只读镜像；Godot 格式未冻结 → 先 <b>DEFER 不校验</b>（照 Talent），待格式定稿再启用全路径 fail-closed 校验门。
+  </div>
+
+  <h3>GODOT_RELIC_SCHEMA（草图）</h3>
+  <pre class="code">{
+  <span class="key">"$schema"</span>: "https://json-schema.org/draft/2020-12/schema",
+  <span class="key">"type"</span>: "object",
+  <span class="key">"required"</span>: ["rarity", "category", "slot_cost", "effects", "is_passive"],
+  <span class="key">"properties"</span>: {
+    <span class="key">"id"</span>: {"type": "string"},          <span class="cmt">// 可选；build_godot_relic 由行注入权威 id</span>
+    <span class="key">"name"</span>: {"type": "string"},        <span class="cmt">// 可选；注入权威 name</span>
+    <span class="key">"description"</span>: {"type": "string"},
+    <span class="key">"rarity"</span>: {"enum": ["common", "rare", "epic", "legendary"]},  <span class="cmt">// 核心枚举严格；legendary 现悬空 [占位]</span>
+    <span class="key">"category"</span>: {"enum": ["economy", "stat", "build"]},           <span class="cmt">// ⚠ 三分法；改两原型待裁决</span>
+    <span class="key">"slot_cost"</span>: {"type": "integer", "minimum": 0},               <span class="cmt">// v0 恒 1 [占位]</span>
+    <span class="key">"is_passive"</span>: {"type": "boolean"},                            <span class="cmt">// v0 恒 true；主动遗物未设计</span>
+    <span class="key">"effects"</span>: {
+      <span class="key">"type"</span>: "array",
+      <span class="key">"items"</span>: {
+        <span class="key">"type"</span>: "object",
+        <span class="key">"required"</span>: ["type"],
+        <span class="key">"properties"</span>: {
+          <span class="key">"type"</span>: {"type": "string"},      <span class="cmt">// ★开放 string 非闭枚举 = 逃生舱口：新机制 = 新 type + 新执行器</span>
+          <span class="key">"value"</span>: {"type": "number"},
+          <span class="key">"stat_key"</span>: {"type": "string"}   <span class="cmt">// 仅 stat_flat 携带（ADR-005 属性键）</span>
+        },
+        <span class="key">"additionalProperties"</span>: {"type": ["integer", "number", "boolean", "string"]}
+      }
+    }
+  },
+  <span class="key">"additionalProperties"</span>: {"type": ["integer", "number", "boolean", "string"]}
+}
+<span class="cmt">// 提案（待裁决）可选顶层字段：</span>
+<span class="cmt">//   "unique": boolean / "stackable": {enum: ["none","count","upgrade"]}</span>
+<span class="cmt">//   "trigger": {enum: ["on_turn_start","on_attack","on_kill","on_damage_taken"]}（回合制词表，⚠禁 proc coefficient/秒 duration）</span>
+<span class="cmt">//   "pool_weight": integer</span></pre>
+
+  <h3>GODOT_EQUIPMENT_SCHEMA（草图）</h3>
+  <pre class="code">{
+  <span class="key">"$schema"</span>: "https://json-schema.org/draft/2020-12/schema",
+  <span class="key">"type"</span>: "object",
+  <span class="key">"required"</span>: ["slot", "tier", "rarity", "stats"],
+  <span class="key">"properties"</span>: {
+    <span class="key">"id"</span>: {"type": "string"}, <span class="key">"name"</span>: {"type": "string"}, <span class="key">"description"</span>: {"type": "string"},
+    <span class="key">"slot"</span>: {"enum": ["weapon", "armor"]},                       <span class="cmt">// 两槽定稿；accessory/off-hand 待裁决</span>
+    <span class="key">"tier"</span>: {"type": "integer", "minimum": 1},                   <span class="cmt">// 品阶方向已定 / 阈值 [占位]</span>
+    <span class="key">"rarity"</span>: {"enum": ["common", "rare", "epic", "legendary"]}, <span class="cmt">// legendary 现悬空 [占位]</span>
+    <span class="key">"stats"</span>: {
+      <span class="key">"type"</span>: "object",
+      <span class="key">"propertyNames"</span>: {"enum": ["STR","MAG","DEX","DEF","RES","SPD","LCK","MOV","VIS","max_hp","hit"]},
+      <span class="key">"additionalProperties"</span>: {"type": "integer"}               <span class="cmt">// 值 flat 整数 [占位]</span>
+    }
+  },
+  <span class="key">"additionalProperties"</span>: {"type": ["integer", "number", "boolean", "string"]}
+}
+<span class="cmt">// 提案（待裁决）：</span>
+<span class="cmt">//   "affixes": array（装备词缀，D4 未采纳；与敌人 data/affixes 词条无关）</span>
+<span class="cmt">//   "requirements": object（职业/等级限制）</span></pre>
+</section>
+
+<!-- ============ §9 软件改动面 ============ -->
+<section id="software">
+  <h2>设计库软件改动面 <span class="sec-tag">§9 · 供 Mercury 参考，本方不实装</span></h2>
+  <div class="tbl-wrap">
+    <table class="wide">
+      <thead><tr><th style="width:130px;">环节</th><th>改动</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>建表</b> <code>models.py</code></td>
+          <td>新增 <code>class Relic</code> + <code>class Equipment</code>（照 Skill/Talent）。★两表<b>省略 <code>class_id</code> 与 <code>game_class</code> 关系</b>（遗物全局掉落池、装备非职业锁）——待用户确认（§10）。新增 <code>relic_tag</code> / <code>equipment_tag</code> 关联表 + <code>Tag.relics</code>/<code>Tag.equipment</code> 反向关系。engine_json 照 Talent 只读。</td>
+        </tr>
+        <tr>
+          <td><b>枚举</b></td>
+          <td>复用：<code>Rarity</code> / <code>TalentStatus</code> / <code>ShelfState</code>。新建：<code>RelicArchetype</code>(经济类/流派类，<span class="badge prop">提案</span> 两分 vs 三分)、<code>EquipSlot</code>(武器/防具，<span class="badge done">已定</span>)。可选：<code>RelicStackRule</code>(<span class="badge prop">提案</span>)。遗物/装备<b>均不设 <code>DamageType</code></b>（遗物是 effects 修饰、装备是纯 stats）。</td>
+        </tr>
+        <tr>
+          <td><b>API</b></td>
+          <td>新建 <code>api/relics.py</code> + <code>api/equipment.py</code>，各照 <code>talents.py</code> 五路由（list/get/create/patch/delete）。写路由挂 <code>require_token</code>；DELETE 照 Talent 软删。★engine_json <b>不进 In/Patch 写模型，仅 Out 只读暴露</b>。</td>
+        </tr>
+        <tr>
+          <td><b>校验</b></td>
+          <td>新建 <code>validation/relic_export.py</code> + <code>equipment_export.py</code>（照 <code>godot_export.py</code>）。但按纪律 engine_json 是只读镜像且格式未冻结 → <b>先 DEFER</b>（不校验、不进写模型），待 Godot 定稿再补 fail-closed 校验门。</td>
+        </tr>
+        <tr>
+          <td><b>模板</b></td>
+          <td><code>relics.html</code> + <code>equipment.html</code>（照 <code>skills.html</code>）。★engine_json 照 <code>talent_detail.html</code> 做<b>只读展示灰框</b>，不做可编辑 textarea。</td>
+        </tr>
+        <tr>
+          <td><b>回填</b></td>
+          <td><code>backfill_engine.py</code> 参数化实体类型（skill/relic/equipment 各自 schema/目标表/镜像文件），或复制 <code>backfill_relic.py</code>/<code>backfill_equipment.py</code>。★遗物/装备 id <b>无职业前缀 → 无需 <code>_design_skill_id</code> 前缀替换</b>（比 skill 简单）。<code>db.py</code> 启动迁移登记新表/新列/索引/派生列回填（否则 NAS <code>codex.db</code> 运行时 <code>no such column</code>）。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ §10 9 个裁决问题 ============ -->
+<section id="decisions">
+  <h2>需用户裁决的结构级问题 <span class="sec-tag">§10 · ★ 附 grounded 推荐</span></h2>
+  <div class="callout warn">
+    参数级数字一律 <span class="badge ph">占位</span> 自行推进；下列<b>结构级</b>冲突属设计裁决，需用户拍板。每条给出 grounded 推荐（带真源出处）。
+  </div>
+  <div class="q-grid">
+
+    <div class="q-card">
+      <div class="q-head"><span class="q-num">Q1</span><span class="q-title">遗物是否绑职业？</span></div>
+      <div class="q-rec"><b>推荐：全局掉落池，不绑职业</b>（省 <code>class_id</code>）。KB「每角色独立掉落」指各角色独立<b>持有槽</b>，遗物本身任意角色可持。设计库现有实体全有 class_id，遗物是首个全局实体。</div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-head"><span class="q-num">Q2</span><span class="q-title">遗物 archetype 分类法采几分？</span></div>
+      <p class="q-q">引擎用<b>三分</b>（economy/stat/build），KB 定<b>两原型</b>（经济类/流派类）。</p>
+      <div class="q-rec"><b>推荐：需统一为一套 canonical</b>。倾向把 <code>stat</code> 归入相应原型（纯属性→经济类语义 or 独立），或把三分正式写进 KB。此冲突不解决，叙述层 archetype 与引擎 category 会长期错位。</div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-head"><span class="q-num">Q3</span><span class="q-title">稀有度词表统一</span></div>
+      <p class="q-q">四套未收敛：引擎 <code>common/rare/epic/legendary</code>、run-loop RewardDrop、D4 <code>Common/Uncommon/Rare/Unique</code>、D5 <code>Common/Rare/Mythic</code>。</p>
+      <div class="q-rec"><b>推荐：定一套 canonical</b>（叙述层中文 + 引擎层英文各自命名 + 对齐映射）。倾向以<b>引擎现值</b> <code>common/rare/epic/legendary</code> 为准（v0 已用），把 D4/D5 的其他命名归档。</div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-head"><span class="q-num">Q4</span><span class="q-title">遗物 unique / stackable 规则</span></div>
+      <p class="q-q">是否设计、如何取值？KB 零规定。且「每角色独立掉落×4」下「唯一」语义歧义（跨 4 角色互斥 vs 单角色池内互斥）。</p>
+      <div class="q-rec"><b>推荐：v1 先不做</b>（KB 无要求）；若做，先明确「唯一」的作用域。属引擎抽取逻辑 → 放 engine_json。</div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-head"><span class="q-num">Q5</span><span class="q-title">遗物 trigger 是否升级结构化枚举？</span></div>
+      <p class="q-q">维持自由文本 trigger，还是升级 <code>trigger_timing</code> 枚举？v0 遗物全 <code>is_passive:true</code>，是否设计主动/触发型遗物？</p>
+      <div class="q-rec"><b>推荐：v1 维持自由文本 trigger</b>；若引入触发型，只用回合制词表（<code>on_turn_start</code>/<code>on_attack</code>/<code>on_kill</code>/<code>on_damage_taken</code>），<b>禁即时制 proc coefficient</b>（R1 critic）。</div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-head"><span class="q-num">Q6</span><span class="q-title">装备是否引入 affix/词缀维度？</span></div>
+      <p class="q-q">D4 提案（5 大类/单词缀≤±15%或≤1 触发/4 tier/50 模板）从未 locked；引擎现只有 <code>stats{}</code>。</p>
+      <div class="q-rec"><b>推荐：v1 维持纯 stats 加值</b>（不引入 affix）。装备非 build-defining，纯品阶替换够用；affix 是显著复杂度，等玩法验证需要再引入。</div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-head"><span class="q-num">Q7</span><span class="q-title">装备槽收敛</span></div>
+      <p class="q-q">两槽（武器+防具，run-loop 定稿）vs class-system 4 槽 Demo（含 off-hand 剑圣双持 / accessory-TBD）。</p>
+      <div class="q-rec"><b>推荐：以两槽定稿为准</b>（更晚、更权威）；剑圣双持若保留，作为<b>职业专属特例</b>单独处理，不进通用 EquipSlot 枚举。需用户确认 class-system 4 槽 Demo 是否作废。</div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-head"><span class="q-num">Q8</span><span class="q-title">遗物/装备品质维度是否对称？</span></div>
+      <p class="q-q">现状遗物只 <code>rarity</code>、装备 <code>rarity</code>+<code>tier</code> 两维。</p>
+      <div class="q-rec"><b>推荐：保持非对称</b>（遗物按稀有度、装备按品阶+稀有度）——契合「装备渐进品阶替换 vs 遗物按稀有度构筑」的不同定位。或统一，需裁决。</div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-head"><span class="q-num">Q9</span><span class="q-title">遗物掉落权重模型</span></div>
+      <p class="q-q">每遗物独立 <code>pool_weight</code> vs「rarity 即权重」简单模型？</p>
+      <div class="q-rec"><b>推荐：先用 rarity 分桶</b>（<code>reward_resolver</code> 现状）跑通；20+ 小池下独立 pool_weight 可能过度设计（R3 critic）。</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ §11 占位清单 ============ -->
+<section id="placeholders">
+  <h2>占位清单 <span class="sec-tag">§11 · 所有 [占位] 数字</span></h2>
+  <details>
+    <summary>展开 12 项占位（全部 <span class="badge ph">占位</span>，纯填坑待调）</summary>
+    <ul>
+      <li>遗物 <code>rarity</code> 每件归类（common/rare/epic/legendary）— 每件 <code>_note</code> 标 rarity 待调</li>
+      <li>遗物 <code>slot_cost</code> 全为 1 — 槽位经济学未设计（relics-system.md 缺口）</li>
+      <li>遗物 <code>effects[].value</code> 全部数值：<code>gold_gain_pct 20</code> / <code>lifesteal_pct 25</code> / <code>low_hp_damage_bonus_pct 40</code> / <code>stat_flat DEF+3</code> / <code>LCK+4</code> / <code>crit_bonus 10</code> / <code>move_bonus 1</code> / <code>talent_point_bonus 1</code> / <code>exp_gain_pct 15</code> / <code>damage_reduction_pct 15</code> — 纯填坑待调（9 类效果均无执行器）</li>
+      <li>遗物初始池规模 — run-loop.md:186「20+ 起」为已定意图、确切规模占位；引擎现仅 10 件骨架</li>
+      <li>遗物保底 N=3（按出现计数）— run-loop.md:137,417（1000 幕模拟示偏紧待调）</li>
+      <li>装备 <code>tier</code> 阈值与数值锚点（class-system Early +2~4 … Endgame +12~18）— 品阶方向已定、数值待调</li>
+      <li>装备 <code>rarity</code> 每件归类 — 用于品质加权抽取</li>
+      <li>装备 <code>stats</code> 数值（<code>{STR:2}</code> / <code>{DEF:4,RES:1}</code> / <code>{DEF:5,max_hp:10}</code> 等）— 声明式、未接引擎</li>
+      <li>门奖励品质权重 / 商店定价 / Boss 包 forced_rarity — act1_config.json</li>
+      <li><b>legendary 稀有度池悬空</b>：<code>data/relics/</code> 与 <code>data/equipment/</code> 均无 legendary 条目，但 Boss <code>forced_rarity</code> + 商店定价引用 legendary → 抽取会回退 — 需补 legendary 池或明确该档暂空</li>
+      <li>（若采纳）遗物 <code>pool_weight</code> / <code>stackable</code> 计数上限 / 装备 <code>affix</code> 词缀数值 — 占位</li>
+    </ul>
+  </details>
+</section>
+
+<footer>
+  <p class="fm"><b>研究方法</b>：内部深读（设计库承载模式 / SoT v0 数据 / KB 真源）+ 业界研究（roguelite 遗物 / 战棋装备 / 数据 schema，各经 game-critic 对抗验证）——10 agent 六线研究 + 对抗验证 + 主代理独立核对 KB 真源（architecture-consensus-v2 / ADR-010 / D4 / run-loop）后定稿。</p>
+  <p class="fm">2026-07-05 · SoT main lane · Companion: <a href="relic-equipment-designlib-fields.md">relic-equipment-designlib-fields.md</a></p>
+  <p class="fm muted">权威：研究材料 + grounded 方案，非设计裁决（结构级裁决属用户；软件实装属 Mercury）</p>
+</footer>
+
+</main>
+</body>
+</html>
