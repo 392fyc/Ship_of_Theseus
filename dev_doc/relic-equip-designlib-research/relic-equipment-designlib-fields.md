@@ -1,8 +1,8 @@
 ---
 title: 遗物/装备加入 SoT 设计库 — 字段规格研究
 date: 2026-07-05
-status: research_deliverable
-authority: 研究材料 + grounded 方案，非设计裁决（结构级裁决属用户；软件实装属 Mercury）
+status: research_deliverable（字段已按 2026-07-05 用户裁决定稿）
+authority: 字段规格已经用户 2026-07-05 裁决（见「用户裁决与字段定稿」章节）；软件实装属 Mercury
 visual_companion: relic-equipment-designlib-fields.html
 lane: SoT main（研究 + 字段结论）→ 交 Mercury（设计库软件实装）
 sources:
@@ -21,7 +21,7 @@ sources:
 > **一句话**：遗物（Relic）和装备（Equipment）可以照设计库现有 Skill / Talent 的承载模式加入——
 > **叙述层字段**（名 / 描述 / 稀有度标注 / 生效时机文本 / 标签）在设计库直接维护，
 > **引擎数值层 `engine_json`** 照 **Talent 的只读镜像模式**（Godot 权威 → Mercury 回填，设计库不手编）。
-> 字段清单、jsonschema 草图、软件改动面已给出；**9 个结构级冲突需用户裁决**（稀有度词表统一、archetype 两分/三分、遗物是否绑职业等）。
+> 字段清单、jsonschema 草图、软件改动面已给出；**9 个结构级冲突已于 2026-07-05 由用户全部裁决**（见「★ 用户裁决与字段定稿」章节），字段规格已据此定稿。
 
 > **三态标注贯穿全文**：**[已定]**=KB 正本 / 用户裁决；**[提案]**=方向建议待确认；**[占位]**=数字纯填坑随时可换。
 > **数据流归属**：`Godot权威→镜像`（引擎数值，设计库只读）/ `设计库可编辑`（叙述层）/ `设计库自动派生`（派生列/时间戳）。
@@ -36,6 +36,54 @@ sources:
 | **本研究不做** | 不改设计库代码（软件实装归 Mercury）；不写 KB 正式规格（`relics-system.md`/`equipment.md` 属设计裁决，需用户先拍板）；不手编设计库 `engine_json` |
 | **用户裁决** | 第 10 节的 9 个结构级冲突 |
 | **Mercury 实装** | 第 9 节的设计库软件改动（建表 / 枚举 / API / 校验 / 模板 / 回填配置） |
+
+---
+
+## ★ 用户裁决与字段定稿（2026-07-05）
+
+第 10 节的 9 个结构级冲突已由用户全部裁决，字段规格据此定稿。
+
+### 裁决速览
+
+| # | 冲突 | 裁决 [已定] |
+|---|---|---|
+| Q1 | 遗物是否绑职业 | **不绑定**——遗物全局实体，无 `class_id` |
+| Q2 | 遗物分类法 | **不用固定 archetype 枚举**；改为「羁绊类别词条」——见下方羁绊系统 |
+| Q3 | 稀有度词表 | **统一 5 档**：common/rare/epic/legendary + **新增 unique**；遗物/装备/**天赋**三者共用；颜色 白/蓝/紫/金/**红** |
+| Q4 | 遗物 unique/stackable 去重规则 | **不做**（有需求再加） |
+| Q5 | 遗物 trigger | **自由文本**，与天赋一致 |
+| Q6 | 装备词缀 affix | **引入**——装备 = 基础数值 + 特殊词条；高稀有度=高数值或高稀有度词条；具体依赖后续设计 |
+| Q7 | 装备槽 | **固定两槽**（武器+防具）；职业特殊机制作专属特例单独处理 |
+| Q8 | 品质维度 | **非对称**：遗物按 rarity；装备 rarity + tier（tier 只提供额外数值加成） |
+| Q9 | 掉落权重 | **rarity 分桶**（必要）；后续若单 run 凑不齐羁绊，再评估「同羁绊掉落轻微优先」 |
+
+### ★ 遗物羁绊系统（Q2 裁决展开，自走棋式凑羁绊）
+
+用户裁决：遗物**类似自走棋凑羁绊**——
+
+- 每个遗物带 **1-3 个「类别词条」**（synergy category，**与设计库/天赋的 Tag 不是同一个东西**）。
+- 同一类别凑到一定数量 → 触发**额外羁绊效果**（自走棋 bond 式）。
+- **不需要提前分类**（具体类别与羁绊阈值效果留给设计层），但**数据结构需预留字段**。
+
+字段落地：
+
+- 遗物 `engine_json` 预留 `synergy_categories: [str]`（1-3 项，开放字符串，不预定义）——引擎层（羁绊逻辑由 Godot 消费），设计库只读镜像。
+- 羁绊阈值效果表（类别 → 数量阈值 → 效果）是**独立的未来设计**（届时可能落 `data/synergies/` 或 `relics-system.md`），本次**只预留遗物侧字段、不设计羁绊内容**。
+- 原「archetype 经济类/流派类两原型」枚举与引擎「economy/stat/build 三分」**都不再作为固定分类字段**——遗物分类维度统一由 `synergy_categories` 承载。
+- ⚠ 掉落权重（Q9）先按 `rarity` 分桶；若后续掉落模拟显示单 run 难凑齐多种羁绊，再评估「同羁绊掉落轻微优先」的偏置机制（与本羁绊系统关联）。
+
+### ★ 稀有度 5 档（Q3 裁决，影响遗物/装备/天赋三者 + 设计库 Rarity 枚举）
+
+| 档 | 英文 | 颜色 |
+|---|---|---|
+| 普通 | `common` | 白 |
+| 稀有 | `rare` | 蓝 |
+| 史诗 | `epic` | 紫 |
+| 传奇 | `legendary` | 金 |
+| **独特** | **`unique`** | **红** |
+
+⚠ 给 Mercury：设计库现有 `Rarity` 枚举是 4 档，需**扩到 5 档并加 `unique`（红）**；**天赋卡片也要支持 unique 档**（用户明确遗物/装备/天赋共用）。unique 定位为特殊事件产出的特殊稀有度。
+（注意区分：Q3 的 unique 是**稀有度档位**，与 Q4 的「unique 去重规则」是两个不同概念——后者不做。）
 
 ---
 
@@ -140,7 +188,7 @@ Talent 的做法就是本研究声明的「只读镜像」纪律的正确范本�
 |---|---|---|
 | **声明式 effects 数组「包打天下」被证伪**——Slay the Spire 每遗物是独立 Java 类、Hades 是过程式 Lua，JSON 只承载展示文本 | R3 critic | `effects[].type` 用**开放 string**（非闭枚举）= **脚本逃生舱口**：新机制 = 新 type + 新 GDScript 执行器，schema 不锁死 |
 | **即时制 proc coefficient / 秒 duration 不可照搬**——战棋每回合每单位仅 1-2 次判定，样本量小两个数量级，套用会变「要么不触发要么单次巨量」 | R1 critic | trigger 若结构化，只用**回合制词表**（`on_turn_start`/`on_attack`/`on_kill`/`on_damage_taken`），**禁 proc coefficient / 秒 duration** |
-| **业界对 build-defining 遗物侧覆盖不足**——取样偏动作 roguelite / 持久战役制战棋，缺回合制多角色队伍类先例（如 Into the Breach） | R1/R2 critic | 遗物字段结论**不搬装备侧「纯升级」思路**；触发/协同/叠加字段全列 [提案] 待裁决，不擅自定 |
+| **业界对 build-defining 遗物侧覆盖不足**——取样偏动作 roguelite / 持久战役制战棋，缺回合制多角色队伍类先例（如 Into the Breach） | R1/R2 critic | 遗物字段结论**不搬装备侧「纯升级」思路**；触发/协同/叠加字段研究阶段全列 [提案]、不擅自定 → 2026-07-05 已由用户裁决（羁绊系统 + 词缀引入等） |
 | **「武器三角 SoT 已拒绝」是过度断言**——实为 park 候选未经用户裁决 | R2 critic | 本文一律标 [park 候选]，不写「已拒绝」 |
 | **槽位模型（6 遗物槽 + 2 装备槽）已由用户裁决**，业界「shared pool 优于固定槽」建议不重开 | R3 critic | 槽位结构按 KB [已定]，不列为 open question |
 | **稀有度/池权重解耦在 20+ 小池下可能过度设计** | R3 critic | 建议先用 `rarity` 分桶（`reward_resolver` 现状）跑通，独立 `pool_weight` 列为 [提案] 按需 |
@@ -158,8 +206,8 @@ Talent 的做法就是本研究声明的「只读镜像」纪律的正确范本�
 | `id` | str PK（`relic_*`） | 元数据 | 设计库可编辑 | **[已定]** | 稳定 join key；**无职业前缀**→ 库内外 id 一致、回填**无需**前缀映射（比 skill 简单） |
 | `name` | str（中文名） | 叙述层 | 设计库可编辑 | **[已定]** | 导出/回填时作权威 name 注入 engine_json |
 | `description` | str（中文描述） | 叙述层 | 设计库可编辑 | **[已定]** | ⚠含内嵌数字（如「20%」）与 engine_json 数值是两处表述，须人工随回填对齐 |
-| `rarity` | enum 中文（普通/稀有/史诗/传奇） | 叙述层 | 设计库可编辑 | **[已定]** 维度 / 每件归类 [占位] | 复用现有 `Rarity` 枚举；与引擎英文 rarity 分离（两 taxonomy） |
-| `archetype` | enum 中文（经济类/流派类）**[新增枚举]** | 叙述层 | 设计库可编辑 | **[已定]** 两原型 locked / 分类法 open | KB 定两原型；但引擎用三分（economy/stat/build）→ **§10 待裁决** |
+| `rarity` | enum 中文 5 档（普通/稀有/史诗/传奇/**独特**） | 叙述层 | 设计库可编辑 | **[已定]** 5 档 + 颜色 / 每件归类 [占位] | 复用 `Rarity` 枚举（**需扩到 5 档加 unique 红**）；与引擎英文 rarity 分离（两 taxonomy） |
+| `synergy_categories` | array[str]（1-3 项）**[新增字段，取代 archetype]** | 引擎镜像层 | Godot权威→镜像 | **[已定]** 预留字段 / 羁绊内容未来设计 | ★羁绊类别词条（自走棋凑羁绊），**≠ 天赋 Tag**；不预定义分类、留设计层；羁绊逻辑 Godot 消费→放 `engine_json`。原 archetype 两/三分弃用 |
 | `trigger` | str（生效时机文本） | 叙述层 | 设计库可编辑 | **[已定]** | 自由文本，照 Talent/Skill 现模式；是否升级结构化 timing 枚举 = open |
 | `notes` | str | 叙述层 | 设计库可编辑 | **[已定]** | 备注 |
 | `engine_json` | str（Godot 引擎块**只读镜像**） | 引擎镜像层 | **Godot权威→镜像** | **[已定]** 纪律 / schema [提案] | ★照 **Talent 只读**（不进 `RelicIn/RelicPatch` 写模型）；Godot `data/relics` 格式未冻结→先 DEFER 不校验 |
@@ -174,13 +222,14 @@ Talent 的做法就是本研究声明的「只读镜像」纪律的正确范本�
 | `shelf_state` / `trashed_at` | 状态 | 设计库自动派生 | **[提案]** | 上架/回收站正交，照 Talent 软删 |
 | `updated_at` / `updated_by` | 元数据 | 设计库自动派生 | **[提案]** | 自动时间戳 + CF Access 身份 |
 
-### 5.3 提案候选字段（放 engine_json 内，待裁决）
+### 5.3 裁决后字段（2026-07-05）
 
 | 字段 | 层 | 三态 | 说明 |
 |---|---|---|---|
-| `unique`（bool） | 引擎镜像 | **[提案]**（缺口） | KB 零规定；「每角色独立掉落×4」下「唯一」语义歧义（跨角色互斥 vs 单角色池内）→ §10 |
-| `stackable`（none/count/upgrade） | 引擎镜像 | **[提案]**（缺口） | KB 零规定；取值与上限须裁决 |
-| `pool_weight`（int） | 引擎镜像 | **[提案]** | 独立掉落权重；20+ 小池下建议先用 rarity 分桶 |
+| `synergy_categories`（array 1-3） | 引擎镜像 | **[已定] 预留字段** | ★羁绊类别词条（见顶部羁绊系统）；不预定义值、羁绊阈值效果未来设计 |
+| ~~`unique`（去重规则）~~ | — | **[已定] 不做** | 用户裁决不做去重规则，有需求再加（≠ 稀有度档 unique） |
+| ~~`stackable`~~ | — | **[已定] 不做** | 用户裁决不做，有需求再加 |
+| `pool_weight`（int） | 引擎镜像 | **[已定] 先不做** | Q9：先按 rarity 分桶；若单 run 难凑羁绊再评估「同羁绊掉落轻微优先」 |
 
 ---
 
@@ -194,7 +243,7 @@ Talent 的做法就是本研究声明的「只读镜像」纪律的正确范本�
 | `name` | str（中文名） | 叙述层 | 设计库可编辑 | **[已定]** | |
 | `description` | str（中文描述） | 叙述层 | 设计库可编辑 | **[已定]** | |
 | `slot` | enum 中文（武器/防具）**[新增枚举]** | 叙述层 | 设计库可编辑 | **[已定]** 两槽 | ⚠ accessory/off-hand（剑圣双持）4 槽 Demo 未收敛 → §10 |
-| `rarity` | enum 中文（普通/稀有/史诗/传奇） | 叙述层 | 设计库可编辑 | **[已定]** 维度 / 归类 [占位] | 复用 `Rarity`；供 `reward_resolver` 品质加权抽取 |
+| `rarity` | enum 中文 5 档（普通/稀有/史诗/传奇/**独特**） | 叙述层 | 设计库可编辑 | **[已定]** 5 档 + 颜色 / 归类 [占位] | 复用 `Rarity`（**扩 5 档**）；高稀有度=高数值或高稀有度词条；供 `reward_resolver` 品质加权抽取 |
 | `notes` | str | 叙述层 | 设计库可编辑 | **[已定]** | |
 | `engine_json` | str（Godot 引擎块**只读镜像**） | 引擎镜像层 | **Godot权威→镜像** | **[已定]** 纪律 / schema [提案] | ★照 Talent 只读；含 `slot`(en)/`tier`(int)/`rarity`(en)/`stats{}`；stats 现未接引擎 |
 
@@ -206,13 +255,13 @@ Talent 的做法就是本研究声明的「只读镜像」纪律的正确范本�
 | `eng_stat_total` | 派生列 | **[提案]** | `sum(stats.values())` 粗功率镜像，供跨 tier 数值离群初筛；stats 键动态不宜逐键拍平（脆弱），仅派生一个聚合列 |
 | `tags` / `status` / `shelf_state` / `trashed_at` / `updated_*` | 关联/状态/元数据 | **[提案]** | 照 Talent 复用；装备非 build-defining，标签需求弱于遗物 |
 
-### 6.3 提案候选字段（放 engine_json 内，待裁决）
+### 6.3 裁决后字段（2026-07-05）
 
 | 字段 | 三态 | 说明 |
 |---|---|---|
-| `affixes`（array） | **[提案]**（D4 未采纳） | D4 完整词缀体系从未 locked。⚠**澄清**：`data/affixes/` 目录是**敌人词条**系统（`af_`/`afs_` 前缀，run-loop 敌人分层），**与装备词缀无关**。是否引入 + 深度上限 → §10 |
-| `requirements`（object：职业/等级限制） | **[提案]** | v0 无限制、KB 未规定；剑圣双持 off-hand 若保留会引入职业专属槽 → 与装备槽收敛绑定 |
-| `tier` 归属 | **[已定]** 品阶方向 / 阈值 [占位] | tier 数值层在 engine_json（Godot 权威）；叙述层是否也暴露 tier 见 §10 品质维度对称问题 |
+| `affixes`（array） | **[已定] 引入** | Q6：装备 = 基础数值 + 特殊词条；高稀有度=高数值或高稀有度词条。放 `engine_json`，`type` 开放 string 作逃生舱口（同遗物 effects）。⚠ 与敌人 `data/affixes/`（`af_`/`afs_` 前缀）**无关**。具体词条设计依赖后续，本次预留字段 |
+| `tier`（int） | **[已定]** 只提供额外数值加成 / 阈值 [占位] | Q8：装备品质非对称——rarity（+ 决定词条强度）+ tier（额外数值加成）两维。tier 数值层在 engine_json |
+| `requirements`（object：职业/等级限制） | **[已定] 按需** | Q7：装备固定两槽；职业特殊机制（如剑圣双持）作**专属特例单独处理**，不进通用 EquipSlot。若特例需条件再加 requirements |
 
 ---
 
@@ -227,13 +276,13 @@ Talent 的做法就是本研究声明的「只读镜像」纪律的正确范本�
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["rarity", "category", "slot_cost", "effects", "is_passive"],
+  "required": ["rarity", "slot_cost", "effects", "is_passive"],
   "properties": {
     "id": {"type": "string"},          // 可选；build_godot_relic 由行注入权威 id
     "name": {"type": "string"},        // 可选；注入权威 name
     "description": {"type": "string"},
-    "rarity": {"enum": ["common", "rare", "epic", "legendary"]},  // 核心枚举严格；legendary 现悬空 [占位]
-    "category": {"enum": ["economy", "stat", "build"]},           // ⚠ 三分法；改两原型待裁决
+    "rarity": {"enum": ["common", "rare", "epic", "legendary", "unique"]},  // 5 档 [已定]；unique 特殊事件产出、UI 红
+    "synergy_categories": {"type": "array", "items": {"type": "string"}, "maxItems": 3},  // 羁绊类别 1-3 项 [已定 预留]；不预定义值、羁绊阈值效果未来设计
     "slot_cost": {"type": "integer", "minimum": 0},               // v0 恒 1 [占位]
     "is_passive": {"type": "boolean"},                            // v0 恒 true；主动遗物未设计
     "effects": {
@@ -252,10 +301,8 @@ Talent 的做法就是本研究声明的「只读镜像」纪律的正确范本�
   },
   "additionalProperties": {"type": ["integer", "number", "boolean", "string"]}
 }
-// 提案（待裁决）可选顶层字段：
-//   "unique": boolean / "stackable": {enum: ["none","count","upgrade"]}
-//   "trigger": {enum: ["on_turn_start","on_attack","on_kill","on_damage_taken"]}（回合制词表，⚠禁 proc coefficient/秒 duration）
-//   "pool_weight": integer
+// 已裁决（2026-07-05）：unique/stackable 去重规则【不做】；trigger 用【自由文本】（叙述层，不入 engine schema）；
+// 掉落先【rarity 分桶】。synergy_categories 预留字段；羁绊阈值效果表（类别→数量→效果）独立未来设计（可能落 data/synergies/）。
 ```
 
 ### 7.2 GODOT_EQUIPMENT_SCHEMA（草图）
@@ -267,20 +314,28 @@ Talent 的做法就是本研究声明的「只读镜像」纪律的正确范本�
   "required": ["slot", "tier", "rarity", "stats"],
   "properties": {
     "id": {"type": "string"}, "name": {"type": "string"}, "description": {"type": "string"},
-    "slot": {"enum": ["weapon", "armor"]},                       // 两槽定稿；accessory/off-hand 待裁决
+    "slot": {"enum": ["weapon", "armor"]},                       // 两槽定稿 [已定 Q7]；职业特殊机制（如剑圣双持）作专属特例，不进通用枚举
     "tier": {"type": "integer", "minimum": 1},                   // 品阶方向已定 / 阈值 [占位]
-    "rarity": {"enum": ["common", "rare", "epic", "legendary"]}, // legendary 现悬空 [占位]
+    "rarity": {"enum": ["common", "rare", "epic", "legendary", "unique"]}, // 5 档 [已定]；unique UI 红
     "stats": {
       "type": "object",
       "propertyNames": {"enum": ["STR","MAG","DEX","DEF","RES","SPD","LCK","MOV","VIS","max_hp","hit"]},
-      "additionalProperties": {"type": "integer"}               // 值 flat 整数 [占位]
+      "additionalProperties": {"type": "integer"}               // 值 flat 整数 [占位]；基础数值
+    },
+    "affixes": {                                                // [已定 引入 Q6]；特殊词条，高稀有度=高强度，具体设计后续
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["type"],
+        "properties": {"type": {"type": "string"}, "value": {"type": "number"}},  // type 开放 string 逃生舱口
+        "additionalProperties": {"type": ["integer","number","boolean","string"]}
+      }
     }
   },
   "additionalProperties": {"type": ["integer", "number", "boolean", "string"]}
 }
-// 提案（待裁决）：
-//   "affixes": array（装备词缀，D4 未采纳；与敌人 data/affixes 词条无关）
-//   "requirements": object（职业/等级限制）
+// 已裁决（2026-07-05）：affixes【引入】（见 properties）；rarity 5 档；tier 只提供额外数值加成。
+//   "requirements": object（职业/等级限制）——按需（职业特殊机制作专属特例）。
+//   ⚠ 装备 affixes 与敌人 data/affixes（af_/afs_ 敌人词条）是两个无关系统。
 ```
 
 ---
@@ -320,8 +375,8 @@ Talent 的做法就是本研究声明的「只读镜像」纪律的正确范本�
 
 | 环节 | 改动 |
 |---|---|
-| **建表** `models.py` | 新增 `class Relic` + `class Equipment`（照 Skill/Talent）。★两表**省略 `class_id` 与 `game_class` 关系**（遗物全局掉落池、装备非职业锁）——待用户确认（§10）。新增 `relic_tag` / `equipment_tag` 关联表 + `Tag.relics`/`Tag.equipment` 反向关系。engine_json 照 Talent 只读。 |
-| **枚举** | 复用：`Rarity` / `TalentStatus` / `ShelfState`。新建：`RelicArchetype`(经济类/流派类，[提案] 两分 vs 三分)、`EquipSlot`(武器/防具，[已定])。可选：`RelicStackRule`([提案])。遗物/装备**均不设 `DamageType`**（遗物是 effects 修饰、装备是纯 stats）。 |
+| **建表** `models.py` | 新增 `class Relic` + `class Equipment`（照 Skill/Talent）。★两表**省略 `class_id` 与 `game_class` 关系**（Q1：遗物不绑职业、全局掉落池）。★**不建 `relic_tag`/`equipment_tag` 关联表**——遗物羁绊类别由 `engine_json.synergy_categories` 承载（Q2：羁绊类别 ≠ 天赋 Tag），不复用 Tag 表；如需按羁绊类别筛选，从 engine_json 派生列/小表。engine_json 照 Talent 只读。 |
+| **枚举** | **扩档**：`Rarity` 从 4 档扩到 **5 档**（加 `unique`/独特/红）+ 颜色映射（白/蓝/紫/金/红）——**遗物/装备/天赋共用**，天赋卡片也要支持 unique。复用：`TalentStatus` / `ShelfState`。新建：`EquipSlot`(武器/防具，[已定])。**移除** `RelicArchetype`（Q2 改用 `synergy_categories` 数组字段，非枚举）。遗物/装备**均不设 `DamageType`**。 |
 | **API** | 新建 `api/relics.py` + `api/equipment.py`，各照 `talents.py` 五路由（list/get/create/patch/delete）。写路由挂 `require_token`；DELETE 照 Talent 软删。★engine_json **不进 In/Patch 写模型，仅 Out 只读暴露**。 |
 | **校验** | 新建 `validation/relic_export.py` + `equipment_export.py`（照 `godot_export.py`）。但按纪律 engine_json 是只读镜像且格式未冻结 → **先 DEFER**（不校验、不进写模型），待 Godot 定稿再补 fail-closed 校验门。 |
 | **模板** | `relics.html` + `equipment.html`（照 `skills.html`）。★engine_json 照 `talent_detail.html` 做**只读展示灰框**，不做可编辑 textarea。 |
@@ -329,9 +384,9 @@ Talent 的做法就是本研究声明的「只读镜像」纪律的正确范本�
 
 ---
 
-## 10. ★需用户裁决的结构级问题（附 grounded 推荐）
+## 10. 结构级问题裁决记录（✅ 2026-07-05 已全部裁决）
 
-> 参数级数字一律 [占位] 自行推进；下列**结构级**冲突属设计裁决，需用户拍板。每条给出我的 grounded 推荐（带真源出处）。
+> **9 条已由用户全部裁决**——裁决结论见顶部「★ 用户裁决与字段定稿」章节，字段规格已据此更新。下表保留原提案 + 我的推荐作**过程记录**（多数裁决与推荐一致；Q2 用户给出更好的方案=羁绊系统，Q6 用户选择引入词缀）。
 
 | # | 结构级问题 | grounded 推荐 |
 |---|---|---|
@@ -358,7 +413,9 @@ Talent 的做法就是本研究声明的「只读镜像」纪律的正确范本�
 - 装备 `rarity` 每件归类 — 用于品质加权抽取
 - 装备 `stats` 数值（`{STR:2}` / `{DEF:4,RES:1}` / `{DEF:5,max_hp:10}` 等） — 声明式、未接引擎
 - 门奖励品质权重 / 商店定价 / Boss 包 forced_rarity — act1_config.json
-- **legendary 稀有度池悬空**：`data/relics/` 与 `data/equipment/` 均无 legendary 条目，但 Boss `forced_rarity` + 商店定价引用 legendary → 抽取会回退 — 需补 legendary 池或明确该档暂空
+- **legendary / unique 稀有度池悬空**：`data/relics/` 与 `data/equipment/` 均无 legendary/unique 条目，但 Boss `forced_rarity` + 商店定价引用 legendary → 抽取会回退 — 需补池或明确该档暂空。unique（新增第 5 档，红）为特殊事件产出，池待建
+- **遗物 `synergy_categories` 具体类别值 + 羁绊阈值效果表** — [占位 / 未来设计]（Q2 只预留字段，羁绊内容留设计层，可能落 `data/synergies/`）
+- **装备 `affixes` 特殊词条具体内容 + 各稀有度的词条强度曲线** — [占位 / 依赖后续设计]（Q6 只预留字段）
 - （若采纳）遗物 `pool_weight` / `stackable` 计数上限 / 装备 `affix` 词缀数值 — 占位
 
 ---

@@ -31,6 +31,13 @@
     --attr-godot: #c05a4a;  /* Godot权威→镜像（只读·锁·红调） */
     --attr-edit: #5fa869;   /* 设计库可编辑（绿调） */
     --attr-derive: #6d8bb0; /* 设计库自动派生（灰调） */
+
+    /* 稀有度 5 档（游戏内 UI 颜色，Q3 裁决） */
+    --rar-common: #d0d0d6;    /* 普通 白 */
+    --rar-rare: #3f8fe0;      /* 稀有 蓝 */
+    --rar-epic: #a45fd0;      /* 史诗 紫 */
+    --rar-legendary: #e0a520; /* 传奇 金 */
+    --rar-unique: #d83b3b;    /* 独特 红 */
   }
   * { box-sizing: border-box; }
   body {
@@ -52,9 +59,11 @@
   section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
             padding: 20px 24px; margin-bottom: 18px; }
   h2 { margin: 0 0 14px; font-size: 17px; font-weight: 600; color: #f0f0f4;
-       display: flex; align-items: center; gap: 8px; }
+       display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   h2 .sec-tag { font-size: 12px; color: var(--muted); font-weight: 400; }
-  h3 { margin: 18px 0 8px; font-size: 14px; font-weight: 600; color: #d8d8e0; }
+  h3 { margin: 18px 0 8px; font-size: 14px; font-weight: 600; color: #d8d8e0;
+       display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  h3 .sec-tag { font-size: 11.5px; color: var(--muted); font-weight: 400; }
   h3.star::before { content: "★ "; color: #d4af37; }
   p, li { font-size: 13.5px; }
   .muted { color: var(--muted); }
@@ -98,6 +107,7 @@
   .badge.gap  { color: #a8a8b2; border-color: #6a6a76; background: rgba(138,138,150,0.14); }
   .badge.conf { color: #d98a7a; border-color: #c05a4a; background: rgba(192,90,74,0.16); }
   .badge.park { color: #a89fc8; border-color: #7a6aa8; background: rgba(122,106,168,0.16); }
+  .badge.verdict { color: #8fe098; border-color: var(--ts-done); background: rgba(95,168,105,0.24); }
 
   /* 数据流归属 chip（配色轴三） */
   .attr { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 10px;
@@ -106,6 +116,10 @@
   .attr.edit   { color: #7fc98a; border-color: var(--attr-edit);   background: rgba(95,168,105,0.13); }
   .attr.derive { color: #9fb0c8; border-color: var(--attr-derive); background: rgba(109,139,176,0.13); }
   .ic { width: 12px; height: 12px; flex: none; }
+
+  /* 划掉「不做」 */
+  .strike { text-decoration: line-through; text-decoration-color: #c05a4a; text-decoration-thickness: 2px;
+            color: var(--muted); }
 
   /* 图例（三配色轴） */
   .legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 6px; }
@@ -122,6 +136,31 @@
   .callout.warn b { color: #dba86a; }
   .callout.ok   { background: rgba(95,168,105,0.08); border-color: var(--ts-done); }
   .callout.ok b { color: #7fc98a; }
+  .callout.synergy { background: rgba(154,127,200,0.11); border-color: var(--engine); }
+  .callout.synergy b { color: #b79fe0; }
+  .callout ul { margin: 8px 0 4px; padding-left: 20px; }
+  .callout ul li { margin-bottom: 5px; font-size: 12.8px; }
+  .callout .cl-foot { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border);
+                      font-size: 12.5px; color: #c8c8d2; }
+
+  /* ★ 顶部裁决大区 */
+  section.verdict-top {
+    border: 1px solid var(--ts-done);
+    box-shadow: 0 0 0 1px rgba(95,168,105,0.18), 0 6px 26px rgba(0,0,0,0.34);
+    background: linear-gradient(180deg, rgba(95,168,105,0.08), var(--surface) 130px);
+  }
+  section.verdict-top > h2 { color: #9fe0a8; }
+  section.verdict-top > h2 .sec-tag { color: #7fc98a; }
+
+  /* 稀有度 5 色卡 */
+  .rarity-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 14px 0; }
+  .rarity-card { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: var(--surface-2); }
+  .rarity-swatch { height: 54px; display: flex; align-items: center; justify-content: center;
+                   font-weight: 700; font-size: 16px; letter-spacing: 3px; }
+  .rarity-body { padding: 8px 12px 10px; font-size: 12px; line-height: 1.5; }
+  .rarity-body .rn { font-weight: 600; font-size: 12.5px; color: #e8e8ec; }
+  .rarity-body .rc { color: var(--muted); }
+  .rarity-body code { font-size: 11px; }
 
   /* 三层承载模式卡片 */
   .tier-card { border-left: 4px solid; background: var(--surface-2); padding: 12px 16px; border-radius: 4px;
@@ -151,19 +190,28 @@
   pre.code .cmt { color: #6f8f7a; font-style: italic; }
   pre.code .key { color: #8fbce0; }
   pre.code .pun { color: #7f7f8a; }
+  pre.code .new { color: #8fe098; }
 
   /* 裁决问题卡片 */
   .q-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
   .q-card { background: var(--surface-3); border: 1px solid var(--border); border-left: 4px solid var(--status);
             border-radius: 6px; padding: 14px 16px; }
+  .q-card.decided { border-left-color: var(--ts-done); }
   .q-head { display: flex; gap: 10px; align-items: baseline; margin-bottom: 8px; flex-wrap: wrap; }
   .q-num { background: var(--status); color: #16161c; font-weight: 700; font-size: 12px; border-radius: 5px;
            padding: 2px 9px; flex: none; }
+  .q-card.decided .q-num { background: var(--ts-done); }
   .q-title { font-weight: 600; font-size: 13.5px; color: #f0e0d0; }
-  .q-q { font-size: 13px; color: #d0d0da; margin: 0 0 8px; }
-  .q-rec { background: rgba(95,168,105,0.08); border-left: 3px solid var(--ts-done); padding: 8px 12px;
+  .q-verdict { background: rgba(95,168,105,0.13); border-left: 3px solid var(--ts-done);
+               padding: 9px 12px; border-radius: 0 4px 4px 0; font-size: 12.8px; color: #d4ecd6; margin: 0 0 8px; }
+  .q-verdict b { color: #8fe098; }
+  .q-q { font-size: 12.8px; color: #d0d0da; margin: 0 0 8px; }
+  .q-rec { background: rgba(74,127,184,0.07); border-left: 3px solid var(--ts-prop); padding: 8px 12px;
            border-radius: 0 4px 4px 0; font-size: 12.5px; color: #cdd0d8; }
-  .q-rec b { color: #7fc98a; }
+  .q-rec b { color: #7fa8d8; }
+  .q-process { margin-top: 4px; }
+  .q-process > summary { cursor: pointer; font-size: 11.8px; color: var(--muted); padding: 4px 0; list-style: revert; }
+  .q-process[open] > summary { margin-bottom: 6px; }
 
   /* 折叠占位清单 */
   details { background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 4px 16px; }
@@ -171,6 +219,7 @@
   details[open] summary { border-bottom: 1px solid var(--border); margin-bottom: 8px; }
   details ul { margin: 4px 0 12px; padding-left: 20px; }
   details li { margin-bottom: 6px; font-size: 12.6px; color: #c8c8d2; }
+  .q-process { background: none; border: none; padding: 0; }
 
   footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 30px;
            border-top: 1px solid var(--border); padding-top: 16px; }
@@ -214,12 +263,12 @@
     遗物（Relic）与装备（Equipment）可照设计库现有 Skill / Talent 的承载模式加入：
     <b>叙述层字段</b>（名 / 描述 / 稀有度标注 / 生效时机 / 标签）在设计库直接维护；
     <b>引擎数值层 <code>engine_json</code></b> 照 <b>Talent 的只读镜像模式</b>（Godot 权威 → Mercury 回填，设计库不手编）。
-    字段清单、jsonschema 草图、软件改动面已给出；<b>9 个结构级冲突需用户裁决</b>。
+    字段清单、jsonschema 草图、软件改动面已给出；<b>9 个结构级冲突已于 2026-07-05 由用户全部裁决、字段据此定稿</b>（详见下方 <b>★ 用户裁决与字段定稿</b> 章节）。
   </p>
   <p class="meta">
     SoT main（研究 + 字段结论）→ 交 Mercury（设计库软件实装）·
-    2026-07-05 · <span class="badge gap">research_deliverable</span>
-    权威边界：结构级裁决属用户 / 软件实装属 Mercury / 本文不写 KB 正式规格、不改设计库代码、不手编 <code>engine_json</code>
+    2026-07-05 · <span class="badge verdict">✅ 字段已定稿</span> <span class="badge gap">research_deliverable</span>
+    权威边界：结构级裁决属用户（<b>已完成</b>）/ 软件实装属 Mercury / 本文不写 KB 正式规格、不改设计库代码、不手编 <code>engine_json</code>
   </p>
 </header>
 
@@ -248,9 +297,10 @@
         <span class="badge gap">缺口</span>
         <span class="badge conf">冲突</span>
         <span class="badge park">park 候选</span>
+        <span class="badge verdict">✅ 已裁决</span>
       </div>
       <p class="fs-sm muted" style="margin:8px 0 0;">
-        <b>已定</b>=KB 正本/用户裁决 · <b>提案</b>=方向建议待确认 · <b>占位</b>=数字纯填坑随时可换 ·（缺口/冲突/park 为补充状态标记）
+        <b>已定</b>=KB 正本/用户裁决 · <b>提案</b>=方向建议待确认 · <b>占位</b>=数字纯填坑随时可换 ·（缺口/冲突/park 为补充状态标记；<b>✅ 已裁决</b>=2026-07-05 本次拍板）
       </p>
     </div>
 
@@ -269,6 +319,82 @@
   </div>
 </section>
 
+<!-- ============ ★ 用户裁决与字段定稿（2026-07-05） · 醒目置顶 ============ -->
+<section id="verdict" class="verdict-top">
+  <h2>★ 用户裁决与字段定稿 <span class="sec-tag">2026-07-05 · 第 10 节 9 个结构级冲突已全部裁决</span></h2>
+  <p class="fs-sm" style="margin-top:0;">
+    第 10 节的 9 个结构级冲突已由用户<b>全部裁决</b>，字段规格据此<b>定稿</b>。下为裁决速览；其中
+    <b>遗物羁绊系统</b>（Q2 展开）与 <b>稀有度 5 档</b>（Q3 展开）是本次两处最重要的结构变化。
+  </p>
+
+  <h3 class="star">裁决速览 <span class="sec-tag">Q1–Q9</span></h3>
+  <div class="tbl-wrap">
+    <table class="wide">
+      <thead><tr><th style="width:46px;">#</th><th style="min-width:150px;">冲突</th><th>裁决结论</th></tr></thead>
+      <tbody>
+        <tr><td><b>Q1</b></td><td>遗物是否绑职业</td><td><span class="badge verdict">✅ 已定</span> <b>不绑定</b>——遗物为全局实体，无 <code>class_id</code></td></tr>
+        <tr><td><b>Q2</b></td><td>遗物分类法</td><td><span class="badge verdict">✅ 已定</span> <b>不用固定 archetype 枚举</b>；改为「羁绊类别词条」<code>synergy_categories</code>——见下方羁绊系统</td></tr>
+        <tr><td><b>Q3</b></td><td>稀有度词表</td><td><span class="badge verdict">✅ 已定</span> <b>统一 5 档</b>：common / rare / epic / legendary + <b>新增 unique</b>；遗物/装备/<b>天赋</b>三者共用；颜色 白/蓝/紫/金/<b>红</b></td></tr>
+        <tr><td><b>Q4</b></td><td>遗物 unique / stackable 去重规则</td><td><span class="badge verdict">✅ 已定</span> <b>不做</b>（有需求再加）</td></tr>
+        <tr><td><b>Q5</b></td><td>遗物 trigger</td><td><span class="badge verdict">✅ 已定</span> <b>自由文本</b>，与天赋一致</td></tr>
+        <tr><td><b>Q6</b></td><td>装备词缀 affix</td><td><span class="badge verdict">✅ 已定</span> <b>引入</b>——装备 = 基础数值 + 特殊词条；高稀有度=高数值或高稀有度词条；具体依赖后续设计</td></tr>
+        <tr><td><b>Q7</b></td><td>装备槽</td><td><span class="badge verdict">✅ 已定</span> <b>固定两槽</b>（武器+防具）；职业特殊机制作专属特例单独处理</td></tr>
+        <tr><td><b>Q8</b></td><td>品质维度</td><td><span class="badge verdict">✅ 已定</span> <b>非对称</b>：遗物按 rarity；装备 rarity + tier（tier 只提供额外数值加成）</td></tr>
+        <tr><td><b>Q9</b></td><td>掉落权重</td><td><span class="badge verdict">✅ 已定</span> <b>rarity 分桶</b>（必要）；后续若单 run 凑不齐羁绊，再评估「同羁绊掉落轻微优先」</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="star">遗物羁绊系统 <span class="sec-tag">Q2 裁决展开 · 自走棋式凑羁绊</span></h3>
+  <div class="callout synergy">
+    用户裁决：遗物<b>类似自走棋凑羁绊</b>——
+    <ul>
+      <li>每个遗物带 <b>1-3 个「类别词条」</b>（<code>synergy category</code>，<b class="warn-mark">与设计库/天赋的 Tag 不是同一个东西</b>）。</li>
+      <li>同一类别凑到一定数量 → 触发<b>额外羁绊效果</b>（自走棋 bond 式）。</li>
+      <li><b>不需要提前分类</b>（具体类别与羁绊阈值效果留给设计层），但<b>数据结构需预留字段</b>。</li>
+    </ul>
+    <div class="cl-foot">
+      <b>字段落地</b>：遗物 <code>engine_json</code> 预留 <code>synergy_categories: [str]</code>（1-3 项、开放字符串、不预定义）——引擎层（羁绊逻辑由 Godot 消费），设计库只读镜像。
+      羁绊阈值效果表（类别 → 数量阈值 → 效果）是<b>独立的未来设计</b>（届时可能落 <code>data/synergies/</code> 或 <code>relics-system.md</code>），本次<b>只预留遗物侧字段、不设计羁绊内容</b>。
+      原「archetype 经济类/流派类」枚举与引擎「economy/stat/build 三分」<b>都不再作为固定分类字段</b>——遗物分类维度统一由 <code>synergy_categories</code> 承载。
+    </div>
+  </div>
+
+  <h3 class="star">稀有度 5 档 <span class="sec-tag">Q3 裁决 · 游戏内 UI 颜色</span></h3>
+  <p class="fs-sm" style="margin-top:0;">
+    影响<b>遗物 / 装备 / 天赋</b>三者 + 设计库 <code>Rarity</code> 枚举扩档（4 档 → 5 档，新增 <code>unique</code>）。下为游戏内 UI 真实色块：
+  </p>
+  <div class="rarity-cards">
+    <div class="rarity-card">
+      <div class="rarity-swatch" style="background:var(--rar-common);color:#16161c;">普通</div>
+      <div class="rarity-body"><span class="rn">普通</span> · <code>common</code><br><span class="rc">颜色：白</span></div>
+    </div>
+    <div class="rarity-card">
+      <div class="rarity-swatch" style="background:var(--rar-rare);color:#f0f6ff;">稀有</div>
+      <div class="rarity-body"><span class="rn">稀有</span> · <code>rare</code><br><span class="rc">颜色：蓝</span></div>
+    </div>
+    <div class="rarity-card">
+      <div class="rarity-swatch" style="background:var(--rar-epic);color:#ffffff;">史诗</div>
+      <div class="rarity-body"><span class="rn">史诗</span> · <code>epic</code><br><span class="rc">颜色：紫</span></div>
+    </div>
+    <div class="rarity-card">
+      <div class="rarity-swatch" style="background:var(--rar-legendary);color:#1a1206;">传奇</div>
+      <div class="rarity-body"><span class="rn">传奇</span> · <code>legendary</code><br><span class="rc">颜色：金</span></div>
+    </div>
+    <div class="rarity-card">
+      <div class="rarity-swatch" style="background:var(--rar-unique);color:#ffffff;">独特</div>
+      <div class="rarity-body"><span class="rn">独特</span> · <code>unique</code> <span class="badge verdict">新增</span><br><span class="rc">颜色：红</span></div>
+    </div>
+  </div>
+  <div class="callout warn">
+    <span class="warn-mark">⚠ 给 Mercury</span>：设计库现有 <code>Rarity</code> 枚举是 4 档，需<b>扩到 5 档并加 <code>unique</code>（红）</b>；
+    <b>天赋卡片也要支持 unique 档</b>（用户明确遗物 / 装备 / 天赋共用）。unique 定位为<b>特殊事件产出</b>的特殊稀有度。
+    <div class="cl-foot">
+      注意区分：Q3 的 <code>unique</code> 是<b>稀有度档位</b>（第 5 档，红），与 Q4 的「unique <b>去重规则</b>」是两个不同概念——后者<b>不做</b>。
+    </div>
+  </div>
+</section>
+
 <!-- ============ §0 边界 ============ -->
 <section id="boundary">
   <h2>本研究的边界 <span class="sec-tag">§0 · 务必先读</span></h2>
@@ -278,7 +404,7 @@
       <tbody>
         <tr><td><b>本研究（SoT main）做</b></td><td>回 KB 真源核对 + 读设计库/引擎代码 + 业界做法研究 → 产出字段规格 + 数据流结论 + 软件改动面参考</td></tr>
         <tr><td><b>本研究不做</b></td><td>不改设计库代码（软件实装归 Mercury）；不写 KB 正式规格（<code>relics-system.md</code> / <code>equipment.md</code> 属设计裁决，需用户先拍板）；不手编设计库 <code>engine_json</code></td></tr>
-        <tr><td><span class="badge conf">用户裁决</span></td><td>第 10 节的 9 个结构级冲突</td></tr>
+        <tr><td><span class="badge verdict">用户裁决</span></td><td>第 10 节的 9 个结构级冲突 <span class="badge verdict">✅ 2026-07-05 已全部裁决</span>（结论见 <b>★ 用户裁决与字段定稿</b> 章节）</td></tr>
         <tr><td><span class="attr edit" style="border:none;background:none;padding:0;">Mercury 实装</span></td><td>第 9 节的设计库软件改动（建表 / 枚举 / API / 校验 / 模板 / 回填配置）</td></tr>
       </tbody>
     </table>
@@ -452,8 +578,8 @@
 { <span class="key">"id"</span>:"relic_vampiric_fang", <span class="key">"name"</span>:"吸血獠牙", <span class="key">"rarity"</span>:"epic", <span class="key">"category"</span>:"build",
   <span class="key">"slot_cost"</span>:1, <span class="key">"effects"</span>:[{ <span class="key">"type"</span>:"lifesteal_pct", <span class="key">"value"</span>:25 }], <span class="key">"is_passive"</span>:true }</pre>
   <ul class="fs-sm" style="padding-left:20px; margin:6px 0;">
-    <li><b>rarity 实际取值</b>：<code>common</code> / <code>epic</code> / <code>legendary</code>（三档在用；<code>rare</code> 也在 RewardDrop 词表）。</li>
-    <li><b>category 实际取值</b>：<code>economy</code> / <code>stat</code> / <code>build</code>（<b>三分法</b>——与 KB 的两原型冲突，见 §4/§10）。</li>
+    <li><b>rarity 实际取值</b>：<code>common</code> / <code>epic</code> / <code>legendary</code>（三档在用；<code>rare</code> 也在 RewardDrop 词表）。<span class="badge verdict">✅ 裁决后</span> 统一扩为 5 档（加 <code>unique</code>）。</li>
+    <li><b>category 实际取值</b>：<code>economy</code> / <code>stat</code> / <code>build</code>（<b>三分法</b>）—— <span class="badge verdict">✅ 裁决后</span> 该固定分类字段<b>弃用</b>，改由 <code>synergy_categories</code>（羁绊类别）承载，见 <b>★ 裁决</b> 章节。</li>
     <li><b>effects 9 类</b>（全声明式、无执行器、全 <span class="badge ph">占位</span>）：<code>gold_gain_pct</code> / <code>exp_gain_pct</code> / <code>talent_point_bonus</code>（经济 3）、<code>stat_flat</code> / <code>crit_bonus</code> / <code>move_bonus</code> / <code>damage_reduction_pct</code>（数值 4）、<code>lifesteal_pct</code> / <code>low_hp_damage_bonus_pct</code>（背水/流派 3）。</li>
     <li><b>slot_cost</b> 恒 1 <span class="badge ph">占位</span>；<b>is_passive</b> 恒 true（主动/触发型遗物未设计）。</li>
   </ul>
@@ -466,8 +592,8 @@
   <span class="key">"rarity"</span>:"epic", <span class="key">"stats"</span>:{ <span class="key">"DEF"</span>:5, <span class="key">"max_hp"</span>:10 } }</pre>
   <ul class="fs-sm" style="padding-left:20px; margin:6px 0;">
     <li><b>slot</b>：<code>weapon</code> / <code>armor</code>（两槽 <span class="badge done">已定</span>）。</li>
-    <li><b>tier</b>：整数 <code>1</code> / <code>2</code>（品阶，与 rarity 是<b>两个维度</b>——见 §10）。</li>
-    <li><b>stats 键</b>：<code>STR</code> / <code>DEF</code> / <code>RES</code> / <code>max_hp</code> / <code>hit</code> 等（ADR-005 属性 + 派生量），值 flat 整数 <span class="badge ph">占位</span>。<span class="warn-mark">未接引擎</span>（<code>run_manager.gd:412</code> 明注 equipment 未接 stats）。</li>
+    <li><b>tier</b>：整数 <code>1</code> / <code>2</code>（品阶，与 rarity 是<b>两个维度</b>）。<span class="badge verdict">✅ 裁决后</span> tier <b>只提供额外数值加成</b>（Q8）。</li>
+    <li><b>stats 键</b>：<code>STR</code> / <code>DEF</code> / <code>RES</code> / <code>max_hp</code> / <code>hit</code> 等（ADR-005 属性 + 派生量），值 flat 整数 <span class="badge ph">占位</span>。<span class="warn-mark">未接引擎</span>（<code>run_manager.gd:412</code> 明注 equipment 未接 stats）。<span class="badge verdict">✅ 裁决后</span> 装备新增 <code>affixes</code> 特殊词条（Q6）。</li>
   </ul>
 
   <h3>消费点（GDScript）</h3>
@@ -490,10 +616,10 @@
         <tr><td>Relic 为正典、Rune 废案；数据层 <code>data/relics/</code>、<code>RewardDrop.kind="relic"</code>、无 <code>rune</code></td><td><span class="badge done">已定</span> ADR-010</td><td>adr-2026-07-02</td></tr>
         <tr><td>遗物来源 = Relic door / shop / Events / Boss 特殊 Relic；池 <b>20+ 起</b>（用户预期下限）</td><td><span class="badge done">已定</span> 意图 / <span class="badge ph">占位</span> 规模</td><td>run-loop.md:186</td></tr>
         <tr><td>装备 = 渐进品阶、更高品阶替换、run-reset</td><td><span class="badge done">已定</span></td><td>run-loop.md:184,196</td></tr>
-        <tr><td>D4 装备词缀体系（9 武器+4 防具 type / 4 tier / 5 词缀大类 / 单词缀 ≤±15% 或 ≤1 触发 / 50 模板 / JSON schema 草案）</td><td><span class="badge prop">提案</span> stage2，<b>从未转 locked</b></td><td>D4-equipment-affix.md</td></tr>
+        <tr><td>D4 装备词缀体系（9 武器+4 防具 type / 4 tier / 5 词缀大类 / 单词缀 ≤±15% 或 ≤1 触发 / 50 模板 / JSON schema 草案）</td><td><span class="badge prop">提案</span> stage2 <span class="badge verdict">✅ 词缀已获采纳</span></td><td>D4-equipment-affix.md</td></tr>
         <tr><td>遗物 rarity tier 是否设计 / reroll / 获取 cost curve / 流派类遗物 vs 流派类 L2 节点冲突</td><td><span class="badge gap">缺口</span> D5 open question 未执行</td><td>architecture-consensus-v2.md:190</td></tr>
         <tr><td><code>relics-system.md</code>（Δ-2）/ <code>equipment.md</code>（Δ-3）正式规格</td><td><span class="badge gap">缺口</span> 从未落地</td><td>architecture-consensus-v2.md:109-121</td></tr>
-        <tr><td>装备 4 槽 Demo（Main Hand / Off Hand 剑圣双持 / Armor / Accessory-TBD）</td><td><span class="badge conf">冲突</span> 与两槽定稿不一致</td><td>class-system.md:448-455</td></tr>
+        <tr><td>装备 4 槽 Demo（Main Hand / Off Hand 剑圣双持 / Armor / Accessory-TBD）</td><td><span class="badge conf">冲突</span> <span class="badge verdict">✅ 两槽定稿</span> 双持作专属特例</td><td>class-system.md:448-455</td></tr>
       </tbody>
     </table>
   </div>
@@ -510,12 +636,12 @@
     <table class="wide">
       <thead><tr><th style="min-width:260px;">警示</th><th style="width:90px;">来源</th><th>已采纳到字段规格的做法</th></tr></thead>
       <tbody>
-        <tr><td><b>声明式 effects 数组「包打天下」被证伪</b>——Slay the Spire 每遗物是独立 Java 类、Hades 是过程式 Lua，JSON 只承载展示文本</td><td>R3 critic</td><td><code>effects[].type</code> 用<b>开放 string</b>（非闭枚举）= <b>脚本逃生舱口</b>：新机制 = 新 type + 新 GDScript 执行器，schema 不锁死</td></tr>
+        <tr><td><b>声明式 effects 数组「包打天下」被证伪</b>——Slay the Spire 每遗物是独立 Java 类、Hades 是过程式 Lua，JSON 只承载展示文本</td><td>R3 critic</td><td><code>effects[].type</code> 用<b>开放 string</b>（非闭枚举）= <b>脚本逃生舱口</b>：新机制 = 新 type + 新 GDScript 执行器，schema 不锁死（装备 <code>affixes[].type</code> 同）</td></tr>
         <tr><td><b>即时制 proc coefficient / 秒 duration 不可照搬</b>——战棋每回合每单位仅 1-2 次判定，样本量小两个数量级</td><td>R1 critic</td><td>trigger 若结构化，只用<b>回合制词表</b>（<code>on_turn_start</code>/<code>on_attack</code>/<code>on_kill</code>/<code>on_damage_taken</code>），<b>禁 proc coefficient / 秒 duration</b></td></tr>
-        <tr><td><b>业界对 build-defining 遗物侧覆盖不足</b>——取样偏动作 roguelite / 持久战役制战棋，缺回合制多角色队伍类先例</td><td>R1/R2 critic</td><td>遗物字段结论<b>不搬装备侧「纯升级」思路</b>；触发/协同/叠加字段全列 <span class="badge prop">提案</span> 待裁决</td></tr>
+        <tr><td><b>业界对 build-defining 遗物侧覆盖不足</b>——取样偏动作 roguelite / 持久战役制战棋，缺回合制多角色队伍类先例</td><td>R1/R2 critic</td><td>遗物字段结论<b>不搬装备侧「纯升级」思路</b>；触发/协同/叠加字段研究阶段全列 <span class="badge prop">提案</span>、不擅自定 → <span class="badge verdict">✅ 2026-07-05 已由用户裁决</span>（羁绊系统 + 词缀引入等）</td></tr>
         <tr><td><b>「武器三角 SoT 已拒绝」是过度断言</b>——实为 park 候选未经用户裁决</td><td>R2 critic</td><td>本文一律标 <span class="badge park">park 候选</span>，不写「已拒绝」</td></tr>
         <tr><td><b>槽位模型（6 遗物槽 + 2 装备槽）已由用户裁决</b>，业界「shared pool 优于固定槽」建议不重开</td><td>R3 critic</td><td>槽位结构按 KB <span class="badge done">已定</span>，不列为 open question</td></tr>
-        <tr><td><b>稀有度/池权重解耦在 20+ 小池下可能过度设计</b></td><td>R3 critic</td><td>建议先用 <code>rarity</code> 分桶（<code>reward_resolver</code> 现状）跑通，独立 <code>pool_weight</code> 列为 <span class="badge prop">提案</span> 按需</td></tr>
+        <tr><td><b>稀有度/池权重解耦在 20+ 小池下可能过度设计</b></td><td>R3 critic</td><td>先用 <code>rarity</code> 分桶（<code>reward_resolver</code> 现状）跑通 <span class="badge verdict">✅ Q9 采纳</span>；独立 <code>pool_weight</code> 先不做</td></tr>
       </tbody>
     </table>
   </div>
@@ -525,7 +651,7 @@
 <section id="relic-fields">
   <h2>遗物字段规格结论 <span class="sec-tag">§5 · ★</span></h2>
 
-  <h3 class="star">核心字段（建议 v1 采纳）</h3>
+  <h3 class="star">核心字段（v1 定稿）</h3>
   <div class="tbl-wrap">
     <table class="wide">
       <thead><tr><th>字段</th><th>类型</th><th>层</th><th>归属</th><th>三态</th><th style="min-width:240px;">说明</th></tr></thead>
@@ -552,25 +678,25 @@
           <td><span class="warn-mark">⚠</span>含内嵌数字（如「20%」）与 engine_json 数值是两处表述，须人工随回填对齐</td>
         </tr>
         <tr class="row-narr">
-          <td><code>rarity</code></td><td>enum 中文（普通/稀有/史诗/传奇）</td>
+          <td><code>rarity</code></td><td>enum 中文 <b>5 档</b>（普通/稀有/史诗/传奇/<b>独特</b>）</td>
           <td><span class="chip narr">叙述层</span></td>
           <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
-          <td><span class="badge done">已定</span>维度 / 归类<span class="badge ph">占位</span></td>
-          <td>复用现有 <code>Rarity</code> 枚举；与引擎英文 rarity 分离（两 taxonomy）</td>
+          <td><span class="badge done">已定</span> 5 档 + 颜色 / 每件归类<span class="badge ph">占位</span></td>
+          <td>复用 <code>Rarity</code> 枚举（<b>需扩到 5 档加 unique 红</b>）；与引擎英文 rarity 分离（两 taxonomy）</td>
         </tr>
-        <tr class="row-narr">
-          <td><code>archetype</code></td><td>enum 中文（经济类/流派类）<span class="badge prop">新增枚举</span></td>
-          <td><span class="chip narr">叙述层</span></td>
-          <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
-          <td><span class="badge done">已定</span>两原型 / 分类法 open</td>
-          <td>KB 定两原型；但引擎用三分（economy/stat/build）→ <b>§10 待裁决</b></td>
+        <tr class="row-engine">
+          <td><code>synergy_categories</code><br><span class="fs-sm muted">取代 <s>archetype</s></span></td><td>array[str]（1-3 项）</td>
+          <td><span class="chip engine">引擎镜像层</span></td>
+          <td><span class="attr godot"><svg class="ic"><use href="#ic-lock"/></svg>Godot权威→镜像</span></td>
+          <td><span class="badge done">已定</span> 预留字段 / 羁绊内容<span class="badge ph">未来设计</span></td>
+          <td>★羁绊类别词条（自走棋凑羁绊），<b class="warn-mark">≠ 天赋 Tag</b>；不预定义分类、留设计层；羁绊逻辑 Godot 消费→放 <code>engine_json</code>。原 archetype 两/三分弃用</td>
         </tr>
         <tr class="row-narr">
           <td><code>trigger</code></td><td>str（生效时机文本）</td>
           <td><span class="chip narr">叙述层</span></td>
           <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
           <td><span class="badge done">已定</span></td>
-          <td>自由文本，照 Talent/Skill 现模式；是否升级结构化 timing 枚举 = open</td>
+          <td>自由文本，照 Talent/Skill 现模式（Q5 定稿：与天赋一致）</td>
         </tr>
         <tr class="row-narr">
           <td><code>notes</code></td><td>str</td>
@@ -604,10 +730,10 @@
         </tr>
         <tr class="row-narr">
           <td><code>tags</code></td>
-          <td><span class="chip narr">叙述层</span>（新增 <code>relic_tag</code> 表）</td>
+          <td><span class="chip narr">叙述层</span>（复用 Tag 表）</td>
           <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
           <td><span class="badge prop">提案</span></td>
-          <td>复用 Tag 表；承载机制轴/流派轴筛选；遗物是 build-defining，标签价值高于装备</td>
+          <td>复用 Tag 表承载机制轴筛选。<span class="warn-mark">⚠ 注意</span>：Tag <b>≠ 羁绊类别</b>（<code>synergy_categories</code>），二者是两回事——不建 <code>relic_tag</code> 关联表（见 §9）</td>
         </tr>
         <tr class="row-status">
           <td><code>status</code>（草稿/待审阅/锁定/待优化）</td>
@@ -634,28 +760,34 @@
     </table>
   </div>
 
-  <h3>提案候选字段（放 engine_json 内，待裁决）</h3>
+  <h3 class="star">裁决后字段（2026-07-05）</h3>
   <div class="tbl-wrap">
     <table class="wide">
       <thead><tr><th>字段</th><th>层</th><th>三态</th><th style="min-width:320px;">说明</th></tr></thead>
       <tbody>
         <tr class="row-engine">
-          <td><code>unique</code>（bool）</td>
+          <td><code>synergy_categories</code>（array 1-3）</td>
           <td><span class="chip engine">引擎镜像</span></td>
-          <td><span class="badge prop">提案</span><span class="badge gap">缺口</span></td>
-          <td>KB 零规定；「每角色独立掉落×4」下「唯一」语义歧义（跨角色互斥 vs 单角色池内）→ §10</td>
+          <td><span class="badge verdict">✅ 已定 · 预留字段</span></td>
+          <td>★羁绊类别词条（见顶部 <b>★ 遗物羁绊系统</b>）；不预定义值、羁绊阈值效果<b>未来设计</b></td>
         </tr>
         <tr class="row-engine">
-          <td><code>stackable</code>（none/count/upgrade）</td>
-          <td><span class="chip engine">引擎镜像</span></td>
-          <td><span class="badge prop">提案</span><span class="badge gap">缺口</span></td>
-          <td>KB 零规定；取值与上限须裁决</td>
+          <td><code class="strike">unique</code>（去重规则）</td>
+          <td class="muted">—</td>
+          <td><span class="badge verdict">✅ 已定 · 不做</span></td>
+          <td><span class="strike">遗物唯一/去重规则</span> 用户裁决<b>不做</b>，有需求再加（<b class="warn-mark">≠ 稀有度档 unique</b>——后者是第 5 档）</td>
+        </tr>
+        <tr class="row-engine">
+          <td><code class="strike">stackable</code></td>
+          <td class="muted">—</td>
+          <td><span class="badge verdict">✅ 已定 · 不做</span></td>
+          <td><span class="strike">叠加规则</span> 用户裁决<b>不做</b>，有需求再加</td>
         </tr>
         <tr class="row-engine">
           <td><code>pool_weight</code>（int）</td>
           <td><span class="chip engine">引擎镜像</span></td>
-          <td><span class="badge prop">提案</span></td>
-          <td>独立掉落权重；20+ 小池下建议先用 rarity 分桶</td>
+          <td><span class="badge verdict">✅ 已定 · 先不做</span></td>
+          <td>Q9：先按 <code>rarity</code> 分桶；若单 run 难凑羁绊再评估「同羁绊掉落轻微优先」</td>
         </tr>
       </tbody>
     </table>
@@ -666,7 +798,7 @@
 <section id="equip-fields">
   <h2>装备字段规格结论 <span class="sec-tag">§6 · ★</span></h2>
 
-  <h3 class="star">核心字段（建议 v1 采纳）</h3>
+  <h3 class="star">核心字段（v1 定稿）</h3>
   <div class="tbl-wrap">
     <table class="wide">
       <thead><tr><th>字段</th><th>类型</th><th>层</th><th>归属</th><th>三态</th><th style="min-width:240px;">说明</th></tr></thead>
@@ -693,18 +825,18 @@
           <td>—</td>
         </tr>
         <tr class="row-narr">
-          <td><code>slot</code></td><td>enum 中文（武器/防具）<span class="badge prop">新增枚举</span></td>
+          <td><code>slot</code></td><td>enum 中文（武器/防具）<span class="badge done">新增枚举</span></td>
           <td><span class="chip narr">叙述层</span></td>
           <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
-          <td><span class="badge done">已定</span>两槽</td>
-          <td><span class="warn-mark">⚠</span> accessory/off-hand（剑圣双持）4 槽 Demo 未收敛 → §10</td>
+          <td><span class="badge done">已定</span> 两槽（Q7）</td>
+          <td>固定两槽；<b>职业特殊机制（如剑圣双持）作专属特例单独处理</b>，不进通用 EquipSlot 枚举</td>
         </tr>
         <tr class="row-narr">
-          <td><code>rarity</code></td><td>enum 中文（普通/稀有/史诗/传奇）</td>
+          <td><code>rarity</code></td><td>enum 中文 <b>5 档</b>（普通/稀有/史诗/传奇/<b>独特</b>）</td>
           <td><span class="chip narr">叙述层</span></td>
           <td><span class="attr edit"><svg class="ic"><use href="#ic-edit"/></svg>可编辑</span></td>
-          <td><span class="badge done">已定</span>维度 / 归类<span class="badge ph">占位</span></td>
-          <td>复用 <code>Rarity</code>；供 <code>reward_resolver</code> 品质加权抽取</td>
+          <td><span class="badge done">已定</span> 5 档 + 颜色 / 归类<span class="badge ph">占位</span></td>
+          <td>复用 <code>Rarity</code>（<b>扩 5 档</b>）；<b>高稀有度=高数值或高稀有度词条</b>；供 <code>reward_resolver</code> 品质加权抽取</td>
         </tr>
         <tr class="row-narr">
           <td><code>notes</code></td><td>str</td>
@@ -718,7 +850,7 @@
           <td><span class="chip engine">引擎镜像层</span></td>
           <td><span class="attr godot"><svg class="ic"><use href="#ic-lock"/></svg>Godot权威→镜像</span></td>
           <td><span class="badge done">已定</span>纪律 / schema<span class="badge prop">提案</span></td>
-          <td>★照 Talent 只读；含 <code>slot</code>(en)/<code>tier</code>(int)/<code>rarity</code>(en)/<code>stats{}</code>；stats 现未接引擎</td>
+          <td>★照 Talent 只读；含 <code>slot</code>(en)/<code>tier</code>(int)/<code>rarity</code>(en)/<code>stats{}</code>/<code>affixes[]</code>；stats 现未接引擎</td>
         </tr>
       </tbody>
     </table>
@@ -754,25 +886,25 @@
     </table>
   </div>
 
-  <h3>提案候选字段（放 engine_json 内，待裁决）</h3>
+  <h3 class="star">裁决后字段（2026-07-05）</h3>
   <div class="tbl-wrap">
     <table class="wide">
       <thead><tr><th>字段</th><th>三态</th><th style="min-width:340px;">说明</th></tr></thead>
       <tbody>
         <tr class="row-engine">
           <td><code>affixes</code>（array）</td>
-          <td><span class="badge prop">提案</span>（D4 未采纳）</td>
-          <td>D4 完整词缀体系从未 locked。<span class="warn-mark">⚠ 澄清</span>：<code>data/affixes/</code> 目录是<b>敌人词条</b>系统（<code>af_</code>/<code>afs_</code> 前缀，run-loop 敌人分层），<b>与装备词缀无关</b>。是否引入 + 深度上限 → §10</td>
+          <td><span class="badge verdict">✅ 已定 · 引入</span></td>
+          <td>Q6：装备 = 基础数值 + <b>特殊词条</b>；高稀有度=高数值或高稀有度词条。放 <code>engine_json</code>，<code>type</code> 开放 string 作逃生舱口（同遗物 effects）。<span class="warn-mark">⚠</span> 与敌人 <code>data/affixes/</code>（<code>af_</code>/<code>afs_</code> 前缀）<b>无关</b>。具体词条设计依赖后续，本次预留字段</td>
+        </tr>
+        <tr class="row-engine">
+          <td><code>tier</code>（int）</td>
+          <td><span class="badge verdict">✅ 已定</span> 只提供额外数值加成 / 阈值<span class="badge ph">占位</span></td>
+          <td>Q8：装备品质<b>非对称</b>——rarity（+ 决定词条强度）+ tier（额外数值加成）两维。tier 数值层在 engine_json</td>
         </tr>
         <tr class="row-engine">
           <td><code>requirements</code>（object：职业/等级限制）</td>
-          <td><span class="badge prop">提案</span></td>
-          <td>v0 无限制、KB 未规定；剑圣双持 off-hand 若保留会引入职业专属槽 → 与装备槽收敛绑定</td>
-        </tr>
-        <tr class="row-engine">
-          <td><code>tier</code> 归属</td>
-          <td><span class="badge done">已定</span>品阶方向 / 阈值<span class="badge ph">占位</span></td>
-          <td>tier 数值层在 engine_json（Godot 权威）；叙述层是否也暴露 tier 见 §10 品质维度对称问题</td>
+          <td><span class="badge verdict">✅ 已定 · 按需</span></td>
+          <td>Q7：装备固定两槽；职业特殊机制（如剑圣双持）作<b>专属特例单独处理</b>，不进通用 EquipSlot。若特例需条件再加 <code>requirements</code></td>
         </tr>
       </tbody>
     </table>
@@ -791,13 +923,13 @@
   <pre class="code">{
   <span class="key">"$schema"</span>: "https://json-schema.org/draft/2020-12/schema",
   <span class="key">"type"</span>: "object",
-  <span class="key">"required"</span>: ["rarity", "category", "slot_cost", "effects", "is_passive"],
+  <span class="key">"required"</span>: ["rarity", "slot_cost", "effects", "is_passive"],
   <span class="key">"properties"</span>: {
     <span class="key">"id"</span>: {"type": "string"},          <span class="cmt">// 可选；build_godot_relic 由行注入权威 id</span>
     <span class="key">"name"</span>: {"type": "string"},        <span class="cmt">// 可选；注入权威 name</span>
     <span class="key">"description"</span>: {"type": "string"},
-    <span class="key">"rarity"</span>: {"enum": ["common", "rare", "epic", "legendary"]},  <span class="cmt">// 核心枚举严格；legendary 现悬空 [占位]</span>
-    <span class="key">"category"</span>: {"enum": ["economy", "stat", "build"]},           <span class="cmt">// ⚠ 三分法；改两原型待裁决</span>
+    <span class="key">"rarity"</span>: {"enum": ["common", "rare", "epic", "legendary", <span class="new">"unique"</span>]},  <span class="cmt">// <span class="new">5 档 [已定]</span>；unique 特殊事件产出、UI 红</span>
+    <span class="new">"synergy_categories"</span>: {"type": "array", "items": {"type": "string"}, "maxItems": 3},  <span class="cmt">// <span class="new">羁绊类别 1-3 项 [已定 预留]</span>；不预定义值、羁绊阈值效果未来设计</span>
     <span class="key">"slot_cost"</span>: {"type": "integer", "minimum": 0},               <span class="cmt">// v0 恒 1 [占位]</span>
     <span class="key">"is_passive"</span>: {"type": "boolean"},                            <span class="cmt">// v0 恒 true；主动遗物未设计</span>
     <span class="key">"effects"</span>: {
@@ -816,10 +948,9 @@
   },
   <span class="key">"additionalProperties"</span>: {"type": ["integer", "number", "boolean", "string"]}
 }
-<span class="cmt">// 提案（待裁决）可选顶层字段：</span>
-<span class="cmt">//   "unique": boolean / "stackable": {enum: ["none","count","upgrade"]}</span>
-<span class="cmt">//   "trigger": {enum: ["on_turn_start","on_attack","on_kill","on_damage_taken"]}（回合制词表，⚠禁 proc coefficient/秒 duration）</span>
-<span class="cmt">//   "pool_weight": integer</span></pre>
+<span class="cmt">// 已裁决（2026-07-05）：<span class="new">category 固定分类字段移除</span> → 改 synergy_categories（羁绊类别）；</span>
+<span class="cmt">//   unique/stackable 去重规则【不做】；trigger 用【自由文本】（叙述层，不入 engine schema）；掉落先【rarity 分桶】。</span>
+<span class="cmt">//   synergy_categories 预留字段；羁绊阈值效果表（类别→数量→效果）独立未来设计（可能落 data/synergies/）。</span></pre>
 
   <h3>GODOT_EQUIPMENT_SCHEMA（草图）</h3>
   <pre class="code">{
@@ -828,20 +959,28 @@
   <span class="key">"required"</span>: ["slot", "tier", "rarity", "stats"],
   <span class="key">"properties"</span>: {
     <span class="key">"id"</span>: {"type": "string"}, <span class="key">"name"</span>: {"type": "string"}, <span class="key">"description"</span>: {"type": "string"},
-    <span class="key">"slot"</span>: {"enum": ["weapon", "armor"]},                       <span class="cmt">// 两槽定稿；accessory/off-hand 待裁决</span>
-    <span class="key">"tier"</span>: {"type": "integer", "minimum": 1},                   <span class="cmt">// 品阶方向已定 / 阈值 [占位]</span>
-    <span class="key">"rarity"</span>: {"enum": ["common", "rare", "epic", "legendary"]}, <span class="cmt">// legendary 现悬空 [占位]</span>
+    <span class="key">"slot"</span>: {"enum": ["weapon", "armor"]},                       <span class="cmt">// 两槽定稿 [已定 Q7]；职业特殊机制（如剑圣双持）作专属特例，不进通用枚举</span>
+    <span class="key">"tier"</span>: {"type": "integer", "minimum": 1},                   <span class="cmt">// 品阶方向已定 / 阈值 [占位]；只提供额外数值加成</span>
+    <span class="key">"rarity"</span>: {"enum": ["common", "rare", "epic", "legendary", <span class="new">"unique"</span>]}, <span class="cmt">// <span class="new">5 档 [已定]</span>；unique UI 红</span>
     <span class="key">"stats"</span>: {
       <span class="key">"type"</span>: "object",
       <span class="key">"propertyNames"</span>: {"enum": ["STR","MAG","DEX","DEF","RES","SPD","LCK","MOV","VIS","max_hp","hit"]},
-      <span class="key">"additionalProperties"</span>: {"type": "integer"}               <span class="cmt">// 值 flat 整数 [占位]</span>
+      <span class="key">"additionalProperties"</span>: {"type": "integer"}               <span class="cmt">// 值 flat 整数 [占位]；基础数值</span>
+    },
+    <span class="new">"affixes"</span>: {                                                <span class="cmt">// <span class="new">[已定 引入 Q6]</span>；特殊词条，高稀有度=高强度，具体设计后续</span>
+      <span class="key">"type"</span>: "array",
+      <span class="key">"items"</span>: {
+        <span class="key">"type"</span>: "object", <span class="key">"required"</span>: ["type"],
+        <span class="key">"properties"</span>: {"type": {"type": "string"}, "value": {"type": "number"}},  <span class="cmt">// type 开放 string 逃生舱口</span>
+        <span class="key">"additionalProperties"</span>: {"type": ["integer","number","boolean","string"]}
+      }
     }
   },
   <span class="key">"additionalProperties"</span>: {"type": ["integer", "number", "boolean", "string"]}
 }
-<span class="cmt">// 提案（待裁决）：</span>
-<span class="cmt">//   "affixes": array（装备词缀，D4 未采纳；与敌人 data/affixes 词条无关）</span>
-<span class="cmt">//   "requirements": object（职业/等级限制）</span></pre>
+<span class="cmt">// 已裁决（2026-07-05）：<span class="new">affixes【引入】</span>（见 properties）；rarity 5 档；tier 只提供额外数值加成。</span>
+<span class="cmt">//   "requirements": object（职业/等级限制）——按需（职业特殊机制作专属特例）。</span>
+<span class="cmt">//   ⚠ 装备 affixes 与敌人 data/affixes（af_/afs_ 敌人词条）是两个无关系统。</span></pre>
 </section>
 
 <!-- ============ §9 软件改动面 ============ -->
@@ -853,11 +992,11 @@
       <tbody>
         <tr>
           <td><b>建表</b> <code>models.py</code></td>
-          <td>新增 <code>class Relic</code> + <code>class Equipment</code>（照 Skill/Talent）。★两表<b>省略 <code>class_id</code> 与 <code>game_class</code> 关系</b>（遗物全局掉落池、装备非职业锁）——待用户确认（§10）。新增 <code>relic_tag</code> / <code>equipment_tag</code> 关联表 + <code>Tag.relics</code>/<code>Tag.equipment</code> 反向关系。engine_json 照 Talent 只读。</td>
+          <td>新增 <code>class Relic</code> + <code>class Equipment</code>（照 Skill/Talent）。★两表<b>省略 <code>class_id</code> 与 <code>game_class</code> 关系</b>（Q1：遗物不绑职业、全局掉落池）。<br>★<b>不建 <code>relic_tag</code> / <code>equipment_tag</code> 关联表</b>——遗物羁绊类别由 <code>engine_json.synergy_categories</code> 承载（Q2：<b>羁绊类别 ≠ 天赋 Tag</b>），不复用 Tag 表；如需按羁绊类别筛选，从 engine_json 派生列/小表。engine_json 照 Talent 只读。</td>
         </tr>
         <tr>
           <td><b>枚举</b></td>
-          <td>复用：<code>Rarity</code> / <code>TalentStatus</code> / <code>ShelfState</code>。新建：<code>RelicArchetype</code>(经济类/流派类，<span class="badge prop">提案</span> 两分 vs 三分)、<code>EquipSlot</code>(武器/防具，<span class="badge done">已定</span>)。可选：<code>RelicStackRule</code>(<span class="badge prop">提案</span>)。遗物/装备<b>均不设 <code>DamageType</code></b>（遗物是 effects 修饰、装备是纯 stats）。</td>
+          <td><b class="warn-mark">扩档</b>：<code>Rarity</code> 从 4 档扩到 <b>5 档</b>（加 <code>unique</code>/独特/红）+ 颜色映射（白/蓝/紫/金/红）——<b>遗物 / 装备 / 天赋共用</b>，<b>天赋卡片也要支持 unique</b>。<br>复用：<code>TalentStatus</code> / <code>ShelfState</code>。新建：<code>EquipSlot</code>(武器/防具，<span class="badge done">已定</span>)。<b>移除 <code>RelicArchetype</code></b>（Q2 改用 <code>synergy_categories</code> 数组字段，非枚举）。遗物/装备<b>均不设 <code>DamageType</code></b>。</td>
         </tr>
         <tr>
           <td><b>API</b></td>
@@ -869,7 +1008,7 @@
         </tr>
         <tr>
           <td><b>模板</b></td>
-          <td><code>relics.html</code> + <code>equipment.html</code>（照 <code>skills.html</code>）。★engine_json 照 <code>talent_detail.html</code> 做<b>只读展示灰框</b>，不做可编辑 textarea。</td>
+          <td><code>relics.html</code> + <code>equipment.html</code>（照 <code>skills.html</code>）。★engine_json 照 <code>talent_detail.html</code> 做<b>只读展示灰框</b>，不做可编辑 textarea。稀有度渲染用 5 档颜色（白/蓝/紫/金/红）。</td>
         </tr>
         <tr>
           <td><b>回填</b></td>
@@ -880,65 +1019,102 @@
   </div>
 </section>
 
-<!-- ============ §10 9 个裁决问题 ============ -->
+<!-- ============ §10 9 个裁决问题（已全部裁决） ============ -->
 <section id="decisions">
-  <h2>需用户裁决的结构级问题 <span class="sec-tag">§10 · ★ 附 grounded 推荐</span></h2>
-  <div class="callout warn">
-    参数级数字一律 <span class="badge ph">占位</span> 自行推进；下列<b>结构级</b>冲突属设计裁决，需用户拍板。每条给出 grounded 推荐（带真源出处）。
+  <h2>结构级问题裁决记录 <span class="sec-tag">§10 · <span class="badge verdict">✅ 2026-07-05 已全部裁决</span></span></h2>
+  <div class="callout ok">
+    <b>✅ 9 条已由用户全部裁决</b>——每条给出<b>裁决结论</b>（绿框）+ 折叠的<b>过程记录</b>（原提案 + 当时 grounded 推荐）。
+    多数裁决与推荐一致；<b>Q2</b> 用户给出比推荐<b>更好的方案</b>（羁绊系统），<b>Q6</b> 用户<b>选择引入词缀</b>（与原推荐相反）。
   </div>
   <div class="q-grid">
 
-    <div class="q-card">
-      <div class="q-head"><span class="q-num">Q1</span><span class="q-title">遗物是否绑职业？</span></div>
-      <div class="q-rec"><b>推荐：全局掉落池，不绑职业</b>（省 <code>class_id</code>）。KB「每角色独立掉落」指各角色独立<b>持有槽</b>，遗物本身任意角色可持。设计库现有实体全有 class_id，遗物是首个全局实体。</div>
+    <div class="q-card decided">
+      <div class="q-head"><span class="q-num">Q1</span><span class="q-title">遗物是否绑职业？</span><span class="badge verdict">✅ 已裁决</span></div>
+      <div class="q-verdict"><b>裁决：</b>不绑定——遗物为<b>全局实体</b>，两表省略 <code>class_id</code>。</div>
+      <details class="q-process">
+        <summary>过程记录：原提案 + grounded 推荐</summary>
+        <div class="q-rec"><b>推荐（当时）：</b>全局掉落池，不绑职业（省 <code>class_id</code>）。KB「每角色独立掉落」指各角色独立<b>持有槽</b>，遗物本身任意角色可持。设计库现有实体全有 class_id，遗物是首个全局实体。</div>
+      </details>
     </div>
 
-    <div class="q-card">
-      <div class="q-head"><span class="q-num">Q2</span><span class="q-title">遗物 archetype 分类法采几分？</span></div>
-      <p class="q-q">引擎用<b>三分</b>（economy/stat/build），KB 定<b>两原型</b>（经济类/流派类）。</p>
-      <div class="q-rec"><b>推荐：需统一为一套 canonical</b>。倾向把 <code>stat</code> 归入相应原型（纯属性→经济类语义 or 独立），或把三分正式写进 KB。此冲突不解决，叙述层 archetype 与引擎 category 会长期错位。</div>
+    <div class="q-card decided">
+      <div class="q-head"><span class="q-num">Q2</span><span class="q-title">遗物 archetype 分类法采几分？</span><span class="badge verdict">✅ 已裁决</span></div>
+      <div class="q-verdict"><b>裁决：</b>不用固定 archetype 枚举；改为<b>「羁绊类别词条」<code>synergy_categories</code></b>（自走棋式凑羁绊，每遗物 1-3 类别）。<b class="warn-mark">用户给出比推荐更好的方案</b>——原推荐是二选一统一 canonical，用户改为羁绊系统（详见顶部 ★ 章节）。</div>
+      <details class="q-process">
+        <summary>过程记录：原提案 + grounded 推荐</summary>
+        <p class="q-q">引擎用<b>三分</b>（economy/stat/build），KB 定<b>两原型</b>（经济类/流派类）。</p>
+        <div class="q-rec"><b>推荐（当时）：</b>需统一为一套 canonical。倾向把 <code>stat</code> 归入相应原型，或把三分正式写进 KB。此冲突不解决，叙述层 archetype 与引擎 category 会长期错位。</div>
+      </details>
     </div>
 
-    <div class="q-card">
-      <div class="q-head"><span class="q-num">Q3</span><span class="q-title">稀有度词表统一</span></div>
-      <p class="q-q">四套未收敛：引擎 <code>common/rare/epic/legendary</code>、run-loop RewardDrop、D4 <code>Common/Uncommon/Rare/Unique</code>、D5 <code>Common/Rare/Mythic</code>。</p>
-      <div class="q-rec"><b>推荐：定一套 canonical</b>（叙述层中文 + 引擎层英文各自命名 + 对齐映射）。倾向以<b>引擎现值</b> <code>common/rare/epic/legendary</code> 为准（v0 已用），把 D4/D5 的其他命名归档。</div>
+    <div class="q-card decided">
+      <div class="q-head"><span class="q-num">Q3</span><span class="q-title">稀有度词表统一</span><span class="badge verdict">✅ 已裁决</span></div>
+      <div class="q-verdict"><b>裁决：</b>统一 <b>5 档</b> <code>common / rare / epic / legendary + unique</code>；遗物/装备/<b>天赋</b>三者共用；颜色 <b>白/蓝/紫/金/红</b>（详见顶部 ★ 稀有度色卡）。</div>
+      <details class="q-process">
+        <summary>过程记录：原提案 + grounded 推荐</summary>
+        <p class="q-q">四套未收敛：引擎 <code>common/rare/epic/legendary</code>、run-loop RewardDrop、D4 <code>Common/Uncommon/Rare/Unique</code>、D5 <code>Common/Rare/Mythic</code>。</p>
+        <div class="q-rec"><b>推荐（当时）：</b>定一套 canonical（叙述层中文 + 引擎层英文各自命名 + 对齐映射）。倾向以引擎现值 <code>common/rare/epic/legendary</code> 为准。（用户裁决在此基础上<b>加了第 5 档 unique</b>）</div>
+      </details>
     </div>
 
-    <div class="q-card">
-      <div class="q-head"><span class="q-num">Q4</span><span class="q-title">遗物 unique / stackable 规则</span></div>
-      <p class="q-q">是否设计、如何取值？KB 零规定。且「每角色独立掉落×4」下「唯一」语义歧义（跨 4 角色互斥 vs 单角色池内互斥）。</p>
-      <div class="q-rec"><b>推荐：v1 先不做</b>（KB 无要求）；若做，先明确「唯一」的作用域。属引擎抽取逻辑 → 放 engine_json。</div>
+    <div class="q-card decided">
+      <div class="q-head"><span class="q-num">Q4</span><span class="q-title">遗物 unique / stackable 去重规则</span><span class="badge verdict">✅ 已裁决</span></div>
+      <div class="q-verdict"><b>裁决：</b><b>不做</b>（有需求再加）。<span class="warn-mark">⚠</span> 此 unique 是<b>去重规则</b>，与 Q3 的 unique <b>稀有度档位</b>是两个概念。</div>
+      <details class="q-process">
+        <summary>过程记录：原提案 + grounded 推荐</summary>
+        <p class="q-q">是否设计、如何取值？KB 零规定。且「每角色独立掉落×4」下「唯一」语义歧义（跨 4 角色互斥 vs 单角色池内互斥）。</p>
+        <div class="q-rec"><b>推荐（当时）：</b>v1 先不做（KB 无要求）；若做，先明确「唯一」的作用域。属引擎抽取逻辑 → 放 engine_json。</div>
+      </details>
     </div>
 
-    <div class="q-card">
-      <div class="q-head"><span class="q-num">Q5</span><span class="q-title">遗物 trigger 是否升级结构化枚举？</span></div>
-      <p class="q-q">维持自由文本 trigger，还是升级 <code>trigger_timing</code> 枚举？v0 遗物全 <code>is_passive:true</code>，是否设计主动/触发型遗物？</p>
-      <div class="q-rec"><b>推荐：v1 维持自由文本 trigger</b>；若引入触发型，只用回合制词表（<code>on_turn_start</code>/<code>on_attack</code>/<code>on_kill</code>/<code>on_damage_taken</code>），<b>禁即时制 proc coefficient</b>（R1 critic）。</div>
+    <div class="q-card decided">
+      <div class="q-head"><span class="q-num">Q5</span><span class="q-title">遗物 trigger 是否升级结构化枚举？</span><span class="badge verdict">✅ 已裁决</span></div>
+      <div class="q-verdict"><b>裁决：</b><b>自由文本</b>，与天赋一致（不升级结构化枚举）。</div>
+      <details class="q-process">
+        <summary>过程记录：原提案 + grounded 推荐</summary>
+        <p class="q-q">维持自由文本 trigger，还是升级 <code>trigger_timing</code> 枚举？v0 遗物全 <code>is_passive:true</code>，是否设计主动/触发型遗物？</p>
+        <div class="q-rec"><b>推荐（当时）：</b>v1 维持自由文本 trigger；若引入触发型，只用回合制词表（<code>on_turn_start</code>/<code>on_attack</code>/<code>on_kill</code>/<code>on_damage_taken</code>），禁即时制 proc coefficient（R1 critic）。</div>
+      </details>
     </div>
 
-    <div class="q-card">
-      <div class="q-head"><span class="q-num">Q6</span><span class="q-title">装备是否引入 affix/词缀维度？</span></div>
-      <p class="q-q">D4 提案（5 大类/单词缀≤±15%或≤1 触发/4 tier/50 模板）从未 locked；引擎现只有 <code>stats{}</code>。</p>
-      <div class="q-rec"><b>推荐：v1 维持纯 stats 加值</b>（不引入 affix）。装备非 build-defining，纯品阶替换够用；affix 是显著复杂度，等玩法验证需要再引入。</div>
+    <div class="q-card decided">
+      <div class="q-head"><span class="q-num">Q6</span><span class="q-title">装备是否引入 affix/词缀维度？</span><span class="badge verdict">✅ 已裁决</span></div>
+      <div class="q-verdict"><b>裁决：</b><b>引入</b>——装备 = 基础数值 + 特殊词条 <code>affixes</code>；高稀有度=高数值或高稀有度词条；具体依赖后续设计。<b class="warn-mark">用户选择引入词缀</b>（与原推荐「v1 维持纯 stats」相反）。</div>
+      <details class="q-process">
+        <summary>过程记录：原提案 + grounded 推荐</summary>
+        <p class="q-q">D4 提案（5 大类/单词缀≤±15%或≤1 触发/4 tier/50 模板）从未 locked；引擎现只有 <code>stats{}</code>。</p>
+        <div class="q-rec"><b>推荐（当时）：</b>v1 维持纯 stats 加值（不引入 affix）。装备非 build-defining，纯品阶替换够用；affix 是显著复杂度，等玩法验证需要再引入。<b>（用户裁决：直接引入）</b></div>
+      </details>
     </div>
 
-    <div class="q-card">
-      <div class="q-head"><span class="q-num">Q7</span><span class="q-title">装备槽收敛</span></div>
-      <p class="q-q">两槽（武器+防具，run-loop 定稿）vs class-system 4 槽 Demo（含 off-hand 剑圣双持 / accessory-TBD）。</p>
-      <div class="q-rec"><b>推荐：以两槽定稿为准</b>（更晚、更权威）；剑圣双持若保留，作为<b>职业专属特例</b>单独处理，不进通用 EquipSlot 枚举。需用户确认 class-system 4 槽 Demo 是否作废。</div>
+    <div class="q-card decided">
+      <div class="q-head"><span class="q-num">Q7</span><span class="q-title">装备槽收敛</span><span class="badge verdict">✅ 已裁决</span></div>
+      <div class="q-verdict"><b>裁决：</b><b>固定两槽</b>（武器+防具）；职业特殊机制（如剑圣双持）作<b>专属特例单独处理</b>，不进通用 EquipSlot。</div>
+      <details class="q-process">
+        <summary>过程记录：原提案 + grounded 推荐</summary>
+        <p class="q-q">两槽（武器+防具，run-loop 定稿）vs class-system 4 槽 Demo（含 off-hand 剑圣双持 / accessory-TBD）。</p>
+        <div class="q-rec"><b>推荐（当时）：</b>以两槽定稿为准（更晚、更权威）；剑圣双持若保留，作为职业专属特例单独处理，不进通用 EquipSlot 枚举。</div>
+      </details>
     </div>
 
-    <div class="q-card">
-      <div class="q-head"><span class="q-num">Q8</span><span class="q-title">遗物/装备品质维度是否对称？</span></div>
-      <p class="q-q">现状遗物只 <code>rarity</code>、装备 <code>rarity</code>+<code>tier</code> 两维。</p>
-      <div class="q-rec"><b>推荐：保持非对称</b>（遗物按稀有度、装备按品阶+稀有度）——契合「装备渐进品阶替换 vs 遗物按稀有度构筑」的不同定位。或统一，需裁决。</div>
+    <div class="q-card decided">
+      <div class="q-head"><span class="q-num">Q8</span><span class="q-title">遗物/装备品质维度是否对称？</span><span class="badge verdict">✅ 已裁决</span></div>
+      <div class="q-verdict"><b>裁决：</b><b>非对称</b>——遗物按 <code>rarity</code>；装备 <code>rarity</code> + <code>tier</code>（<b>tier 只提供额外数值加成</b>，rarity 决定词条强度）。</div>
+      <details class="q-process">
+        <summary>过程记录：原提案 + grounded 推荐</summary>
+        <p class="q-q">现状遗物只 <code>rarity</code>、装备 <code>rarity</code>+<code>tier</code> 两维。</p>
+        <div class="q-rec"><b>推荐（当时）：</b>保持非对称（遗物按稀有度、装备按品阶+稀有度）——契合「装备渐进品阶替换 vs 遗物按稀有度构筑」的不同定位。</div>
+      </details>
     </div>
 
-    <div class="q-card">
-      <div class="q-head"><span class="q-num">Q9</span><span class="q-title">遗物掉落权重模型</span></div>
-      <p class="q-q">每遗物独立 <code>pool_weight</code> vs「rarity 即权重」简单模型？</p>
-      <div class="q-rec"><b>推荐：先用 rarity 分桶</b>（<code>reward_resolver</code> 现状）跑通；20+ 小池下独立 pool_weight 可能过度设计（R3 critic）。</div>
+    <div class="q-card decided">
+      <div class="q-head"><span class="q-num">Q9</span><span class="q-title">遗物掉落权重模型</span><span class="badge verdict">✅ 已裁决</span></div>
+      <div class="q-verdict"><b>裁决：</b><b>rarity 分桶</b>（必要）；后续若单 run 凑不齐羁绊，再评估「同羁绊掉落轻微优先」的偏置机制（与羁绊系统关联）。</div>
+      <details class="q-process">
+        <summary>过程记录：原提案 + grounded 推荐</summary>
+        <p class="q-q">每遗物独立 <code>pool_weight</code> vs「rarity 即权重」简单模型？</p>
+        <div class="q-rec"><b>推荐（当时）：</b>先用 rarity 分桶（<code>reward_resolver</code> 现状）跑通；20+ 小池下独立 pool_weight 可能过度设计（R3 critic）。</div>
+      </details>
     </div>
 
   </div>
@@ -948,9 +1124,9 @@
 <section id="placeholders">
   <h2>占位清单 <span class="sec-tag">§11 · 所有 [占位] 数字</span></h2>
   <details>
-    <summary>展开 12 项占位（全部 <span class="badge ph">占位</span>，纯填坑待调）</summary>
+    <summary>展开 13 项占位（全部 <span class="badge ph">占位</span>，纯填坑待调）</summary>
     <ul>
-      <li>遗物 <code>rarity</code> 每件归类（common/rare/epic/legendary）— 每件 <code>_note</code> 标 rarity 待调</li>
+      <li>遗物 <code>rarity</code> 每件归类（common/rare/epic/legendary/unique）— 每件 <code>_note</code> 标 rarity 待调</li>
       <li>遗物 <code>slot_cost</code> 全为 1 — 槽位经济学未设计（relics-system.md 缺口）</li>
       <li>遗物 <code>effects[].value</code> 全部数值：<code>gold_gain_pct 20</code> / <code>lifesteal_pct 25</code> / <code>low_hp_damage_bonus_pct 40</code> / <code>stat_flat DEF+3</code> / <code>LCK+4</code> / <code>crit_bonus 10</code> / <code>move_bonus 1</code> / <code>talent_point_bonus 1</code> / <code>exp_gain_pct 15</code> / <code>damage_reduction_pct 15</code> — 纯填坑待调（9 类效果均无执行器）</li>
       <li>遗物初始池规模 — run-loop.md:186「20+ 起」为已定意图、确切规模占位；引擎现仅 10 件骨架</li>
@@ -959,7 +1135,9 @@
       <li>装备 <code>rarity</code> 每件归类 — 用于品质加权抽取</li>
       <li>装备 <code>stats</code> 数值（<code>{STR:2}</code> / <code>{DEF:4,RES:1}</code> / <code>{DEF:5,max_hp:10}</code> 等）— 声明式、未接引擎</li>
       <li>门奖励品质权重 / 商店定价 / Boss 包 forced_rarity — act1_config.json</li>
-      <li><b>legendary 稀有度池悬空</b>：<code>data/relics/</code> 与 <code>data/equipment/</code> 均无 legendary 条目，但 Boss <code>forced_rarity</code> + 商店定价引用 legendary → 抽取会回退 — 需补 legendary 池或明确该档暂空</li>
+      <li><b>legendary / unique 稀有度池悬空</b>：<code>data/relics/</code> 与 <code>data/equipment/</code> 均无 legendary/unique 条目，但 Boss <code>forced_rarity</code> + 商店定价引用 legendary → 抽取会回退 — 需补池或明确该档暂空。unique（新增第 5 档，红）为特殊事件产出，池待建</li>
+      <li><b>遗物 <code>synergy_categories</code> 具体类别值 + 羁绊阈值效果表</b> — <span class="badge ph">占位 / 未来设计</span>（Q2 只预留字段，羁绊内容留设计层，可能落 <code>data/synergies/</code>）</li>
+      <li><b>装备 <code>affixes</code> 特殊词条具体内容 + 各稀有度的词条强度曲线</b> — <span class="badge ph">占位 / 依赖后续设计</span>（Q6 只预留字段）</li>
       <li>（若采纳）遗物 <code>pool_weight</code> / <code>stackable</code> 计数上限 / 装备 <code>affix</code> 词缀数值 — 占位</li>
     </ul>
   </details>
@@ -967,8 +1145,8 @@
 
 <footer>
   <p class="fm"><b>研究方法</b>：内部深读（设计库承载模式 / SoT v0 数据 / KB 真源）+ 业界研究（roguelite 遗物 / 战棋装备 / 数据 schema，各经 game-critic 对抗验证）——10 agent 六线研究 + 对抗验证 + 主代理独立核对 KB 真源（architecture-consensus-v2 / ADR-010 / D4 / run-loop）后定稿。</p>
-  <p class="fm">2026-07-05 · SoT main lane · Companion: <a href="relic-equipment-designlib-fields.md">relic-equipment-designlib-fields.md</a></p>
-  <p class="fm muted">权威：研究材料 + grounded 方案，非设计裁决（结构级裁决属用户；软件实装属 Mercury）</p>
+  <p class="fm">2026-07-05 · SoT main lane · <b>字段规格已经用户裁决定稿</b> · Companion: <a href="relic-equipment-designlib-fields.md">relic-equipment-designlib-fields.md</a></p>
+  <p class="fm muted">权威：9 个结构级冲突<b>已由用户全部裁决</b>（本文据此定稿）；软件实装属 Mercury；本文不写 KB 正式规格、不改设计库代码、不手编 <code>engine_json</code></p>
 </footer>
 
 </main>
