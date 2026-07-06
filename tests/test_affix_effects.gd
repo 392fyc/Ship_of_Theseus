@@ -3,7 +3,6 @@ extends SceneTree
 ##
 ## 覆盖本迭代把「占位」升级为「真实生效」的三条 hook：
 ##   - af_vanguard（先手部署）：unit.gd 首回合速度加成态（round_ended 关闭）——已实装。
-##   - af_zone_expand（控域）：pathfinding.gd ZOC 半径 = 1 + zoc_radius_bonus——已实装。
 ##   - afs_bulwark（壁垒统御）：damage_calculator 防御乘区 + tactical_manager 己方全队光环——已实装。
 ##
 ## 每条已实装词条均附「无词条零影响对照」，证明纯加法门控（无词条单位行为逐位不变）。
@@ -36,7 +35,6 @@ func _run() -> void:
 	dl.load_all()
 
 	_test_vanguard(dl)
-	_test_zone_expand(dl)
 	_test_bulwark(dl)
 	_test_global_zero_impact(dl)
 
@@ -113,55 +111,7 @@ func _test_vanguard(dl: Object) -> void:
 	tm.free()
 
 
-# ── 2. af_zone_expand：ZOC 半径扩展（已实装 · hook=pathfinding.gd _in_enemy_zoc）──
-
-func _test_zone_expand(dl: Object) -> void:
-	print("\n[2] af_zone_expand 控域 ZOC 半径（已实装）")
-	var grid_script: GDScript = load("res://scripts/core/grid.gd")
-	var path_script: GDScript = load("res://scripts/core/pathfinding.gd")
-	var start: Vector2i = Vector2i(2, 2)
-	var move_points: int = 5
-
-	# 场景 A（无词条对照）：敌方在 distance 2（非相邻）→ 无 ZOC 惩罚 → 起点剩余==5。
-	var grid_a: Object = grid_script.new()
-	grid_a.initialize({"width": 5, "height": 5, "id": "zoc_a"})
-	var player_a: Unit = _make_unit(dl.enemies["goblin_melee"], "player")
-	var enemy_a: Unit = _make_unit(dl.enemies["goblin_melee"], "enemy")
-	grid_a.place_unit(player_a, start)
-	grid_a.place_unit(enemy_a, Vector2i(2, 4))  # distance 2
-	var mr_a: Dictionary = path_script.get_move_range(grid_a, start, move_points, "player")
-	_eq("无 zone_expand · 敌方 dist2 → 起点剩余 MP==5（无惩罚，零影响）",
-		int(mr_a.get(start, -1)), 5)
-
-	# 场景 B：同布局，敌方带 af_zone_expand(zoc_radius_bonus=1) → 半径 2 → 起点入 ZOC → 剩余==4。
-	var grid_b: Object = grid_script.new()
-	grid_b.initialize({"width": 5, "height": 5, "id": "zoc_b"})
-	var player_b: Unit = _make_unit(dl.enemies["goblin_melee"], "player")
-	var enemy_b: Unit = _make_unit(dl.enemies["goblin_melee"], "enemy")
-	enemy_b.apply_affixes(["af_zone_expand"], null, 1.0, dl.affixes)
-	grid_b.place_unit(player_b, start)
-	grid_b.place_unit(enemy_b, Vector2i(2, 4))  # distance 2，radius 2 覆盖
-	var mr_b: Dictionary = path_script.get_move_range(grid_b, start, move_points, "player")
-	_eq("af_zone_expand · 敌方 dist2 → 起点剩余 MP==4（半径2 命中，扣 ZOC 惩罚）",
-		int(mr_b.get(start, -1)), 4)
-
-	# 场景 C（基础 ZOC 不变）：普通敌方相邻 dist1 → 仍触发惩罚（与引入词条前一致）。
-	var grid_c: Object = grid_script.new()
-	grid_c.initialize({"width": 5, "height": 5, "id": "zoc_c"})
-	var player_c: Unit = _make_unit(dl.enemies["goblin_melee"], "player")
-	var enemy_c: Unit = _make_unit(dl.enemies["goblin_melee"], "enemy")
-	grid_c.place_unit(player_c, start)
-	grid_c.place_unit(enemy_c, Vector2i(2, 3))  # distance 1（相邻）
-	var mr_c: Dictionary = path_script.get_move_range(grid_c, start, move_points, "player")
-	_eq("基础 ZOC 不变 · 无词条敌方 dist1 → 起点剩余 MP==4（相邻惩罚照旧）",
-		int(mr_c.get(start, -1)), 4)
-
-	player_a.free(); enemy_a.free()
-	player_b.free(); enemy_b.free()
-	player_c.free(); enemy_c.free()
-
-
-# ── 3. afs_bulwark：己方减伤光环（已实装 · hook=damage_calculator 防御乘区 + 全队扫描）──
+# ── 2. afs_bulwark：己方减伤光环（已实装 · hook=damage_calculator 防御乘区 + 全队扫描）──
 
 func _test_bulwark(dl: Object) -> void:
 	print("\n[3] afs_bulwark 壁垒统御 己方减伤光环（已实装）")

@@ -61,8 +61,8 @@ var _debug_spawn_positions: Dictionary = {}
 
 # ── 敌人词条（affix）时机分发 —— 纯加法，无词条单位零影响 ─────────
 # v0 声明式占位词条 id（挂载但效果待后续时机 hook 实装；非静默，_notify 一次性提示）。
-# af_zone_expand→pathfinding ZOC 半径、afs_bulwark→_build_hostile_action_context 防御乘区、
-# af_vanguard→unit SPD 首回合态 均已实装并移出；其余占位词条已随所依赖系统废弃而移除。
+# afs_bulwark→_build_hostile_action_context 防御乘区、af_vanguard→unit SPD 首回合态 均已实装并移出；
+# af_zone_expand（控制区）随 ZOC 系统于 2026-07-06 完全移除；其余占位词条已随所依赖系统废弃而移除。
 # 当前无占位词条，列表为空（机制对空数组安全，扫描空转）。
 const _AFFIX_V0_PLACEHOLDERS: Array[String] = []
 # 占位提示去重（affix_id → 已提示），保证「未实装」显式可见但不刷屏。
@@ -2446,7 +2446,7 @@ func _execute_affix_effect(unit: Unit, affix: Dictionary, _context: Dictionary) 
 	match affix_id:
 		_:
 			# 已实装词条在各自 hook 真实生效，分发器不重复执行：
-			#   af_vanguard→unit SPD 首回合态（round_ended 清）/ af_zone_expand→pathfinding ZOC 半径 /
+			#   af_vanguard→unit SPD 首回合态（round_ended 清）/
 			#   afs_bulwark→_build_hostile_action_context 防御乘区 / af_heal_resist→heal() /
 			#   afs_frenzy→damage_calc 输出乘区 / af_counter_boost→反击乘区 / stat_flat·stat_pct→get_effective_stat。
 			pass

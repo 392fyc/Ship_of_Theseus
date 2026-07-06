@@ -3,24 +3,14 @@ extends RefCounted
 
 const _MAX_COST := 9999
 
-# ZOC 移动惩罚（暂定 -1，观察中；小棋盘+低移动力+地形消耗叠加下 -2 易卡死，待并入平衡配置 JSON）
-const ZOC_MOVE_PENALTY := 1
-
-
 # ── BFS 移动范围 ─────────────────────────────────────
 # 返回 Dictionary{ Vector2i: int }，value = 到达该格后剩余移动力
-# ZOC 规则（设计文档 02-grid-and-map）：
-#   仅在移动开始时一次性扣除 ZOC_MOVE_PENALTY（暂定 -1），不是每经过 ZOC 格都扣
-#   即：起始位置处于敌方 ZOC → 总移动力按惩罚扣除后再 BFS 展开
+# （ZOC 已完全移除，2026-07-06 用户裁决：移动力不再受敌方控制区惩罚。）
 
 static func get_move_range(grid: Grid, start: Vector2i,
 		move_points: int, unit_faction: String) -> Dictionary:
-	var effective_mp := move_points
-	if _in_enemy_zoc(grid, start, unit_faction):
-		effective_mp = maxi(0, effective_mp - ZOC_MOVE_PENALTY)
-
-	var reachable: Dictionary = {start: effective_mp}
-	var queue: Array = [{"pos": start, "mp": effective_mp}]
+	var reachable: Dictionary = {start: move_points}
+	var queue: Array = [{"pos": start, "mp": move_points}]
 
 	while not queue.is_empty():
 		var cur = queue.pop_front()
@@ -137,44 +127,6 @@ static func check_attack_line(grid: Grid,
 
 
 # ── 辅助函数 ─────────────────────────────────────────
-
-static func _in_enemy_zoc(grid: Grid, pos: Vector2i, faction: String) -> bool:
-	# 基础 ZOC（半径 1，相邻敌方单位）—— 与引入词条前逐格一致，零改动。
-	for nb in grid.get_neighbors(pos):
-		var unit = grid.get_unit_at(nb)
-		if unit != null and unit.faction != faction:
-			return true
-	# 敌人词条 af_zone_expand（控域）：携带此词条的敌方单位 ZOC 半径 = 1 + zoc_radius_bonus，
-	# 覆盖 distance≥2 的格子。无任何敌方携带该词条 → 下方扫描恒 false（等价旧行为，零影响）。
-	return _in_expanded_enemy_zoc(grid, pos, faction)
-
-
-# af_zone_expand 扩域 ZOC：扫描全场敌方单位，按各自 ZOC 半径判定（仅 distance≥2；
-# distance≤1 已由基础 ZOC 覆盖）。非词条敌方 radius==1 → 恒不满足 distance≤radius → 返回 false。
-static func _in_expanded_enemy_zoc(grid: Grid, pos: Vector2i, faction: String) -> bool:
-	for y in grid.height:
-		for x in grid.width:
-			var dist: int = absi(pos.x - x) + absi(pos.y - y)
-			if dist < 2:
-				continue
-			var unit = grid.get_unit_at(Vector2i(x, y))
-			if unit == null or unit.faction == faction:
-				continue
-			if dist <= _enemy_zoc_radius(unit):
-				return true
-	return false
-
-
-# 单位 ZOC 半径：基础 1 + af_zone_expand 的 zoc_radius_bonus（从 affix params 读）。
-# 非词条单位 / 无 get_affixes 的占位 → 返回 1（与相邻 ZOC 一致）。
-static func _enemy_zoc_radius(unit) -> int:
-	var radius: int = 1
-	if unit != null and unit.has_method("get_affixes"):
-		for affix in unit.get_affixes():
-			if str(affix.get("id", "")) == "af_zone_expand":
-				radius += int(affix.get("params", {}).get("zoc_radius_bonus", 0))
-	return radius
-
 
 static func _heuristic(a: Vector2i, b: Vector2i) -> int:
 	return absi(a.x - b.x) + absi(a.y - b.y)

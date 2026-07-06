@@ -1,11 +1,10 @@
 extends SceneTree
-## 剑圣资源引擎 headless 集成测试（批次2：tactical_manager 运行时接线 + 功能性 ZOC）
+## 剑圣资源引擎 headless 集成测试（批次2：tactical_manager 运行时接线）
 ##
 ## 批次1 覆盖真理源代码（unit.gd / damage_calculator.gd）+ JSON 数据层；
 ## 本批次补足「运行时接线」与「功能性寻路」：
 ##   A. tactical_manager._apply_sword_qi_on_hit 真实接线（命中产气/击杀返气/mark_gain/cd-1/未命中不产气）
 ##   B. tactical_manager._build_skill_entry 真实可用性门槛（剑气不足 / 印记不足）
-##   C. Pathfinding.get_move_range 真实 ZOC 惩罚（-1，且不随相邻敌人数叠加）
 ##
 ## 施放扣气（_execute_skill_action:1249-1254 的 set_sword_qi(-qi_cost)/clear_marks）
 ## 需完整目标选择流程才能端到端触发；其扣减原语已在批次1验证(set_sword_qi/clear_marks)，
@@ -51,7 +50,6 @@ func _run() -> void:
 		_test_skill_displacement(tm, sword)
 
 	_test_dashboard_widget_format()
-	_test_zoc_functional()
 
 	scene.free()
 
@@ -299,40 +297,3 @@ func _test_dashboard_widget_format() -> void:
 	_eq("DEX 有加成 → '9 (+2)'", labels[2].text, "9 (+2)")
 	_eq("SPD 心眼加成 → '8 (+1)'", labels[3].text, "8 (+1)")
 	dash.free()
-
-
-# ── C. Pathfinding.get_move_range 功能性 ZOC ────────────
-
-func _test_zoc_functional() -> void:
-	print("\n[C] Pathfinding ZOC 功能性（合成棋盘）")
-	var mp: int = 4
-
-	# 5x1 全平原，敌人在 (1,0)
-	var grid: Grid = Grid.new()
-	grid.initialize({"id": "zoc_line", "width": 5, "height": 1, "terrain": [[0, 0, 0, 0, 0]]})
-	var enemy: Unit = Unit.new()
-	enemy.faction = "enemy"
-	grid.get_cell(Vector2i(1, 0)).occupant = enemy
-
-	# 起点 (0,0) 相邻敌人 → 有效移动力 = mp-1
-	var r_adj: Dictionary = Pathfinding.get_move_range(grid, Vector2i(0, 0), mp, "player")
-	_eq("起点相邻敌 → 有效移动==mp-1", r_adj.get(Vector2i(0, 0)), mp - 1)
-	# 起点 (4,0) 不相邻敌人 → 有效移动力 = mp（无惩罚）
-	var r_far: Dictionary = Pathfinding.get_move_range(grid, Vector2i(4, 0), mp, "player")
-	_eq("起点无相邻敌 → 有效移动==mp", r_far.get(Vector2i(4, 0)), mp)
-	enemy.free()
-
-	# 3x3 全平原，起点 (1,1) 相邻两个敌人 → 仍只 -1（不叠加）
-	var grid2: Grid = Grid.new()
-	grid2.initialize({"id": "zoc_box", "width": 3, "height": 3,
-		"terrain": [[0, 0, 0], [0, 0, 0], [0, 0, 0]]})
-	var e1: Unit = Unit.new()
-	e1.faction = "enemy"
-	var e2: Unit = Unit.new()
-	e2.faction = "enemy"
-	grid2.get_cell(Vector2i(0, 1)).occupant = e1
-	grid2.get_cell(Vector2i(2, 1)).occupant = e2
-	var r_two: Dictionary = Pathfinding.get_move_range(grid2, Vector2i(1, 1), mp, "player")
-	_eq("相邻2敌 → 仍只-1(不叠加)", r_two.get(Vector2i(1, 1)), mp - 1)
-	e1.free()
-	e2.free()

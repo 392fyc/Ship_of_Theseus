@@ -123,13 +123,12 @@ func _test_heal_resist(dl: Object) -> void:
 func _test_mount(dl: Object) -> void:
 	print("\n[1] 词条挂载")
 	var u: Unit = _make_unit(dl.enemies["goblin_melee"])
-	u.apply_affixes(["af_counter_boost", "af_vanguard", "af_zone_expand"],
+	u.apply_affixes(["af_counter_boost", "af_vanguard"],
 		"afs_bulwark", 1.35, dl.affixes)
 	_check("has_affix(af_counter_boost)", u.has_affix("af_counter_boost"))
 	_check("has_affix(af_vanguard)", u.has_affix("af_vanguard"))
-	_check("has_affix(af_zone_expand)", u.has_affix("af_zone_expand"))
 	_check("special afs_bulwark 并入 _affixes", u.has_affix("afs_bulwark"))
-	_eq("_affixes 数量==4(3基础+1特殊)", u.get_affixes().size(), 4)
+	_eq("_affixes 数量==3(2基础+1特殊)", u.get_affixes().size(), 3)
 	_check("未挂载词条 has_affix==false", not u.has_affix("af_nonexistent_probe"))
 	u.free()
 
@@ -256,7 +255,7 @@ func _test_assembler(dl: Object, ba: GDScript) -> void:
 	_eq("敌0 pos==(7,3)", e0["pos"], Vector2i(7, 3))
 	_feq("敌0 stat_scale==1.35", e0["stat_scale"], 1.35)
 	_eq("敌0 special_affix==afs_bulwark", e0["special_affix"], "afs_bulwark")
-	_eq("敌0 affixes 长度==3", (e0["affixes"] as Array).size(), 3)
+	_eq("敌0 affixes 长度==2", (e0["affixes"] as Array).size(), 2)
 	_check("敌0 affixes 含 af_counter_boost", "af_counter_boost" in (e0["affixes"] as Array))
 	# normal 敌人缺省
 	var e1: Dictionary = enemies[1]

@@ -11,9 +11,8 @@
   "swift_limit": 1,
   "timing_constraint": "before_move",
   "effects": [
-    { "type": "block_up", "chance": 100, "duration": 2, "value": 20 },
     { "type": "physical_defense_up", "chance": 100, "duration": 2, "value": 5 }
   ],
-  "tags": ["defense", "block"],
-  "description": "强化格挡与物理防御，稳固前线。"
+  "tags": ["defense"],
+  "description": "强化物理防御，稳固前线。"
 }

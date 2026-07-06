@@ -1,9 +1,9 @@
 extends SceneTree
-## 剑圣资源引擎 headless 回归测试（批次1：单位级 + 伤害计算 + ZOC 常量）
+## 剑圣资源引擎 headless 回归测试（批次1：单位级 + 伤害计算）
 ##
-## 覆盖「真理源」代码（unit.gd / damage_calculator.gd / pathfinding.gd）+ JSON 数据层：
+## 覆盖「真理源」代码（unit.gd / damage_calculator.gd）+ JSON 数据层：
 ##   居合必中必暴、满印记→拔刀槽位替换、心眼(暴击/速度)、印记属性+2、
-##   暴击倍率(1.5x 基线 / 拔刀 2.0x / pure 固定 1.5x)、命中 1% 下限、ZOC=-1。
+##   暴击倍率(1.5x 基线 / 拔刀 2.0x / pure 固定 1.5x)、命中 1% 下限。
 ## tactical_manager.gd 的运行时接线（命中产气/施放扣气/击杀返气/cd-1/mark_gain）
 ##   由批次2 集成测试覆盖（test_swordsman_integration.gd）。
 ##
@@ -43,7 +43,6 @@ func _run() -> void:
 	_test_slot_swap(dl)
 	_test_class_isolation(dl)
 	_test_damage_formulas(dl)
-	_test_zoc_constant()
 
 	dl.free()
 
@@ -354,10 +353,3 @@ func _test_damage_formulas(dl: Object) -> void:
 
 	atk.free()
 	dft.free()
-
-
-# ── 8. ZOC 移动惩罚常量（-2 → -1）────────────────────
-
-func _test_zoc_constant() -> void:
-	print("\n[8] ZOC 移动惩罚常量")
-	_eq("Pathfinding.ZOC_MOVE_PENALTY==1", Pathfinding.ZOC_MOVE_PENALTY, 1)

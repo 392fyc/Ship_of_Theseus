@@ -264,7 +264,7 @@ const ACTION_BUTTONS: Array = [
 const MOCK_SKILL_POPUP: Array = [
 	{"title": "净世火焰", "subtitle": "召唤圣火，对单体造成高额魔法伤害。", "icon": "☆", "accent": Color(0.98, 0.45, 0.09, 1.0), "badge": "S ×1"},
 	{"title": "治愈光环", "subtitle": "恢复周围一格内友军 20 HP。", "icon": "✚", "accent": Color(0.98, 0.45, 0.09, 1.0), "badge": "S ×1"},
-	{"title": "疾风残影", "subtitle": "本回合移动力 +3，无视控制区。", "icon": "✦", "accent": Color(0.23, 0.70, 0.96, 1.0), "badge": "M ×1"},
+	{"title": "疾风残影", "subtitle": "本回合移动力 +3。", "icon": "✦", "accent": Color(0.23, 0.70, 0.96, 1.0), "badge": "M ×1"},
 	{"title": "绝对神盾", "subtitle": "放弃攻击，使下一次受到的伤害变为 0。", "icon": "♦", "accent": Color(0.72, 0.58, 0.28, 1.0), "badge": "A ×1"},
 	{"title": "神圣连斩", "subtitle": "对目标进行两次连续打击。", "icon": "⚔", "accent": Color(0.98, 0.45, 0.09, 1.0), "badge": "S ×2"},
 ]

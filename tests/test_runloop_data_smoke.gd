@@ -56,9 +56,9 @@ const WAVE_FILES: Array[String] = [
 ]
 ## 敌人层级合法枚举（词条制敌人五层，v0 暂用四档）
 const ENEMY_TIERS: Array[String] = ["normal", "lesser_elite", "greater_elite", "elite_chief"]
-## 基础词条池 4 个 + 特殊词条池 2 个
+## 基础词条池 3 个 + 特殊词条池 2 个
 const AFFIX_BASE_FILES: Array[String] = [
-	"af_counter_boost", "af_vanguard", "af_heal_resist", "af_zone_expand",
+	"af_counter_boost", "af_vanguard", "af_heal_resist",
 ]
 const AFFIX_SPECIAL_FILES: Array[String] = ["afs_bulwark", "afs_frenzy"]
 ## 遗物 / 装备合法枚举

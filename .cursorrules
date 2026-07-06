@@ -23,13 +23,11 @@ KB 正本: Obsidian Vault `D:\ShipOfTheseus\ShipOfTheseus-KB\` (`obsidian_*` MCP
 
 ## DO NOT — 游戏机制
 
-- 格挡和暴击 → **互斥**
-- pure伤害格挡 → **无视**；pure暴击 → **固定1.5x，不受加成**
+- pure暴击 → **固定1.5x，不受加成**
 - hybrid → **phys_atk + mag_atk 同时生效**，武器倍率取平均
 - 反击/追击 → **不触发**连锁；area攻击 → **不触发**反击
 - 建筑耐久 → **固定扣减**；建筑摧毁 → **变废墟**
 - 距离 → **无衰减**
-- ZOC → **不叠加**固定-2，仅从控制区离开时触发
 
 ## DO NOT — AI
 

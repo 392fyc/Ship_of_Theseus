@@ -105,7 +105,7 @@ const MOCK_SKILLS: Array = [
 	{"name": "治愈光环", "icon": "✚", "cost_type": "S", "cost": 1,
 		"cd": 2, "cd_max": 3, "desc": "恢复周围一格内友军 20 HP。"},
 	{"name": "疾风残影", "icon": "≈", "cost_type": "M", "cost": 1,
-		"cd": 0, "cd_max": 0, "desc": "本回合移动力 +3，无视控制区。"},
+		"cd": 0, "cd_max": 0, "desc": "本回合移动力 +3。"},
 	{"name": "绝对神盾", "icon": "♦", "cost_type": "A", "cost": 1,
 		"cd": 0, "cd_max": 0, "desc": "放弃攻击，使下一次受到的伤害变为 0。"},
 ]
