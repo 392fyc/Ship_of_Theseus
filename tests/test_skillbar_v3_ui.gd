@@ -51,22 +51,22 @@ func _test_dashboard_sword_qi_binding() -> void:
 	var dash: Control = BottomDashboardScript.new()
 	root.add_child(dash)
 
-	# 剑圣态：sword_qi=8 / max=10 / threshold=7（达标）+ 印记满 3
+	# 剑圣态：sword_qi=80 / max=100 / threshold=70（达标）+ 印记满 3
 	dash.update_state({
 		"visible": true,
 		"show_actions": false,
 		"unit_name": "剑圣",
 		"hp": 30, "hp_max": 42,
-		"sword_qi": 8, "sword_qi_max": 10,
-		"sword_qi_config": {"speed_threshold": 7},
+		"sword_qi": 80, "sword_qi_max": 100,
+		"sword_qi_config": {"speed_threshold": 70},
 		"marks": {"心": true, "道": true, "势": true},
 	})
 	var bar: Control = dash._sword_qi_bar
 	_check("SwordQiBar 实例存在", bar != null)
 	if bar != null:
-		_eq("SwordQiBar.sword_qi == 8", bar.sword_qi, 8)
-		_eq("SwordQiBar.sword_qi_max == 10", bar.sword_qi_max, 10)
-		_eq("SwordQiBar.threshold == 7（自 state.sword_qi_config）", bar.threshold, 7)
+		_eq("SwordQiBar.sword_qi == 80", bar.sword_qi, 80)
+		_eq("SwordQiBar.sword_qi_max == 100", bar.sword_qi_max, 100)
+		_eq("SwordQiBar.threshold == 70（自 state.sword_qi_config）", bar.threshold, 70)
 	_check("剑气区可见（剑圣单位）", dash._sword_qi_row.visible)
 	# 印记满 3 → 各方块 held + full_state
 	var block_xin: Control = dash._mark_blocks.get("心", null)
@@ -75,7 +75,7 @@ func _test_dashboard_sword_qi_binding() -> void:
 		_check("印记『心』held", block_xin.held)
 		_check("印记满3 → full_state", block_xin.full_state)
 
-	# 阈值缺省回退：state 不带 sword_qi_config → 回退 7
+	# 阈值缺省回退：state 不带 sword_qi_config → 回退 70
 	dash.update_state({
 		"visible": true, "show_actions": false, "unit_name": "剑圣",
 		"hp": 30, "hp_max": 42,
@@ -83,7 +83,7 @@ func _test_dashboard_sword_qi_binding() -> void:
 		"marks": {"心": false, "道": false, "势": false},
 	})
 	if bar != null:
-		_eq("缺省 threshold 回退 7", bar.threshold, 7)
+		_eq("缺省 threshold 回退 70", bar.threshold, 70)
 		_eq("SwordQiBar.sword_qi == 3（未达标）", bar.sword_qi, 3)
 	var block_xin2: Control = dash._mark_blocks.get("心", null)
 	if block_xin2 != null:

@@ -326,9 +326,9 @@ var _item_popup_list: VBoxContainer = null
 # v3：剑气纯文本 → SwordQiBar 分段条；印记 Label → MarkBlock 方块（24/28px）。
 # 用 preload 引用 SwordQiBar（headless --script 不刷新全局 class_name 缓存）。
 const SwordQiBarScript: GDScript = preload("res://scripts/ui/sword_qi_bar.gd")
-const SWORD_QI_DEFAULT_THRESHOLD: int = 7  # state 缺省时回退（逻辑值优先从 state 读）
+const SWORD_QI_DEFAULT_THRESHOLD: int = 70  # state 缺省时回退（逻辑值优先从 state 读；剑气 0-100 标度）
 var _sword_qi_row: HBoxContainer = null
-var _sword_qi_label: Label = null         # 数值标签 "0/10"（保留：条上方右对齐）
+var _sword_qi_label: Label = null         # 数值标签 "0/100"（保留：条上方右对齐）
 var _sword_qi_bar: Control = null         # SwordQiBar 实例（v3 分段条）
 var _mark_blocks: Dictionary = {}         # mark_key -> MarkBlock 方块
 var _mark_labels: Dictionary = {}         # 兼容保留（不再使用，避免外部潜在引用断裂）

@@ -70,7 +70,9 @@ func _draw() -> void:
 		draw_rect(bar_rect, TRACK_LOW)
 		draw_rect(bar_rect, Color(CELL_EDGE_LOW, 0.7), false, 1.0)
 
-	var filled: int = clampi(roundi(float(sword_qi) / float(sword_qi_max) * float(CELLS)), 0, CELLS)
+	# floori（非 roundi）：每 sword_qi_max/CELLS 点满 1 格，与心眼 floor(剑气/10) 语义一致；
+	# 避免 [65,69] 舍入填满 7 格却未达 70 阈值线的观感错位（格满才算达标）。
+	var filled: int = clampi(floori(float(sword_qi) / float(sword_qi_max) * float(CELLS)), 0, CELLS)
 	var fill_col: Color = QI_HIGH if reached else QI_LOW
 	var empty_edge: Color = CELL_EDGE_HIGH if reached else CELL_EDGE_LOW
 
