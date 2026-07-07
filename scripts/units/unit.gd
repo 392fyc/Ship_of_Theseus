@@ -134,7 +134,7 @@ func setup(class_data: Dictionary) -> void:
 			stat_dict[key] = class_data[key]
 	stats.load_from_dict(stat_dict)
 	if class_data.has("growth_rates"):
-		stats.load_growth_rates(class_data["growth_rates"])
+		stats.load_growth_rates(class_data["growth_rates"], class_data.get("ss_growth_stats", []))
 	# ── 剑圣专属资源初始化 ─────────────────────────────────
 	_init_sword_qi_resource(class_data)
 	var basic_attack_range: Dictionary = class_data.get("basic_attack_range", {})

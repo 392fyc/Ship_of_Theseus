@@ -22,6 +22,9 @@ extends Resource
 # ── Growth system ───────────────────────────────────
 # growth_rates: percentage chance per attribute on level-up (HP/STR/MAG/DEX/DEF/RES)
 var growth_rates: Dictionary = {}
+# SS 档属性（纯预留，2026-07-07）：列于此的属性每级做两次成长判定、任一成功即成长并重置 pity
+# （比普通属性单判定多一次机会）。当前剑圣线无 SS 属性 → class_data 不含 ss_growth_stats、此表恒空、不触发。
+var _ss_growth_stats: Array = []
 # Pity counters: tracks consecutive failures per attribute
 var _pity_counts: Dictionary = {}
 
@@ -40,8 +43,9 @@ func load_from_dict(d: Dictionary) -> void:
 	vis      = d.get("VIS", d.get("vision", 3))
 
 
-func load_growth_rates(rates: Dictionary) -> void:
+func load_growth_rates(rates: Dictionary, ss_stats: Array = []) -> void:
 	growth_rates = rates
+	_ss_growth_stats = ss_stats
 	_pity_counts = {}
 	for key: String in ["HP", "STR", "MAG", "DEX", "DEF", "RES"]:
 		_pity_counts[key] = 0
@@ -83,7 +87,12 @@ func level_up() -> Dictionary:
 		var rate: float = growth_rates.get(key, 0) / 100.0
 		var grew: bool = false
 		if rate > 0.0:
-			if randf() < rate:
+			var success: bool = randf() < rate
+			# SS 档预留（纯预留，当前无 SS 属性、恒不触发）：每级两次 S 率判定，
+			# 任一成功即成长（首次失败再补一次机会）。任一成功后 pity 归零沿用下方逻辑。
+			if not success and key in _ss_growth_stats:
+				success = randf() < rate
+			if success:
 				grew = true
 			else:
 				_pity_counts[key] = _pity_counts.get(key, 0) + 1

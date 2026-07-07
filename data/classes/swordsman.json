@@ -14,10 +14,10 @@
   "growth_rates": {
     "HP": 50,
     "STR": 50,
-    "MAG": 5,
-    "DEX": 50,
-    "DEF": 30,
-    "RES": 20
+    "MAG": 40,
+    "DEX": 75,
+    "DEF": 50,
+    "RES": 40
   },
   "MOV": 4,
   "VIS": 3,
