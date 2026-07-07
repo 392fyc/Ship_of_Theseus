@@ -1,19 +1,19 @@
 class_name SwordQiBar
 extends Control
-## 剑气 10 格分段条（v3）：空格始终可见细边 + 颜色突变 + 阈值线。
+## 剑气分段条（v3，10 格；剑气 0-100 标度，按 sword_qi_max 比例填格）：空格始终可见细边 + 颜色突变 + 阈值线。
 ## 全自绘 _draw，参照 bottom_dashboard.gd 内部类 HPShieldBar / XPBar。
 ##
 ## 规则（对齐 spec.md §8.1 / mockup §四）：
 ##   - 10 格，每格内宽 15.2px、步进 18.2px，条宽 182px、高 16px。
 ##   - 空格始终画：底 #0a1019 + 1px 细边（未达标 #314257 / 达标 #5b3f7a）。
-##   - 填充整条切色：<7 淡蓝 #5fa8d8（槽底 #0c1320）；≥7 紫 #a855f7（当前最高格亮紫 #c98bff，槽底 #100a1c，槽缘紫）。
+##   - 填充整条切色：未达阈值 淡蓝 #5fa8d8（槽底 #0c1320）；达阈值 紫 #a855f7（当前最高格亮紫 #c98bff，槽底 #100a1c，槽缘紫）。
 ##   - 阈值线固定第 7 格右缘 x≈126.4：未达标 灰虚线 + 「阈值7」；达标 金实线 1.4px + 上指箭头 + 「速度+1」。
 ##
 ## 用法：
 ##   var bar := SwordQiBar.new()
 ##   bar.sword_qi = 7
-##   bar.sword_qi_max = 10
-##   bar.threshold = 7
+##   bar.sword_qi_max = 100
+##   bar.threshold = 70
 
 const BAR_W: float = 182.0
 const BAR_H: float = 16.0
@@ -42,11 +42,11 @@ var sword_qi: int = 0:
 	set(value):
 		sword_qi = value
 		queue_redraw()
-var sword_qi_max: int = 10:
+var sword_qi_max: int = 100:
 	set(value):
 		sword_qi_max = maxi(value, 1)
 		queue_redraw()
-var threshold: int = 7:
+var threshold: int = 70:
 	set(value):
 		threshold = value
 		queue_redraw()
@@ -70,7 +70,7 @@ func _draw() -> void:
 		draw_rect(bar_rect, TRACK_LOW)
 		draw_rect(bar_rect, Color(CELL_EDGE_LOW, 0.7), false, 1.0)
 
-	var filled: int = clampi(sword_qi, 0, CELLS)
+	var filled: int = clampi(roundi(float(sword_qi) / float(sword_qi_max) * float(CELLS)), 0, CELLS)
 	var fill_col: Color = QI_HIGH if reached else QI_LOW
 	var empty_edge: Color = CELL_EDGE_HIGH if reached else CELL_EDGE_LOW
 

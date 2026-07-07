@@ -43,6 +43,7 @@ var marks: Dictionary = {"心": false, "道": false, "势": false}
 var _mark_max: int = 0
 # 心眼参数缓存（从 JSON 读取后存放此处，避免重复查表）
 var _xinyan_crit_per_qi: int = 0
+var _xinyan_qi_per_crit_pct: int = 10  # 每多少点剑气 +1%×crit_per_qi 暴击（剑气 0-100 标度）
 var _xinyan_speed_threshold: int = 0
 var _xinyan_speed_bonus: int = 0
 # 印记属性加成缓存
@@ -315,7 +316,7 @@ func get_avoid_value(terrain_evade_bonus: int = 0) -> int:
 
 func get_crit_value(weapon_crit: int = 0) -> int:
 	var effective_dex: int = get_effective_stat("DEX")
-	# crit_bonus: 加法钩子，心眼被动 sword_qi × crit_per_qi 写入此处
+	# crit_bonus: 加法钩子，心眼被动 floor(剑气/qi_per_crit_pct)×crit_per_qi 写入此处
 	return weapon_crit + int(effective_dex / 2.0) + crit_bonus
 
 
@@ -753,7 +754,8 @@ func _init_sword_qi_resource(class_data: Dictionary) -> void:
 	marks = {"心": false, "道": false, "势": false}
 	_mark_max = int(cfg.get("mark_max", marks.size()))
 	_xinyan_crit_per_qi = int(cfg.get("crit_per_qi", 1))
-	_xinyan_speed_threshold = int(cfg.get("speed_threshold", 7))
+	_xinyan_qi_per_crit_pct = maxi(1, int(cfg.get("qi_per_crit_pct", 10)))
+	_xinyan_speed_threshold = int(cfg.get("speed_threshold", 70))
 	_xinyan_speed_bonus = int(cfg.get("speed_bonus", 1))
 	_mark_dex_bonus = int(cfg.get("mark_dex_bonus", 2))
 	_mark_lck_bonus = int(cfg.get("mark_lck_bonus", 2))
@@ -761,12 +763,13 @@ func _init_sword_qi_resource(class_data: Dictionary) -> void:
 	_apply_xinyan_passive()
 
 
-## 心眼被动更新：将 sword_qi × crit_per_qi 写入 crit_bonus 钩子。
+## 心眼被动更新：暴击加成 = floor(剑气 / qi_per_crit_pct) × crit_per_qi（剑气 0-100 标度，
+## 满气默认 floor(100/10)×1 = +10% 暴击）写入 crit_bonus 钩子。
 ## SPD 阈值加成通过 get_effective_stat 实时计算，不需要此处写入。
 func _apply_xinyan_passive() -> void:
 	if _xinyan_crit_per_qi <= 0:
 		return
-	crit_bonus = sword_qi * _xinyan_crit_per_qi
+	crit_bonus = (sword_qi / _xinyan_qi_per_crit_pct) * _xinyan_crit_per_qi
 
 
 # ── 敌人词条（affix）公开接口 ─────────────────────────

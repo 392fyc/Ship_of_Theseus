@@ -12,12 +12,12 @@
   "effects": [],
   "tags": ["basic", "melee", "sword_qi", "mark"],
   "qi_cost": 0,
-  "qi_gain_on_hit": 1,
+  "qi_gain_on_hit": 10,
   "qi_gain_on_kill": 0,
   "mark_gain": 1,
   "mark_cost": 0,
   "requires_marks": 0,
   "guaranteed_crit": false,
   "guaranteed_hit": false,
-  "description": "距离 1，造成 100% 物理伤害。命中后获得 1 点剑气，并随机获得一枚尚未持有的剑意印记（已集满 3 枚时不再获得）。"
+  "description": "距离 1，造成 100% 物理伤害。命中后获得 10 点剑气，并随机获得一枚尚未持有的剑意印记（已集满 3 枚时不再获得）。"
 }

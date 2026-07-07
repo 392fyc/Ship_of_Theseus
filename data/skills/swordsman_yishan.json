@@ -11,7 +11,7 @@
   "timing_constraint": "any",
   "effects": [],
   "tags": ["mobility", "sword", "area"],
-  "qi_cost": 1,
+  "qi_cost": 10,
   "qi_gain_on_hit": 0,
   "qi_gain_on_kill": 0,
   "mark_gain": 0,
@@ -20,5 +20,5 @@
   "displacement": true,
   "guaranteed_crit": false,
   "guaranteed_hit": false,
-  "description": "向所选方向突进，最远移动 4 格；沿途敌人受到 50% 物理伤害。消耗 1 点剑气，自身不产生剑气。落点被占据或不可通行时不会位移。"
+  "description": "向所选方向突进，最远移动 4 格；沿途敌人受到 50% 物理伤害。消耗 10 点剑气，自身不产生剑气。落点被占据或不可通行时不会位移。"
 }

@@ -11,14 +11,14 @@
   "timing_constraint": "any",
   "effects": [],
   "tags": ["sword", "ougi", "execute"],
-  "qi_cost": 6,
+  "qi_cost": 60,
   "qi_gain_on_hit": 0,
-  "qi_gain_on_kill": 3,
+  "qi_gain_on_kill": 30,
   "mark_gain": 1,
   "mark_cost": 0,
   "requires_marks": 0,
   "guaranteed_crit": true,
   "guaranteed_hit": true,
   "ki_on_kill_cd_reduction": 1,
-  "description": "奥义·距离 1，造成 300% 物理伤害，必定命中且必定暴击。消耗 6 点剑气；击杀目标可返还 3 点剑气并使本技能冷却减 1；施放后获得 1 枚印记。"
+  "description": "奥义·距离 1，造成 300% 物理伤害，必定命中且必定暴击。消耗 60 点剑气；击杀目标可返还 30 点剑气并使本技能冷却减 1；施放后获得 1 枚印记。"
 }
