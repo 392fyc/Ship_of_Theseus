@@ -59,26 +59,26 @@ func _run() -> void:
 # ── P0-① 居合剑气门槛 ────────────────────────────────────
 
 func _test_gate_juhe(tm: Object, sword: Unit, dummy: Unit) -> void:
-	print("\n[①a] 居合剑气门槛：qi<6 拦截、qi>=6 放行")
+	print("\n[①a] 居合剑气门槛：qi<60 拦截、qi>=60 放行")
 	var data: Dictionary = tm._get_skill_data("swordsman_juhe")
 	_reset(sword)
-	sword.set_sword_qi(5)  # < qi_cost 6
+	sword.set_sword_qi(50)  # < qi_cost 60
 	var v_low: Dictionary = GameAction.validate_skill_usage(sword, data)
-	_check("居合 qi=5 validate ok=false", not bool(v_low.get("ok", true)))
+	_check("居合 qi=50 validate ok=false", not bool(v_low.get("ok", true)))
 	tm._selected_skill_id = "swordsman_juhe"
 	var act_low: Object = tm._build_skill_action(sword, dummy.grid_position, dummy)
 	var ok_low: bool = tm._execute_skill_action(act_low)
-	_check("居合 qi=5 execute 返回 false", not ok_low)
-	_eq("居合被拦截 → 剑气未消耗(仍5)", sword.sword_qi, 5)
+	_check("居合 qi=50 execute 返回 false", not ok_low)
+	_eq("居合被拦截 → 剑气未消耗(仍50)", sword.sword_qi, 50)
 	_eq("居合被拦截 → 未进冷却", sword.get_skill_cooldown("swordsman_juhe"), 0)
 
 	_reset(sword)
-	sword.set_sword_qi(6)  # == qi_cost
+	sword.set_sword_qi(60)  # == qi_cost
 	var v_ok: Dictionary = GameAction.validate_skill_usage(sword, data)
-	_check("居合 qi=6 validate ok=true", bool(v_ok.get("ok", false)))
+	_check("居合 qi=60 validate ok=true", bool(v_ok.get("ok", false)))
 	tm._selected_skill_id = "swordsman_juhe"
 	var act_ok: Object = tm._build_skill_action(sword, dummy.grid_position, dummy)
-	_check("居合 qi=6 execute 返回 true", tm._execute_skill_action(act_ok))
+	_check("居合 qi=60 execute 返回 true", tm._execute_skill_action(act_ok))
 
 
 # ── P0-① 拔刀印记门槛 ────────────────────────────────────
@@ -87,7 +87,7 @@ func _test_gate_badao(tm: Object, sword: Unit, dummy: Unit) -> void:
 	print("\n[①b] 拔刀印记门槛：印记<3 拦截、满3 放行")
 	var data: Dictionary = tm._get_skill_data("swordsman_badao")
 	_reset(sword)
-	sword.set_sword_qi(5)
+	sword.set_sword_qi(20)  # >= qi_cost 20（隔离出印记不足的失败原因）
 	sword.clear_marks()
 	sword.marks["心"] = true
 	sword.marks["道"] = true  # 仅2枚 < requires_marks 3
@@ -99,7 +99,7 @@ func _test_gate_badao(tm: Object, sword: Unit, dummy: Unit) -> void:
 	_eq("拔刀被拦截 → 印记未消耗(仍2)", sword.get_mark_count(), 2)
 
 	_reset(sword)
-	sword.set_sword_qi(5)
+	sword.set_sword_qi(20)  # >= qi_cost 20
 	sword.clear_marks()
 	sword.marks["心"] = true
 	sword.marks["道"] = true
@@ -124,7 +124,7 @@ func _test_gate_yishan(tm: Object, sword: Unit) -> void:
 func _test_badao_mark_timing(tm: Object, sword: Unit, dummy: Unit) -> void:
 	print("\n[②] 拔刀伤害结算后才扣印记 → 吃到自身势(STR+2)")
 	_reset(sword)
-	sword.set_sword_qi(5)            # >= qi_cost 2
+	sword.set_sword_qi(20)            # >= qi_cost 20
 	sword.clear_marks()
 	sword.marks["心"] = true
 	sword.marks["道"] = true

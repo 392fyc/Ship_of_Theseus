@@ -114,7 +114,7 @@ func _test_yishan_path_aoe(tm: Object, sword: Unit) -> void:
 	sword.movement_used = false
 	sword.swift_used = false
 	sword.skill_cooldowns.clear()
-	sword.set_sword_qi(5)
+	sword.set_sword_qi(10)
 	sword.clear_marks()
 
 	var action: Object = tm._build_skill_action(sword, landing, null)
@@ -224,7 +224,7 @@ func _test_badao_splash(tm: Object, sword: Unit) -> void:
 	sword.movement_used = false
 	sword.swift_used = false
 	sword.skill_cooldowns.clear()
-	sword.set_sword_qi(9)
+	sword.set_sword_qi(20)
 	# 拔刀 requires_marks=3 + mark_cost=3：给满 3 印记
 	sword.clear_marks()
 	sword.marks["心"] = true

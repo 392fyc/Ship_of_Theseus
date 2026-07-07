@@ -170,17 +170,17 @@ func _test_resource_gate(tm: Object, sword: Unit) -> void:
 		not bool(e_qi0.get("available", false)) and ("剑气" in str(e_qi0.get("reason", ""))),
 		"available=%s reason=%s" % [str(e_qi0.get("available")), str(e_qi0.get("reason"))])
 
-	# B2 居合剑气满足：6 气可用（居合单体，上游检查应通过）
-	sword.set_sword_qi(6)
+	# B2 居合剑气满足：60 气可用（居合单体，上游检查应通过）
+	sword.set_sword_qi(60)
 	sword.standard_used = false
 	var e_qi6: Dictionary = tm._build_skill_entry(sword, "swordsman_juhe")
-	_check("居合 6气 → 可用",
+	_check("居合 60气 → 可用",
 		bool(e_qi6.get("available", false)),
 		"available=%s reason=%s" % [str(e_qi6.get("available")), str(e_qi6.get("reason"))])
 
 	# B3 拔刀印记门槛：0 印记原因含印记不足
 	sword.clear_marks()
-	sword.set_sword_qi(10)
+	sword.set_sword_qi(20)
 	sword.standard_used = false
 	var e_m0: Dictionary = tm._build_skill_entry(sword, "swordsman_badao")
 	_check("拔刀 0印记 → 原因含「印记」",
@@ -199,10 +199,10 @@ func _test_resource_gate(tm: Object, sword: Unit) -> void:
 		"available=%s reason=%s" % [str(e_m3.get("available")), str(e_m3.get("reason"))])
 
 
-# ── F. 基础攻击产气（剑圣普攻命中 +1 剑气，数据驱动 basic_attack_qi_gain）──
+# ── F. 基础攻击产气（剑圣普攻命中 +10 剑气，数据驱动 basic_attack_qi_gain）──
 
 func _test_basic_attack_qi(tm: Object, sword: Unit) -> void:
-	print("\n[F] 基础攻击产气（剑圣普攻命中 +1 剑气）")
+	print("\n[F] 基础攻击产气（剑圣普攻命中 +10 剑气）")
 	var enemy: Unit = null
 	for u: Unit in tm.units:
 		if u.faction == "enemy":
@@ -220,7 +220,7 @@ func _test_basic_attack_qi(tm: Object, sword: Unit) -> void:
 	sword.clear_marks()
 	# 空 data 模拟基础攻击 payload；_build_hostile_action_context 应按职业补 qi_gain_on_hit
 	tm._execute_hostile_action(sword, enemy, {})
-	_eq("剑圣普攻命中 → sword_qi==1（基础攻击产气）", sword.sword_qi, 1)
+	_eq("剑圣普攻命中 → sword_qi==10（基础攻击产气）", sword.sword_qi, 10)
 
 
 # ── G. 一闪位移（落在所选目标格）──────────────────────────

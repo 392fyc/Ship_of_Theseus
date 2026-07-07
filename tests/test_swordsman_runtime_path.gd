@@ -44,7 +44,7 @@ func _run() -> void:
 	_check("场景中存在剑圣单位", true)
 
 	# ── 0. spawn-init：运行期 _qi_max 是否 >0 ──
-	_eq("spawn 剑圣 _qi_max>0（资源已初始化）", sword._qi_max, 10)
+	_eq("spawn 剑圣 _qi_max>0（资源已初始化）", sword._qi_max, 100)
 	_eq("spawn 剑圣 sword_qi 初始==0", sword.sword_qi, 0)
 
 	_test_zhanji_qi_runtime(tm, sword)
@@ -103,7 +103,7 @@ func _test_zhanji_qi_runtime(tm: Object, sword: Unit) -> void:
 	var qi_before: int = sword.sword_qi
 	var ok: bool = tm._execute_skill_action(action)
 	_check("斩击 _execute_skill_action 返回 true", ok)
-	_eq("斩击命中 → sword_qi +1（运行时真实链路）", sword.sword_qi, qi_before + 1)
+	_eq("斩击命中 → sword_qi +10（运行时真实链路）", sword.sword_qi, qi_before + 10)
 	# 剑圣=转职后职业 → 斩击命中随机获得一枚未持印记（mark_gain=1）
 	_eq("斩击命中 → 得1印记（剑圣转职后，mark_gain=1）", sword.get_mark_count(), 1)
 
@@ -117,7 +117,7 @@ func _test_yishan_cooldown_runtime(tm: Object, sword: Unit) -> void:
 	sword.movement_used = false
 	sword.swift_used = false
 	sword.skill_cooldowns.clear()
-	sword.set_sword_qi(5)  # 一闪 qi_cost=1
+	sword.set_sword_qi(50)  # 一闪 qi_cost=10
 	sword.clear_marks()
 
 	# 一闪 displacement=true，落点须为空格；选剑圣的一个空邻格作落点
@@ -174,7 +174,7 @@ func _test_juhe_kill_optional(tm: Object, sword: Unit) -> void:
 	sword.movement_used = false
 	sword.swift_used = false
 	sword.skill_cooldowns.clear()  # 不可预置 cd：execute 会先验证 is_skill_available 而拒绝
-	sword.set_sword_qi(6)  # 居合 qi_cost=6
+	sword.set_sword_qi(60)  # 居合 qi_cost=60
 	sword.clear_marks()
 
 	tm._selected_skill_id = "swordsman_juhe"
@@ -182,13 +182,13 @@ func _test_juhe_kill_optional(tm: Object, sword: Unit) -> void:
 	if action == null:
 		_check("居合 action 构造成功", false)
 		return
-	# 施放扣6气 → 0；击杀返3气；施放时 consume_skill 用 payload.cooldown=3(JSON)写入，
+	# 施放扣60气 → 0；击杀返30气；施放时 consume_skill 用 payload.cooldown=3(JSON)写入，
 	# 再经击杀 ki_on_kill_cd_reduction -1 → 2。
 	var ok: bool = tm._execute_skill_action(action)
 	_check("居合 _execute_skill_action 返回 true", ok)
 	_check("居合击杀 → 敌人死亡", not enemy.stats.is_alive())
-	# 扣6返3 → 净 3 气
-	_eq("居合: 施放扣6气 + 击杀返3气 → sword_qi==3", sword.sword_qi, 3)
+	# 扣60返30 → 净 30 气
+	_eq("居合: 施放扣60气 + 击杀返30气 → sword_qi==30", sword.sword_qi, 30)
 	_eq("居合: 得1印记(mark_gain)", sword.get_mark_count(), 1)
 	# 施放写 cd=3(JSON)，击杀 -1 → 2
 	_eq("居合: cd 写3 → 击杀-1 → 2", sword.get_skill_cooldown("swordsman_juhe"), 2)

@@ -84,10 +84,10 @@ func _test_data_layer(dl: Object) -> void:
 	var cls: Dictionary = dl.classes.get("swordsman", {})
 	_check("swordsman 职业存在", not cls.is_empty())
 	var cfg: Dictionary = cls.get("sword_qi_config", {})
-	_eq("sword_qi_config.qi_max==10", cfg.get("qi_max"), 10)
+	_eq("sword_qi_config.qi_max==100", cfg.get("qi_max"), 100)
 	_eq("sword_qi_config.qi_initial==0", cfg.get("qi_initial"), 0)
 	_eq("sword_qi_config.crit_per_qi==1", cfg.get("crit_per_qi"), 1)
-	_eq("sword_qi_config.speed_threshold==7", cfg.get("speed_threshold"), 7)
+	_eq("sword_qi_config.speed_threshold==70", cfg.get("speed_threshold"), 70)
 	_eq("sword_qi_config.speed_bonus==1", cfg.get("speed_bonus"), 1)
 	_eq("sword_qi_config.mark_dex_bonus==2", cfg.get("mark_dex_bonus"), 2)
 	_eq("sword_qi_config.mark_lck_bonus==2", cfg.get("mark_lck_bonus"), 2)
@@ -96,24 +96,24 @@ func _test_data_layer(dl: Object) -> void:
 	_eq("skill_ids 长度==5", (cls.get("skill_ids", []) as Array).size(), 5)
 
 	var zhanji: Dictionary = dl.skills.get("swordsman_zhanji", {})
-	_eq("斩击 qi_gain_on_hit==1", zhanji.get("qi_gain_on_hit"), 1)
+	_eq("斩击 qi_gain_on_hit==10", zhanji.get("qi_gain_on_hit"), 10)
 	_eq("斩击 qi_cost==0", zhanji.get("qi_cost"), 0)
 	_eq("斩击 power==100", zhanji.get("power"), 100)
 
 	var yishan: Dictionary = dl.skills.get("swordsman_yishan", {})
-	_eq("一闪 qi_cost==1", yishan.get("qi_cost"), 1)
+	_eq("一闪 qi_cost==10", yishan.get("qi_cost"), 10)
 	_eq("一闪 power==50", yishan.get("power"), 50)
 
 	var zhaojia: Dictionary = dl.skills.get("swordsman_zhaojia", {})
-	_eq("招架 qi_cost==1", zhaojia.get("qi_cost"), 1)
+	_eq("招架 qi_cost==10", zhaojia.get("qi_cost"), 10)
 	_eq("招架 slot_swap_trigger==marks_full", zhaojia.get("slot_swap_trigger"), "marks_full")
 	_eq("招架 slot_swap_target==swordsman_badao", zhaojia.get("slot_swap_target"), "swordsman_badao")
 
 	var juhe: Dictionary = dl.skills.get("swordsman_juhe", {})
-	_eq("居合 qi_cost==6", juhe.get("qi_cost"), 6)
+	_eq("居合 qi_cost==60", juhe.get("qi_cost"), 60)
 	_eq("居合 guaranteed_hit==true", juhe.get("guaranteed_hit"), true)
 	_eq("居合 guaranteed_crit==true", juhe.get("guaranteed_crit"), true)
-	_eq("居合 qi_gain_on_kill==3", juhe.get("qi_gain_on_kill"), 3)
+	_eq("居合 qi_gain_on_kill==30", juhe.get("qi_gain_on_kill"), 30)
 	_eq("居合 mark_gain==1", juhe.get("mark_gain"), 1)
 	_eq("居合 ki_on_kill_cd_reduction==1", juhe.get("ki_on_kill_cd_reduction"), 1)
 	_eq("居合 power==300", juhe.get("power"), 300)
@@ -121,7 +121,7 @@ func _test_data_layer(dl: Object) -> void:
 	var badao: Dictionary = dl.skills.get("swordsman_badao", {})
 	_eq("拔刀 requires_marks==3", badao.get("requires_marks"), 3)
 	_eq("拔刀 mark_cost==3", badao.get("mark_cost"), 3)
-	_eq("拔刀 qi_cost==2", badao.get("qi_cost"), 2)
+	_eq("拔刀 qi_cost==20", badao.get("qi_cost"), 20)
 	_eq("拔刀 crit_damage_bonus==1.5", badao.get("crit_damage_bonus"), 1.5)
 	_eq("拔刀 slot_swap_provider==true", badao.get("slot_swap_provider"), true)
 	_eq("拔刀 power==180", badao.get("power"), 180)
@@ -132,13 +132,13 @@ func _test_data_layer(dl: Object) -> void:
 func _test_unit_resource(dl: Object) -> void:
 	print("\n[2] unit.gd 剑气钳制")
 	var u: Unit = _make_unit(dl.classes["swordsman"])
-	_eq("初始 _qi_max==10", u._qi_max, 10)
+	_eq("初始 _qi_max==100", u._qi_max, 100)
 	_eq("初始 sword_qi==0", u.sword_qi, 0)
 	_eq("初始印记数==0", u.get_mark_count(), 0)
 	u.set_sword_qi(5)
 	_eq("set_sword_qi(5)→5", u.sword_qi, 5)
-	u.set_sword_qi(99)
-	_eq("set_sword_qi(99)→钳到10", u.sword_qi, 10)
+	u.set_sword_qi(150)
+	_eq("set_sword_qi(150)→钳到100", u.sword_qi, 100)
 	u.set_sword_qi(-3)
 	_eq("set_sword_qi(-3)→钳到0", u.sword_qi, 0)
 	u.free()
@@ -149,21 +149,21 @@ func _test_unit_resource(dl: Object) -> void:
 func _test_xinyan_passive(dl: Object) -> void:
 	print("\n[3] 心眼被动")
 	var u: Unit = _make_unit(dl.classes["swordsman"])
-	# 暴击：每点剑气 +1 crit_bonus
+	# 暴击：floor(剑气/qi_per_crit_pct)×crit_per_qi crit_bonus（0-100 标度，每10点+1%）
 	u.set_sword_qi(0)
 	_eq("剑气0 → crit_bonus==0", u.crit_bonus, 0)
-	u.set_sword_qi(7)
-	_eq("剑气7 → crit_bonus==7", u.crit_bonus, 7)
+	u.set_sword_qi(70)
+	_eq("剑气70 → crit_bonus==7(floor(70/10)×1)", u.crit_bonus, 7)
 	# get_crit_value 反映 crit_bonus（weapon_crit + dex/2 + crit_bonus）
 	var base_dex_half: int = int(u.stats.dex / 2.0)
 	_eq("get_crit_value(10)==10+dex/2+7", u.get_crit_value(10), 10 + base_dex_half + 7)
-	# 速度阈值：剑气≥7 时 SPD +1（base SPD=8）
-	u.set_sword_qi(6)
-	_eq("剑气6 → SPD==8(无加成)", u.get_effective_stat("SPD"), 8)
-	u.set_sword_qi(7)
-	_eq("剑气7 → SPD==9(+1)", u.get_effective_stat("SPD"), 9)
-	u.set_sword_qi(10)
-	_eq("剑气10 → SPD==9(+1 不再叠)", u.get_effective_stat("SPD"), 9)
+	# 速度阈值：剑气≥70 时 SPD +1（base SPD=8）
+	u.set_sword_qi(69)
+	_eq("剑气69 → SPD==8(无加成，未达70阈值)", u.get_effective_stat("SPD"), 8)
+	u.set_sword_qi(70)
+	_eq("剑气70 → SPD==9(+1，达70阈值)", u.get_effective_stat("SPD"), 9)
+	u.set_sword_qi(100)
+	_eq("剑气100 → SPD==9(+1 不再叠)", u.get_effective_stat("SPD"), 9)
 	u.free()
 
 
@@ -272,12 +272,12 @@ func _test_damage_formulas(dl: Object) -> void:
 	var pv_hit: Dictionary = DamageCalculator.preview_attack(atk, dft, {"weapon_hit": 80})
 	_eq("命中公式 ==70%", pv_hit["hit_percent"], 70)
 
-	# 7c. 心眼注入暴击率：sword_qi 0→7 时 crit_percent 增加 7
+	# 7c. 心眼注入暴击率：sword_qi 0→70 时 crit_percent 增加 7（floor(70/10)×1）
 	atk.set_sword_qi(0)
 	var pv_c0: Dictionary = DamageCalculator.preview_attack(atk, dft, {"weapon_crit": 10})
-	atk.set_sword_qi(7)
+	atk.set_sword_qi(70)
 	var pv_c7: Dictionary = DamageCalculator.preview_attack(atk, dft, {"weapon_crit": 10})
-	_eq("心眼: 剑气7 暴击率比0高7", pv_c7["crit_percent"] - pv_c0["crit_percent"], 7)
+	_eq("心眼: 剑气70 暴击率比0高7", pv_c7["crit_percent"] - pv_c0["crit_percent"], 7)
 	atk.set_sword_qi(0)
 
 	# 7d. 居合必中：guaranteed_hit 无视回避 → 100%
