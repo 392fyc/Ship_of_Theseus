@@ -16,15 +16,13 @@
     "STR": 40,
     "MAG": 5,
     "DEX": 50,
+    "SPD": 60,
     "DEF": 20,
     "RES": 15
   },
   "MOV": 3,
-  "VIS": 4,
   "attack_type": "ranged",
-  "weapon_might": 4,
-  "weapon_hit": 88,
-  "weapon_crit": 6,
+  "weapon_id": "wpn_archer_starter",
   "damage_type": "physical",
   "basic_attack_range": { "min": 2, "max": 4 },
   "skill_ids": [
@@ -32,5 +30,6 @@
     "archer_piercing_arrow",
     "archer_eagle_eye"
   ],
-  "description": "高命中潜力的远程玻璃炮，依赖站位和先手压制。"
+  "description": "高命中潜力的远程玻璃炮，依赖站位和先手压制。",
+  "_note": "[占位] SPD growth_rate 为迁移占位值，待设计侧给具体成长率标定（Mercury R2.1，2026-07-08）"
 }

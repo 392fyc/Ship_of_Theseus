@@ -11,6 +11,7 @@ var events:    Dictionary = {}
 var affixes:   Dictionary = {}
 var waves:     Dictionary = {}
 var equipment: Dictionary = {}
+var weapons:   Dictionary = {}
 
 
 func _ready() -> void:
@@ -30,6 +31,7 @@ func load_all() -> void:
 	_load_directory("res://data/affixes/special/", affixes)
 	_load_directory("res://data/waves/", waves)
 	_load_directory("res://data/equipment/", equipment)
+	_load_directory("res://data/weapons/", weapons)
 	print("[DataLoader] Loaded: %d classes, %d skills, %d buffs, %d enemies, %d maps" \
 		% [classes.size(), skills.size(), buffs.size(), enemies.size(), maps.size()])
 

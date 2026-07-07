@@ -12,11 +12,8 @@
     "RES": 3
   },
   "MOV": 4,
-  "VIS": 4,
   "attack_type": "ranged",
-  "weapon_might": 5,
-  "weapon_hit": 85,
-  "weapon_crit": 5,
+  "weapon_id": "wpn_test_archer",
   "damage_type": "physical",
   "basic_attack_range": { "min": 2, "max": 3 },
   "skill_ids": [],

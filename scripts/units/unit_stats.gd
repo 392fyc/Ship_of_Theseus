@@ -1,8 +1,8 @@
 class_name UnitStats
 extends Resource
-## ADR-005: 10-attribute system (STR/MAG/DEX/SPD/LCK/DEF/RES/HP/MOV/VIS)
-## Growth attributes (6): HP, STR, MAG, DEX, DEF, RES
-## Fixed attributes (4): SPD, LCK, MOV, VIS
+## ADR-005: 9-attribute system (STR/MAG/DEX/SPD/LCK/DEF/RES/HP/MOV)
+## Growth attributes (7): HP, STR, MAG, DEX, SPD, DEF, RES
+## Fixed attributes (2): LCK, MOV
 
 # ── Core attributes ─────────────────────────────────
 @export var max_hp:    int = 20
@@ -10,17 +10,16 @@ extends Resource
 @export var str_attr:  int = 8   # STR — physical attack power
 @export var mag:       int = 3   # MAG — magical attack power
 @export var dex:       int = 6   # DEX — hit/crit derivation
-@export var spd:       int = 5   # SPD — turn order / avoid (no growth)
-@export var lck:       int = 3   # LCK — crit avoid + status resist + minor hit (fixed, no growth)
+@export var spd:       int = 5   # SPD — turn order / avoid (growth-eligible, R2.1)
+@export var lck:       int = 3   # LCK — crit avoid + status resist (fixed, no growth)
 @export var def_attr:  int = 4   # DEF — physical defense
 @export var res:       int = 2   # RES — magical defense
 
 # Fixed (no level-up growth)
 @export var mov:       int = 4   # MOV — movement range
-@export var vis:       int = 3   # VIS — vision range
 
 # ── Growth system ───────────────────────────────────
-# growth_rates: percentage chance per attribute on level-up (HP/STR/MAG/DEX/DEF/RES)
+# growth_rates: percentage chance per attribute on level-up (HP/STR/MAG/DEX/SPD/DEF/RES)
 var growth_rates: Dictionary = {}
 # SS 档属性（纯预留，2026-07-07）：列于此的属性每级做两次成长判定、任一成功即成长并重置 pity
 # （比普通属性单判定多一次机会）。当前剑圣线无 SS 属性 → class_data 不含 ss_growth_stats、此表恒空、不触发。
@@ -40,14 +39,13 @@ func load_from_dict(d: Dictionary) -> void:
 	def_attr = d.get("DEF", d.get("physical_defense", 4))
 	res      = d.get("RES", d.get("magical_defense", 2))
 	mov      = d.get("MOV", d.get("move", 4))
-	vis      = d.get("VIS", d.get("vision", 3))
 
 
 func load_growth_rates(rates: Dictionary, ss_stats: Array = []) -> void:
 	growth_rates = rates
 	_ss_growth_stats = ss_stats
 	_pity_counts = {}
-	for key: String in ["HP", "STR", "MAG", "DEX", "DEF", "RES"]:
+	for key: String in ["HP", "STR", "MAG", "DEX", "SPD", "DEF", "RES"]:
 		_pity_counts[key] = 0
 
 
@@ -56,11 +54,11 @@ func load_growth_rates(rates: Dictionary, ss_stats: Array = []) -> void:
 # Formula source: ADR-005 §4.3
 
 func get_hit(weapon_hit: int = 90) -> int:
-	return weapon_hit + dex * 2 + roundi(lck * 0.5)
+	return weapon_hit + dex * 2
 
 
 func get_avoid(terrain_evade_bonus: int = 0) -> int:
-	return spd * 2 + roundi(lck * 0.5) + terrain_evade_bonus
+	return spd * 2 + terrain_evade_bonus
 
 
 func get_crit(weapon_crit: int = 0) -> int:
@@ -83,7 +81,7 @@ func level_up() -> Dictionary:
 	## Roll growth for each growable attribute. Returns dict of increases.
 	## Uses pity: after N consecutive failures, force +1.
 	var gains: Dictionary = {}
-	for key: String in ["HP", "STR", "MAG", "DEX", "DEF", "RES"]:
+	for key: String in ["HP", "STR", "MAG", "DEX", "SPD", "DEF", "RES"]:
 		var rate: float = growth_rates.get(key, 0) / 100.0
 		var grew: bool = false
 		if rate > 0.0:
@@ -127,6 +125,8 @@ func _apply_growth(key: String) -> void:
 			mag += 1
 		"DEX":
 			dex += 1
+		"SPD":
+			spd += 1
 		"DEF":
 			def_attr += 1
 		"RES":

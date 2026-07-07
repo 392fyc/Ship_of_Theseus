@@ -13,4 +13,7 @@ globs: ["scripts/**/*.gd", "scenes/**/*.gd", "data/**/*.json"]
 ## 数据驱动
 - 游戏内容 = JSON文件，代码只处理逻辑
 - **禁止**在代码中硬编码数值，必须从JSON读取
-- speed/move/vision/block 不出现在 stat_growth 中
+- move 不出现在 stat_growth 中（固定属性，R2.1）
+- vis 属性已整体移除（v1 不做视野系统，Mercury R2.1，2026-07-08）
+- speed(SPD) 现为成长属性，可出现在 stat_growth 中（Mercury R2.1，2026-07-08 起，此前禁止）
+- block/格挡机制已整体移除（2026-07-06，见战斗规则）

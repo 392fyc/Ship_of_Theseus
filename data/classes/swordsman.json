@@ -16,15 +16,13 @@
     "STR": 50,
     "MAG": 40,
     "DEX": 75,
+    "SPD": 60,
     "DEF": 50,
     "RES": 40
   },
   "MOV": 4,
-  "VIS": 3,
   "attack_type": "melee",
-  "weapon_might": 6,
-  "weapon_hit": 90,
-  "weapon_crit": 10,
+  "weapon_id": "wpn_swordsman_starter",
   "damage_type": "physical",
   "basic_attack_qi_gain": 10,
   "basic_attack_range": { "min": 1, "max": 1 },
@@ -47,5 +45,6 @@
     "mark_lck_bonus": 2,
     "mark_str_bonus": 2
   },
-  "description": "剑圣（日本剑道线）。高速高暴击近战。本体属性为测试占位值，待数值调校。剑气标度 0-100。心眼：每 qi_per_crit_pct（10）点剑气+1%暴击率（floor(剑气/qi_per_crit_pct)×crit_per_qi，满气+10%），剑气≥70（speed_threshold）时速度+1（speed_bonus）。三印记加成各+2（mark_*_bonus，均可调）。"
+  "description": "剑圣（日本剑道线）。高速高暴击近战。本体属性为测试占位值，待数值调校。剑气标度 0-100。心眼：每 qi_per_crit_pct（10）点剑气+1%暴击率（floor(剑气/qi_per_crit_pct)×crit_per_qi，满气+10%），剑气≥70（speed_threshold）时速度+1（speed_bonus）。三印记加成各+2（mark_*_bonus，均可调）。",
+  "_note": "[占位] SPD growth_rate 为迁移占位值，待设计侧给具体成长率标定（Mercury R2.1，2026-07-08）"
 }

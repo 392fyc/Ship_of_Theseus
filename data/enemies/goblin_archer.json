@@ -12,8 +12,10 @@
     "RES": 2
   },
   "MOV": 3,
-  "VIS": 4,
   "attack_type": "ranged",
+  "weapon_id": "wpn_physical_ranged_basic",
+  "damage_type": "physical",
+  "basic_attack_range": { "min": 2, "max": 4 },
   "skill_ids": [
     "archer_aimed_shot",
     "archer_piercing_arrow"

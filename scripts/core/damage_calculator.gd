@@ -2,7 +2,8 @@ class_name DamageCalculator
 extends RefCounted
 ## ADR-005: FE-style additive base damage + multiplicative outer layers.
 ## Block removed from base resolution flow.
-## Hit/Crit derived from DEX/SPD/LCK instead of independent attributes.
+## Hit/Avoid derived from DEX/SPD (LCK removed, R1.2); Crit derived from DEX/LCK
+## (LCK still gates crit avoid).
 
 
 class AttackResult:
@@ -32,8 +33,8 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	var terrain_res_bonus: int = action_data.get("terrain_res_bonus", 0)
 
 	# ── Step 1: Hit determination ───────────────────────
-	# Hit = weapon_hit + DEX×2 + LCK×0.5
-	# Avoid = SPD×2 + LCK×0.5 + terrain_evade
+	# Hit = weapon_hit + DEX×2
+	# Avoid = SPD×2 + terrain_evade
 	# guaranteed_hit（居合）：绕过命中判定，直接命中。
 	var guaranteed_hit: bool = bool(action_data.get("guaranteed_hit", false))
 	if guaranteed_hit:
@@ -174,7 +175,7 @@ static func _calc_base_damage(attacker: Unit, defender: Unit,
 		terrain_def_bonus: int, terrain_res_bonus: int) -> float:
 	## ADR-005 §4.2: Additive base damage formula.
 	## physical:  max(1, STR + weapon_might - DEF)
-	## magical:   max(1, MAG + tome_might  - RES)
+	## magical:   max(1, MAG + weapon_might - RES)
 	## pure:      [source] + weapon_might  (ignores defense)
 	## hybrid:    max(1, (STR+MAG) + hybrid_might - min(DEF,RES))  ⚠️ TBD (ADR-006)
 	var base: float = 0.0

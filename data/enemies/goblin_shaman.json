@@ -12,8 +12,10 @@
     "RES": 6
   },
   "MOV": 2,
-  "VIS": 3,
   "attack_type": "ranged",
+  "weapon_id": "wpn_magical_ranged_basic",
+  "damage_type": "magical",
+  "basic_attack_range": { "min": 1, "max": 3 },
   "skill_ids": [
     "cleric_heal",
     "cleric_bless",

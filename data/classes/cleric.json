@@ -16,15 +16,13 @@
     "STR": 5,
     "MAG": 45,
     "DEX": 30,
+    "SPD": 40,
     "DEF": 15,
     "RES": 45
   },
   "MOV": 2,
-  "VIS": 3,
   "attack_type": "ranged",
-  "weapon_might": 4,
-  "weapon_hit": 92,
-  "weapon_crit": 0,
+  "weapon_id": "wpn_cleric_starter",
   "damage_type": "holy",
   "basic_attack_range": { "min": 1, "max": 3 },
   "skill_ids": [
@@ -32,5 +30,6 @@
     "cleric_bless",
     "cleric_holy_smite"
   ],
-  "description": "治疗与增益核心，兼具有限的神圣打击能力。"
+  "description": "治疗与增益核心，兼具有限的神圣打击能力。",
+  "_note": "[占位] SPD growth_rate 为迁移占位值，待设计侧给具体成长率标定（Mercury R2.1，2026-07-08）"
 }

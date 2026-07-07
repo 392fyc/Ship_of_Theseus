@@ -16,15 +16,13 @@
     "STR": 40,
     "MAG": 5,
     "DEX": 25,
+    "SPD": 40,
     "DEF": 50,
     "RES": 15
   },
   "MOV": 3,
-  "VIS": 3,
   "attack_type": "melee",
-  "weapon_might": 6,
-  "weapon_hit": 85,
-  "weapon_crit": 0,
+  "weapon_id": "wpn_knight_starter",
   "damage_type": "physical",
   "basic_attack_range": { "min": 1, "max": 1 },
   "skill_ids": [
@@ -32,5 +30,6 @@
     "knight_heavy_strike",
     "knight_iron_wall"
   ],
-  "description": "高防低速前排，依靠承伤与嘲讽承担队伍伤害。"
+  "description": "高防低速前排，依靠承伤与嘲讽承担队伍伤害。",
+  "_note": "[占位] SPD growth_rate 为迁移占位值，待设计侧给具体成长率标定（Mercury R2.1，2026-07-08）"
 }

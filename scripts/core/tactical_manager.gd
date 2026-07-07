@@ -2181,23 +2181,18 @@ func _build_basic_attack_action_data(attacker: Unit, defender: Unit,
 
 func _get_unit_basic_attack_profile(unit: Unit) -> Dictionary:
 	var source_data: Dictionary = _get_unit_source_data(unit)
-	var fallback_profiles: Dictionary = _get_basic_attack_profile_defaults()
-	var fallback_key: String = _get_basic_attack_profile_key(source_data)
-	var fallback_profile: Dictionary = fallback_profiles.get(fallback_key, {})
-	var range_data: Dictionary = source_data.get("basic_attack_range", fallback_profile.get(
-		"basic_attack_range", {"min": 1, "max": 1}))
+	var weapon_data: Dictionary = _get_unit_weapon_data(source_data, unit)
+	var range_data: Dictionary = source_data.get("basic_attack_range", {"min": 1, "max": 1})
 	var attack_type: String = "melee" if int(range_data.get("max", 1)) <= 1 else "ranged"
 	return {
-		"weapon_might": int(source_data.get("weapon_might", fallback_profile.get("weapon_might", 0))),
-		"weapon_hit": int(source_data.get("weapon_hit", fallback_profile.get("weapon_hit", 0))),
-		"weapon_crit": int(source_data.get("weapon_crit", fallback_profile.get("weapon_crit", 0))),
-		"damage_type": str(source_data.get("damage_type", fallback_profile.get("damage_type", "physical"))),
-		"pure_atk_source": str(source_data.get("pure_atk_source", fallback_profile.get(
-			"pure_atk_source", "phys"))),
+		"weapon_might": int(weapon_data.get("weapon_might", 0)),
+		"weapon_hit": int(weapon_data.get("weapon_hit", 0)),
+		"weapon_crit": int(weapon_data.get("weapon_crit", 0)),
+		"damage_type": str(source_data.get("damage_type", "physical")),
+		"pure_atk_source": str(source_data.get("pure_atk_source", "phys")),
 		"attack_type": attack_type,
 		# 剑圣等职业：基础攻击（普攻/反击）命中产气，数值从职业 JSON 读，非剑圣缺省 0
-		"basic_attack_qi_gain": int(source_data.get("basic_attack_qi_gain",
-			fallback_profile.get("basic_attack_qi_gain", 0))),
+		"basic_attack_qi_gain": int(source_data.get("basic_attack_qi_gain", 0)),
 		"basic_attack_range": {
 			"min": maxi(1, int(range_data.get("min", 1))),
 			"max": maxi(1, int(range_data.get("max", 1))),
@@ -2214,32 +2209,20 @@ func _get_unit_source_data(unit: Unit) -> Dictionary:
 	return DataLoader.enemies.get(unit.unit_id, {})
 
 
-func _get_basic_attack_profile_defaults() -> Dictionary:
-	var defaults_entry: Dictionary = DataLoader.classes.get("basic_weapon_profiles", {})
-	return defaults_entry.get("profiles", {})
-
-
-func _get_basic_attack_profile_key(source_data: Dictionary) -> String:
-	var attack_type: String = str(source_data.get("attack_type", "melee"))
-	var damage_type: String = str(source_data.get("damage_type", ""))
-	if damage_type == "":
-		damage_type = _infer_damage_type_from_skills(source_data)
-	if damage_type == "":
-		damage_type = "physical"
-	return "%s_%s" % [damage_type, attack_type]
-
-
-func _infer_damage_type_from_skills(source_data: Dictionary) -> String:
-	var skill_ids: Array = source_data.get("skill_ids", [])
-	for skill_id_value: Variant in skill_ids:
-		var skill_id: String = str(skill_id_value)
-		var skill_data: Dictionary = DataLoader.skills.get(skill_id, {})
-		if skill_data.is_empty():
-			continue
-		if _is_support_skill(skill_data):
-			continue
-		return str(skill_data.get("damage_type", ""))
-	return ""
+## R1.8：武器参数唯一来源 = 所装备武器（data/weapons/，DataLoader.weapons）。
+## 每单位恒持一件武器（class/enemy JSON 必须声明 weapon_id）；缺失时数据校验兜底：
+## push_error 记录 + might/hit/crit 回退 0（不崩溃战斗，但日志会显眼暴露数据缺陷）。
+func _get_unit_weapon_data(source_data: Dictionary, unit: Unit) -> Dictionary:
+	var weapon_id: String = str(source_data.get("weapon_id", ""))
+	if weapon_id == "":
+		push_error("[Weapon] 单位 %s 缺少 weapon_id（每单位恒持一件武器，R1.8）" \
+			% (unit.unit_id if unit != null else "?"))
+		return {}
+	var weapon_data: Dictionary = DataLoader.weapons.get(weapon_id, {})
+	if weapon_data.is_empty():
+		push_error("[Weapon] 单位 %s 的 weapon_id \"%s\" 未找到武器定义" % [
+			(unit.unit_id if unit != null else "?"), weapon_id])
+	return weapon_data
 
 
 func _get_unit_terrain_context(unit: Unit) -> Dictionary:

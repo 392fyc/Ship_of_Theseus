@@ -1,0 +1,8 @@
+{
+  "id": "wpn_cleric_starter",
+  "name": "牧师初始法杖",
+  "weapon_might": 4,
+  "weapon_hit": 92,
+  "weapon_crit": 0,
+  "_note": "[结构迁移] 从旧 class/enemy json 内联字段搬迁而来，数值与迁移前完全一致（Mercury R1.8，2026-07-08）"
+}

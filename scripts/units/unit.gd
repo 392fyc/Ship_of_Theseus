@@ -129,7 +129,7 @@ func setup(class_data: Dictionary) -> void:
 		skill_ids.append(str(skill_id_value))
 	skill_cooldowns.clear()
 	var stat_dict: Dictionary = class_data.get("base_stats", {}).duplicate()
-	for key: String in ["MOV", "VIS"]:
+	for key: String in ["MOV"]:
 		if class_data.has(key):
 			stat_dict[key] = class_data[key]
 	stats.load_from_dict(stat_dict)
@@ -304,14 +304,12 @@ func get_effective_priority() -> int:
 
 func get_hit_value(weapon_hit: int = 90) -> int:
 	var effective_dex: int = get_effective_stat("DEX")
-	var effective_lck: int = get_effective_stat("LCK")
-	return weapon_hit + effective_dex * 2 + roundi(effective_lck * 0.5)
+	return weapon_hit + effective_dex * 2
 
 
 func get_avoid_value(terrain_evade_bonus: int = 0) -> int:
 	var effective_spd: int = get_effective_stat("SPD")
-	var effective_lck: int = get_effective_stat("LCK")
-	return effective_spd * 2 + roundi(effective_lck * 0.5) + terrain_evade_bonus
+	return effective_spd * 2 + terrain_evade_bonus
 
 
 func get_crit_value(weapon_crit: int = 0) -> int:
@@ -711,8 +709,6 @@ func _normalize_stat_key(stat_key: String) -> String:
 			return "RES"
 		"MOVE":
 			return "MOV"
-		"VISION":
-			return "VIS"
 	return normalized
 
 
@@ -736,8 +732,6 @@ func _get_base_stat_value(stat_key: String) -> int:
 			return stats.res
 		"MOV":
 			return stats.mov
-		"VIS":
-			return stats.vis
 		"PRIORITY":
 			return priority
 	return 0

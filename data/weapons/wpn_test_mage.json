@@ -1,0 +1,8 @@
+{
+  "id": "wpn_test_mage",
+  "name": "测试用法师武器",
+  "weapon_might": 5,
+  "weapon_hit": 88,
+  "weapon_crit": 0,
+  "_note": "[结构迁移] 从旧 class/enemy json 内联字段搬迁而来，数值与迁移前完全一致（Mercury R1.8，2026-07-08）"
+}
