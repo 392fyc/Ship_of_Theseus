@@ -768,7 +768,7 @@ func _apply_xinyan_passive() -> void:
 
 # ── 敌人词条（affix）公开接口 ─────────────────────────
 # 挂载路径：spawn_unit(class_id,...) 之后由上层（BattleAssembler → 运行时）调用 apply_affixes。
-# 与「心眼」同构：数值类立即写入缓存，触发类（on_hit/on_kill/on_turn_start/on_counter/aura）
+# 与「心眼」同构：数值类立即写入缓存，触发类（on_hit/on_kill/on_turn_start/aura）
 # 保留在 _affixes 供 tactical_manager 按时机分发。纯加法：无词条单位不调用即零影响。
 
 ## 注入词条。affix_ids: 基础词条 id 列表；special_affix_id: 特殊词条 id（可为 null/""）；

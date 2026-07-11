@@ -82,48 +82,8 @@ static func find_path(grid: Grid, start: Vector2i,
 	return []
 
 
-# ── 攻击线检测（Bresenham）───────────────────────────
-# 仅 PEAK 阻挡远程攻击线，WALL 不阻挡
-# 起点终点本身不检测
-
-static func check_attack_line(grid: Grid,
-		from_pos: Vector2i, to_pos: Vector2i) -> bool:
-	if from_pos == to_pos:
-		return true
-
-	var x0 := from_pos.x
-	var y0 := from_pos.y
-	var x1 := to_pos.x
-	var y1 := to_pos.y
-
-	var dx := absi(x1 - x0)
-	var dy := absi(y1 - y0)
-	var sx := 1 if x0 < x1 else -1
-	var sy := 1 if y0 < y1 else -1
-	var err := dx - dy
-
-	var x := x0
-	var y := y0
-
-	while true:
-		var pos := Vector2i(x, y)
-		if pos != from_pos and pos != to_pos:
-			var cell := grid.get_cell(pos)
-			if cell != null and cell.terrain == Cell.Terrain.PEAK:
-				return false
-
-		if x == x1 and y == y1:
-			break
-
-		var e2 := 2 * err
-		if e2 > -dy:
-			err -= dy
-			x += sx
-		if e2 < dx:
-			err += dx
-			y += sy
-
-	return true
+# ── 攻击线检测已移除（2026-07-11 用户裁决）──────────────
+# 地形不再阻挡任何攻击线（敌我双方）；PEAK 仅保留移动不可通行。
 
 
 # ── 辅助函数 ─────────────────────────────────────────

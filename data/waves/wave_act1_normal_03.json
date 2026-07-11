@@ -3,7 +3,7 @@
   "enemies": [
     { "class_id": "goblin_melee", "spawn_pos": [6, 2], "tier": "normal" },
     { "class_id": "goblin_melee", "spawn_pos": [6, 5], "tier": "normal" },
-    { "class_id": "goblin_melee", "spawn_pos": [7, 3], "tier": "lesser_elite", "affixes": ["af_counter_boost"] },
+    { "class_id": "goblin_melee", "spawn_pos": [7, 3], "tier": "lesser_elite", "affixes": ["af_vanguard"] },
     { "class_id": "goblin_archer", "spawn_pos": [7, 5], "tier": "normal" }
   ],
   "_note": "[占位] v0 波次骨架：spawn 坐标/数值增强/词条搭配均占位，待调"

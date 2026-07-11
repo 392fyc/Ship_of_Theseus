@@ -139,15 +139,13 @@ func _test_console_button_state(scene: Node, tm: Object) -> void:
 	tm.debug_cycle_crit_mode()
 	_eq("暴击循环3回绕=随机", tm.debug_crit_mode_label(), "随机")
 
-	# 木桩三态：不动→只反击→自动攻击→不动
+	# 木桩两态：不动→自动攻击→不动（只反击态已随自动反击移除，2026-07-11）
 	tm.debug_dummy_behavior = 0  # IDLE
 	_eq("木桩初态=不动", tm._debug_dummy_behavior_label(), "不动")
 	tm.debug_cycle_dummy_behavior()
-	_eq("木桩循环1=只反击", tm._debug_dummy_behavior_label(), "只反击")
+	_eq("木桩循环1=自动攻击", tm._debug_dummy_behavior_label(), "自动攻击")
 	tm.debug_cycle_dummy_behavior()
-	_eq("木桩循环2=自动攻击", tm._debug_dummy_behavior_label(), "自动攻击")
-	tm.debug_cycle_dummy_behavior()
-	_eq("木桩循环3回绕=不动", tm._debug_dummy_behavior_label(), "不动")
+	_eq("木桩循环2回绕=不动", tm._debug_dummy_behavior_label(), "不动")
 
 	# 确定性开关 toggle
 	tm.debug_deterministic = false
@@ -158,7 +156,7 @@ func _test_console_button_state(scene: Node, tm: Object) -> void:
 
 	# 按钮文案随状态同步（_refresh_debug_overlay 镜像）
 	tm.debug_crit_mode = 1   # 必暴
-	tm.debug_dummy_behavior = 2  # 自动攻击
+	tm.debug_dummy_behavior = 1  # 自动攻击（两态枚举 IDLE=0 / AUTO=1）
 	tm.debug_deterministic = true
 	scene._refresh_debug_overlay()
 	_eq("暴击按钮文案同步", str(scene._btn_crit.text), "暴击态：必暴")

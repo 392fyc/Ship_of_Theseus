@@ -34,7 +34,6 @@ static func make_attack(attacker: Unit, target: Unit,
 		"pure_atk_source": pure_atk_source,
 		"skill_multiplier": 1.0,
 		"terrain_multiplier": 1.0,
-		"allow_counter": true,
 	}
 	return a
 
@@ -147,6 +146,10 @@ static func validate_action_cost(unit: Unit, action_cost: String,
 				return {"ok": false, "reason": "Reaction already used"}
 			if not reaction_trigger_met:
 				return {"ok": false, "reason": "Reaction trigger not met"}
+		"free":
+			# [预留] 2026-07-11 用户裁决：free = 不消耗任何行动资源、无资源门槛
+			# （R3.3 将增补该枚举值）；当前无技能使用。
+			pass
 		_:
 			return {"ok": false, "reason": "Unknown action_cost: %s" % action_cost}
 
@@ -198,6 +201,9 @@ static func consume_action_cost(unit: Unit, action_cost: String,
 				unit.consume_swift_resource()
 		"reaction":
 			unit.consume_reaction_resource()
+		"free":
+			# [预留] free 零消耗（2026-07-11 用户裁决，R3.3 将增补；当前无技能使用）
+			pass
 
 
 static func consume_normal_move(unit: Unit) -> void:

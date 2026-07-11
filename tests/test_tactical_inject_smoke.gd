@@ -53,7 +53,7 @@ func _run() -> void:
 		{
 			"class_id": "goblin_melee",
 			"pos": Vector2i(6, 3),
-			"affixes": ["af_counter_boost"],
+			"affixes": ["af_heal_resist"],
 			"special_affix": "afs_bulwark",
 			"stat_scale": INJECT_SCALE,
 		},
@@ -88,7 +88,7 @@ func _run() -> void:
 		_check("玩家单位为 swordsman", str(players[0].unit_id) == "swordsman",
 			"unit_id=%s" % str(players[0].unit_id))
 		_check("玩家不注入词条（has_affix 为假）",
-			not players[0].has_affix("af_counter_boost"))
+			not players[0].has_affix("af_heal_resist"))
 		# HP 继承：注入 hp=3(<max_hp) → 玩家不满血入场，stats.hp==注入 hp。
 		_check("玩家单位 max_hp > 注入 hp（磨损前提）", players[0].stats.max_hp > WORN_HP,
 			"max_hp=%d" % players[0].stats.max_hp)
@@ -108,13 +108,13 @@ func _run() -> void:
 	_check("参照敌（无词条）存在", reference != null)
 
 	if scaled != null:
-		_check("缩放敌 has_affix(af_counter_boost) 为真（基础词条注入）",
-			scaled.has_affix("af_counter_boost"))
+		_check("缩放敌 has_affix(af_heal_resist) 为真（基础词条注入）",
+			scaled.has_affix("af_heal_resist"))
 		_check("缩放敌 has_affix(afs_bulwark) 为真（特殊词条注入）",
 			scaled.has_affix("afs_bulwark"))
 	if reference != null:
-		_check("参照敌 has_affix(af_counter_boost) 为假（scale=1.0 未注入词条）",
-			not reference.has_affix("af_counter_boost"))
+		_check("参照敌 has_affix(af_heal_resist) 为假（scale=1.0 未注入词条）",
+			not reference.has_affix("af_heal_resist"))
 
 	if scaled != null and reference != null:
 		var expected_hp: int = roundi(float(reference.stats.max_hp) * INJECT_SCALE)

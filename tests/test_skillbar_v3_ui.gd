@@ -123,7 +123,7 @@ func _test_forecaster_branches() -> void:
 
 	# 治疗：is_heal → 「治疗 · +16」无命中暴击
 	fc.set_forecast({
-		"visible": true, "damage_type": "holy", "is_heal": true,
+		"visible": true, "damage_type": "magical", "is_heal": true,
 		"hit_count": 1, "damage": 16, "total_damage": 16,
 	})
 	_eq("治疗 → 治疗 · +16", fc.get_value_line_text(), "治疗 · +16")

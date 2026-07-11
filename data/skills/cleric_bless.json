@@ -1,11 +1,12 @@
 {
   "id": "cleric_bless",
   "name": "Bless",
-  "damage_type": "holy",
+  "damage_type": "magical",
   "power": 0,
   "hit_bonus": 0,
   "range": { "type": "square", "min": 0, "max": 2 },
   "area": { "type": "diamond", "size": 1 },
+  "attack_type": "area",
   "cooldown": 3,
   "action_cost": "swift",
   "swift_limit": 1,

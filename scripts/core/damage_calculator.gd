@@ -156,7 +156,6 @@ static func preview_attack(attacker: Unit, defender: Unit,
 		"hit_percent": clampi(roundi(hit_rate * 100.0), 0, 100),
 		"crit_percent": clampi(roundi(crit_rate * 100.0), 0, 100),
 		"damage": dmg_int,
-		"counter_expected": bool(action_data.get("allow_counter", true)),
 		"terrain_name": str(action_data.get("defender_terrain_name", "PLAIN")),
 		"terrain_evade_bonus": terrain_evade_bonus,
 		"terrain_def_bonus": terrain_def_bonus,
@@ -185,7 +184,7 @@ static func _calc_base_damage(attacker: Unit, defender: Unit,
 		"physical":
 			base = float(attacker.get_effective_stat("STR") + weapon_might \
 				 - defender_def)
-		"magical", "holy":
+		"magical":
 			base = float(attacker.get_effective_stat("MAG") + weapon_might \
 				 - defender_res)
 		"pure":

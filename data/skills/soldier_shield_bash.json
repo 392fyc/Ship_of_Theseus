@@ -6,6 +6,7 @@
   "hit_bonus": 0,
   "range": { "type": "cross", "min": 1, "max": 2 },
   "area": { "type": "single", "size": 0 },
+  "attack_type": "ranged",
   "cooldown": 2,
   "action_cost": "standard",
   "timing_constraint": "any",

@@ -6,6 +6,7 @@
   "hit_bonus": 0,
   "range": { "type": "line", "min": 1, "max": 4 },
   "area": { "type": "line", "size": 1 },
+  "attack_type": "area",
   "cooldown": 3,
   "action_cost": "move",
   "timing_constraint": "any",

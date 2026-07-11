@@ -42,13 +42,10 @@ var _hit_percent: int = 92
 var _crit_percent: int = 35
 var _is_heal: bool = false
 var _heal_amount: int = 16
-# 新增：FE 式目标 HP + 反击行
+# 新增：FE 式目标 HP 行（反击行已随自动反击移除，2026-07-11 用户裁决）
 var _target_name: String = ""
 var _target_hp: int = 0
 var _target_hp_max: int = 1
-var _counter_damage: int = 0
-var _counter_hit_percent: int = 0
-var _counter_crit_percent: int = 0
 
 
 func _ready() -> void:
@@ -76,9 +73,6 @@ func set_forecast(forecast: Dictionary) -> void:
 	_target_name = str(forecast.get("target_name", ""))
 	_target_hp = int(forecast.get("target_hp", 0))
 	_target_hp_max = maxi(int(forecast.get("target_hp_max", 1)), 1)
-	_counter_damage = int(forecast.get("counter_damage", 0))
-	_counter_hit_percent = int(forecast.get("counter_hit_percent", 0))
-	_counter_crit_percent = int(forecast.get("counter_crit_percent", 0))
 	queue_redraw()
 
 
@@ -89,7 +83,6 @@ func _color_for_type(damage_type: String) -> Color:
 		"magical":  return DamagePopup.COLOR_MAGIC
 		"pure":     return DamagePopup.COLOR_PURE
 		"hybrid":   return DamagePopup.COLOR_HYBRID
-		"holy":     return DamagePopup.COLOR_HEAL
 	return DamagePopup.COLOR_PHYS
 
 
@@ -109,7 +102,6 @@ func _name_for_type(damage_type: String) -> String:
 		"magical":  return "魔法"
 		"pure":     return "纯粹"
 		"hybrid":   return "混合"
-		"holy":     return "神圣"
 	return "物理"
 
 
@@ -157,8 +149,6 @@ func _draw() -> void:
 		draw_string(fnt, Vector2(32.0, 52.0), "%s · +%d" % [_type_name, _heal_amount], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, _type_color)
 		# 治疗无命中/暴击行
 		draw_string(fnt, Vector2(12.0, 70.0), "必定生效", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, C_TEXT_SUB)
-		# 反击行不适用（治疗技能）
-		draw_string(fnt, Vector2(12.0, 86.0), "无反击", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, C_TEXT_DIM)
 		return
 
 	# 命中 0% 或总伤为 0（不可用）→ 数值置灰
@@ -184,15 +174,6 @@ func _draw() -> void:
 	var crit_col: Color = C_TEXT_DIM if unavailable else C_CRIT
 	draw_string(fnt, Vector2(12.0, 70.0), "命中 %d%%" % _hit_percent, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, hit_col)
 	draw_string(fnt, Vector2(96.0, 70.0), "暴击 %d%%" % _crit_percent, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, crit_col)
-
-	# 反击行（FE 式：有反击→显伤害/命中/暴击；无反击→灰显「无反击」）
-	if _counter_damage > 0 or _counter_hit_percent > 0:
-		var c_type_col: Color = DamagePopup.COLOR_PHYS  # 反击伤害用白色（物理基础攻击）
-		draw_string(fnt, Vector2(12.0, 86.0),
-			"反击 %d  命中%d%%  暴击%d%%" % [_counter_damage, _counter_hit_percent, _counter_crit_percent],
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 9, c_type_col)
-	else:
-		draw_string(fnt, Vector2(12.0, 86.0), "无反击", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, C_TEXT_DIM)
 
 
 ## 画一段文本并返回下一段起始 x（用于多段拼色）。

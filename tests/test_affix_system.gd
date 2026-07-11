@@ -4,7 +4,7 @@ extends SceneTree
 ## 覆盖「真理源」代码（unit.gd / damage_calculator.gd）+ 纯逻辑装配器（battle_assembler.gd）：
 ##   词条挂载、stat_scale(HP+输出)、常驻数值分发(get_effective_stat)、afs_frenzy(低血增伤,
 ##   preview==resolve)、affix_damage_mult 输出乘区、BattleAssembler.build、回归零影响对照。
-## tactical_manager.gd 的时机分发器（on_turn_start/on_hit/on_kill/on_counter + 占位提示）
+## tactical_manager.gd 的时机分发器（on_turn_start/on_hit/on_kill + 占位提示）
 ##   为纯加法门控，不改变无词条单位行为；其运行时接线由集成/手动测试覆盖。
 ##
 ## 运行：
@@ -87,11 +87,11 @@ func _make_unit(class_data: Dictionary) -> Unit:
 func _test_idempotent(dl: Object) -> void:
 	print("\n[8] 幂等守卫（apply_affixes 仅注入一次）")
 	var u: Unit = _make_unit(dl.enemies["goblin_melee"])
-	u.apply_affixes(["af_counter_boost"], null, 1.5, dl.affixes)
+	u.apply_affixes(["af_heal_resist"], null, 1.5, dl.affixes)
 	var after_first_hp: int = u.stats.max_hp
 	var after_first_count: int = u.get_affixes().size()
 	# 重复调用（不同参数）应被幂等守卫忽略
-	u.apply_affixes(["af_counter_boost", "af_vanguard"], "afs_bulwark", 2.0, dl.affixes)
+	u.apply_affixes(["af_heal_resist", "af_vanguard"], "afs_bulwark", 2.0, dl.affixes)
 	_eq("重复 apply_affixes → max_hp 不再累乘（仍==首次）", u.stats.max_hp, after_first_hp)
 	_eq("重复 apply_affixes → _affixes 不重复累加", u.get_affixes().size(), after_first_count)
 	_feq("重复 apply_affixes → affix_damage_mult 不变(1.5)", u.affix_damage_mult, 1.5)
@@ -123,9 +123,9 @@ func _test_heal_resist(dl: Object) -> void:
 func _test_mount(dl: Object) -> void:
 	print("\n[1] 词条挂载")
 	var u: Unit = _make_unit(dl.enemies["goblin_melee"])
-	u.apply_affixes(["af_counter_boost", "af_vanguard"],
+	u.apply_affixes(["af_heal_resist", "af_vanguard"],
 		"afs_bulwark", 1.35, dl.affixes)
-	_check("has_affix(af_counter_boost)", u.has_affix("af_counter_boost"))
+	_check("has_affix(af_heal_resist)", u.has_affix("af_heal_resist"))
 	_check("has_affix(af_vanguard)", u.has_affix("af_vanguard"))
 	_check("special afs_bulwark 并入 _affixes", u.has_affix("afs_bulwark"))
 	_eq("_affixes 数量==3(2基础+1特殊)", u.get_affixes().size(), 3)
@@ -255,8 +255,8 @@ func _test_assembler(dl: Object, ba: GDScript) -> void:
 	_eq("敌0 pos==(7,3)", e0["pos"], Vector2i(7, 3))
 	_feq("敌0 stat_scale==1.35", e0["stat_scale"], 1.35)
 	_eq("敌0 special_affix==afs_bulwark", e0["special_affix"], "afs_bulwark")
-	_eq("敌0 affixes 长度==2", (e0["affixes"] as Array).size(), 2)
-	_check("敌0 affixes 含 af_counter_boost", "af_counter_boost" in (e0["affixes"] as Array))
+	_eq("敌0 affixes 长度==1", (e0["affixes"] as Array).size(), 1)
+	_check("敌0 affixes 含 af_vanguard", "af_vanguard" in (e0["affixes"] as Array))
 	# normal 敌人缺省
 	var e1: Dictionary = enemies[1]
 	_eq("敌1 tier==normal", e1["tier"], "normal")

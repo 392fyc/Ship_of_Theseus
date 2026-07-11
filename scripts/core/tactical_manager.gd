@@ -50,7 +50,7 @@ var _targeting_origin_state: InputState = InputState.IDLE
 # ── 调试 harness（测试场景专用，默认全关，不影响正式战斗）──────────
 # 确定性开关：开时所有敌对结算强制命中 + 暴击三态可控。
 enum CritMode { RANDOM, FORCE, DISABLE }
-enum DummyBehavior { IDLE, COUNTER_ONLY, AUTO }
+enum DummyBehavior { IDLE, AUTO }
 ## 总开关：仅测试场景在 _ready 置 true；false 时所有调试行为 inert，正式战斗不受影响。
 var debug_harness_active: bool = false
 var debug_deterministic: bool = false
@@ -371,8 +371,7 @@ func _do_enemy_turn(unit: Unit) -> void:
 	if not battle_active or turn_manager.current_unit != unit:
 		return
 
-	# ── 调试木桩行为开关：仅 AUTO 走正式敌方 AI；IDLE / COUNTER_ONLY 不主动行动 ──
-	# （反击仍由 _execute_hostile_action 的现有机制处理，不受此开关影响。）
+	# ── 调试木桩行为开关：仅 AUTO 走正式敌方 AI；IDLE 不主动行动 ──
 	# 门控：debug_harness_active=false（正式战斗）时跳过木桩逻辑，直接走敌方 AI。
 	if debug_harness_active and debug_dummy_behavior != DummyBehavior.AUTO:
 		print("[AI] %s: dummy behavior=%s (no proactive action)" % [
@@ -1241,18 +1240,6 @@ func _build_attack_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 	var hit_pct: int = int(preview.get("hit_percent", 0))
 	var crit_pct: int = int(preview.get("crit_percent", 0))
 	var dtype: String = str(preview_data.get("damage_type", "physical"))
-	var counter: bool = _can_counterattack(preview_data, target, current_unit)
-	# 反击预算（目标→我方方向逆向计算）
-	var counter_dmg: int = 0
-	var counter_hit: int = 0
-	var counter_crit: int = 0
-	if counter:
-		var c_action: GameAction = GameAction.make_attack(target, current_unit)
-		var c_ctx: Dictionary = _build_hostile_action_context(target, current_unit, c_action.data)
-		var c_prev: Dictionary = DamageCalculator.preview_attack(target, current_unit, c_ctx)
-		counter_dmg = int(c_prev.get("damage", 0))
-		counter_hit = int(c_prev.get("hit_percent", 0))
-		counter_crit = int(c_prev.get("crit_percent", 0))
 	return {
 		"visible": true,
 		"target_name": target.unit_name,
@@ -1264,7 +1251,6 @@ func _build_attack_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 		"total_damage": int(preview.get("total_damage", preview.get("damage", 0))),
 		"damage_type": dtype,
 		"is_heal": bool(preview.get("is_heal", false)),
-		"counter_expected": counter,
 		"terrain_name": str(preview.get("terrain_name", "PLAIN")),
 		"terrain_evade_bonus": int(preview.get("terrain_evade_bonus", 0)),
 		"terrain_def_bonus": int(preview.get("terrain_def_bonus", 0)),
@@ -1280,9 +1266,6 @@ func _build_attack_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 		}],
 		"target_hp": target.stats.hp,
 		"target_hp_max": target.stats.max_hp,
-		"counter_damage": counter_dmg,
-		"counter_hit_percent": counter_hit,
-		"counter_crit_percent": counter_crit,
 	}
 
 
@@ -1325,7 +1308,6 @@ func _build_skill_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 	var primary_per_hit: int = 0
 	var primary_hit_percent: int = 0
 	var primary_crit_percent: int = 0
-	var primary_counter: bool = false
 	var primary_terrain_name: String = "PLAIN"
 	var primary_terrain_evade: int = 0
 	var primary_terrain_def: int = 0
@@ -1367,7 +1349,6 @@ func _build_skill_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 			primary_per_hit = dmg
 			primary_hit_percent = t_hit
 			primary_crit_percent = t_crit
-			primary_counter = _can_counterattack(preview_data, target_unit, current_unit)
 			primary_terrain_name = str(preview.get("terrain_name", "PLAIN"))
 			primary_terrain_evade = int(preview.get("terrain_evade_bonus", 0))
 			primary_terrain_def = int(preview.get("terrain_def_bonus", 0))
@@ -1378,7 +1359,6 @@ func _build_skill_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 			primary_per_hit = dmg
 			primary_hit_percent = t_hit
 			primary_crit_percent = t_crit
-			primary_counter = _can_counterattack(preview_data, target_unit, current_unit)
 			primary_terrain_name = str(preview.get("terrain_name", "PLAIN"))
 			primary_terrain_evade = int(preview.get("terrain_evade_bonus", 0))
 			primary_terrain_def = int(preview.get("terrain_def_bonus", 0))
@@ -1387,20 +1367,6 @@ func _build_skill_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 
 	if primary_per_hit == 0 and not has_first:
 		primary_per_hit = first_per_hit
-
-	# 反击预算（主目标→我方方向逆向计算）
-	var counter_dmg: int = 0
-	var counter_hit: int = 0
-	var counter_crit: int = 0
-	if primary_counter and primary_target_unit != null:
-		var c_action: GameAction = GameAction.make_attack(primary_target_unit, current_unit)
-		var c_ctx: Dictionary = _build_hostile_action_context(
-			primary_target_unit, current_unit, c_action.data)
-		var c_prev: Dictionary = DamageCalculator.preview_attack(
-			primary_target_unit, current_unit, c_ctx)
-		counter_dmg = int(c_prev.get("damage", 0))
-		counter_hit = int(c_prev.get("hit_percent", 0))
-		counter_crit = int(c_prev.get("crit_percent", 0))
 
 	return {
 		"visible": true,
@@ -1413,7 +1379,6 @@ func _build_skill_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 		"total_damage": total_damage,
 		"damage_type": str(base_payload.get("damage_type", "physical")),
 		"is_heal": false,
-		"counter_expected": primary_counter,
 		"terrain_name": primary_terrain_name,
 		"terrain_evade_bonus": primary_terrain_evade,
 		"terrain_def_bonus": primary_terrain_def,
@@ -1422,9 +1387,6 @@ func _build_skill_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 		"targets": targets_list,
 		"target_hp": primary_target_unit.stats.hp if primary_target_unit != null else 0,
 		"target_hp_max": primary_target_unit.stats.max_hp if primary_target_unit != null else 1,
-		"counter_damage": counter_dmg,
-		"counter_hit_percent": counter_hit,
-		"counter_crit_percent": counter_crit,
 	}
 
 # ── Action execution ─────────────────────────────────
@@ -1640,8 +1602,6 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 		data: Dictionary) -> void:
 	var action_data: Dictionary = _build_hostile_action_context(attacker, defender, data)
 	var damage_type: String = str(action_data.get("damage_type", "physical"))
-	var defender_disabled_before_attack: bool = defender.has_buff("stun") \
-		or defender.has_buff("freeze")
 	defender.handle_attacked()
 
 	# Main attack: calculate → popup → apply
@@ -1667,34 +1627,8 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 	if result.defender_died:
 		_apply_affixes(attacker, "on_kill", {"defender": defender, "result": result})
 
-	if result.defender_died:
-		return
-
-	# Counter-attack
-	if _can_counterattack(action_data, defender, attacker, defender_disabled_before_attack):
-		var counter_data: Dictionary = _build_basic_attack_action_data(defender, attacker, {
-			"allow_counter": false,
-		})
-		# ── 敌人词条 af_counter_boost：反击伤害提升（真实生效 hook）──
-		# 无该词条时乘区==1.0 → 反击伤害与引入前一致。
-		var counter_boost: float = _affix_counter_multiplier(defender)
-		if counter_boost != 1.0:
-			counter_data["final_multiplier"] = \
-				float(counter_data.get("final_multiplier", 1.0)) * counter_boost
-			_apply_affixes(defender, "on_counter", {"target": attacker})
-		var counter_result: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(
-			defender, attacker, counter_data)
-		_log_attack(defender, attacker, counter_result, "Counterattack")
-		if counter_result.hit:
-			var counter_damage_type: String = str(counter_data.get("damage_type", "physical"))
-			DamagePopup.spawn(popup_layer, attacker.position,
-				counter_result.damage, counter_damage_type, counter_result.crit)
-			attacker.take_damage(counter_result.damage, counter_damage_type)
-		else:
-			DamagePopup.spawn_miss(popup_layer, attacker.position)
-		if counter_result.defender_died:
-			result.attacker_died = true
-			return
+	# 自动反击已整体移除（2026-07-11 用户裁决）：未来以天赋/敌方特性形式回归，
+	# 伤害与特效将与天赋/特性深度绑定，不预设反击框架。
 
 
 func _is_waiting_for_line_direction() -> bool:
@@ -2006,7 +1940,6 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		user.grid_position, target_pos, skill_data)
 	var affected_cells: Array[Vector2i] = _compute_skill_area_cells(
 		user, skill_data, target_pos, area_direction)
-	var is_area_skill: bool = area_type != "single"
 	var basic_attack_profile: Dictionary = _get_unit_basic_attack_profile(user)
 	var payload: Dictionary = {
 		"skill_name": str(skill_data.get("name", _selected_skill_id)),
@@ -2015,7 +1948,8 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		"swift_limit": int(skill_data.get("swift_limit", 1)),
 		"cooldown": int(skill_data.get("cooldown", 0)),
 		"damage_type": str(skill_data.get("damage_type", "physical")),
-		"attack_type": str(skill_data.get("attack_type", "melee")),
+		"pure_atk_source": str(skill_data.get("pure_atk_source", "phys")),
+		"attack_type": _derive_skill_attack_type(skill_data),
 		"skill_multiplier": float(skill_data.get("power", 100)) / 100.0,
 		"terrain_multiplier": 1.0,
 		"weapon_might": int(basic_attack_profile.get("weapon_might", 0)),
@@ -2029,7 +1963,6 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		"effects": skill_data.get("effects", []).duplicate(true),
 		"target_direction": _serialize_vector2i(area_direction),
 		"affected_cells": _serialize_cells(affected_cells),
-		"allow_counter": not is_area_skill,
 		# ── 剑圣专属字段（缺省安全，非剑圣技能此处为 0/false）──
 		"skill_id": _selected_skill_id,
 		"guaranteed_hit": bool(skill_data.get("guaranteed_hit", false)),
@@ -2041,6 +1974,22 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		"ki_on_kill_cd_reduction": int(skill_data.get("ki_on_kill_cd_reduction", 0)),
 	}
 	return GameAction.make_skill(user, _selected_skill_id, target_pos, target, payload)
+
+
+func _derive_skill_attack_type(skill_data: Dictionary) -> String:
+	## R4.3 攻击方式轴：技能声明 attack_type 时用声明值；
+	## 未声明时按同一规则派生（area ≠ single → area；射程 max > 1 → ranged；否则 melee），
+	## 保证缺省值也符合锁定规则而非固定 melee。
+	var declared: String = str(skill_data.get("attack_type", ""))
+	if declared != "":
+		return declared
+	var area_type: String = str(skill_data.get("area", {}).get("type", "single"))
+	if area_type != "single":
+		return "area"
+	var range_max: int = int(skill_data.get("range", {}).get("max", 1))
+	if range_max > 1:
+		return "ranged"
+	return "melee"
 
 
 func _serialize_cells(cells: Array[Vector2i]) -> Array[Dictionary]:
@@ -2081,7 +2030,8 @@ func _is_supported_runtime_skill(skill_data: Dictionary) -> bool:
 	if skill_data.is_empty():
 		return false
 	var action_cost: String = str(skill_data.get("action_cost", "standard"))
-	if action_cost not in ["move", "standard", "swift"]:
+	# free 为 [预留] 类型（2026-07-11 用户裁决：零消耗，R3.3 将增补；当前无技能使用）
+	if action_cost not in ["move", "standard", "swift", "free"]:
 		return false
 	var range_data: Dictionary = skill_data.get("range", {})
 	if str(range_data.get("type", "")) not in [
@@ -2096,7 +2046,7 @@ func _is_supported_runtime_skill(skill_data: Dictionary) -> bool:
 	if _is_support_skill(skill_data):
 		return true
 	var damage_type: String = str(skill_data.get("damage_type", ""))
-	if damage_type not in ["physical", "magical", "pure", "hybrid", "holy"]:
+	if damage_type not in ["physical", "magical", "pure", "hybrid"]:
 		return false
 	return int(skill_data.get("power", 0)) > 0
 
@@ -2122,7 +2072,7 @@ func _build_hostile_action_context(attacker: Unit, defender: Unit,
 		action_data["damage_type"] = str(basic_attack_profile.get("damage_type", "physical"))
 	if str(action_data.get("attack_type", "")) == "":
 		action_data["attack_type"] = str(basic_attack_profile.get("attack_type", "melee"))
-	# 基础攻击（普攻/反击，无 skill 的 qi 字段）按职业基础攻击产气量补默认值；
+	# 基础攻击（普攻，无 skill 的 qi 字段）按职业基础攻击产气量补默认值；
 	# 技能动作已带 qi_gain_on_hit，不会被覆盖。
 	if not action_data.has("qi_gain_on_hit"):
 		action_data["qi_gain_on_hit"] = int(basic_attack_profile.get("basic_attack_qi_gain", 0))
@@ -2171,7 +2121,6 @@ func _build_basic_attack_action_data(attacker: Unit, defender: Unit,
 		"weapon_hit": int(basic_attack_profile.get("weapon_hit", 0)),
 		"weapon_crit": int(basic_attack_profile.get("weapon_crit", 0)),
 		"pure_atk_source": str(basic_attack_profile.get("pure_atk_source", "phys")),
-		"allow_counter": true,
 	}
 	for key_value: Variant in extra_data.keys():
 		var key: String = str(key_value)
@@ -2191,7 +2140,7 @@ func _get_unit_basic_attack_profile(unit: Unit) -> Dictionary:
 		"damage_type": str(source_data.get("damage_type", "physical")),
 		"pure_atk_source": str(source_data.get("pure_atk_source", "phys")),
 		"attack_type": attack_type,
-		# 剑圣等职业：基础攻击（普攻/反击）命中产气，数值从职业 JSON 读，非剑圣缺省 0
+		# 剑圣等职业：基础攻击（普攻）命中产气，数值从职业 JSON 读，非剑圣缺省 0
 		"basic_attack_qi_gain": int(source_data.get("basic_attack_qi_gain", 0)),
 		"basic_attack_range": {
 			"min": maxi(1, int(range_data.get("min", 1))),
@@ -2248,33 +2197,6 @@ func _get_unit_terrain_context(unit: Unit) -> Dictionary:
 		"terrain_def_bonus": int(combat_modifiers.get("def_bonus", 0)),
 		"terrain_res_bonus": int(combat_modifiers.get("res_bonus", 0)),
 	}
-
-
-func _can_counterattack(action_data: Dictionary, defender: Unit, attacker: Unit,
-		defender_disabled: bool = false) -> bool:
-	if not bool(action_data.get("allow_counter", true)):
-		return false
-	if str(action_data.get("attack_type", "melee")) == "area":
-		return false
-	if defender == null or attacker == null:
-		return false
-	if not defender.stats.is_alive():
-		return false
-	if defender_disabled:
-		return false
-	if defender.has_buff("stun") or defender.has_buff("freeze"):
-		return false
-	return _is_within_basic_attack_range(defender, attacker.grid_position)
-
-
-func _is_within_basic_attack_range(unit: Unit, target_pos: Vector2i) -> bool:
-	var basic_attack_profile: Dictionary = _get_unit_basic_attack_profile(unit)
-	var range_data: Dictionary = basic_attack_profile.get("basic_attack_range", {})
-	var min_range: int = maxi(1, int(range_data.get("min", 1)))
-	var max_range: int = maxi(min_range, int(range_data.get("max", min_range)))
-	var distance: int = absi(unit.grid_position.x - target_pos.x) \
-		+ absi(unit.grid_position.y - target_pos.y)
-	return distance >= min_range and distance <= max_range
 
 
 func _log_attack(attacker: Unit, defender: Unit,
@@ -2405,8 +2327,8 @@ func _apply_sword_qi_on_hit(attacker: Unit,
 
 # ── 敌人词条时机分发器（触发类词条）──────────────────────
 # 纯加法：无词条单位 get_affixes() 为空 → 立即 return，正式战斗零影响。
-# 数值类词条（stat_scale/stat_flat/stat_pct 常驻/afs_frenzy/af_heal_resist/af_counter_boost）
-# 已在 unit.gd / damage_calculator.gd / 反击 hook 处生效；本分发器负责状态型触发时机
+# 数值类词条（stat_scale/stat_flat/stat_pct 常驻/afs_frenzy/af_heal_resist）
+# 已在 unit.gd / damage_calculator.gd 处生效；本分发器负责状态型触发时机
 # 与 v0 占位词条的显式提示（不静默）。
 
 ## 时机分发：遍历 unit 的词条，type==timing 者执行效果。
@@ -2431,21 +2353,8 @@ func _execute_affix_effect(unit: Unit, affix: Dictionary, _context: Dictionary) 
 			# 已实装词条在各自 hook 真实生效，分发器不重复执行：
 			#   af_vanguard→unit SPD 首回合态（round_ended 清）/
 			#   afs_bulwark→_build_hostile_action_context 防御乘区 / af_heal_resist→heal() /
-			#   afs_frenzy→damage_calc 输出乘区 / af_counter_boost→反击乘区 / stat_flat·stat_pct→get_effective_stat。
+			#   afs_frenzy→damage_calc 输出乘区 / stat_flat·stat_pct→get_effective_stat。
 			pass
-
-
-## af_counter_boost（反击强化）：返回反击伤害乘区。无该词条 → 1.0。
-func _affix_counter_multiplier(unit: Unit) -> float:
-	if unit == null:
-		return 1.0
-	var mult: float = 1.0
-	for affix: Dictionary in unit.get_affixes():
-		if str(affix.get("id", "")) != "af_counter_boost":
-			continue
-		var params: Dictionary = affix.get("params", {})
-		mult *= (1.0 + float(params.get("damage_pct", 0)) / 100.0)
-	return mult
 
 
 ## afs_bulwark（壁垒统御）：防御方所属阵营存在存活的携该词条单位 → 返回减伤乘区，否则 1.0。
@@ -2590,9 +2499,9 @@ func debug_cycle_crit_mode() -> CritMode:
 	return debug_crit_mode
 
 
-## 循环切换木桩行为（不动 → 只反击 → 自动攻击 → 不动），返回新态。
+## 循环切换木桩行为（不动 → 自动攻击 → 不动），返回新态。
 func debug_cycle_dummy_behavior() -> DummyBehavior:
-	debug_dummy_behavior = ((debug_dummy_behavior + 1) % 3) as DummyBehavior
+	debug_dummy_behavior = ((debug_dummy_behavior + 1) % 2) as DummyBehavior
 	return debug_dummy_behavior
 
 
@@ -2608,8 +2517,6 @@ func debug_crit_mode_label() -> String:
 
 func _debug_dummy_behavior_label() -> String:
 	match debug_dummy_behavior:
-		DummyBehavior.COUNTER_ONLY:
-			return "只反击"
 		DummyBehavior.AUTO:
 			return "自动攻击"
 		_:

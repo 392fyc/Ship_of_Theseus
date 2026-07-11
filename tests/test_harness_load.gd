@@ -125,11 +125,10 @@ func _run() -> void:
 	_eq("暴击态 cycle 2 → 不暴(2)", int(tm.debug_cycle_crit_mode()), 2)
 	_eq("暴击态 cycle 3 → 随机(0)", int(tm.debug_cycle_crit_mode()), 0)
 
-	# 木桩行为循环：不动(0)→只反击(1)→自动(2)→不动(0)
+	# 木桩行为循环：不动(0)→自动(1)→不动(0)（只反击态已随自动反击移除，2026-07-11）
 	tm.debug_dummy_behavior = 0
-	_eq("木桩 cycle 1 → 只反击(1)", int(tm.debug_cycle_dummy_behavior()), 1)
-	_eq("木桩 cycle 2 → 自动(2)", int(tm.debug_cycle_dummy_behavior()), 2)
-	_eq("木桩 cycle 3 → 不动(0)", int(tm.debug_cycle_dummy_behavior()), 0)
+	_eq("木桩 cycle 1 → 自动(1)", int(tm.debug_cycle_dummy_behavior()), 1)
+	_eq("木桩 cycle 2 → 不动(0)", int(tm.debug_cycle_dummy_behavior()), 0)
 
 	# 状态汇总字典字段
 	var status: Dictionary = tm.debug_get_status()

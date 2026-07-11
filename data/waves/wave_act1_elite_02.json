@@ -1,7 +1,7 @@
 {
   "id": "wave_act1_elite_02",
   "enemies": [
-    { "class_id": "goblin_shaman", "spawn_pos": [7, 3], "tier": "elite_chief", "affixes": ["af_heal_resist", "af_vanguard", "af_counter_boost"], "special_affix": "afs_frenzy", "stat_scale": 1.35 },
+    { "class_id": "goblin_shaman", "spawn_pos": [7, 3], "tier": "elite_chief", "affixes": ["af_heal_resist", "af_vanguard"], "special_affix": "afs_frenzy", "stat_scale": 1.35 },
     { "class_id": "goblin_archer", "spawn_pos": [6, 2], "tier": "normal" },
     { "class_id": "goblin_melee", "spawn_pos": [6, 5], "tier": "normal" }
   ],

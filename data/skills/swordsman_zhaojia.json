@@ -6,6 +6,7 @@
   "hit_bonus": 0,
   "range": { "type": "self", "min": 0, "max": 0 },
   "area": { "type": "single", "size": 0 },
+  "attack_type": "melee",
   "cooldown": 1,
   "action_cost": "swift",
   "swift_limit": 1,

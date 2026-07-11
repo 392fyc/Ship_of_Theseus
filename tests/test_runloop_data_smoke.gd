@@ -56,9 +56,9 @@ const WAVE_FILES: Array[String] = [
 ]
 ## 敌人层级合法枚举（词条制敌人五层，v0 暂用四档）
 const ENEMY_TIERS: Array[String] = ["normal", "lesser_elite", "greater_elite", "elite_chief"]
-## 基础词条池 3 个 + 特殊词条池 2 个
+## 基础词条池 2 个 + 特殊词条池 2 个（af_counter_boost 已随自动反击移除，2026-07-11）
 const AFFIX_BASE_FILES: Array[String] = [
-	"af_counter_boost", "af_vanguard", "af_heal_resist",
+	"af_vanguard", "af_heal_resist",
 ]
 const AFFIX_SPECIAL_FILES: Array[String] = ["afs_bulwark", "afs_frenzy"]
 ## 遗物 / 装备合法枚举
@@ -289,7 +289,7 @@ func _run() -> void:
 	#  与既有风格一致，不经 DataLoader。）
 	_check_wave_references(cfg)   # a. 波次存在性升级：非空字符串 → 文件存在
 	_check_wave_files()           # b. 波次 schema
-	_check_affix_files()          # c. 词条 schema（base 4 + special 2）
+	_check_affix_files()          # c. 词条 schema（base 2 + special 2）
 	_check_relic_files()          # d. 遗物 schema（≥10）
 	_check_equipment_files()      # e. 装备 schema（≥8）
 
@@ -475,7 +475,7 @@ func _check_wave_files() -> void:
 	_check("data/waves 至少 7 个 JSON（实际 %d）" % count, count >= 7)
 
 
-## c. 词条 schema：base 4 + special 2；pool 与所在子目录一致。
+## c. 词条 schema：base 2 + special 2；pool 与所在子目录一致。
 func _check_affix_files() -> void:
 	for aid: String in AFFIX_BASE_FILES:
 		var path: String = AFFIX_BASE_DIR + "/" + aid + ".json"

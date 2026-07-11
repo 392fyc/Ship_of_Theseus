@@ -23,7 +23,7 @@
   "MOV": 2,
   "attack_type": "ranged",
   "weapon_id": "wpn_cleric_starter",
-  "damage_type": "holy",
+  "damage_type": "magical",
   "basic_attack_range": { "min": 1, "max": 3 },
   "skill_ids": [
     "cleric_heal",
@@ -31,5 +31,5 @@
     "cleric_holy_smite"
   ],
   "description": "治疗与增益核心，兼具有限的神圣打击能力。",
-  "_note": "[占位] SPD growth_rate 为迁移占位值，待设计侧给具体成长率标定（Mercury R2.1，2026-07-08）"
+  "_note": "[占位] 全部 growth_rates 为旧标尺迁移遗留值，设计侧尚未按 R2.3 档位标尺（C=40/B=50/A=60/S=75）标定本职业；标定发布后更新（2026-07-11 漂移核查）"
 }

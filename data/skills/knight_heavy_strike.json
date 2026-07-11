@@ -6,6 +6,7 @@
   "hit_bonus": -10,
   "range": { "type": "diamond", "min": 1, "max": 1 },
   "area": { "type": "single", "size": 0 },
+  "attack_type": "melee",
   "cooldown": 1,
   "action_cost": "standard",
   "timing_constraint": "any",

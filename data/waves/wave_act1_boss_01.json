@@ -1,7 +1,7 @@
 {
   "id": "wave_act1_boss_01",
   "enemies": [
-    { "class_id": "goblin_melee", "spawn_pos": [7, 3], "tier": "elite_chief", "affixes": ["af_counter_boost", "af_vanguard", "af_heal_resist"], "special_affix": "afs_bulwark", "stat_scale": 1.6 },
+    { "class_id": "goblin_melee", "spawn_pos": [7, 3], "tier": "elite_chief", "affixes": ["af_vanguard", "af_heal_resist"], "special_affix": "afs_bulwark", "stat_scale": 1.6 },
     { "class_id": "goblin_melee", "spawn_pos": [7, 2], "tier": "normal" },
     { "class_id": "goblin_melee", "spawn_pos": [7, 4], "tier": "normal" },
     { "class_id": "goblin_archer", "spawn_pos": [6, 1], "tier": "normal" }

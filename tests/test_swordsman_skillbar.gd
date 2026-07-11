@@ -92,7 +92,7 @@ func _run() -> void:
 	_check("被动 tooltip 标注（被动）", "（被动）" in tip_p)
 	bar.free()
 
-	# ⑥ forecast 数据契约：targets / counter_* / target_hp 字段
+	# ⑥ forecast 数据契约：targets / target_hp 字段（counter_* 已随自动反击移除）
 	_test_forecast_data_contract(tm, sword)
 
 	_finish(scene)
@@ -100,10 +100,10 @@ func _run() -> void:
 
 # ── ⑥ forecast 数据契约 ─────────────────────────────────
 # 验证 _build_attack_forecast_for_hover 和 _build_skill_forecast_for_hover
-# 都输出 targets/target_hp/target_hp_max/counter_* 字段。
+# 都输出 targets/target_hp/target_hp_max 字段（counter_* 已随自动反击移除，2026-07-11）。
 # AoE 场景（拔刀：主目标 + 溅射目标）验证 targets.size() > 1。
 func _test_forecast_data_contract(tm: Object, sword: Unit) -> void:
-	print("\n[⑥] forecast 数据契约：targets/counter_*/target_hp")
+	print("\n[⑥] forecast 数据契约：targets/target_hp")
 
 	# --- 单体攻击 forecast（ATTACK_TARGETING 态）---
 	_clear_all_occupancy(tm)
@@ -146,9 +146,8 @@ func _test_forecast_data_contract(tm: Object, sword: Unit) -> void:
 		_check("攻击 forecast 含 target_hp_max", fc_atk.has("target_hp_max"))
 		_eq("攻击 target_hp==80", int(fc_atk.get("target_hp", -1)), 80)
 		_eq("攻击 target_hp_max==100", int(fc_atk.get("target_hp_max", -1)), 100)
-		_check("攻击 forecast 含 counter_damage", fc_atk.has("counter_damage"))
-		_check("攻击 forecast 含 counter_hit_percent", fc_atk.has("counter_hit_percent"))
-		_check("攻击 forecast 含 counter_crit_percent", fc_atk.has("counter_crit_percent"))
+		_check("攻击 forecast 无 counter_damage（自动反击已移除）",
+			not fc_atk.has("counter_damage"))
 
 	# --- AoE 技能 forecast（拔刀：主目标 + 溅射目标）---
 	_clear_all_occupancy(tm)
@@ -203,9 +202,8 @@ func _test_forecast_data_contract(tm: Object, sword: Unit) -> void:
 		_check("AoE targets 含 is_primary==true 的主目标", has_primary)
 		_check("AoE forecast 含 target_hp", fc_aoe.has("target_hp"))
 		_check("AoE forecast 含 target_hp_max", fc_aoe.has("target_hp_max"))
-		_check("AoE forecast 含 counter_damage", fc_aoe.has("counter_damage"))
-		_check("AoE forecast 含 counter_hit_percent", fc_aoe.has("counter_hit_percent"))
-		_check("AoE forecast 含 counter_crit_percent", fc_aoe.has("counter_crit_percent"))
+		_check("AoE forecast 无 counter_damage（自动反击已移除）",
+			not fc_aoe.has("counter_damage"))
 
 
 func _find_enemy_other(tm: Object, exclude: Unit) -> Unit:

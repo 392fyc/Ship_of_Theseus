@@ -1,5 +1,8 @@
 class_name RangeCalculator
 extends RefCounted
+## 射程形态计算（diamond/line/cross/square/self）。
+## 2026-07-11 用户裁决：取消地形对攻击线的阻挡（敌我双方），视线过滤层已整体移除；
+## 射程只由形态与距离决定。
 
 const CARDINAL_DIRECTIONS: Array[Vector2i] = [
 	Vector2i.UP,
@@ -10,8 +13,7 @@ const CARDINAL_DIRECTIONS: Array[Vector2i] = [
 
 
 static func calculate_cells(grid: Grid, origin: Vector2i, pattern: Dictionary,
-		direction: Vector2i = Vector2i.ZERO,
-		use_line_of_sight: bool = true) -> Array[Vector2i]:
+		direction: Vector2i = Vector2i.ZERO) -> Array[Vector2i]:
 	var cells_by_pos: Dictionary = {}
 	if grid == null or not grid.is_valid(origin):
 		return []
@@ -27,23 +29,19 @@ static func calculate_cells(grid: Grid, origin: Vector2i, pattern: Dictionary,
 
 	match pattern_type:
 		"diamond":
-			_append_diamond_cells(
-				grid, origin, min_range, max_range, cells_by_pos, use_line_of_sight)
+			_append_diamond_cells(grid, origin, min_range, max_range, cells_by_pos)
 		"line":
 			var line_direction: Vector2i = normalize_direction(direction)
 			if line_direction == Vector2i.ZERO:
 				return []
 			_append_line_cells(
-				grid, origin, line_direction, min_range, max_range,
-				cells_by_pos, use_line_of_sight)
+				grid, origin, line_direction, min_range, max_range, cells_by_pos)
 		"cross":
 			for cardinal_direction: Vector2i in CARDINAL_DIRECTIONS:
 				_append_line_cells(
-					grid, origin, cardinal_direction, min_range, max_range,
-					cells_by_pos, use_line_of_sight)
+					grid, origin, cardinal_direction, min_range, max_range, cells_by_pos)
 		"square":
-			_append_square_cells(
-				grid, origin, min_range, max_range, cells_by_pos, use_line_of_sight)
+			_append_square_cells(grid, origin, min_range, max_range, cells_by_pos)
 		_:
 			return []
 
@@ -87,44 +85,35 @@ static func direction_from_to(from_pos: Vector2i, to_pos: Vector2i) -> Vector2i:
 
 
 static func _append_diamond_cells(grid: Grid, origin: Vector2i,
-		min_range: int, max_range: int, cells_by_pos: Dictionary,
-		use_line_of_sight: bool) -> void:
+		min_range: int, max_range: int, cells_by_pos: Dictionary) -> void:
 	for dy: int in range(-max_range, max_range + 1):
 		for dx: int in range(-max_range, max_range + 1):
 			var distance: int = absi(dx) + absi(dy)
 			if distance < min_range or distance > max_range:
 				continue
-			_try_append_cell(
-				grid, origin, origin + Vector2i(dx, dy), cells_by_pos, use_line_of_sight)
+			_try_append_cell(grid, origin + Vector2i(dx, dy), cells_by_pos)
 
 
 static func _append_square_cells(grid: Grid, origin: Vector2i,
-		min_range: int, max_range: int, cells_by_pos: Dictionary,
-		use_line_of_sight: bool) -> void:
+		min_range: int, max_range: int, cells_by_pos: Dictionary) -> void:
 	for dy: int in range(-max_range, max_range + 1):
 		for dx: int in range(-max_range, max_range + 1):
 			var distance: int = maxi(absi(dx), absi(dy))
 			if distance < min_range or distance > max_range:
 				continue
-			_try_append_cell(
-				grid, origin, origin + Vector2i(dx, dy), cells_by_pos, use_line_of_sight)
+			_try_append_cell(grid, origin + Vector2i(dx, dy), cells_by_pos)
 
 
 static func _append_line_cells(grid: Grid, origin: Vector2i, direction: Vector2i,
-		min_range: int, max_range: int, cells_by_pos: Dictionary,
-		use_line_of_sight: bool) -> void:
+		min_range: int, max_range: int, cells_by_pos: Dictionary) -> void:
 	for distance: int in range(min_range, max_range + 1):
 		var cell_pos: Vector2i = origin + direction * distance
-		_try_append_cell(grid, origin, cell_pos, cells_by_pos, use_line_of_sight)
+		_try_append_cell(grid, cell_pos, cells_by_pos)
 
 
-static func _try_append_cell(grid: Grid, origin: Vector2i, cell_pos: Vector2i,
-		cells_by_pos: Dictionary, use_line_of_sight: bool) -> void:
+static func _try_append_cell(grid: Grid, cell_pos: Vector2i,
+		cells_by_pos: Dictionary) -> void:
 	if grid == null or not grid.is_valid(cell_pos):
-		return
-	if use_line_of_sight \
-			and cell_pos != origin \
-			and not Pathfinding.check_attack_line(grid, origin, cell_pos):
 		return
 	cells_by_pos[cell_pos] = true
 
