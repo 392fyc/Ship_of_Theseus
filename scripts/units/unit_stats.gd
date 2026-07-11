@@ -21,8 +21,9 @@ extends Resource
 # ── Growth system ───────────────────────────────────
 # growth_rates: percentage chance per attribute on level-up (HP/STR/MAG/DEX/SPD/DEF/RES)
 var growth_rates: Dictionary = {}
-# SS 档属性（纯预留，2026-07-07）：列于此的属性每级做两次成长判定、任一成功即成长并重置 pity
-# （比普通属性单判定多一次机会）。当前剑圣线无 SS 属性 → class_data 不含 ss_growth_stats、此表恒空、不触发。
+# SS 档属性（R2.3 预留，2026-07-07 建 / 2026-07-11 修正语义）：列于此的属性每级做两次**独立**
+# 成长判定，每次成功各 +1（单级至多 +2、期望 +1.5），任一成功重置该属性 pity。
+# 当前剑圣线无 SS 属性 → class_data 不含 ss_growth_stats、此表恒空、不触发。
 var _ss_growth_stats: Array = []
 # Pity counters: tracks consecutive failures per attribute
 var _pity_counts: Dictionary = {}
@@ -83,24 +84,25 @@ func level_up() -> Dictionary:
 	var gains: Dictionary = {}
 	for key: String in ["HP", "STR", "MAG", "DEX", "SPD", "DEF", "RES"]:
 		var rate: float = growth_rates.get(key, 0) / 100.0
-		var grew: bool = false
+		var grew_count: int = 0
 		if rate > 0.0:
-			var success: bool = randf() < rate
-			# SS 档预留（纯预留，当前无 SS 属性、恒不触发）：每级两次 S 率判定，
-			# 任一成功即成长（首次失败再补一次机会）。任一成功后 pity 归零沿用下方逻辑。
-			if not success and key in _ss_growth_stats:
-				success = randf() < rate
-			if success:
-				grew = true
-			else:
+			# SS 档属性掷两次、普通属性掷一次；每次成功独立计 +1
+			# （R2.3：SS = 每级两次 S 判定，至多 +2、期望 +1.5）
+			var roll_count: int = 2 if key in _ss_growth_stats else 1
+			for _i: int in roll_count:
+				if randf() < rate:
+					grew_count += 1
+			if grew_count == 0:
+				# [占位] KB 未定义 SS 双判定全失败时 pity 计数，保守取 +1（与单判定同），待用户确认
 				_pity_counts[key] = _pity_counts.get(key, 0) + 1
 				var threshold: int = _get_pity_threshold(rate * 100.0)
 				if _pity_counts[key] >= threshold:
-					grew = true
+					grew_count = 1
 
-		if grew:
-			_apply_growth(key)
-			gains[key] = 1
+		if grew_count > 0:
+			for _i: int in grew_count:
+				_apply_growth(key)
+			gains[key] = grew_count
 			_pity_counts[key] = 0
 	return gains
 
