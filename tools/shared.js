@@ -118,7 +118,8 @@ const WEAPON_TYPES = {
 // 游戏常量 — 伤害/技能类型
 // ============================================================
 
-const ELEMENT_TYPES = ['physical', 'magical', 'holy', 'hybrid'];
+// 2026-07-11 用户裁决：伤害类型轴无 holy，旧 holy（无视防御）语义即 pure
+const ELEMENT_TYPES = ['physical', 'magical', 'pure', 'hybrid'];
 const ATTACK_TYPES = ['melee', 'ranged', 'area'];
 
 // ============================================================
@@ -250,7 +251,7 @@ const GameFormulas = {
     switch (elementType) {
       case 'physical': return Math.max(0, atk - pdef);
       case 'magical':  return Math.max(0, mag - mdef);
-      case 'holy':     return mag; // holy无视防御
+      case 'pure':     return mag; // pure 无视防御（工具简化：按 mag 来源）
       case 'hybrid':   return Math.max(0, Math.max(atk, mag) - Math.min(pdef, mdef));
       default:         return Math.max(0, atk - pdef);
     }

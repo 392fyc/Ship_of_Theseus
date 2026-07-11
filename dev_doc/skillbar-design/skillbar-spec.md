@@ -138,7 +138,7 @@
 | 伤害类型 | hex | 来源常量 |
 |---------|-----|---------|
 | 物理 physical | `#ffffff`（白）| `DamagePopup.COLOR_PHYS` |
-| 魔法 magical / holy | `#aa88ff` | `DamagePopup.COLOR_MAGIC` |
+| 魔法 magical | `#aa88ff` | `DamagePopup.COLOR_MAGIC` |（holy 类型已移除 2026-07-11，类型轴只有 physical/magical/pure/hybrid）
 | 纯 pure | `#ffd700` | `DamagePopup.COLOR_PURE` |
 | 混合 hybrid | `#ff8c00` | `DamagePopup.COLOR_HYBRID` |
 | 治疗 heal | `#4ce64c`（绿）| `DamagePopup.COLOR_HEAL` |
@@ -257,13 +257,13 @@
 - 每槽：`skills[i]` 含 `skill_id`/`name`/`action_cost`/`timing_constraint`/`cooldown`/`available`/`reason`/`selected`/`slot_origin_id`。
 - 资源：顶层 `sword_qi`/`sword_qi_max`/`marks`（+ 可选 `sword_qi_config`）。
 - 个人信息：`unit_name`/`char_name`/`level`/`hp`/`hp_max`/`shield`/`xp`/`stats`/`stats_delta`（现 `_info_panel` 已用）。
-- forecast：顶层 `forecast`（`tactical_manager._combat_forecast`），现含 `hit_percent`/`crit_percent`/`damage`/`counter_expected`/`terrain_*`。
+- forecast：顶层 `forecast`（`tactical_manager._combat_forecast`），现含 `hit_percent`/`crit_percent`/`damage`/`terrain_*`（`counter_expected` 与 counter_* 字段已随自动反击移除 2026-07-11）。
 
 ### 10.2 资源消耗角标 = 路 2（数据驱动，沿用 v2）
 在 `_build_skill_entry()` 新增透传 `qi_cost`/`mark_cost`/`requires_marks`（取自技能 JSON）。仅加 entry 键，不改任何签名。角标文案由这三字段拼装（见 §5）；缺失时回退常量表 `SKILL_COST_HINT`。
 
 ### 10.3 伤害预测器数据需求（v3 关键 — 后端字段补充，加法不破坏现有返回）
-**现状**：`DamageCalculator.preview_attack(attacker, defender, action_data)` 返回 `hit_percent` / `crit_percent` / **单次** `damage` / `counter_expected` / `terrain_*`。**无段数、无单段伤害、无伤害类型透传到 UI**（伤害类型在 `action_data.damage_type`，但 forecast 字典未带出）。
+**现状**：`DamageCalculator.preview_attack(attacker, defender, action_data)` 返回 `hit_percent` / `crit_percent` / **单次** `damage` / `terrain_*`（`counter_expected` 已随自动反击移除 2026-07-11）。**无段数、无单段伤害、无伤害类型透传到 UI**（伤害类型在 `action_data.damage_type`，但 forecast 字典未带出）。
 
 **建议新增字段（全部加法，旧消费者兼容）**：
 

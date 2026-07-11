@@ -68,7 +68,7 @@ button:hover{background:#c73050}
       <select id="skill-type">
         <option value="physical">Physical 物理</option>
         <option value="magical">Magical 魔法</option>
-        <option value="holy">Holy 神圣</option>
+        <option value="pure">Pure 纯粹</option>
         <option value="hybrid">Hybrid 混合</option>
       </select>
       <div class="row" style="margin-top:6px">
@@ -304,7 +304,7 @@ function calcDamage(inp, overrides) {
   const st = o.skillType;
   if (st === 'physical') baseDmg = Math.max(0, effAtk - effPdef);
   else if (st === 'magical') baseDmg = Math.max(0, effMag - effMdef);
-  else if (st === 'holy') baseDmg = effAtk > effMag ? effAtk : effMag; // 无减防
+  else if (st === 'pure') baseDmg = effAtk > effMag ? effAtk : effMag; // 无减防（2026-07-11：holy 更名 pure）
   else baseDmg = Math.max(0, effAtk - Math.min(effPdef, effMdef)); // hybrid
 
   // 技能倍率
@@ -319,14 +319,14 @@ function calcDamage(inp, overrides) {
 
   // 暴击率
   let critRate = 0;
-  let canCrit = st !== 'holy';
+  let canCrit = st !== 'pure';
   if (canCrit) {
     critRate = (o.crit + o.wepCrit + o.skillCrit - o.critEva);
     critRate = Math.max(0, Math.min(50, critRate));
   }
 
   // 格挡率
-  let canBlock = st !== 'holy';
+  let canBlock = st !== 'pure';
   let blockRate = canBlock ? o.block : 0;
 
   // 暴击倍率
