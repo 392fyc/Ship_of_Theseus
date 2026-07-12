@@ -1,11 +1,11 @@
 extends SceneTree
-## growth_rates 新标定 + SS 档双判定预留 —— 2026-07-07 建 / 2026-07-11 修正 SS 语义
+## growth_rates 新标定 + SS 档预留 —— 2026-07-07 建 / 2026-07-12 语义定稿（用户裁决 [已定]）
 ##
 ## 覆盖：
 ##   1. swordsman.json growth_rates 新标定（DEX75 / HP50 / STR50 / DEF50 / MAG40 / RES40；LCK 已移除）。
-##   2. SS 档双判定预留（unit_stats.load_growth_rates 的 ss_stats 参数 + level_up 双判定分支）：
-##      SS 档属性每级做两次**独立** S 率判定，每次成功各 +1（单级至多 +2、期望 +1.5），
-##      任一成功重置该属性 pity（R2.3）；剑圣无 SS 属性（纯预留、恒不触发）。
+##   2. SS 档预留（unit_stats.load_growth_rates 的 ss_stats 参数 + level_up SS 分支）：
+##      SS 档属性每级**仅判定一次** S 率，成功 +2、失败保底 +1（最少 +1、至多 +2；
+##      S=75% 期望 +1.75），每级必有成长、pity 恒重置；剑圣无 SS 属性（纯预留、恒不触发）。
 ##
 ## 坑规避：用 load().new() + 动态属性访问，避免 --script 下引用全局 class_name UnitStats 的缓存问题。
 ## 运行：<Godot_console.exe> --headless --path D:/ShipOfTheseus/Ship_of_Theseus \
@@ -21,7 +21,7 @@ var _ran: bool = false
 
 
 func _initialize() -> void:
-	print("=== test_growth_ss_reserve (growth 标定 + SS 双判定预留) ===")
+	print("=== test_growth_ss_reserve (growth 标定 + SS 档预留) ===")
 
 
 func _process(_delta: float) -> bool:
@@ -81,7 +81,7 @@ func _test_ss_boundary() -> void:
 	for _i in 50:
 		s0.level_up()
 	_eq("SS + rate=0 → DEX 不成长（50 级）", s0.dex, dex0)
-	# rate=100 + SS：两次独立判定必双中 → 每级 +2（R2.3：至多 +2）
+	# rate=100 + SS：单判定必成功 → 每级 +2（至多 +2）
 	var s100: Object = load(UNIT_STATS).new()
 	s100.load_growth_rates({"DEX": 100}, ["DEX"])
 	var dex100: int = s100.dex
@@ -92,11 +92,12 @@ func _test_ss_boundary() -> void:
 	_eq("SS + rate=100 → 每级 +2（20 级 +40）", s100.dex, dex100 + 40)
 
 
-# ── 4. SS 双判定生效（固定 seed 统计：SS 成长事件率与成长量均 > 非 SS）──
+# ── 4. SS 分支生效（固定 seed 统计：保底每级必成长 + 成功级 +2）──
 func _test_ss_dual_roll_effect() -> void:
 	var trials: int = 3000
-	# 两次独立判定（R2.3）：成长事件率 1-(0.6)^2=64% vs 单判定 40%；
-	# 成长量期望 2×0.4=0.8/级 vs 0.4/级（另受 pity 拉高，两者同受）。
+	# SS 语义（2026-07-12 [已定]）：单判定，成功 +2 / 失败保底 +1 →
+	# 成长事件率 100%（每级必成长）；成长量期望 @rate40% = 2×0.4+1×0.6 = 1.4/级。
+	# 非 SS 对照：单判定 40%（另受 pity 拉高）。
 	var rate: int = 40
 
 	seed(20260707)
@@ -118,15 +119,17 @@ func _test_ss_dual_roll_effect() -> void:
 		if (nm.level_up() as Dictionary).has("DEX"):
 			nm_grows += 1
 
-	_check("SS 双判定成长事件数 > 非 SS（%d vs %d / %d 级 @rate %d%%）"
+	_eq("SS 保底：每级必成长（事件数 == %d）" % trials, ss_grows, trials)
+	_check("SS 成长事件率高于非 SS（%d vs %d / %d 级 @rate %d%%）"
 		% [ss_grows, nm_grows, trials, rate], ss_grows > nm_grows,
 		"ss=%d nm=%d" % [ss_grows, nm_grows])
-	# 事件率 64% vs 40% ≈ 差 720/3000；留宽松下限 300 防统计抖动 flaky。
-	_check("SS 成长事件率明显高于非 SS（差 > 300）", ss_grows - nm_grows > 300,
-		"差=%d（ss=%d nm=%d）" % [ss_grows - nm_grows, ss_grows, nm_grows])
-	# 双中（+2）级存在：rate 40% 下 P(双中)=16% ≈ 480/3000，总成长量应明显大于事件数。
-	_check("SS 存在单级 +2（总成长量 - 事件数 > 100）", ss_total - ss_grows > 100,
+	# +2 级存在：rate 40% 下成功级 ≈ 1200/3000，总成长量应明显大于事件数。
+	_check("SS 存在单级 +2（总成长量 - 事件数 > 300）", ss_total - ss_grows > 300,
 		"total=%d events=%d" % [ss_total, ss_grows])
+	# 成长量上下界：全失败=3000、全成功=6000，实际应落在开区间内（保底与+2并存）。
+	_check("SS 总成长量在 (3000, 6000) 开区间（保底+1 与成功+2 并存）",
+		ss_total > trials and ss_total < trials * 2,
+		"total=%d" % ss_total)
 
 
 # ── 工具 ───────────────────────────────────────────────
