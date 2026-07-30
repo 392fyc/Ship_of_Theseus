@@ -1,6 +1,6 @@
 class_name UnitStats
 extends Resource
-## ADR-005: 9-attribute system (STR/MAG/DEX/SPD/LCK/DEF/RES/HP/MOV)
+## R2.1: 9-attribute system (STR/MAG/DEX/SPD/LCK/DEF/RES/HP/MOV)
 ## Growth attributes (7): HP, STR, MAG, DEX, SPD, DEF, RES
 ## Fixed attributes (2): LCK, MOV
 
@@ -52,7 +52,9 @@ func load_growth_rates(rates: Dictionary, ss_stats: Array = []) -> void:
 
 # ── Derived combat stats ────────────────────────────
 # These replace the old independent hit/evade/crit/crit_evade attributes.
-# Formula source: ADR-005 §4.3
+# Formula source: R1.2 (hit/avoid) / R1.3 (crit/crit_avoid) / R1.5 (status resist)
+# LCK does not enter the hit or avoid chain — it applies only to crit avoid (R1.3)
+# and debuff resistance (R1.5).
 
 func get_hit(weapon_hit: int = 90) -> int:
 	return weapon_hit + dex * 2

@@ -80,7 +80,7 @@ func _test_zhanji_qi_runtime(tm: Object, sword: Unit) -> void:
 	enemy.stats.lck = 0
 	enemy.stats.max_hp = 9999
 	enemy.stats.hp = 9999
-	enemy.stats.def_attr = 9999  # 伤害压到下限1，确保不死
+	enemy.stats.def_attr = 9999  # 高防→伤害压到下限（R1.1 加法层 max(0, ·)），9999 HP 确保不死
 
 	# 把剑圣移到敌人相邻格（斩击 range diamond1-1）
 	_place_adjacent(tm, sword, enemy)

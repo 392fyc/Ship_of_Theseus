@@ -68,7 +68,7 @@ const MOCK_TURNS: Array[Dictionary] = [
 const POPUP_SEQ: Array[Dictionary] = [
 	{"text": "-24", "type": "phys",   "crit": false},
 	{"text": "-38", "type": "magic",  "crit": false},
-	{"text": "-99", "type": "pure",   "crit": true},
+	{"text": "-99", "type": "pure",   "crit": false},
 	{"text": "-15", "type": "hybrid", "crit": false},
 	{"text": "-56", "type": "phys",   "crit": true},
 ]

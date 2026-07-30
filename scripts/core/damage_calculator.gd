@@ -49,10 +49,10 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 
 	# ── Step 2: Crit determination ──────────────────────
 	# Crit = weapon_crit + DEX/2 + crit_bonus;  Dodge = LCK
-	# guaranteed_crit（居合）：跳过随机判定直接暴击（pure伤害仍受限）。
+	# guaranteed_crit（居合）：跳过随机判定直接暴击；纯粹伤害不参与暴击判定（R1.3），guaranteed_crit 对其无效。
 	var is_pure: bool = (damage_type == "pure")
 	var allow_crit: bool = true
-	if is_pure and not action_data.get("enable_pure_crit", false):
+	if is_pure:
 		allow_crit = false
 	# disable_crit（调试确定性开关「不暴」态）：纯加法分支，默认 false 不影响正式战斗。
 	if bool(action_data.get("disable_crit", false)):
@@ -77,10 +77,8 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	var final_dmg: float = base_damage * skill_multiplier * terrain_multiplier
 
 	if result.crit:
-		var crit_mult: float = 1.5
-		if not is_pure:
-			# crit_damage_bonus：拔刀额外暴击倍率（叠加到 1.5x 基础上）
-			crit_mult += float(action_data.get("crit_damage_bonus", 0.0))
+		# crit_damage_bonus：拔刀额外暴击倍率（叠加到 1.5x 基础上）
+		var crit_mult: float = 1.5 + float(action_data.get("crit_damage_bonus", 0.0))
 		final_dmg *= crit_mult
 
 	final_dmg *= relic_multiplier * final_multiplier
@@ -128,8 +126,7 @@ static func preview_attack(attacker: Unit, defender: Unit,
 
 	var crit_rate: float = 0.0
 	var is_pure: bool = (damage_type == "pure")
-	var crit_blocked: bool = (is_pure and not action_data.get("enable_pure_crit", false)) \
-		or bool(action_data.get("disable_crit", false))
+	var crit_blocked: bool = is_pure or bool(action_data.get("disable_crit", false))
 	if not crit_blocked:
 		var guaranteed_crit: bool = bool(action_data.get("guaranteed_crit", false))
 		if guaranteed_crit:
@@ -172,11 +169,11 @@ static func _calc_base_damage(attacker: Unit, defender: Unit,
 		damage_type: String,
 		weapon_might: int, pure_atk_source: String,
 		terrain_def_bonus: int, terrain_res_bonus: int) -> float:
-	## ADR-005 §4.2: Additive base damage formula.
-	## physical:  max(1, STR + weapon_might - DEF)
-	## magical:   max(1, MAG + weapon_might - RES)
+	## R1.1（伤害链）: Additive base damage formula.
+	## physical:  max(0, STR + weapon_might - DEF)
+	## magical:   max(0, MAG + weapon_might - RES)
 	## pure:      [source] + weapon_might  (ignores defense)
-	## hybrid:    max(1, (STR+MAG) + hybrid_might - min(DEF,RES))  ⚠️ TBD (ADR-006)
+	## hybrid:    max(0, (STR+MAG) + hybrid_might - min(DEF,RES))  ⚠️ TBD (ADR-006)
 	var base: float = 0.0
 	var defender_def: int = defender.get_effective_stat("DEF") + terrain_def_bonus
 	var defender_res: int = defender.get_effective_stat("RES") + terrain_res_bonus
@@ -198,14 +195,14 @@ static func _calc_base_damage(attacker: Unit, defender: Unit,
 					raw = float(
 						attacker.get_effective_stat("STR") + attacker.get_effective_stat("MAG"))
 			base = raw + float(weapon_might)
-			return base  # pure ignores defense, no max(1) floor needed
+			return base  # pure ignores defense
 		"hybrid":
 			# ⚠️ TBD — placeholder per ADR-005 §4.2. Awaiting ADR-006.
 			var both_atk: float = float(
 				attacker.get_effective_stat("STR") + attacker.get_effective_stat("MAG"))
 			var weaker_def: float = float(mini(defender_def, defender_res))
 			base = both_atk + float(weapon_might) - weaker_def
-	return maxf(1.0, base)
+	return maxf(0.0, base)
 
 
 ## 敌人词条输出乘区：攻击方 stat_scale 增强（affix_damage_mult）× 条件触发词条。
