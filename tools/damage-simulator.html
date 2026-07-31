@@ -165,6 +165,8 @@ const DMG_I18N = {
     lbl_expected_dmg: '每次攻击期望伤害',
     lbl_miss: 'miss', lbl_normal: '普通', lbl_crit: '暴击', lbl_block: '格挡',
     lbl_hits_to_kill: '击杀需要', lbl_times: '次', lbl_target_hp: '目标HP',
+    lbl_unkillable: '∞（期望伤害 0，无法击杀）',
+    lbl_pure_no_crit: '—（纯粹伤害不参与暴击判定）',
     lbl_hp_pct: '占目标HP',
     lbl_sim: '═══ 1000次模拟 ═══',
     lbl_total_dmg: '总伤害', lbl_avg: '平均',
@@ -198,6 +200,8 @@ const DMG_I18N = {
     lbl_expected_dmg: 'Expected Damage per Attack',
     lbl_miss: 'miss', lbl_normal: 'normal', lbl_crit: 'crit', lbl_block: 'block',
     lbl_hits_to_kill: 'Hits to Kill', lbl_times: 'hits', lbl_target_hp: 'Target HP',
+    lbl_unkillable: '∞ (expected damage 0 — cannot kill)',
+    lbl_pure_no_crit: '— (pure damage does not roll crits)',
     lbl_hp_pct: 'of Target HP',
     lbl_sim: '═══ 1000 Simulations ═══',
     lbl_total_dmg: 'Total Damage', lbl_avg: 'Average',
@@ -315,7 +319,7 @@ function calcDamage(inp, overrides) {
 
   // 命中率
   let hitRate = o.hit + o.wepHit + o.skillHit - o.eva - o.terrainEva;
-  hitRate = Math.max(20, Math.min(100, hitRate));
+  hitRate = Math.max(1, Math.min(100, hitRate));
 
   // 暴击率
   let critRate = 0;
@@ -350,13 +354,14 @@ function calcDamage(inp, overrides) {
   let blockChance_final = hitChance * blockChance_ifHit;
 
   let expectedDmg = normalChance * normalDmg + critChance_final * critDmg + blockChance_final * blockDmg;
+  const shownDmg = Math.round(expectedDmg);
 
   return {
     baseDmg, dmg: Math.floor(dmg), normalDmg, critDmg, blockDmg,
     hitRate, critRate, blockRate, critMult,
-    expectedDmg: Math.round(expectedDmg),
+    expectedDmg: shownDmg,
     effAtk, effMag, effPdef, effMdef,
-    hitsToKill: Math.ceil(o.hp / Math.max(1, expectedDmg)),
+    hitsToKill: shownDmg > 0 ? Math.ceil(o.hp / shownDmg) : Infinity,
     normalChance, critChance_final, blockChance_final, missChance,
   };
 }
@@ -378,17 +383,17 @@ ${t('lbl_skill_mult')}(${inp.skillPower}%): ${r.dmg}
 ${t('lbl_hit_rate')}: <span class="${r.hitRate>=90?'good':'warn'}">${r.hitRate}%</span>
 ${t('lbl_crit_rate')}: <span class="${r.critRate>=30?'good':'warn'}">${r.critRate}%</span> (cap 50%)
 ${t('lbl_block_rate')}: ${r.blockRate}%
-${t('lbl_crit_mult')}: ×${r.critMult.toFixed(2)}
+${t('lbl_crit_mult')}: ${inp.skillType === 'pure' ? t('lbl_pure_no_crit') : '×' + r.critMult.toFixed(2)}
 
 <span class="highlight">${t('lbl_dmg_result')}</span>
 ${t('lbl_normal_hit')}: ${r.normalDmg}
-${t('lbl_crit_hit')}: <span class="good">${r.critDmg}</span> (×${r.critMult.toFixed(2)})
+${t('lbl_crit_hit')}: <span class="good">${inp.skillType === 'pure' ? t('lbl_pure_no_crit') : r.critDmg + ' (×' + r.critMult.toFixed(2) + ')'}</span>
 ${t('lbl_block_hit')}: ${r.blockDmg} (×0.3)
 
 <span class="highlight">${t('lbl_expected')}</span>
 ${t('lbl_expected_dmg')}: <span class="highlight">${r.expectedDmg}</span>
   ${t('lbl_miss')} ${(r.missChance*100).toFixed(1)}% / ${t('lbl_normal')} ${(r.normalChance*100).toFixed(1)}% / ${t('lbl_crit')} ${(r.critChance_final*100).toFixed(1)}% / ${t('lbl_block')} ${(r.blockChance_final*100).toFixed(1)}%
-${t('lbl_hits_to_kill')}: <span class="warn">${r.hitsToKill}${t('lbl_times')}</span> (${t('lbl_target_hp')} ${inp.hp})
+${t('lbl_hits_to_kill')}: <span class="warn">${Number.isFinite(r.hitsToKill) ? r.hitsToKill + t('lbl_times') : t('lbl_unkillable')}</span> (${t('lbl_target_hp')} ${inp.hp})
 ${t('lbl_hp_pct')}: ${(r.expectedDmg/inp.hp*100).toFixed(1)}%`;
 }
 
@@ -461,8 +466,9 @@ function compareNodes() {
     return getVal(b) - getVal(a);
   });
 
+  const critNote = inp.skillType === 'pure' ? '' : ` (${t('lbl_crit_hit')} ${base.critDmg})`;
   document.getElementById('compare-result').innerHTML =
-    `<span class="highlight">${t('lbl_base_expected')}: ${base.expectedDmg} (${t('lbl_crit_hit')} ${base.critDmg})</span>\n\n` +
+    `<span class="highlight">${t('lbl_base_expected')}: ${base.expectedDmg}${critNote}</span>\n\n` +
     lines.join('\n');
 }
 

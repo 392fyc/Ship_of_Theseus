@@ -3,7 +3,7 @@ extends SceneTree
 ##
 ## 覆盖「真理源」代码（unit.gd / damage_calculator.gd）+ JSON 数据层：
 ##   居合必中必暴、满印记→拔刀槽位替换、心眼(暴击/速度)、印记属性+2、
-##   暴击倍率(1.5x 基线 / 拔刀 2.0x / pure 固定 1.5x)、命中 1% 下限。
+##   暴击倍率(1.5x 基线 / 拔刀 2.0x)、纯粹伤害不参与暴击判定、命中 1% 下限。
 ## tactical_manager.gd 的运行时接线（命中产气/施放扣气/击杀返气/cd-1/mark_gain）
 ##   由批次2 集成测试覆盖（test_swordsman_integration.gd）。
 ##
@@ -259,14 +259,14 @@ func _test_damage_formulas(dl: Object) -> void:
 
 	# 7a. 命中下限 1%（原 20%）：命中远低于回避时钳到 0.01
 	atk.stats.dex = 0
-	atk.stats.lck = 0
 	dft.stats.spd = 50  # 回避=100
 	var pv_floor: Dictionary = DamageCalculator.preview_attack(atk, dft, {"weapon_hit": 0})
 	_eq("命中下限==1%(非20%)", pv_floor["hit_percent"], 1)
 
-	# 7b. 命中公式正常档：dex=10,lck=0,weapon_hit=80; 目标 spd=15,lck=0 → (80+20-30)/100=70%
+	# 7b. 命中公式正常档(R1.2)：dex=10,weapon_hit=80; 目标 spd=15 → (80+20-30)/100=70%
+	#     LCK 不参与命中与闪避(R2.1)，不是本公式的输入；下面 dft.stats.lck = 0 是给紧随其后的
+	#     7c 暴击用例压低暴击回避用的(LCK 是暴击回避基值)，与本条命中断言无关。
 	atk.stats.dex = 10
-	atk.stats.lck = 0
 	dft.stats.spd = 15
 	dft.stats.lck = 0
 	var pv_hit: Dictionary = DamageCalculator.preview_attack(atk, dft, {"weapon_hit": 80})
@@ -290,13 +290,13 @@ func _test_damage_formulas(dl: Object) -> void:
 		{"damage_type": "physical", "guaranteed_crit": true})
 	_eq("guaranteed_crit(physical) → 暴击100%", pv_gc["crit_percent"], 100)
 
-	# 7f. pure 必暴被拦截（未开 enable_pure_crit）
-	var pv_pc_off: Dictionary = DamageCalculator.preview_attack(atk, dft,
+	# 7f. pure 不参与暴击判定（R1.3，无条件）：guaranteed_crit 对 pure 无效
+	var pv_pc_guar: Dictionary = DamageCalculator.preview_attack(atk, dft,
 		{"damage_type": "pure", "guaranteed_crit": true})
-	_eq("pure guaranteed_crit 默认被拦截 → 0%", pv_pc_off["crit_percent"], 0)
-	var pv_pc_on: Dictionary = DamageCalculator.preview_attack(atk, dft,
+	_eq("pure + guaranteed_crit → 暴击 0%", pv_pc_guar["crit_percent"], 0)
+	var pv_pc_forced: Dictionary = DamageCalculator.preview_attack(atk, dft,
 		{"damage_type": "pure", "guaranteed_crit": true, "enable_pure_crit": true})
-	_eq("pure 开 enable_pure_crit → 100%", pv_pc_on["crit_percent"], 100)
+	_eq("pure 无论传什么暴击开关都不暴 → 0%", pv_pc_forced["crit_percent"], 0)
 
 	# ── 暴击倍率（用 resolve_attack 强制必中必暴，控制 base=20）──
 	atk.clear_marks()
@@ -319,17 +319,19 @@ func _test_damage_formulas(dl: Object) -> void:
 		 "guaranteed_hit": true, "guaranteed_crit": true, "crit_damage_bonus": 1.5})
 	_eq("拔刀 3.0x (base20→60)", r_badao.damage, 60)
 
-	# 7i. pure 暴击固定 1.5x，不受 crit_damage_bonus 影响：base 20 → 30
+	# 7i. pure 不参与暴击判定（R1.3）：即使传 guaranteed_crit 与 crit_damage_bonus，
+	#     也不进暴击乘区，base 20 → 20
 	var r_pure: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(atk, dft,
 		{"damage_type": "pure", "pure_atk_source": "phys", "weapon_might": 0,
 		 "skill_multiplier": 1.0, "guaranteed_hit": true, "guaranteed_crit": true,
-		 "enable_pure_crit": true, "crit_damage_bonus": 1.5})
-	_eq("pure 暴击固定1.5x (base20→30, 不吃+1.5)", r_pure.damage, 30)
+		 "crit_damage_bonus": 1.5})
+	_check("pure 不暴击且无暴击乘区 (base20→20)", not r_pure.crit and r_pure.damage == 20,
+		"crit=%s dmg=%d" % [str(r_pure.crit), r_pure.damage])
 
 	# ── 基础伤害公式（非暴击；crit_rate=0 由目标高 LCK 保证）──
 	dft.stats.lck = 50  # crit dodge 高 → 不会暴击
 
-	# 7j. physical = max(1, STR+might-DEF)：20+0-0=20
+	# 7j. physical = max(0, STR+might-DEF)：20+0-0=20
 	atk.stats.str_attr = 20
 	dft.stats.def_attr = 0
 	var r_phys: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(atk, dft,
@@ -337,12 +339,12 @@ func _test_damage_formulas(dl: Object) -> void:
 	_check("physical base==20", not r_phys.crit and r_phys.damage == 20,
 		"crit=%s dmg=%d" % [str(r_phys.crit), r_phys.damage])
 
-	# 7k. max(1) 下限：STR1 - DEF100 → 1
+	# 7k. 伤害下限 0（max(0, ·)）：STR1 - DEF100 → 0（防御足够高时命中也结算 0 伤害）
 	atk.stats.str_attr = 1
 	dft.stats.def_attr = 100
 	var r_floor: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(atk, dft,
 		{"damage_type": "physical", "weapon_might": 0, "guaranteed_hit": true})
-	_eq("physical 下限 max(1)==1", r_floor.damage, 1)
+	_eq("physical 下限 max(0)==0", r_floor.damage, 0)
 
 	# 7l. pure 无视防御：STR20, DEF100 → 仍 20
 	atk.stats.str_attr = 20

@@ -73,13 +73,12 @@ const STAT_DEFS = {
   crit_eva: { name: 'C.EVA', fullName: '暴击闪避', category: 'critical' },
   spd:   { name: 'SPD',   fullName: '速度',    category: 'speed' },
   move:  { name: 'MOVE',  fullName: '移动力',  category: 'speed' },
-  vision:{ name: 'VIS',   fullName: '视野',    category: 'utility' },
   block: { name: 'BLOCK', fullName: '格挡',    category: 'defense' },
   res:   { name: 'RES',   fullName: '抗性',    category: 'defense' },
 };
 
 // 不随等级成长的属性
-const NON_GROWING_STATS = ['spd', 'move', 'vision', 'block'];
+const NON_GROWING_STATS = ['spd', 'move', 'block'];
 
 // ============================================================
 // 游戏常量 — 稀有度
@@ -157,7 +156,7 @@ const EQUIPMENT_TIER_REFERENCE = [
 const CLASS_BASE_STATS = {
   swordsman: {
     name: '剑士', hp: 90, atk: 14, mag: 5, pdef: 7, mdef: 5,
-    hit: 85, eva: 15, crit: 12, crit_eva: 5, spd: 12, move: 3, vision: 3, block: 0, res: 5,
+    hit: 85, eva: 15, crit: 12, crit_eva: 5, spd: 12, move: 3, block: 0, res: 5,
     growth: { hp: 8, atk: 3, mag: 0, pdef: 1, mdef: 1, hit: 2, eva: 2, crit: 2, crit_eva: 0, res: 0 },
     advancements: {
       sword_saint: { name: '剑圣', growthOverride: { atk: 4, crit: 3 } },
@@ -166,7 +165,7 @@ const CLASS_BASE_STATS = {
   },
   archer: {
     name: '弓箭手', hp: 75, atk: 16, mag: 5, pdef: 5, mdef: 5,
-    hit: 78, eva: 12, crit: 14, crit_eva: 3, spd: 10, move: 3, vision: 4, block: 0, res: 5,
+    hit: 78, eva: 12, crit: 14, crit_eva: 3, spd: 10, move: 3, block: 0, res: 5,
     growth: { hp: 6, atk: 3, mag: 0, pdef: 1, mdef: 1, hit: 2, eva: 2, crit: 3, crit_eva: 0, res: 0 },
     advancements: {
       sniper: { name: '神射手', growthOverride: { atk: 4, hit: 3 } },
@@ -175,7 +174,7 @@ const CLASS_BASE_STATS = {
   },
   mage: {
     name: '魔法师', hp: 65, atk: 5, mag: 20, pdef: 4, mdef: 10,
-    hit: 82, eva: 5, crit: 5, crit_eva: 3, spd: 7, move: 2, vision: 3, block: 0, res: 10,
+    hit: 82, eva: 5, crit: 5, crit_eva: 3, spd: 7, move: 2, block: 0, res: 10,
     growth: { hp: 5, atk: 0, mag: 4, pdef: 0, mdef: 2, hit: 2, eva: 1, crit: 1, crit_eva: 0, res: 0 },
     advancements: {
       fire_sage: { name: '火之贤者', growthOverride: { mag: 5, crit: 2 } },
@@ -234,7 +233,6 @@ const GameFormulas = {
     stats.hp = cls.hp + cls.growth.hp * (level - 1);
     stats.spd = cls.spd;
     stats.move = cls.move;
-    stats.vision = cls.vision;
     stats.block = cls.block;
 
     return stats;

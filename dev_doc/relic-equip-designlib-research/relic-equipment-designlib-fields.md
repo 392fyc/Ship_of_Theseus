@@ -319,7 +319,7 @@ Talent 的做法就是本研究声明的「只读镜像」纪律的正确范本�
     "rarity": {"enum": ["common", "rare", "epic", "legendary", "unique"]}, // 5 档 [已定]；unique UI 红
     "stats": {
       "type": "object",
-      "propertyNames": {"enum": ["STR","MAG","DEX","DEF","RES","SPD","LCK","MOV","VIS","max_hp","hit"]},
+      "propertyNames": {"enum": ["STR","MAG","DEX","DEF","RES","SPD","LCK","MOV","max_hp","hit"]},
       "additionalProperties": {"type": "integer"}               // 值 flat 整数 [占位]；基础数值
     },
     "affixes": {                                                // [已定 引入 Q6]；特殊词条，高稀有度=高强度，具体设计后续

@@ -1165,7 +1165,6 @@ const LOCAL_DICT = {
     stat_res: 'RES (抗性)',
     stat_speed: 'SPEED (速度)',
     stat_move: 'MOVE (移动力)',
-    stat_vision: 'VISION (视野)',
     stat_range_bonus: 'RANGE (射程加成)',
     // Slot/rarity/weapon names (zh)
     slot_weapon: '武器',
@@ -1247,7 +1246,6 @@ const LOCAL_DICT = {
     stat_res: 'RES (Resistance)',
     stat_speed: 'SPEED (Speed)',
     stat_move: 'MOVE (Movement)',
-    stat_vision: 'VISION (Vision)',
     stat_range_bonus: 'RANGE (Range Bonus)',
     // Slot/rarity/weapon names (en)
     slot_weapon: 'Weapon',
@@ -1356,12 +1354,12 @@ function getStatLabel(key) {
   return t('stat_' + key);
 }
 
-const STAT_KEYS = ['atk', 'mag', 'hit', 'crit', 'hp', 'pdef', 'mdef', 'eva', 'crit_eva', 'res', 'speed', 'move', 'vision', 'range_bonus'];
+const STAT_KEYS = ['atk', 'mag', 'hit', 'crit', 'hp', 'pdef', 'mdef', 'eva', 'crit_eva', 'res', 'speed', 'move', 'range_bonus'];
 const STAT_CATEGORIES = {
   atk: 'offense', mag: 'offense', hit: 'offense', crit: 'offense',
   hp: 'defense', pdef: 'defense', mdef: 'defense', eva: 'defense',
   crit_eva: 'defense', res: 'defense',
-  speed: 'utility', move: 'utility', vision: 'utility', range_bonus: 'utility'
+  speed: 'utility', move: 'utility', range_bonus: 'utility'
 };
 
 // Tier progression reference

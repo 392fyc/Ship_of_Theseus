@@ -91,8 +91,9 @@ func _test_yishan_path_aoe(tm: Object, sword: Unit) -> void:
 		_check("存在敌方单位(一闪)", false)
 		return
 	# 木桩化中途敌：必命中、不死。
-	# 注意：spd=0 且 lck=0 → 回避=0 → 一闪(非必中)命中率钳到 100%，确定性命中。
-	# 勿用高 lck 抵消暴击（lck 同时抬高回避 round(lck*0.5)→一闪会偶发 miss）；
+	# 注意：spd=0 且无地形/直接闪避修正 → 回避=0（R1.2：avoid = SPD×2 + 地形闪避 + 直接闪避修正），
+	# 一闪(非必中)命中率钳到 100%，确定性命中。
+	# LCK 只进 R1.3 暴击回避与 R1.5 减益抵抗，不参与命中与闪避（R1.2/R2.1）；
 	# "受伤(HP下降)"断言与暴击无关，无需抑制暴击。
 	mid_enemy.stats.spd = 0
 	mid_enemy.stats.lck = 0
@@ -205,7 +206,7 @@ func _test_badao_splash(tm: Object, sword: Unit) -> void:
 		return
 	for e: Unit in [main_enemy, splash_enemy]:
 		e.stats.spd = 0
-		e.stats.lck = 0     # LCK=0 → 不增回避（保证执行命中）
+		e.stats.lck = 0     # 木桩化；命中由上一行 spd=0 → 回避=0 保证，LCK 不进闪避(R1.2/R2.1)
 		e.stats.dex = 0
 		e.stats.max_hp = 9999
 		e.stats.hp = 9999
@@ -321,7 +322,7 @@ func _test_skill_forecast(tm: Object, sword: Unit) -> void:
 		return
 	for e2: Unit in [main_e, splash_e]:
 		e2.stats.spd = 0
-		e2.stats.lck = 0  # 回避=0；forecast 走 preview(确定性)，此处仅保持一致
+		e2.stats.lck = 0  # forecast 走 preview(确定性)，此处仅保持一致（回避=0 来自上一行 spd=0）
 		e2.stats.max_hp = 9999
 		e2.stats.hp = 9999
 		e2.stats.def_attr = 0
