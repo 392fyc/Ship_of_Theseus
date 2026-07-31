@@ -12,12 +12,8 @@
     "RES": 7
   },
   "growth_rates": {
-    "HP": 35,
-    "STR": 10,
     "MAG": 50,
-    "DEX": 35,
     "SPD": 50,
-    "DEF": 15,
     "RES": 40
   },
   "MOV": 2,
