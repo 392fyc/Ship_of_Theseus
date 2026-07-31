@@ -13,12 +13,8 @@
   },
   "growth_rates": {
     "HP": 50,
-    "STR": 45,
-    "MAG": 10,
     "DEX": 40,
-    "SPD": 50,
-    "DEF": 35,
-    "RES": 15
+    "SPD": 50
   },
   "MOV": 3,
   "attack_type": "melee",

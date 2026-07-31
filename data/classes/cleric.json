@@ -13,12 +13,7 @@
   },
   "growth_rates": {
     "HP": 40,
-    "STR": 5,
-    "MAG": 45,
-    "DEX": 30,
-    "SPD": 40,
-    "DEF": 15,
-    "RES": 45
+    "SPD": 40
   },
   "MOV": 2,
   "attack_type": "ranged",
