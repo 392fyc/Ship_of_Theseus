@@ -23,7 +23,7 @@ const RUN_CONFIG_FILE: String = "res://data/runloop/run_config.json"
 
 # [占位] v0 队伍 roster：4 人 class_id + level=1，其余账本字段由 RunState 补齐。数值临时占位。
 const PARTY_ROSTER: Array[Dictionary] = [
-	{"class_id": "swordsman", "level": 1},
+	{"class_id": "kensei", "level": 1},
 	{"class_id": "soldier", "level": 1},
 	{"class_id": "archer", "level": 1},
 	{"class_id": "cleric", "level": 1},

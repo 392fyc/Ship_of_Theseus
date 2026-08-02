@@ -49,7 +49,7 @@ var injected_enemy_units: Array = []
 
 const PLAYER_UNITS: Array[Dictionary] = [
 	# 测试场景：仅剑圣，便于专注验证剑气/印记/技能手感
-	{"class_id": "swordsman", "pos": Vector2i(1, 2)},
+	{"class_id": "kensei", "pos": Vector2i(1, 2)},
 ]
 
 # ── 敌人列表（木桩场景 B=不动 与 受击场景 B=自动攻击 共用，可增删）──

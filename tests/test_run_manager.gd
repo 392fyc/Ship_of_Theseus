@@ -121,7 +121,7 @@ func _load_env() -> bool:
 
 	# 3 人队伍 roster（class_id / level / max_hp 最简，其余由 RunState 补齐）
 	_roster = [
-		{ "class_id": "swordsman", "level": 1, "max_hp": 30 },
+		{ "class_id": "kensei", "level": 1, "max_hp": 30 },
 		{ "class_id": "knight", "level": 1, "max_hp": 34 },
 		{ "class_id": "archer", "level": 1, "max_hp": 26 },
 	]

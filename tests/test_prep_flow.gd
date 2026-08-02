@@ -96,7 +96,7 @@ func _load_env() -> bool:
 
 	# 队伍带 max_hp（模拟已回填真值），便于测恢复/继承。
 	_roster = [
-		{ "class_id": "swordsman", "level": 1, "max_hp": 30 },
+		{ "class_id": "kensei", "level": 1, "max_hp": 30 },
 		{ "class_id": "knight", "level": 1, "max_hp": 34 },
 		{ "class_id": "archer", "level": 1, "max_hp": 26 },
 	]
@@ -202,18 +202,18 @@ func _test_hp_inheritance() -> void:
 	_check("[2] 初始 party hp==max_hp（满血）",
 		int(st.party[0].get("hp", 0)) == int(st.party[0].get("max_hp", 0)))
 
-	# 写回存活 HP：swordsman 磨损 12/30、knight 满血 34/34、archer 缺席（战死）
+	# 写回存活 HP：kensei 磨损 12/30、knight 满血 34/34、archer 缺席（战死）
 	var survivors: Array = [
-		{ "class_id": "swordsman", "hp": 12, "max_hp": 30 },
+		{ "class_id": "kensei", "hp": 12, "max_hp": 30 },
 		{ "class_id": "knight", "hp": 34, "max_hp": 34 },
 	]
 	rm.writeback_party_hp(survivors)
-	_check("[2] 磨损者写回存活 hp（swordsman=12）", int(st.party[0].get("hp", 0)) == 12,
+	_check("[2] 磨损者写回存活 hp（kensei=12）", int(st.party[0].get("hp", 0)) == 12,
 		"hp=%d" % int(st.party[0].get("hp", 0)))
 	_check("[2] 满血者写回 hp==max_hp（knight=34）", int(st.party[1].get("hp", 0)) == 34)
 	_check("[2] 战死者（缺席 survivors）hp=0（archer）", int(st.party[2].get("hp", 0)) == 0,
 		"hp=%d" % int(st.party[2].get("hp", 0)))
-	_check("[2] 写回回填 max_hp（swordsman=30）", int(st.party[0].get("max_hp", 0)) == 30)
+	_check("[2] 写回回填 max_hp（kensei=30）", int(st.party[0].get("max_hp", 0)) == 30)
 
 	# 下关 BattleAssembler：磨损者带 hp、满血者不带 hp、战死者带 hp=0
 	var assembled: Dictionary = BattleAssemblerScript.build(
@@ -222,7 +222,7 @@ func _test_hp_inheritance() -> void:
 	_check("[2] 装配 player_units 非空", not player_units.is_empty(),
 		"size=%d" % player_units.size())
 
-	var sw_entry: Dictionary = _find_player(player_units, "swordsman")
+	var sw_entry: Dictionary = _find_player(player_units, "kensei")
 	var kn_entry: Dictionary = _find_player(player_units, "knight")
 	var ar_entry: Dictionary = _find_player(player_units, "archer")
 
@@ -239,7 +239,7 @@ func _test_hp_inheritance() -> void:
 	rm.recover_party([true, true, true])
 	var assembled2: Dictionary = BattleAssemblerScript.build(
 		ASSEMBLE_MAP, ASSEMBLE_WAVE, st.party, _pools)
-	var sw_entry2: Dictionary = _find_player(assembled2.get("player_units", []), "swordsman")
+	var sw_entry2: Dictionary = _find_player(assembled2.get("player_units", []), "kensei")
 	_check("[2] 恢复后磨损者 hp 提升（12 → >12 且 <=max）",
 		sw_entry2.has("hp") and int(sw_entry2.get("hp", 0)) > 12,
 		"hp=%d" % int(sw_entry2.get("hp", -1)))

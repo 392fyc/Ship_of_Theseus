@@ -35,7 +35,7 @@ func _run() -> void:
 	if tm.turn_manager != null:
 		tm.turn_manager.stop()
 	tm.input_state = 2  # ACTION_PHASE
-	var sword: Unit = _find(tm, "swordsman")
+	var sword: Unit = _find(tm, "kensei")
 	var dummy: Unit = _find_enemy(tm)
 	if sword == null or dummy == null:
 		_check("场景含剑圣+敌人", false)

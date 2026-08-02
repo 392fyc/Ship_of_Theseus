@@ -82,8 +82,8 @@ func _make_unit(class_data: Dictionary) -> Unit:
 
 func _test_data_layer(dl: Object) -> void:
 	print("\n[1] 数据层 JSON 值")
-	var cls: Dictionary = dl.classes.get("swordsman", {})
-	_check("swordsman 职业存在", not cls.is_empty())
+	var cls: Dictionary = dl.classes.get("kensei", {})
+	_check("kensei 职业存在", not cls.is_empty())
 	var cfg: Dictionary = cls.get("sword_qi_config", {})
 	_eq("sword_qi_config.qi_max==100", cfg.get("qi_max"), 100)
 	_eq("sword_qi_config.qi_initial==0", cfg.get("qi_initial"), 0)
@@ -133,7 +133,7 @@ func _test_data_layer(dl: Object) -> void:
 
 func _test_unit_resource(dl: Object) -> void:
 	print("\n[2] unit.gd 剑气钳制")
-	var u: Unit = _make_unit(dl.classes["swordsman"])
+	var u: Unit = _make_unit(dl.classes["kensei"])
 	_eq("初始 _qi_max==100", u._qi_max, 100)
 	_eq("初始 sword_qi==0", u.sword_qi, 0)
 	_eq("初始印记数==0", u.get_mark_count(), 0)
@@ -150,7 +150,7 @@ func _test_unit_resource(dl: Object) -> void:
 
 func _test_xinyan_passive(dl: Object) -> void:
 	print("\n[3] 心眼被动")
-	var u: Unit = _make_unit(dl.classes["swordsman"])
+	var u: Unit = _make_unit(dl.classes["kensei"])
 	# 暴击：floor(剑气/qi_per_crit_pct)×crit_per_qi crit_bonus（0-100 标度，每10点+1%）
 	u.set_sword_qi(0)
 	_eq("剑气0 → crit_bonus==0", u.crit_bonus, 0)
@@ -173,7 +173,7 @@ func _test_xinyan_passive(dl: Object) -> void:
 
 func _test_mark_attributes(dl: Object) -> void:
 	print("\n[4] 印记属性 +2")
-	var u: Unit = _make_unit(dl.classes["swordsman"])
+	var u: Unit = _make_unit(dl.classes["kensei"])
 	# 基线（base: DEX=9, LCK=5, STR=10）
 	_eq("基线 DEX==9", u.get_effective_stat("DEX"), 9)
 	_eq("基线 LCK==5", u.get_effective_stat("LCK"), 5)
@@ -198,7 +198,7 @@ func _test_mark_attributes(dl: Object) -> void:
 
 func _test_slot_swap(dl: Object) -> void:
 	print("\n[5] 印记计数 + 招架→拔刀槽位替换（数据驱动，替换规则读 JSON）")
-	var u: Unit = _make_unit(dl.classes["swordsman"])
+	var u: Unit = _make_unit(dl.classes["kensei"])
 	# 替换规则来自招架技能 JSON（slot_swap_trigger / slot_swap_target），不在代码硬编码
 	var zj: Dictionary = dl.skills["swordsman_zhaojia"]
 	var trig: String = str(zj.get("slot_swap_trigger", ""))
@@ -253,7 +253,7 @@ func _test_class_isolation(_dl: Object) -> void:
 
 func _test_damage_formulas(dl: Object) -> void:
 	print("\n[7] 伤害公式 / 必中必暴 / 暴击倍率")
-	var atk: Unit = _make_unit(dl.classes["swordsman"])
+	var atk: Unit = _make_unit(dl.classes["kensei"])
 	var dft: Unit = _make_unit({
 		"id": "target", "name": "靶子",
 		"base_stats": {"HP": 999, "STR": 0, "DEX": 0, "SPD": 0, "LCK": 50, "DEF": 0, "RES": 0},

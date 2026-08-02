@@ -33,8 +33,8 @@ var crit_avoid_bonus: int = 0
 # 暴击率加法钩子（同源；心眼被动写入此字段，其他天赋/符文也可叠加）
 var crit_bonus: int = 0
 
-# ── 剑圣专属资源（仅在 unit_id == "swordsman" 时初始化/有意义）─
-# 剑气：整数 0~qi_max（从 swordsman.json sword_qi_config 读取）
+# ── 剑气类资源（仅在职业 JSON 带 sword_qi_config 时初始化/有意义）─
+# 剑气：整数 0~qi_max（从职业 JSON 的 sword_qi_config 读取，如 kensei.json / myrmidon.json）
 var sword_qi: int = 0
 var _qi_max: int = 0
 # 印记：三个离散布尔值，键名对应印记类型

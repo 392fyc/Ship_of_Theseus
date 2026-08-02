@@ -35,7 +35,7 @@ func _run() -> void:
 	var scene: Node = load("res://scenes/tactical/TacticalScene.tscn").instantiate()
 	root.add_child(scene)
 	var tm: Object = scene.tactical_manager
-	var sword: Unit = _find_swordsman(tm)
+	var sword: Unit = _find_kensei(tm)
 
 	if sword == null:
 		_check("场景中存在剑圣单位", false)
@@ -210,9 +210,9 @@ func _eq(name: String, actual: Variant, expected: Variant) -> void:
 	_check(name, actual == expected, "期望 %s 实际 %s" % [str(expected), str(actual)])
 
 
-func _find_swordsman(tm: Object) -> Unit:
+func _find_kensei(tm: Object) -> Unit:
 	for u: Unit in tm.units:
-		if u.unit_id == "swordsman":
+		if u.unit_id == "kensei":
 			return u
 	return null
 

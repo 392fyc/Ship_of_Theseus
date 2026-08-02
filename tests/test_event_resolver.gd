@@ -107,7 +107,7 @@ func _load_env() -> bool:
 	_check("data_pools.waves 非空", not (dl.waves as Dictionary).is_empty())
 
 	_roster = [
-		{ "class_id": "swordsman", "level": 1, "max_hp": 30 },
+		{ "class_id": "kensei", "level": 1, "max_hp": 30 },
 		{ "class_id": "knight", "level": 1, "max_hp": 34 },
 		{ "class_id": "archer", "level": 1, "max_hp": 26 },
 	]
