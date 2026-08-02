@@ -309,7 +309,8 @@ function calcDamage(inp, overrides) {
   if (st === 'physical') baseDmg = Math.max(0, effAtk - effPdef);
   else if (st === 'magical') baseDmg = Math.max(0, effMag - effMdef);
   else if (st === 'pure') baseDmg = effAtk > effMag ? effAtk : effMag; // 无减防（2026-07-11：holy 更名 pure）
-  else baseDmg = Math.max(0, effAtk - Math.min(effPdef, effMdef)); // hybrid
+  // hybrid：物理与魔法各算一次（各带自己的 max(0,·) 地板）再取算术平均，不是一次性减平均防御（2026-08-03 用户裁决）
+  else baseDmg = (Math.max(0, effAtk - effPdef) + Math.max(0, effMag - effMdef)) / 2;
 
   // 技能倍率
   let dmg = baseDmg * (o.skillPower / 100);

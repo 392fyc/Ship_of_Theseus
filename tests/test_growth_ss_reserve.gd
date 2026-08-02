@@ -2,7 +2,8 @@ extends SceneTree
 ## growth_rates 新标定 + SS 档预留 —— 2026-07-07 建 / 2026-07-12 语义定稿（用户裁决 [已定]）
 ##
 ## 覆盖：
-##   1. swordsman.json growth_rates 新标定（DEX75 / HP50 / STR50 / DEF50 / MAG40 / RES40；LCK 已移除）。
+##   1. swordsman.json growth_rates 新标定（DEX75 / STR60 / HP50 / DEF50 / MAG40 / RES40；LCK 已移除）。
+##      STR 于 2026-08-03 由 B 档(50) 改 A 档(60)，见用户裁决 C [已定]。
 ##   2. SS 档预留（unit_stats.load_growth_rates 的 ss_stats 参数 + level_up SS 分支）：
 ##      SS 档属性每级**仅判定一次** S 率，成功 +2、失败保底 +1（最少 +1、至多 +2；
 ##      S=75% 期望 +1.75），每级必有成长、pity 恒重置；剑圣无 SS 属性（纯预留、恒不触发）。
@@ -49,7 +50,8 @@ func _test_growth_rates_calibration() -> void:
 	var gr: Dictionary = (cfg as Dictionary).get("growth_rates", {})
 	_eq("growth DEX==75", int(gr.get("DEX", -1)), 75)
 	_eq("growth HP==50", int(gr.get("HP", -1)), 50)
-	_eq("growth STR==50", int(gr.get("STR", -1)), 50)
+	# STR 于 2026-08-03 由 B 档(50) 改 A 档(60)（用户裁决 C [已定]）。
+	_eq("growth STR==60", int(gr.get("STR", -1)), 60)
 	_eq("growth DEF==50", int(gr.get("DEF", -1)), 50)
 	_eq("growth MAG==40", int(gr.get("MAG", -1)), 40)
 	_eq("growth RES==40", int(gr.get("RES", -1)), 40)

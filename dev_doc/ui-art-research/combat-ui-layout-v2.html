@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SoT 战斗 HUD 排版稿 v2 — 信息层级重整（②冷石皮肤 CSS 近似 + ④密度）</title>
+<style>
+  :root{
+    --void:#14121d; --fill:#0e1019; --fill2:#12141e;
+    --stone:#3b4252; --stone-hi:#5c6678; --stone-lo:#1a1d28; --outline:#0a0b12;
+    --gold:#c9a23e; --gold-b:#e0bf48; --gold-d:#5a481f;
+    --text:#e6dbc7; --sub:#8f96a8; --dim:#5c6678;
+    --hp:#3a9d4a; --hp-hi:#5bc46a; --qi-lo:#5fa8d8; --qi-hi:#a855f7; --qi-br:#c98bff;
+    --shield:#5b9bd8; --orange:#fa730f; --blue:#3b82f5; --green:#10b884; --red:#d8442e;
+    --num:"DejaVu Sans Mono","Consolas",monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#0c0b12;color:var(--text);
+       font-family:"Microsoft YaHei","Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;padding:28px 20px 70px}
+  .wrap{max-width:1120px;margin:0 auto}
+  h1{font-size:21px;color:var(--gold-b);margin:0 0 6px}
+  h2{font-size:16px;color:var(--gold);margin:30px 0 8px;border-left:3px solid var(--gold);padding-left:10px}
+  p.sub{color:var(--sub);font-size:13px;margin:2px 0}
+  .meta{color:var(--dim);font-size:12px;margin:4px 0 0}
+  .note{background:#16141f;border:1px solid #2a2640;border-left:3px solid var(--gold);
+        border-radius:4px;padding:12px 16px;margin:14px 0;font-size:13px;color:var(--sub)}
+  .note b{color:var(--text)} code{background:#211c30;color:#cdb6e0;padding:1px 6px;border-radius:3px;font-size:12px}
+
+  /* ── 战场底（模拟场景内 HUD 语境）── */
+  .field{margin-top:12px;border-radius:8px;overflow:hidden;border:1px solid #23202e;
+         background:
+           linear-gradient(180deg,#171622 0%,#0f0e17 55%,#0b0a11 100%);
+         position:relative;padding:30px 18px 18px;min-height:300px}
+  .field::before{content:"";position:absolute;inset:0;opacity:.30;pointer-events:none;
+    background-image:linear-gradient(#2a2740 1px,transparent 1px),linear-gradient(90deg,#2a2740 1px,transparent 1px);
+    background-size:46px 30px;transform:perspective(400px) rotateX(34deg);transform-origin:bottom}
+  .hud{position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:14px}
+
+  /* ── ② 冷石皮肤（CSS 近似：石带 + 双向斜面 + 外缘 + 投影）── */
+  .stone{background:var(--fill);border:3px solid var(--stone);border-radius:2px;position:relative;
+    box-shadow:inset 1.5px 1.5px 0 0 var(--stone-hi),inset -1.5px -1.5px 0 0 var(--stone-lo),
+               0 0 0 1px var(--outline),0 5px 14px rgba(0,0,0,.55)}
+  .stone::after{content:"";position:absolute;inset:2px;border:1px solid rgba(201,162,62,.18);border-radius:1px;pointer-events:none}
+
+  /* ── 信息面板（④ 密度）── */
+  .info{display:flex;gap:12px;padding:11px 13px;min-width:430px}
+  .portrait{width:66px;height:84px;flex:none;border-radius:2px;background:#0c0e16;
+    border:2px solid #2c323e;box-shadow:inset 1px 1px 0 #4a5163,inset -1px -1px 0 #13161e;
+    display:flex;align-items:flex-end;justify-content:center;position:relative;overflow:hidden}
+  .portrait .bust{position:absolute;bottom:0;width:46px;height:54px;
+    background:radial-gradient(circle 11px at 50% 22%,#5a6275 0 100%,transparent 0),
+              linear-gradient(180deg,transparent 36%,#454c5e 36%);}
+  .portrait .ptag{position:relative;font-size:9px;color:#7a8294;background:rgba(8,9,15,.7);
+    width:100%;text-align:center;padding:1px 0;z-index:2}
+  .vitals{flex:1;min-width:188px;display:flex;flex-direction:column;gap:5px;justify-content:center}
+  .nameline{display:flex;align-items:baseline;gap:8px}
+  .name{font-size:16px;color:var(--text);font-weight:600;letter-spacing:1px}
+  .lv{font-size:11px;color:var(--sub)}
+  .statrow{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:7px}
+  .statrow .lbl{font-size:11px;color:var(--sub)}
+  .statrow .lbl.hp{color:#7cc47a} .statrow .lbl.qi{color:#b79be0}
+  .statrow .val{font-family:var(--num);font-size:12px;color:var(--text);letter-spacing:.5px}
+  .bar{height:10px;background:#0a1019;border:1px solid var(--outline);border-radius:1px;overflow:hidden;
+    box-shadow:inset 0 1px 0 rgba(0,0,0,.5)}
+  .bar>i{display:block;height:100%;background:linear-gradient(180deg,var(--hp-hi),var(--hp));box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+  /* 剑气 10 段 */
+  .seg{display:grid;grid-template-columns:repeat(10,1fr);gap:1px;height:10px}
+  .seg span{background:#100a1c;border-radius:1px}
+  .seg span.f{background:linear-gradient(180deg,var(--qi-br),var(--qi-hi))}
+  .seg span.t{box-shadow:1px 0 0 var(--gold-b)}
+  .markrow{display:flex;align-items:center;gap:6px;margin-top:1px}
+  .markrow .lbl{font-size:11px;color:var(--sub);width:30px}
+  .mark{width:20px;height:20px;border-radius:2px;display:flex;align-items:center;justify-content:center;
+    font-size:12px;border:1px solid var(--dim);color:var(--dim);background:#0d0a14}
+  .mark.held{border-color:var(--gold-b);color:var(--gold-b);background:#1a1410}
+  .xp{margin-left:auto;font-size:10px;color:var(--sub);display:flex;align-items:center;gap:5px}
+  .xp i{display:block;width:56px;height:4px;background:#16101f;border-radius:2px;overflow:hidden}
+  .xp i::before{content:"";display:block;width:62%;height:100%;background:#7a52c8}
+  /* 属性格 */
+  .stats{flex:none;align-self:center;display:grid;grid-template-columns:auto auto;gap:5px 16px;
+    padding-left:13px;border-left:1px solid var(--gold-d)}
+  .stat{display:flex;justify-content:space-between;gap:10px;min-width:44px}
+  .stat .k{font-size:11px;color:var(--sub)}
+  .stat .v{font-family:var(--num);font-size:12px;color:var(--text)}
+
+  /* ── 技能栏 ── */
+  .skills{display:flex;align-items:flex-end;gap:7px;padding-bottom:2px}
+  .slot{width:58px;display:flex;flex-direction:column;align-items:center;gap:3px}
+  .sq{width:54px;height:54px;border-radius:3px;position:relative;background:var(--fill);
+    border:2px solid var(--stone);box-shadow:inset 1px 1px 0 var(--stone-hi),inset -1px -1px 0 var(--stone-lo),0 0 0 1px var(--outline)}
+  .sq .ic{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;color:#aeb4c0}
+  .sq .key{position:absolute;top:2px;left:2px;min-width:14px;height:14px;padding:0 2px;border-radius:2px;
+    background:rgba(8,9,15,.85);border:1px solid rgba(201,162,62,.5);color:var(--text);
+    font-family:var(--num);font-size:10px;line-height:13px;text-align:center}
+  .sq .cost{position:absolute;right:2px;bottom:2px;font-family:var(--num);font-size:10px;
+    padding:0 3px;border-radius:2px;background:rgba(8,9,15,.85)}
+  .cost.std{color:var(--orange)} .cost.qi{color:var(--qi-lo)} .cost.mark{color:var(--gold-b)} .cost.mv{color:var(--blue)}
+  .slot .nm{font-size:11px;color:var(--sub)}
+  /* 选中 */
+  .sq.sel{border-color:var(--gold-b);background:#1a160c;
+    box-shadow:inset 1px 1px 0 #f4d765,inset -1px -1px 0 #6b531c,0 0 0 1px var(--outline),0 0 10px 1px rgba(224,191,72,.45)}
+  .sq.sel .ic{color:#fff6d8} .slot.sel .nm{color:var(--gold-b)}
+  /* 冷却 */
+  .sq.cd .ic{color:#565a64}
+  .sq.cd .cdmask{position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,4,10,.78) 32%,rgba(4,6,11,.62) 32%);
+    display:flex;align-items:center;justify-content:center;font-family:var(--num);font-size:24px;color:#d8cdb6}
+  .slot.cd .nm{color:var(--dim)}
+  /* 置灰 */
+  .sq.dis{border-color:#3a3f4c;background:#0c0a12;filter:saturate(.4)}
+  .sq.dis .ic{color:#41454e} .sq.dis .cost{color:var(--red)} .slot.dis .nm{color:var(--dim)}
+  /* 被动 */
+  .slot.passive .sq{width:42px;height:42px}
+  .slot.passive .ic{font-size:17px;color:#b79be0}
+  .slot.passive .key{border-color:#3a3f4c;color:var(--sub)}
+
+  /* ── 动作按钮 ── */
+  .actions{display:flex;align-items:flex-end;gap:6px;padding-bottom:2px}
+  .abtn{width:50px;height:50px;border-radius:3px;background:var(--fill);border:2px solid var(--stone);
+    box-shadow:inset 1px 1px 0 var(--stone-hi),inset -1px -1px 0 var(--stone-lo),0 0 0 1px var(--outline);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--sub);cursor:default}
+  .abtn .ai{font-size:18px;color:#c8cdd8} .abtn .at{font-size:10px}
+  .abtn.end{border-color:#5a2622} .abtn.end .ai{color:var(--red)}
+  .adiv{width:1px;height:30px;background:var(--gold-d);align-self:center;margin:0 2px}
+
+  /* ── 伤害预测窗（浮窗）── */
+  .floatrow{display:flex;gap:24px;flex-wrap:wrap;margin-top:14px;align-items:flex-start}
+  .forecast{width:200px;padding:9px 11px}
+  .fhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+  .fhead b{color:var(--gold);font-size:12px;font-weight:600} .fhead span{color:var(--sub);font-size:11px}
+  .fhp{font-size:11px;color:var(--sub);font-family:var(--num);margin-bottom:5px}
+  .fdmg{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+  .fdmg .dot{width:9px;height:9px;border-radius:50%;background:var(--text);border:1px solid #888}
+  .fdmg b{font-size:15px;color:var(--text);font-family:var(--num)}
+  .frow{display:flex;gap:14px;font-size:11px;font-family:var(--num);margin-bottom:3px}
+  .frow .hit{color:var(--sub)} .frow .crit{color:var(--orange)}
+  .fcounter{font-size:10.5px;color:#cfd4de;font-family:var(--num)}
+  /* 飘字示例 */
+  .popups{display:flex;gap:18px;align-items:center;background:#0b0a11;border:1px solid #23202e;border-radius:6px;padding:16px 20px}
+  .pop{font-family:var(--num);font-weight:700;text-shadow:1px 1px 0 #000;display:flex;align-items:center;gap:3px}
+  .pop.phys{color:#fff;font-size:18px} .pop.mag{color:#aa88ff;font-size:18px}
+  .pop.crit{color:#fff;font-size:21px} .pop.heal{color:#4ee06a;font-size:18px} .pop.miss{color:#9a9a9a;font-size:16px}
+
+  table{border-collapse:collapse;font-size:12.5px;margin:8px 0;width:100%;max-width:900px}
+  th,td{border:1px solid #2a2640;padding:6px 9px;text-align:left;vertical-align:top}
+  th{background:#13101e;color:var(--gold)}
+  ul{margin:8px 0;padding-left:22px} li{margin:4px 0;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>SoT 战斗 HUD — 排版稿 v2（信息层级重整）</h1>
+<p class="sub">修 v1「内部文本混乱」：改用 HTML/CSS 把排版/对齐/层级理清；②冷石皮肤先用 CSS 近似，排版定稿后再回贴精确像素皮肤</p>
+<p class="meta">2026-06-30 · dev_doc/ui-art-research/combat-ui-layout-v2.html · 取代 v1（v1 留档对比）</p>
+
+<div class="note">
+<b>这一稿的重点 = 排版，不是像素质感</b>。v1 把太多小字塞进一张 SVG、手摆坐标导致挤撞错位。这版用浏览器原生布局（flex/grid）把<b>对齐、间距、信息层级、密度</b>理清——你是网页 UI/UX 专家，在这个介质上评估和提改动最直接。<br>
+<b>分两步走</b>：①（现在）排版定稿 → ②（之后）把锁定的排版回贴 ② 高清像素皮肤（精确 SVG / Godot 自绘 + 像素管线素材）。CSS 里的石框/斜面/金线只是<b>气质近似</b>，真像素质感以 mood 图 + 首样例为准。<br>
+<b>字体</b>：现用系统字看排版；最终中文 Fusion Pixel 12px、数字 m5x7。<br>
+<b>红线签名零改动</b>（仅内部视觉）。
+</div>
+
+<h2>场景内 HUD 总览</h2>
+<div class="field">
+  <div class="hud">
+
+    <!-- 信息面板：④ 密度 -->
+    <div class="info stone">
+      <div class="portrait"><div class="bust"></div><div class="ptag">头像·素材</div></div>
+      <div class="vitals">
+        <div class="nameline"><span class="name">武藏</span><span class="lv">Lv.12 · 剑圣</span></div>
+        <div class="statrow"><span class="lbl hp">HP</span><div class="bar"><i style="width:71%"></i></div><span class="val">30/42</span></div>
+        <div class="statrow"><span class="lbl qi">剑气</span>
+          <div class="seg">
+            <span class="f"></span><span class="f"></span><span class="f"></span><span class="f"></span>
+            <span class="f"></span><span class="f"></span><span class="f t"></span>
+            <span></span><span></span><span></span>
+          </div>
+          <span class="val">7/10</span></div>
+        <div class="markrow"><span class="lbl">印记</span>
+          <span class="mark held">心</span><span class="mark held">道</span><span class="mark">势</span>
+          <span class="xp">护盾 8 · XP <i></i></span>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="k">力</span><span class="v">18</span></div>
+        <div class="stat"><span class="k">守</span><span class="v">12</span></div>
+        <div class="stat"><span class="k">技</span><span class="v">15</span></div>
+        <div class="stat"><span class="k">抗</span><span class="v">8</span></div>
+        <div class="stat"><span class="k">速</span><span class="v">11</span></div>
+        <div class="stat"><span class="k">幸</span><span class="v">9</span></div>
+        <div class="stat"><span class="k">魔</span><span class="v">4</span></div>
+        <div class="stat"><span class="k">移</span><span class="v">5</span></div>
+      </div>
+    </div>
+
+    <!-- 技能栏：四主动 + 被动 -->
+    <div class="skills">
+      <div class="slot"><div class="sq"><span class="key">1</span><div class="ic">⚔</div><span class="cost std">标</span></div><span class="nm">斩击</span></div>
+      <div class="slot"><div class="sq"><span class="key">2</span><div class="ic">◈</div><span class="cost qi">5气</span></div><span class="nm">居合</span></div>
+      <div class="slot sel"><div class="sq sel"><span class="key">3</span><div class="ic">⚡</div><span class="cost mark">3印</span></div><span class="nm">拔刀</span></div>
+      <div class="slot cd"><div class="sq cd"><span class="key">4</span><div class="ic">✦</div><div class="cdmask">2</div></div><span class="nm">一闪</span></div>
+      <div class="slot passive"><div class="sq"><span class="key">P</span><div class="ic">◉</div></div><span class="nm">心眼</span></div>
+    </div>
+
+    <!-- 动作按钮 -->
+    <div class="actions">
+      <div class="abtn"><div class="ai">◈</div><div class="at">技能</div></div>
+      <div class="abtn"><div class="ai">⚗</div><div class="at">道具</div></div>
+      <div class="adiv"></div>
+      <div class="abtn end"><div class="ai">⏻</div><div class="at">结束</div></div>
+    </div>
+
+  </div>
+</div>
+
+<h2>浮窗 + 飘字</h2>
+<div class="floatrow">
+  <div class="forecast stone">
+    <div class="fhead"><b>伤害预测</b><span>木桩</span></div>
+    <div class="fhp">HP 18 / 30</div>
+    <div class="fdmg"><span class="dot"></span><b>物理 · 24</b></div>
+    <div class="frow"><span class="hit">命中 92%</span><span class="crit">暴击 35%</span></div>
+    <div class="fcounter">反击 12 · 命中 80%</div>
+  </div>
+  <div class="popups">
+    <span class="pop phys">⚔ 24</span>
+    <span class="pop crit">⚔ 38！</span>
+    <span class="pop mag">◈ 19</span>
+    <span class="pop heal">✚ 16</span>
+    <span class="pop miss">MISS</span>
+  </div>
+</div>
+
+<h2>这版排版做了什么</h2>
+<ul>
+  <li><b>三段定位</b>对齐真实布局：信息面板钉左下、技能栏居中下、动作按钮钉右下（与 <code>_layout_dashboard</code> 一致）。</li>
+  <li><b>信息面板分三栏</b>：头像 / 武将信息(名+HP+剑气+印记，左对齐、行距统一、数值右对齐) / 8 属性 2×4 格(金线分隔)——④ 密度但不再挤撞。</li>
+  <li><b>统一对齐</b>：每行 <code>标签 30px · 进度条弹性 · 数值右对齐</code> 三段网格，HP 与剑气条同宽同基线；属性键左值右。</li>
+  <li><b>技能槽</b>状态清晰：键位左上 / 消耗右下 / 选中金边发光 / 冷却遮罩居中数字 / 被动缩小无键位。</li>
+  <li>图标暂用字符占位（⚔◈⚡✦◉），真图标走像素管线。</li>
+</ul>
+
+<h2>原生 vs 素材（不变）</h2>
+<table>
+  <tr><th>原生自做（路 A · SoT）</th><th>像素管线（路 B · Mercury 按②气质）</th></tr>
+  <tr><td>冷石框/斜面/金线 · HP/剑气/XP 段条 · 印记块 · 属性 · 技能槽全状态 · 预测窗 · 飘字动效</td><td>角色头像立绘 · 四技能真图标终版 · 可选金丝角饰</td></tr>
+</table>
+
+<h2>请你定</h2>
+<ul>
+  <li>这版<b>排版/层级/密度</b>对路吗？要调：信息面板分栏顺序 / 哪些字段优先 / 行距密度 / 技能槽大小 / 浮窗信息量。</li>
+  <li>排版你点头后，我再把它<b>回贴成精确 ② 像素皮肤</b>（SVG/Godot），并整理像素管线素材清单 + 字体导入清单。</li>
+  <li>你也可以直接在脑中按网页习惯给我排版改法（你熟这个），我照改。</li>
+</ul>
+
+</div>
+</body>
+</html>

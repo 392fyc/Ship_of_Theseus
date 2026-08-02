@@ -13,7 +13,7 @@
   },
   "growth_rates": {
     "HP": 50,
-    "STR": 50,
+    "STR": 60,
     "MAG": 40,
     "DEX": 75,
     "SPD": 60,
@@ -46,5 +46,5 @@
     "mark_str_bonus": 2
   },
   "description": "剑圣（日本剑道线）。高速高暴击近战。本体属性为测试占位值，待数值调校。剑气标度 0-100。心眼：每 qi_per_crit_pct（10）点剑气+1%暴击率（floor(剑气/qi_per_crit_pct)×crit_per_qi，满气+10%），剑气≥70（speed_threshold）时速度+1（speed_bonus）。三印记加成各+2（mark_*_bonus，均可调）。",
-  "_note": "[已定] SPD growth_rate=60（A档）为剑圣（剑士线转职后）确认值，由旧固定值档 B→A 字母平移而来（Mercury 确认，2026-07-08）。其余属性初始值仍为占位，待设计侧标定。"
+  "_note": "[已定] SPD growth_rate=60（A档）为剑圣（剑士线转职后）确认值，由旧固定值档 B→A 字母平移而来（Mercury 确认，2026-07-08）。[已定] STR growth_rate 由 50（B档）改为 60（A档），依据用户裁决（2026-08-03）；R2.3 档位标尺 A=60%。其余属性初始值仍为占位，待设计侧标定。"
 }

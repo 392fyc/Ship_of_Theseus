@@ -20,8 +20,8 @@
   "requires_marks": 3,
   "guaranteed_crit": false,
   "guaranteed_hit": false,
-  "crit_damage_bonus": 1.5,
+  "crit_damage_mult": 1.2,
   "splash_damage_pct": 50,
   "slot_swap_provider": true,
-  "description": "距离 1-2，造成 180% 物理伤害，暴击时伤害提升至 3.0 倍；主目标全额承伤，周围 1 格内的目标受到 50% 溅射伤害。需集满 3 枚印记，施放消耗 3 枚印记与 20 点剑气。施放后印记清空，槽位变回招架。"
+  "description": "距离 1-2，造成 180% 物理伤害，暴击倍率 ×1.2；主目标全额承伤，周围 1 格内的目标受到 50% 溅射伤害。需集满 3 枚印记，施放消耗 3 枚印记与 20 点剑气。施放后印记清空，槽位变回招架。"
 }

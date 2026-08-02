@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SoT 战斗 UI 材质气质 mood 对照（gpt-image-2 探气质）</title>
+<style>
+  :root{--bg:#0d0c14;--surface:#16141f;--line:#2a2640;--gold:#b8942f;--gold-b:#e0bf48;
+        --text:#e6dbc7;--sub:#9a8f86;--dim:#5c5c66;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif;
+       font-size:14px;line-height:1.65;padding:30px 22px 80px}
+  .wrap{max-width:1180px;margin:0 auto}
+  h1{font-size:22px;color:var(--gold-b);margin:0 0 6px}
+  h2{font-size:16px;color:var(--gold);margin:34px 0 6px;border-left:3px solid var(--gold);padding-left:10px}
+  p.sub{color:var(--sub);font-size:13px;margin:2px 0}
+  .meta{color:var(--dim);font-size:12px;margin:4px 0 0}
+  .note{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--gold);
+        border-radius:4px;padding:12px 16px;margin:16px 0;font-size:13px;color:var(--sub)}
+  .note b{color:var(--text)} code{background:#211c30;color:#cdb6e0;padding:1px 6px;border-radius:3px;font-size:12px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;margin-top:14px}
+  .card{background:#08070d;border:1px solid var(--line);border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
+  .card img{width:100%;display:block;image-rendering:auto;border-bottom:1px solid var(--line)}
+  .card .body{padding:13px 15px 16px}
+  .tt{font-size:15px;color:var(--gold-b);font-weight:650;margin:0 0 2px}
+  .pos{font-size:12.5px;color:var(--text);margin:0 0 8px}
+  .row{font-size:12.5px;color:var(--sub);margin:3px 0}
+  .row b{color:var(--text);font-weight:600}
+  .tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:10px;border:1px solid var(--line);margin:2px 4px 2px 0}
+  .pix{color:#7cc47a;border-color:#2e5a2c} .paint{color:#d8893a;border-color:#5a4320}
+  .base{color:#8ea2d8;border-color:#2c3a5a}
+  ul{margin:6px 0;padding-left:20px} li{margin:3px 0;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>SoT 战斗 UI — 材质气质 mood 对照</h1>
+<p class="sub">混合路线第 1 步：gpt-image-2 探气质（4 套）→ 你选 vibe → 我用 SVG/Godot 落精确功能件</p>
+<p class="meta">2026-06-30 · gpt-image-2（medium，1024²，约 $0.05/张）· dev_doc/ui-art-research/mood/</p>
+
+<div class="note">
+<b>怎么看这页</b>：这 4 张是 AI 出的<b>材质/质感参考</b>，<b>只看</b>气质——像素 vs 拟物 / 调色 / 装饰密度 / 明暗 / 暖冷。<br>
+<b>不是功能稿</b>：AI 自由发挥了内容（③ 的宝珠+骷髅、④ 的头像+战术格都不是我们的实际布局，键位/消耗/剑气 10 格/红线签名一概没按）。<br>
+<b>下一步</b>：你选一套（或几套元素混搭）气质 → 我用 <b>SVG/Godot 原生</b>落精确功能件（保红线签名、零硬编码）；真技能图标 / 角色立绘 / 高质感边框再交 <b>像素管线</b> 按选定气质产（这正是你说的「影响后续像素管线」——③④ 里已自带的像素图标/头像就是管线能交付的预览）。<br>
+对照基线：我之前手写的 SVG 样例在 <code>../hd-pixel-ui-material-sample.html</code>（精确但矢量模拟）。
+</div>
+
+<div class="grid">
+
+  <div class="card">
+    <img src="01-cold-stone.png" alt="拟物华丽">
+    <div class="body">
+      <p class="tt">① 拟物华丽 · 冷石哥特</p>
+      <p class="pos">手绘质感、平滑渐变、最唬人的暗黑哥特石雕。</p>
+      <span class="tag paint">拟物·非像素</span><span class="tag">最华丽</span>
+      <p class="row"><b>调色</b>：冷灰石 + 金角饰 + 蓝紫资源条 + 深紫黑底（传承现体系）</p>
+      <p class="row"><b>取舍</b>：成品最华丽；但<b>不是像素</b>、与你「高清像素」方向不符；这种拟物质感<b>最依赖素材</b>、且与像素 sprite 管线气质割裂。</p>
+      <p class="row"><b>定位</b>：作「如果改走非像素华丽」的对照候选。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="02-pixel-cold-stone.png" alt="高清像素冷石哥特">
+    <div class="body">
+      <p class="tt">② 高清像素 · 冷石哥特</p>
+      <p class="pos">真像素（可见方块 + 抖色）；①的像素化版本。</p>
+      <span class="tag pix">真·像素</span><span class="tag base">最贴现体系</span>
+      <p class="row"><b>调色</b>：冷灰石 + 金丝角饰 + 蓝→紫分段条 + 深紫黑底</p>
+      <p class="row"><b>取舍</b>：最贴近你「高清像素」目标；与现有冷紫黑/金体系<b>传承最好、断代最小</b>；华丽张力中等。</p>
+      <p class="row"><b>定位</b>：中性偏「稳妥基线」候选。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="03-pixel-warm-gold.png" alt="高清像素暖金华丽">
+    <div class="body">
+      <p class="tt">③ 高清像素 · 暖金华丽</p>
+      <p class="pos">真像素、暖铜金 + 红黑宝珠 + 骷髅 + <b>已自带像素技能图标</b>（剑/骷髅/斩击）。</p>
+      <span class="tag pix">真·像素</span><span class="tag">最华丽像素</span>
+      <p class="row"><b>调色</b>：暖铜金 + 暗红 + 橙→金资源条 + 棕黑底（偏暖，与现冷紫黑<b>断代</b>）</p>
+      <p class="row"><b>取舍</b>：像素方向里最华丽、最 Diablo HUD 味；宝珠/骷髅是 AI 发挥非我们布局；自带的像素图标正好<b>预览像素管线能交付什么</b>。</p>
+      <p class="row"><b>定位</b>：「华丽度优先」候选（需接受偏暖+断代）。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="04-pixel-minimal.png" alt="高清像素极简克制">
+    <div class="body">
+      <p class="tt">④ 高清像素 · 极简克制</p>
+      <p class="pos">真像素、薄金描边 + 扁平深蓝 + <b>自带角色头像</b> + 信息行 + 战术格。</p>
+      <span class="tag pix">真·像素</span><span class="tag">最可读</span>
+      <p class="row"><b>调色</b>：薄金 + 扁平深蓝黑 + 青→蓝资源条（偏冷、装饰最少）</p>
+      <p class="row"><b>取舍</b>：最干净最可读，Triangle Strategy / 火纹味；头像/战术格是 AI riff（头像正属<b>必须素材</b>项，正好预览像素立绘）；华丽张力弱、信息优先。</p>
+      <p class="row"><b>定位</b>：「可读性/信息优先」候选。</p>
+    </div>
+  </div>
+
+</div>
+
+<h2>我的中立读图（不替你拍板）</h2>
+<ul>
+  <li><b>最贴「高清像素」目标</b>：②（冷·稳妥）、③（暖·华丽）、④（冷·极简）三套都是真像素；①是拟物对照。</li>
+  <li><b>与现有冷紫黑/金体系断代最小</b>：②；<b>最华丽</b>：③（接受偏暖）；<b>最可读</b>：④。</li>
+  <li>可<b>混搭</b>：例如「②的冷石框 + ④的信息密度排版」「②的体系 + ③的暖金角饰点缀」都行——告诉我你要的组合即可。</li>
+  <li>③④ 自带的像素<b>图标/头像</b>不是浪费——它们就是「影响后续像素管线」的具体预览：选定气质后，这套图标/立绘/边框会由像素管线按同一气质正式产出。</li>
+</ul>
+
+</div>
+</body>
+</html>

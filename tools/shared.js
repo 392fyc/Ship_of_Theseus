@@ -242,15 +242,17 @@ const GameFormulas = {
    * 基础伤害计算
    * physical: ATK - P.DEF (min 0)
    * magical:  MAG - M.DEF (min 0)
-   * holy:     无防御
-   * hybrid:   ATK/MAG - min(P.DEF, M.DEF) (min 0)
+   * pure:     无视防御
+   * hybrid:   物理与魔法各算一次（各带自己的 min 0 地板）再取算术平均
+   *           = ( max(0, ATK - P.DEF) + max(0, MAG - M.DEF) ) / 2
    */
   calcBaseDamage(atk, mag, pdef, mdef, elementType) {
     switch (elementType) {
       case 'physical': return Math.max(0, atk - pdef);
       case 'magical':  return Math.max(0, mag - mdef);
       case 'pure':     return mag; // pure 无视防御（工具简化：按 mag 来源）
-      case 'hybrid':   return Math.max(0, Math.max(atk, mag) - Math.min(pdef, mdef));
+      // hybrid：各算一次再平均，不是一次性减平均防御（2026-08-03 用户裁决）
+      case 'hybrid':   return (Math.max(0, atk - pdef) + Math.max(0, mag - mdef)) / 2;
       default:         return Math.max(0, atk - pdef);
     }
   },

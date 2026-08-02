@@ -18,5 +18,5 @@
   "basic_attack_range": { "min": 2, "max": 3 },
   "skill_ids": [],
   "ai_behavior": "AGGRESSIVE",
-  "description": "测试用·火纹弓箭手：远程物理（距2-3），玻璃炮；近身（距1）无法攻击/反击。数值为测试占位（可调）。"
+  "description": "测试用·火纹弓箭手：远程物理（距2-3），玻璃炮；近身（距1）无法攻击。数值为测试占位（可调）。"
 }

@@ -3,7 +3,9 @@ extends SceneTree
 ##
 ## ① 资源门槛强制：validate_skill_usage 现校验 qi_cost / requires_marks / mark_cost。
 ##    居合剑气不足、拔刀印记不足、一闪剑气不足 → 拦截，不执行、不消耗。
-## ② 拔刀印记消耗推迟到伤害结算之后：拔刀吃到自身正在消耗的势(STR+2) → 非暴击 29 而非 25。
+## ② 拔刀印记消耗推迟到伤害结算之后：拔刀吃到自身正在消耗的势(STR+2) → 非暴击 28 而非 25。
+##    （期望值 2026-08-03 由 29 改 28：最终伤害取整口径按 R1.8 从四舍五入改为向下取整，
+##      28.8 → 28；旧 bug 那一侧 25.2 → 25 不变，本用例的分辨力不受影响。）
 ##
 ## 经正式 TacticalScene 走 _build_skill_action → _execute_skill_action 真实链路。
 ## 坑规避：断言放 _process 首帧；tm/action 用 Object。
@@ -129,15 +131,15 @@ func _test_badao_mark_timing(tm: Object, sword: Unit, dummy: Unit) -> void:
 	sword.marks["心"] = true
 	sword.marks["道"] = true
 	sword.marks["势"] = true          # 势 → STR +2 → 10→12
-	# 期望非暴击伤害 = (STR12 + weapon_might6 − def2) × power1.8 = 16 × 1.8 = 28.8 → 29
-	# 若印记在伤害前被扣（旧 bug），STR=10 → (10+6−2)×1.8 = 25.2 → 25
+	# 期望非暴击伤害 = (STR12 + weapon_might6 − def2) × power1.8 = 16 × 1.8 = 28.8 → 向下取整 28
+	# 若印记在伤害前被扣（旧 bug），STR=10 → (10+6−2)×1.8 = 25.2 → 向下取整 25
 	dummy.stats.hp = dummy.stats.max_hp
 	var hp_before: int = dummy.stats.hp
 	tm._selected_skill_id = "swordsman_badao"
 	var act: Object = tm._build_skill_action(sword, dummy.grid_position, dummy)
 	_check("拔刀 满印记 execute 返回 true", tm._execute_skill_action(act))
 	var dmg: int = hp_before - dummy.stats.hp
-	_eq("拔刀非暴击伤害=29（吃到势，非旧 bug 的 25）", dmg, 29)
+	_eq("拔刀非暴击伤害=28（吃到势，非旧 bug 的 25）", dmg, 28)
 	_eq("拔刀施放后印记清空(get_mark_count==0)", sword.get_mark_count(), 0)
 
 

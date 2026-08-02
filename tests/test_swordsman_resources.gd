@@ -3,7 +3,8 @@ extends SceneTree
 ##
 ## 覆盖「真理源」代码（unit.gd / damage_calculator.gd）+ JSON 数据层：
 ##   居合必中必暴、满印记→拔刀槽位替换、心眼(暴击/速度)、印记属性+2、
-##   暴击倍率(1.5x 基线 / 拔刀 2.0x)、纯粹伤害不参与暴击判定、命中 1% 下限。
+##   暴击倍率(1.5x 基线 / 拔刀乘算 ×1.2 → 1.8x)、纯粹伤害不参与暴击判定、命中 1% 下限、
+##   hybrid 基础伤害（物理魔法各算一次再取平均）。
 ## tactical_manager.gd 的运行时接线（命中产气/施放扣气/击杀返气/cd-1/mark_gain）
 ##   由批次2 集成测试覆盖（test_swordsman_integration.gd）。
 ##
@@ -122,7 +123,8 @@ func _test_data_layer(dl: Object) -> void:
 	_eq("拔刀 requires_marks==3", badao.get("requires_marks"), 3)
 	_eq("拔刀 mark_cost==3", badao.get("mark_cost"), 3)
 	_eq("拔刀 qi_cost==20", badao.get("qi_cost"), 20)
-	_eq("拔刀 crit_damage_bonus==1.5", badao.get("crit_damage_bonus"), 1.5)
+	_eq("拔刀 crit_damage_mult==1.2（乘算通道）", badao.get("crit_damage_mult"), 1.2)
+	_check("拔刀不再使用加算字段 crit_damage_bonus", not badao.has("crit_damage_bonus"))
 	_eq("拔刀 slot_swap_provider==true", badao.get("slot_swap_provider"), true)
 	_eq("拔刀 power==180", badao.get("power"), 180)
 
@@ -313,18 +315,26 @@ func _test_damage_formulas(dl: Object) -> void:
 	_check("暴击基线 1.5x (base20→30)", r_crit.crit and r_crit.damage == 30,
 		"crit=%s dmg=%d" % [str(r_crit.crit), r_crit.damage])
 
-	# 7h. 拔刀 crit_damage_bonus=1.5 → 3.0x：base 20 → 60（基础1.5x + 1.5）
+	# 7h. 拔刀 crit_damage_mult=1.2（乘算）→ 1.5×1.2=1.8x：base 20 → 36
 	var r_badao: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(atk, dft,
 		{"damage_type": "physical", "weapon_might": 0, "skill_multiplier": 1.0,
-		 "guaranteed_hit": true, "guaranteed_crit": true, "crit_damage_bonus": 1.5})
-	_eq("拔刀 3.0x (base20→60)", r_badao.damage, 60)
+		 "guaranteed_hit": true, "guaranteed_crit": true, "crit_damage_mult": 1.2})
+	_eq("拔刀 1.8x = 1.5×1.2 (base20→36)", r_badao.damage, 36)
 
-	# 7i. pure 不参与暴击判定（R1.3）：即使传 guaranteed_crit 与 crit_damage_bonus，
+	# 7h-2. R1.3 加算先于乘算：(1.5 + 0.5) × 1.2 = 2.4 → base 20 → 48。
+	#       若写成先乘后加会得 (1.5×1.2)+0.5 = 2.3 → 46，本断言即为二者的分辨点。
+	var r_mix: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(atk, dft,
+		{"damage_type": "physical", "weapon_might": 0, "skill_multiplier": 1.0,
+		 "guaranteed_hit": true, "guaranteed_crit": true,
+		 "crit_damage_bonus": 0.5, "crit_damage_mult": 1.2})
+	_eq("加算先于乘算 (1.5+0.5)×1.2=2.4 (base20→48)", r_mix.damage, 48)
+
+	# 7i. pure 不参与暴击判定（R1.3）：即使传 guaranteed_crit 与暴击倍率修正，
 	#     也不进暴击乘区，base 20 → 20
 	var r_pure: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(atk, dft,
 		{"damage_type": "pure", "pure_atk_source": "phys", "weapon_might": 0,
 		 "skill_multiplier": 1.0, "guaranteed_hit": true, "guaranteed_crit": true,
-		 "crit_damage_bonus": 1.5})
+		 "crit_damage_bonus": 0.5, "crit_damage_mult": 1.2})
 	_check("pure 不暴击且无暴击乘区 (base20→20)", not r_pure.crit and r_pure.damage == 20,
 		"crit=%s dmg=%d" % [str(r_pure.crit), r_pure.damage])
 
@@ -353,5 +363,107 @@ func _test_damage_formulas(dl: Object) -> void:
 		{"damage_type": "pure", "pure_atk_source": "phys", "weapon_might": 0, "guaranteed_hit": true})
 	_eq("pure 无视防御==20", r_pureatk.damage, 20)
 
+	_test_hybrid_formula(atk, dft)
+	_test_final_damage_floor(atk, dft)
+
 	atk.free()
 	dft.free()
+
+
+# ── 8. hybrid 基础伤害（裁决 A：各算一次再取平均）──────
+
+## hybrid = ( max(0, STR + might - DEF) + max(0, MAG + might - RES) ) / 2。
+## 与「一次性减去平均防御」的分辨点在于地板：任一侧被 max(0,·) 截断时两种写法结果不同。
+## 复用 _test_damage_formulas 里已构造好的攻防单位（dft.lck=50 → 不会暴击）。
+func _test_hybrid_formula(atk: Unit, dft: Unit) -> void:
+	print("\n[8] hybrid 基础伤害（物理魔法各算一次再取平均）")
+	atk.clear_marks()
+	atk.set_sword_qi(0)
+	dft.stats.hp = 999
+	dft.stats.lck = 50
+
+	# 8a. DEF > RES，两侧都不触地板：
+	#     物理 30+0-20=10，魔法 20+0-4=16 → (10+16)/2 = 13
+	atk.stats.str_attr = 30
+	atk.stats.mag = 20
+	dft.stats.def_attr = 20
+	dft.stats.res = 4
+	var r_a: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(atk, dft,
+		{"damage_type": "hybrid", "weapon_might": 0, "guaranteed_hit": true})
+	_check("hybrid DEF>RES：(10+16)/2==13", not r_a.crit and r_a.damage == 13,
+		"crit=%s dmg=%d" % [str(r_a.crit), r_a.damage])
+
+	# 8b. DEF < RES，两侧仍都不触地板：
+	#     物理 30+0-4=26，魔法 20+0-12=8 → (26+8)/2 = 17
+	dft.stats.def_attr = 4
+	dft.stats.res = 12
+	var r_b: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(atk, dft,
+		{"damage_type": "hybrid", "weapon_might": 0, "guaranteed_hit": true})
+	_check("hybrid DEF<RES：(26+8)/2==17", not r_b.crit and r_b.damage == 17,
+		"crit=%s dmg=%d" % [str(r_b.crit), r_b.damage])
+
+	# 8c. ★核心护栏：魔法一侧被地板截断。
+	#     物理 30+0-10=20，魔法 20+0-100=-80 → 截断为 0 → (20+0)/2 = 10。
+	#     若错写成「一次性减平均防御」= (30+20)/2 - (10+100)/2 = 25-55 < 0 → 0，
+	#     两种写法在此处分叉（10 vs 0），本断言即为分辨点。
+	dft.stats.def_attr = 10
+	dft.stats.res = 100
+	var r_c: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(atk, dft,
+		{"damage_type": "hybrid", "weapon_might": 0, "guaranteed_hit": true})
+	_eq("hybrid 魔法侧触地板：(20+0)/2==10", r_c.damage, 10)
+
+	# 8d. 物理一侧被地板截断（对称验证）：
+	#     物理 30+0-100=-70 → 0，魔法 20+0-5=15 → (0+15)/2 = 7.5 → 向下取整 7。
+	dft.stats.def_attr = 100
+	dft.stats.res = 5
+	var r_d: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(atk, dft,
+		{"damage_type": "hybrid", "weapon_might": 0, "guaranteed_hit": true})
+	_eq("hybrid 物理侧触地板：(0+15)/2=7.5 → 向下取整 7", r_d.damage, 7)
+
+	# 8e. 两侧都被截断 → 0（最终伤害下限 0，R1.1）
+	dft.stats.def_attr = 100
+	dft.stats.res = 100
+	var r_e: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(atk, dft,
+		{"damage_type": "hybrid", "weapon_might": 0, "guaranteed_hit": true})
+	_eq("hybrid 两侧都触地板==0", r_e.damage, 0)
+
+	# 8f. weapon_might 对物理、魔法两侧同时生效（无独立的 hybrid_might）：
+	#     物理 30+6-20=16，魔法 20+6-4=22 → (16+22)/2 = 19
+	dft.stats.def_attr = 20
+	dft.stats.res = 4
+	var r_f: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(atk, dft,
+		{"damage_type": "hybrid", "weapon_might": 6, "guaranteed_hit": true})
+	_eq("hybrid weapon_might 两侧共用：(16+22)/2==19", r_f.damage, 19)
+
+
+# ── 9. 最终伤害向下取整（R1.8）────────────────────────
+
+## R1.8：中间量不取整，最终量向下取整。旧实装用四舍五入（roundi），
+## 于 2026-08-03 一并改为 floori；forecast 与结算两条路径必须同口径。
+func _test_final_damage_floor(atk: Unit, dft: Unit) -> void:
+	print("\n[9] 最终伤害向下取整（R1.8）")
+	atk.clear_marks()
+	atk.set_sword_qi(0)
+	dft.stats.hp = 999
+	dft.stats.lck = 50
+	atk.stats.str_attr = 10
+	dft.stats.def_attr = 0
+	dft.stats.res = 0
+
+	# base 10 × power 175% = 17.5 → 向下取整 17（四舍五入会得 18）
+	var r_floor: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(atk, dft,
+		{"damage_type": "physical", "weapon_might": 0, "skill_multiplier": 1.75,
+		 "guaranteed_hit": true})
+	_eq("结算 17.5 → 向下取整 17（非四舍五入 18）", r_floor.damage, 17)
+
+	# 预告路径同口径 → forecast == 实际伤害
+	var pv_floor: Dictionary = DamageCalculator.preview_attack(atk, dft,
+		{"damage_type": "physical", "weapon_might": 0, "skill_multiplier": 1.75,
+		 "guaranteed_hit": true})
+	_eq("预告 17.5 → 向下取整 17（与结算同口径）", int(pv_floor["damage"]), 17)
+
+	# 0.9 这类不足 1 的残值向下取整为 0（下限本就是 0，不产生 1 点保底伤害）
+	var r_sub_one: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(atk, dft,
+		{"damage_type": "physical", "weapon_might": 0, "skill_multiplier": 0.09,
+		 "guaranteed_hit": true})
+	_eq("结算 0.9 → 向下取整 0", r_sub_one.damage, 0)

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SoT 战斗 HUD 精确功能稿 v1 — ②冷石哥特皮肤 + ④信息密度</title>
+<style>
+  :root{--bg:#0d0c14;--surface:#16141f;--line:#2a2640;--gold:#b8942f;--gold-b:#e0bf48;
+        --text:#e6dbc7;--sub:#8f96a8;--dim:#5c5c66;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif;font-size:14px;line-height:1.6;padding:30px 22px 80px}
+  .wrap{max-width:1080px;margin:0 auto}
+  h1{font-size:21px;color:var(--gold-b);margin:0 0 6px}
+  h2{font-size:16px;color:var(--gold);margin:34px 0 8px;border-left:3px solid var(--gold);padding-left:10px}
+  p.sub{color:var(--sub);font-size:13px;margin:2px 0}
+  .meta{color:var(--dim);font-size:12px;margin:4px 0 0}
+  .note{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--gold);
+        border-radius:4px;padding:12px 16px;margin:14px 0;font-size:13px;color:var(--sub)}
+  .note b{color:var(--text)} code{background:#211c30;color:#cdb6e0;padding:1px 6px;border-radius:3px;font-size:12px}
+  .stage{background:#0a0910;border:1px solid var(--line);border-radius:7px;padding:24px;margin-top:10px;display:flex;justify-content:center}
+  svg{image-rendering:pixelated;display:block}
+  .pal{display:flex;flex-wrap:wrap;gap:0;margin-top:10px;border:1px solid var(--line);border-radius:6px;overflow:hidden;max-width:840px}
+  .sw{width:84px;height:56px;display:flex;flex-direction:column;justify-content:flex-end;padding:4px 6px;font-size:10px}
+  .sw small{display:block;font-size:8.5px;opacity:.75}
+  .dk{color:#e6dbc7;text-shadow:0 1px 0 rgba(0,0,0,.6)} .lt{color:#000}
+  table{border-collapse:collapse;font-size:12.5px;margin:8px 0;width:100%;max-width:920px}
+  th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+  th{background:#13101e;color:var(--gold)}
+  .a{color:#7cc47a} .b{color:#d8893a}
+  ul{margin:8px 0;padding-left:22px} li{margin:4px 0;font-size:13px}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin:8px 0}
+  .chip{display:inline-block;width:11px;height:11px;border-radius:2px;vertical-align:-1px;margin-right:4px}
+</style>
+</head>
+<body>
+
+<!-- 冷调抖色 pattern -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <pattern id="dith" patternUnits="userSpaceOnUse" width="2" height="2">
+    <rect width="2" height="2" fill="#0e1019"/>
+    <rect x="0" y="0" width="1" height="1" fill="#161c28"/>
+    <rect x="1" y="1" width="1" height="1" fill="#161c28"/>
+  </pattern>
+</defs></svg>
+
+<div class="wrap">
+
+<h1>SoT 战斗 HUD — 精确功能稿 v1</h1>
+<p class="sub">②「高清像素·冷石哥特」皮肤 + ④「信息密度」布局 · 落到真实 SoT 战斗 UI 组件（真字段 / 真状态 / 红线签名不动）</p>
+<p class="meta">2026-06-30 · dev_doc/ui-art-research/combat-ui-mockup-v1.html · SVG 按像素网格绘制(放大看清像素) · 设计稿非实装代码</p>
+
+<div class="note">
+<b>这一稿是什么</b>：把你选的方向（②皮肤 + ④密度）落成<b>精确功能件</b>——每个真实字段（剑气 10 格 / 心道势印记 / HP+护盾 / 8 属性 / 键位 1-4 / 消耗 / 冷却 / 选中）都在正确位置、正确状态。<br>
+<b>原生 vs 素材分工</b>：<span class="legend" style="display:inline"><span><span class="chip" style="background:#3a9d4a"></span>原生自做（路 A，SoT 现在就能写）</span> <span><span class="chip" style="background:#d8893a"></span>像素管线产（路 B，Mercury 按 ② 气质出）</span></span><br>
+<b>字体</b>：图中中文/标签暂用系统字（平滑，不算数）；最终中文走 <b>Fusion Pixel 12px</b> 像素字、拉丁/数字走 <b>m5x7</b>（首样例 <code>hd-pixel-ui-material-sample.html</code> 有像素数字演示）。<br>
+<b>红线</b>：仅重写内部视觉，<code>BottomDashboard</code>/<code>SkillBar</code>/<code>DamageForecaster</code>/<code>DamagePopup</code> 公开签名零改动。<br>
+<b>仍是设计稿</b>：你点头这一稿后才走 Playground 模式落 Godot 代码。
+</div>
+
+<h2>调色板 · ② 冷石哥特</h2>
+<div class="pal">
+  <div class="sw dk" style="background:#14121d">页底/虚空<small>#14121d</small></div>
+  <div class="sw dk" style="background:#0e1019">面板内底<small>#0e1019</small></div>
+  <div class="sw dk" style="background:#3b4252">冷石·中<small>#3b4252</small></div>
+  <div class="sw dk" style="background:#5c6678">石·受光面<small>#5c6678</small></div>
+  <div class="sw dk" style="background:#1a1d28">石·背光面<small>#1a1d28</small></div>
+  <div class="sw lt" style="background:#c9a23e">金·角钉/角饰<small>#c9a23e</small></div>
+  <div class="sw lt" style="background:#e0bf48">亮金·选中<small>#e0bf48</small></div>
+  <div class="sw dk" style="background:#5fa8d8">剑气&lt;7 / 护盾<small>#5fa8d8</small></div>
+  <div class="sw lt" style="background:#a855f7">剑气≥7<small>#a855f7</small></div>
+  <div class="sw lt" style="background:#3a9d4a">HP<small>#3a9d4a</small></div>
+  <div class="sw dk" style="background:#e6dbc7">主文本<small>#e6dbc7</small></div>
+</div>
+
+<h2>一、底栏信息面板 BottomDashboard（②皮肤 + ④密度）</h2>
+<p class="sub">左 头像 · 中 武将信息+HP+剑气+印记 · 右 8 属性紧凑格。整块一个冷石哥特框。</p>
+<div class="stage">
+  <svg viewBox="0 0 208 90" width="728" height="315" shape-rendering="crispEdges">
+    <!-- ===== 冷石哥特外框 ===== -->
+    <rect x="0" y="0" width="208" height="90" fill="#0a0b12"/>
+    <rect x="1" y="1" width="206" height="88" fill="#3b4252"/>
+    <rect x="1" y="1" width="206" height="1" fill="#5c6678"/>
+    <rect x="1" y="1" width="1" height="88" fill="#5c6678"/>
+    <rect x="1" y="88" width="206" height="1" fill="#1a1d28"/>
+    <rect x="206" y="1" width="1" height="88" fill="#1a1d28"/>
+    <rect x="4" y="4" width="200" height="82" fill="url(#dith)"/>
+    <rect x="4" y="4" width="200" height="1" fill="#070810"/>
+    <!-- 角钉 -->
+    <rect x="2" y="2" width="2" height="2" fill="#e0bf48"/>
+    <rect x="204" y="2" width="2" height="2" fill="#c9a23e"/>
+    <rect x="2" y="86" width="2" height="2" fill="#c9a23e"/>
+    <rect x="204" y="86" width="2" height="2" fill="#8a6f2a"/>
+    <!-- 顶中央哥特金饰 -->
+    <rect x="103" y="1" width="2" height="2" fill="#e0bf48"/>
+    <rect x="101" y="2" width="6" height="1" fill="#8a6f2a"/>
+    <rect x="100" y="2" width="1" height="1" fill="#4a3c18"/>
+    <rect x="107" y="2" width="1" height="1" fill="#4a3c18"/>
+
+    <!-- ===== 头像（路B 素材占位）===== -->
+    <rect x="8" y="9" width="44" height="60" fill="#0a0b12"/>
+    <rect x="9" y="10" width="42" height="58" fill="#2c323e"/>
+    <rect x="9" y="10" width="42" height="1" fill="#4a soup"/>
+    <rect x="9" y="10" width="42" height="1" fill="#4a5163"/>
+    <rect x="9" y="10" width="1" height="58" fill="#4a5163"/>
+    <rect x="9" y="67" width="42" height="1" fill="#13161e"/>
+    <rect x="50" y="10" width="1" height="58" fill="#13161e"/>
+    <rect x="11" y="12" width="38" height="54" fill="#0e1019"/>
+    <!-- 简易半身剪影(占位) -->
+    <rect x="25" y="20" width="10" height="10" fill="#5a6275"/>
+    <rect x="27" y="18" width="6" height="3" fill="#5a6275"/>
+    <rect x="20" y="32" width="20" height="20" fill="#4a5163"/>
+    <rect x="23" y="36" width="14" height="16" fill="#3f4658"/>
+    <rect x="28" y="38" width="4" height="14" fill="#5a6275"/>
+    <text x="30" y="63" fill="#8f96a8" font-size="5" text-anchor="middle">头像·像素管线</text>
+
+    <!-- 分隔金线 -->
+    <rect x="55" y="9" width="1" height="60" fill="#5a481f"/>
+
+    <!-- ===== 中列：信息 + HP + 剑气 + 印记 ===== -->
+    <text x="60" y="18" fill="#e6dbc7" font-size="9">武藏</text>
+    <text x="60" y="28" fill="#8f96a8" font-size="6">Lv.12 · 剑圣</text>
+
+    <!-- HP -->
+    <text x="60" y="40" fill="#7cc47a" font-size="5.5">HP</text>
+    <rect x="74" y="34" width="62" height="7" fill="#0a1019"/>
+    <rect x="74" y="34" width="44" height="7" fill="#3a9d4a"/>
+    <rect x="74" y="34" width="44" height="1" fill="#5bc46a"/>
+    <rect x="74" y="34" width="62" height="7" fill="none" stroke="#1f3a22" stroke-width="0.6"/>
+    <text x="138" y="40" fill="#e6dbc7" font-size="5.5">30/42</text>
+    <text x="158" y="40" fill="#5b9bd8" font-size="5.5">护盾8</text>
+
+    <!-- 剑气 10 段 -->
+    <text x="60" y="52" fill="#8f96a8" font-size="5.5">剑气</text>
+    <g>
+      <rect x="74" y="46" width="50" height="7" fill="#0a1019"/>
+      <rect x="74" y="46" width="5" height="7" fill="#9a4ee0"/><rect x="74" y="46" width="5" height="1" fill="#c98bff"/>
+      <rect x="79" y="46" width="5" height="7" fill="#9a4ee0"/><rect x="79" y="46" width="5" height="1" fill="#c98bff"/>
+      <rect x="84" y="46" width="5" height="7" fill="#9a4ee0"/><rect x="84" y="46" width="5" height="1" fill="#c98bff"/>
+      <rect x="89" y="46" width="5" height="7" fill="#9a4ee0"/><rect x="89" y="46" width="5" height="1" fill="#c98bff"/>
+      <rect x="94" y="46" width="5" height="7" fill="#9a4ee0"/><rect x="94" y="46" width="5" height="1" fill="#c98bff"/>
+      <rect x="99" y="46" width="5" height="7" fill="#9a4ee0"/><rect x="99" y="46" width="5" height="1" fill="#c98bff"/>
+      <rect x="104" y="46" width="5" height="7" fill="#b266ff"/><rect x="104" y="46" width="5" height="1" fill="#e9ccff"/>
+      <rect x="109" y="46" width="5" height="7" fill="#100a1c"/>
+      <rect x="114" y="46" width="5" height="7" fill="#100a1c"/>
+      <rect x="119" y="46" width="5" height="7" fill="#100a1c"/>
+      <!-- 阈值金线(第7格后) -->
+      <rect x="109" y="45" width="1" height="9" fill="#e0bf48"/>
+      <!-- 每格分隔 -->
+      <rect x="79" y="46" width="1" height="7" fill="#0a1019" opacity="0.5"/>
+    </g>
+    <text x="138" y="52" fill="#c98bff" font-size="5.5">7/10</text>
+
+    <!-- 印记 心道势 -->
+    <text x="60" y="64" fill="#8f96a8" font-size="5.5">印记</text>
+    <!-- 心(持有) -->
+    <rect x="74" y="58" width="12" height="12" fill="#1a1410"/><rect x="74" y="58" width="12" height="12" fill="none" stroke="#e0bf48" stroke-width="1"/>
+    <text x="80" y="67.5" fill="#e0bf48" font-size="7" text-anchor="middle">心</text>
+    <!-- 道(持有) -->
+    <rect x="88" y="58" width="12" height="12" fill="#1a1410"/><rect x="88" y="58" width="12" height="12" fill="none" stroke="#e0bf48" stroke-width="1"/>
+    <text x="94" y="67.5" fill="#e0bf48" font-size="7" text-anchor="middle">道</text>
+    <!-- 势(未持) -->
+    <rect x="102" y="58" width="12" height="12" fill="#0d0a14"/><rect x="102" y="58" width="12" height="12" fill="none" stroke="#3a3f4c" stroke-width="1"/>
+    <text x="108" y="67.5" fill="#5c6678" font-size="7" text-anchor="middle">势</text>
+    <!-- XP 细条 -->
+    <text x="120" y="64" fill="#8f96a8" font-size="5">XP</text>
+    <rect x="131" y="60" width="32" height="3" fill="#16101f"/>
+    <rect x="131" y="60" width="20" height="3" fill="#7a52c8"/>
+
+    <!-- 分隔金线 -->
+    <rect x="150" y="9" width="1" height="60" fill="#5a481f"/>
+
+    <!-- ===== 右列：8 属性紧凑格 (④密度) ===== -->
+    <text x="156" y="16" font-size="5.5"><tspan fill="#8f96a8">力 </tspan><tspan fill="#e6dbc7">18</tspan></text>
+    <text x="182" y="16" font-size="5.5"><tspan fill="#8f96a8">守 </tspan><tspan fill="#e6dbc7">12</tspan></text>
+    <text x="156" y="28" font-size="5.5"><tspan fill="#8f96a8">技 </tspan><tspan fill="#e6dbc7">15</tspan></text>
+    <text x="182" y="28" font-size="5.5"><tspan fill="#8f96a8">抗 </tspan><tspan fill="#e6dbc7">8</tspan></text>
+    <text x="156" y="40" font-size="5.5"><tspan fill="#8f96a8">速 </tspan><tspan fill="#e6dbc7">11</tspan></text>
+    <text x="182" y="40" font-size="5.5"><tspan fill="#8f96a8">幸 </tspan><tspan fill="#e6dbc7">9</tspan></text>
+    <text x="156" y="52" font-size="5.5"><tspan fill="#8f96a8">魔 </tspan><tspan fill="#e6dbc7">4</tspan></text>
+    <text x="182" y="52" font-size="5.5"><tspan fill="#8f96a8">移 </tspan><tspan fill="#e6dbc7">5</tspan></text>
+    <!-- 小型战术格件(④味, 占位) -->
+    <rect x="156" y="58" width="44" height="22" fill="#0c0f17"/>
+    <rect x="156" y="58" width="44" height="22" fill="none" stroke="#2a3140" stroke-width="1"/>
+    <g stroke="#3a4150" stroke-width="0.5">
+      <line x1="170" y1="62" x2="182" y2="69"/><line x1="182" y1="69" x2="194" y2="62"/>
+      <line x1="170" y1="76" x2="182" y2="69"/><line x1="182" y1="69" x2="194" y2="76"/>
+    </g>
+    <rect x="180" y="67" width="5" height="3" fill="#5fa8d8"/>
+    <text x="178" y="79" fill="#5c6678" font-size="4">战术缩览</text>
+  </svg>
+</div>
+<div class="legend">
+  <span><span class="chip" style="background:#3a9d4a"></span>原生：冷石框/角钉/HP+剑气+XP 段条/印记块/属性/战术缩览</span>
+  <span><span class="chip" style="background:#d8893a"></span>素材：头像立绘（+ 可选的更精致金丝角饰）</span>
+</div>
+
+<h2>二、技能栏 SkillBar（②皮肤 · 四主动 + 被动）</h2>
+<p class="sub">屏幕底部居中常驻。左上键位 1-4 / 右下消耗 / 冷却中心遮罩 / 选中金边 / 不可用置灰 / 被动无键位。</p>
+<div class="stage">
+  <svg viewBox="0 0 156 34" width="780" height="170" shape-rendering="crispEdges">
+    <!-- 槽宏: 冷石框22x22。这里逐个画 4 主动 + 1 被动 -->
+
+    <!-- ① 斩击 key1 标准(橙) 常态 -->
+    <g>
+      <rect x="6" y="5" width="22" height="22" fill="#0a0b12"/>
+      <rect x="7" y="6" width="20" height="20" fill="#3b4252"/>
+      <rect x="7" y="6" width="20" height="1" fill="#5c6678"/><rect x="7" y="6" width="1" height="20" fill="#5c6678"/>
+      <rect x="7" y="25" width="20" height="1" fill="#1a1d28"/><rect x="26" y="6" width="1" height="20" fill="#1a1d28"/>
+      <rect x="9" y="8" width="16" height="16" fill="url(#dith)"/>
+      <rect x="8" y="7" width="2" height="2" fill="#c9a23e"/><rect x="24" y="7" width="2" height="2" fill="#8a6f2a"/>
+      <rect x="8" y="23" width="2" height="2" fill="#8a6f2a"/><rect x="24" y="23" width="2" height="2" fill="#4a3c18"/>
+      <!-- 占位剑图标(斜) -->
+      <rect x="19" y="10" width="2" height="1" fill="#cfd4de"/><rect x="17" y="12" width="2" height="1" fill="#bcc2cc"/>
+      <rect x="15" y="14" width="2" height="1" fill="#bcc2cc"/><rect x="13" y="16" width="2" height="1" fill="#a8aeba"/>
+      <rect x="11" y="18" width="3" height="1" fill="#8a6f2a"/><rect x="11" y="19" width="1" height="2" fill="#6b531c"/>
+      <text x="11" y="13" fill="#e6dbc7" font-size="5" text-anchor="middle">1</text>
+      <text x="24" y="25" fill="#fa9a4a" font-size="4.5" text-anchor="end">标</text>
+      <text x="17" y="32" fill="#9aa0b0" font-size="5" text-anchor="middle">斩击</text>
+    </g>
+
+    <!-- ② 居合 key2 消耗5气 常态 -->
+    <g>
+      <rect x="36" y="5" width="22" height="22" fill="#0a0b12"/>
+      <rect x="37" y="6" width="20" height="20" fill="#3b4252"/>
+      <rect x="37" y="6" width="20" height="1" fill="#5c6678"/><rect x="37" y="6" width="1" height="20" fill="#5c6678"/>
+      <rect x="37" y="25" width="20" height="1" fill="#1a1d28"/><rect x="56" y="6" width="1" height="20" fill="#1a1d28"/>
+      <rect x="39" y="8" width="16" height="16" fill="url(#dith)"/>
+      <rect x="38" y="7" width="2" height="2" fill="#c9a23e"/><rect x="54" y="7" width="2" height="2" fill="#8a6f2a"/>
+      <rect x="38" y="23" width="2" height="2" fill="#8a6f2a"/><rect x="54" y="23" width="2" height="2" fill="#4a3c18"/>
+      <!-- 居合: 一道横向剑气 -->
+      <rect x="42" y="16" width="11" height="1" fill="#c98bff"/><rect x="43" y="15" width="9" height="1" fill="#a855f7"/>
+      <rect x="44" y="17" width="7" height="1" fill="#7a52c8"/>
+      <text x="41" y="13" fill="#e6dbc7" font-size="5" text-anchor="middle">2</text>
+      <text x="54" y="25" fill="#5fa8d8" font-size="4.5" text-anchor="end">5气</text>
+      <text x="47" y="32" fill="#9aa0b0" font-size="5" text-anchor="middle">居合</text>
+    </g>
+
+    <!-- ③ 拔刀 key3 消耗3印 选中(金边外发光) -->
+    <g>
+      <rect x="64" y="3" width="26" height="26" fill="#e0bf48" opacity="0.10"/>
+      <rect x="66" y="5" width="22" height="22" fill="#0a0b12"/>
+      <rect x="67" y="6" width="20" height="20" fill="#3f3a22"/>
+      <rect x="67" y="6" width="20" height="1" fill="#e0bf48"/><rect x="67" y="6" width="1" height="20" fill="#e0bf48"/>
+      <rect x="67" y="25" width="20" height="1" fill="#6b531c"/><rect x="86" y="6" width="1" height="20" fill="#6b531c"/>
+      <rect x="69" y="8" width="16" height="16" fill="#1a160c"/>
+      <rect x="68" y="7" width="2" height="2" fill="#f4d765"/><rect x="84" y="7" width="2" height="2" fill="#e0bf48"/>
+      <rect x="68" y="23" width="2" height="2" fill="#e0bf48"/><rect x="84" y="23" width="2" height="2" fill="#8a6f2a"/>
+      <!-- 拔刀: 爆发剑气(从鞘抽出) -->
+      <rect x="77" y="10" width="1" height="13" fill="#fff6d8"/><rect x="76" y="11" width="3" height="1" fill="#f0e6c4"/>
+      <rect x="73" y="22" width="9" height="1" fill="#e0bf48"/>
+      <text x="72" y="13" fill="#fff6d8" font-size="5" text-anchor="middle">3</text>
+      <text x="84" y="25" fill="#e0bf48" font-size="4.5" text-anchor="end">3印</text>
+      <text x="77" y="32" fill="#e0bf48" font-size="5" text-anchor="middle">拔刀</text>
+    </g>
+
+    <!-- ④ 一闪 key4 移动(蓝) 冷却2 -->
+    <g>
+      <rect x="96" y="5" width="22" height="22" fill="#0a0b12"/>
+      <rect x="97" y="6" width="20" height="20" fill="#2c303a"/>
+      <rect x="97" y="6" width="20" height="1" fill="#41464f"/><rect x="97" y="6" width="1" height="20" fill="#41464f"/>
+      <rect x="97" y="25" width="20" height="1" fill="#13151b"/><rect x="116" y="6" width="1" height="20" fill="#13151b"/>
+      <rect x="99" y="8" width="16" height="16" fill="url(#dith)"/>
+      <!-- 冷却暗化遮罩 + 上方扇区台阶 -->
+      <rect x="99" y="8" width="16" height="16" fill="#04060b" opacity="0.6"/>
+      <rect x="99" y="8" width="16" height="6" fill="#02040a" opacity="0.5"/>
+      <text x="107" y="20" fill="#d8cdb6" font-size="11" text-anchor="middle">2</text>
+      <text x="101" y="13" fill="#6f7686" font-size="5" text-anchor="middle">4</text>
+      <text x="107" y="32" fill="#6f7686" font-size="5" text-anchor="middle">一闪</text>
+    </g>
+
+    <!-- 被动 心眼 (无键位, 16x16, P 标记) -->
+    <g>
+      <rect x="128" y="8" width="16" height="16" fill="#0a0b12"/>
+      <rect x="129" y="9" width="14" height="14" fill="#332c3e"/>
+      <rect x="129" y="9" width="14" height="1" fill="#4e4660"/><rect x="129" y="9" width="1" height="14" fill="#4e4660"/>
+      <rect x="129" y="22" width="14" height="1" fill="#15121c"/><rect x="142" y="9" width="1" height="14" fill="#15121c"/>
+      <rect x="131" y="11" width="10" height="10" fill="#0e0c16"/>
+      <!-- 心眼: 眼形 -->
+      <rect x="133" y="15" width="7" height="2" fill="#a855f7"/><rect x="135" y="14" width="3" height="1" fill="#c98bff"/><rect x="135" y="17" width="3" height="1" fill="#7a52c8"/>
+      <rect x="136" y="15" width="1" height="2" fill="#fff6d8"/>
+      <text x="131" y="13" fill="#8f96a8" font-size="4.5" text-anchor="middle">P</text>
+      <text x="136" y="29" fill="#8f96a8" font-size="4.5" text-anchor="middle">心眼</text>
+    </g>
+  </svg>
+</div>
+<div class="legend">
+  <span><span class="chip" style="background:#3a9d4a"></span>原生：冷石槽框/角钉/状态(常态·选中金边发光·冷却台阶遮罩)/键位+消耗角标/几何占位图标</span>
+  <span><span class="chip" style="background:#d8893a"></span>素材：四技能真图标终版（按 ② 气质，过渡可用 SDF shader）</span>
+</div>
+
+<h2>三、伤害预测窗 DamageForecaster（②皮肤 · 浮目标头顶）</h2>
+<div class="stage">
+  <svg viewBox="0 0 84 60" width="420" height="300" shape-rendering="crispEdges">
+    <!-- 冷石框 -->
+    <rect x="2" y="2" width="80" height="48" fill="#0a0b12"/>
+    <rect x="3" y="3" width="78" height="46" fill="#3b4252"/>
+    <rect x="3" y="3" width="78" height="1" fill="#5c6678"/><rect x="3" y="3" width="1" height="46" fill="#5c6678"/>
+    <rect x="3" y="48" width="78" height="1" fill="#1a1d28"/><rect x="80" y="3" width="1" height="46" fill="#1a1d28"/>
+    <rect x="6" y="6" width="72" height="40" fill="url(#dith)"/>
+    <rect x="4" y="4" width="2" height="2" fill="#c9a23e"/><rect x="78" y="4" width="2" height="2" fill="#8a6f2a"/>
+    <rect x="4" y="46" width="2" height="2" fill="#8a6f2a"/><rect x="78" y="46" width="2" height="2" fill="#4a3c18"/>
+    <!-- 向下指向三角(对准目标) -->
+    <rect x="39" y="50" width="6" height="2" fill="#3b4252"/>
+    <rect x="40" y="52" width="4" height="2" fill="#3b4252"/>
+    <rect x="41" y="54" width="2" height="2" fill="#2a303a"/>
+    <!-- 内容(系统字占位) -->
+    <text x="10" y="13" fill="#c9a23e" font-size="6">伤害预测</text>
+    <text x="76" y="13" fill="#8f96a8" font-size="5" text-anchor="end">木桩</text>
+    <text x="10" y="22" fill="#8f96a8" font-size="5">HP 18/30</text>
+    <!-- 类型点 + 数值 -->
+    <rect x="10" y="27" width="4" height="4" fill="#e6dbc7"/><rect x="10" y="27" width="4" height="4" fill="none" stroke="#888" stroke-width="0.5"/>
+    <text x="18" y="31" fill="#e6dbc7" font-size="7">物理 · 24</text>
+    <text x="10" y="40" fill="#8f96a8" font-size="5">命中 92%</text>
+    <text x="46" y="40" fill="#fa730f" font-size="5">暴击 35%</text>
+    <text x="10" y="46" fill="#cfd4de" font-size="4.5">反击 12 · 命中80%</text>
+  </svg>
+</div>
+<div class="legend">
+  <span><span class="chip" style="background:#3a9d4a"></span>原生：全部（冷石框/三角/双色描边/类型点/文本）—— 现 <code>DamageForecaster</code> 已是此画法，仅换冷石配色</span>
+</div>
+
+<h2>四、原生 vs 素材 分工总表</h2>
+<table>
+  <tr><th>组件</th><th>原生自做（路 A · SoT）</th><th>像素管线（路 B · Mercury，按 ② 气质）</th></tr>
+  <tr><td>信息面板</td><td class="a">冷石框 · 角钉 · HP/护盾/XP 段条 · 剑气 10 格 + 阈值线 · 心道势印记块 · 8 属性 · 战术缩览</td><td class="b">角色头像立绘 · 可选更精致金丝角饰</td></tr>
+  <tr><td>技能栏</td><td class="a">冷石槽框 · 全状态(常态/选中金边发光/冷却台阶/置灰) · 键位+消耗角标 · 被动小图标位</td><td class="b">四技能真图标终版（过渡用 SDF shader 或字占位）</td></tr>
+  <tr><td>伤害预测窗</td><td class="a">全部(框/三角/类型点/数值/命中暴击反击行)</td><td class="b">无（纯原生即可）</td></tr>
+  <tr><td>伤害飘字</td><td class="a">像素数字 + 几何类型字形 + 升起淡出动效(Tween)</td><td class="b">可选：类型字形换像素点阵 sprite</td></tr>
+</table>
+
+<h2>五、下一步</h2>
+<ul>
+  <li>你看这一稿（②皮肤 + ④密度落到真字段）<b>对不对</b>？要调的：冷石明暗 / 金的比重 / ④密度是否还要更紧或更松 / 哪个组件先动。</li>
+  <li>对的话，下一步二选一：① 我继续把<b>飘字 + 动效</b >也补成精确稿；② 直接进 <b>Playground 模式</b>把这一稿落成 Godot 代码（独立文件、红线签名不动、人工审阅后合回）。</li>
+  <li>同时我整理一份<b>像素管线需求清单</b>（头像立绘 + 4 技能图标 + 可选角饰，含 ② 气质规格 + 尺寸），交给像素管线时气质统一。</li>
+  <li>字体：定 <b>Fusion Pixel 12px + m5x7</b> 后我给导入设置清单（Nearest/关抗锯齿/整数缩放/.tres fallback）。</li>
+</ul>
+
+</div>
+</body>
+</html>

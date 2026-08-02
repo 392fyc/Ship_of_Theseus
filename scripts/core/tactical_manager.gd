@@ -1968,6 +1968,7 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		"guaranteed_hit": bool(skill_data.get("guaranteed_hit", false)),
 		"guaranteed_crit": bool(skill_data.get("guaranteed_crit", false)),
 		"crit_damage_bonus": float(skill_data.get("crit_damage_bonus", 0.0)),
+		"crit_damage_mult": float(skill_data.get("crit_damage_mult", 1.0)),
 		"qi_gain_on_hit": int(skill_data.get("qi_gain_on_hit", 0)),
 		"qi_gain_on_kill": int(skill_data.get("qi_gain_on_kill", 0)),
 		"mark_gain": int(skill_data.get("mark_gain", 0)),
@@ -2158,13 +2159,13 @@ func _get_unit_source_data(unit: Unit) -> Dictionary:
 	return DataLoader.enemies.get(unit.unit_id, {})
 
 
-## R1.8：武器参数唯一来源 = 所装备武器（data/weapons/，DataLoader.weapons）。
+## R1.7：武器参数唯一来源 = 所装备武器（data/weapons/，DataLoader.weapons）。
 ## 每单位恒持一件武器（class/enemy JSON 必须声明 weapon_id）；缺失时数据校验兜底：
 ## push_error 记录 + might/hit/crit 回退 0（不崩溃战斗，但日志会显眼暴露数据缺陷）。
 func _get_unit_weapon_data(source_data: Dictionary, unit: Unit) -> Dictionary:
 	var weapon_id: String = str(source_data.get("weapon_id", ""))
 	if weapon_id == "":
-		push_error("[Weapon] 单位 %s 缺少 weapon_id（每单位恒持一件武器，R1.8）" \
+		push_error("[Weapon] 单位 %s 缺少 weapon_id（每单位恒持一件武器，R1.7）" \
 			% (unit.unit_id if unit != null else "?"))
 		return {}
 	var weapon_data: Dictionary = DataLoader.weapons.get(weapon_id, {})

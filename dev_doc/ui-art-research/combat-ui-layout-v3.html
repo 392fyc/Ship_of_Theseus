@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SoT 战斗 HUD 排版稿 v3 — 五区架构（资源剥离 · 物品2×3 · 取消技能/道具按钮）</title>
+<style>
+  :root{
+    --void:#14121d; --fill:#0e1019;
+    --stone:#3b4252; --stone-hi:#5c6678; --stone-lo:#1a1d28; --outline:#0a0b12;
+    --gold:#c9a23e; --gold-b:#e0bf48; --gold-d:#5a481f;
+    --text:#e6dbc7; --sub:#8f96a8; --dim:#5c6678;
+    --hp:#3a9d4a; --hp-hi:#5bc46a; --qi-hi:#a855f7; --qi-br:#c98bff;
+    --shield:#5b9bd8; --orange:#fa730f; --blue:#3b82f5; --green:#10b884; --red:#d8442e;
+    --num:"DejaVu Sans Mono","Consolas",monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#0c0b12;color:var(--text);
+       font-family:"Microsoft YaHei","Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;padding:28px 20px 70px}
+  .wrap{max-width:1180px;margin:0 auto}
+  h1{font-size:21px;color:var(--gold-b);margin:0 0 6px}
+  h2{font-size:16px;color:var(--gold);margin:30px 0 8px;border-left:3px solid var(--gold);padding-left:10px}
+  p.sub{color:var(--sub);font-size:13px;margin:2px 0}
+  .meta{color:var(--dim);font-size:12px;margin:4px 0 0}
+  .note{background:#16141f;border:1px solid #2a2640;border-left:3px solid var(--gold);
+        border-radius:4px;padding:12px 16px;margin:14px 0;font-size:13px;color:var(--sub)}
+  .note b{color:var(--text)} code{background:#211c30;color:#cdb6e0;padding:1px 6px;border-radius:3px;font-size:12px}
+
+  .field{margin-top:12px;border-radius:8px;overflow:hidden;border:1px solid #23202e;
+         background:linear-gradient(180deg,#171622 0%,#0f0e17 55%,#0b0a11 100%);
+         position:relative;padding:34px 16px 18px;min-height:240px}
+  .field::before{content:"";position:absolute;inset:0;opacity:.28;pointer-events:none;
+    background-image:linear-gradient(#2a2740 1px,transparent 1px),linear-gradient(90deg,#2a2740 1px,transparent 1px);
+    background-size:46px 30px;transform:perspective(420px) rotateX(36deg);transform-origin:bottom}
+  /* 五区一行 */
+  .hud{position:relative;display:flex;align-items:flex-end;justify-content:center;gap:8px;flex-wrap:wrap}
+  .region{position:relative}
+  .rtag{position:absolute;top:-16px;left:0;font-size:10px;color:var(--gold);opacity:.85;white-space:nowrap}
+
+  .stone{background:var(--fill);border:3px solid var(--stone);border-radius:2px;position:relative;
+    box-shadow:inset 1.5px 1.5px 0 0 var(--stone-hi),inset -1.5px -1.5px 0 0 var(--stone-lo),
+               0 0 0 1px var(--outline),0 5px 14px rgba(0,0,0,.55)}
+  .stone::after{content:"";position:absolute;inset:2px;border:1px solid rgba(201,162,62,.16);border-radius:1px;pointer-events:none}
+
+  /* ① 个人信息（类无关，无资源）*/
+  .info{display:flex;gap:11px;padding:10px 12px}
+  .portrait{width:60px;height:78px;flex:none;border-radius:2px;background:#0c0e16;
+    border:2px solid #2c323e;box-shadow:inset 1px 1px 0 #4a5163,inset -1px -1px 0 #13161e;
+    display:flex;align-items:flex-end;justify-content:center;position:relative;overflow:hidden}
+  .portrait .bust{position:absolute;bottom:0;width:42px;height:50px;
+    background:radial-gradient(circle 10px at 50% 22%,#5a6275 0 100%,transparent 0),linear-gradient(180deg,transparent 38%,#454c5e 38%)}
+  .portrait .ptag{position:relative;font-size:8.5px;color:#7a8294;background:rgba(8,9,15,.7);width:100%;text-align:center;padding:1px 0;z-index:2}
+  .vitals{display:flex;flex-direction:column;gap:5px;justify-content:center;min-width:150px}
+  .nameline{display:flex;align-items:baseline;gap:8px}
+  .name{font-size:15px;color:var(--text);font-weight:600;letter-spacing:1px}
+  .lv{font-size:11px;color:var(--sub)}
+  .statrow{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:7px}
+  .statrow .lbl{font-size:11px;color:var(--sub)}
+  .statrow .lbl.hp{color:#7cc47a} .statrow .lbl.qi{color:#b79be0}
+  .statrow .val{font-family:var(--num);font-size:12px;color:var(--text);letter-spacing:.5px}
+  .bar{height:10px;background:#0a1019;border:1px solid var(--outline);border-radius:1px;overflow:hidden;box-shadow:inset 0 1px 0 rgba(0,0,0,.5)}
+  .bar>i{display:block;height:100%;background:linear-gradient(180deg,var(--hp-hi),var(--hp));box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+  .subline{display:flex;gap:12px;font-size:10.5px;color:var(--sub);align-items:center}
+  .subline .sh{color:var(--shield)}
+  .subline .xp i{display:inline-block;width:48px;height:4px;background:#16101f;border-radius:2px;overflow:hidden;vertical-align:middle;margin-left:3px}
+  .subline .xp i::before{content:"";display:block;width:62%;height:100%;background:#7a52c8}
+  .stats{align-self:center;display:grid;grid-template-columns:auto auto;gap:5px 14px;padding-left:11px;border-left:1px solid var(--gold-d)}
+  .stat{display:flex;justify-content:space-between;gap:9px;min-width:42px}
+  .stat .k{font-size:11px;color:var(--sub)} .stat .v{font-family:var(--num);font-size:12px;color:var(--text)}
+
+  /* ② 资源栏（按职业·独立框）*/
+  .res{padding:9px 11px;display:flex;flex-direction:column;gap:6px;min-width:210px}
+  .rhead{font-size:10.5px;color:var(--sub)} .rhead b{color:var(--gold);font-weight:600}
+  .seg{display:grid;grid-template-columns:repeat(10,1fr);gap:1px;height:12px;width:182px;max-width:100%}
+  .seg span{background:#100a1c;border-radius:1px}
+  .seg span.f{background:linear-gradient(180deg,var(--qi-br),var(--qi-hi))}
+  .seg span.t{box-shadow:1px 0 0 var(--gold-b)}
+  .reslabel{display:flex;align-items:center;gap:7px}
+  .reslabel .lbl{font-size:11px;color:#b79be0;width:30px} .reslabel .val{font-family:var(--num);font-size:12px;color:var(--qi-br);margin-left:auto}
+  .markrow{display:flex;align-items:center;gap:6px}
+  .markrow .lbl{font-size:11px;color:var(--sub);width:30px}
+  .mark{width:24px;height:24px;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13px;border:1px solid var(--dim);color:var(--dim);background:#0d0a14}
+  .mark.held{border-color:var(--gold-b);color:var(--gold-b);background:#1a1410}
+  .rnote{font-size:9.5px;color:var(--dim)}
+
+  /* ③ 技能栏（居中·平铺·无切换按钮）*/
+  .skills{display:flex;align-items:flex-end;gap:7px;padding:8px 10px}
+  .slot{width:58px;display:flex;flex-direction:column;align-items:center;gap:3px}
+  .sq{width:54px;height:54px;border-radius:3px;position:relative;background:var(--fill);
+    border:2px solid var(--stone);box-shadow:inset 1px 1px 0 var(--stone-hi),inset -1px -1px 0 var(--stone-lo),0 0 0 1px var(--outline)}
+  .sq .ic{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;color:#aeb4c0}
+  .sq .key{position:absolute;top:2px;left:2px;min-width:14px;height:14px;padding:0 2px;border-radius:2px;background:rgba(8,9,15,.85);border:1px solid rgba(201,162,62,.5);color:var(--text);font-family:var(--num);font-size:10px;line-height:13px;text-align:center}
+  .sq .cost{position:absolute;right:2px;bottom:2px;font-family:var(--num);font-size:10px;padding:0 3px;border-radius:2px;background:rgba(8,9,15,.85)}
+  .cost.std{color:var(--orange)} .cost.qi{color:#5fa8d8} .cost.mark{color:var(--gold-b)} .cost.mv{color:var(--blue)}
+  .sq .swap{position:absolute;left:2px;bottom:2px;font-size:8px;padding:0 2px;border-radius:2px;background:rgba(8,9,15,.85);color:var(--green)}
+  .slot .nm{font-size:11px;color:var(--sub)}
+  .sq.sel{border-color:var(--gold-b);background:#1a160c;box-shadow:inset 1px 1px 0 #f4d765,inset -1px -1px 0 #6b531c,0 0 0 1px var(--outline),0 0 10px 1px rgba(224,191,72,.45)}
+  .sq.sel .ic{color:#fff6d8} .slot.sel .nm{color:var(--gold-b)}
+  .sq.cd .ic{color:#565a64}
+  .sq.cd .cdmask{position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,4,10,.78) 36%,rgba(4,6,11,.6) 36%);display:flex;align-items:center;justify-content:center;font-family:var(--num);font-size:24px;color:#d8cdb6}
+  .slot.cd .nm{color:var(--dim)}
+  .skdiv{width:1px;height:46px;background:var(--gold-d);align-self:center;margin:0 3px}
+  .slot.passive .sq{width:44px;height:44px} .slot.passive{width:48px}
+  .slot.passive .ic{font-size:18px;color:#b79be0} .slot.passive .key{border-color:#3a3f4c;color:var(--sub)}
+
+  /* ④ 物品 2×3 平铺 */
+  .items{padding:8px 10px}
+  .ihead{font-size:10.5px;color:var(--sub);margin-bottom:5px}
+  .igrid{display:grid;grid-template-columns:repeat(3,38px);grid-template-rows:repeat(2,38px);gap:6px}
+  .icell{position:relative;border-radius:2px;background:#0d0e16;border:1px solid #2a3040;
+    box-shadow:inset 1px 1px 0 #353c4a,inset -1px -1px 0 #14171f;display:flex;align-items:center;justify-content:center;font-size:16px;color:#9aa0b0}
+  .icell.empty{color:#2f3440;background:#0a0b11}
+  .icell .ct{position:absolute;right:1px;bottom:0;font-family:var(--num);font-size:8px;color:#18b84a}
+
+  /* ⑤ 结束 */
+  .endcol{display:flex;align-items:flex-end}
+  .endbtn{width:54px;height:54px;border-radius:3px;background:#160b0c;border:2px solid #5a2622;
+    box-shadow:inset 1px 1px 0 #7a3a34,inset -1px -1px 0 #1a0a0a,0 0 0 1px var(--outline);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+  .endbtn .ai{font-size:18px;color:var(--red)} .endbtn .at{font-size:10px;color:#c98a86}
+
+  table{border-collapse:collapse;font-size:12.5px;margin:8px 0;width:100%;max-width:920px}
+  th,td{border:1px solid #2a2640;padding:6px 9px;text-align:left;vertical-align:top}
+  th{background:#13101e;color:var(--gold)}
+  ul{margin:8px 0;padding-left:22px} li{margin:4px 0;font-size:13px}
+  .del{color:#c97a72} .add{color:#7cc47a}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>SoT 战斗 HUD — 排版稿 v3（五区架构）</h1>
+<p class="sub">按 skillbar-spec §1 五区硬布局重整：资源从信息栏剥离 · 物品 2×3 平铺 · 技能/物品已平铺故取消切换按钮</p>
+<p class="meta">2026-06-30 · combat-ui-layout-v3.html · 取代 v2 · ②冷石皮肤 CSS 近似（排版定稿后再贴精确像素皮）</p>
+
+<div class="note">
+<b>三处架构纠正（你提，回 skillbar-spec §1/§2 真源确认）</b>：<br>
+① <b>资源剥离</b>：剑气/印记是<b>剑圣专属</b>，移出「个人信息」独立成 <b>② 资源栏</b>。个人信息只留 头像/名/等级/HP+护盾/XP/8属性 = <b>类无关、跨职业复用</b>；换职业只换②资源框（法力/怒气…），信息栏不动。<br>
+② <b>物品 2×3 平铺</b>：6 格 38px 常驻（§2 表确认 38×38、2 行 3 列），不再是弹窗。<br>
+③ <b>取消「技能」「道具」按钮</b>：技能③、物品④都已平铺常驻，切换按钮冗余；动作区只剩 <b>⑤ 结束</b>。（<code>skill_toggle_requested</code> 等 signal 按红线保留声明，不再驱动 UI）<br>
+<b>这版仍是排版稿</b>：②冷石皮肤为 CSS 近似，排版定稿后回贴精确像素皮（SVG/Godot+像素管线）；字体最终 Fusion Pixel + m5x7。
+</div>
+
+<h2>五区底栏（L→R：①个人信息 · ②资源 · ③技能 · ④物品 · ⑤结束）</h2>
+<div class="field">
+  <div class="hud">
+
+    <!-- ① 个人信息（类无关·复用）-->
+    <div class="region"><span class="rtag">① 个人信息（跨职业复用）</span>
+      <div class="info stone">
+        <div class="portrait"><div class="bust"></div><div class="ptag">头像·素材</div></div>
+        <div class="vitals">
+          <div class="nameline"><span class="name">武藏</span><span class="lv">Lv.12 · 剑圣</span></div>
+          <div class="statrow"><span class="lbl hp">HP</span><div class="bar"><i style="width:71%"></i></div><span class="val">30/42</span></div>
+          <div class="subline"><span class="sh">护盾 8</span><span class="xp">XP<i></i></span></div>
+        </div>
+        <div class="stats">
+          <div class="stat"><span class="k">力</span><span class="v">18</span></div>
+          <div class="stat"><span class="k">守</span><span class="v">12</span></div>
+          <div class="stat"><span class="k">技</span><span class="v">15</span></div>
+          <div class="stat"><span class="k">抗</span><span class="v">8</span></div>
+          <div class="stat"><span class="k">速</span><span class="v">11</span></div>
+          <div class="stat"><span class="k">幸</span><span class="v">9</span></div>
+          <div class="stat"><span class="k">魔</span><span class="v">4</span></div>
+          <div class="stat"><span class="k">移</span><span class="v">5</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② 资源栏（按职业·独立框）-->
+    <div class="region"><span class="rtag">② 资源（按职业独立·剑圣示例）</span>
+      <div class="res stone">
+        <div class="rhead">资源 · <b>剑圣</b></div>
+        <div class="reslabel"><span class="lbl">剑气</span><span class="val">7/10</span></div>
+        <div class="seg">
+          <span class="f"></span><span class="f"></span><span class="f"></span><span class="f"></span>
+          <span class="f"></span><span class="f"></span><span class="f t"></span>
+          <span></span><span></span><span></span>
+        </div>
+        <div class="markrow"><span class="lbl">印记</span>
+          <span class="mark held">心</span><span class="mark held">道</span><span class="mark">势</span>
+        </div>
+        <div class="rnote">换职业换此框：魔法师→法力槽 / 狂战→怒气条 …</div>
+      </div>
+    </div>
+
+    <!-- ③ 技能栏（居中·平铺·无切换按钮）-->
+    <div class="region"><span class="rtag">③ 技能（平铺常驻·无「技能」按钮）</span>
+      <div class="skills stone">
+        <div class="slot"><div class="sq"><span class="key">1</span><div class="ic">⚔</div><span class="cost std">标</span></div><span class="nm">斩击</span></div>
+        <div class="slot cd"><div class="sq cd"><span class="key">2</span><div class="ic">✦</div><div class="cdmask">2</div></div><span class="nm">一闪</span></div>
+        <div class="slot sel"><div class="sq sel"><span class="key">3</span><div class="ic">⚡</div><span class="cost mark">3印</span><span class="swap">换</span></div><span class="nm">拔刀</span></div>
+        <div class="slot"><div class="sq"><span class="key">4</span><div class="ic">◈</div><span class="cost qi">5气</span></div><span class="nm">居合</span></div>
+        <div class="skdiv"></div>
+        <div class="slot passive"><div class="sq"><span class="key">P</span><div class="ic">◉</div></div><span class="nm">心眼</span></div>
+      </div>
+    </div>
+
+    <!-- ④ 物品 2×3 平铺 -->
+    <div class="region"><span class="rtag">④ 物品 2×3（平铺·无「道具」按钮）</span>
+      <div class="items stone">
+        <div class="ihead">物品</div>
+        <div class="igrid">
+          <div class="icell">⚗<span class="ct">2</span></div>
+          <div class="icell">✶<span class="ct">1</span></div>
+          <div class="icell">◓<span class="ct">3</span></div>
+          <div class="icell empty">◌</div>
+          <div class="icell empty">◌</div>
+          <div class="icell empty">◌</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑤ 结束 -->
+    <div class="region"><span class="rtag">⑤ 结束</span>
+      <div class="endcol"><div class="endbtn"><div class="ai">⏻</div><div class="at">结束</div></div></div>
+    </div>
+
+  </div>
+</div>
+
+<h2>v2 → v3 改了什么</h2>
+<table>
+  <tr><th>项</th><th>v2（错）</th><th>v3（对，按 spec §1）</th></tr>
+  <tr><td>剑气/印记</td><td class="del">塞在「个人信息」面板内 → 换职业整栏报废</td><td class="add">独立成 ② 资源栏（按职业换框），信息栏类无关复用</td></tr>
+  <tr><td>物品</td><td class="del">动作区一个「道具」按钮（弹窗）</td><td class="add">④ 物品 2×3 平铺常驻（38px×6）</td></tr>
+  <tr><td>技能入口</td><td class="del">动作区一个「技能」切换按钮</td><td class="add">技能栏③平铺常驻，删「技能」按钮</td></tr>
+  <tr><td>动作区</td><td class="del">技能/道具/结束 三按钮</td><td class="add">仅 ⑤ 结束（红框）</td></tr>
+</table>
+
+<h2>原生 vs 素材（不变）</h2>
+<table>
+  <tr><th>原生自做（路 A · SoT）</th><th>像素管线（路 B · Mercury 按②气质）</th></tr>
+  <tr><td>五区冷石框/斜面/金线 · HP/剑气/XP 段条 · 印记块 · 属性 · 技能槽全状态 · 物品格 · 结束框 · 预测窗 · 飘字动效</td><td>角色头像立绘 · 技能/物品真图标终版 · 可选金丝角饰</td></tr>
+</table>
+
+<h2>请你定</h2>
+<ul>
+  <li>五区架构 + 资源剥离这版<b>对了吗</b>？要调：五区<b>顺序/间距</b>（spec 定 ①②③④⑤，技能居中）；②资源栏的标题/呈现；①信息栏现在空间宽松了，要不要补字段（如下一回合预览/状态图标行）；物品 2×3 位置。</li>
+  <li>对的话下一步：把锁定排版<b>回贴 ② 精确像素皮肤</b>（SVG/Godot）+ 像素管线素材清单（头像/技能图标/物品图标/可选角饰，按②气质）+ 字体导入清单。</li>
+  <li>架构层面还有一个待你定的点：<b>多角色切换时</b>，①个人信息 + ②资源栏是「跟随当前选中单位刷新」对吧？（即同一套框，内容随选中角色/职业换；②资源框按职业切换布局）——确认我就按这个落。</li>
+</ul>
+
+</div>
+</body>
+</html>
