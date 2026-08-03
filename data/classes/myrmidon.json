@@ -25,7 +25,10 @@
   "weapon_id": "wpn_swordsman_starter",
   "damage_type": "physical",
   "basic_attack_qi_gain": 10,
-  "basic_attack_range": { "min": 1, "max": 1 },
+  "basic_attack_range": {
+    "min": 1,
+    "max": 1
+  },
   "skill_ids": [
     "swordsman_zhanji",
     "swordsman_yishan",
@@ -48,5 +51,5 @@
     "mark_str_bonus": 2
   },
   "description": "剑士（日本剑道线下位职业）。近战物理，成长偏技巧，是剑圣与剑仙的前置职业。共享剑气与剑意印记资源，可用斩击、一闪、招架、居合，并持有心眼被动；奥义「拔刀」为剑圣专属，不在本职业技能表内（槽位替换会因拔刀不在本职业 skill_ids 内而不生效）。心眼：每 10 点剑气 → 暴击 +2；剑气不高于上限 50% 时速度 +2，高于时技巧 +2。",
-  "_note": "[已定] growth_rates 全部七项依据设计库 myrmidon stat_tiers（HP B / STR B / MAG C / DEX A / SPD B / DEF B / RES C）按 R2.3 档位标尺 C=40/B=50/A=60/S=75 换算（2026-08-03）。[占位] base_stats 与 MOV 直接沿用 kensei 当前值，仅为保证两者同标度可比，并非「剑士与剑圣本体属性相同」的设计结论；kensei 自身的 base_stats 也仍是测试占位值（HP 28 量级），与 KB 属性档位标度（HP 90 量级）尚未统一，待标度统一后与 kensei 一并重标定。[已定] 心眼五项（crit_per_qi / qi_per_crit_pct / qi_ratio_threshold_pct / low_qi_stat_* / high_qi_stat_*）于 2026-08-03 按设计库 myrmidon_xinyan 现行口径实装：每 10 点剑气 → 暴击 +2；剑气 ≤ 上限 50% 时速度 +2，>50% 时技巧 +2。旧键 speed_threshold / speed_bonus 已删除。[占位] 印记三项加成（mark_*_bonus）沿用 kensei，是否应在下位职业上弱于剑圣，设计侧尚未裁决。[占位] weapon_id 暂借用 wpn_swordsman_starter（名为「剑圣初始太刀」），未新建剑士专属起始武器，以免引入未经裁决的武器数值。"
+  "_note": "[已定] growth_rates 全部七项依据设计库 myrmidon stat_tiers（HP B / STR B / MAG C / DEX A / SPD B / DEF B / RES C）按 R2.3 档位标尺 C=40/B=50/A=60/S=75 换算（2026-08-03）。[占位] base_stats 与 MOV 直接沿用 kensei 当前值，仅为保证两者同标度可比，并非「剑士与剑圣本体属性相同」的设计结论；kensei 自身的 base_stats 也仍是测试占位值（HP 28 量级），与 KB 属性档位标度（HP 90 量级）尚未统一，待标度统一后与 kensei 一并重标定。[已定] 心眼五项（crit_per_qi / qi_per_crit_pct / qi_ratio_threshold_pct / low_qi_stat_* / high_qi_stat_*）于 2026-08-03 按设计库 myrmidon_xinyan 现行口径实装：每 10 点剑气 → 暴击 +2；剑气 ≤ 上限 50% 时速度 +2，>50% 时技巧 +2。旧键 speed_threshold / speed_bonus 已删除。[占位] 印记三项加成（mark_*_bonus）沿用 kensei，是否应在下位职业上弱于剑圣，设计侧尚未裁决。[占位] weapon_id 暂借用 wpn_swordsman_starter（名为「剑圣初始太刀」），未新建剑士专属起始武器，以免引入未经裁决的武器数值。 [已定] 剑士是这条线的起点（Lv1-10），转职在 Lv10-11。所以 base_stats 的正确归属是本文件，而不是 kensei —— 目前「myrmidon 照抄 kensei」的复制方向是临时的、且是反的，只因引擎尚未实装转职、测试场景直接生成剑圣。转职实装时应以本文件的 base_stats 为唯一起始值，剑圣的属性由九级成长 + 转职加成推出。★ 由此「剑士本体该比剑圣弱多少」不是一个待裁决的设计问题，差距是推出来的、不该手填。仍然待裁决的是另一件事：base_stats 的数值标度（引擎 HP 28 量级 vs KB 属性档位 HP 90 量级，差约 3 倍），那与转职模型无关。"
 }
