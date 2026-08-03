@@ -2,7 +2,7 @@ extends SceneTree
 ## 剑圣资源引擎 headless 回归测试（批次1：单位级 + 伤害计算）
 ##
 ## 覆盖「真理源」代码（unit.gd / damage_calculator.gd）+ JSON 数据层：
-##   居合必中必暴、满印记→拔刀槽位替换、心眼(暴击/速度)、印记属性+2、
+##   居合必中必暴、满印记→拔刀槽位替换（含职业校验）、心眼(暴击/剑气分档属性)、印记属性+2、
 ##   暴击倍率(1.5x 基线 / 拔刀乘算 ×1.2 → 1.8x)、纯粹伤害不参与暴击判定、命中 1% 下限、
 ##   hybrid 基础伤害（物理魔法各算一次再取平均）。
 ## tactical_manager.gd 的运行时接线（命中产气/施放扣气/击杀返气/cd-1/mark_gain）
@@ -42,6 +42,7 @@ func _run() -> void:
 	_test_xinyan_passive(dl)
 	_test_mark_attributes(dl)
 	_test_slot_swap(dl)
+	_test_slot_swap_class_gate(dl)
 	_test_class_isolation(dl)
 	_test_damage_formulas(dl)
 
@@ -87,11 +88,20 @@ func _test_data_layer(dl: Object) -> void:
 	var cfg: Dictionary = cls.get("sword_qi_config", {})
 	_eq("sword_qi_config.qi_max==100", cfg.get("qi_max"), 100)
 	_eq("sword_qi_config.qi_initial==0", cfg.get("qi_initial"), 0)
-	_eq("sword_qi_config.crit_per_qi==1", cfg.get("crit_per_qi"), 1)
-	_eq("sword_qi_config.speed_threshold==70", cfg.get("speed_threshold"), 70)
-	_eq("sword_qi_config.speed_bonus==1", cfg.get("speed_bonus"), 1)
+	# 心眼数值（设计库 myrmidon_xinyan / kensei_xinyan 现行口径，2026-08-03 实装）：
+	# 每 10 点剑气 → 暴击 +2；剑气 ≤ 上限 50% → 速度 +2，> 50% → 技巧 +2。
+	_eq("sword_qi_config.crit_per_qi==2", cfg.get("crit_per_qi"), 2)
+	_eq("sword_qi_config.qi_per_crit_pct==10", cfg.get("qi_per_crit_pct"), 10)
+	_eq("sword_qi_config.qi_ratio_threshold_pct==50", cfg.get("qi_ratio_threshold_pct"), 50)
+	_eq("sword_qi_config.low_qi_stat_key==SPD", cfg.get("low_qi_stat_key"), "SPD")
+	_eq("sword_qi_config.low_qi_stat_bonus==2", cfg.get("low_qi_stat_bonus"), 2)
+	_eq("sword_qi_config.high_qi_stat_key==DEX", cfg.get("high_qi_stat_key"), "DEX")
+	_eq("sword_qi_config.high_qi_stat_bonus==2", cfg.get("high_qi_stat_bonus"), 2)
+	# 旧的单一阈值键已随语义变化删除，不与新键并存
+	_check("旧键 speed_threshold 已删除", not cfg.has("speed_threshold"))
+	_check("旧键 speed_bonus 已删除", not cfg.has("speed_bonus"))
 	_eq("sword_qi_config.mark_dex_bonus==2", cfg.get("mark_dex_bonus"), 2)
-	_eq("sword_qi_config.mark_lck_bonus==2", cfg.get("mark_lck_bonus"), 2)
+	_eq("sword_qi_config.mark_spd_bonus==2", cfg.get("mark_spd_bonus"), 2)
 	_eq("sword_qi_config.mark_str_bonus==2", cfg.get("mark_str_bonus"), 2)
 	_eq("sword_qi_config.mark_max==3", cfg.get("mark_max"), 3)
 	_eq("skill_ids 长度==5", (cls.get("skill_ids", []) as Array).size(), 5)
@@ -146,26 +156,49 @@ func _test_unit_resource(dl: Object) -> void:
 	u.free()
 
 
-# ── 3. 心眼（暴击 + 速度阈值）────────────────────────
+# ── 3. 心眼（暴击 + 剑气比例分档属性）────────────────
 
+## 设计库现行口径（myrmidon_xinyan / kensei_xinyan）：
+##   每 10 点剑气 = 暴击 +2（向下取整）；
+##   剑气 ≤ 上限的 50% 时速度 +2，> 50% 时技巧 +2。
+## 旧口径（每 10 点 +1、剑气 ≥70 时速度 +1）已废弃。
 func _test_xinyan_passive(dl: Object) -> void:
-	print("\n[3] 心眼被动")
+	print("\n[3] 心眼被动（暴击每10点+2 / 剑气比例分档属性）")
 	var u: Unit = _make_unit(dl.classes["kensei"])
-	# 暴击：floor(剑气/qi_per_crit_pct)×crit_per_qi crit_bonus（0-100 标度，每10点+1%）
+	var base_spd: int = u.stats.spd
+	var base_dex: int = u.stats.dex
+	# ── 暴击：floor(剑气/qi_per_crit_pct)×crit_per_qi → 每 10 点 +2 ──
 	u.set_sword_qi(0)
 	_eq("剑气0 → crit_bonus==0", u.crit_bonus, 0)
+	u.set_sword_qi(9)
+	_eq("剑气9 → crit_bonus==0(不足一档，向下取整)", u.crit_bonus, 0)
+	u.set_sword_qi(10)
+	_eq("剑气10 → crit_bonus==2(floor(10/10)×2)", u.crit_bonus, 2)
 	u.set_sword_qi(70)
-	_eq("剑气70 → crit_bonus==7(floor(70/10)×1)", u.crit_bonus, 7)
-	# get_crit_value 反映 crit_bonus（weapon_crit + dex/2 + crit_bonus）
-	var base_dex_half: int = int(u.stats.dex / 2.0)
-	_eq("get_crit_value(10)==10+dex/2+7", u.get_crit_value(10), 10 + base_dex_half + 7)
-	# 速度阈值：剑气≥70 时 SPD +1（base SPD=8）
-	u.set_sword_qi(69)
-	_eq("剑气69 → SPD==8(无加成，未达70阈值)", u.get_effective_stat("SPD"), 8)
-	u.set_sword_qi(70)
-	_eq("剑气70 → SPD==9(+1，达70阈值)", u.get_effective_stat("SPD"), 9)
+	_eq("剑气70 → crit_bonus==14(floor(70/10)×2)", u.crit_bonus, 14)
 	u.set_sword_qi(100)
-	_eq("剑气100 → SPD==9(+1 不再叠)", u.get_effective_stat("SPD"), 9)
+	_eq("剑气100(满) → crit_bonus==20(floor(100/10)×2)", u.crit_bonus, 20)
+	# ── 剑气比例分档：≤上限50% 给速度，>50% 给技巧 ──
+	u.set_sword_qi(0)
+	_eq("剑气0(低气段) → SPD==基础+2", u.get_effective_stat("SPD"), base_spd + 2)
+	_eq("剑气0(低气段) → DEX==基础(不给技巧)", u.get_effective_stat("DEX"), base_dex)
+	u.set_sword_qi(50)
+	_eq("剑气50(==上限50%，边界含等号) → SPD==基础+2",
+		u.get_effective_stat("SPD"), base_spd + 2)
+	_eq("剑气50 → DEX==基础", u.get_effective_stat("DEX"), base_dex)
+	u.set_sword_qi(51)
+	_eq("剑气51(>上限50%) → SPD==基础(不再给速度)",
+		u.get_effective_stat("SPD"), base_spd)
+	_eq("剑气51(高气段) → DEX==基础+2", u.get_effective_stat("DEX"), base_dex + 2)
+	u.set_sword_qi(100)
+	_eq("剑气100(高气段) → SPD==基础", u.get_effective_stat("SPD"), base_spd)
+	_eq("剑气100(高气段) → DEX==基础+2(不叠加)",
+		u.get_effective_stat("DEX"), base_dex + 2)
+	# ── get_crit_value = weapon_crit + int(生效DEX/2) + crit_bonus ──
+	# 剑气70 属高气段 → 生效 DEX = 基础+2，这 +2 再经 DEX/2 额外贡献暴击。
+	u.set_sword_qi(70)
+	_eq("剑气70 → get_crit_value(10)==10+int((基础DEX+2)/2)+14",
+		u.get_crit_value(10), 10 + int((base_dex + 2) / 2.0) + 14)
 	u.free()
 
 
@@ -174,6 +207,7 @@ func _test_xinyan_passive(dl: Object) -> void:
 func _test_mark_attributes(dl: Object) -> void:
 	print("\n[4] 印记属性 +2")
 	var u: Unit = _make_unit(dl.classes["kensei"])
+	var base_spd: int = u.get_effective_stat("SPD")
 	# 基线（base: DEX=9, LCK=5, STR=10）
 	_eq("基线 DEX==9", u.get_effective_stat("DEX"), 9)
 	_eq("基线 LCK==5", u.get_effective_stat("LCK"), 5)
@@ -181,9 +215,14 @@ func _test_mark_attributes(dl: Object) -> void:
 	# 心→DEX+2
 	u.marks["心"] = true
 	_eq("持心 → DEX==11", u.get_effective_stat("DEX"), 11)
-	# 道→LCK+2
+	# 道→SPD+2
+	# ⚠ 2026-08-03 更正：本条原先断言「道 → LCK+2」，钉的是引擎当时的实装，
+	# 而设计库真源（/api/resources 的 mark 条目）逐字写的是「道为速度 SPD +2」。
+	# 台账 D-8 已判定设计库为准（KB 那句是 2026-07-25 commit 8e09371 对齐生产库写入的），
+	# 故引擎改为加 SPD，本断言随之改成验证正确口径。
 	u.marks["道"] = true
-	_eq("持道 → LCK==7", u.get_effective_stat("LCK"), 7)
+	_eq("持道 → SPD+2", u.get_effective_stat("SPD"), base_spd + 2)
+	_eq("持道 → LCK 不变", u.get_effective_stat("LCK"), 5)
 	# 势→STR+2
 	u.marks["势"] = true
 	_eq("持势 → STR==12", u.get_effective_stat("STR"), 12)
@@ -191,6 +230,7 @@ func _test_mark_attributes(dl: Object) -> void:
 	u.clear_marks()
 	_eq("clear后 DEX==9", u.get_effective_stat("DEX"), 9)
 	_eq("clear后 STR==10", u.get_effective_stat("STR"), 10)
+	_eq("clear后 SPD 复原", u.get_effective_stat("SPD"), base_spd)
 	u.free()
 
 
@@ -230,6 +270,50 @@ func _test_slot_swap(dl: Object) -> void:
 	_eq("spend_marks(5) 超量 → 返回剩余2", u.spend_marks(5), 2)
 	_eq("全扣后 印记数==0", u.get_mark_count(), 0)
 	u.free()
+
+
+# ── 5b. 槽位替换的职业校验（替换目标必须在本单位 skill_ids 内）──
+
+## 全仓只有「建技能栏」与「扫迅捷技能」两处读 skill_ids，施放路径不另做职业检查，
+## 技能栏本身就是访问控制。剑士（myrmidon）共享剑气与剑意印记、也能靠斩击/居合把印记攒满，
+## 但拔刀按 R2.4 是剑圣专属、不在其 skill_ids 内 → 招架槽必须保持为招架。
+## 两侧都要覆盖：拥有 target 则替换生效（剑圣），不拥有则不替换（剑士）。
+func _test_slot_swap_class_gate(dl: Object) -> void:
+	print("\n[5b] 槽位替换职业校验（拔刀=剑圣专属，剑士不得替换）")
+	var zj: Dictionary = dl.skills["swordsman_zhaojia"]
+	var trig: String = str(zj.get("slot_swap_trigger", ""))
+	var tgt: String = str(zj.get("slot_swap_target", ""))
+
+	# ① 不拥有 target 的一侧：剑士
+	var mm: Dictionary = dl.classes.get("myrmidon", {})
+	_check("myrmidon 职业存在", not mm.is_empty())
+	var m: Unit = _make_unit(mm)
+	_check("剑士 skill_ids 不含拔刀", not m.skill_ids.has(tgt))
+	_check("剑士持有招架（替换的 provider 槽确实在其技能表内）",
+		m.skill_ids.has("swordsman_zhaojia"))
+	m.gain_random_mark()
+	m.gain_random_mark()
+	m.gain_random_mark()
+	_check("剑士印记同样能攒满（共享印记资源）", m.is_marks_full())
+	_eq("剑士印记满 → 招架槽仍是招架（不得替换为剑圣专属拔刀）",
+		m.get_visible_skill_id("swordsman_zhaojia", trig, tgt), "swordsman_zhaojia")
+	m.free()
+
+	# ② 拥有 target 的一侧：剑圣（对照组，确认校验没把正常替换一并挡掉）
+	var k: Unit = _make_unit(dl.classes["kensei"])
+	_check("剑圣 skill_ids 含拔刀", k.skill_ids.has(tgt))
+	_eq("剑圣印记0 → 招架槽是招架",
+		k.get_visible_skill_id("swordsman_zhaojia", trig, tgt), "swordsman_zhaojia")
+	k.gain_random_mark()
+	k.gain_random_mark()
+	k.gain_random_mark()
+	_eq("剑圣印记满 → 招架槽替换为拔刀（替换仍然生效）",
+		k.get_visible_skill_id("swordsman_zhaojia", trig, tgt), "swordsman_badao")
+	# ③ 声明了替换但目标不在技能表内的一般情形（用不存在的技能 id 兜底验证）
+	_eq("剑圣印记满 + 目标为不存在的技能 → 不替换",
+		k.get_visible_skill_id("swordsman_zhaojia", trig, "swordsman_not_owned"),
+		"swordsman_zhaojia")
+	k.free()
 
 
 # ── 6. 职业隔离（非剑圣 _qi_max==0，资源写入失效）────
@@ -274,12 +358,16 @@ func _test_damage_formulas(dl: Object) -> void:
 	var pv_hit: Dictionary = DamageCalculator.preview_attack(atk, dft, {"weapon_hit": 80})
 	_eq("命中公式 ==70%", pv_hit["hit_percent"], 70)
 
-	# 7c. 心眼注入暴击率：sword_qi 0→70 时 crit_percent 增加 7（floor(70/10)×1）
+	# 7c. 心眼注入暴击率：sword_qi 0→70 时 crit_percent 增加 15，由两部分构成——
+	#     ① crit_bonus = floor(70/10)×2 = 14；
+	#     ② 剑气 70 > 上限 50% 属高气段 → 技巧 +2（DEX 10→12），经 int(DEX/2) 再 +1。
+	#     旧口径下这里是 +7（每 10 点 +1，且高剑气只给速度不给技巧，无 ② 项）。
 	atk.set_sword_qi(0)
 	var pv_c0: Dictionary = DamageCalculator.preview_attack(atk, dft, {"weapon_crit": 10})
 	atk.set_sword_qi(70)
 	var pv_c7: Dictionary = DamageCalculator.preview_attack(atk, dft, {"weapon_crit": 10})
-	_eq("心眼: 剑气70 暴击率比0高7", pv_c7["crit_percent"] - pv_c0["crit_percent"], 7)
+	_eq("心眼: 剑气70 暴击率比0高15(=14 暴击加成 + 1 技巧折算)",
+		pv_c7["crit_percent"] - pv_c0["crit_percent"], 15)
 	atk.set_sword_qi(0)
 
 	# 7d. 居合必中：guaranteed_hit 无视回避 → 100%
