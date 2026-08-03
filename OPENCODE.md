@@ -38,15 +38,27 @@ Reporting To: Main Agent (via Human relay)
 - 核心脚本目录: `scripts/core/`, `scripts/tactical/`, `scripts/ui/`, `scripts/units/`, `scripts/data/`
 - 场景目录: `scenes/tactical/`, `scenes/menus/`
 
-## MANDATORY — Game Mechanics Constraints
+## MANDATORY — Game Mechanics: Consult the Rule Table
 
-以下规则在实现任何战斗/技能/伤害逻辑时**必须遵守**：
+规则正本 = 设计库规则表 `/api/rules`，共 23 条（R1.1–R1.10 / R2.1–R2.4 / R3.1–R3.4 / R4.1–R4.4 / R5.9）。
+离线全量索引 = KB `01-Game-Design/rules-catalog.md`（每条一句话 + 展开文档链接）；逐字原文 = 设计库仓库 `snapshots/rules.json`。
 
-- 纯粹伤害(pure) → **不参与暴击判定**（R1.1 / R1.3；不做暴击判定，也不进暴击乘区）
-- hybrid → 物理与魔法**各按 R1.1 算一次**（各自取 max(0,·) 地板）再取算术平均；**不是**一次性减平均防御
-- **自动反击已移除**（2026-07-11 用户裁决；未来以天赋/敌方特性形式回归，不预设反击框架）；**追击系统已移除**
-- 建筑耐久 → **固定扣减**；建筑摧毁 → **变废墟**
-- 距离 → **无衰减**
+实现任何战斗 / 技能 / 伤害逻辑前**必须**回查上述真源。本文件只给指针、**不复述规则内容**；
+凭记忆或凭旧摘要写公式，按下文 Escalation Protocol 的「**禁止**猜测设计意图」处理。
+
+| 要确认什么 | 查这里 |
+|---------|-------|
+| 伤害怎么算、hybrid 怎么合、纯粹伤害(pure)是什么 | R1.1；展开见 KB `01-Game-Design/Core-Systems/battle-calculation.md` |
+| 命中 / 暴击怎么算，哪些属性参与 | R1.2 / R1.3 |
+| 某个修正该落在哪一层，什么时候取整、什么时候 clamp | R1.8 |
+| 一次效果对同一单位结算几次，会不会自己触发自己 | R1.9 / R1.10 |
+| 技能消耗什么行动资源、什么时机能放 | R3.2 / R3.3 |
+| 速度到底影响什么（有没有速度带来的追击） | R3.1 |
+| 建筑受伤走不走伤害公式，摧毁后那格变成什么 | 规则表无此域 → KB `01-Game-Design/Core-Systems/grid-and-map.md` §建筑耐久系统 |
+| 受击方会不会自动反击 | 规则表无此域 → KB `01-Game-Design/Core-Systems/battle-calculation.md` §反击系统 |
+
+R1.1 / R1.2 / R1.3 各自列全了本链的层与乘区。规则层没有列出的因素（例如距离）**禁止**自行补进公式；
+要让某个因素参与结算，必须由技能 / 天赋 / 遗物条目显式声明，并按 R1.8 落到指定的层。
 
 ---
 
