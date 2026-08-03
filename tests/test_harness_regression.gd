@@ -44,7 +44,7 @@ func _run() -> void:
 
 func _test_forecast_multitarget(scene: Node, tm: Object) -> void:
 	print("\n[①] forecast 多目标边界（拔刀 AoE 汇总 / 0/1/3 目标）")
-	var sword: Unit = _find(tm, "swordsman")
+	var sword: Unit = _find(tm, "kensei")
 	if sword == null:
 		_check("场景含剑圣", false)
 		return

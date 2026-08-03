@@ -1,0 +1,52 @@
+{
+  "id": "myrmidon",
+  "name": "剑士",
+  "base_stats": {
+    "HP": 28,
+    "STR": 10,
+    "MAG": 2,
+    "DEX": 9,
+    "SPD": 8,
+    "LCK": 5,
+    "DEF": 5,
+    "RES": 4
+  },
+  "growth_rates": {
+    "HP": 50,
+    "STR": 50,
+    "MAG": 40,
+    "DEX": 60,
+    "SPD": 50,
+    "DEF": 50,
+    "RES": 40
+  },
+  "MOV": 4,
+  "attack_type": "melee",
+  "weapon_id": "wpn_swordsman_starter",
+  "damage_type": "physical",
+  "basic_attack_qi_gain": 10,
+  "basic_attack_range": { "min": 1, "max": 1 },
+  "skill_ids": [
+    "swordsman_zhanji",
+    "swordsman_yishan",
+    "swordsman_zhaojia",
+    "swordsman_juhe"
+  ],
+  "sword_qi_config": {
+    "qi_max": 100,
+    "qi_initial": 0,
+    "mark_max": 3,
+    "crit_per_qi": 2,
+    "qi_per_crit_pct": 10,
+    "qi_ratio_threshold_pct": 50,
+    "low_qi_stat_key": "SPD",
+    "low_qi_stat_bonus": 2,
+    "high_qi_stat_key": "DEX",
+    "high_qi_stat_bonus": 2,
+    "mark_dex_bonus": 2,
+    "mark_spd_bonus": 2,
+    "mark_str_bonus": 2
+  },
+  "description": "剑士（日本剑道线下位职业）。近战物理，成长偏技巧，是剑圣与剑仙的前置职业。共享剑气与剑意印记资源，可用斩击、一闪、招架、居合，并持有心眼被动；奥义「拔刀」为剑圣专属，不在本职业技能表内（槽位替换会因拔刀不在本职业 skill_ids 内而不生效）。心眼：每 10 点剑气 → 暴击 +2；剑气不高于上限 50% 时速度 +2，高于时技巧 +2。",
+  "_note": "[已定] growth_rates 全部七项依据设计库 myrmidon stat_tiers（HP B / STR B / MAG C / DEX A / SPD B / DEF B / RES C）按 R2.3 档位标尺 C=40/B=50/A=60/S=75 换算（2026-08-03）。[占位] base_stats 与 MOV 直接沿用 kensei 当前值，仅为保证两者同标度可比，并非「剑士与剑圣本体属性相同」的设计结论；kensei 自身的 base_stats 也仍是测试占位值（HP 28 量级），与 KB 属性档位标度（HP 90 量级）尚未统一，待标度统一后与 kensei 一并重标定。[已定] 心眼五项（crit_per_qi / qi_per_crit_pct / qi_ratio_threshold_pct / low_qi_stat_* / high_qi_stat_*）于 2026-08-03 按设计库 myrmidon_xinyan 现行口径实装：每 10 点剑气 → 暴击 +2；剑气 ≤ 上限 50% 时速度 +2，>50% 时技巧 +2。旧键 speed_threshold / speed_bonus 已删除。[占位] 印记三项加成（mark_*_bonus）沿用 kensei，是否应在下位职业上弱于剑圣，设计侧尚未裁决。[占位] weapon_id 暂借用 wpn_swordsman_starter（名为「剑圣初始太刀」），未新建剑士专属起始武器，以免引入未经裁决的武器数值。"
+}

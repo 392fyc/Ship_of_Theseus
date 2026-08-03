@@ -243,7 +243,7 @@ func _test_damage_mult(dl: Object) -> void:
 func _test_assembler(dl: Object, ba: GDScript) -> void:
 	print("\n[6] BattleAssembler.build")
 	var pools: Dictionary = {"maps": dl.maps, "waves": dl.waves}
-	var roster: Array = [{"class_id": "swordsman", "level": 1}, {"class_id": "soldier"}]
+	var roster: Array = [{"class_id": "kensei", "level": 1}, {"class_id": "soldier"}]
 	var result: Dictionary = ba.build("test_arena", "wave_act1_elite_01", roster, pools)
 	_eq("map_id 透传", result["map_id"], "test_arena")
 	# 敌人清单（含词条）
@@ -266,7 +266,7 @@ func _test_assembler(dl: Object, ba: GDScript) -> void:
 	# 玩家站位来自地图 spawns [[0,2],[0,3],[1,2]]
 	var players: Array = result["player_units"]
 	_eq("玩家数==2", players.size(), 2)
-	_eq("玩家0 class_id==swordsman", players[0]["class_id"], "swordsman")
+	_eq("玩家0 class_id==kensei", players[0]["class_id"], "kensei")
 	_eq("玩家0 pos==(0,2)", players[0]["pos"], Vector2i(0, 2))
 	_eq("玩家0 level==1", players[0]["level"], 1)
 	_eq("玩家1 class_id==soldier", players[1]["class_id"], "soldier")

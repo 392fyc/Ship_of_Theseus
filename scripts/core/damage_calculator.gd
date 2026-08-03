@@ -77,8 +77,11 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	var final_dmg: float = base_damage * skill_multiplier * terrain_multiplier
 
 	if result.crit:
-		# crit_damage_bonus：拔刀额外暴击倍率（叠加到 1.5x 基础上）
-		var crit_mult: float = 1.5 + float(action_data.get("crit_damage_bonus", 0.0))
+		# R1.3 暴击倍率 = (1.5 + Σ 加算 crit_damage_bonus) × Π 乘算 crit_damage_mult，
+		# 加算先于乘算。crit_damage_mult 默认 1.0 → 无乘算修正时与引入本通道前完全一致。
+		# 例：拔刀「暴击倍率 ×1.2」是乘算 → 1.5 × 1.2 = 1.8（2026-08-03 用户裁决 F [已定]）。
+		var crit_mult: float = (1.5 + float(action_data.get("crit_damage_bonus", 0.0))) \
+			* float(action_data.get("crit_damage_mult", 1.0))
 		final_dmg *= crit_mult
 
 	final_dmg *= relic_multiplier * final_multiplier
@@ -96,7 +99,8 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	final_dmg *= float(action_data.get("affix_defense_multiplier", 1.0))
 
 	# ── Step 5: Calculate final damage (caller applies) ─
-	result.damage = maxi(0, roundi(final_dmg))
+	# R1.8：中间量不取整，最终量向下取整；下限 0 在最外层生效。
+	result.damage = maxi(0, floori(final_dmg))
 	result.defender_died = defender.stats.hp <= result.damage
 
 	return result
@@ -148,7 +152,8 @@ static func preview_attack(attacker: Unit, defender: Unit,
 	# afs_bulwark 防御乘区（与 resolve_attack 一致，保证 forecast == 实际伤害）。
 	final_damage *= float(action_data.get("affix_defense_multiplier", 1.0))
 
-	var dmg_int: int = maxi(0, roundi(final_damage))
+	# R1.8：与 resolve_attack 一致向下取整，保证 forecast == 实际伤害。
+	var dmg_int: int = maxi(0, floori(final_damage))
 	return {
 		"hit_percent": clampi(roundi(hit_rate * 100.0), 0, 100),
 		"crit_percent": clampi(roundi(crit_rate * 100.0), 0, 100),
@@ -173,7 +178,9 @@ static func _calc_base_damage(attacker: Unit, defender: Unit,
 	## physical:  max(0, STR + weapon_might - DEF)
 	## magical:   max(0, MAG + weapon_might - RES)
 	## pure:      [source] + weapon_might  (ignores defense)
-	## hybrid:    max(0, (STR+MAG) + hybrid_might - min(DEF,RES))  ⚠️ TBD (ADR-006)
+	## hybrid:    ( max(0, STR + weapon_might - DEF) + max(0, MAG + weapon_might - RES) ) / 2
+	##            物理与魔法各按 R1.1 各算一次（各自带自己的地板），再取算术平均。
+	##            2026-08-03 用户裁决 A [已定]，取代旧的 min(DEF,RES) 占位写法。
 	var base: float = 0.0
 	var defender_def: int = defender.get_effective_stat("DEF") + terrain_def_bonus
 	var defender_res: int = defender.get_effective_stat("RES") + terrain_res_bonus
@@ -197,11 +204,16 @@ static func _calc_base_damage(attacker: Unit, defender: Unit,
 			base = raw + float(weapon_might)
 			return base  # pure ignores defense
 		"hybrid":
-			# ⚠️ TBD — placeholder per ADR-005 §4.2. Awaiting ADR-006.
-			var both_atk: float = float(
-				attacker.get_effective_stat("STR") + attacker.get_effective_stat("MAG"))
-			var weaker_def: float = float(mini(defender_def, defender_res))
-			base = both_atk + float(weapon_might) - weaker_def
+			# 裁决 A（2026-08-03 [已定]）：物理与魔法各按 R1.1 各算一次（各自带自己的
+			# max(0,·) 地板），再取算术平均。
+			# ⚠️ 这不等于「一次性减去平均防御」——只要有一侧被地板截断，两种写法结果就不同，
+			# 所以必须在分支内先各自取地板再平均，不能落到函数末尾那个统一地板
+			# （那条路径是「先平均再取地板」，与裁决不符）。
+			var phys_part: float = maxf(0.0, float(
+				attacker.get_effective_stat("STR") + weapon_might - defender_def))
+			var mag_part: float = maxf(0.0, float(
+				attacker.get_effective_stat("MAG") + weapon_might - defender_res))
+			return (phys_part + mag_part) / 2.0
 	return maxf(0.0, base)
 
 

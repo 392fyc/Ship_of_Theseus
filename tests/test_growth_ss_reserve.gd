@@ -2,7 +2,8 @@ extends SceneTree
 ## growth_rates 新标定 + SS 档预留 —— 2026-07-07 建 / 2026-07-12 语义定稿（用户裁决 [已定]）
 ##
 ## 覆盖：
-##   1. swordsman.json growth_rates 新标定（DEX75 / HP50 / STR50 / DEF50 / MAG40 / RES40；LCK 已移除）。
+##   1. kensei.json growth_rates 新标定（DEX75 / STR60 / HP50 / DEF50 / MAG40 / RES40；LCK 已移除）。
+##      STR 于 2026-08-03 由 B 档(50) 改 A 档(60)，见用户裁决 C [已定]。
 ##   2. SS 档预留（unit_stats.load_growth_rates 的 ss_stats 参数 + level_up SS 分支）：
 ##      SS 档属性每级**仅判定一次** S 率，成功 +2、失败保底 +1（最少 +1、至多 +2；
 ##      S=75% 期望 +1.75），每级必有成长、pity 恒重置；剑圣无 SS 属性（纯预留、恒不触发）。
@@ -11,7 +12,7 @@ extends SceneTree
 ## 运行：<Godot_console.exe> --headless --path D:/ShipOfTheseus/Ship_of_Theseus \
 ##   --script res://tests/test_growth_ss_reserve.gd  （退出码 0=全过）
 
-const SWORDSMAN_JSON: String = "res://data/classes/swordsman.json"
+const KENSEI_JSON: String = "res://data/classes/kensei.json"
 const UNIT_STATS: String = "res://scripts/units/unit_stats.gd"
 
 var _pass: int = 0
@@ -42,14 +43,15 @@ func _run() -> void:
 
 # ── 1. growth_rates 新标定（任务1）─────────────────────
 func _test_growth_rates_calibration() -> void:
-	var cfg: Variant = _load_json(SWORDSMAN_JSON)
-	_check("swordsman.json 可解析为 Dictionary", cfg is Dictionary)
+	var cfg: Variant = _load_json(KENSEI_JSON)
+	_check("kensei.json 可解析为 Dictionary", cfg is Dictionary)
 	if not (cfg is Dictionary):
 		return
 	var gr: Dictionary = (cfg as Dictionary).get("growth_rates", {})
 	_eq("growth DEX==75", int(gr.get("DEX", -1)), 75)
 	_eq("growth HP==50", int(gr.get("HP", -1)), 50)
-	_eq("growth STR==50", int(gr.get("STR", -1)), 50)
+	# STR 于 2026-08-03 由 B 档(50) 改 A 档(60)（用户裁决 C [已定]）。
+	_eq("growth STR==60", int(gr.get("STR", -1)), 60)
 	_eq("growth DEF==50", int(gr.get("DEF", -1)), 50)
 	_eq("growth MAG==40", int(gr.get("MAG", -1)), 40)
 	_eq("growth RES==40", int(gr.get("RES", -1)), 40)
@@ -58,10 +60,10 @@ func _test_growth_rates_calibration() -> void:
 
 # ── 2. 剑圣无 SS 属性（纯预留、不触发）──────────────────
 func _test_swordsman_no_ss() -> void:
-	var cfg: Variant = _load_json(SWORDSMAN_JSON)
+	var cfg: Variant = _load_json(KENSEI_JSON)
 	if not (cfg is Dictionary):
 		return
-	_check("swordsman.json 不含 ss_growth_stats（剑圣无 SS 属性）",
+	_check("kensei.json 不含 ss_growth_stats（剑圣无 SS 属性）",
 		not (cfg as Dictionary).has("ss_growth_stats"))
 	# 空 ss_stats 时 level_up 行为与无参调用一致（单判定，现状不变）：
 	var s: Object = load(UNIT_STATS).new()

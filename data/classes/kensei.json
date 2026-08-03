@@ -1,0 +1,53 @@
+{
+  "id": "kensei",
+  "name": "剑圣",
+  "base_stats": {
+    "HP": 28,
+    "STR": 10,
+    "MAG": 2,
+    "DEX": 9,
+    "SPD": 8,
+    "LCK": 5,
+    "DEF": 5,
+    "RES": 4
+  },
+  "growth_rates": {
+    "HP": 50,
+    "STR": 60,
+    "MAG": 40,
+    "DEX": 75,
+    "SPD": 60,
+    "DEF": 50,
+    "RES": 40
+  },
+  "MOV": 4,
+  "attack_type": "melee",
+  "weapon_id": "wpn_swordsman_starter",
+  "damage_type": "physical",
+  "basic_attack_qi_gain": 10,
+  "basic_attack_range": { "min": 1, "max": 1 },
+  "skill_ids": [
+    "swordsman_zhanji",
+    "swordsman_yishan",
+    "swordsman_zhaojia",
+    "swordsman_juhe",
+    "swordsman_badao"
+  ],
+  "sword_qi_config": {
+    "qi_max": 100,
+    "qi_initial": 0,
+    "mark_max": 3,
+    "crit_per_qi": 2,
+    "qi_per_crit_pct": 10,
+    "qi_ratio_threshold_pct": 50,
+    "low_qi_stat_key": "SPD",
+    "low_qi_stat_bonus": 2,
+    "high_qi_stat_key": "DEX",
+    "high_qi_stat_bonus": 2,
+    "mark_dex_bonus": 2,
+    "mark_spd_bonus": 2,
+    "mark_str_bonus": 2
+  },
+  "description": "剑圣（日本剑道线）。高速高暴击近战。本体属性为测试占位值，待数值调校。剑气标度 0-100。心眼：每 qi_per_crit_pct（10）点剑气 → 暴击 +crit_per_qi（2，向下取整，满气 +20）；剑气不高于上限的 qi_ratio_threshold_pct%（50%）时 low_qi_stat_key（速度 SPD）+low_qi_stat_bonus（2），高于时 high_qi_stat_key（技巧 DEX）+high_qi_stat_bonus（2）。三印记加成各 +2（mark_*_bonus，均可调）。",
+  "_note": "[已定] SPD growth_rate=60（A档）为剑圣（剑士线转职后）确认值，由旧固定值档 B→A 字母平移而来（Mercury 确认，2026-07-08）。[已定] STR growth_rate 由 50（B档）改为 60（A档），依据用户裁决（2026-08-03）；R2.3 档位标尺 A=60%。其余属性初始值仍为占位，待设计侧标定。[已定] 心眼数值于 2026-08-03 按设计库 kensei_xinyan / myrmidon_xinyan 现行口径实装：暴击由「每 10 点 +1」改为「每 10 点 +2」；速度加成由「剑气 ≥70 时 +1」的单一阈值改为「剑气 ≤ 上限 50% 时速度 +2，>50% 时技巧 +2」的比例分档，旧键 speed_threshold / speed_bonus 已删除，不与新键并存。"
+}

@@ -18,7 +18,7 @@ extends SceneTree
 
 const INJECT_MAP: String = "forest_01"
 const INJECT_SCALE: float = 1.35
-const WORN_HP: int = 3  # 注入磨损 HP（swordsman base HP=28，3<28 → 不满血入场）
+const WORN_HP: int = 3  # 注入磨损 HP（kensei base HP=28，3<28 → 不满血入场）
 
 var _pass: int = 0
 var _fail: int = 0
@@ -44,9 +44,9 @@ func _run() -> void:
 	scene.run_injected = true
 	scene.debug_harness_enabled = false
 	scene.injected_map_id = INJECT_MAP
-	# HP 继承注入（磨损模型 #8）：swordsman 带 hp=3（<max_hp=28）→ 应不满血入场（stats.hp==3）。
+	# HP 继承注入（磨损模型 #8）：kensei 带 hp=3（<max_hp=28）→ 应不满血入场（stats.hp==3）。
 	scene.injected_player_units = [
-		{"class_id": "swordsman", "pos": Vector2i(0, 2), "level": 1, "hp": WORN_HP},
+		{"class_id": "kensei", "pos": Vector2i(0, 2), "level": 1, "hp": WORN_HP},
 	]
 	# 缩放敌（含基础词条 + 特殊词条 + 数值增强）与 参照敌（无词条、scale=1.0）同 class。
 	scene.injected_enemy_units = [
@@ -85,7 +85,7 @@ func _run() -> void:
 	_eq("玩家单位 spawn 1 个", players.size(), 1)
 	_eq("敌人单位 spawn 2 个", enemies.size(), 2)
 	if players.size() >= 1:
-		_check("玩家单位为 swordsman", str(players[0].unit_id) == "swordsman",
+		_check("玩家单位为 kensei", str(players[0].unit_id) == "kensei",
 			"unit_id=%s" % str(players[0].unit_id))
 		_check("玩家不注入词条（has_affix 为假）",
 			not players[0].has_affix("af_heal_resist"))
@@ -144,7 +144,7 @@ func _run_hp_dead_case() -> void:
 	scene2.debug_harness_enabled = false
 	scene2.injected_map_id = INJECT_MAP
 	scene2.injected_player_units = [
-		{"class_id": "swordsman", "pos": Vector2i(0, 2), "level": 1, "hp": 0},
+		{"class_id": "kensei", "pos": Vector2i(0, 2), "level": 1, "hp": 0},
 	]
 	scene2.injected_enemy_units = [
 		{"class_id": "goblin_melee", "pos": Vector2i(6, 4)},

@@ -1,0 +1,2173 @@
+{
+  "summary": "SoT 战斗 UI 美术美化研究先行：6维并行调研 Godot 生态可复用资源/做法 → 对抗核验许可证与原生绘制边界 → 综合4-5套风格方向",
+  "agentCount": 10,
+  "logs": [
+    "调研完成：6/6 维度返回",
+    "核验完成：3/3 项"
+  ],
+  "result": {
+    "research": [
+      {
+        "dimension": "Godot 4.6.1 主题系统能力边界与最佳实践",
+        "summary": "Godot 4.6.1 的主题系统由 Theme 资源、StyleBox 家族（Flat/Texture/Line/Empty）、Control 节点局部覆盖（add_theme_*_override）以及 CanvasItem 的 _draw 自绘能力共同构成。集中式 Theme 资源加类型变体（type variation）是个人开发者可维护的工程路径；StyleBoxFlat 可处理绝大多数程序化样式需求，但天然不支持双色描边，需叠层 Panel 或 StyleBoxTexture 九宫格补偿；_draw 自绘与主题系统可通过 get_theme_stylebox / draw_style_box 桥接，是最灵活但也最需要纪律的方案；CJK 字体必须显式嵌入并建立回退链，不能依赖系统字体兜底（发行版无法保证）。Godot 4.6 在主题/UI 方向对游戏开发者有实质影响的新增点为：鼠标焦点与键盘焦点视觉解耦（不再强制蓝框）、pivot_offset_ratio 比例锚点，以及已知的全局主题热更新延迟 bug（需手动切换标签页触发）。主题查找链优先级从高到低：节点局部覆盖 → 祖先链 Theme 资源（type_variation 优先，再类名链）→ 项目全局主题 → 引擎默认主题。",
+        "findings": [
+          {
+            "claim": "主题传播机制：Theme 资源向下级联，局部覆盖不传播",
+            "detail": "将 Theme 资源赋给某个 Control 节点后，该节点及其所有直接/间接子节点（只要 Control 链不中断）均受此主题影响。查找链优先级从高到低：①节点自身的 add_theme_*_override 局部覆盖（只影响该节点，不传播）；②沿祖先链找到第一个有 Theme 资源的 Control，在其 Theme 内按 type_variation（若已设）→ 变体 baseType 链 → 类名继承链的顺序查找；③项目设置 GUI/Theme/Custom 全局主题；④引擎内置默认主题。任何层都找不到时返回类型默认值而非报错。关键坑：Theme 覆盖（add_theme_*_override）是节点私有的，不会沿树向下传播，只有 Theme 资源才会传播。个人开发者若在根控件节点挂一个 .tres 主题文件，全场景均受影响，是最省力的统一入口。已知 bug（4.x 至 4.6 未完全修复）：主题被设置在 Project Settings 层级（全局主题）时，编辑器内调整后不立即更新预览，需手动切换场景标签页或重新加载；若挂在根 Control 节点上则没有此问题。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/tutorials/ui/gui_skinning.html",
+              "https://docs.godotengine.org/en/stable/tutorials/ui/gui_theme_type_variations.html",
+              "https://github.com/godotengine/godot/issues/79319",
+              "https://bugnet.io/blog/fix-godot-theme-override-not-applying"
+            ]
+          },
+          {
+            "claim": "add_theme_*_override 与集中式 Theme 资源的工程取舍",
+            "detail": "局部覆盖（add_theme_stylebox_override / add_theme_color_override / add_theme_font_override / add_theme_constant_override）适合运行时动态改变单个节点的样式（如技能槽选中时加金边），不影响其他同类控件；但大量散落在代码中的局部覆盖会变成调试噩梦，编辑器 Theme Debugger 面板可可视化「哪条覆盖赢了」。集中式 Theme 资源（.tres 文件）适合定义全局风格底座：所有 Button 的 normal/hover/pressed/disabled 样式、所有 Label 的字体和颜色等；改一处全场景生效。个人开发者推荐策略：用一个全局 Theme 资源定义底座（挂在根 Control 或 Project Settings），运行时仅对需要特殊状态的节点用 add_theme_*_override，避免两种机制混用导致优先级混乱。注意：Theme 项目不是 Object 属性，不能用 Object.get() / Object.set() 访问，必须用专用的 get_theme_* / add_theme_*_override 方法。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/classes/class_control.html",
+              "https://docs.godotengine.org/en/stable/classes/class_theme.html",
+              "https://docs.godotengine.org/en/stable/tutorials/ui/gui_using_theme_editor.html"
+            ]
+          },
+          {
+            "claim": "类型变体（type variation）：一套控件、多种样式",
+            "detail": "type variation 允许在同一个 Theme 资源内定义多个具名样式，每个样式继承某个基础控件类型（如 Button）但可选择性覆盖部分属性。用法：在 Theme 编辑器点击类型列表旁的加号，输入变体名（如 GoldButton），在属性 Tab 设置 Base Type 为 Button，然后只覆盖需要改变的属性（如 border_color）。应用：在 Inspector 里找到 Control 节点的 Theme Type Variation 字段，输入变体名。变体可以嵌套（变体的 baseType 本身也可以是另一个变体）。技能栏的「选中态/不可用态/普通态」可以用三个变体处理，避免代码里做条件分支切换 StyleBox。已知局限：变体名在编辑器中是字符串类型，拼写错误不报错，只会静默回退到基础类型；自定义脚本类的控件目前没有官方方法注册自己的 theme 属性列表到编辑器提示（提案 #3257 中有讨论但未实现）。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/tutorials/ui/gui_theme_type_variations.html",
+              "https://github.com/godotengine/godot-proposals/issues/3257"
+            ]
+          },
+          {
+            "claim": "StyleBoxFlat 能做什么、不能做什么",
+            "detail": "能做：单色填充背景（bg_color）、每边独立宽度描边（border_width_top/bottom/left/right，同一颜色 border_color）、每角独立圆角（corner_radius_*）、阴影（shadow_color / shadow_offset / shadow_size，shadow_size < 1 时无效）、水平/垂直斜切（skew，正值向右/上偏斜，适合科幻风格按钮）、抗锯齿边缘（anti_aliasing，圆角和斜切时最明显）、可控制中心填充是否绘制（draw_center=false 可做镂空边框效果）、每边独立的内容边距（expand_margin_* 可让 StyleBox 超出控件边界绘制，用于阴影不裁剪）。不能做（关键限制）：①描边只有单一颜色，不能做双色描边（如外金内黑）——这是 SoT 目标风格的核心需求，StyleBoxFlat 原生不支持，提案 #4948/#6812 讨论多年但截至 4.6 未合并；②无渐变背景（只有纯色）；③描边颜色不能按边（上/下/左/右）单独设置；④不能内嵌纹理/噪点。corner_detail 影响圆角平滑度（默认 8 顶点/角），半径 <10px 建议 4-5，<30px 建议 8-12；倒角（45 度，corner_detail=1）时应关闭 anti_aliasing 避免视觉故障。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/classes/class_styleboxflat.html",
+              "https://github.com/godotengine/godot-proposals/issues/6812",
+              "https://github.com/godotengine/godot-proposals/issues/4948",
+              "https://forum.godotengine.org/t/multiple-border-colours-in-a-styleboxflat/66889"
+            ]
+          },
+          {
+            "claim": "双色描边的补偿方案：三种可行路径",
+            "detail": "路径一（叠层 Panel，纯程序化）：外层 Panel 用 StyleBoxFlat 设外框色（金色），内层 Panel 用 StyleBoxFlat 设内框色（深色），通过 expand_margin / 手动 padding 拉开间距产生视觉双色描边效果。无需贴图，完全程序化，控件层级稍深但可接受。路径二（StyleBoxTexture 九宫格）：用图像编辑工具（或 Aseprite）绘制一张小尺寸双色框贴图（如 32×32px），导入后创建 StyleBoxTexture，设 texture_margin_* 定义九宫格边界，控件拉伸时角部保持原样、边缘延伸。axis_stretch_horizontal/vertical 可选 STRETCH（变形）、TILE（平铺）、TILE_FIT（自适应平铺）。路径三（_draw 自绘两次 draw_rect）：在自定义控件 _draw 方法中先画大矩形（外框色），再画略小矩形（内框色），两者厚度差即内外双色描边。完全矢量，无贴图依赖，但维护在代码里。对于 SoT 暗黑华丽风（金属双色描边），路径三或路径二最接近目标效果；路径一最省事但层级管理较繁。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/classes/class_styleboxflat.html",
+              "https://docs.godotengine.org/en/stable/classes/class_styleboxtexture.html",
+              "https://github.com/godotengine/godot-proposals/issues/6812"
+            ]
+          },
+          {
+            "claim": "StyleBoxTexture 九宫格用法与能力",
+            "detail": "StyleBoxTexture 通过 texture_margin_top/bottom/left/right 将贴图分为 3×3 格：四角保持原比例不变形，四边和中心按 axis_stretch 模式处理。三种拉伸模式：AXIS_STRETCH_MODE_STRETCH（整体拉伸，适合渐变边框），AXIS_STRETCH_MODE_TILE（平铺，适合花纹描边），AXIS_STRETCH_MODE_TILE_FIT（按整数倍平铺再缩放，保持纹素比）。region_rect 属性可从图集（AtlasTexture）中截取子区域，支持多个 StyleBox 共用一张图集。modulate_color 可对贴图叠加颜色调制，可用于不可用态变灰而不必另存一张贴图。draw_center=false 可做镂空边框而不绘制中心。相比 StyleBoxFlat 的优势：可做贴图描边（金属质感、石质双色、噪点纹理）；相比的劣势：依赖外部贴图资源，修改需重新做图。对于 SoT 的「金属/石质双色描边+暗底渐变+微噪点」目标，StyleBoxTexture 是最直接的实现路径。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/classes/class_styleboxtexture.html"
+            ]
+          },
+          {
+            "claim": "StyleBoxLine 能力（仅适用分隔线场景）",
+            "detail": "StyleBoxLine 极其简单：color（颜色）、thickness（像素厚度，int）、vertical（水平/垂直布尔）、grow_begin/grow_end（向边界外延伸的像素数）。仅用于做单色实线分隔符，无圆角、无阴影、无双色，不适合 SoT 任何主要 UI 组件。可在底栏仪表盘内部做属性格之间的分隔线时考虑使用。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/classes/class_styleboxline.html"
+            ]
+          },
+          {
+            "claim": "自定义控件 _draw 与主题系统的协作方式",
+            "detail": "_draw 方法是 CanvasItem 的绘制回调，每次 queue_redraw() 后在空闲时间触发一次，绘制命令被缓存直到下次重绘。draw_* 方法只能在 _draw / NOTIFICATION_DRAW 回调 / 连接到 draw 信号的函数内调用，否则报错。与主题系统的桥接：在自定义 Control 子类中调用 get_theme_stylebox(name, theme_type) 取出 StyleBox 资源，再调用 draw_style_box(stylebox, rect) 绘制，这样样式数据仍由外部 Theme 资源控制，代码只负责布局逻辑。get_theme_color / get_theme_font / get_theme_constant 同理，使自定义控件的视觉参数可被 Theme 系统统一管理。StyleBox 的 get_minimum_size() 方法返回 StyleBox 要求的最小绘制尺寸（由 content_margin_* 决定），可用于 _get_minimum_size() 的计算中确保控件不被压缩到内容溢出。重绘时机建议：属性 setter 内调用 queue_redraw()；连续动画（如冷却扇形遮罩）在 _process 内每帧调用 queue_redraw()，但注意性能——非动画 UI 只在状态变化时重绘。@tool 注解可让 _draw 在编辑器中预览。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html",
+              "https://docs.godotengine.org/en/stable/classes/class_canvasitem.html",
+              "https://docs.godotengine.org/en/stable/classes/class_control.html"
+            ]
+          },
+          {
+            "claim": "CanvasItem _draw 绘制能力全景（Godot 4.6 stable）",
+            "detail": "线条类：draw_line（单线段，支持抗锯齿）、draw_dashed_line（虚线）、draw_polyline（折线，支持逐顶点颜色渐变）、draw_polyline_colors（折线+各顶点颜色）、draw_multiline（多段不连通线，整体单色）、draw_multiline_colors（多段不连通线+各段颜色）。形状类：draw_rect（矩形，填充或描边，支持抗锯齿）、draw_circle（圆形，填充或描边，支持抗锯齿）、draw_arc（圆弧，支持抗锯齿，可控制点数）、draw_ellipse / draw_ellipse_arc（椭圆，Godot 4.x 新增）、draw_polygon（多边形，支持逐顶点颜色和 UV+贴图）、draw_colored_polygon（带贴图 UV 的彩色多边形）、draw_primitive（底层图元）、draw_mesh / draw_multimesh（网格）。文字类：draw_string / draw_string_outline（单行文字+轮廓）、draw_multiline_string / draw_multiline_string_outline（多行+轮廓）、draw_char / draw_char_outline（单字符）。贴图类：draw_texture（最简单贴图）、draw_texture_rect（矩形区域+平铺选项）、draw_texture_rect_region（从图集截取区域）、draw_lcd_texture_rect_region（LCD 次像素文字）、draw_msdf_texture_rect_region（MSDF 距离场文字，支持 outline/scale 参数）。工具类：draw_style_box（绘制 StyleBox 资源）、draw_set_transform / draw_set_transform_matrix（变换矩阵）、draw_animation_slice / draw_end_animation（动画切片）。重要限制：_draw 本身无原生渐变绘制方法（无 draw_gradient_rect），需借助 Gradient/GradientTexture2D + draw_texture_rect 或逐顶点颜色多边形模拟；原生不支持模糊/光晕（需 shader 或 CanvasLayer+BackBufferCopy）。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/classes/class_canvasitem.html",
+              "https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html"
+            ]
+          },
+          {
+            "claim": "Godot 4.6 相对 4.3/4.4/4.5 在主题/UI 方向的实质变更",
+            "detail": "1. 鼠标焦点与键盘焦点视觉解耦（4.6 新增）：点击按钮不再强制显示蓝色键盘焦点框，两种焦点的视觉样式现在独立控制。对游戏 UI 意义重大：技能槽鼠标悬停和键盘选中可以有完全不同的视觉反馈，不必担心鼠标点击后残留焦点框。2. pivot_offset_ratio 比例锚点（4.6 新增）：Control 节点新增 pivot_offset_ratio 属性，用 0-1 归一化坐标表示旋转/缩放锚点，设 Vector2(0.5, 0.5) 即始终居中，无需代码中重新计算 size/2。对技能槽缩放动画很实用。3. Modern 编辑器主题（4.6 集成）：原 Godot Minimal Theme 社区插件已作为 Modern 主题合入编辑器默认；这仅影响编辑器界面，游戏项目 UI 不受影响（游戏运行时使用的是游戏自己设定的 Project Theme，不是编辑器主题）。注意：部分用户在 4.6.1 中发现新主题无法直接应用到游戏控件，原因通常是未将主题资源保存到磁盘或未正确赋给根 Control 节点。4. live resource preview（4.6）：在快速打开对话框中可以实时预览贴图/StyleBox 等资源，加速迭代。5. 主题/StyleBox 的底层 API（Flat/Texture/Line 属性集）在 4.3→4.6 之间无重大结构性变更，skew 属性在更早版本（4.1 左右）已存在。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://godotengine.org/releases/4.6/",
+              "https://80.lv/articles/godot-4-6-s-third-development-snapshot-released",
+              "https://www.gdquest.com/library/godot_4_6_workflow_changes/",
+              "https://forum.godotengine.org/t/godot-4-6-1-how-to-use-the-new-theme-in-a-project/134158"
+            ]
+          },
+          {
+            "claim": "CJK 字体支持：必须显式嵌入，不能依赖系统字体兜底",
+            "detail": "Godot 引擎在编辑器模式下会自动使用系统字体作为最终兜底，因此 CJK 汉字在开发机上通常能显示。但发行版（导出的游戏包）不包含系统字体，若没有显式嵌入 CJK 字体，汉字将显示为方块或完全消失。正确做法：将 TTF/OTF/WOFF 格式的 CJK 字体文件放入项目，在主字体（可以是任意拉丁字体）的 Advanced Import Settings 中添加 Fallbacks 数组，将 CJK 字体设为回退；或直接以 CJK 字体为主字体。商用注意：字体有版权，发行前必须核实许可证。SIL OFL 1.1 是最宽松的开源字体许可证，允许商用和分发（包括嵌入游戏）；部分中文字体（如思源宋体/思源黑体，Noto Sans/Serif CJK，OFL 授权）可安全商用。godot-font-baker 插件可将 TTF bake 为 MSDF 图集（.fontdata），在许可证允许的前提下可减小包体并规避部分许可证对「原始字体文件」分发的限制。字体渲染模式：Dynamic（矢量，任意尺寸清晰）> MSDF（任意尺寸清晰但小字号效果差）> Bitmap（固定分辨率，小包体但缩放失真）；游戏 UI 推荐 Dynamic 或 MSDF。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/tutorials/ui/gui_using_fonts.html",
+              "https://github.com/shiena/godot-font-baker"
+            ]
+          },
+          {
+            "claim": "个人开发者常见坑汇总",
+            "detail": "坑1——共享 StyleBox 资源被意外污染：若在 Theme 内两个状态（如 normal 和 hover）错误地引用了同一个 StyleBox 对象，运行时修改其中一个会影响另一个；编辑器内「复制粘贴」StyleBox 实际上创建了副本（不共享），但代码中 duplicate(true) 才能深拷贝。建议在 Theme 中为每个状态都创建独立 StyleBox 实例。坑2——项目全局主题热更新延迟（4.6 已知 bug）：Project Settings 层级设置的全局主题在编辑器中修改后不立即刷新预览，需手动切换场景标签页。绕过方法：改为在每个场景根 Control 节点赋 Theme 资源。坑3——局部覆盖优先级意外覆盖主题：用 add_theme_*_override 设置后忘记清除，即使后来换了全局 Theme 也不生效，因局部覆盖优先级最高；用 remove_theme_*_override 或 reset_size 清除。坑4——StyleBoxFlat 阴影被 clip_children 裁剪：若父容器开启了 clip_children，StyleBox 的 shadow 和 border（通过 expand_margin 超出控件边界的部分）会被裁剪，需在父容器外一层绘制或用 CanvasGroup。坑5——type_variation 拼写错误静默失败：变体名是字符串，拼错不报错，只会静默回退到基础类型；建议用常量或枚举管理变体名字符串。坑6——corner_detail 过高的性能问题：大量 StyleBoxFlat 同时设置高 corner_detail 会增加 CPU 计算量；圆角半径 <10px 建议 4-5，<30px 建议 8-12，超过 30px 才需要默认 8 或更高。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/classes/class_styleboxflat.html",
+              "https://github.com/godotengine/godot/issues/79319",
+              "https://github.com/godotengine/godot/issues/80797",
+              "https://bugnet.io/blog/fix-godot-theme-override-not-applying"
+            ]
+          }
+        ],
+        "resources": [
+          {
+            "name": "Godot 4 StyleBoxFlat 官方文档",
+            "url": "https://docs.godotengine.org/en/stable/classes/class_styleboxflat.html",
+            "license": "CC BY 3.0",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "notes": "官方 API 参考，涵盖所有属性含义、限制说明（corner_detail 性能、skew 文字边距、anti_aliasing 注意事项）",
+            "cjk_support": "N/A（API 文档）"
+          },
+          {
+            "name": "Godot 4 StyleBoxTexture 官方文档",
+            "url": "https://docs.godotengine.org/en/stable/classes/class_styleboxtexture.html",
+            "license": "CC BY 3.0",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "notes": "九宫格用法、axis_stretch 三种模式、region_rect 图集截取",
+            "cjk_support": "N/A"
+          },
+          {
+            "name": "Godot 4 Theme 类型变体教程",
+            "url": "https://docs.godotengine.org/en/stable/tutorials/ui/gui_theme_type_variations.html",
+            "license": "CC BY 3.0",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "notes": "详细说明如何创建/应用 type variation，变体继承链规则",
+            "cjk_support": "N/A"
+          },
+          {
+            "name": "Godot 4 自定义 2D 绘制教程",
+            "url": "https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html",
+            "license": "CC BY 3.0",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "notes": "_draw 工作流、queue_redraw、绘制命令列表、@tool 编辑器预览",
+            "cjk_support": "N/A"
+          },
+          {
+            "name": "Godot 4 字体使用教程",
+            "url": "https://docs.godotengine.org/en/stable/tutorials/ui/gui_using_fonts.html",
+            "license": "CC BY 3.0",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "notes": "CJK 字体回退链设置、Dynamic/MSDF/Bitmap 对比、商用许可证注意",
+            "cjk_support": "详细说明"
+          },
+          {
+            "name": "godot-font-baker（CJK MSDF 图集 bake 工具）",
+            "url": "https://github.com/shiena/godot-font-baker",
+            "license": "MIT",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "notes": "将 TTF/OTF bake 为 MSDF 字形图集，规避部分字体许可证对原始文件分发的限制；bake 后无 HarfBuzz 复杂排版，但 CJK 1:1 字符映射不受影响",
+            "cjk_support": "支持 CJK，bake 时需指定字符集"
+          }
+        ],
+        "sources": [
+          "https://docs.godotengine.org/en/stable/classes/class_styleboxflat.html",
+          "https://docs.godotengine.org/en/stable/classes/class_styleboxtexture.html",
+          "https://docs.godotengine.org/en/stable/classes/class_styleboxline.html",
+          "https://docs.godotengine.org/en/stable/classes/class_stylebox.html",
+          "https://docs.godotengine.org/en/stable/classes/class_theme.html",
+          "https://docs.godotengine.org/en/stable/classes/class_control.html",
+          "https://docs.godotengine.org/en/stable/classes/class_canvasitem.html",
+          "https://docs.godotengine.org/en/stable/tutorials/ui/gui_skinning.html",
+          "https://docs.godotengine.org/en/stable/tutorials/ui/gui_theme_type_variations.html",
+          "https://docs.godotengine.org/en/stable/tutorials/ui/gui_using_theme_editor.html",
+          "https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html",
+          "https://docs.godotengine.org/en/stable/tutorials/ui/gui_using_fonts.html",
+          "https://godotengine.org/releases/4.6/",
+          "https://www.gdquest.com/library/godot_4_6_workflow_changes/",
+          "https://80.lv/articles/godot-4-6-s-third-development-snapshot-released",
+          "https://jettelly.com/blog/godot-4-6-editor-improvements-workflow-changes-and-supporting-tools",
+          "https://github.com/godotengine/godot/issues/79319",
+          "https://github.com/godotengine/godot/issues/80797",
+          "https://bugnet.io/blog/fix-godot-theme-override-not-applying",
+          "https://github.com/godotengine/godot-proposals/issues/6812",
+          "https://github.com/godotengine/godot-proposals/issues/4948",
+          "https://github.com/godotengine/godot-proposals/issues/3301",
+          "https://github.com/godotengine/godot-proposals/issues/3257",
+          "https://forum.godotengine.org/t/multiple-border-colours-in-a-styleboxflat/66889",
+          "https://forum.godotengine.org/t/godot-4-6-1-how-to-use-the-new-theme-in-a-project/134158",
+          "https://github.com/shiena/godot-font-baker"
+        ],
+        "open_questions": [
+          "StyleBoxFlat 的 shadow 在大量 UI 控件同时存在时的实际帧预算消耗尚未实测——建议在 SoT 战斗场景中做一次 profiler 对比（开启/关闭 shadow_size 对 CPU/GPU 帧时间的影响）",
+          "draw_style_box 是否在 _draw 之外（如 _notification(NOTIFICATION_DRAW)）也能正常调用——文档说「及其对应的 Object._notification」，但实际边界需要验证，避免在错误时机调用导致静默失效",
+          "4.6.1 中 Modern 编辑器主题是否有对应的「游戏版」可直接引用（如通过 ThemeDB 取默认主题），还是仅限编辑器界面——有评论指出这可能是个误解，需确认",
+          "StyleBoxFlat 的 skew + border 已知存在边缘对齐 bug（issue #79672），在 4.6.1 中是否已修复——如果使用斜切框需优先验证此 bug",
+          "对于 SoT 的伤害飘字（DamagePopup）组件，draw_polygon 逐顶点渐变色能否替代渐变贴图做出高质量数字阴影效果，还是必须走 GradientTexture2D 路线——两者性能特征差异需评估"
+        ],
+        "version_notes": "Godot 4.6.1 stable（2026-01 发布）。StyleBox / Theme API 在 4.3→4.6 之间无结构性重大变更，主要新增在 4.6：鼠标焦点与键盘焦点视觉解耦、pivot_offset_ratio、Modern 编辑器主题集成。CanvasItem draw_ellipse / draw_ellipse_arc 在 Godot 4.x 中新增（4.3 版本起可见）。skew 属性大约在 4.1 已存在。双色描边提案（#6812/#4948）截至 4.6 仍未合并。所有版本信息来源于官方发布页与 GDQuest/Jettelly 等二次来源交叉验证。"
+      },
+      {
+        "dimension": "可复用 UI 资源（Godot 4.x 生态）",
+        "summary": "Godot 4.x 生态内可直接复用的 UI 资源分三类：(a) .theme/.tres 主题项目——数量少、整体风格多为科幻或通用扁平，无现成暗色奇幻战斗 HUD 主题，需以这些项目为基础改色调；(b) nine-patch 边框/面板素材——Kenney Fantasy UI Borders 是最优 CC0 九宫格面板包，但色调偏亮，用于暗底需叠加染色；OpenGameArt 有专门暗色幻想 UI 包但需署名；(c) UI 图标集——game-icons.net 是最大战术奇幻图标库（4180+ SVG），CC-BY 3.0 署名可用；CJK 字体方面，Noto Sans SC / Source Han Sans SC（同一字体双发行渠道）是简体中文嵌入的唯一可靠 SIL OFL 开源选项，可商用、无须付费。当前生态的最大缺口：没有任何现成资源可以直接 drop-in 覆盖「暗色哥特战术 RPG 战斗 HUD（技能栏+仪表盘+伤害浮窗）」的完整主题，必须自组合。",
+        "findings": [
+          {
+            "claim": "(a) 类 .theme/.tres 项目：接入方式最直接，但现有资源无现成暗色奇幻战斗 HUD 主题",
+            "detail": "Godot 4 的 .theme 文件可直接挂到根 Control 节点上全局应用，无须逐控件设置。现有社区主题项目中，Themey（Clashy/Spacey 风格）偏科幻；Kenney's UI Theme for Godot（azagaya 包装的 CC0 Kenney 素材）是扁平明亮风；Main Menu Multi-Theme 提供 4 套主菜单主题（含 Dark 变体）；Pixel UI Theme for Godot（Pelatho，付费 $5）是少数真正完整的 Godot 4.6 兼容像素 .theme 文件，含 Blood/Leather/Paper 变体，最接近暗色 RPG 气质，但仍是像素极简风非哥特华丽风。ThemeGen 是代码生成工具而非现成主题，适合以编程方式批量生成/维护主题文件。Godot Theme Template（jonathanlake）是仿官方默认主题的骨架，适合作为改造底座。以上项目无一能直接覆盖 SoT 技能栏+仪表盘+伤害浮窗的战斗 HUD 需求，价值在于提供结构骨架或调色起点。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://github.com/wadlo/Themey",
+              "https://azagaya.itch.io/kenneys-ui-theme",
+              "https://godotengine.org/asset-library/asset/4258",
+              "https://thowsenmedia.itch.io/pixel-ui-theme-for-godot",
+              "https://github.com/Inspiaaa/ThemeGen",
+              "https://github.com/jonathanlake/godot-theme-template"
+            ]
+          },
+          {
+            "claim": "(b) 类 nine-patch 边框/面板素材：Kenney Fantasy UI Borders 是唯一 CC0 九宫格幻想面板包，但色调偏亮须叠加处理",
+            "detail": "在 Godot 中，nine-patch 素材通过 StyleBoxTexture 接入：在面板的 StyleBox 属性中改用 StyleBoxTexture，设置 margin_left/right/top/bottom 定义可拉伸区域，再将目标 PNG 切片作为贴图挂入。Kenney Fantasy UI Borders（130+ 精灵，CC0）是明确为 9-slice 设计的幻想/RPG 窗口/对话框面板包，可免费商用无须署名，适合做 DamageForecaster 浮窗框架；缺点是风格偏明亮彩色，与 SoT 深紫黑底不直接匹配，需在 Godot 的 modulate 属性叠加深色调或换色版。Kenney UI Pack RPG Expansion（85 素材，CC0）补充了 RPG 特定的按钮/条状元素。OpenGameArt 的 Dark Fantasy UI Pack（CC-BY 4.0，需署名）包含用 Blender 渲染的暗色幻想风 HP 条/容器/按钮，视觉气质接近 Diablo 系，是少数真正暗色系的九宫格素材，但许可证需在游戏中署名「Of Far Different Nature」。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://kenney.nl/assets/fantasy-ui-borders",
+              "https://kenney-assets.itch.io/fantasy-ui-borders",
+              "https://kenney.nl/assets/ui-pack-rpg-expansion",
+              "https://opengameart.org/content/dark-fantasy-ui-pack-health-bars-inventory-containers-buttons"
+            ]
+          },
+          {
+            "claim": "(c) 类 UI 图标集：game-icons.net 是战术奇幻场景的最大开源图标库，CC-BY 3.0 署名可商用",
+            "detail": "game-icons.net 提供 4180+ SVG/PNG 图标，覆盖剑/盾/法术/药水/生物/地形/技能等战术奇幻全品类，许可证为 CC BY 3.0——商用允许，需在游戏致谢中注明「Lorc, Delapouite & contributors / game-icons.net」。图标均为单色矢量（黑/白背景可选），导入 Godot 后可通过 modulate 着色到任意颜色，与 SoT 现有配色（技能橙 #fa730f/物理白/魔法紫等）可无缝适配。适合作为技能栏槽位图标的来源。OpenGameArt 的 RPG Icons Set（245 个，64×64 PNG）和 700+ RPG Icons（Lorc 作者，多为 CC0/CC-BY）提供补充选项，但 game-icons.net 覆盖最广且检索最方便（支持标签过滤）。Kenney 系列图标（CC0）数量相对少且风格偏扁平卡通，与暗色哥特气质匹配度低。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://game-icons.net/",
+              "https://game-icons.net/about.html",
+              "https://opengameart.org/content/rpg-icons-set",
+              "https://opengameart.org/content/700-rpg-icons"
+            ]
+          },
+          {
+            "claim": "CJK 字体唯一可靠开源商用选项：Noto Sans SC / Source Han Sans SC（同一字体两个发行渠道），SIL OFL 1.1 可嵌入商业游戏",
+            "detail": "Noto Sans SC（Google 发布）与 Source Han Sans SC（Adobe 发布，思源黑体）是同一字体家族，互为品牌别名，均采用 SIL OFL 1.1 许可证。SIL OFL 明确允许字体嵌入软件/游戏发行，可商用，唯一限制是不能将字体本身单独出售。两者均覆盖全部简体中文 BMP 汉字（两万+字），支持 7 个字重（ExtraLight 至 Heavy）。在 Godot 4 中直接将 .ttf 文件放入 res:// 目录，在 ThemeDB 或各 Label/Button 的 font 属性中引用即可替换 fallback_font。体积注意：完整单地区字体文件约 10-30 MB，建议用子集化工具（如 pyftsubset）仅保留游戏内用到的汉字以压缩体积。Source Han Sans 最新版本 2.005（2025-06-18 发布）已更新 Latin 字形。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://notofonts.github.io/noto-docs/website/use/",
+              "https://github.com/notofonts/noto-cjk",
+              "https://github.com/adobe-fonts/source-han-sans",
+              "https://community.software.sil.org/t/im-inquiring-about-google-noto-sans-and-serif-cjk-licenses/5678"
+            ]
+          },
+          {
+            "claim": "GDQuest Open RPG 与 Godot Tactical RPG Demo 提供战术 RPG 战斗 UI 的结构参考，但视觉风格为中性/简洁而非暗色奇幻",
+            "detail": "GDQuest godot-open-rpg（MIT，Godot 4.6.2）是展示回合制战棋 RPG 完整架构的开源演示项目，含战斗系统、库存、角色成长、地图转场和 UI 多菜单；其 UI 结构与代码可作为 SoT 战斗 HUD 实现方式的参考，但视觉风格为清晰演示用途，非黑暗奇幻美术。ramaureirac/godot-tactical-rpg（MIT，Godot 4）同样是轻量战术 RPG 模板，提供格子移动/回合/AI 骨架，无具体战斗 HUD 美术。两者的价值主要在代码结构参考和许可复用，而非视觉素材复用。",
+            "evidence_strength": "medium",
+            "sources": [
+              "https://github.com/gdquest-demos/godot-open-rpg",
+              "https://github.com/ramaureirac/godot-tactical-rpg"
+            ]
+          }
+        ],
+        "resources": [
+          {
+            "name": "Kenney Fantasy UI Borders",
+            "url": "https://kenney.nl/assets/fantasy-ui-borders",
+            "license": "CC0 1.0 Universal（公有领域）",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "不适用（图像素材，非字体）",
+            "notes": "130+ 精灵，明确为 9-slice/nine-patch 九宫格使用设计，覆盖幻想/RPG 窗口、对话框、面板边框。无需署名，无需付费。色调偏亮彩，用于深底背景需在 Godot 中叠加 modulate 暗色或寻找深色变体。通过 StyleBoxTexture 接入，是当前 CC0 九宫格面板的最优单一来源。"
+          },
+          {
+            "name": "Kenney UI Pack RPG Expansion",
+            "url": "https://kenney.nl/assets/ui-pack-rpg-expansion",
+            "license": "CC0 1.0 Universal",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "不适用",
+            "notes": "85 个 PNG 精灵，含 RPG 专用面板、按钮、进度条元素，是基础 Kenney UI Pack 的 RPG 扩展。与 Fantasy UI Borders 配合使用可覆盖更多控件类型。同样偏明亮扁平风，需染色适配暗底。"
+          },
+          {
+            "name": "Kenney's UI Theme for Godot（azagaya 包装版）",
+            "url": "https://azagaya.itch.io/kenneys-ui-theme",
+            "license": "CC0 1.0 Universal",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "需自行替换字体（原始字体不含 CJK）",
+            "notes": "将 Kenney UI Pack 资源打包为 Godot 3.x/4.x 可直接挂载的 .theme 文件，评分 4.9/5。免费按意愿付费。覆盖大多数控件类型（注：对话框/弹窗/Tab/Tree 等部分控件暂未覆盖）。扁平明亮风，不适合直接作为暗色哥特主题，但结构完整可作为改色起点。"
+          },
+          {
+            "name": "Themey（wadlo）",
+            "url": "https://github.com/wadlo/Themey",
+            "license": "MIT（代码）/ CC0（图像，Material Design 图标除外为 Apache 2.0）",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "需自行替换字体",
+            "notes": "Godot 4.x 游戏主题集，含 Clashy（3D 感矢量 UI）与 Spacey（科幻极简 UI）主题，每套含完整 .tres 文件与配套图像。2024-11-24 发布 v0.3.0，活跃维护。风格偏科幻，与暗色奇幻需求有差距，但结构完整，可作为 .theme 文件结构学习和改造基础。"
+          },
+          {
+            "name": "ThemeGen（Inspiaaa）",
+            "url": "https://github.com/Inspiaaa/ThemeGen",
+            "license": "MIT",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "不适用（工具，非主题素材）",
+            "notes": "Godot 4.x 用 GDScript 以代码方式定义并生成主题文件的工具。支持语义化颜色变量、多主题变体（如 dark/light 同代码不同色值）、样式复用组合。适合「已有 StyleBoxFlat 方案，想系统化整理并生成可分发 .theme 文件」的场景。已在 Godot Asset Library 上架（asset/3299）。"
+          },
+          {
+            "name": "Main Menu Multi-Theme",
+            "url": "https://godotengine.org/asset-library/asset/4258",
+            "license": "MIT",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "需自行替换字体",
+            "notes": "含 Dark/Purple/Red/Light 四套主菜单主题，支持实时切换，2025-08-25 更新。以场景形式提供而非纯 .theme 文件，可直接 drop-in。Dark 变体风格偏现代扁平，非哥特奇幻，但可作为 SoT 菜单 UI 改造起点，价值不在战斗 HUD 而在游戏菜单流。"
+          },
+          {
+            "name": "Pixel UI Theme for Godot（Pelatho）",
+            "url": "https://thowsenmedia.itch.io/pixel-ui-theme-for-godot",
+            "license": "商业许可（付费 $5 后允许商用）",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "无 CJK 字体，需另行嵌入",
+            "notes": "迄今最完整的 Godot 4.6 兼容像素风 .theme 文件，含 Blood/Leather/Paper 多个暗色变体，8x8 像素基底，2026-01-18 发布 v1.4。许可证于购买时授权商用（单次买断，具体多游戏条款未完全确认，建议购前核查页面条款）。风格为克制像素极简而非华丽哥特，与 Diablo IV 气质仍有差距。"
+          },
+          {
+            "name": "Godot Theme Template（jonathanlake）",
+            "url": "https://github.com/jonathanlake/godot-theme-template",
+            "license": "MIT",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "需自行替换字体",
+            "notes": "精确还原 Godot 官方默认主题预览的骨架模板，Godot 4.x 专用。价值在于提供结构完整的 .theme 起点（所有控件类型已预定义），开发者可在主题编辑器中直接改色/改字体/改 StyleBox，适合「从空白骨架自定义」路线，无现成美术资产。"
+          },
+          {
+            "name": "game-icons.net",
+            "url": "https://game-icons.net/",
+            "license": "CC BY 3.0（需署名「Lorc, Delapouite & contributors」）",
+            "commercial_ok": "attribution",
+            "reusability": "high",
+            "cjk_support": "不适用（图标库）",
+            "notes": "4180+ SVG/PNG 游戏图标，覆盖剑/盾/法术/毒药/骷髅/龙/战术地形等战棋奇幻全品类。单色矢量设计，在 Godot 中通过 modulate 可染成任意颜色，与 SoT 现有配色方案（技能橙/魔法紫/纯金）完全兼容。商用要求：游戏内致谢页注明作者即可（一般一行文字）。支持标签检索，适合批量筛选技能类型图标（如物理/魔法/特殊等）。"
+          },
+          {
+            "name": "Dark Fantasy UI Pack（OpenGameArt，Of Far Different Nature）",
+            "url": "https://opengameart.org/content/dark-fantasy-ui-pack-health-bars-inventory-containers-buttons",
+            "license": "CC-BY 4.0（需署名）",
+            "commercial_ok": "attribution",
+            "reusability": "medium",
+            "cjk_support": "不适用",
+            "notes": "用 Blender 渲染的暗色幻想风 UI 元素：HP 条（满/空两版可混合）、容器框、按钮。视觉气质接近 Diablo，是少数真正暗底风格的九宫格素材，16.7 MB。缺点：PNG 渲染风格难以与像素画风框架融合；需检查各元素是否有足够边距以支持 StyleBoxTexture 的九宫格切分。署名要求：游戏内注明「Of Far Different Nature」。"
+          },
+          {
+            "name": "GDQuest Open RPG（gdquest-demos）",
+            "url": "https://github.com/gdquest-demos/godot-open-rpg",
+            "license": "MIT",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "需自行适配",
+            "notes": "完整 Godot 4.6.2 回合制 RPG 演示项目，含战斗系统/库存/角色成长/多菜单 UI。价值在于战斗 UI 的结构与 GDScript 实现参考（可直接 fork 改造），而非视觉美术资产。UI 为中性演示风格，需替换全部视觉素材。GDQuest 另有独立 JRPG Combat UI 教程模块（MIT 许可）。"
+          },
+          {
+            "name": "Noto Sans SC / Source Han Sans SC（思源黑体）",
+            "url": "https://github.com/notofonts/noto-cjk",
+            "license": "SIL Open Font License 1.1",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "完整覆盖简体中文（含全部 BMP 汉字两万+字），7 字重",
+            "notes": "简体中文游戏开发唯一可靠的开源商用 CJK 字体选项。Noto Sans SC（Google）与 Source Han Sans SC（Adobe，2.005 版本，2025-06-18 更新）是同一字体家族，SIL OFL 允许嵌入游戏发行且可商用，不可单独出售字体。在 Godot 4 中直接将 .ttf 放入项目目录引用。体积提示：完整字体文件约 10-30 MB，建议用 pyftsubset 子集化（仅保留游戏内汉字）以控制包体积。另有 Source Han Sans TTF 转换项目（be5invis/source-han-sans-ttf）可获取 TTF 格式。"
+          }
+        ],
+        "sources": [
+          "https://github.com/wadlo/Themey",
+          "https://github.com/jonathanlake/godot-theme-template",
+          "https://github.com/maxfieldev/godot-themes-hub",
+          "https://github.com/Inspiaaa/ThemeGen",
+          "https://godotengine.org/asset-library/asset/3299",
+          "https://godotengine.org/asset-library/asset/4258",
+          "https://azagaya.itch.io/kenneys-ui-theme",
+          "https://thowsenmedia.itch.io/pixel-ui-theme-for-godot",
+          "https://thowsenmedia.itch.io/pixel-ui-theme-for-godot/devlog/1320589/version-14-for-godot-46",
+          "https://kenney.nl/assets/fantasy-ui-borders",
+          "https://kenney-assets.itch.io/fantasy-ui-borders",
+          "https://kenney.nl/assets/ui-pack-rpg-expansion",
+          "https://kenney.nl/assets/ui-pack",
+          "https://opengameart.org/content/dark-fantasy-ui-pack-health-bars-inventory-containers-buttons",
+          "https://game-icons.net/",
+          "https://game-icons.net/about.html",
+          "https://opengameart.org/content/rpg-icons-set",
+          "https://opengameart.org/content/700-rpg-icons",
+          "https://github.com/gdquest-demos/godot-open-rpg",
+          "https://github.com/ramaureirac/godot-tactical-rpg",
+          "https://notofonts.github.io/noto-docs/website/use/",
+          "https://github.com/notofonts/noto-cjk",
+          "https://github.com/adobe-fonts/source-han-sans",
+          "https://community.software.sil.org/t/im-inquiring-about-google-noto-sans-and-serif-cjk-licenses/5678",
+          "https://forum.godotengine.org/t/godot-ui-theme-browser/73981",
+          "https://itch.io/game-assets/tag-dark-fantasy/tag-user-interface",
+          "https://veyroa.itch.io/fantasy-minimal-pixel-art-gui",
+          "https://github.com/Maaack/Godot-Game-Template"
+        ],
+        "open_questions": [
+          "Kenney Fantasy UI Borders 色调偏亮彩——在深紫黑底（#0a0c17）下叠加深色 modulate 后，九宫格边框的视觉质感是否可接受？还是需要寻找或自制深色变体版本？",
+          "game-icons.net CC-BY 3.0 的署名要求：仅在游戏内致谢页加一行文字是否足够，还是需要在技能图标显示时的某处持续显示？（CC BY 3.0 对游戏内嵌入的惯例做法需确认）",
+          "Pixel UI Theme for Godot（$5）的商业授权是否涵盖多个游戏项目，还是单游戏买断？购买前需核查 itch.io 购买页面的完整条款。",
+          "当前生态缺口：是否存在专为战术 RPG 战斗 HUD（技能栏+单位状态面板+伤害浮窗）设计的完整暗色主题包？本次调研未发现，建议调研后续做「美术方向」维度时再验证。",
+          "CJK 字体子集化：若游戏内汉字总量确定后（如仅常用 3000 字），用 pyftsubset 工具裁剪 Noto Sans SC 后的目标包体积预期在 2-5 MB 以内，是否在可接受范围内需用户确认。",
+          "Dark Fantasy UI Pack（OpenGameArt）的 PNG 文件是否有足够的边框留白，可以正确配置为 StyleBoxTexture 的九宫格切分边距？需下载文件测量像素边距后才能确认是否可直接用于面板控件。"
+        ],
+        "version_notes": "调研基于 Godot 4.6（2025 年稳定版）生态。Themey v0.3.0（2024-11-24）；Pixel UI Theme v1.4（Godot 4.6，2026-01-18）；Main Menu Multi-Theme（2025-08-25）；Source Han Sans 2.005（2025-06-18）；game-icons.net 4180+ 图标（截至 2026-06 确认）。Kenney 资源均为 CC0，版本号在其资产库页面未重点标注。所有版本号和许可证结论已通过至少 2 个独立来源交叉确认。"
+      },
+      {
+        "dimension": "战斗 UI 可商用 CJK 字体调研（Godot 4.6）",
+        "summary": "调研了三大类可商用中文字体及其在 Godot 4.6 的加载机制。正文/数值无衬线 CJK 字体中，Noto Sans SC 与思源黑体（同源）、得意黑 Smiley Sans、阿里巴巴普惠体 3.0 均可商用嵌入再分发；展示字体方面，得意黑凭借斜意窄体黑体气质最适合战斗飘字/标题，站酷黄油体偏可爱不符合暗黑 RPG 风；像素字体方面，绝大多数西方像素字体不含 CJK 字形，Fusion Pixel Font（OFL 1.1，8/10/12px）是目前最完整的可商用 CJK 像素方案，折衷策略是汉字用思源黑体/Noto Sans SC、拉丁数字用专属像素字体做多字体 fallback 混排。Godot 4.6 通过 FontFile.fallbacks 数组支持此机制，像素字体须在导入设置中将 antialiasing 设为 None、subpixel_positioning 设为 Disabled；已知 Issue #92297 显示 fallback 在重新导入时有概率被剥离，推荐以 .tres 资源文件持久化而非依赖 .import 文件。",
+        "findings": [
+          {
+            "claim": "正文/数值无衬线类：Noto Sans SC 与思源黑体同源，是最安全的零风险选择",
+            "detail": "Noto Sans SC 与 Adobe 思源黑体（Source Han Sans CN）共享字形，均采用 SIL OFL 1.1，允许商用嵌入再分发、无需署名。截至 2025-06-18 发布 v2.005，覆盖 GB18030-2022 实现级别 2（8,105 常用汉字）。语言特定 OTF 单字重文件约 4.5–9 MB，适合游戏嵌入；可变字体（VF）格式进一步压缩体积、支持 7 档字重插值。Godot 4.6 直接加载 OTF/TTF，无需插件。两者区别仅在发行渠道（Google vs Adobe），字形内容一致；思源黑体额外提供 OTC/Super OTC 格式，方便单文件覆盖多区域。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://community.software.sil.org/t/im-inquiring-about-google-noto-sans-and-serif-cjk-licenses/5678",
+              "https://github.com/notofonts/noto-cjk",
+              "https://github.com/adobe-fonts/source-han-sans",
+              "https://mirrors.sjtug.sjtu.edu.cn/CTAN/fonts/notocjksc/SourceHanSansReadMe.pdf"
+            ]
+          },
+          {
+            "claim": "正文/展示两用：得意黑 Smiley Sans 气质最接近暗黑 RPG 战斗 UI，数字字形醒目",
+            "detail": "得意黑（SIL OFL 1.1）是斜意窄体黑体，融合几何感与手绘笔触细节，数字字形具有强辨识度，适合战斗伤害飘字和技能标题。覆盖 GB/T 2312-1980 全量 6,763 汉字扩展至 8,335 字，含拉丁（415 字，覆盖 100+ 语言）、假名（174 字）、西里尔（80 字）。提供 OTF/TTF/WOFF2。CCTV 2022 世界杯转播实际商用案例清晰。SIL OFL 1.1 下无额外义务，不要求署名。唯一需注意：斜角造型在极小字号（10px 以下）下可读性需实测。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://github.com/atelier-anchor/smiley-sans",
+              "https://www.appinn.com/smiley-sans/"
+            ]
+          },
+          {
+            "claim": "正文类：阿里巴巴普惠体 3.0 字重最多、覆盖最广，但许可条款略严于 SIL OFL",
+            "detail": "阿里巴巴普惠体 3.0 采用厂商专属免费商用许可（非 SIL OFL），全球永久免费，允许将 TTF/OTF 直接嵌入商业游戏/软件分发。GB18030-2022 全量，7 字重共 194,460 汉字，覆盖 172 种语言。额外条款：嵌入使用须在软件内显著标注使用了该字体（通常理解为授权页/关于页）；不得单独出售字体文件。字重数量（7–9 个）和字符覆盖量均为调研范围内最高，适合需要多字重 UI 层级的项目。solo dev 须注意标注义务。2024 年发布 3.0 版，符合最新国标。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://www.alibabafonts.com/",
+              "https://freepd.cn/fonts/alibaba-puhuiti",
+              "https://www.ithome.com/0/696/780.htm"
+            ]
+          },
+          {
+            "claim": "正文类：霞鹜文楷 LXGW WenKai 气质文艺，适合剧情/叙事界面，不适合高密度战斗 UI 正文",
+            "detail": "霞鹜文楷（SIL OFL 1.1）是基于 Fontworks Klee One 衍生的楷体/手写风格字体，覆盖 CJK 统一表意文字 20,992 字 + 扩展 A 6,592 字；Lite 轻便版覆盖 GB2312 6,763 字，体积更小适合嵌入。提供 Light/Regular/Medium 三字重。楷书笔形在小字号下可读性弱于黑体，高密度战斗 UI 中（如属性格、技能描述）视觉舒适度不如 Noto Sans SC。适合用于叙事/剧情/标题等低密度场景。GB 版本符合 GB 18030-2022。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://github.com/lxgw/LxgwWenKai",
+              "https://github.com/lxgw/LxgwWenKai-Lite"
+            ]
+          },
+          {
+            "claim": "展示字体：站酷庆科黄油体 ZCOOL QingKe HuangYou 可商用但风格与暗黑 RPG 不符",
+            "detail": "站酷庆科黄油体（SIL OFL 1.1，Google Fonts）是圆润几何黑体，右角处理为 4pt 圆角，整体偏可爱/广告风，单字重。覆盖简体中文常用字（接近 GB2312，精确字符数未公开披露）。许可清晰，可商用无额外条款。但其视觉气质与 SoT 暗黑哥特风格明显不符，仅适合作为反面参考或对照测试，不建议用于战斗 UI 主字体。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://fonts.google.com/specimen/ZCOOL+QingKe+HuangYou",
+              "https://github.com/googlefonts/zcool-qingke-huangyou"
+            ]
+          },
+          {
+            "claim": "像素字体 CJK 现实约束：绝大多数西方像素字体不含汉字，折衷方案是多字体 fallback 混排",
+            "detail": "Press Start 2P、Silver、Early GameBoy 等常见西方像素/奇幻字体均不含任何 CJK 字形，无法直接用于简体中文界面。根本原因是汉字字形至少需要 12x12 像素点阵才勉强可辨，而多数西方小像素字体设计于 8x8 或 10x10 网格。折衷策略：在 Godot 4.6 中配置两套字体的 fallback 链——主字体用具有奇幻气质的西方字体（处理拉丁字母、数字、标点），fallback 设置为思源黑体/Noto Sans SC（处理全部汉字）。主字体查找不到的字形自动回落到 fallback，无需手动判断。这样可以在标题/按钮等拉丁场景保留像素风格，汉字仍保持清晰可读。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/tutorials/ui/gui_using_fonts.html",
+              "https://asianabsolute.co.uk/blog/cjk-typesetting-challenges-workflows-and-best-practices/",
+              "https://github.com/TakWolf/fusion-pixel-font"
+            ]
+          },
+          {
+            "claim": "像素 CJK 字体：Fusion Pixel Font（OFL 1.1）是目前最完整的可商用 CJK 像素方案",
+            "detail": "Fusion Pixel Font（SIL OFL 1.1，字体；MIT，构建工具）提供 8px/10px/12px 三种像素尺寸，含等宽和比例两种模式，融合了方舟像素字体（Ark Pixel Font）字形，覆盖简体中文 CJK 字符。截至 2025 年 5 月仍在持续维护。若想在汉字层也使用像素风格（如复古肉鸽 UI），12px 尺寸是最小可接受标准，8px 汉字难以辨认。方舟像素字体（同作者，OFL 1.1）是其上游字形库，独立使用时 GB2312 字形仍在补全中（10px/12px/16px），16px 尺寸最完整。两者商用均无额外限制。",
+            "evidence_strength": "medium",
+            "sources": [
+              "https://github.com/TakWolf/fusion-pixel-font",
+              "https://github.com/TakWolf/ark-pixel-font",
+              "https://sourceforge.net/projects/ark-pixel-font.mirror/"
+            ]
+          },
+          {
+            "claim": "Godot 4.6 字体加载机制：FontFile 负责底层渲染，FontVariation 负责变体，fallback 链通过 .fallbacks 数组配置",
+            "detail": "FontFile 继承自 Font > Resource，核心渲染属性：antialiasing（抗锯齿模式，枚举 0=None/1=Gray/2=LCD）；hinting（微调，动态字体专用，MSDF 不支持）；subpixel_positioning（次像素定位，枚举 0=Disabled）；oversampling（正值时覆盖视口过采样系数）；allow_system_fallback（默认 true，自动回落系统字体，可保底 CJK 显示）。FontVariation 用于 OpenType 变体特性和模拟粗体/斜体。主题默认字体：项目设置 GUI > Theme 可设全局默认；运行时覆盖用 label.add_theme_font_override('font', my_font)。多字体 fallback 配置方式：Inspector 中双击字体文件 > Advanced Import Settings > Fallbacks > Array[Font] > Add Element；或运行时设 primary_font.fallbacks = [cjk_font]，再 label.add_theme_font_override('font', primary_font)。已知 Issue #92297（影响 4.2.2–4.5.1）：fallback 数组在重新导入时有概率被剥离出 .import 文件，推荐将字体配置保存为独立 .tres 资源文件持久化。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/tutorials/ui/gui_using_fonts.html",
+              "https://docs.godotengine.org/en/stable/classes/class_fontfile.html",
+              "https://docs.godotengine.org/en/stable/classes/class_fontvariation.html",
+              "https://github.com/godotengine/godot/issues/92297"
+            ]
+          },
+          {
+            "claim": "像素字体去抗锯齿配置：Godot 4.4+ 有自动检测，4.6 可在导入设置或运行时手动设置",
+            "detail": "像素字体要获得像素完美渲染，需在字体导入设置（Advanced Import Settings）中：将 Antialiasing 设为 None；将 Subpixel Positioning 设为 Disabled；关闭 Generate Mipmaps；Hinting 设为 None 或 Light。同时需在项目设置 Rendering > Textures > Canvas Textures > Default Texture Filter 改为 Nearest（否则缩放时仍会模糊）。字号必须为设计像素尺寸的整数倍，Control 节点使用整数缩放。Godot 4.4+ 新增「自动检测像素字体并禁用次像素定位」功能，但 SoT 当前引擎版本是 Godot 4.6.1 stable，该特性应已可用。Fusion Pixel Font 导入时需确认上述设置以避免模糊。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://forum.godotengine.org/t/why-pixel-font-blurry-godot-4/735",
+              "https://not-jam.itch.io/not-jam-font-pack/devlog/749049/pixel-fonts-a-godot-tutorial",
+              "https://docs.godotengine.org/en/stable/tutorials/ui/gui_using_fonts.html"
+            ]
+          }
+        ],
+        "resources": [
+          {
+            "name": "Noto Sans SC（Noto Sans 简体中文）",
+            "url": "https://github.com/notofonts/noto-cjk",
+            "license": "SIL OFL 1.1",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "简体中文 GB18030-2022 实现级别 2（8,105 常用汉字，SC 子集）；全量 OTC 覆盖简繁日韩",
+            "notes": "与思源黑体同源（Google 发行版），7 字重 + 可变字体 VF。单字重语言特定 OTF 约 4.5–9 MB，适合嵌入游戏。2025-06-18 发布 v2.005。"
+          },
+          {
+            "name": "思源黑体 Source Han Sans",
+            "url": "https://github.com/adobe-fonts/source-han-sans",
+            "license": "SIL OFL 1.1（v1.002 起；v1.001 及更早为 Apache 2.0）",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "简体中文 CN 子集，与 Noto Sans SC 共享字形（Adobe 上游）；7 字重 + 可变字体",
+            "notes": "Adobe 原版；Noto Sans SC 是其 Google 发行版，字形一致。额外提供 OTC/Super OTC 格式，方便单文件覆盖多区域。"
+          },
+          {
+            "name": "思源宋体 Source Han Serif",
+            "url": "https://source.typekit.com/source-han-serif/",
+            "license": "SIL OFL 1.1",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "简体中文 CN 子集，GB18030-2022 覆盖；7 字重 + 可变字体",
+            "notes": "衬线（明朝体）风格，气质偏古典/正统，适合叙事/剧情界面标题，不适合密集 UI 正文。"
+          },
+          {
+            "name": "得意黑 Smiley Sans",
+            "url": "https://github.com/atelier-anchor/smiley-sans",
+            "license": "SIL OFL 1.1",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "简体中文 GB/T 2312-1980 全量 6,763 字扩展至 8,335 字；含拉丁 415 字、假名 174 字、西里尔 80 字",
+            "notes": "斜意窄体黑体，数字字形醒目，最适合战斗飘字/标题。OTF/TTF/WOFF2。CCTV 2022 世界杯转播商用案例。"
+          },
+          {
+            "name": "阿里巴巴普惠体 3.0 Alibaba PuHuiTi",
+            "url": "https://www.alibabafonts.com/",
+            "license": "阿里巴巴专属免费商用许可（非 SIL OFL）",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "简体中文 GB18030-2022 全量，7 字重共 194,460 汉字；覆盖 172 种语言",
+            "notes": "字重最多（7–9 个），覆盖最广。嵌入商业软件须在软件内显著标注使用了该字体；不得单独出售字体文件。非 SIL OFL，条款略严。2024 年发布 3.0 版。"
+          },
+          {
+            "name": "霞鹜文楷 LXGW WenKai",
+            "url": "https://github.com/lxgw/LxgwWenKai",
+            "license": "SIL OFL 1.1",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "CJK 统一表意文字 20,992 字 + 扩展A 6,592 字；Lite 轻便版覆盖 GB2312 6,763 字",
+            "notes": "楷体/手写风格，文艺感强，小字号可读性弱于黑体。Lite 版适合嵌入，体积更小。不适合战斗 UI 高密度正文，可用于叙事场景。"
+          },
+          {
+            "name": "站酷庆科黄油体 ZCOOL QingKe HuangYou",
+            "url": "https://fonts.google.com/specimen/ZCOOL+QingKe+HuangYou",
+            "license": "SIL OFL 1.1",
+            "commercial_ok": "yes",
+            "reusability": "low",
+            "cjk_support": "简体中文常用字（覆盖接近 GB2312，精确字符数未披露），单字重",
+            "notes": "圆润几何黑体，偏可爱/广告风。气质与暗黑 RPG 不符，不建议作为 SoT 主字体，仅适合对比参考。"
+          },
+          {
+            "name": "Fusion Pixel Font 融合像素字体",
+            "url": "https://github.com/TakWolf/fusion-pixel-font",
+            "license": "SIL OFL 1.1（字体文件）；MIT（构建工具）",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "简体中文 CJK 像素字形，8px/10px/12px 三种尺寸（含等宽和比例两种模式），融合方舟像素字体字形",
+            "notes": "目前最完整的可商用 CJK 像素字体。12px 是最小可接受标准，8px 汉字难辨。若汉字层也追求像素风的唯一完整选择。截至 2025 年 5 月仍在维护。"
+          },
+          {
+            "name": "方舟像素字体 Ark Pixel Font",
+            "url": "https://github.com/TakWolf/ark-pixel-font",
+            "license": "SIL OFL 1.1",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "简体中文 GB2312 目标（10px/12px/16px，持续开发中，部分字形仍在补全）",
+            "notes": "Fusion Pixel 的上游字形库；独立使用时字符集仍不完整，16px 尺寸最完整。可作为 Fusion Pixel 的备选或补充。"
+          }
+        ],
+        "open_questions": [
+          "阿里巴巴普惠体'显著标注'要求的具体形式未在官方文档中明确说明，solo dev 在游戏内关于页一行文字是否满足，需进一步咨询或参考同类案例",
+          "fallback 被剥离的 Issue #92297 在 Godot 4.6.1 stable 中是否已完全修复（该 issue 记录影响 4.2.2–4.5.1），需在本项目实际测试后确认 .tres 持久化方案的稳定性",
+          "得意黑 Smiley Sans 斜意字形在 SoT 暗黑哥特配色（深紫黑底 + 金色描边）下的视觉调性匹配度，需实际渲染测试才能判断",
+          "Fusion Pixel Font 8px 尺寸的简体中文字形完整度（是否已覆盖全量 GB2312 6,763 字）未在文档中精确披露，须查 GitHub releases 确认",
+          "MiSans（小米字体）虽覆盖 GB18030-2022 且文件质量高，但其专属许可条款（必须标注+不可独立分发+可撤销授权）使其在商业游戏场景的法律确定性低于 SIL OFL，暂不推荐，可作为未来对比项保留",
+          "多字体混排方案（拉丁像素字体 + 思源黑体 fallback）在 Godot 4.6 中是否存在行高不一致问题（Issue #77879 提及 FontVariation 未使用 fallback 时仍增加最小高度），需实测"
+        ],
+        "sources": [
+          "https://community.software.sil.org/t/im-inquiring-about-google-noto-sans-and-serif-cjk-licenses/5678",
+          "https://github.com/notofonts/noto-cjk",
+          "https://github.com/adobe-fonts/source-han-sans",
+          "https://github.com/adobe-fonts/source-han-sans/blob/master/LICENSE.txt",
+          "https://mirrors.sjtug.sjtu.edu.cn/CTAN/fonts/notocjksc/SourceHanSansReadMe.pdf",
+          "https://github.com/atelier-anchor/smiley-sans",
+          "https://www.appinn.com/smiley-sans/",
+          "https://www.alibabafonts.com/",
+          "https://freepd.cn/fonts/alibaba-puhuiti",
+          "https://www.ithome.com/0/696/780.htm",
+          "https://github.com/lxgw/LxgwWenKai",
+          "https://github.com/lxgw/LxgwWenKai-Lite",
+          "https://fonts.google.com/specimen/ZCOOL+QingKe+HuangYou",
+          "https://github.com/googlefonts/zcool-qingke-huangyou",
+          "https://github.com/TakWolf/fusion-pixel-font",
+          "https://github.com/TakWolf/ark-pixel-font",
+          "https://docs.godotengine.org/en/stable/tutorials/ui/gui_using_fonts.html",
+          "https://docs.godotengine.org/en/stable/classes/class_fontfile.html",
+          "https://docs.godotengine.org/en/stable/classes/class_fontvariation.html",
+          "https://github.com/godotengine/godot/issues/92297",
+          "https://github.com/godotengine/godot/issues/77879",
+          "https://forum.godotengine.org/t/why-pixel-font-blurry-godot-4/735",
+          "https://not-jam.itch.io/not-jam-font-pack/devlog/749049/pixel-fonts-a-godot-tutorial",
+          "https://asianabsolute.co.uk/blog/cjk-typesetting-challenges-workflows-and-best-practices/",
+          "https://source.typekit.com/source-han-serif/"
+        ],
+        "version_notes": "Noto Sans CJK v2.005（2025-06-18 发布）；思源黑体 Version 2.005（同期，Source Han Sans ReadMe PDF 确认）；阿里巴巴普惠体 3.0（2024 年发布，GB18030-2022 合规）；得意黑 Smiley Sans v1.x（SIL OFL 1.1，2022 年首发至今维护中）；Fusion Pixel Font 截至 2025-05-xx 仍活跃维护；Godot 4.6.1 stable（SoT 项目当前引擎版本）。以上版本号来自 WebSearch 交叉验证两个以上来源，但具体子版本号建议在下载时以各自 GitHub Releases 页面为准。"
+      },
+      {
+        "dimension": "参考游戏UI在Godot 4里的可行复刻路径（飘字、技能栏冷却、伤害预测浮窗、HP条质感）",
+        "summary": "调研覆盖四个核心战斗UI组件在Godot 4里的具体实现路径，以FFXIV飘字、火纹SRPG预测窗、Hades/杀戮尖塔肉鸽资源条为参考基准。整体结论：飘字、冷却弧、HP条、世界坐标浮窗锚定这四个效果均可在Godot 4里靠布局+动效+少量_draw()自绘达成，不需要美术素材驱动；真正依赖素材的是金属纹理/噪点/角饰等\"华丽质感\"层，这层与玩法UI逻辑完全解耦，可单独推进。字体方面：CJK必须使用Noto Sans CJK SC（SIL OFL，商用可），像素风英数字可用m5x7但不含汉字，两者需搭配使用。",
+        "findings": [
+          {
+            "claim": "飘字系统（DamagePopup）核心技法：Label + LabelSettings + Tween，完全无 shader，靠布局+动效达成",
+            "detail": "标准做法：用 FCTManager 节点维护 Label 池（避免逐帧 instance/free 开销），通过 show_value(value, direction, duration, is_crit) 接口驱动。动画三步：① position Tween 沿随机角度（±45°~90°偏移）向上漂移；② modulate.a Tween 从1.0线性降到0.0淡出；③ 暴击时 scale Tween 先放大再归一（bounce效果）配合颜色改变。LabelSettings 可设 font_size / outline_size / outline_color / shadow_color，不需要 shader。多段叠加时间差：每段独立创建 Tween，用 await tween.tween_interval(0.05).finished 逐步错开50ms，参见 GitHub Gist（anthonyec）。SoT 已有的形状图标（剑/菱/星/十字）靠 _draw() + draw_polygon() 自绘矢量，这部分属于SoT自建能力，无现成库完整复现，但 draw_arc() / draw_polygon() 在 CanvasItem._draw() 里直接可用，每帧 queue_redraw() 触发重绘。伤害类型配色：Label.modulate 或 LabelSettings.font_color 在 show_value() 时按类型设置即可。现成可用 MIT 插件：minos-damage-numbers-for-godot（Godot 4，支持2D+3D，按伤害类型着色，对象池管理）。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://kidscancode.org/godot_recipes/4.x/ui/floating_text/index.html",
+              "https://www.wayline.io/blog/godot-dynamic-damage-numbers",
+              "https://github.com/Minoqi/minos-damage-numbers-for-godot",
+              "https://gist.github.com/anthonyec/34df5ecb3b2975df4a8d259f59232512",
+              "https://shweep.medium.com/damage-numbers-in-rpgs-1f0e3b1bc23a",
+              "https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html"
+            ]
+          },
+          {
+            "claim": "FFXIV风飘字设计要点：形状+运动方向+文字大小三层编码，已有公开设计分析",
+            "detail": "FFXIV（6.3版后）飘字系统：Flying text（自己打出的伤害向上飘）/ Pop-up text（其他人的数字弹出后落地弹跳消失）两套运动轨迹；文字大小区分直击（direct hit，字体放大）、暴击（critical，更大+感叹号）、暴击直击（双感叹号）；6.3版后加入伤害类型图标（物理/魔法/unique）。SoT 的分类配色（物理白/魔法紫/纯金/混合橙）比FFXIV图标方案更清晰，适合战棋慢节奏。多目标AoE飘字设计参考DQ11：数字不同时出现，逐目标错开时间差，防止信息过载——这正是 tween_interval 错开方案的设计依据。",
+            "evidence_strength": "medium",
+            "sources": [
+              "https://forum.square-enix.com/ffxiv/threads/371705",
+              "https://shweep.medium.com/damage-numbers-in-rpgs-1f0e3b1bc23a"
+            ]
+          },
+          {
+            "claim": "技能栏冷却径向弧：两条无 shader 路径均可行，TextureProgressBar 最省力",
+            "detail": "路径A（TextureProgressBar，推荐）：节点 TextureButton > TextureProgressBar（FILL_COUNTER_CLOCKWISE 模式）+ Timer + Label。TextureProgressBar.value = int((timer.time_left / cooldown) * 100) 每帧更新；modulate 设深灰半透明叠在图标上产生暗化遮罩效果；不需要任何贴图（tint_progress 着色即可）。fill_mode 可用 FILL_CLOCKWISE 或 FILL_COUNTER_CLOCKWISE，radial_initial_angle / radial_fill_degrees 控制起点和扇面范围。具体配置参见 kidscancode Cooldown Button 教程。路径B（_draw() 自绘弧）：在 Control 子类的 _draw() 里调 draw_arc(center, radius, start_angle, end_angle, color, width)，每帧根据剩余冷却比例算 end_angle，调 queue_redraw()。更灵活但每帧重绘有微小开销。路径C（低成本 shader 增益）：Radial/Cooldown shader（CC0，一个 uniform cooldown_progress 驱动）或 Procedural Circular Progress Bar（MIT，支持分段、自定义半径），作为视觉提升可选项单列。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://kidscancode.org/godot_recipes/4.x/ui/cooldown_button/index.html",
+              "https://docs.godotengine.org/en/stable/classes/class_textureprogressbar.html",
+              "https://godotshaders.com/shader/radial-cooldown-shader/",
+              "https://godotshaders.com/shader/procedural-circular-progress-bar/"
+            ]
+          },
+          {
+            "claim": "伤害预测浮窗（DamageForecaster）世界坐标→屏幕坐标锚定：get_screen_transform().origin 是 Godot 4 推荐做法",
+            "detail": "核心公式：screen_pos = unit_node.get_screen_transform().origin，然后 control_node.position = screen_pos + offset（向上偏移防止遮挡单位头部）。防溢出：用 .clamp(Vector2.ZERO, get_viewport_rect().size - panel_size) 把面板夹在视口内。或用 viewport.get_canvas_transform() * world_position（适用于相机跟随时的坐标映射）。向下指向三角：用 Panel（PanelContainer）加自定义 _draw() 画一个向下的三角形，或者用 Polygon2D 节点单独摆在面板下方。整个浮窗放在 CanvasLayer 节点下避免与游戏世界 z-index 冲突；position 计算放在 _process() 里每帧同步，取整防抖（roundf）。此方案完全靠布局+坐标变换，不需要素材。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://forum.godotengine.org/t/determining-the-ui-position-via-world-to-screen-projection/132329",
+              "https://forum.godotengine.org/t/static-function-to-translate-a-position-in-2d-space-to-a-position-on-the-canvaslayer/70485",
+              "https://docs.godotengine.org/en/stable/tutorials/2d/2d_transforms.html"
+            ]
+          },
+          {
+            "claim": "HP条质感：StyleBoxFlat 不支持渐变，分段效果需用 _draw() 叠加分隔线；TextureProgressBar 三层贴图方案可接近参考品质",
+            "detail": "StyleBoxFlat 限制：只有单一 bg_color，无渐变支持（官方文档明确）；border 单色；shadow_size > 0 时有 shadow_color 效果。做渐变HP条的方案：① 用两个重叠 ProgressBar（底层亮色，前景正常色），制造伪渐变视觉；② TextureProgressBar 用1×1纯色像素图 + tint_under/tint_progress/tint_over 三层着色，可做底色/前景色/覆盖高光分离；③ 低成本 shader 增益：godotshaders.com 上有 Health Bar 专项 shader（UI 分类），可附加渐变色和内发光。分段线（如剑圣剑气10格）：在HP条所在 Control 的 _draw() 里画等间距竖线，每帧只在 HP 值变化时 queue_redraw()。HP值平滑减少动效（视觉滞后条）：第二个 ProgressBar 用 Tween 缓慢跟随实际值，产生 FF14 风格的延迟扣减效果，完全靠布局+动效。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/classes/class_styleboxflat.html",
+              "https://docs.godotengine.org/en/stable/classes/class_textureprogressbar.html",
+              "https://godotshaders.com/shader-tag/ui/",
+              "https://kidscancode.org/godot_recipes/4.x/3d/healthbars/index.html"
+            ]
+          },
+          {
+            "claim": "CJK汉字字体：Noto Sans CJK SC 是战斗UI的唯一实用选择，SIL OFL 商用完全合法",
+            "detail": "Noto Sans CJK SC：65535字形，覆盖44806个Unicode字符，简体汉字完整。许可证：SIL Open Font License 1.1（OFL）。OFL 条款：允许在任何软件（含商业游戏）中嵌入使用，不允许单独出售字体本身；LEGO等商业公司在游戏中使用已有先例。Godot 4 导入：直接拖入 .ttf/.otc 文件，在 LabelSettings 或 Theme 里引用。文件体积注意事项：完整 Noto Sans CJK SC 文件较大（约15-20MB），可用子集化工具裁剪只保留游戏所需汉字集。像素风英数字 m5x7（Daniel Linssen）：商用免费，itch.io 付随意，但不含CJK，需搭配 Noto Sans CJK 做字体回退链（fallback）。Godot 4 支持字体回退：在 FontVariation 里设置 fallback_fonts 数组，英数字走 m5x7，CJK 自动回退到 Noto Sans CJK SC。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://github.com/notofonts/noto-cjk/blob/main/Sans/LICENSE",
+              "https://community.software.sil.org/t/im-inquiring-about-google-noto-sans-and-serif-cjk-licenses/5678",
+              "https://notofonts.github.io/noto-docs/specimen/NotoSansCJKsc/",
+              "https://managore.itch.io/m5x7",
+              "https://docs.godotengine.org/en/stable/tutorials/ui/gui_using_fonts.html"
+            ]
+          },
+          {
+            "claim": "可复用开源参考项目：GDQuest Open RPG（MIT）、Slay the Robot（MIT）、godot-tactical-rpg（MIT）均可学习战斗UI实现",
+            "detail": "GDQuest Open RPG（github.com/gdquest-demos/godot-open-rpg）：MIT，Godot 4.6.2，含回合制战斗、角色成长、菜单UI系统；99.7% GDScript，仅0.3% shader；视觉风格基于 Kenney Tiny Town 像素资源包，适合研究无贴图依赖的纯代码UI架构。Slay the Robot（github.com/DesirePathGames/Slay-The-Robot）：MIT，Godot 4.6 GDScript，含敌人意图图标系统（intent icon，类似战棋预测窗的信息展示范式）、JSON驱动卡牌数据API、能量条系统；适合研究意图图标的数据→UI渲染管线和卡牌 hover 动效。godot-tactical-rpg（github.com/ramaureirac/godot-tactical-rpg）：MIT，支持 Godot 4.0/4.2/4.3多版本分支，格子移动+回合战斗，可研究格子高亮和基础战斗UI结构。TBS_GoDot（github.com/ja-brouil/TBS_GoDot）：Fire Emblem 风格，但为 Godot 3.x，版本较旧，仅作布局参考。",
+            "evidence_strength": "medium",
+            "sources": [
+              "https://github.com/gdquest-demos/godot-open-rpg",
+              "https://github.com/DesirePathGames/Slay-The-Robot",
+              "https://github.com/ramaureirac/godot-tactical-rpg",
+              "https://github.com/ja-brouil/TBS_GoDot"
+            ]
+          },
+          {
+            "claim": "面板暗色质感：StyleBoxFlat + shadow_size 是零素材基线；NinePatchRect 是引入角饰纹理的过渡路径；godotshaders.com UI Shader (2D) 是低成本发光边框增益",
+            "detail": "StyleBoxFlat 零素材基线：bg_color 深色（如 #0a0c17），border_color 金色（如 #b8942f），border_width_* 1-2px，shadow_size 4-8px（产生外发光感），shadow_color 半透明金色（如 #b8942f80）。这已是 SoT 当前方案。NinePatchRect 升级路径：当需要角部金属饰件时，提供一张小纹理图（如 64×64 像素的边框角饰），用 NinePatchRect 的九宫格拉伸机制在任意尺寸面板上保持四角不变形。此时仅引入一张极小贴图，开发量低。godotshaders.com UI Shader (2D)：纯过程式描边盒，可设边框宽度/圆角/边框颜色/背景颜色，不需要贴图；可作为 StyleBoxFlat 的视觉增强替代。CanvasLayer 层级注意（来自 shaggydev.com）：若要对所有UI包括动态弹窗做后处理 shader，需把 CanvasLayer.layer 在 _ready() 里设为 1025（超过 Window 节点默认的 1024），否则弹窗/下拉菜单逃出 shader 覆盖。",
+            "evidence_strength": "medium",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/classes/class_styleboxflat.html",
+              "https://docs.godotengine.org/en/stable/classes/class_ninepatchrect.html",
+              "https://godotshaders.com/shader/ui-shader-2d/",
+              "https://shaggydev.com/2025/04/09/godot-ui-postprocessing-shaders/"
+            ]
+          },
+          {
+            "claim": "「布局+动效可达成」vs「必须素材」的完整边界划定",
+            "detail": "靠布局+动效（_draw/Tween/StyleBox/TextureProgressBar）可完整达成：① 飘字升起淡出、多段时间差叠加、暴击缩放、颜色按类型区分；② 技能槽径向冷却遮罩（TextureProgressBar FILL_CLOCKWISE 或 draw_arc）；③ HP条数值平滑过渡（双 ProgressBar 延迟跟随）、分段格线（_draw 竖线）；④ 预测浮窗随单位头顶跟随（get_screen_transform + CanvasLayer）、向下三角（draw_polygon）；⑤ 文字描边/阴影（LabelSettings.outline_size / shadow_color）；⑥ 面板阴影发光感（StyleBoxFlat.shadow_size + shadow_color 金色半透）。必须美术素材才能达成：① Diablo IV 风金属纹理 + 噪点暗底渐变 + 角部金属饰件（需 NinePatchRect + 美术图）；② HP条内部渐变色贴图（如火焰纹章鲜明渐变条）；③ 技能图标本身（属于像素美术素材管线，不在UI研究范围）。低成本 shader 增益（单独列出，可选）：Procedural Circular Progress Bar（MIT）做分段冷却弧、Glow Effect 2D 做面板外发光、全屏 ColorRect+shader 做整体后处理（如暗角/CRT扫描线）。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://kidscancode.org/godot_recipes/4.x/ui/floating_text/index.html",
+              "https://kidscancode.org/godot_recipes/4.x/ui/cooldown_button/index.html",
+              "https://docs.godotengine.org/en/stable/classes/class_textureprogressbar.html",
+              "https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html",
+              "https://godotshaders.com/shader/procedural-circular-progress-bar/"
+            ]
+          }
+        ],
+        "resources": [
+          {
+            "name": "Godot 4 Recipes — Floating Combat Text",
+            "url": "https://kidscancode.org/godot_recipes/4.x/ui/floating_text/index.html",
+            "license": "CC-BY 4.0（教程）/ MIT（代码示例）",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "不涉及（Label节点本身支持CJK，字体另配）",
+            "notes": "最完整的 Godot 4 飘字实现教程，含 FCTManager 池化模式、Tween 动画、暴击效果。代码可直接移植。"
+          },
+          {
+            "name": "Godot 4 Recipes — Cooldown Button",
+            "url": "https://kidscancode.org/godot_recipes/4.x/ui/cooldown_button/index.html",
+            "license": "CC-BY 4.0（教程）/ MIT（代码示例）",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "不涉及",
+            "notes": "TextureProgressBar + FILL_COUNTER_CLOCKWISE 无shader冷却弧完整实现，配 Timer 节点，代码约30行。SoT 技能槽可直接参考此方案。"
+          },
+          {
+            "name": "minos-damage-numbers-for-godot（MIT插件）",
+            "url": "https://github.com/Minoqi/minos-damage-numbers-for-godot",
+            "license": "MIT",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "Label节点原生支持CJK，字体另配Noto CJK即可",
+            "notes": "Godot 4专用，支持2D+3D，对象池，按伤害类型着色。可作为飘字基础层直接集成，在其上叠加 SoT 的形状图标（_draw自绘）。"
+          },
+          {
+            "name": "Slay the Robot — 肉鸽卡牌框架（MIT）",
+            "url": "https://github.com/DesirePathGames/Slay-The-Robot",
+            "license": "MIT",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "不涉及（框架层），UI节点支持CJK字体",
+            "notes": "Godot 4.6 GDScript，含意图图标（intent icon）系统可参考信息展示管线，能量条数据→UI驱动模式与SoT资源条相似。JSON驱动卡牌API设计思路可参考。"
+          },
+          {
+            "name": "GDQuest Open RPG（MIT）",
+            "url": "https://github.com/gdquest-demos/godot-open-rpg",
+            "license": "MIT",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "不涉及（框架层）",
+            "notes": "Godot 4.6.2，99.7% GDScript，回合制战斗+角色成长+菜单UI，可研究无贴图依赖的战斗UI架构和信号驱动的状态面板更新。"
+          },
+          {
+            "name": "godot-tactical-rpg（MIT）",
+            "url": "https://github.com/ramaureirac/godot-tactical-rpg",
+            "license": "MIT",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "不涉及",
+            "notes": "Godot 4.3多版本分支，格子移动+回合战斗，可参考战棋格子高亮 + 基础战斗UI结构布局。"
+          },
+          {
+            "name": "Procedural Circular Progress Bar shader（MIT）",
+            "url": "https://godotshaders.com/shader/procedural-circular-progress-bar/",
+            "license": "MIT",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "不涉及",
+            "notes": "canvas_item shader，支持分段/自定义半径/渐变色贴图驱动。作为技能冷却弧的视觉提升可选项，参数化控制方便。"
+          },
+          {
+            "name": "Radial / Cooldown shader（CC0）",
+            "url": "https://godotshaders.com/shader/radial-cooldown-shader/",
+            "license": "CC0",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "不涉及",
+            "notes": "CC0完全公有域，最简单的径向遮罩shader，cooldown_progress 一个uniform驱动。注意：有用户报告在TextureRect上存在兼容性问题，实装前需测试。"
+          },
+          {
+            "name": "Noto Sans CJK SC（Google Noto字体，SIL OFL）",
+            "url": "https://github.com/notofonts/noto-cjk/blob/main/Sans/LICENSE",
+            "license": "SIL Open Font License 1.1",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "完整简体中文（65535字形，44806字符覆盖）",
+            "notes": "CJK战斗UI文字的唯一实用选择。商用合法，可嵌入游戏包分发。建议用子集化工具裁剪体积。在 FontVariation.fallback_fonts 里搭配 m5x7 实现英数字像素风+CJK混排。"
+          },
+          {
+            "name": "m5x7 像素字体（Daniel Linssen）",
+            "url": "https://managore.itch.io/m5x7",
+            "license": "公有域 / 商用免费（itch.io随意定价）",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "不含CJK，仅英数字+基本拉丁符号",
+            "notes": "极受欢迎的像素字体，适合技能槽角标（键位1-4）、数值等英数显示。与 Noto Sans CJK SC 搭配用作字体回退链：英数字走 m5x7，汉字自动回退 Noto CJK。"
+          }
+        ],
+        "sources": [
+          "https://kidscancode.org/godot_recipes/4.x/ui/floating_text/index.html",
+          "https://kidscancode.org/godot_recipes/4.x/ui/cooldown_button/index.html",
+          "https://www.wayline.io/blog/godot-dynamic-damage-numbers",
+          "https://github.com/Minoqi/minos-damage-numbers-for-godot",
+          "https://gist.github.com/anthonyec/34df5ecb3b2975df4a8d259f59232512",
+          "https://shweep.medium.com/damage-numbers-in-rpgs-1f0e3b1bc23a",
+          "https://docs.godotengine.org/en/stable/classes/class_textureprogressbar.html",
+          "https://docs.godotengine.org/en/stable/classes/class_styleboxflat.html",
+          "https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html",
+          "https://docs.godotengine.org/en/stable/classes/class_ninepatchrect.html",
+          "https://forum.godotengine.org/t/determining-the-ui-position-via-world-to-screen-projection/132329",
+          "https://forum.godotengine.org/t/static-function-to-translate-a-position-in-2d-space-to-a-position-on-the-canvaslayer/70485",
+          "https://docs.godotengine.org/en/stable/tutorials/2d/2d_transforms.html",
+          "https://godotshaders.com/shader/procedural-circular-progress-bar/",
+          "https://godotshaders.com/shader/radial-cooldown-shader/",
+          "https://godotshaders.com/shader-tag/ui/",
+          "https://github.com/gdquest-demos/godot-open-rpg",
+          "https://github.com/DesirePathGames/Slay-The-Robot",
+          "https://github.com/ramaureirac/godot-tactical-rpg",
+          "https://github.com/notofonts/noto-cjk/blob/main/Sans/LICENSE",
+          "https://community.software.sil.org/t/im-inquiring-about-google-noto-sans-and-serif-cjk-licenses/5678",
+          "https://managore.itch.io/m5x7",
+          "https://shaggydev.com/2025/04/09/godot-ui-postprocessing-shaders/",
+          "https://docs.godotengine.org/en/stable/tutorials/ui/gui_using_fonts.html",
+          "https://forum.square-enix.com/ffxiv/threads/371705"
+        ],
+        "open_questions": [
+          "SoT 飘字形状图标（剑/菱/星/十字）当前已用 _draw() 自绘，需确认：多段叠加（同目标向右上偏移）的坐标偏移逻辑是否已实现，还是仍在待做列表？",
+          "DamageForecaster 的 get_screen_transform() 锚定方案在相机缩放（Camera2D.zoom）情况下是否已验证？Godot 4 中 zoom 会影响 canvas_transform，需确认实际战棋场景的缩放参数。",
+          "NinePatchRect 角饰纹理如果要制作：由 Mercury 管线还是用户临时提供一张占位纹理？是否阻塞当前 UI 实装？（判断：不阻塞，可先用 StyleBoxFlat 占位，后续替换为 NinePatchRect）",
+          "字体方案：是否接受在技能槽角标/数值处使用 m5x7（英数像素风） + Noto Sans CJK SC 作字体回退链？还是统一用单一字体（全程 Noto Sans CJK SC）？两者视觉气质差异明显，需用户确认方向。",
+          "Pixel UI Theme for Godot（$5，itch.io，Pelatho）的8×8像素风主题是否与 SoT 的暗黑哥特气质兼容？当前原型是暗紫黑底+金边，该主题偏更克制的8位像素清色调，气质可能有出入，需用户看截图后判断是否纳入。",
+          "godotshaders.com 上的 UI Shader (2D) 发光边框 shader 的具体许可证需要访问页面核实（搜索结果未返回许可证类型，建议实装前直接访问 https://godotshaders.com/shader/ui-shader-2d/ 确认）。"
+        ],
+        "version_notes": "调研时间：2026-06-30。Godot 版本：4.6 stable（SoT 当前版本）。所有 Godot API（TextureProgressBar、StyleBoxFlat、LabelSettings、get_screen_transform）均基于 Godot 4.x stable 文档验证，不依赖训练数据。插件版本：minos-damage-numbers-for-godot（无具体版本号标注，2024年活跃维护中）、Slay the Robot（Godot 4.6 GDScript）。Noto Sans CJK SC 许可证来源：github.com/notofonts/noto-cjk 仓库 LICENSE 文件 + SIL 官方论坛交叉确认，均为 OFL 1.1。"
+      },
+      {
+        "dimension": "UI 动效与 juice 模式（Godot 4.6，shader-free 优先）",
+        "summary": "本次调研覆盖战棋 UI 的全套 juice 动效模式：飘字弹跳上浮、屏幕/控件抖动、技能槽冷却扇形、HP 条延迟追赶、StyleBox 属性动画、面板出现消失过渡、Tween 缓动函数选择、create_tween 并行链式用法，以及四类最小 shader 增益（流光、发光、溶解、渐变描边）的成本与必要性分析。所有 shader-free 方案均与项目现有全 _draw 架构兼容；shader 方案均来自 CC0/MIT 授权资源，可商用。TRANS_SPRING 于 Godot 4.1 引入，4.6.1 下稳定可用。",
+        "findings": [
+          {
+            "claim": "create_tween 的串行、并行、chain 三种模式及正确使用规范",
+            "detail": "Godot 4 中 Tween 节点已移除，必须用 Node.create_tween() 或 get_tree().create_tween()；后者生命周期不依赖节点，适合节点在动画结束前被 queue_free 的场景（如飘字）。默认模式为串行：每步等前一步完成再执行。parallel() 紧贴在某一步之前调用，使该步与前一步并行执行（非全局）。set_parallel(true) 使此后所有步均并行；chain() 在此之后恢复串行插入点。在同一属性上启动新 Tween 前必须先 kill() 旧的，否则两个 Tween 竞争属性会产生跳变。典型飘字综合动效（串并联合）示例流程：① tween_property(label, 'scale', Vector2(1.5,1.5), 0.07) 瞬间放大；② parallel() 同时 tween_property(label, 'modulate:a', 1.0, 0.07) 确保可见；③ tween_property(label, 'scale', Vector2(1.0,1.0), 0.12) 弹回原大；④ tween_interval(0.3) 停留可读；⑤ tween_property(label, 'position:y', pos_y-60, 0.45) 上浮；⑥ parallel() 同时 tween_property(label, 'modulate:a', 0.0, 0.45) 淡出；⑦ tween_callback(label.queue_free)。全程 shader-free。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/classes/class_tween.html",
+              "https://www.syntaxcache.com/gdscript/cheatsheet/tweens"
+            ]
+          },
+          {
+            "claim": "缓动函数适用场景速查：不同 TRANS_* 与 EASE_* 组合对应不同 UI 情境",
+            "detail": "核心规律：进场用 EASE_OUT（快起慢停，感觉有力量落地），退场用 EASE_IN（加速离开，干脆），持续循环用 EASE_IN_OUT（最慢在两端，自然呼吸感）。具体组合建议——① EASE_OUT + TRANS_CUBIC：最通用的 UI 出现/收起，适合面板滑入、HP 条追赶；② EASE_OUT + TRANS_BACK：弹跳过冲（过冲约10%后回正），适合技能槽选中高亮、按钮按下弹起，有活力感，战棋哥特风适度使用；③ EASE_OUT + TRANS_SPRING（Godot 4.1 起可用）：物理弹簧，比 TRANS_ELASTIC 更可控，适合 HP 追赶条到达终点时的微弹；④ EASE_OUT + TRANS_ELASTIC：夸张弹簧，仅限风格化/卡通游戏，当前哥特风不推荐；⑤ EASE_IN_OUT + TRANS_SINE：平滑循环，适合 idle 发光脉冲、呼吸动画（不暴力）；⑥ EASE_IN + TRANS_QUAD：元素退出/消失，加速消失更干脆；⑦ EASE_OUT + TRANS_QUAD：数值追赶（ghost bar lerp），比 CUBIC 稍平，更接近线性感觉。飘字数字弹跳推荐 TRANS_BACK + EASE_OUT，暴击版放大倍数从 1.5x 提升到 2.0x 并维持 TRANS_BACK。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/classes/class_tween.html",
+              "https://school.gdquest.com/glossary/easing",
+              "https://www.gotut.net/tweens-in-godot-4/"
+            ]
+          },
+          {
+            "claim": "飘字弹跳动效（scale punch + 停留 + 上浮淡出）完全 shader-free，Tween 三阶段实现",
+            "detail": "阶段一「冲击弹跳」：instantiate Label，设 pivot_offset = size/2（居中缩放），立即 tween_property scale 从 Vector2(1.5,1.5) → Vector2(1.0,1.0)，时长 0.07s，TRANS_BACK + EASE_OUT；暴击版从 Vector2(2.0,2.0) → Vector2(1.0,1.0)，时长 0.09s，并同步 modulate:a 1.0→1.0（确保可见）。阶段二「停留可读」：tween_interval(0.3)，数字悬浮在目标头顶，让玩家读取，FF14 风格标配（此为与直接上浮方案最大差异点）。阶段三「上浮淡出」：并行 tween_property position.y -= 60（距离可按技能类型微调）+ tween_property modulate:a 0.0，时长 0.4-0.5s，TRANS_QUAD + EASE_OUT。同一目标多段伤害叠加：每个新实例在前一个实例基础上右偏 Vector2(12,0) * active_count（需全局管理器追踪同目标活跃飘字数）。类型配色通过 Label.modulate 或 Label.add_theme_color_override('font_color') 设置，无需 shader：物理=白色 #e6dbc7 / 魔法=紫色 #AA88FF / 纯粹=金色 #FFD700 / 混合=橙色 #FF8C00 / 治疗=绿色 / MISS=灰色。战棋回合制频率低，无需对象池，直接 instance + queue_free 即可。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://kidscancode.org/godot_recipes/4.x/ui/floating_text/index.html",
+              "https://www.wayline.io/blog/godot-dynamic-damage-numbers",
+              "https://docs.godotengine.org/en/stable/classes/class_tween.html"
+            ]
+          },
+          {
+            "claim": "屏幕/控件抖动采用 trauma 衰减系统，战棋场景须区分全屏抖动与控件抖动",
+            "detail": "trauma 系统核心：维护 float trauma（0-1），受击时 add_trauma(amount) 累加（clamp 到 1.0），_process 中 trauma -= decay * delta（decay 典型值 0.8-1.5），实际抖幅 = trauma^2（平方使轻微值几乎无感，重击才明显）。两种 shader-free 实现：① Camera2D.offset 全屏抖（max_offset 建议 ≤ Vector2(8,6)，避免影响战棋格子坐标映射）；② Control.position 控件抖（仅抖特定 UI 节点，不影响世界坐标）——对战棋更安全。控件抖 Tween 实现：kill 旧 tween，新建 tween，for i in 6: 交替 tween_property(node, 'position:x', original_x ± shake_px, 0.04)，最后归位，shake_px 典型 4-8px。Godot 4 中旧 OpenSimplexNoise 已更名为 FastNoiseLite，噪声驱动比随机驱动更平滑自然，推荐用于 Camera2D 方案。受击伤害数字时触发控件抖：HP 条和伤害预测浮窗最适合做控件抖，全屏抖留给大技能/必杀。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://kidscancode.org/godot_recipes/4.x/2d/screen_shake/index.html",
+              "https://www.musah.net/posts/godot-4-screenshake.html",
+              "https://gist.github.com/Alkaliii/3d6d920ec3302c0ce26b5ab89b417a4a"
+            ]
+          },
+          {
+            "claim": "技能槽冷却扇形首选 _draw() + draw_arc 纯代码方案，与项目现有架构零冲突",
+            "detail": "方案A（推荐，本项目最优）：在技能槽自绘 Control 的 _draw() 中追加扇形遮罩逻辑。计算：start_angle = -PI/2（12点钟），end_angle = -PI/2 + 2*PI * (1.0 - cooldown_ratio)（cooldown_ratio 从1递减到0）。draw_arc(center, radius, start_angle, end_angle, 64, Color(0,0,0,0.55), thickness, true)——最后参数 true 表示填充扇形而非仅弧线（GDScript: draw_arc 第7参数 antialiased，填充扇形应用 draw_polygon 或通过 draw_arc + draw_line 组合实现；更精确做法是用 draw_colored_polygon 或预算多边形点模拟扇形遮罩）。改变 cooldown_ratio 时调用 queue_redraw() 触发重绘。回合数文字用 draw_string 叠在圆心。此方案与项目现有全 _draw 架构完全统一，零外部依赖。方案B（备选）：TextureProgressBar，fill_mode = FILL_COUNTER_CLOCKWISE，radial_initial_angle = -90（从12点开始），叠加在技能图标之上，tween value 属性从 100→0；需要 texture_under/texture_progress 贴图（可用 ImageTexture.create_from_image 程序生成纯色1x1，无需外部PNG）。方案C（最小shader）：28行 CC0 radial cooldown shader，参见 shader 增益小节。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/classes/class_textureprogressbar.html",
+              "https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html",
+              "https://godotshaders.com/shader/radial-cooldown-shader/"
+            ]
+          },
+          {
+            "claim": "HP 条延迟追赶（双段残影条）完全 shader-free，延迟 Tween + _draw 实现",
+            "detail": "结构：在现有 HP 条 _draw 逻辑中增加 ghost_value 变量，绘制两段矩形：底层残影条（宽度按 ghost_value/max_hp 比例，颜色用受击类型色或淡红 Color(0.8,0.2,0.2,0.6)），上层实时条（宽度按 hp/max_hp，颜色为现有渐变绿→黄→红）。逻辑（GDScript 伪码）：take_damage 时 hp 立即更新→queue_redraw() 实时条即刻收缩→kill 旧延迟 timer→等待 0.45s→创建 Tween（EASE_OUT + TRANS_QUAD，0.5s）驱动 ghost_value → hp；追赶过程中需在 Tween 的 tween_method 回调里调用 queue_redraw()，或在 _process 中持续 queue_redraw（后者性能稍差但写法更简单）。连续受伤时每次 kill 旧 tween 并重新计时，ghost_value 从当前位置开始追赶新目标（不重置到满血）。治疗时反向：hp 上升而 ghost_value 低于 hp 时不显示残影，直接隐藏底层条。颜色建议：残影条物理伤害用白色（与飘字物理白一致），魔法伤害用 #AA88FF 淡紫，使玩家能感知伤害类型。",
+            "evidence_strength": "medium",
+            "sources": [
+              "https://kidscancode.org/godot_recipes/4.x/math/interpolation/index.html",
+              "https://dredyson.com/advanced-godot-globaltweens-techniques-that-pros-dont-want-you-to-know-how-i-mastered-async-tween-automation-fire-and-forget-loops-and-production-ready-animation-workflows-in-godot-4-x/",
+              "https://docs.godotengine.org/en/stable/classes/class_tween.html"
+            ]
+          },
+          {
+            "claim": "StyleBoxFlat 所有颜色/圆角/描边属性均可被 tween_property() 直接驱动，但须避免共享实例",
+            "detail": "可动画属性完整列表：bg_color、border_color、shadow_color（颜色类）；corner_radius_top_left、corner_radius_top_right、corner_radius_bottom_left、corner_radius_bottom_right（圆角，int）；border_width_top/bottom/left/right（描边宽度，int）；shadow_size（int）。关键陷阱：StyleBoxFlat 是 Resource，多个控件若共享同一实例，tween 会同时改变所有使用该实例的控件。解决方案：在 _ready 中对每个需要独立动画的控件调用 stylebox.duplicate() 并 add_theme_stylebox_override('panel', duplicated_sb)。本项目适用场景：① 技能槽选中时 border_color 从 #b8942f 脉冲到 #ffe08a（亮金）再回归（0.15s + 0.25s，TRANS_SINE + EASE_IN_OUT）；② 不可用技能槽 bg_color 向暗灰渐变（0.2s，EASE_OUT）；③ 仪表盘进入「危险HP」状态时 border_color 缓慢切换到暗红（1.0s 循环脉冲）。圆角动画注意：corner_radius 动画每帧触发 StyleBox 几何重新生成，代价高于颜色动画，仅用于一次性过渡，不做持续循环。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/classes/class_styleboxflat.html",
+              "https://forum.godotengine.org/t/how-can-i-fade-a-panel-in-4-0/407"
+            ]
+          },
+          {
+            "claim": "面板出现消失过渡：三要素（淡入淡出 + 缩放冲击 + 滑入）shader-free 组合，须配合状态机防冲突",
+            "detail": "三要素：① modulate.a：出现从0→1，消失从1→0；② scale + pivot_offset：出现时从 Vector2(0.92,0.92)→Vector2(1.0,1.0)（缩放需先设 pivot_offset = size/2 使其从中心缩放而非左上角），搭配 modulate 并行执行；③ position 滑入（可选，浮窗类适用）：y 从 target_y+10 → target_y。推荐参数——出现：0.18s，TRANS_CUBIC + EASE_OUT，modulate 与 scale 并行；消失：0.10s，TRANS_QUAD + EASE_IN（消失要比出现快，用户无需等待）。DamageForecaster 浮窗特殊处理：从目标格头顶 position.y-8 向下滑入 position.y，时长 0.08s，确保指向箭头定位准确后再做淡入。状态机保护（关键）：定义 enum PanelState {HIDDEN, ENTERING, VISIBLE, EXITING}，每次调用 show/hide 前检查当前状态，若处于 ENTERING/EXITING 则先 kill() 当前 tween 再启动新过渡，防止动画叠加导致属性残留异常。_ready 中预设初始状态（modulate.a = 0.0, scale = Vector2(0.92,0.92)），避免首帧闪烁（首帧 _draw 完成之前控件已可见）。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://forum.godotengine.org/t/how-can-i-fade-a-panel-in-4-0/407",
+              "https://dredyson.com/advanced-godot-globaltweens-techniques-that-pros-dont-want-you-to-know-how-i-mastered-async-tween-automation-fire-and-forget-loops-and-production-ready-animation-workflows-in-godot-4-x/",
+              "https://docs.godotengine.org/en/stable/classes/class_tween.html"
+            ]
+          },
+          {
+            "claim": "【最小 shader 增益】流光 shine：11行 CC0，技能槽选中流光最低成本方案，必须 shader",
+            "detail": "2D Shine Highlight shader（godotshaders.com，CC0，11行）：shader_type canvas_item，diagonal sine wave 对角流光，参数：shine_color（颜色）/ shine_speed（速度，0-10）/ shine_size（宽度，0.01-1.0）。使用方式：为技能槽的「选中态 ShaderMaterial」挂载此 shader，shine_speed = 1.5，shine_color = Color(1,1,1,0.35)（半透明白色流光叠在金色框上），选中时激活，取消选中时将 shine_color.a 设为0（或 ShaderMaterial 置 null）。是否必须 shader：是——shader-free 的 _draw 可实现静态高亮但无法低成本实现随时间自动运动的对角流光（需手动计算每帧 x/y 截面并传参 queue_redraw，复杂度远超11行 shader）。商用许可：CC0，无条件可用。注意：Godot 4.2+ 中 hint_color 已改为 source_color，若从 Godot 3 版本移植需手动修改 uniform 声明。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://godotshaders.com/shader/2d-shine-highlight/",
+              "https://godotshaders.com/shader/highlight-canvasitem/"
+            ]
+          },
+          {
+            "claim": "【最小 shader 增益】发光 glow：推荐用 WorldEnvironment 全局开启替代单控件 shader，成本最低",
+            "detail": "方案A（推荐，近乎免费）：在 WorldEnvironment.Environment 中开启 glow_enabled，调高 glow_threshold（如 0.8），使只有颜色亮度超过阈值的元素发光。技能槽选中时将 border_color 切换到高亮金 Color(1.0, 0.92, 0.35)（HDR 亮度>1 更有效），会自动被全局 glow 捕捉，无需任何 per-node shader。代价：一次性项目设置，运行时零额外开销。方案B（局部发光，~50行 CC0 shader）：godotshaders.com 的 2D Glow Screen 后处理 shader，需在 CanvasLayer 下加 ColorRect 并挂载；需在项目设置中开启 HDR 2D；GPU 消耗中等（按像素 blur 采样）；Web 构建不支持。是否必须 shader：方案A不需要 shader（依赖全局设置）；若不开 WorldEnvironment 且要局部发光则必须 shader。优先推荐方案A，与哥特暗金配色高度契合。",
+            "evidence_strength": "medium",
+            "sources": [
+              "https://godotshaders.com/shader-tag/glow/",
+              "https://forum.godotengine.org/t/how-to-use-glow-effect-in-godot-4/1626"
+            ]
+          },
+          {
+            "claim": "【最小 shader 增益】溶解 dissolve：11行 CC0（需4.x适配），浮窗消失的高级过渡，必须 shader",
+            "detail": "Simple 2D Dissolve shader（godotshaders.com，CC0，原版11行，Godot 3；4.x 适配：hint_albedo 改为 source_color，其余不变）。参数：dissolve_texture（NoiseTexture2D，程序生成，无需外部文件）/ dissolve_value（0-1，控制溶解进度）。使用方式：面板/浮窗退出时 Tween dissolve_value 从 0→1（消失），出现时从 1→0（显现）；可替代或叠加 modulate.a 淡出，视觉层次更丰富。NoiseTexture2D 配置参考：noise = FastNoiseLite，frequency = 0.03-0.08（过高碎片化，过低溶解边缘太大块），width/height = 与控件相近尺寸。是否必须 shader：是——_draw 无法实现噪点溶解效果；但若接受纯淡出，modulate.a tween 是零成本降级方案，可先实装淡出，后续再升级为溶解。商用许可：CC0，无限制。",
+            "evidence_strength": "medium",
+            "sources": [
+              "https://godotshaders.com/shader/simple-2d-dissolve/",
+              "https://github.com/BodenMcHale/PixelDissolve"
+            ]
+          },
+          {
+            "claim": "【最小 shader 增益】渐变描边 outline：单色描边有 ~70行 CC0 方案，真正渐变描边须自写扩展",
+            "detail": "现成方案：All-in-One Outline Shader（godotshaders.com，CC0，~70行，Godot 4.2+ 验证）——参数含 thickness / ring_count / outline_color / border_clipping_fix，支持单色描边；不支持渐变色。若要实现「外金内白」双色描边效果（本项目 Diablo IV 方向目标）：shader-free 替代——用两层 StyleBoxFlat 叠加模拟：外框 border_width 较宽（3-4px）颜色为深金 #8a6a20，内框 border_width 较窄（1-2px）颜色为亮白 #e0d8c0，两层叠加产生金属厚重感，无渐变但有层次感（无需 shader）。若要真正渐变描边：在 All-in-One Outline 基础上添加基于 UV.x 或 UV.y 的 mix() 混色，约额外10行代码，合计 ~80行，仍为 CC0 可商用。是否必须 shader：双色分层 StyleBox 不需 shader；真正颜色渐变描边必须 shader。建议先用双层 StyleBox 方案，视风格验收结果决定是否升级到 shader 渐变描边。",
+            "evidence_strength": "medium",
+            "sources": [
+              "https://godotshaders.com/shader/all-in-one-outline-shader/",
+              "https://godotshaders.com/shader/configurable-canvasitem-outline-shader/"
+            ]
+          },
+          {
+            "claim": "【最小 shader 增益】冷却扇形专用 radial shader：28行 CC0，适合需要贴图图标时的备选方案",
+            "detail": "Radial Cooldown Shader（godotshaders.com，CC0，28行）：参数 cooldown_progress（0-1）/ use_transparency（布尔）/ transparency_alpha（0-1）。使用方式：挂载到遮罩 TextureRect/ColorRect，将 cooldown_progress 通过 Tween 或 set_shader_parameter() 从1→0驱动。优势：图标可以是任意纹理，遮罩精确跟随圆形；劣势：已知与 AtlasTexture 区域及部分 TextureRect 节点有兼容问题（用户反馈）。相比之下，本项目已全程 _draw，推荐直接用 draw_arc 方案（Finding 5 方案A），无需此 shader；仅当技能图标为真实 PNG 贴图时此 shader 有价值。",
+            "evidence_strength": "medium",
+            "sources": [
+              "https://godotshaders.com/shader/radial-cooldown-shader/"
+            ]
+          }
+        ],
+        "resources": [
+          {
+            "name": "Godot 4 Tween 官方文档",
+            "url": "https://docs.godotengine.org/en/stable/classes/class_tween.html",
+            "license": "CC-BY-3.0",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "不涉及（参考文档）",
+            "notes": "create_tween / set_parallel / chain / tween_property / tween_callback / set_trans / set_ease 完整 API 参考，所有 TRANS_* 与 EASE_* 枚举值列表。TRANS_SPRING 于 4.1 引入，4.6.1 下稳定。"
+          },
+          {
+            "name": "KidsCanCode Godot Recipes — Floating Combat Text",
+            "url": "https://kidscancode.org/godot_recipes/4.x/ui/floating_text/index.html",
+            "license": "MIT",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "不涉及（代码逻辑，字体由项目决定）",
+            "notes": "飘字基础实现（Label + Tween 位移 + modulate:a 淡出），包含 FCTManager 管理器模式和暴击放大逻辑。需改造以实现「停留后上浮」的 FF14 风格三阶段。"
+          },
+          {
+            "name": "KidsCanCode Godot Recipes — Screen Shake",
+            "url": "https://kidscancode.org/godot_recipes/4.x/2d/screen_shake/index.html",
+            "license": "MIT",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "不涉及",
+            "notes": "trauma 衰减系统完整实现，含随机偏移和 OpenSimplexNoise（Godot 4 已改名 FastNoiseLite）两种方案。战棋使用时建议改用 Control.position 抖动替代 Camera2D.offset 抖动，避免影响格子坐标映射。"
+          },
+          {
+            "name": "2D Shine Highlight Shader（godotshaders.com）",
+            "url": "https://godotshaders.com/shader/2d-shine-highlight/",
+            "license": "CC0",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "不涉及（shader 不影响字体）",
+            "notes": "11行，对角线 sine wave 流光，参数：shine_color / shine_speed / shine_size。Godot 4.2+ 需将 hint_color 改为 source_color。最小成本选中高亮方案。"
+          },
+          {
+            "name": "Highlight CanvasItem Shader（godotshaders.com）",
+            "url": "https://godotshaders.com/shader/highlight-canvasitem/",
+            "license": "CC0",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "不涉及",
+            "notes": "约 78 行，旋转流光，参数更丰富（旋转角度 / 速度 / 亮度 / Position 区间），可控 Position uniform 配合 Tween 实现「流光扫过一次」效果。兼容模式下 fma() 需改为普通乘加。"
+          },
+          {
+            "name": "Simple 2D Dissolve Shader（godotshaders.com）",
+            "url": "https://godotshaders.com/shader/simple-2d-dissolve/",
+            "license": "CC0",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "不涉及",
+            "notes": "原版 11 行（Godot 3），4.x 适配：hint_albedo → source_color。需配套 NoiseTexture2D（程序生成，无外部文件依赖）。通过 Tween dissolve_value uniform 驱动溶解进度。"
+          },
+          {
+            "name": "Radial Cooldown Shader（godotshaders.com）",
+            "url": "https://godotshaders.com/shader/radial-cooldown-shader/",
+            "license": "CC0",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "不涉及",
+            "notes": "28 行，参数 cooldown_progress / use_transparency / transparency_alpha。与 AtlasTexture 有已知兼容问题。本项目全 _draw 架构优先用 draw_arc 方案，此 shader 作为图标为真实贴图时的备选。"
+          },
+          {
+            "name": "All-in-One Outline Shader（godotshaders.com）",
+            "url": "https://godotshaders.com/shader/all-in-one-outline-shader/",
+            "license": "CC0",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "不涉及",
+            "notes": "约 70 行，单色描边，参数含 thickness / ring_count / border_clipping_fix / square_border。不支持渐变描边。可在此基础上扩展约 10 行实现双色渐变描边。Godot 4.2.1 验证。"
+          },
+          {
+            "name": "Radial Progress Indicator 插件（Godot Asset Library）",
+            "url": "https://github.com/daveTheOldCoder/godot-radial-progress-indicator",
+            "license": "MIT",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "不涉及",
+            "notes": "Godot 4 插件，v2.1.2（2025-10），提供 Control 节点含 radius / thickness / bg_color / bar_color / nb_points 参数，内建 animate() 方法。本项目若不想手写 draw_arc 扇形可直接引入此插件，MIT 可商用。"
+          },
+          {
+            "name": "SyntaxCache GDScript Tweens 速查表",
+            "url": "https://www.syntaxcache.com/gdscript/cheatsheet/tweens",
+            "license": "不明（仅参考）",
+            "commercial_ok": "unclear",
+            "reusability": "low",
+            "cjk_support": "不涉及",
+            "notes": "速查参考，涵盖 create_tween / set_parallel / set_ease / set_trans / tween_interval / tween_callback / set_loops / kill / pause / play 用法概览。仅作开发参考，不直接复用代码。"
+          }
+        ],
+        "open_questions": [
+          "战棋场景中 Camera2D.offset 抖动对鼠标点格子坐标映射的实际影响范围未量化——是否在 max_offset ≤ Vector2(8,6) 时就可接受，还是必须改用 Control.position 控件抖动，需要在测试场景中实测验证。",
+          "StyleBoxFlat corner_radius 动画在 60fps 下的实际帧率开销未量化——若用于技能槽选中时的圆角扩张过渡（仅 0.2s 一次性），是否会产生可感知卡顿，需在 harness 场景实测 4 个技能槽同时触发的极端情况。",
+          "TextureProgressBar 方案中 texture_under/texture_progress 是否可完全用 ImageTexture.create_from_image（纯程序化，无外部 PNG）满足需求，与全 _draw 规范的兼容性待验证，若存在问题应优先使用 draw_arc 方案。",
+          "飘字多段叠加（同一目标在 0.5s 内触发多段伤害）的右上偏移逻辑需要全局管理器追踪当前活跃飘字数——现有 DamagePopup 实现是否已有活跃实例计数机制，或需要新增 FCTManager autoload 节点。",
+          "WorldEnvironment glow 全局开启方案（Finding 10 方案A）在 Godot 4.6.1 的 Compatibility 渲染模式（WebGL/低端设备）下是否受限——若目标平台包含 Web 导出，需确认 glow_enabled 在 Compatibility 模式下的行为。",
+          "Highlight CanvasItem Shader 约 78 行，其 fma() 函数在 Compatibility 模式下已知报错——若项目使用 Forward+ 则无问题，若后续计划 Web 导出则需提前将 fma(a,b,c) 改写为 a*b+c，应在引入时统一修改。"
+        ],
+        "sources": [
+          "https://docs.godotengine.org/en/stable/classes/class_tween.html",
+          "https://docs.godotengine.org/en/stable/classes/class_styleboxflat.html",
+          "https://docs.godotengine.org/en/stable/classes/class_textureprogressbar.html",
+          "https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html",
+          "https://kidscancode.org/godot_recipes/4.x/ui/floating_text/index.html",
+          "https://kidscancode.org/godot_recipes/4.x/2d/screen_shake/index.html",
+          "https://kidscancode.org/godot_recipes/4.x/math/interpolation/index.html",
+          "https://godotshaders.com/shader/2d-shine-highlight/",
+          "https://godotshaders.com/shader/simple-2d-dissolve/",
+          "https://godotshaders.com/shader/radial-cooldown-shader/",
+          "https://godotshaders.com/shader/all-in-one-outline-shader/",
+          "https://godotshaders.com/shader/highlight-canvasitem/",
+          "https://godotshaders.com/shader-tag/glow/",
+          "https://github.com/daveTheOldCoder/godot-radial-progress-indicator",
+          "https://www.syntaxcache.com/gdscript/cheatsheet/tweens",
+          "https://dredyson.com/advanced-godot-globaltweens-techniques-that-pros-dont-want-you-to-know-how-i-mastered-async-tween-automation-fire-and-forget-loops-and-production-ready-animation-workflows-in-godot-4-x/",
+          "https://www.musah.net/posts/godot-4-screenshake.html",
+          "https://gist.github.com/Alkaliii/3d6d920ec3302c0ce26b5ab89b417a4a",
+          "https://forum.godotengine.org/t/how-can-i-fade-a-panel-in-4-0/407",
+          "https://www.wayline.io/blog/godot-dynamic-damage-numbers",
+          "https://github.com/BodenMcHale/PixelDissolve",
+          "https://school.gdquest.com/glossary/easing",
+          "https://github.com/godotengine/godot-proposals/issues/4212"
+        ],
+        "version_notes": "Godot 4.6.1 stable 下确认：TRANS_SPRING 于 4.1 引入稳定可用；hint_color → source_color uniform 语法变更自 4.0；TextureProgressBar 径向填充属性（radial_initial_angle 等）4.x 全支持；FastNoiseLite 替代旧 OpenSimplexNoise 自 4.0；Tween 节点已移除，仅 create_tween() 有效。godotshaders.com 所有引用 shader 均为 CC0，商用无限制，部分原版为 Godot 3，已在各 Finding 中注明 4.x 适配要点。"
+      },
+      {
+        "dimension": "Godot 原生绘制上限 vs 贴图素材边界（SoT 战斗 UI 美化研究）",
+        "summary": "Godot 4.6 的 _draw() / StyleBox 体系可独立完成「暗黑华丽」战棋 UI 约 70% 的视觉效果，涵盖：顶点渐变背景、双色立体金属框、角部括号装饰、外发光近似（多圈半透明层）、分段资源条、径向冷却扇、矢量几何图标、斜向玻璃高光条、稀疏噪点颗粒、投影阴影。另有约 20% 可用极少量（5-15行）CC0 canvas_item shader 低成本解锁（外发光柔边、扫光动画、玻璃磨砂模糊）。真正必须依赖位图美术素材的只有约 10%：角色头像立绘、手绘雕花角饰、具象技能图标、有机材质纹理。SoT 当前代码（skill_bar.gd / bottom_dashboard.gd / damage_forecaster.gd / sword_qi_bar.gd）已实现径向冷却扇、分段剑气条、双色受光/背光描边、矢量几何徽标，基础扎实。与「暗黑华丽」目标差距最大的缺口依次是：① 背景面板无渐变（StyleBoxFlat 仅支持纯色 bg_color）→ 改用 draw_polygon 顶点色或 GradientTexture2D；② 外发光只有 1-2 圈太生硬；③ 无角部括号装饰；④ 无斜向高光反光条；⑤ 全程用 ThemeDB.fallback_font 占位，无 CJK 自定义字体。以上五条全部可在原生 _draw() 内完成，无需等待 Mercury 素材管线。",
+        "findings": [
+          {
+            "claim": "顶点渐变背景面板——纯原生可做，StyleBoxFlat 不行但 draw_polygon 可行",
+            "detail": "draw_polygon() 接受 PackedColorArray，支持每顶点独立颜色并在顶点间线性插值，因此4顶点矩形即可做双色线性渐变背景（上深紫→下极黑、或对角渐变）。StyleBoxFlat 的 bg_color 属性仅支持单一纯色，官方文档明确无渐变支持——这是现有面板背景「死板」的根源。另一条路：GradientTexture2D 是纯程序资源（无需外部位图文件），支持 LINEAR / RADIAL / SQUARE / CONIC 四种填充类型，赋给 TextureRect 的 texture 属性即可做任意方向渐变背景，运行时可修改 Gradient 控制点颜色做动态效果。两种方案成本都极低：draw_polygon 约 8 行代码，GradientTexture2D 可在编辑器 Inspector 拖拽完成。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/4.6/classes/class_canvasitem.html",
+              "https://docs.godotengine.org/en/stable/classes/class_gradienttexture2d.html",
+              "https://docs.godotengine.org/en/stable/classes/class_styleboxflat.html"
+            ]
+          },
+          {
+            "claim": "双色立体金属描边——纯原生可做，已在 DamageForecaster 有原型",
+            "detail": "连续两到三次 draw_rect(rect, color, false, width) 调用即可模拟金属框的「受光/背光」浮雕感：① 外层深色宽 1.5px（金属阴影）→ ② 中层亮金色 1px（高光面）→ ③ 内层极暗细边 0.5px（分界线）。damage_forecaster.gd 已实现：顶+左画 EDGE_HI（亮金色 0.55α），底+右画 EDGE_LO（暗金色 0.9α），产生可识别的立体边框感。可进一步扩展为三层（再加 -1px 偏移的最外暗环）逼近 Diablo IV 金属镶嵌边框。StyleBoxFlat 的 border_blend 属性可让边框向背景色渐变，也是一个辅助手段。技术成本：在现有双层基础上加一行 draw_rect 即可达到三层效果。",
+            "evidence_strength": "high",
+            "sources": [
+              "D:/ShipOfTheseus/Ship_of_Theseus/scripts/ui/damage_forecaster.gd",
+              "https://docs.godotengine.org/en/stable/classes/class_styleboxflat.html",
+              "https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html"
+            ]
+          },
+          {
+            "claim": "角部括号装饰（金属角饰几何版）——纯原生可做，零贴图",
+            "detail": "在面板四角各画两条 draw_line（水平 + 垂直，各长 8-12px，亮金色），即可获得老派策略 RPG（FF Tactics / Tactics Ogre 风格）的「L形角饰」。进阶版：每角额外加一条对角短线模拟斜切金属角，或改用 draw_polygon 画填充三角形角块。这是「Diablo IV 风金边框」程序可达的上限——有机卷草纹则超出原生能力。SoT 四个核心 UI 组件（SkillBar 槽位/BottomDashboard/DamageForecaster/DamagePopup）均没有角部装饰，这是与「暗黑华丽」目标差距最直观的缺口之一，且修复成本仅约 10 行代码。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html",
+              "https://docs.godotengine.org/en/4.6/classes/class_canvasitem.html"
+            ]
+          },
+          {
+            "claim": "外发光近似（多圈半透明矩形叠加）——纯原生可做，现有代码已有雏形",
+            "detail": "skill_bar.gd 的 SkillSlot._draw() 已用 draw_rect(Rect2(-2,-2,s+4,s+4), Color(C_SELECTED, 0.35), false, 3.0) 实现单圈外发光近似。将此扩展为 4-5 圈（偏移 -1/-2/-4/-6/-9，alpha 从 0.30 递减到 0.04），即可获得软衰减的「光晕」效果，在视觉上逼近 Gaussian glow。StyleBoxFlat 的 shadow_size + shadow_color 属性（已在 skill_bar._make_panel_style 中设 shadow_size=8）本质上也是盒形阴影，shadow_offset=Vector2(0,0) 时等效于全方向柔边外发光近似。纯原生方案的局限：发光边缘为矩形而非真正圆润的 Gaussian 曲线，近距离观察可见「台阶」。若需真 Gaussian 柔边，需转用小型 shader（见 (b) 类清单）。",
+            "evidence_strength": "high",
+            "sources": [
+              "D:/ShipOfTheseus/Ship_of_Theseus/scripts/ui/skill_bar.gd",
+              "https://docs.godotengine.org/en/stable/classes/class_styleboxflat.html"
+            ]
+          },
+          {
+            "claim": "斜向玻璃高光条与稀疏噪点颗粒——纯原生可做，提升「有机质感」",
+            "detail": "玻璃高光条：在面板左上区域用 draw_polygon 画一个细长平行四边形（约 120×6px，45度倾斜，白色 alpha 0.05-0.08），模拟光泽斜高光。这是游戏 UI「高端感」的常用技巧（见 Material Design 卡片高光）。噪点颗粒：在 _ready() 中用 RandomNumberGenerator 预算一组随机 1×1 或 2×2 像素坐标，存为静态数组，在 _draw() 中批量 draw_rect 绘制（alpha 约 0.03-0.05）。面板静止时计算一次即可，不影响性能。这两项在成品效果上的贡献是把「平坦的数字界面」提升为「有微弱材质感的石板/金属面板」，无需任何贴图文件。draw_dashed_line 也是原生方法（Godot 4.0 起内置），可用于面板分隔线、虚线指示标注。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/4.6/classes/class_canvasitem.html",
+              "https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html"
+            ]
+          },
+          {
+            "claim": "（b类）外发光柔边 shader——极少量代码、CC0 商用自由，最值得引入的 shader",
+            "detail": "godotshaders.com 的「Glowing Rect 2D」shader（约 12 行，blend_add 渲染模式，log 衰减函数，CC0 许可）可放在面板背后的 ColorRect 节点上，产生真正的 Gaussian 级柔边外发光。参数：rect_size 控制发光矩形大小，fall_off_scale 控制衰减速率，bness 控制强度。适用于：选中技能槽金色外发光、印记激活时的紫色气场光晕、伤害预测浮窗悬停时的微弱白光。重要前提：该 shader 使用 blend_add 模式（加色混合），不需要 WorldEnvironment HDR——这很关键，因为 WorldEnvironment glow 效果对 CanvasLayer 上的 UI 节点完全无效（已由 Godot 论坛多处讨论确认），不能依赖全局辉光来处理 UI 发光。引入成本：一个 .gdshader 文件 + 每个需要发光的槽位后置一个 ColorRect 子节点。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://godotshaders.com/shader/glowing-rect-2d/",
+              "https://forum.godotengine.org/t/how-to-use-glow-effect-in-godot-4/1626",
+              "https://godotforums.org/d/28698-world-environment-canvas-and-3d-and-glow"
+            ]
+          },
+          {
+            "claim": "（b类）扫光/流光动画 shader——选中状态增益效果，约 5 行可实现",
+            "detail": "对已选中的技能槽添加一个随时间沿 X 方向缓移的半透明高光带（白色 alpha 0.12，smoothstep 软边，TIME 驱动偏移），模拟「金属镜面反光扫过」的动态感。核心代码约 5 行 GLSL（canvas_item shader），不需要任何贴图。godotshaders.com 上 CC0 的流光/扫光类 shader 有多个版本可直接复用。替代方案（完全原生）：用 Tween 动画移动一个 Control 子节点（设 clip_children）来实现扫光，但代码量更多且效果较僵硬。",
+            "evidence_strength": "medium",
+            "sources": [
+              "https://godotshaders.com/shader-tag/glow/",
+              "https://docs.godotengine.org/en/stable/tutorials/shaders/shader_reference/canvas_item_shader.html"
+            ]
+          },
+          {
+            "claim": "（b类）玻璃磨砂背景模糊——博德之门3/毛玻璃风格面板，需 screen_texture 采样",
+            "detail": "「Glow Screen」类 shader（godotshaders.com，CC0，使用 hint_screen_texture 采样当前屏幕像素后模糊）可做背景磨砂玻璃效果，适合伤害预测浮窗（DamageForecaster）做「半透明磨砂」样式。限制：① 需启用 HDR 2D 或使用 gl_compatibility 渲染模式；② Web 平台不支持 texture bias（有平台限制）；③ 若浮窗在最顶层 CanvasLayer，屏幕采样读到的是其下层内容，效果正确；④ 已有的 CC0 版本（1244 favorites）经社区大量验证。对于 SoT 的具体用途建议仅限 DamageForecaster 浮窗，其余面板保持纯原生避免引入额外渲染开销。",
+            "evidence_strength": "medium",
+            "sources": [
+              "https://godotshaders.com/shader/2d-glow-screen-no-worldenvironment-node/",
+              "https://godotshaders.com/shader/glow/"
+            ]
+          },
+          {
+            "claim": "（c类）角色头像/立绘——真正必须位图美术，无程序替代",
+            "detail": "BottomDashboard 左下角的单位头像位置当前用纯色矩形占位。无论用多少 draw_polygon / draw_arc，均无法程序生成一个能传达具体角色识别度的头像。这是硬性必须等待美术素材的项目。唯一的程序近似是：用职业色 + 职业缩写文字作为「临时头牌」（如剑圣=红底「剑」字），保留识别度但不符合 RPG 视觉预期。头像贴图的技术接入点：TextureRect 或 draw_texture()，分辨率建议 64×64 或 80×80px 像素风格。",
+            "evidence_strength": "high",
+            "sources": [
+              "D:/ShipOfTheseus/Ship_of_Theseus/scripts/ui/bottom_dashboard.gd"
+            ]
+          },
+          {
+            "claim": "（c类）手绘雕花角饰——程序几何括号可近似，但有机卷草纹必须美术素材",
+            "detail": "Diablo IV 风格的金属镶嵌框角使用有机卷草/花卷纹样，其曲线复杂度和「手工感」超出纯几何 draw_line 能力范围。程序可达上限：L形括号 + 对角斜切线（约 6 行代码），可营造「策略游戏角饰」感，但与「暗黑华丽雕花」目标有明显差距。若要真正「金属雕花角」，需要 8×8 到 16×16px 的像素美术 sprite 作为角部贴图，通过 NinePatchRect（StyleBoxTexture + 九宫格拉伸）或 draw_texture 放置在四角。这属于 Mercury 像素管线的输出物。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://docs.godotengine.org/en/stable/classes/class_ninepatchrect.html",
+              "https://medium.com/codex/the-power-of-nine-patching-in-godot-aae89679d3cb"
+            ]
+          },
+          {
+            "claim": "（c类）具体技能图标——几何占位图标可用但不可达最终品质",
+            "detail": "DamagePopup._Glyph 已用 draw_polygon / draw_line / draw_arc 实现剑形/菱形/星形/十字/混合几何图标，作为伤害类型徽标效果尚可（小尺寸 12px 下几何形状识别度足够）。但 SkillBar 的技能槽图标当前是「取技能名首字汉字」——这是临时占位，最终需要各技能的专属像素风图标（如「居合」= 一闪式剑气图案，「一闪」= 直线斩击轨迹）。这类具象图标无法程序生成，属于 Mercury 管线任务。接入方式：56×56px sprite 赋给 SkillSlot 的 icon_texture 变量，在 _draw_icon() 中改用 draw_texture 替代当前首字渲染。",
+            "evidence_strength": "high",
+            "sources": [
+              "D:/ShipOfTheseus/Ship_of_Theseus/scripts/ui/damage_popup.gd",
+              "D:/ShipOfTheseus/Ship_of_Theseus/scripts/ui/skill_bar.gd"
+            ]
+          },
+          {
+            "claim": "CJK 商用字体——OFL 许可可商用，Noto Sans SC / Source Han Sans CN 均可嵌入",
+            "detail": "Noto Sans SC（Google 出品）和 Source Han Sans CN（Adobe × Google 联合出品）均采用 SIL Open Font License v1.1，明确允许：嵌入软件/游戏分发、商业销售（条件是不单独出售字体本身），需附 LICENSE 文件。两者均完整覆盖简体中文字符集。文件体积：全量 SC 字体约 8-15MB，建议在 Godot 编辑器 Import 设置中配置字符子集（仅预加载游戏实际用到的汉字）减小包体。Godot 4 支持 MSDF（多通道有向距离场）渲染，可任意缩放字号不失真——对 SkillBar 标题行（9px）到 DamagePopup 数字（16-19px）的跨尺寸使用特别重要。godot-font-baker 插件可将 OFL 字体烘焙为 MSDF atlas（仅含字形缓存，不含原始字体二进制），在某些许可场景下更灵活。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://fonts.google.com/noto/specimen/Noto%2BSans/license",
+              "https://community.software.sil.org/t/im-inquiring-about-google-noto-sans-and-serif-cjk-licenses/5678",
+              "https://github.com/shiena/godot-font-baker",
+              "https://docs.godotengine.org/en/stable/tutorials/ui/gui_using_fonts.html"
+            ]
+          },
+          {
+            "claim": "关键机制确认：WorldEnvironment glow 对 CanvasLayer UI 节点完全无效",
+            "detail": "Godot 引擎设计上 WorldEnvironment 的 Glow/Bloom 效果仅作用于 3D 场景和非 CanvasLayer 的 2D 节点，CanvasLayer 及其所有子节点被明确排除在外（Godot Forum / GitHub Issue #86098 均有记录）。SoT 的四个战斗 UI 组件全部挂载于 CanvasLayer，因此：① 不能通过调整 WorldEnvironment 让 UI 发光；② 任何 UI 发光必须是自绘近似（多圈 draw_rect）或 canvas_item shader（blend_add ColorRect）；③ 不需要也不应为 UI 发光而全局开启 HDR 2D（会影响游戏画面整体色调映射）。这条确认直接决定了 SoT UI 发光的实现路径。",
+            "evidence_strength": "high",
+            "sources": [
+              "https://forum.godotengine.org/t/how-to-use-glow-effect-in-godot-4/1626",
+              "https://godotforums.org/d/28698-world-environment-canvas-and-3d-and-glow",
+              "https://github.com/godotengine/godot/issues/86098"
+            ]
+          }
+        ],
+        "resources": [
+          {
+            "name": "Noto Sans SC",
+            "url": "https://fonts.google.com/noto/specimen/Noto+Sans+SC",
+            "license": "SIL Open Font License v1.1",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "完整简体中文支持，约 6763 汉字（GB2312 范围），全量文件约 8-12MB",
+            "notes": "需随软件附 LICENSE 文件；可用 Godot Import 设置配置字符子集减小包体；支持 MSDF 渲染"
+          },
+          {
+            "name": "Source Han Sans CN",
+            "url": "https://github.com/adobe-fonts/source-han-sans",
+            "license": "SIL Open Font License v1.1",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "cjk_support": "完整简体中文支持，笔画更细腻，适合小字号；Adobe × Google 联合出品",
+            "notes": "与 Noto Sans SC 同许可；有 CN 子集版本（仅简中）可减小文件体积至约 3-5MB"
+          },
+          {
+            "name": "Glowing Rect 2D shader（外发光柔边）",
+            "url": "https://godotshaders.com/shader/glowing-rect-2d/",
+            "license": "CC0（公共领域）",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "notes": "约 12 行，blend_add 模式，log 衰减，适用于 ColorRect 或 Sprite2D；放在面板后方做外发光层；不需要 WorldEnvironment HDR；参数：rect_size / bness / fall_off_scale"
+          },
+          {
+            "name": "2D Glow Screen（无 WorldEnvironment 辉光后处理）",
+            "url": "https://godotshaders.com/shader/2d-glow-screen-no-worldenvironment-node/",
+            "license": "CC0（公共领域）",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "notes": "全屏辉光后处理，hint_screen_texture 采样；1244 次收藏，社区验证度高；放在 CanvasLayer 最顶层 ColorRect；Web 平台有限制；若要精确控制只发光特定元素，不如 Glowing Rect 2D 精准"
+          },
+          {
+            "name": "UI Shader 2D（圆角软边边框）",
+            "url": "https://godotshaders.com/shader/ui-shader-2d/",
+            "license": "CC0（公共领域）",
+            "commercial_ok": "yes",
+            "reusability": "high",
+            "notes": "约 10 行，smoothstep 软边圆角边框；参数：border_width / corner_radius / border_color；可替代 StyleBoxFlat 做更精细的圆角边框渲染"
+          },
+          {
+            "name": "godot-font-baker（CJK 字体 MSDF 烘焙插件）",
+            "url": "https://github.com/shiena/godot-font-baker",
+            "license": "MIT",
+            "commercial_ok": "yes",
+            "reusability": "medium",
+            "cjk_support": "将 TTF/OTF CJK 字体烘焙为 MSDF atlas，不嵌入原始字体二进制",
+            "notes": "Godot 4 编辑器插件；用于在不分发原始字体文件情况下嵌入字形缓存；对 OFL 字体实际上不需要此插件，直接嵌入 TTF 即可合规"
+          }
+        ],
+        "sources": [
+          "https://docs.godotengine.org/en/4.6/classes/class_canvasitem.html",
+          "https://docs.godotengine.org/en/stable/classes/class_styleboxflat.html",
+          "https://docs.godotengine.org/en/stable/classes/class_gradienttexture2d.html",
+          "https://docs.godotengine.org/en/stable/tutorials/2d/custom_drawing_in_2d.html",
+          "https://docs.godotengine.org/en/stable/classes/class_ninepatchrect.html",
+          "https://godotshaders.com/shader/glowing-rect-2d/",
+          "https://godotshaders.com/shader/2d-glow-screen-no-worldenvironment-node/",
+          "https://godotshaders.com/shader/glow/",
+          "https://godotshaders.com/shader/ui-shader-2d/",
+          "https://godotshaders.com/shader-tag/glow/",
+          "https://fonts.google.com/noto/specimen/Noto%2BSans/license",
+          "https://community.software.sil.org/t/im-inquiring-about-google-noto-sans-and-serif-cjk-licenses/5678",
+          "https://github.com/shiena/godot-font-baker",
+          "https://docs.godotengine.org/en/stable/tutorials/ui/gui_using_fonts.html",
+          "https://forum.godotengine.org/t/how-to-use-glow-effect-in-godot-4/1626",
+          "https://godotforums.org/d/28698-world-environment-canvas-and-3d-and-glow",
+          "https://github.com/godotengine/godot/issues/86098",
+          "https://docs.godotengine.org/en/stable/tutorials/shaders/shader_reference/canvas_item_shader.html",
+          "https://medium.com/codex/the-power-of-nine-patching-in-godot-aae89679d3cb"
+        ],
+        "open_questions": [
+          "GradientTexture2D（纯程序资源，编辑器拖拽）vs draw_polygon 顶点色（纯代码）做背景渐变——动态调整面板大小时哪个更方便？GradientTexture2D 随 TextureRect 自动拉伸，draw_polygon 需要在 _draw() 内重新计算顶点坐标，哪种对 SoT 的动态面板更合适？",
+          "引入 Glowing Rect 2D shader 的维护成本权衡：每个需要发光的 SkillSlot 需要额外一个 ColorRect 子节点（约 4 个槽位 × 1 节点），场景树会略有膨胀。是否值得为「外发光柔边」vs「多圈矩形近似」的视觉差异引入 shader 依赖？",
+          "CJK 字体文件包体影响：全量 Noto Sans SC 约 8-12MB，若配置字符子集（仅游戏实际用到的汉字），实际大小能否控制在 2-3MB 以内？需要在 Godot Import 的 language_support 或 preload_configurations 中实际测试。",
+          "角部括号装饰的复用架构：做成独立的 CornerBracket Control 子节点供四个 UI 组件复用，还是每个组件在自己的 _draw() 中重复实现？独立节点复用更干净但增加场景树深度。",
+          "伤害飘字 DamagePopup 引入自定义 CJK 字体后，数字字形的视觉风格是否与「FF14 飘字」设计意图一致？Noto Sans SC 是无衬线现代风格，若目标是「中世纪暗黑」气质，是否需要考虑有衬线或笔画更粗重的字体？"
+        ],
+        "version_notes": "Godot 4.6.1 stable。draw_dashed_line 自 Godot 4.0 起内置（已原生化，无需手动循环模拟虚线）。draw_polygon 的 PackedColorArray 支持是 Godot 4.x 持续特性。GradientTexture2D CONIC 填充类型在 4.x 中引入（具体小版本未找到 changelog 精确记录）。StyleBoxFlat 在 4.x 全版本均无渐变支持——这是已知限制而非 bug，Godot proposals #6812 提出了改进建议但截至 4.6.1 尚未实现。godotshaders.com 所有 shader 代码为 CC0，图片/视频不含在内。"
+      }
+    ],
+    "verifications": [
+      {
+        "target": "UI资源许可证核验（Godot 4.6 战斗UI美化，共12项）",
+        "verdict": "partially_confirmed",
+        "findings": [
+          "【1 Kenney Fantasy UI Borders】CC0 1.0 确认（kenney.nl 直接页面）。商用免署名确认。原声明完全正确。",
+          "【2 Kenney UI Pack RPG Expansion】CC0 1.0 确认（kenney.nl 直接页面）。商用免署名确认。原声明完全正确。",
+          "【3 Kenney's UI Theme for Godot（azagaya）】CC0 1.0 确认（itch.io 页面明文 'Public Domain, you can do whatever you want'）。提供 Godot 3.x 和 Godot 4.x 两个独立版本下载（已确认）。商用无限制确认。待核实点：Godot 4.6.x 具体版本兼容性未在页面明确列出（仅写 '4.x'）；上次更新约 2025 年（约一年前），4.6.1 适配需自测。原声明整体正确，但需补注意 4.6 细版本兼容性未明确验证。",
+          "【4 Themey（wadlo）】三重许可确认：代码 MIT、图像 CC0（src/material 目录除外）、Material Design 图标 Apache 2.0（Google 官方 Apache 2.0 许可）。v0.3.0 发布日期 2024-11-24 确认。Godot 4.x 明确支持确认。Apache 2.0 商用可用（只需保留版权声明，无需付费）。原声明许可证三层结构描述正确。",
+          "【5 ThemeGen（Inspiaaa）】MIT 确认（GitHub + Asset Library 双重核实）。Asset Library 编号 3299 确认。最后更新 2026-05-02（v1.4.0）—— 活跃维护确认。Godot 4.x 兼容确认。原声明完全正确。",
+          "【6 Main Menu Multi-Theme（Asset Library #4258）】MIT 确认。Asset Library 显示目标 Godot 版本为 4.4，最后更新 2025-08-25 确认。注意：原声明未点明 4.4，对于 SoT 使用的 Godot 4.6.1，跨小版本兼容性未核实，需实测后再确认可用。",
+          "【7 Pixel UI Theme（Pelatho/thowsenmedia）】$5 USD 起购确认（itch.io 最低购买价）。v1.4 明确标注 Godot 4.6 兼容，发布日期 2026-01-18 确认。商用允许原文：'one or more game or software projects, either commercially or non-commercially'。无正式标准开源许可证名称（MIT/CC-BY 等），系创作者在 itch.io 自行声明的商业许可。Godot 4.6 版本兼容是本次核验中唯一明确标注 4.6 的付费主题。",
+          "【8 Godot Theme Template（jonathanlake）】MIT 确认。Godot 4.x 确认。但仓库总计仅 4 次提交，无发布版本，无维护活动记录——属于一次性骨架提交而非活跃维护项目。原声明将其定位为结构骨架起点是准确的，但'medium'维护活跃度评分存疑（实际接近停滞）。",
+          "【9 game-icons.net】核验结果：原声明『CC BY 3.0（需署名 Lorc, Delapouite & contributors）』存在两处需纠正：（a）并非所有图标均为 CC BY 3.0——官方 FAQ 明确写明「CC-BY license (or even Public Domain for some)」，部分图标已进入公有领域（CC0 等同），具体需逐图标查看页面；（b）署名不是一个统一的「Lorc, Delapouite & contributors」格式——官方要求的格式为「Icons made by [具体作者名]. Available on https://game-icons.net」，不同图标作者不同，需按图标页面的实际作者名单独署名。游戏内放置在菜单可访问的致谢页即可满足要求。商用可行性不变。",
+          "【10 Dark Fantasy UI Pack（OpenGameArt, Of Far Different Nature）】CC-BY 4.0 确认（OpenGameArt 页面直接标注，zip 文件名含 'cc-by_4.0'）。作者 Of Far Different Nature 确认。商用需署名（致谢页注明作者及链接）确认。原声明正确。",
+          "【11 GDQuest Open RPG（gdquest-demos）】MIT（代码）+ CC0（Kenney 图像/音效/音乐资产）双层许可确认（CREDITS.md 明确列出各资产 CC0）。README 明确标注需要 Godot 4.6.2 打开项目（原声明写法与此完全吻合）。最后提交 2025-07-01。原声明正确；但需注意外部素材（Kenney CC0）与仓库代码（MIT）是独立许可层，引用其 UI 结构代码归 MIT，无需额外顾虑。",
+          "【12 Noto Sans SC / Source Han Sans SC（思源黑体）】SIL Open Font License 1.1 确认（Adobe 官方 GitHub LICENSE.txt + Google Fonts 许可页双重来源）。商业游戏嵌入明确允许（字体可捆绑、内嵌、再分发）。限制：不可单独出售字体本身。原声明正确。附加说明：原声明提到的 be5invis/source-han-sans-ttf 为第三方转换项目，Adobe 官方仓库（adobe-fonts/source-han-sans）自身已提供 TTF 格式（release 分支），建议优先使用官方来源而非第三方转换。"
+        ],
+        "corrections": [
+          "【需纠正 - game-icons.net 许可证描述不准确】原声明「CC BY 3.0（需署名 Lorc, Delapouite & contributors）」有两处错误：① 并非全库统一 CC BY 3.0，官方 FAQ 明确部分图标为公有领域/CC0，需逐图标查看具体页面的许可证标注；② 署名格式不是统一写「Lorc, Delapouite & contributors」，而是需要写各图标实际作者（格式：Icons made by [作者名]. Available on https://game-icons.net），不同图标作者不同。应将原声明修改为：「大多数图标 CC BY 3.0（需按图标实际作者逐一署名），部分图标公有领域（CC0），具体许可以各图标页面显示为准」。",
+          "【需纠正 - Pixel UI Theme 多项目条款已可确认】原声明写「具体多游戏条款未完全确认」，但 itch.io 页面明文：'you can use this asset for one or more game or software projects'，即明确允许多个项目使用单次购买。该条款已确认，无需标注未确认。",
+          "【需补充 - Main Menu Multi-Theme Godot 版本标注不足】原声明未明确指出 Asset Library 登记的目标版本为 Godot 4.4（非 4.6）。SoT 使用 Godot 4.6.1，跨小版本兼容性未核实。应在注释中加注『Asset Library 目标版本 4.4，4.6.1 兼容性需实测』。",
+          "【需补充 - jonathanlake godot-theme-template 维护活跃度严重偏低】原声明未揭示该仓库仅有 4 次提交、无发布版本的实际状态。维护活跃度应从 medium 改为 low/停滞（essentially abandoned），避免误判为可长期依赖的基础设施。",
+          "【需补充 - azagaya Kenney UI Theme Godot 4.6 兼容性未明确验证】itch.io 页面标注 Godot 4.x，但未列出具体版本如 4.6。约一年前更新（2025），建议在注释中加注『4.6.1 兼容性需自测，4.x 标注不等于 4.6 保证』。",
+          "【需补充 - Noto Sans SC 第三方 TTF 转换源风险】原声明推荐 be5invis/source-han-sans-ttf 为 TTF 获取途径，但 Adobe 官方仓库（adobe-fonts/source-han-sans）release 分支本身已包含 TTF 格式，无需依赖第三方转换项目（第三方项目可能存在版本滞后或转换质量问题）。应优先引用官方来源。"
+        ],
+        "sources": [
+          "https://kenney.nl/assets/fantasy-ui-borders",
+          "https://kenney.nl/assets/ui-pack-rpg-expansion",
+          "https://azagaya.itch.io/kenneys-ui-theme",
+          "https://github.com/wadlo/Themey",
+          "https://github.com/google/material-design-icons/blob/master/LICENSE",
+          "https://github.com/Inspiaaa/ThemeGen",
+          "https://godotengine.org/asset-library/asset/3299",
+          "https://godotengine.org/asset-library/asset/4258",
+          "https://thowsenmedia.itch.io/pixel-ui-theme-for-godot",
+          "https://github.com/jonathanlake/godot-theme-template",
+          "https://game-icons.net/about.html",
+          "https://game-icons.net/faq.html",
+          "https://opengameart.org/content/dark-fantasy-ui-pack",
+          "https://github.com/gdquest-demos/godot-open-rpg",
+          "https://github.com/gdquest-demos/godot-open-rpg/blob/main/CREDITS.md",
+          "https://github.com/adobe-fonts/source-han-sans/blob/master/LICENSE.txt",
+          "https://fonts.google.com/noto/specimen/Noto%2BSans/license"
+        ],
+        "confidence": "high"
+      },
+      {
+        "target": "CJK字体许可证核验",
+        "verdict": "partially_confirmed",
+        "findings": [
+          "【Noto Sans SC — 版本号严重错误】原始声明称「v2.005，2025-06-18 发布」。经核验：v2.005 + 2025-06-18 属于 Adobe 发行的 Source Han Sans（思源黑体上游），而非 Google 发行的 Noto Sans SC。notofonts/noto-cjk 仓库最新版为 v2.004（2024年1月27日）。截至 2026-06 notofonts 是否跟进 v2.005 尚存疑（GitHub issue #314 询问「Will Google publish Noto Sans CJK 2.005?」，仍无发布）。许可证 SIL OFL 1.1、GB18030-2022 Level 2（8,105 字）、可商用嵌入分发均属实。来源：https://github.com/notofonts/noto-cjk/releases / https://github.com/notofonts/noto-cjk/issues/314",
+          "【思源黑体 Source Han Sans — 版本与许可证均核实正确】Adobe 于 2025-06-18 发布 v2.005R（含 Unicode 15.1 CJK Extension H 新字）✓。许可证改制节点「v1.002 起为 SIL OFL 1.1，v1.001 及更早为 Apache 2.0」经多来源交叉确认 ✓。LICENSE.txt 版权行 2014-2025 Adobe ✓。SIL OFL 允许随游戏打包嵌入再分发 ✓。来源：https://github.com/adobe-fonts/source-han-sans/releases / https://github.com/adobe-fonts/source-han-sans/blob/master/LICENSE.txt",
+          "【思源宋体 Source Han Serif — 许可证确认，URL 存疑】SIL OFL 1.1 经 GitHub LICENSE.txt 确认 ✓，可商用嵌入 ✓。原始声明 URL 填写为 source.typekit.com/source-han-serif/（该域名旧品牌），权威正本在 https://github.com/adobe-fonts/source-han-serif。字重/可变字体声明未独立验证，但与 Source Han Sans 同源结构可信度高。来源：https://github.com/adobe-fonts/source-han-serif/blob/master/LICENSE.txt",
+          "【得意黑 Smiley Sans — 全部核心声明确认正确】SIL OFL 1.1 ✓，8,335 汉字（GB/T 2312-1980 全量 6,763 + 扩展）已从官方 GitHub 仓库页面直接确认 ✓，最新版 v2.0.1（2024年2月7日）。商用免授权、可嵌入游戏 ✓。原始声明未提最新版本日期，属信息不完整，非错误。来源：https://github.com/atelier-anchor/smiley-sans",
+          "【阿里巴巴普惠体 3.0 — 两处需纠正】(A) 「显著标注」要求：原始声明称「嵌入商业软件须在软件内显著标注使用了该字体」，但核验官方使用声明（maoken.com 转载全文）未找到此硬性「显著标注」要求；条款仅禁止单独出售/转让/修改字体、不得删除著作权声明、不得误导与阿里商业关联。嵌入「各类嵌入式应用（iOS/Android/Windows/macOS/Web）」明确允许，无强制署名要求。此条款描述标注为 unclear/unconfirmed，从严处理。(B) 字重数量前后矛盾：原始声明同时出现「7 字重」（notes 栏）与「7–9 个」（reusability 栏）。核验：旧规格简体有 9 字重（2.0 版沿用），3.0 新增 GB18030-2022 Level 1+2 规格为 7 字重；Level 3（覆盖实现级别3，194,460 全形汉字）仅 Regular 单一字重。「7 字重共 194,460 汉字」说法混淆不同实现级别，应描述为「7 字重覆盖 Level 1+2，Level 3 仅 Regular 1 字重，合计 194,460 字」。来源：https://www.ithome.com/0/696/780.htm / https://www.maoken.com/freefonts/1151.html",
+          "【霞鹜文楷 LXGW WenKai — 许可证与字符集均核实正确】SIL OFL 1.1 ✓；完整版 CJK 统一表意 20,992 字 + 扩展 A 6,592 字 ✓；Lite 版确认覆盖 GB/T 2312-80（6,763 汉字）已从作者博文独立确认 ✓（https://lxgw.github.io/2021/02/15/Lxgw-Wenkai-GB2312/）。Lite 版说明补充：「在 GB 18030-2022 Level 2 范围内缺少部分生僻字，如需使用请下载完整版」。最新版 v1.522（2026年3月17日）。商用嵌入可行 ✓。来源：https://github.com/lxgw/LxgwWenKai / https://lxgw.github.io/2021/02/15/Lxgw-Wenkai-GB2312/",
+          "【站酷庆科黄油体 ZCOOL QingKe HuangYou — 字符数声明错误】原始声明称「精确字符数未披露」且「覆盖接近 GB2312」，两点均不准确。核验：Google Fonts / fontsource 元数据显示该字体有 9,429 字符 / 9,432 字形，远超 GB2312 的 6,763 字，「接近 GB2312」为严重低估。单字重 ✓，SIL OFL 1.1 ✓。来源：https://fontsource.org/fonts/zcool-qingke-huangyou",
+          "【融合像素字体 Fusion Pixel Font — 许可证确认，「最完整」表述存争议】字体文件 SIL OFL 1.1 ✓，构建工具 MIT ✓，8px/10px/12px 三尺寸 ✓，2025 年仍维护 ✓。「目前最完整的可商用 CJK 像素字体」是评述性主张，仓库本身未作此声明，且 README 明确标注「仍是 patch-based 字体方案，对各语言字形不应有特别期望」。作为主观最优评估可保留但需加限定语。来源：https://github.com/TakWolf/fusion-pixel-font",
+          "【方舟像素字体 Ark Pixel Font — 覆盖不完整程度被低估，字重描述待查】原始声明称「部分字形仍在补全」，但官方 GitHub 明确标注「该字体目前处于积极开发阶段，仍然缺少大量汉字（lacks MANY Chinese characters）」，并向 10px/12px 用户推荐改用 Fusion Pixel 作为过渡替代。原始声明软化了不完整程度。关于「16px 尺寸最完整」：无法从官方文档直接确认；12px 是主力开发目标，10px/16px 状态为实验性（experimental），故「16px 最完整」存疑（uncertain）。SIL OFL 1.1 ✓，最新版 2026.05.07 仍在维护 ✓。来源：https://github.com/TakWolf/ark-pixel-font"
+        ],
+        "corrections": [
+          "[错误] Noto Sans SC 版本号：原始声明「v2.005，2025-06-18」实为 Adobe Source Han Sans 的发布信息。Noto Sans SC（Google 发行版）最新为 v2.004（2024-01-27），v2.005 截至 2026-06 尚未由 notofonts 发布。两者字形同源但是不同发行版，版本号不可混用。",
+          "[错误] 阿里巴巴普惠体「显著标注」要求：官方许可条款未发现强制「显著标注」要求，嵌入各类应用被明确允许，限制仅为禁止单独出售/转让/修改/删除著作权声明。此条款应标注为 unclear/unconfirmed，不应作为确定性要求转述。",
+          "[错误] ZCOOL QingKe HuangYou「精确字符数未披露」：实际 9,429 字符（来自 Google Fonts / Fontsource 元数据），「覆盖接近 GB2312（6,763字）」明显低估，应改为「9,429 字符，超过 GB2312 范围」。",
+          "[修正] 阿里巴巴普惠体字重描述不一致：「7 字重」（GB18030-2022 Level 1+2 规格）与「7–9 个」混用来源于版本差异（2.0 旧规格 9 字重 vs 3.0 新规格 7 字重），须分开标注；「7 字重共 194,460 汉字」将两个不同实现级别混合，逻辑上不准确。",
+          "[修正] 方舟像素字体覆盖程度表述：「部分字形仍在补全」低估严重程度，官方说法是「缺少大量汉字（lacks MANY characters）」。「16px 最完整」存疑，12px 为主力开发目标，16px 为实验性尺寸。",
+          "[提示] 思源宋体 URL：原始声明 URL source.typekit.com/source-han-serif/ 为旧品牌域名，建议改为 https://github.com/adobe-fonts/source-han-serif 作为权威来源。",
+          "[提示] Fusion Pixel 「最完整」主张：属主观评述，仓库本身不作此声明且注明 patch-based 局限性，如引用应加「目前已知」等限定语。"
+        ],
+        "sources": [
+          "https://github.com/notofonts/noto-cjk/releases",
+          "https://github.com/notofonts/noto-cjk/issues/314",
+          "https://github.com/adobe-fonts/source-han-sans/releases",
+          "https://github.com/adobe-fonts/source-han-sans/blob/master/LICENSE.txt",
+          "https://github.com/adobe-fonts/source-han-serif/blob/master/LICENSE.txt",
+          "https://github.com/atelier-anchor/smiley-sans",
+          "https://www.alibabafonts.com/",
+          "https://www.maoken.com/freefonts/1151.html",
+          "https://www.ithome.com/0/696/780.htm",
+          "https://github.com/lxgw/LxgwWenKai",
+          "https://lxgw.github.io/2021/02/15/Lxgw-Wenkai-GB2312/",
+          "https://github.com/lxgw/LxgwWenKai-Lite",
+          "https://fontsource.org/fonts/zcool-qingke-huangyou",
+          "https://github.com/googlefonts/zcool-qingke-huangyou",
+          "https://github.com/TakWolf/fusion-pixel-font",
+          "https://github.com/TakWolf/ark-pixel-font",
+          "https://ken-lunde.medium.com/the-gb-18030-2022-standard-3d0ebaeb4132",
+          "https://groups.google.com/g/noto-font/c/GRp8kNNMqOA"
+        ],
+        "confidence": "high"
+      },
+      {
+        "target": "原生绘制边界核验",
+        "verdict": "partially_confirmed",
+        "findings": [
+          "【反例 A1：被归入「原生能做好」但实际代价更高】draw_polygon 顶点渐变背景存在两个隐蔽技术缺陷，原始过于乐观。缺陷一：Godot 4 的 CanvasItem 顶点颜色被强制压缩为 8 位整数（每通道 256 级），从深紫 (0.07, 0.05, 0.11) 到近黑 (0.02, 0.01, 0.03) 的暗色渐变仅跨约 12-15/256 步，8 位精度在此区间内会产生肉眼可见的色阶带；Godot 3 的浮点顶点色在 4.x 中已被移除（GitHub issue #6703 有明确记录）。缺陷二：draw_polygon 对 4 顶点矩形内部做三角剖分（通常为对角线分割），Gouraud 着色的颜色线性插值是三角形内部的，非轴向渐变（如左上深紫→右下极黑的对角渐变）会在对角剖分线处产生可见接缝；纯上→下或左→右的轴向渐变不受此影响，但设计上常见的角色面板对角深色过渡会暴露此问题（godotforums.org 中有 polygon shearing 相关讨论）。修正推荐：GradientTexture2D + TextureRect 方案规避了两个问题——GPU 片元级别的插值无三角接缝，精度由纹理格式决定而非顶点色；GradientTexture2D 是纯程序资源，不需要外部位图文件，仍属「原生能做」范畴，但应作为渐变背景的首选方案，而非与 draw_polygon 并列对等的可选项。",
+          "【反例 A2：GradientTexture2D CONIC 填充类型在 Godot 4.6.1 中不存在——原始有事实错误】原始文档声称「GradientTexture2D 支持 LINEAR / RADIAL / SQUARE / CONIC 四种填充类型」，这对 Godot 4.6.1 是错误的。实际版本演进：Godot 4.0 仅有 FILL_LINEAR 和 FILL_RADIAL 两种（4.0 官方文档可查）；FILL_SQUARE 在 4.1 通过 PR #76151（2023-05 合并）加入；FILL_CONIC 在 4.7 dev 1 通过 GH-115394 加入（4.7 dev 1 发布公告明确提及）。4.4 官方文档确认只有三种（LINEAR/RADIAL/SQUARE），「stable」文档指向 4.7，其中才出现四种。SoT 使用 Godot 4.6.1，因此在代码中使用 FILL_CONIC 会出错；「支持四种填充类型」的说法仅对 4.7+ 成立，原始文档需修正。",
+          "【反例 A3：稀疏噪点颗粒 draw_rect 方案的性能表述有误，且存在更好的程序替代】原始声称「面板静止时计算一次即可，不影响性能」有误导性——_draw() 是每次 queue_redraw 都完整重执行的，并非持久画布缓存；若 UI 因状态变化频繁重绘，50-100 次 draw_rect 调用会产生大量 GDScript→渲染器的独立命令开销。更根本的是：Godot 4 内置的 NoiseTexture2D 是更正确的程序替代方案，它在初始化时（异步线程）程序生成一张噪点纹理（如 64×64 px），通过 TextureRect 的 stretch_mode=TILE 平铺覆盖面板，本质上同样是「程序生成、零位图文件依赖」，但以一次 GPU 纹理采样替代了大量 draw_rect 调用。NoiseTexture2D 在 Godot 4.6.1 中可用，参数包括 width/height/noise（FastNoiseLite）/as_normal_map/gradient 等。噪点颗粒效果未被推入「必须素材」范畴，但最佳原生工具是 NoiseTexture2D，而非逐像素 draw_rect 循环。",
+          "【反例 A4：WorldEnvironment glow 对 CanvasLayer 的排除表述在技术上不准确】原始声称「CanvasLayer 及其所有子节点被明确排除在外」，措辞过于绝对。实际机制：Environment 资源有 background_canvas_max_layer 属性，控制哪些层级索引（及以下）的 CanvasLayer 受辉光影响；层级高于该阈值的 CanvasLayer 才被排除。当 Background 模式设为 Canvas 时，辉光可以影响任意 CanvasLayer（Issue #70243：编辑器 UI 也被 glow 波及），并非绝对不影响。UI CanvasLayer 实践上通常使用高层级索引（如 100），默认配置下确实不受辉光影响，但这是参数设置的结果而非硬性排除。此外在 Forward+ 后端的 2D 场景中，glow 本身因 LDR 渲染限制存在不工作的 bug（Issue #62110），与 CanvasLayer 无关。实践结论方向正确——不应依赖 WorldEnvironment 做 UI 发光，应改用 canvas_item shader 或多圈 draw_rect 近似——但技术理由需从「明确排除」修正为「行为受参数控制且在 2D 渲染路径下不可靠」。",
+          "【反例 B1：被归入「必须素材」但程序可做到可用水平】有机装饰曲线（简化卷草纹）：draw_polyline + 贝塞尔采样点可达「程序化装饰曲线」级别，原始过于保守。具体路径：Godot 4 的 Curve2D.sample_baked() 或内置全局函数 cubic_bezier_interpolate() 可采样约 20-30 个顶点点位，传入 draw_polyline 渲染，产生平滑 S 形/螺旋形/双卷形装饰线条，约 40-60 行 GDScript。在像素风策略游戏（Tactics Ogre/老派 SRPG 风）中，这类简化程序曲线具有相当可信度，明显优于直线 L 形括号。真正超出程序能力的是：可变线宽（笔刷感描边）、多层分支、翻卷末端——这才是「暗黑雕花」的真实门槛。修正分类：从「完全无法程序生成，必须素材」改为「低复杂度程序曲线近似约 40-60 行可用，高保真有机感版本需位图素材」。",
+          "【反例 B2：被归入「必须素材」但 SDF shader 可超越几何局限】技能图标：原始把「具体技能图标」归为「必须位图美术，无程序替代」，仅提及 draw_polygon/draw_arc 几何近似（圆、三角、星）的上限。SDF（有向距离场）canvas_item shader 的能力被低估：以 30-40 行 GLSL 代码，SDF 可在片元层面生成光滑弯曲形状（弯刀轮廓、盾牌弧面、卷轴形状）并做软边混合，这已超出顶点几何的能力范围。godotshaders.com 的 SDF 类别有 CC0 版本，且 Godot 4 引擎在 CanvasItem shaders 文档中内置了 2D SDF 采样工具（针对 LightOccluder2D 生成的场景 SDF）。在 56×56 px 技能槽位尺寸下，SDF shader 生成的弯曲图标视觉质量明显优于「首字汉字占位」，可在 Mercury 素材交付前作为「可识别的技能视觉标识」使用。修正分类：从「必须位图美术，无程序替代」改为「SDF shader 可提供超越几何近似的程序图标（需 30-40 行 shader），最终高精度手工像素感版本需素材」。"
+        ],
+        "confidence": "high",
+        "corrections": [
+          "draw_polygon 顶点渐变背景方案的说明需补充两个技术缺陷：① Godot 4 CanvasItem 顶点色强制 8 位整数，暗色区间易产生色阶带；② 4 顶点矩形三角剖分导致非轴向渐变有对角接缝。GradientTexture2D 应改为「首选方案」而非「并列可选」。依据：GitHub proposal issue #6703，godotforums.org polygon shearing 讨论。",
+          "删除「GradientTexture2D 支持 LINEAR / RADIAL / SQUARE / CONIC 四种填充类型」中的 CONIC。Godot 4.6.1 仅有三种：LINEAR（4.0 起）、RADIAL（4.0 起）、SQUARE（4.1 PR #76151 起）。CONIC 是 4.7 dev 1 新增特性（GH-115394）。依据：4.0 官方文档、4.4 官方文档对比、4.7 dev 1 发布公告。",
+          "稀疏噪点颗粒的推荐实现路径应从「_draw() 中批量 draw_rect」改为「NoiseTexture2D + TextureRect TILE 平铺」；同时修正「面板静止时计算一次即可」的误导——_draw() 每次 queue_redraw 都完整重执行，不是持久缓存。NoiseTexture2D 同样是纯程序资源，但以单次 GPU 纹理采样替代大量 draw 命令，性能更优。",
+          "WorldEnvironment glow 与 CanvasLayer 的关系应从「明确排除」修正为「受 background_canvas_max_layer 参数控制，且在 Forward+ 2D 路径下因 LDR 限制存在可靠性问题（Issue #62110）」。实践结论不变（UI 发光不依赖 WorldEnvironment），技术理由修正。依据：Environment 文档 canvas_max_layer 属性，Issue #62110，Issue #70243。",
+          "有机装饰曲线分类从「必须素材」改为「低复杂度程序近似可用（draw_polyline + 贝塞尔采样，约 40-60 行），高保真版本需素材」。Curve2D.sample_baked() 或 cubic_bezier_interpolate() 可达简化卷草纹可用水平，其限制在于无可变线宽和多层分支，而非完全不可程序生成。",
+          "技能图标分类从「必须位图美术，无程序替代」改为「SDF canvas_item shader 可提供超越 draw_polygon 几何限制的程序图标（30-40 行），最终版需素材」。godotshaders.com 有 CC0 的 SDF 类 shader，Godot 4 引擎 CanvasItem shaders 文档含内置 SDF 工具函数。"
+        ],
+        "sources": [
+          "https://github.com/godotengine/godot-proposals/issues/6703 — Godot 4 CanvasItem 顶点色强制 8 位整数（float 精度丢失）",
+          "https://forum.godotengine.org/t/best-methods-to-reduce-polygon-shearing/10704 — polygon 三角剖分导致颜色/UV 线性插值接缝问题",
+          "https://docs.godotengine.org/en/4.0/classes/class_gradienttexture2d.html — Godot 4.0 仅有 FILL_LINEAR 和 FILL_RADIAL 两种填充类型",
+          "https://docs.godotengine.org/en/4.4/classes/class_gradienttexture2d.html — Godot 4.4 有三种：LINEAR/RADIAL/SQUARE",
+          "https://github.com/godotengine/godot/pull/76151 — FILL_SQUARE 在 Godot 4.1 通过 PR #76151（2023-05）合并",
+          "https://godotengine.org/article/dev-snapshot-godot-4-7-dev-1/ — FILL_CONIC 在 Godot 4.7 dev 1 通过 GH-115394 新增",
+          "https://docs.godotengine.org/en/stable/classes/class_noisetexture2d.html — NoiseTexture2D 纯程序噪点纹理资源说明",
+          "https://forum.godotengine.org/t/how-do-i-make-sure-the-hdr-glow-bloom-effect-doesnt-get-applied-to-certain-canvas-layers/106258 — canvas_max_layer 控制 CanvasLayer 是否受辉光影响",
+          "https://github.com/godotengine/godot/issues/62110 — Vulkan/Forward+ 后端 2D glow 因 LDR 限制不工作",
+          "https://github.com/godotengine/godot/issues/70243 — Canvas 背景模式下 glow 波及编辑器 UI（CanvasLayer 未被绝对排除）",
+          "https://godotshaders.com/shader/glowing-rect-2d/ — Glowing Rect 2D shader，CC0，2024-07 发布，需注意节点须放大否则 glow 被裁剪",
+          "https://docs.godotengine.org/en/stable/tutorials/math/beziers_and_curves.html — cubic_bezier_interpolate + Curve2D.tessellate 采样点工作流",
+          "https://www.hedberggames.com/blog/rendering-curves-in-godot — Path2D tessellate + draw_polyline 有机曲线渲染实践",
+          "https://godotshaders.com/shader-tag/sdf/ — godotshaders.com SDF 类 shader 目录（含 CC0 版本）",
+          "https://docs.godotengine.org/en/stable/tutorials/shaders/shader_reference/canvas_item_shader.html — Godot 4 CanvasItem shader 内置 SDF 工具函数"
+        ]
+      }
+    ],
+    "synthesis": {
+      "ceiling_verdict": {
+        "summary": "Godot 4.6.1 原生 _draw / StyleBox / GradientTexture2D 可独立完成约 70% 的「暗黑华丽」战斗 UI 视觉；另约 20% 用极少量 CC0/MIT canvas_item shader（5-40 行）低成本解锁；仅约 10%（角色头像立绘、手绘金属雕花角饰、具象技能图标终版、真实材质纹理）必须等 Mercury 像素管线。与目标差距最大的 5 个缺口——背景无渐变、外发光太生硬、无角部金饰、无斜向高光、全程占位字体——全部 SoT 自己就能补，不阻塞素材。现有四个组件（SkillBar 径向冷却扇 / SwordQiBar 分段阈值条 / DamageForecaster 双色受光背光描边 / DamagePopup 矢量字形飘字）已是扎实基座，可直接增量增强。",
+        "can_do_native": [
+          "顶点/纹理渐变背景面板：首选 GradientTexture2D + TextureRect（GPU 片元级插值、无接缝、精度由纹理格式决定）；draw_polygon 顶点色仅限纯上下/左右轴向渐变，暗色区会出现 8 位色阶带、对角渐变会有三角剖分接缝，不作首选",
+          "双色/三色立体金属描边：连续 2-3 次 draw_rect / draw_line 模拟受光面+背光面浮雕（DamageForecaster 已有 EDGE_HI/EDGE_LO 双色原型，再加一层即逼近 Diablo IV 金属镶嵌厚边）",
+          "角部 L 形几何金角饰：四角各两条 draw_line（约 10 行），达 FFT/Tactics Ogre 策略 RPG 角饰水平",
+          "简化卷草装饰曲线：draw_polyline + cubic_bezier_interpolate / Curve2D.sample_baked 采样 20-30 点（约 40-60 行），可做 S 形/螺旋装饰线；可变线宽、翻卷末端做不到",
+          "外发光近似：多圈半透明 draw_rect 叠加（偏移 -1/-2/-4/-6/-9、alpha 0.30→0.04 衰减）；矩形边缘非真高斯柔边，近看有台阶",
+          "分段资源条 + 阈值线：SwordQiBar 已实装（10 格、<7 淡蓝 #5fa8d8 / ≥7 紫 #a855f7、第 7 格阈值金线+上指箭头）",
+          "径向冷却扇 + 中心回合数：SkillBar 已用 draw_colored_polygon 扇形 + draw_arc 描边实装",
+          "矢量几何图标/徽标：剑/菱/星/十字/混合（DamagePopup._Glyph）、攻击剑/技能三连菱/道具书+药水（ActionGlyph）已实装，小尺寸识别度足够",
+          "斜向玻璃高光条：draw_polygon 细长平行四边形（约 120×6px、45 度、白色 alpha 0.05-0.08）",
+          "稀疏噪点微颗粒：首选 NoiseTexture2D + TextureRect TILE 平铺（一次 GPU 采样），不要用 _draw 内 draw_rect 循环（每次 queue_redraw 全量重执行）",
+          "投影/盒形阴影：StyleBoxFlat.shadow_size + shadow_color（SkillBar 面板已用 shadow_size=8）",
+          "飘字全套动效：Tween 停留→升起→淡出、暴击 TRANS_BACK 缩放弹跳、多段同目标右上叠加、类型配色（DamagePopup 已实装，纯 shader-free）",
+          "HP 延迟追赶残影条：双段 _draw / 双 ProgressBar + 延迟 Tween（EASE_OUT + TRANS_QUAD），FF14 式滞后扣减",
+          "世界坐标→屏幕浮窗锚定 + 向下指向三角：get_screen_transform().origin + clamp 防溢出 + draw_colored_polygon 三角（DamageForecaster 已实装锚定与三角）"
+        ],
+        "small_shader_unlocks": [
+          "真高斯柔边外发光：Glowing Rect 2D（约 12 行 CC0，blend_add 模式 ColorRect 置于槽位/印记后方）；关键前提——WorldEnvironment glow 对 CanvasLayer UI 不可靠（受 background_canvas_max_layer 控制且 Forward+ 2D 路径有 LDR bug #62110），UI 发光必须走此 shader 或多圈 draw_rect",
+          "选中槽位流光/扫光：2D Shine Highlight（11 行 CC0，对角 sine 流光）或约 5 行 TIME 驱动半透高光带；Godot 4.2+ 须把 hint_color 改 source_color",
+          "浮窗溶解出现/消失：Simple 2D Dissolve（11 行 CC0 + 程序 NoiseTexture2D，无外部文件）；不引入则降级为 modulate.a 纯淡出（零成本）",
+          "博德之门3 风毛玻璃磨砂背景：Glow Screen / hint_screen_texture 采样模糊（约 30-50 行 CC0，仅建议用于 DamageForecaster 一个组件）；需 HDR 2D 或 gl_compatibility，Web 平台受限",
+          "真颜色渐变描边：All-in-One Outline（约 70 行 CC0）+ 约 10 行 UV.x/UV.y mix 扩展；注意——双色分层描边用两层 StyleBoxFlat 即可，不必上 shader",
+          "SDF 程序图标：约 30-40 行 canvas_item shader 生成弯刀轮廓/盾弧/卷轴等超越顶点几何的软边形状，可作为 Mercury 素材到位前的「可识别技能视觉标识」过渡（优于技能名首字占位）"
+        ],
+        "needs_assets": [
+          "角色头像/立绘：BottomDashboard 左下现为纯色矩形占位，无任何程序替代；唯一近似=职业色底 + 职业缩写字（如剑圣=红底「剑」），保留识别度但不符 RPG 视觉预期（→ Mercury 像素管线）",
+          "手绘金属雕花角饰：Diablo IV 风有机卷草纹（曲线复杂度 + 可变线宽笔刷感 + 翻卷末端）超出几何/贝塞尔近似能力，须 8×8~16×16px 像素 sprite 经 NinePatchRect/draw_texture 放四角（→ Mercury）",
+          "具象技能图标终版：居合=一闪式剑气、一闪=直线斩击轨迹等专属像素图标；SkillBar 现取技能名首字占位，SDF shader 可过渡但高精度像素感终版须素材（→ Mercury）",
+          "有机材质纹理：金属拉丝/石材/皮革等真实质感位图；程序 NoiseTexture2D 只能做微颗粒近似，达不到「拟物高质感」（→ Mercury，仅高质感拟物方向需要）"
+        ]
+      },
+      "directions": [
+        {
+          "id": "gothic_native",
+          "name": "暗金哥特·原生深化（Diablo IV 内敛版）",
+          "vibe": "在当前暗紫黑+金描边占位原型上做直接进化：把现有「克制像素风」往金属厚重、暗底渐变、外发光柔化的方向推，气质沉郁华丽但不喧闹。对应 KB 概念 A（火焰纹章金边深蓝底）但更暗、金属感更重、底色由蓝转紫黑；是四个方向里唯一「零新位图素材、改现有 _draw 即可见效」的最低成本路线，也是与现状断代最小的演进。",
+          "palette": [
+            {
+              "hex": "#08070d",
+              "role": "主背景底（渐变深端，比现 #0a0c17 更沉）"
+            },
+            {
+              "hex": "#16131f",
+              "role": "面板背景渐变浅端 / 上缘提亮"
+            },
+            {
+              "hex": "#d8b95a",
+              "role": "受光金高光（角饰、选中外发光、浮雕顶+左）"
+            },
+            {
+              "hex": "#b8942f",
+              "role": "金主描边（直接传承现值）"
+            },
+            {
+              "hex": "#5a4715",
+              "role": "背光暗金（浮雕底+右、厚边阴影）"
+            },
+            {
+              "hex": "#e6dbc7",
+              "role": "米白主文字（直接传承现值）"
+            },
+            {
+              "hex": "#fa730f",
+              "role": "标准动作橙 / 暴击强调（传承）"
+            },
+            {
+              "hex": "#a855f7",
+              "role": "剑气≥7 紫 / 印记激活气场（传承 SwordQiBar）"
+            }
+          ],
+          "typography": {
+            "display": "得意黑 Smiley Sans（标题、伤害数字）",
+            "body": "思源黑体 Source Han Sans CN / Noto Sans SC（正文、属性、描述）",
+            "cjk": "思源黑体 Source Han Sans CN（与 Noto Sans SC 同源字形，CN 子集体积更小）",
+            "license": "全部 SIL OFL 1.1（可商用嵌入再分发，限制仅为不可单独出售字体）",
+            "rationale": "得意黑斜意窄体黑体数字字形醒目，契合战斗飘字/标题的力量感；思源黑体小字号可读性优于楷/宋，适合密集属性格与技能描述。两者同为 OFL 1.1，零署名义务。得意黑最新 v2.0.1（2024-02-07），思源黑体 v2.005R（2025-06-18，Adobe 官方）。"
+          },
+          "materials": "金属浮雕靠三层 draw_rect 描边（外暗金 #5a4715 → 中金 #b8942f → 内高光 #d8b95a）；暗底渐变靠 GradientTexture2D（深紫黑竖向）；微噪点石板感靠 NoiseTexture2D TILE 平铺（alpha 0.03-0.05）；斜向玻璃高光条点缀「高端感」。全部程序生成，无位图。",
+          "animation": "飘字维持 DamagePopup 现 Tween（停留 0.5s → TRANS_CUBIC/EASE_OUT 升起 + EASE_IN 淡出），暴击改 TRANS_BACK/EASE_OUT 弹跳放大 2.0x；选中槽位多圈 draw_rect 外发光呼吸（TRANS_SINE/EASE_IN_OUT 脉冲）或可选 blend_add glow shader + 11 行流光；面板进 0.18s TRANS_CUBIC/EASE_OUT、出 0.10s TRANS_QUAD/EASE_IN，状态机防叠加；StyleBox 动画须 duplicate() 防共享实例污染。",
+          "sot_application": {
+            "skill_bar": "56px 方槽不变；槽底换 GradientTexture2D 深紫→近黑竖向渐变；金边由现单层升级三层 draw_rect 浮雕；四角加 L 形金角饰（约 10 行 draw_line）；选中态由现单圈 draw_rect 升级 4-5 圈衰减外发光（或可选 blend_add glow shader + 流光扫光）；径向冷却扇维持 draw_colored_polygon，扇缘加暗金描边；占位首字图标先换 CJK 字体、后续接 SDF 过渡图标或 Mercury 终版。",
+            "bottom_dashboard": "头像窗加三层金属边框 + L 角饰（头像本身待素材，先职业色底+职业字占位）；HP 条维持 HP_STOPS 渐变 + 新增延迟追赶残影；8 属性格加细金分隔线（StyleBoxLine）+ 斜向高光条；剑气条沿用 SwordQiBar；面板背景换 GradientTexture2D + NoiseTexture2D 微噪点。",
+            "damage_forecaster": "在现有 EDGE_HI/EDGE_LO 双色描边上扩为三层金属浮雕 + 四角 L 角饰；背景换渐变；悬停时可选 blend_add 微白外发光；向下三角与多段 x×y 数值行布局不变。",
+            "damage_popup": "维持 FF14 矢量字形（剑/菱/星/十字）+ Tween；数字换得意黑 Smiley Sans 提升醒目度；暴击 TRANS_BACK 弹跳 + 「！」后缀；类型配色（物理白/魔法紫/纯金/混合橙/治疗绿）保持不变。"
+          },
+          "implementation": {
+            "approach": "在现有四个 _draw 组件上做纯增量增强：GradientTexture2D 背景 + 三层 draw_rect 金属浮雕 + L 角饰 + 多圈外发光 + NoiseTexture2D 噪点 + CJK 字体 + 统一全局 Theme .tres 底座；先在 Playground 独立文件出提案、人工审阅后合回真机。",
+            "native_vs_asset": "约 95% 原生 _draw/StyleBox/GradientTexture2D/NoiseTexture2D；约 5% 可选 CC0 shader；位图素材为 0（头像/技能图标仍占位待 Mercury）",
+            "cost": "low",
+            "shader_needed": "可选而非必需：blend_add 外发光（约 12 行 CC0）+ 流光扫光（约 11 行 CC0）；不引入则降级为多圈 draw_rect 近似，方向仍成立。"
+          },
+          "license_summary": "全部 SIL OFL 1.1 字体 + 可选 CC0 shader；零位图素材许可负担；可商用、无署名义务（字体随包附 LICENSE 文件即可）。许可风险在五个方向里最低。",
+          "reusability": "high",
+          "pros": [
+            "与现状断代最小，直接进化现原型，见效最快",
+            "零新位图素材，不阻塞 Mercury 像素管线",
+            "传承现 #0a0c17/#b8942f/#e6dbc7 体系，配色一致性最好",
+            "全局 Theme .tres + type variation 可跨场景复用",
+            "许可证最干净（OFL+CC0，零署名）"
+          ],
+          "cons": [
+            "天花板受几何近似限制，难达 Diablo IV 真实金属雕花保真",
+            "多圈 draw_rect 外发光近看有矩形台阶，真柔边须上 shader",
+            "头像与技能图标终版仍须等素材，纯原生只能占位",
+            "「华丽」程度依赖描边层数与发光，过度叠加易显脏"
+          ],
+          "reference_games": [
+            "Diablo IV",
+            "Diablo II: Resurrected",
+            "Path of Exile",
+            "Darkest Dungeon"
+          ]
+        },
+        {
+          "id": "bg3_glass",
+          "name": "博德之门3·暖琥珀毛玻璃",
+          "vibe": "暖褐皮革+羊皮纸+琥珀金的毛玻璃半透质感，温润厚重、奇幻叙事感强。直接对应 KB 概念 B（博德之门3 风毛玻璃暖琥珀），并明确与现冷紫黑体系拉开「冷→暖」色温差异。这是四个方向里最华丽、也最依赖现成素材包的路线：用 Kenney CC0 九宫格面板染暖琥珀 + game-icons.net 图标 + 单个毛玻璃 shader 撑起 DamageForecaster。",
+          "palette": [
+            {
+              "hex": "#14100a",
+              "role": "暖黑褐主背景底（偏暖，区别现冷紫黑）"
+            },
+            {
+              "hex": "#241a10",
+              "role": "皮革褐面板背景"
+            },
+            {
+              "hex": "#e0a64b",
+              "role": "琥珀金主色（描边、强调）"
+            },
+            {
+              "hex": "#f4d28a",
+              "role": "暖高光（选中、受光面）"
+            },
+            {
+              "hex": "#c8782e",
+              "role": "焦糖橙副边 / 标准动作"
+            },
+            {
+              "hex": "#ece0c8",
+              "role": "羊皮纸米白主文字"
+            },
+            {
+              "hex": "#8a6a3c",
+              "role": "旧铜分隔线 / 次级描边"
+            },
+            {
+              "hex": "#6db8a0",
+              "role": "青绿（治疗 / 正面状态）"
+            }
+          ],
+          "typography": {
+            "display": "思源宋体 Source Han Serif（标题、浮窗抬头，古典衬线）",
+            "body": "思源黑体 Source Han Sans CN / Noto Sans SC（正文、数值）",
+            "cjk": "思源黑体 Source Han Sans CN（正文）+ 思源宋体（标题）",
+            "license": "全部 SIL OFL 1.1（思源宋体权威源 github.com/adobe-fonts/source-han-serif）",
+            "rationale": "博德之门3 的奇幻典籍气质适合衬线标题，思源宋体明朝体笔形传达「古卷」感；正文仍用思源黑体保证密集信息可读。叙事/剧情场景如需更暖手写感，可备选霞鹜文楷 LXGW WenKai（OFL 1.1，v1.522）。全 OFL，可商用。"
+          },
+          "materials": "皮革/羊皮纸质感靠 Kenney Fantasy UI Borders（CC0 九宫格）经 modulate 染暖琥珀 + StyleBoxTexture 接入；毛玻璃磨砂靠 hint_screen_texture 采样模糊 shader；琥珀金边靠 StyleBox + game-icons.net 单色图标染色。质感来源以现成素材为主，原生为辅。",
+          "animation": "面板出现用溶解 shader（Simple 2D Dissolve，11 行 CC0）或暖色淡入；DamageForecaster 毛玻璃浮窗滑入 + 磨砂；飘字暖色调弹跳；选中暖金高光脉冲。整体动效偏柔和、慢节奏，契合叙事感。",
+          "sot_application": {
+            "skill_bar": "56px 槽改用 Kenney Fantasy UI Borders 九宫格染暖琥珀做框（StyleBoxTexture），或暖褐 StyleBoxFlat；图标换 game-icons.net 单色矢量染琥珀金；选中暖金高光；冷却扇暖橙色。",
+            "bottom_dashboard": "羊皮纸/皮革质感面板（九宫格暖褐）；头像圆角窗（待素材）；HP 条暖红→琥珀渐变；属性用 game-icons 小图标 + 数值并排，典籍式排版。",
+            "damage_forecaster": "毛玻璃磨砂半透浮窗（Glow Screen / screen_texture shader）+ 琥珀金边 + 向下三角；本方向最华丽的组件，质感最突出。",
+            "damage_popup": "暖色调飘字，数字可用思源宋体衬线感增强古典味；类型色保留但整体偏暖；停留升起淡出节奏稍慢。"
+          },
+          "implementation": {
+            "approach": "引入 Kenney Fantasy UI Borders（CC0 九宫格）染暖琥珀做面板框 + game-icons.net 图标库染色 + DamageForecaster 单个毛玻璃 shader；StyleBoxTexture 接入九宫格；Playground 先出提案。",
+            "native_vs_asset": "约 60% 原生 + 约 40% 现成素材（九宫格面板 + 图标库 + 字体）",
+            "cost": "medium",
+            "shader_needed": "需 1 个 hint_screen_texture 毛玻璃 shader（约 30-50 行 CC0，仅 DamageForecaster 用）；其余组件可 shader-free。"
+          },
+          "license_summary": "Kenney 资源 CC0（免署名）；game-icons.net 须按各图标实际作者逐一署名（格式 Icons made by [作者]. Available on https://game-icons.net，部分图标为公有领域）；可选 Dark Fantasy UI Pack（OpenGameArt）CC-BY 4.0 须署名 Of Far Different Nature；字体 OFL；shader CC0。全部可商用，但署名负担在五方向里最重，须设致谢页。",
+          "reusability": "medium",
+          "pros": [
+            "最华丽、暖色叙事感最强，视觉成品度高",
+            "大量复用 CC0/现成素材，省自绘工作量",
+            "与冷紫黑现状形成清晰差异化，记忆点强",
+            "毛玻璃浮窗是低成本高回报的「高端感」组件"
+          ],
+          "cons": [
+            "与现 #0a0c17 冷体系断代，需整套重做配色",
+            "素材包风格偏亮彩，染暗琥珀后质感需实测验收",
+            "署名义务最重（game-icons 逐图标 + OpenGameArt 包）",
+            "九宫格素材边距须下载测量才能确认可九宫格切分",
+            "毛玻璃 shader 依赖 HDR 2D/兼容模式，Web 导出受限"
+          ],
+          "reference_games": [
+            "Baldur's Gate 3",
+            "Pillars of Eternity II: Deadfire",
+            "Divinity: Original Sin 2"
+          ]
+        },
+        {
+          "id": "fft_elegant",
+          "name": "FFT 三角战略·纤金衬线",
+          "vibe": "纤细 1px 金线 + 深蓝灰渐变底 + 衬线标题的古典战棋优雅，克制、精致、不厚重。直接对应 KB 概念 C（FFT 三角战略风纤细金边深色渐变），并与 D1 的「金属厚浮雕」明确区分为「纤细线条美学」。是四方向里传承现配色最多、又最优雅的一条；几乎纯原生，仅头像窗格需素材。",
+          "palette": [
+            {
+              "hex": "#0a0c17",
+              "role": "主背景底（直接传承现值）"
+            },
+            {
+              "hex": "#151a2e",
+              "role": "蓝灰渐变浅端（FFT 深蓝灰）"
+            },
+            {
+              "hex": "#c9a24a",
+              "role": "纤金线（1px 描边、分隔）"
+            },
+            {
+              "hex": "#e8d49a",
+              "role": "浅金高光（选中、抬头）"
+            },
+            {
+              "hex": "#e6dbc7",
+              "role": "米白主文字（直接传承现值）"
+            },
+            {
+              "hex": "#7c8aa6",
+              "role": "冷灰副文字 / 次级信息"
+            },
+            {
+              "hex": "#3b82f5",
+              "role": "移动蓝（传承）"
+            },
+            {
+              "hex": "#aa88ff",
+              "role": "魔法紫（传承伤害类型色）"
+            }
+          ],
+          "typography": {
+            "display": "思源宋体 Source Han Serif（标题、技能名、浮窗抬头）",
+            "body": "思源黑体 Source Han Sans CN / Noto Sans SC（数值、属性、描述）",
+            "cjk": "思源宋体（标题）+ 思源黑体 CN（正文）",
+            "license": "全部 SIL OFL 1.1",
+            "rationale": "FFT/Tactics Ogre 的古典战棋气质核心在纤细衬线标题；思源宋体明朝体笔形纤雅，恰配纤金线美学。正文用思源黑体保证小字号密集信息可读（衬线密集正文可读性弱须避免）。全 OFL，可商用零署名。"
+          },
+          "materials": "纤金线靠 draw_rect(false,1px) / draw_line 单像素描边；深色渐变靠 GradientTexture2D（蓝灰竖向，FILL_LINEAR）；克制不做厚浮雕、不做噪点；头像小窗格须素材。质感来源以原生纤细线条 + 渐变为主。",
+          "animation": "克制优雅：面板淡入 + 轻微缩放（TRANS_CUBIC/EASE_OUT 0.18s）；选中纤金双线 + 极淡发光（不夸张）；飘字停留升起、暴击不做夸张放大（维持古典内敛）；HP 条平滑追赶。",
+          "sot_application": {
+            "skill_bar": "极纤 1px 金边方槽（draw_rect false 1px，区别 D1 厚浮雕），深蓝灰→黑 GradientTexture2D 底；选中态纤金双线 + 极淡发光；角饰用极短纤金 L（比 D1 更克制）；图标 SDF 或 CJK 过渡；冷却扇维持但描边纤细。",
+            "bottom_dashboard": "经典 SRPG 头像窗格（小肖像框，待素材）+ 纤金分隔线；HP 条纤细 + FFT 式蓝白；属性纵列衬线标签 + 黑体数值排版；剑气条沿用 SwordQiBar 但配纤金阈值线。",
+            "damage_forecaster": "FFT 式纤金边深色浮窗 + 衬线抬头「伤害预测」；向下三角纤细；整体克制优雅，信息层级清晰。",
+            "damage_popup": "数字用思源宋体衬线增强古典感；停留升起；暴击克制（不夸张弹跳）；类型矢量字形与配色保留。"
+          },
+          "implementation": {
+            "approach": "纤金线 _draw（1px 描边）+ GradientTexture2D 深蓝灰渐变 + 思源宋体衬线 + 小头像窗格（待素材）；几乎不引入 shader；Playground 先出提案。",
+            "native_vs_asset": "约 85% 原生 _draw/GradientTexture2D + 约 15% 素材（头像 + 字体）",
+            "cost": "low",
+            "shader_needed": "无需 shader（纯 _draw + GradientTexture2D 即可）；可选极淡 blend_add 发光作为选中增益。"
+          },
+          "license_summary": "字体 SIL OFL 1.1（思源宋体/思源黑体）；无第三方位图素材依赖；除头像须自制/Mercury 外可商用零署名。许可证与 D1 并列最干净。",
+          "reusability": "high",
+          "pros": [
+            "传承现 #0a0c17 配色最多，断代最小且更优雅",
+            "几乎纯原生，成本低、许可干净",
+            "纤细线条美学与 D1 厚浮雕清晰区分，提供另一种暗金路线",
+            "纤金线 + 渐变可参数化，跨场景复用度高",
+            "古典战棋气质契合 SoT 战棋定位"
+          ],
+          "cons": [
+            "衬线标题在极小字号下笔形可读性须实测",
+            "纤细美学「华丽」张力弱于 D1/D2，可能显得「素」",
+            "头像窗格仍须素材才能完整",
+            "克制风格下暴击/打击感的视觉冲击较弱"
+          ],
+          "reference_games": [
+            "Final Fantasy Tactics: The War of the Lions",
+            "Tactics Ogre: Reborn",
+            "Triangle Strategy"
+          ]
+        },
+        {
+          "id": "pixel_retro",
+          "name": "像素 RPG·暗色复古",
+          "vibe": "把当前执行「克制像素风」的漂移做成有意为之的完整像素框架：8×8 像素描边、阶梯状冷却、像素血条、像素字 CJK，暗色复古、与 Mercury 像素美术管线天然同源。不直接对应 KB 四概念中任何一个（A/B/C/D 均非纯像素），是为弥合「像素美术 sprite 管线」与「UI 视觉」而新增的一条；与「暗黑华丽 Diablo IV」原意距离最大，但一致性与生产管线契合度最高。",
+          "palette": [
+            {
+              "hex": "#0d0b14",
+              "role": "深底（像素暗，主背景）"
+            },
+            {
+              "hex": "#1a1626",
+              "role": "面板紫灰（像素降饱和）"
+            },
+            {
+              "hex": "#c0a040",
+              "role": "像素金边（降饱和 8 位感）"
+            },
+            {
+              "hex": "#e8d890",
+              "role": "像素亮金高光（选中）"
+            },
+            {
+              "hex": "#6b2230",
+              "role": "血红（Blood 变体 / HP 低）"
+            },
+            {
+              "hex": "#4a3322",
+              "role": "皮革褐（Leather 变体 / 面板）"
+            },
+            {
+              "hex": "#d8d0c0",
+              "role": "像素米白主文字"
+            },
+            {
+              "hex": "#5fa8d8",
+              "role": "像素蓝（资源 / 剑气 <7，传承色阶）"
+            }
+          ],
+          "typography": {
+            "display": "Fusion Pixel Font 融合像素字体 12px（标题、技能名、CJK）",
+            "body": "Fusion Pixel Font 12px（CJK 正文）+ m5x7（拉丁字母/键位角标/数字）",
+            "cjk": "Fusion Pixel Font 12px（目前最完整的可商用 CJK 像素字体；8px 汉字难辨，12px 为最小可接受）",
+            "license": "Fusion Pixel SIL OFL 1.1（字体）+ MIT（构建工具）；m5x7 公有领域/免费商用",
+            "rationale": "像素方向必须用像素字才不破风格；Fusion Pixel 12px 是 OFL 可商用 CJK 像素字的最完整选择（其上游方舟像素字体仍缺大量汉字，不单独用）。拉丁键位/数字用 m5x7（Daniel Linssen，极受欢迎）做 fallback 链，CJK 自动回退 Fusion Pixel。导入须 Antialiasing=None、Subpixel=Disabled、项目 Nearest 过滤。"
+          },
+          "materials": "像素描边靠 StyleBoxFlat 1px 实边 + 整数倍尺寸，或 Pixel UI Theme for Godot（$5，Blood/Leather/Paper 变体）九宫格像素框；血条/资源条像素分段；阶梯状（非平滑）冷却用块状 draw_rect。质感来源=像素纪律 + 可选付费像素主题包。",
+          "animation": "像素感动效：飘字整数像素步进弹跳（避免亚像素模糊）；冷却阶梯块状递减；选中像素金边闪烁（非渐变发光）；面板像素弹出。所有位移取整、Nearest 过滤、整数缩放，保持像素完美。",
+          "sot_application": {
+            "skill_bar": "8×8 像素槽框（Pixel UI Theme 或纯 StyleBox 像素描边）+ 像素金边；图标待 Mercury 像素图标，过渡用 Fusion Pixel 字；冷却用像素阶梯扇（块状 draw_rect，非平滑 polygon）；选中像素金闪。",
+            "bottom_dashboard": "像素血条（Blood 变体红）/皮革变体面板；像素头像窗（待 Mercury 像素立绘，与本方向最契合）；属性用像素字 + 像素小图标。",
+            "damage_forecaster": "像素框浮窗 + 像素块状向下三角；Fusion Pixel 12px CJK；信息行像素排版。",
+            "damage_popup": "像素字飘字（Fusion Pixel CJK + m5x7 数字）；整数步进弹跳；类型色 posterized 降阶；矢量字形可改为像素点阵形状。"
+          },
+          "implementation": {
+            "approach": "采用像素框架：Pixel UI Theme for Godot（$5 商业授权，Blood/Leather/Paper 变体）或纯 StyleBox 像素描边 + Fusion Pixel 12px CJK + m5x7 拉丁 fallback 链；项目设 Nearest 过滤 + 整数缩放；像素阶梯冷却；Playground 先出提案。",
+            "native_vs_asset": "约 50% 原生 StyleBox/_draw + 约 50% 素材（像素主题包 + 像素字 + 待 Mercury 像素图标/立绘）",
+            "cost": "medium",
+            "shader_needed": "无需 shader；像素完美靠导入设置（Antialiasing=None / Subpixel=Disabled / Nearest 过滤 / 整数倍字号）实现。"
+          },
+          "license_summary": "Pixel UI Theme 为创作者 itch.io 商业授权（$5，页面明确允许「one or more game or software projects」即多项目商用，非标准 OSS 许可）；Fusion Pixel SIL OFL 1.1；m5x7 公有领域。若走纯 StyleBox 像素路线则零素材许可。全部可商用。",
+          "reusability": "medium",
+          "pros": [
+            "与 Mercury 像素美术 sprite 管线天然同源，头像/图标素材无缝衔接",
+            "把现「克制像素风」漂移转为有意为之，风格自洽",
+            "像素纪律明确（Nearest+整数缩放），实现路径清晰",
+            "像素血条/资源条与战棋复古气质契合",
+            "可选纯 StyleBox 路线，许可可降为零"
+          ],
+          "cons": [
+            "与「暗黑华丽 Diablo IV」原始意图距离最大",
+            "Pixel UI Theme 需 $5 + 像素纪律学习成本",
+            "Fusion Pixel 8px 汉字难辨，受限 12px 最小字号，密集信息空间紧张",
+            "像素框架自成体系，与非像素菜单/场景混用会割裂",
+            "阶梯块状冷却/发光的「华丽」张力弱"
+          ],
+          "reference_games": [
+            "Final Fantasy Tactics Advance",
+            "Shining Force",
+            "Fae Tactics",
+            "Loop Hero"
+          ]
+        },
+        {
+          "id": "tactical_flat",
+          "name": "XCOM 陷阵之志·扁平信息优先",
+          "vibe": "高对比扁平实色 + skew 斜切全宽条带 + 大字号信息层级，硬朗、现代战术、可读性至上。直接对应 KB 概念 D（XCOM 陷阵之志风扁平全宽条带），并与暖金哥特/像素风明确区分为「冷色高对比、装饰最少、信息密度最高」。是四方向里最易读、最易复用、纯原生成本最低，但也最偏离「暗黑华丽」原意的一条。",
+          "palette": [
+            {
+              "hex": "#0b0e16",
+              "role": "近黑主背景底（扁平实色，无渐变）"
+            },
+            {
+              "hex": "#1c2230",
+              "role": "石板蓝灰条带 / 面板"
+            },
+            {
+              "hex": "#f0a020",
+              "role": "高对比警示金橙（信息强调、选中）"
+            },
+            {
+              "hex": "#e8edf2",
+              "role": "冷白主文字（比米白更冷更高对比）"
+            },
+            {
+              "hex": "#ff5a4d",
+              "role": "危险红（HP 低、敌方、暴击）"
+            },
+            {
+              "hex": "#3b82f5",
+              "role": "移动蓝（传承）"
+            },
+            {
+              "hex": "#10b884",
+              "role": "迅捷绿（传承）"
+            },
+            {
+              "hex": "#8a93a6",
+              "role": "中性灰副信息 / 分隔"
+            }
+          ],
+          "typography": {
+            "display": "得意黑 Smiley Sans（标题、大号数值，斜窄体几何感）",
+            "body": "思源黑体 Source Han Sans CN / Noto Sans SC（属性、描述）",
+            "cjk": "思源黑体 Source Han Sans CN",
+            "license": "全部 SIL OFL 1.1",
+            "rationale": "得意黑斜意窄体的几何工业感恰配 XCOM 式科技扁平条带，斜角呼应 skew 斜切；正文用思源黑体保证高密度信息清晰。冷白文字 #e8edf2 比米白对比更高，服务「信息优先」。全 OFL 可商用。"
+          },
+          "materials": "扁平实色 StyleBoxFlat（bg_color 单色，无渐变无阴影无浮雕）；skew 斜切 StyleBoxFlat 做科技条带切角；high-contrast 配色撑视觉；game-icons.net 扁平单色图标。质感来源=扁平色块 + 斜切几何，装饰极简。",
+          "animation": "硬朗快节奏：条带滑入（TRANS_QUAD/EASE_OUT）；选中橙金高对比切换（无渐变发光，直接变色）；飘字大号高对比快速弹跳；数值变化用 ghost bar 快速追赶。动效服务信息反馈而非氛围。",
+          "sot_application": {
+            "skill_bar": "全宽/半宽扁平条带，skew 斜切 StyleBoxFlat 科技切角；高对比橙金强调选中；实色无渐变无浮雕无角饰；图标 game-icons 扁平单色；冷却用线性进度遮罩或简洁扇 + 大号回合数。",
+            "bottom_dashboard": "全宽底部扁平条带，左头像（待素材，先纯色+职业字）+ 大号 HP 数值条 + 属性横排高对比标签；信息密度最高、装饰最少；剑气条扁平实色分段。",
+            "damage_forecaster": "扁平高对比浮窗，大字号命中%/暴击%；信息层级清晰；可省向下三角改极简连接线；冷白底深字或深底亮字双向高对比。",
+            "damage_popup": "大号高对比数字飘字（得意黑），矢量类型徽标保留；快节奏弹跳；危险红/警示橙强调暴击。"
+          },
+          "implementation": {
+            "approach": "扁平实色 StyleBoxFlat + skew 斜切条带 + 高对比配色 + game-icons 扁平图标 + 得意黑大字号；无渐变无浮雕无角饰，信息密度优先；type variation 管理条带状态；Playground 先出提案。",
+            "native_vs_asset": "约 98% 原生 StyleBox/_draw + 约 2% 图标素材",
+            "cost": "low",
+            "shader_needed": "无需 shader（纯 StyleBoxFlat + skew + _draw）。"
+          },
+          "license_summary": "字体 SIL OFL 1.1；game-icons.net 须按各图标实际作者逐一署名（部分 CC0）；StyleBox 纯原生零许可负担；全部可商用。",
+          "reusability": "high",
+          "pros": [
+            "可读性与信息密度最高，战术战棋功能性最强",
+            "纯原生 StyleBox + skew，成本最低、无 shader",
+            "type variation 极易复用，跨场景一致",
+            "与暖金哥特/像素风差异最大，方向辨识度高",
+            "高对比配色对色弱/小屏更友好"
+          ],
+          "cons": [
+            "最偏离「暗黑华丽 Diablo IV」原始意图",
+            "扁平实色「氛围感/华丽感」最弱，偏工具化",
+            "与 SoT 暗黑奇幻世界观气质可能违和",
+            "skew 斜切 + border 在旧版有边缘对齐 bug（#79672）须验证",
+            "game-icons 仍须逐图标署名"
+          ],
+          "reference_games": [
+            "XCOM 2",
+            "Into the Breach",
+            "Mario + Rabbids: Kingdom Battle",
+            "Phoenix Point"
+          ]
+        }
+      ],
+      "cross_cutting": [
+        "先引入 CJK 字体替换 ThemeDB.fallback_font：主力 Noto Sans SC v2.004（Google，2024-01-27）或思源黑体 Source Han Sans CN v2.005R（Adobe，2025-06-18，同源字形），均 SIL OFL 1.1；配 fallback 链（拉丁/数字可挂 m5x7 或得意黑，CJK 自动回退）；用 pyftsubset 子集化控包体到 2-3MB；字体配置存为独立 .tres 资源持久化，规避 Issue #92297 fallback 重导入被剥离。注意版本：v2.005 是 Adobe 思源黑体非 Google Noto，二者版本号不可混用。",
+        "统一一个全局 Theme .tres 底座挂在战斗场景根 Control（不挂 Project Settings 层级，规避 4.6 全局主题热更新延迟 bug），用 type variation 管理技能槽常态/选中/不可用三态；运行时仅对特殊态用 add_theme_*_override，避免散落覆盖导致优先级混乱；变体名用常量管理防拼写静默回退。",
+        "背景渐变统一走 GradientTexture2D + TextureRect（GPU 片元级插值、无三角接缝、精度不受 8 位顶点色限制），不用 draw_polygon 顶点色（暗色区色阶带 + 对角接缝）；注意 GradientTexture2D 在 4.6.1 仅有 FILL_LINEAR/RADIAL/SQUARE 三种，FILL_CONIC 是 4.7 dev 才加入，当前用会出错。",
+        "UI 发光一律不依赖 WorldEnvironment（对 CanvasLayer 受 background_canvas_max_layer 控制且 Forward+ 2D 有 LDR bug #62110，不可靠）；需柔边发光走 blend_add ColorRect canvas_item shader（Glowing Rect 2D，约 12 行 CC0），否则用多圈半透明 draw_rect 近似。",
+        "噪点质感用 NoiseTexture2D + TextureRect TILE 平铺（一次 GPU 采样），不要在 _draw 内用 draw_rect 循环（_draw 每次 queue_redraw 全量重执行，50-100 次 draw_rect 开销大）。",
+        "动效基线：飘字 = 停留 0.3-0.5s → TRANS_CUBIC/EASE_OUT 升起 + EASE_IN 淡出，暴击 TRANS_BACK/EASE_OUT 弹跳放大；面板进 0.18s TRANS_CUBIC/EASE_OUT、出 0.10s TRANS_QUAD/EASE_IN，配 enum 状态机（HIDDEN/ENTERING/VISIBLE/EXITING）防动画叠加残留；StyleBox 属性动画前必须 duplicate() 避免共享实例污染（多控件共用一个 StyleBox 时 tween 会全改）；_ready 预设初始 modulate.a/scale 防首帧闪烁。",
+        "双色描边用两层 StyleBoxFlat / 多次 draw_rect 即可（DamageForecaster 已有原型），不必上 shader；真颜色渐变描边才需 shader（All-in-One Outline + UV mix 扩展）。",
+        "许可证合规清单：字体随包附 LICENSE 文件；game-icons.net 须按各图标实际作者逐一署名（格式 Icons made by [作者]. Available on https://game-icons.net，非统一格式，部分为公有领域），设可访问的游戏内致谢页；Kenney 资源 CC0 免署名；Dark Fantasy UI Pack（OpenGameArt）CC-BY 4.0 须署名 Of Far Different Nature；Pixel UI Theme 为 itch.io 商业授权（$5，多项目可用，非 OSS 许可）。涉及版本号/许可证的结论以各官方 GitHub/itch.io 页面为准。",
+        "遵循项目约定：所有视觉皮肤先在 Playground 独立文件出提案、人工审阅后再合回真机；保持四个组件 public API（signal 签名 + public method 签名）不变，仅重写内部 _draw/视觉构建代码；像素方向须项目设 Nearest 过滤 + 整数缩放 + 字体 Antialiasing=None/Subpixel=Disabled。",
+        "字体/全局 Theme 底座/动效基线是跨全部方向通用的基础设施，可先于「视觉皮肤层」落地——无论用户最终选哪套风格，这三项都不浪费。"
+      ],
+      "recommendation_note": "以下为中立取舍陈述，最终方向由用户挑选，绝不替用户拍板。按成本与意图契合度排序帮助判断：(1) 成本光谱——tactical_flat（XCOM 扁平）与 fft_elegant（FFT 纤金）最省（约 98%/85% 原生、零或少 shader、无付费）；gothic_native（暗金哥特）次低（约 95% 原生，可选 2 个 CC0 shader）；bg3_glass（博德之门3 暖琥珀）与 pixel_retro（像素复古）为中等（前者引素材包+1 个毛玻璃 shader+署名负担，后者需 $5 主题包+像素纪律）。(2) 与「暗黑华丽 Diablo IV」原意契合度——gothic_native 最贴合且与现状断代最小（直接进化现原型），bg3_glass 最华丽但偏暖且与现冷紫黑体系断代，fft_elegant 传承现 #0a0c17 配色最多且优雅但「华丽张力」偏弱，tactical_flat 最易读但最偏离暗黑奇幻意图，pixel_retro 与原意距离最大但与 Mercury 像素管线/像素美术天然同源、能把当前「克制像素风」漂移转为有意为之。(3) 关键权衡——若优先「最快见效+最低风险+一致性」选 gothic_native；若优先「成品华丽度」选 bg3_glass（接受署名与断代成本）；若优先「优雅+传承+低成本」选 fft_elegant；若优先「与像素 sprite 管线统一」选 pixel_retro；若优先「功能可读性」选 tactical_flat。(4) 跨方向通用基础设施（CJK 字体、全局 Theme 底座、动效基线）建议无论选哪套都先落地，不会浪费。(5) 五套并非互斥——配色/字体/动效可混搭，例如「gothic_native 视觉皮肤 + tactical_flat 的信息密度排版」也可组合。请用户结合 SoT 世界观、对「华丽 vs 可读」的偏好、以及对素材/署名/付费的接受度做最终裁决。\""
+    }
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "调研"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "核验"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 3,
+      "title": "综合"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "维度1·主题系统",
+      "phaseIndex": 1,
+      "phaseTitle": "调研",
+      "agentId": "a880cec50211a9a08",
+      "agentType": "research",
+      "model": "claude-sonnet-4-6",
+      "state": "done",
+      "startedAt": 1782762455100,
+      "queuedAt": 1782762455049,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Godot 4.6.1 主题系统能力边界与最佳实践",
+      "promptPreview": "项目背景：SoT 是一款战棋RPG（战旗 + Roguelite + 城镇建设），引擎 Godot 4.6.1 stable，GDScript，个人开发者（solo dev）。本研究目标是为「战斗界面」的视觉美化做研究先行——不从头造车，先调研 Godot 生态里现成可复用的 UI 资源/做法，再供用户挑选风格方向。\n\n现状（重要约束）：现有战斗 UI 全部用 Godot 原生 _draw 自绘 + StyleBoxFlat 构建，没有任何贴图/图标素材，没有自定义字体（全程用 ThemeDB.fallback_font）。当前视觉=暗色哥特占位原型：深紫黑底 #0a0c17 / 金色描边 #b8942f / 米白文字 #e6dbc7 / 标准技能橙 #fa730f / 移动蓝 #3b82f5 / 迅捷绿 #10b884。意图方向曾在设计文档定为 Diablo IV 暗黑华丽（金属/石质双…",
+      "lastProgressAt": 1782763070898,
+      "tokens": 50780,
+      "toolCalls": 39,
+      "durationMs": 615798,
+      "resultPreview": "{\"dimension\":\"Godot 4.6.1 主题系统能力边界与最佳实践\",\"summary\":\"Godot 4.6.1 的主题系统由 Theme 资源、StyleBox 家族（Flat/Texture/Line/Empty）、Control 节点局部覆盖（add_theme_*_override）以及 CanvasItem 的 _draw 自绘能力共同构成。集中式 Theme 资源加类型变体（type variation）是个人开发者可维护的工程路径；StyleBoxFlat 可处理绝大多数程序化样式需求，但天然不支持双色描边，需叠层 Panel 或 StyleBoxTexture 九宫格补偿；_draw 自绘与主题系统可通过 get_theme_stylebox / draw_style_box 桥接，是最灵活但也最需要纪律的方案；CJK 字体必须显式嵌入并建立回退链，不能依赖系…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "维度2·可复用资源",
+      "phaseIndex": 1,
+      "phaseTitle": "调研",
+      "agentId": "a0c237dd1f2c9d31c",
+      "agentType": "research",
+      "model": "claude-sonnet-4-6",
+      "state": "done",
+      "startedAt": 1782762455103,
+      "queuedAt": 1782762455050,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "可复用 UI 资源（Godot 4.x 生态）",
+      "promptPreview": "项目背景：SoT 是一款战棋RPG（战旗 + Roguelite + 城镇建设），引擎 Godot 4.6.1 stable，GDScript，个人开发者（solo dev）。本研究目标是为「战斗界面」的视觉美化做研究先行——不从头造车，先调研 Godot 生态里现成可复用的 UI 资源/做法，再供用户挑选风格方向。\n\n现状（重要约束）：现有战斗 UI 全部用 Godot 原生 _draw 自绘 + StyleBoxFlat 构建，没有任何贴图/图标素材，没有自定义字体（全程用 ThemeDB.fallback_font）。当前视觉=暗色哥特占位原型：深紫黑底 #0a0c17 / 金色描边 #b8942f / 米白文字 #e6dbc7 / 标准技能橙 #fa730f / 移动蓝 #3b82f5 / 迅捷绿 #10b884。意图方向曾在设计文档定为 Diablo IV 暗黑华丽（金属/石质双…",
+      "lastProgressAt": 1782762900667,
+      "tokens": 46790,
+      "toolCalls": 49,
+      "durationMs": 445564,
+      "resultPreview": "{\"dimension\":\"可复用 UI 资源（Godot 4.x 生态）\",\"summary\":\"Godot 4.x 生态内可直接复用的 UI 资源分三类：(a) .theme/.tres 主题项目——数量少、整体风格多为科幻或通用扁平，无现成暗色奇幻战斗 HUD 主题，需以这些项目为基础改色调；(b) nine-patch 边框/面板素材——Kenney Fantasy UI Borders 是最优 CC0 九宫格面板包，但色调偏亮，用于暗底需叠加染色；OpenGameArt 有专门暗色幻想 UI 包但需署名；(c) UI 图标集——game-icons.net 是最大战术奇幻图标库（4180+ SVG），CC-BY 3.0 署名可用；CJK 字体方面，Noto Sans SC / Source Han Sans SC（同一字体双发行渠道）是简体中文嵌入的唯一可靠 SIL OFL 开源…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "维度3·CJK字体",
+      "phaseIndex": 1,
+      "phaseTitle": "调研",
+      "agentId": "ae3a39f1e3e115412",
+      "agentType": "research",
+      "model": "claude-sonnet-4-6",
+      "state": "done",
+      "startedAt": 1782762455104,
+      "queuedAt": 1782762455050,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "战斗 UI 可商用 CJK 字体调研（Godot 4.6）",
+      "promptPreview": "项目背景：SoT 是一款战棋RPG（战旗 + Roguelite + 城镇建设），引擎 Godot 4.6.1 stable，GDScript，个人开发者（solo dev）。本研究目标是为「战斗界面」的视觉美化做研究先行——不从头造车，先调研 Godot 生态里现成可复用的 UI 资源/做法，再供用户挑选风格方向。\n\n现状（重要约束）：现有战斗 UI 全部用 Godot 原生 _draw 自绘 + StyleBoxFlat 构建，没有任何贴图/图标素材，没有自定义字体（全程用 ThemeDB.fallback_font）。当前视觉=暗色哥特占位原型：深紫黑底 #0a0c17 / 金色描边 #b8942f / 米白文字 #e6dbc7 / 标准技能橙 #fa730f / 移动蓝 #3b82f5 / 迅捷绿 #10b884。意图方向曾在设计文档定为 Diablo IV 暗黑华丽（金属/石质双…",
+      "lastProgressAt": 1782763131228,
+      "tokens": 59649,
+      "toolCalls": 34,
+      "durationMs": 676124,
+      "resultPreview": "{\"dimension\":\"战斗 UI 可商用 CJK 字体调研（Godot 4.6）\",\"summary\":\"调研了三大类可商用中文字体及其在 Godot 4.6 的加载机制。正文/数值无衬线 CJK 字体中，Noto Sans SC 与思源黑体（同源）、得意黑 Smiley Sans、阿里巴巴普惠体 3.0 均可商用嵌入再分发；展示字体方面，得意黑凭借斜意窄体黑体气质最适合战斗飘字/标题，站酷黄油体偏可爱不符合暗黑 RPG 风；像素字体方面，绝大多数西方像素字体不含 CJK 字形，Fusion Pixel Font（OFL 1.1，8/10/12px）是目前最完整的可商用 CJK 像素方案，折衷策略是汉字用思源黑体/Noto Sans SC、拉丁数字用专属像素字体做多字体 fallback 混排。Godot 4.6 通过 FontFile.fallbacks 数组支持此机制，像素字体须…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "维度4·参考游戏复刻",
+      "phaseIndex": 1,
+      "phaseTitle": "调研",
+      "agentId": "ae1f6de25a7c8dd81",
+      "agentType": "research",
+      "model": "claude-sonnet-4-6",
+      "state": "done",
+      "startedAt": 1782762455105,
+      "queuedAt": 1782762455051,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "参考游戏UI在Godot 4里的可行复刻路径（飘字、技能栏冷却、伤害…",
+      "promptPreview": "项目背景：SoT 是一款战棋RPG（战旗 + Roguelite + 城镇建设），引擎 Godot 4.6.1 stable，GDScript，个人开发者（solo dev）。本研究目标是为「战斗界面」的视觉美化做研究先行——不从头造车，先调研 Godot 生态里现成可复用的 UI 资源/做法，再供用户挑选风格方向。\n\n现状（重要约束）：现有战斗 UI 全部用 Godot 原生 _draw 自绘 + StyleBoxFlat 构建，没有任何贴图/图标素材，没有自定义字体（全程用 ThemeDB.fallback_font）。当前视觉=暗色哥特占位原型：深紫黑底 #0a0c17 / 金色描边 #b8942f / 米白文字 #e6dbc7 / 标准技能橙 #fa730f / 移动蓝 #3b82f5 / 迅捷绿 #10b884。意图方向曾在设计文档定为 Diablo IV 暗黑华丽（金属/石质双…",
+      "lastProgressAt": 1782763036306,
+      "tokens": 65594,
+      "toolCalls": 68,
+      "durationMs": 581201,
+      "resultPreview": "{\"dimension\":\"参考游戏UI在Godot 4里的可行复刻路径（飘字、技能栏冷却、伤害预测浮窗、HP条质感）\",\"summary\":\"调研覆盖四个核心战斗UI组件在Godot 4里的具体实现路径，以FFXIV飘字、火纹SRPG预测窗、Hades/杀戮尖塔肉鸽资源条为参考基准。整体结论：飘字、冷却弧、HP条、世界坐标浮窗锚定这四个效果均可在Godot 4里靠布局+动效+少量_draw()自绘达成，不需要美术素材驱动；真正依赖素材的是金属纹理/噪点/角饰等\\\"华丽质感\\\"层，这层与玩法UI逻辑完全解耦，可单独推进。字体方面：CJK必须使用Noto Sans CJK SC（SIL OFL，商用可），像素风英数字可用m5x7但不含汉字，两者需搭配使用。\",\"findings\":[{\"claim\":\"飘字系统（DamagePopup）核心技法：Label + LabelSettings +…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 5,
+      "label": "维度5·动效juice",
+      "phaseIndex": 1,
+      "phaseTitle": "调研",
+      "agentId": "ade80652250bf3e31",
+      "agentType": "research",
+      "model": "claude-sonnet-4-6",
+      "state": "done",
+      "startedAt": 1782762455106,
+      "queuedAt": 1782762455052,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "UI 动效与 juice 模式（Godot 4.6，shader-free 优先）",
+      "promptPreview": "项目背景：SoT 是一款战棋RPG（战旗 + Roguelite + 城镇建设），引擎 Godot 4.6.1 stable，GDScript，个人开发者（solo dev）。本研究目标是为「战斗界面」的视觉美化做研究先行——不从头造车，先调研 Godot 生态里现成可复用的 UI 资源/做法，再供用户挑选风格方向。\n\n现状（重要约束）：现有战斗 UI 全部用 Godot 原生 _draw 自绘 + StyleBoxFlat 构建，没有任何贴图/图标素材，没有自定义字体（全程用 ThemeDB.fallback_font）。当前视觉=暗色哥特占位原型：深紫黑底 #0a0c17 / 金色描边 #b8942f / 米白文字 #e6dbc7 / 标准技能橙 #fa730f / 移动蓝 #3b82f5 / 迅捷绿 #10b884。意图方向曾在设计文档定为 Diablo IV 暗黑华丽（金属/石质双…",
+      "lastProgressAt": 1782763038463,
+      "tokens": 49963,
+      "toolCalls": 37,
+      "durationMs": 583357,
+      "resultPreview": "{\"dimension\":\"UI 动效与 juice 模式（Godot 4.6，shader-free 优先）\",\"summary\":\"本次调研覆盖战棋 UI 的全套 juice 动效模式：飘字弹跳上浮、屏幕/控件抖动、技能槽冷却扇形、HP 条延迟追赶、StyleBox 属性动画、面板出现消失过渡、Tween 缓动函数选择、create_tween 并行链式用法，以及四类最小 shader 增益（流光、发光、溶解、渐变描边）的成本与必要性分析。所有 shader-free 方案均与项目现有全 _draw 架构兼容；shader 方案均来自 CC0/MIT 授权资源，可商用。TRANS_SPRING 于 Godot 4.1 引入，4.6.1 下稳定可用。\",\"findings\":[{\"claim\":\"create_tween 的串行、并行、chain 三种模式及正确使用规范\",\"detail…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 6,
+      "label": "维度6·原生绘制边界",
+      "phaseIndex": 1,
+      "phaseTitle": "调研",
+      "agentId": "ac8cae64da2867971",
+      "agentType": "research",
+      "model": "claude-sonnet-4-6",
+      "state": "done",
+      "startedAt": 1782762455107,
+      "queuedAt": 1782762455053,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Godot 原生绘制上限 vs 贴图素材边界（SoT 战斗 UI 美化研究）",
+      "promptPreview": "项目背景：SoT 是一款战棋RPG（战旗 + Roguelite + 城镇建设），引擎 Godot 4.6.1 stable，GDScript，个人开发者（solo dev）。本研究目标是为「战斗界面」的视觉美化做研究先行——不从头造车，先调研 Godot 生态里现成可复用的 UI 资源/做法，再供用户挑选风格方向。\n\n现状（重要约束）：现有战斗 UI 全部用 Godot 原生 _draw 自绘 + StyleBoxFlat 构建，没有任何贴图/图标素材，没有自定义字体（全程用 ThemeDB.fallback_font）。当前视觉=暗色哥特占位原型：深紫黑底 #0a0c17 / 金色描边 #b8942f / 米白文字 #e6dbc7 / 标准技能橙 #fa730f / 移动蓝 #3b82f5 / 迅捷绿 #10b884。意图方向曾在设计文档定为 Diablo IV 暗黑华丽（金属/石质双…",
+      "lastProgressAt": 1782763154462,
+      "tokens": 80744,
+      "toolCalls": 50,
+      "durationMs": 699355,
+      "resultPreview": "{\"dimension\":\"Godot 原生绘制上限 vs 贴图素材边界（SoT 战斗 UI 美化研究）\",\"summary\":\"Godot 4.6 的 _draw() / StyleBox 体系可独立完成「暗黑华丽」战棋 UI 约 70% 的视觉效果，涵盖：顶点渐变背景、双色立体金属框、角部括号装饰、外发光近似（多圈半透明层）、分段资源条、径向冷却扇、矢量几何图标、斜向玻璃高光条、稀疏噪点颗粒、投影阴影。另有约 20% 可用极少量（5-15行）CC0 canvas_item shader 低成本解锁（外发光柔边、扫光动画、玻璃磨砂模糊）。真正必须依赖位图美术素材的只有约 10%：角色头像立绘、手绘雕花角饰、具象技能图标、有机材质纹理。SoT 当前代码（skill_bar.gd / bottom_dashboard.gd / damage_forecaster.gd / sword_qi_…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 7,
+      "label": "核验·UI资源许可证",
+      "phaseIndex": 2,
+      "phaseTitle": "核验",
+      "agentId": "a42a7f066b77b008f",
+      "agentType": "research",
+      "model": "claude-sonnet-4-6",
+      "state": "done",
+      "startedAt": 1782763154503,
+      "queuedAt": 1782763154475,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "UI资源许可证核验（Godot 4.6 战斗UI美化，共12项）",
+      "promptPreview": "这是 SoT 战棋RPG（Godot 4.6.1, GDScript, 个人开发, 有商用意图）战斗 UI 美化研究的对抗性核验环节。用清晰中文作答，许可证/版本结论必须有出处 URL 且独立交叉验证，不轻信原始声明。默认对许可证从严判定（不确定即标 unclear/uncertain）。\n\n对抗性复核以下 Godot UI 资源候选的【许可证与可商用性 + Godot 4 兼容性 + 维护活跃度】声明。逐项独立用 WebSearch/WebFetch 找官方仓库 LICENSE 文件或 Asset Library 页面交叉确认（≥2 来源），纠正任何错误——尤其：把 CC-BY 误标 MIT、把\"免费下载\"误当\"可商用\"、把停滞/仅 Godot 3 的当 Godot 4 可用。target 填\"UI资源许可证核验\"。findings 给逐项结论，corrections 给需修正项。原始声…",
+      "lastProgressAt": 1782763431307,
+      "tokens": 35582,
+      "toolCalls": 31,
+      "durationMs": 276804,
+      "resultPreview": "{\"target\":\"UI资源许可证核验（Godot 4.6 战斗UI美化，共12项）\",\"verdict\":\"partially_confirmed\",\"findings\":[\"【1 Kenney Fantasy UI Borders】CC0 1.0 确认（kenney.nl 直接页面）。商用免署名确认。原声明完全正确。\",\"【2 Kenney UI Pack RPG Expansion】CC0 1.0 确认（kenney.nl 直接页面）。商用免署名确认。原声明完全正确。\",\"【3 Kenney's UI Theme for Godot（azagaya）】CC0 1.0 确认（itch.io 页面明文 'Public Domain, you can do whatever you want'）。提供 Godot 3.x 和 Godot 4.x 两个独立版本下载（已确认）。商用无限制确认…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 8,
+      "label": "核验·CJK字体许可证",
+      "phaseIndex": 2,
+      "phaseTitle": "核验",
+      "agentId": "a02a9d106431852d7",
+      "agentType": "research",
+      "model": "claude-sonnet-4-6",
+      "state": "done",
+      "startedAt": 1782763154505,
+      "queuedAt": 1782763154475,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "CJK字体许可证核验",
+      "promptPreview": "这是 SoT 战棋RPG（Godot 4.6.1, GDScript, 个人开发, 有商用意图）战斗 UI 美化研究的对抗性核验环节。用清晰中文作答，许可证/版本结论必须有出处 URL 且独立交叉验证，不轻信原始声明。默认对许可证从严判定（不确定即标 unclear/uncertain）。\n\n对抗性复核以下 CJK 字体候选的【许可证 + 商用条款 + 简体汉字覆盖 + 可嵌入再分发】声明。逐项查官方来源（SIL OFL / Apache 2.0 / 厂商条款页），纠正错误——尤其：\"免费\"≠\"可商用\"、是否真含简体字形、是否允许随游戏打包嵌入分发、署名要求。target 填\"CJK字体许可证核验\"。原始声明：\n[{\"name\":\"Noto Sans SC（Noto Sans 简体中文）\",\"url\":\"https://github.com/notofonts/noto-cjk\",\"lic…",
+      "lastProgressAt": 1782763579836,
+      "tokens": 47973,
+      "toolCalls": 38,
+      "durationMs": 425331,
+      "resultPreview": "{\"target\":\"CJK字体许可证核验\",\"verdict\":\"partially_confirmed\",\"findings\":[\"【Noto Sans SC — 版本号严重错误】原始声明称「v2.005，2025-06-18 发布」。经核验：v2.005 + 2025-06-18 属于 Adobe 发行的 Source Han Sans（思源黑体上游），而非 Google 发行的 Noto Sans SC。notofonts/noto-cjk 仓库最新版为 v2.004（2024年1月27日）。截至 2026-06 notofonts 是否跟进 v2.005 尚存疑（GitHub issue #314 询问「Will Google publish Noto Sans CJK 2.005?」，仍无发布）。许可证 SIL OFL 1.1、GB18030-2022 Level 2（8,10…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 9,
+      "label": "核验·原生绘制边界",
+      "phaseIndex": 2,
+      "phaseTitle": "核验",
+      "agentId": "af79b053d697ac2e4",
+      "agentType": "research",
+      "model": "claude-sonnet-4-6",
+      "state": "done",
+      "startedAt": 1782763154507,
+      "queuedAt": 1782763154475,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "原生绘制边界核验",
+      "promptPreview": "这是 SoT 战棋RPG（Godot 4.6.1, GDScript, 个人开发, 有商用意图）战斗 UI 美化研究的对抗性核验环节。用清晰中文作答，许可证/版本结论必须有出处 URL 且独立交叉验证，不轻信原始声明。默认对许可证从严判定（不确定即标 unclear/uncertain）。\n\n对抗性复核「原生绘制视觉上限 vs 必须素材边界」的判断。找反例：哪些被归入\"必须靠素材\"的，其实纯 _draw 或极少量 shader 也能做到？哪些被归入\"原生能做好\"的，其实代价很高或效果明显逊于素材？给出修正与社区证据 URL。target 填\"原生绘制边界核验\"。原始判断：\n{\"dimension\":\"Godot 原生绘制上限 vs 贴图素材边界（SoT 战斗 UI 美化研究）\",\"summary\":\"Godot 4.6 的 _draw() / StyleBox 体系可独立完成「暗黑华丽」战…",
+      "lastProgressAt": 1782763573654,
+      "tokens": 55074,
+      "toolCalls": 35,
+      "durationMs": 419146,
+      "resultPreview": "{\"target\":\"原生绘制边界核验\",\"verdict\":\"partially_confirmed\",\"findings\":[\"【反例 A1：被归入「原生能做好」但实际代价更高】draw_polygon 顶点渐变背景存在两个隐蔽技术缺陷，原始过于乐观。缺陷一：Godot 4 的 CanvasItem 顶点颜色被强制压缩为 8 位整数（每通道 256 级），从深紫 (0.07, 0.05, 0.11) 到近黑 (0.02, 0.01, 0.03) 的暗色渐变仅跨约 12-15/256 步，8 位精度在此区间内会产生肉眼可见的色阶带；Godot 3 的浮点顶点色在 4.x 中已被移除（GitHub issue #6703 有明确记录）。缺陷二：draw_polygon 对 4 顶点矩形内部做三角剖分（通常为对角线分割），Gouraud 着色的颜色线性插值是三角形内部的，非轴向渐变（如左上深…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 10,
+      "label": "项目背景：SoT 是一款战棋RPG（战旗 + Roguelite + 城镇建设），引擎 Godot 4.6.1 stab",
+      "phaseIndex": 3,
+      "phaseTitle": "综合",
+      "agentId": "a365f1726c071c7c5",
+      "model": "claude-opus-4-8[1m]",
+      "state": "done",
+      "startedAt": 1782763579874,
+      "queuedAt": 1782763579839,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "以下为中立取舍陈述，最终方向由用户挑选，绝不替用户拍板。按…",
+      "promptPreview": "项目背景：SoT 是一款战棋RPG（战旗 + Roguelite + 城镇建设），引擎 Godot 4.6.1 stable，GDScript，个人开发者（solo dev）。本研究目标是为「战斗界面」的视觉美化做研究先行——不从头造车，先调研 Godot 生态里现成可复用的 UI 资源/做法，再供用户挑选风格方向。\n\n现状（重要约束）：现有战斗 UI 全部用 Godot 原生 _draw 自绘 + StyleBoxFlat 构建，没有任何贴图/图标素材，没有自定义字体（全程用 ThemeDB.fallback_font）。当前视觉=暗色哥特占位原型：深紫黑底 #0a0c17 / 金色描边 #b8942f / 米白文字 #e6dbc7 / 标准技能橙 #fa730f / 移动蓝 #3b82f5 / 迅捷绿 #10b884。意图方向曾在设计文档定为 Diablo IV 暗黑华丽（金属/石质双…",
+      "lastProgressAt": 1782764045196,
+      "tokens": 129267,
+      "toolCalls": 7,
+      "durationMs": 465322,
+      "resultPreview": "{\"ceiling_verdict\":{\"summary\":\"Godot 4.6.1 原生 _draw / StyleBox / GradientTexture2D 可独立完成约 70% 的「暗黑华丽」战斗 UI 视觉；另约 20% 用极少量 CC0/MIT canvas_item shader（5-40 行）低成本解锁；仅约 10%（角色头像立绘、手绘金属雕花角饰、具象技能图标终版、真实材质纹理）必须等 Mercury 像素管线。与目标差距最大的 5 个缺口——背景无渐变、外发光太生硬、无角部金饰、无斜向高光、全程占位字体——全部 SoT 自己就能补，不阻塞素材。现有四个组件（SkillBar 径向冷却扇 / SwordQiBar 分段阈值条 / DamageForecaster 双色受光背光描边 / DamagePopup 矢量字形飘字）已是扎实基座，可直接增量增强。\",\"can_do…"
+    }
+  ],
+  "totalTokens": 621416,
+  "totalToolCalls": 388
+}

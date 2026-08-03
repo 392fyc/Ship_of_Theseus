@@ -95,7 +95,7 @@ func _setup() -> bool:
 	_tm.input_state = 2  # ACTION_PHASE
 	_popup_layer = _tm.popup_layer
 
-	_sword = _find_unit("swordsman")
+	_sword = _find_unit("kensei")
 	var regen: Unit = _find_unit("test_dummy_regen")
 	var revive: Unit = _find_unit("test_dummy_revive")
 	if _sword == null or regen == null or revive == null:

@@ -41,7 +41,7 @@ const ELITE_SPECIAL: String = "afs_bulwark"
 const ELITE_SCALE: float = 1.35
 
 # party 下标（roster 顺序固定）。
-const IDX_SWORDSMAN: int = 0
+const IDX_KENSEI: int = 0
 const IDX_SOLDIER: int = 1
 const IDX_ARCHER: int = 2
 const IDX_CLERIC: int = 3
@@ -123,7 +123,7 @@ func _load_env() -> bool:
 
 	# 4 人队伍（带 max_hp 真值，便于测磨损/恢复/继承）。顺序＝上方 IDX_* 常量。
 	_roster = [
-		{ "class_id": "swordsman", "level": 1, "max_hp": 30 },
+		{ "class_id": "kensei", "level": 1, "max_hp": 30 },
 		{ "class_id": "soldier", "level": 1, "max_hp": 40 },
 		{ "class_id": "archer", "level": 1, "max_hp": 26 },
 		{ "class_id": "cleric", "level": 1, "max_hp": 24 },
@@ -153,7 +153,7 @@ func _test_full_act_integration() -> void:
 	_check("[1] start_run: party 恰 4 人", st0.party.size() == 4, "size=%d" % st0.party.size())
 	var all_full: bool = true
 	var ids_ok: bool = true
-	var expect_ids: Array[String] = ["swordsman", "soldier", "archer", "cleric"]
+	var expect_ids: Array[String] = ["kensei", "soldier", "archer", "cleric"]
 	for i: int in range(st0.party.size()):
 		var m: Dictionary = st0.party[i]
 		if int(m.get("hp", -1)) != int(m.get("max_hp", -2)):
@@ -161,7 +161,7 @@ func _test_full_act_integration() -> void:
 		if i < expect_ids.size() and str(m.get("class_id", "")) != expect_ids[i]:
 			ids_ok = false
 	_check("[1] start_run: 4 人满血（hp==max_hp）", all_full)
-	_check("[1] start_run: class_id 顺序 == [swordsman,soldier,archer,cleric]", ids_ok)
+	_check("[1] start_run: class_id 顺序 == [kensei,soldier,archer,cleric]", ids_ok)
 
 	var base_exp: int = _exp_base()
 	var stages_seq: Array[int] = []
@@ -204,23 +204,23 @@ func _test_full_act_integration() -> void:
 			_check("[5] stage2 soldier.hp == stage1 恢复后 hp(%d)" % _expected_soldier_hp_stage2,
 				int(sol.get("hp", -1)) == _expected_soldier_hp_stage2,
 				"hp=%d 期望 %d" % [int(sol.get("hp", -1)), _expected_soldier_hp_stage2])
-			# 满血者（swordsman 恢复到满）不带 hp 字段
-			var sw: Dictionary = _find_player(player_units, "swordsman")
-			_check("[5] stage2 swordsman 满血→不带 hp 字段",
+			# 满血者（kensei 恢复到满）不带 hp 字段
+			var sw: Dictionary = _find_player(player_units, "kensei")
+			_check("[5] stage2 kensei 满血→不带 hp 字段",
 				not sw.is_empty() and not sw.has("hp"))
 
 		# ── [2] stage1 模拟战斗磨损 → writeback（先写回，镜像 RunScene 顺序）──
 		if cur == 1:
 			var survivors: Array = [
-				{ "class_id": "swordsman", "hp": 15, "max_hp": 30 },  # 磨损 15/30
+				{ "class_id": "kensei", "hp": 15, "max_hp": 30 },  # 磨损 15/30
 				{ "class_id": "soldier", "hp": 8, "max_hp": 40 },     # 深度磨损 8/40
 				{ "class_id": "archer", "hp": 26, "max_hp": 26 },     # 满血 26/26
 				# cleric 缺席 → 战死 hp=0
 			]
 			rm.writeback_party_hp(survivors)
-			_check("[2] writeback: swordsman hp 写回磨损值 15",
-				int(st.party[IDX_SWORDSMAN].get("hp", -1)) == 15,
-				"hp=%d" % int(st.party[IDX_SWORDSMAN].get("hp", -1)))
+			_check("[2] writeback: kensei hp 写回磨损值 15",
+				int(st.party[IDX_KENSEI].get("hp", -1)) == 15,
+				"hp=%d" % int(st.party[IDX_KENSEI].get("hp", -1)))
 			_check("[2] writeback: soldier hp 写回磨损值 8",
 				int(st.party[IDX_SOLDIER].get("hp", -1)) == 8)
 			_check("[2] writeback: archer hp 写回满血 26",
@@ -231,13 +231,13 @@ func _test_full_act_integration() -> void:
 
 		# ── [3] 结算：gold 单调不减 + exp 累积（cum=(level-1)*base+exp）──
 		var g_before: int = int(st.gold)
-		var cum_before: int = _cumulative_exp(st.party[IDX_SWORDSMAN], base_exp)
+		var cum_before: int = _cumulative_exp(st.party[IDX_KENSEI], base_exp)
 		rm.on_battle_resolved("victory")
 		var st_after: Object = rm.get_state()
 		_check("[3] stage %d 结算 gold 单调不减" % cur,
 			int(st_after.gold) >= g_before, "gold %d→%d" % [g_before, int(st_after.gold)])
-		var cum_after: int = _cumulative_exp(st_after.party[IDX_SWORDSMAN], base_exp)
-		_check("[3] stage %d 结算 swordsman 累计经验不减" % cur,
+		var cum_after: int = _cumulative_exp(st_after.party[IDX_KENSEI], base_exp)
+		_check("[3] stage %d 结算 kensei 累计经验不减" % cur,
 			cum_after >= cum_before, "cum %d→%d" % [cum_before, cum_after])
 
 		# ── [8] Boss 关：固定包 gold 增 ──
@@ -316,7 +316,7 @@ func _do_prep_actions(rm: Object, resolved_stage: int) -> void:
 		_check("[4] 恢复量 run 内恒定（与 stage 无关）", a1 == a2, "a1=%d a2=%d" % [a1, a2])
 
 		var sol_hp_before: int = int(st.party[IDX_SOLDIER].get("hp", 0))
-		var sw_hp_before: int = int(st.party[IDX_SWORDSMAN].get("hp", 0))
+		var sw_hp_before: int = int(st.party[IDX_KENSEI].get("hp", 0))
 		var cleric_hp_before: int = int(st.party[IDX_CLERIC].get("hp", 0))
 		var sol_amount: int = rm.get_recovery_amount(st.party[IDX_SOLDIER])
 		_check("[4] 恢复量 == roundi(max_hp*pct/100)",
@@ -336,12 +336,12 @@ func _do_prep_actions(rm: Object, resolved_stage: int) -> void:
 			int(st.party[IDX_SOLDIER].get("hp", 0)) < sol_max)
 		_expected_soldier_hp_stage2 = int(st.party[IDX_SOLDIER].get("hp", 0))
 
-		# swordsman 磨损 15/30 + 50% 恢复 → clamp 到满 30
-		_check("[4] swordsman 恢复 clamp 到 max_hp（15+15→30）",
-			int(st.party[IDX_SWORDSMAN].get("hp", 0)) == int(st.party[IDX_SWORDSMAN].get("max_hp", 0)),
+		# kensei 磨损 15/30 + 50% 恢复 → clamp 到满 30
+		_check("[4] kensei 恢复 clamp 到 max_hp（15+15→30）",
+			int(st.party[IDX_KENSEI].get("hp", 0)) == int(st.party[IDX_KENSEI].get("max_hp", 0)),
 			"hp=%d max=%d 前=%d" % [
-				int(st.party[IDX_SWORDSMAN].get("hp", 0)),
-				int(st.party[IDX_SWORDSMAN].get("max_hp", 0)), sw_hp_before])
+				int(st.party[IDX_KENSEI].get("hp", 0)),
+				int(st.party[IDX_KENSEI].get("max_hp", 0)), sw_hp_before])
 		# cleric hp=0 → 恢复到 amount
 		_check("[4] cleric 恢复：hp 从 0 提升",
 			int(st.party[IDX_CLERIC].get("hp", 0)) > cleric_hp_before)
@@ -397,18 +397,18 @@ func _test_forced_levelup() -> void:
 	# 全员 exp = base-1，一次固定结算(+fixed_exp) 必越阈值升级
 	for i: int in range(st.party.size()):
 		st.party[i]["exp"] = base_exp - 1
-	var lvl_before: int = int(st.party[IDX_SWORDSMAN].get("level", 1))
-	var tp_before: int = int(st.party[IDX_SWORDSMAN].get("talent_points", 0))
+	var lvl_before: int = int(st.party[IDX_KENSEI].get("level", 1))
+	var tp_before: int = int(st.party[IDX_KENSEI].get("talent_points", 0))
 	var top_tp_before: int = int(st.talent_points)
 
 	rm.on_battle_resolved("victory")
 
-	_check("[3] 升级：swordsman level++（%d→%d）" % [lvl_before, int(st.party[IDX_SWORDSMAN].get("level", 1))],
-		int(st.party[IDX_SWORDSMAN].get("level", 1)) == lvl_before + 1,
-		"level=%d" % int(st.party[IDX_SWORDSMAN].get("level", 1)))
-	_check("[3] 升级：swordsman talent_points++",
-		int(st.party[IDX_SWORDSMAN].get("talent_points", 0)) == tp_before + _tp_per_level(),
-		"tp=%d" % int(st.party[IDX_SWORDSMAN].get("talent_points", 0)))
+	_check("[3] 升级：kensei level++（%d→%d）" % [lvl_before, int(st.party[IDX_KENSEI].get("level", 1))],
+		int(st.party[IDX_KENSEI].get("level", 1)) == lvl_before + 1,
+		"level=%d" % int(st.party[IDX_KENSEI].get("level", 1)))
+	_check("[3] 升级：kensei talent_points++",
+		int(st.party[IDX_KENSEI].get("talent_points", 0)) == tp_before + _tp_per_level(),
+		"tp=%d" % int(st.party[IDX_KENSEI].get("talent_points", 0)))
 	_check("[3] 升级：顶层 talent_points 合计随全队升级累加",
 		int(st.talent_points) == top_tp_before + _tp_per_level() * st.party.size(),
 		"top=%d 前=%d" % [int(st.talent_points), top_tp_before])

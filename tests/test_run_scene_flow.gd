@@ -102,7 +102,7 @@ func _load_env() -> bool:
 
 	# [占位] 4 人队伍（与 RunScene.PARTY_ROSTER 同构）
 	_roster = [
-		{"class_id": "swordsman", "level": 1},
+		{"class_id": "kensei", "level": 1},
 		{"class_id": "soldier", "level": 1},
 		{"class_id": "archer", "level": 1},
 		{"class_id": "cleric", "level": 1},

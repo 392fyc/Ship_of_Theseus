@@ -33,8 +33,8 @@ var crit_avoid_bonus: int = 0
 # 暴击率加法钩子（同源；心眼被动写入此字段，其他天赋/符文也可叠加）
 var crit_bonus: int = 0
 
-# ── 剑圣专属资源（仅在 unit_id == "swordsman" 时初始化/有意义）─
-# 剑气：整数 0~qi_max（从 swordsman.json sword_qi_config 读取）
+# ── 剑气类资源（仅在职业 JSON 带 sword_qi_config 时初始化/有意义）─
+# 剑气：整数 0~qi_max（从职业 JSON 的 sword_qi_config 读取，如 kensei.json / myrmidon.json）
 var sword_qi: int = 0
 var _qi_max: int = 0
 # 印记：三个离散布尔值，键名对应印记类型
@@ -42,13 +42,25 @@ var marks: Dictionary = {"心": false, "道": false, "势": false}
 # 印记上限（0=未初始化/非剑圣）；从 sword_qi_config.mark_max 读，默认=印记类型数
 var _mark_max: int = 0
 # 心眼参数缓存（从 JSON 读取后存放此处，避免重复查表）
+# 暴击：每 _xinyan_qi_per_crit_pct 点剑气 → 暴击率 +_xinyan_crit_per_qi 个百分点（向下取整）。
 var _xinyan_crit_per_qi: int = 0
-var _xinyan_qi_per_crit_pct: int = 10  # 每多少点剑气 +1%×crit_per_qi 暴击（剑气 0-100 标度）
+var _xinyan_qi_per_crit_pct: int = 10  # 每多少点剑气计一档暴击（剑气 0-100 标度）
+# 属性分档：剑气 ≤ 上限的 _xinyan_qi_ratio_threshold_pct% → 低气段属性加成；
+# 高于该比例 → 高气段属性加成。属性键与加成值全部来自职业 JSON，不在代码里写死。
+var _xinyan_qi_ratio_threshold_pct: int = 0
+var _xinyan_low_qi_stat_key: String = ""
+var _xinyan_low_qi_stat_bonus: int = 0
+var _xinyan_high_qi_stat_key: String = ""
+var _xinyan_high_qi_stat_bonus: int = 0
+# ── 兼容字段：仅供 tactical_manager 的剑气条阈值线与被动描述文本读取 ──
+# 新口径下速度加成不再是「达到阈值即 +N」，而是剑气比例分档，因此这两个字段
+# 已不参与任何属性计算，只是把「分档界线」与「低气段速度加成」派生出来给 UI 用。
+# tactical_manager.gd 不在本次写入范围内，故保留原字段名不改。
 var _xinyan_speed_threshold: int = 0
 var _xinyan_speed_bonus: int = 0
 # 印记属性加成缓存
 var _mark_dex_bonus: int = 0
-var _mark_lck_bonus: int = 0
+var _mark_spd_bonus: int = 0
 var _mark_str_bonus: int = 0
 
 # ── 敌人词条（affix）系统 v0 —— 纯加法，无词条单位零影响 ─────────
@@ -274,10 +286,9 @@ func get_effective_stat(stat_key: String) -> int:
 			flat_modifier += buff.value
 	var effective_value: float = float(base_value) + flat_modifier
 	effective_value += float(base_value) * percentage_modifier / 100.0
-	# ── 剑圣心眼：速度阈值加成（仅 SPD 键）─────────────────
-	if normalized_key == "SPD" and _xinyan_speed_threshold > 0 \
-			and sword_qi >= _xinyan_speed_threshold:
-		effective_value += float(_xinyan_speed_bonus)
+	# ── 心眼：剑气比例分档属性加成（低气段 / 高气段各给一种属性）──────
+	# 非剑气类单位（_qi_max<=0）恒返回 0 → 零影响。
+	effective_value += float(_get_xinyan_stat_bonus(normalized_key))
 	# ── 敌人词条 af_vanguard：首回合（round 1）速度加成（仅 SPD 键）──────────
 	# 无该词条单位 _affix_vanguard_active 恒 false → 零影响。
 	if normalized_key == "SPD" and _affix_vanguard_active:
@@ -285,8 +296,8 @@ func get_effective_stat(stat_key: String) -> int:
 	# ── 印记属性加成（心/道/势）───────────────────────────
 	if normalized_key == "DEX" and bool(marks.get("心", false)):
 		effective_value += float(_mark_dex_bonus)
-	if normalized_key == "LCK" and bool(marks.get("道", false)):
-		effective_value += float(_mark_lck_bonus)
+	if normalized_key == "SPD" and bool(marks.get("道", false)):
+		effective_value += float(_mark_spd_bonus)
 	if normalized_key == "STR" and bool(marks.get("势", false)):
 		effective_value += float(_mark_str_bonus)
 	# ── 敌人词条常驻数值加成（无词条单位两 dict 均空 → 零影响）────────
@@ -479,9 +490,16 @@ func is_marks_full() -> bool:
 ## slot_swap_trigger / slot_swap_target 声明，本函数只按触发类型求值，不硬编码技能 ID）。
 ## 触发类型 marks_full = 印记满 3 时切换到 slot_swap_target（如招架→拔刀）。
 ## 未来多种技能替换 / 印记改写天赋可新增触发类型而无需改动调用方。
+##
+## ★职业校验：替换目标必须真的在本单位的 skill_ids 内，否则不替换。
+## 全仓只有「建技能栏」与「扫迅捷技能」两处读 skill_ids，施放路径上没有任何职业检查——
+## 技能栏本身就是访问控制。若此处不校验，共享剑气/印记资源的下位职业（剑士 myrmidon）
+## 会在印记满 3 时把招架槽换成拔刀并真的放得出来，而拔刀按 R2.4 是剑圣（kensei）专属。
 func get_visible_skill_id(skill_id: String, slot_swap_trigger: String = "",
 		slot_swap_target: String = "") -> String:
 	if slot_swap_target == "":
+		return skill_id
+	if not skill_ids.has(slot_swap_target):
 		return skill_id
 	match slot_swap_trigger:
 		"marks_full":
@@ -747,23 +765,49 @@ func _init_sword_qi_resource(class_data: Dictionary) -> void:
 	sword_qi = clampi(int(cfg.get("qi_initial", 0)), 0, _qi_max)
 	marks = {"心": false, "道": false, "势": false}
 	_mark_max = int(cfg.get("mark_max", marks.size()))
-	_xinyan_crit_per_qi = int(cfg.get("crit_per_qi", 1))
+	_xinyan_crit_per_qi = int(cfg.get("crit_per_qi", 0))
 	_xinyan_qi_per_crit_pct = maxi(1, int(cfg.get("qi_per_crit_pct", 10)))
-	_xinyan_speed_threshold = int(cfg.get("speed_threshold", 70))
-	_xinyan_speed_bonus = int(cfg.get("speed_bonus", 1))
+	_xinyan_qi_ratio_threshold_pct = clampi(
+		int(cfg.get("qi_ratio_threshold_pct", 0)), 0, 100)
+	_xinyan_low_qi_stat_key = _normalize_stat_key(str(cfg.get("low_qi_stat_key", "")))
+	_xinyan_low_qi_stat_bonus = int(cfg.get("low_qi_stat_bonus", 0))
+	_xinyan_high_qi_stat_key = _normalize_stat_key(str(cfg.get("high_qi_stat_key", "")))
+	_xinyan_high_qi_stat_bonus = int(cfg.get("high_qi_stat_bonus", 0))
+	# 兼容字段（仅供 UI 读，见字段声明处说明）：分档界线换算成剑气绝对值。
+	_xinyan_speed_threshold = int(
+		float(_qi_max) * float(_xinyan_qi_ratio_threshold_pct) / 100.0)
+	_xinyan_speed_bonus = _xinyan_low_qi_stat_bonus \
+		if _xinyan_low_qi_stat_key == "SPD" else 0
 	_mark_dex_bonus = int(cfg.get("mark_dex_bonus", 2))
-	_mark_lck_bonus = int(cfg.get("mark_lck_bonus", 2))
+	_mark_spd_bonus = int(cfg.get("mark_spd_bonus", 2))
 	_mark_str_bonus = int(cfg.get("mark_str_bonus", 2))
 	_apply_xinyan_passive()
 
 
 ## 心眼被动更新：暴击加成 = floor(剑气 / qi_per_crit_pct) × crit_per_qi（剑气 0-100 标度，
-## 满气默认 floor(100/10)×1 = +10% 暴击）写入 crit_bonus 钩子。
-## SPD 阈值加成通过 get_effective_stat 实时计算，不需要此处写入。
+## 当前配置 = 每 10 点剑气 +2 → 满气 floor(100/10)×2 = +20 暴击）写入 crit_bonus 钩子。
+## 分档属性加成通过 get_effective_stat 实时计算，不需要此处写入。
 func _apply_xinyan_passive() -> void:
 	if _xinyan_crit_per_qi <= 0:
 		return
 	crit_bonus = (sword_qi / _xinyan_qi_per_crit_pct) * _xinyan_crit_per_qi
+
+
+## 心眼剑气分档属性加成：剑气 ≤ 上限的 qi_ratio_threshold_pct% 时给低气段属性，
+## 高于该比例时给高气段属性。两段属性键与加成值均来自职业 JSON（sword_qi_config）。
+## 非剑气类单位（_qi_max<=0）恒返回 0，对其他职业零影响。
+func _get_xinyan_stat_bonus(normalized_key: String) -> int:
+	if _qi_max <= 0:
+		return 0
+	# 用整数交叉相乘比较，避免除法取整带来的边界漂移：剑气/上限 ≤ 比例/100。
+	var in_low_band: bool = sword_qi * 100 <= _qi_max * _xinyan_qi_ratio_threshold_pct
+	if in_low_band:
+		if _xinyan_low_qi_stat_key != "" and normalized_key == _xinyan_low_qi_stat_key:
+			return _xinyan_low_qi_stat_bonus
+		return 0
+	if _xinyan_high_qi_stat_key != "" and normalized_key == _xinyan_high_qi_stat_key:
+		return _xinyan_high_qi_stat_bonus
+	return 0
 
 
 # ── 敌人词条（affix）公开接口 ─────────────────────────
