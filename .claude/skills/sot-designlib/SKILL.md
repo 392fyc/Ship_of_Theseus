@@ -31,13 +31,13 @@ ssh -i C:/Users/392fy/.ssh/id_ed25519 392fyc@192.168.0.254 \
    curl -s -H \"X-API-Token: \$T\" 'http://localhost:8400/api/talents?include_shelved=true'"
 ```
 
-- **列表端点必须加 `include_shelved=true`**，否则数不到已归档与待删除的。
+- **数全量必须带对参数**：talents / relics / equipment 加 `include_shelved=true`（否则漏掉已归档与待删除），skills 加 `include_upgrades=true`（否则漏掉回忆天赋产出的升级版技能）。其余端点没有这两个参数，传了会被静默忽略。
 - 端点：`/api/{talents,skills,equipment,relics,rules,tags,classes,resources,states,judgments}`。
 - 拿回来的 JSON 用**本地** python 解析——NAS 宿主没有 python3 也没有 jq。
 
 ## 二、写数据：PATCH + 回读核对
 
-批量写生产数据前先 dry-run。参考 `scripts/backfill_trigger.py` 的做法：默认不写、写入后**立即回读比对**，不一致就停。别做「发完 200 就算成功」。
+批量写生产数据前先 dry-run。参考 `scripts/backfill_trigger.py` 的做法：默认不写、写入后**立即回读比对**，不一致就停。别做「发完就算成功」。
 
 跑脚本要进容器（宿主无 python3）：
 
@@ -56,7 +56,7 @@ $CSD exec -e SOT_API_TOKEN="$T" -e SOT_API_BASE="http://localhost:8000" \
 
 ## 三、改代码 → 上线：只走 deploy.sh
 
-**只提交不部署等于没做。** 曾因此让三批改动（equipment 四字段、trigger 分级选择器、标签悬浮换行）在线上消失了整整一周，用户以为「什么都没做」。
+**只提交不部署等于没做。** 曾因此让三批改动在线上消失了整整一周，用户以为「什么都没做」。
 
 ```bash
 cd /d/ShipOfTheseus/SoT-fyc-space
@@ -65,38 +65,46 @@ bash scripts/deploy.sh --check    # 只读自检
 bash scripts/deploy.sh --no-build # 只同步（不算上线）
 ```
 
-sudo 密码放 `scripts/deploy.local`（gitignored，从 nas-ssh.md 取），否则脚本会因为没有 tty 而中止。
+sudo 密码放 `scripts/deploy.local`（gitignored，从 nas-ssh.md 取），缺失时脚本在无 tty 环境会直接中止并给出补救路径。
 
-跑测试**必须用仓内虚拟环境**：`.venv/Scripts/python.exe -m pytest -q`。用系统 Python 会报 32 个 collection error（`No module named 'sqlalchemy'`），看着像代码坏了、其实只是环境不对。
+## 四、写测试：照抄既有脚手架，别自己发明
 
-## 四、QNAP Container Station 的坑（全部实测过）
+曾有一轮独立写验证脚手架连撞 14 次失败，全是下面这些约定没对上，没有一次是实装错。**先照抄参考测试，再写新断言。**
 
-1. **docker 不在 PATH**，在 `/share/CACHEDEV1_DATA/.qpkg/container-station/bin/docker`。直接敲 `docker` 得到的是 `command not found`——若把 stderr 丢了（`2>/dev/null`）就会看成「零输出 = 没有容器」，从而误判。
-2. **必须显式 `-H unix:///var/run/system-docker.sock`**。`/var/run/docker.sock` **不存在**。
-3. **非 root 下 `build` 与 `compose` 两个子命令不可见**——不报错，只打印通用帮助。`ps` / `exec` / `cp` / `restart` 可用。所以构建必须 sudo。
-4. **`392fyc` 在 administrators 组，但 sudo 仍要密码**；交互式 `sudo` 需要 tty，agent 环境没有 → 用 `sudo -S` 从 stdin 喂密码。
-5. **busybox 工具集很窄**：没有 `comm`、没有 `python3`、没有 `jq`；`find` 不支持 `-empty`，也不支持某些 `-o` 组合。写要在 NAS 上跑的 shell 前先探测，别照 GNU 习惯写。
-6. **scp 不可用**（连接直接关闭），用 `cat file | ssh host "cat > /tmp/file"`。
+1. **必须用仓内虚拟环境**：`.venv/Scripts/python.exe -m pytest -q`。系统 Python 会在 collection 阶段成片报 `No module named 'sqlalchemy'`，看着像代码坏了、其实只是环境不对。
+2. **鉴权**：`API_TOKEN` 是 `app/deps.py` 在 import 期读入的模块常量，`monkeypatch.setenv` 已经太晚 → `monkeypatch.setattr(deps, "API_TOKEN", "t")`（照 `tests/test_class_tier_api.py`）。例外：review 系端点的 `require_review_token` 故意从 `config` 动态读属性，要 patch `config`（照 `tests/test_review_async.py`）。
+3. **夹具标准写法**：内存 engine + `tests/fixtures/design_library_fixture.json` + `app.seed.import_payload` + `app.dependency_overrides[get_session]`（照 `tests/test_classes_page.py`）。
+4. **状态码**：POST 建资源返回 **201**，PATCH 才是 200。
+5. **`SkillIn.skill_type` 无默认值**（2026-07-08 裁决：强制显式声明），构造技能 payload 漏传直接 422。
+6. **L1 校验的真实入口**是 `run_l1_deterministic(candidate, ctx)` + `L1Context`（`app/validation/l1.py`），不是想当然的 `run_l1` / `ValidationContext`。
+7. **改断言要断言新的正确行为并补反向断言**，不要放宽成「怎么都能过」。
 
-## 五、验证纪律（这几条都是踩过才写下来的）
+## 五、QNAP Container Station 的坑（全部实测过）
+
+1. **docker 的唯一正确调用**：`/share/CACHEDEV1_DATA/.qpkg/container-station/bin/docker -H unix:///var/run/system-docker.sock`。它不在 PATH（直接敲 `docker` 是 command not found，stderr 一丢就会误判成「没有容器」），且 `/var/run/docker.sock` **不存在**，socket 必须显式指定。
+2. **非 root 下 `build` 与 `compose` 两个子命令不可见**——不报错，只打印通用帮助。`ps` / `exec` / `cp` / `restart` 可用。所以构建必须 sudo。
+3. **sudo 要密码，交互式 sudo 要 tty**，agent 环境没有 → 用 `sudo -S` 从 stdin 喂密码。
+4. **busybox 工具集很窄**：没有 `comm`、`python3`、`jq`；`find` 不支持 `-empty`，也不支持某些 `-o` 组合。写要在 NAS 上跑的 shell 前先探测，别照 GNU 习惯写。
+5. **scp 不可用**（连接直接关闭），用 `cat file | ssh host "cat > /tmp/file"`。
+
+## 六、验证纪律（这几条都是踩过才写下来的）
 
 **★ 用与被验对象相同的解析规则，否则结论必然是错的。**
 
 1. **验「线上是不是新代码」要看运行时行为，不能比对文件。** 文件送到了 ≠ 进程加载了。deploy.sh 的做法是拉线上的设计书导航、数条目数，与本地 `NAV_STRUCTURE` 比。曾经文件明明是新的、容器跑的还是旧逻辑。
-2. **验 HTML 属性要用 `html.parser`，不能用正则。** 曾用宽松正则跨引号取 `x-data`，把浏览器眼里已经破碎的 HTML 又拼回成完整 JSON，于是判定「服务端数据完全正常」，白白去猜 CDN 和 Rocket Loader。真凶是 `x-data="...{{ x|tojson }}..."` 用了双引号——**Jinja 的 tojson 只转义 `< > & '`，不转义 `"`**，属性在 JSON 第一个双引号处就被截断。同类写法必须用单引号包裹。
+2. **验 HTML 属性要用 `html.parser`，不能用正则。** 曾用宽松正则把浏览器眼里已经破碎的属性拼回「完整 JSON」，判成「服务端完全正常」，白白去猜 CDN。根因：**Jinja 的 `tojson` 只转义 `< > & '`，不转义 `"`**，`x-data="...{{ x|tojson }}..."` 在 JSON 第一个双引号处就截断——这类属性必须用单引号包裹。
 3. **Alpine 渲染的东西不能在服务端 HTML 里 grep。** 下拉选项与 `selected` 状态是浏览器端由 `x-for` / `x-model` 生成的，服务端根本不输出。要验当前值，去解析传给组件的初始参数（`x-data="triggerPicker({...}, {...})"` 的第一个实参）。
 4. **任何「零命中 / 零输出」先自证有权限、有工具、命令真的执行了。** 三次误判都源于此：非 root 跑 `crontab -l` 被 QNAP 拒绝、`docker` 不在 PATH 而 stderr 被丢、远端没有 `comm` 导致差集恒为空却照样打印「无过期文件」。
-5. **改测试断言时，要断言新的正确行为并补反向断言**，不要放宽成「怎么都能过」。
 
-## 六、数据结构要点
+## 七、数据结构要点
 
-- **稀有度**：普通 / 稀有 / 史诗 / 传奇 / 独特（`app/models.py` `Rarity`）。
+- **稀有度**（`app/models.py` `Rarity`）：普通 / 稀有 / 史诗 / 传奇 / 独特 / **回忆**。末两档是特殊档，不进普通稀有度池。回忆 = 技能升级专用：`Talent.upgrade_skill_id` 指向升级后技能，`Skill.upgrade_of` 标记它是谁的升级版；升级版技能默认不出现在列表端点。
 - **基数来源** `damage_type`：无 / 物理 / 魔法 / 混合（2026-08-04 起改名并去掉「纯粹」——「纯粹」属于应用侧，不是基数取哪个属性）。引擎侧 Godot 仓的 `damage_type` 是**独立 taxonomy**（physical/magical/pure），两者不要互相套用。
-- **生效时机五段**：`trigger_event`（23 个枚举，9 族）/ `trigger_object`（仅 8 个事件带此槽，值必须是注册表 id）/ `trigger_source`（仅 6 个事件带此槽）/ `trigger_condition`（自由文本）/ `trigger_frequency` + `_n`。槽位约束服务端会 400。
-- **架状态** `shelf_state`：在用 / 已归档 / 待删除，只有「在用」进池。
+- **生效时机五段**：`trigger_event`（23 个枚举，9 族）/ `trigger_object`（仅 8 个事件带此槽，值必须是注册表 id）/ `trigger_source`（仅 6 个事件带此槽）/ `trigger_condition`（自由文本）/ `trigger_frequency` + `_n`。槽位约束服务端会 400（枚举与槽位表都定义在 `app/models.py`，`validation/trigger.py` 只是引用）。
+- **上架状态** `shelf_state`：在用 / 已归档 / 待删除，只有「在用」进池。
 - 天赋回填现状与遗留缺口见 `docs/trigger-backfill-2026-08-04.md`。
 
-## 七、别做的事
+## 八、别做的事
 
 - 别从公网 curl 写数据（Cloudflare Access 会挡）。
 - 别手编 `engine_json`（引擎数值只读镜像，Mercury 有回填管线，手改会被覆盖）。
