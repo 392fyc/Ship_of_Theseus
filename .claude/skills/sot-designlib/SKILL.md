@@ -39,6 +39,8 @@ ssh -i C:/Users/392fy/.ssh/id_ed25519 392fyc@192.168.0.254 \
 
 批量写生产数据前先 dry-run。参考 `scripts/backfill_trigger.py` 的做法：默认不写、写入后**立即回读比对**，不一致就停。别做「发完就算成功」。
 
+实体 id 可改（2026-08-05 起）：`POST /api/{talents,skills,equipment,relics,states,resources,judgments}/{id}/rename-id`，body `{"new_id": "..."}`——全库引用单事务级联（对象槽按事件类型过滤防跨注册表误改），返回各引用点更新行数。id 是建卡时的拼音助记，改名后用它纠正 id、别放着旧拼音骗人。
+
 跑脚本要进容器（宿主无 python3）：
 
 ```bash
