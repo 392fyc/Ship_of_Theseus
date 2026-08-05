@@ -100,7 +100,7 @@ sudo 密码放 `scripts/deploy.local`（gitignored，从 nas-ssh.md 取），缺
 
 - **稀有度**（`app/models.py` `Rarity`）：普通 / 稀有 / 史诗 / 传奇 / 独特 / **回忆**。末两档是特殊档，不进普通稀有度池。回忆 = 技能升级专用：`Talent.upgrade_skill_id` 指向升级后技能，`Skill.upgrade_of` 标记它是谁的升级版；升级版技能默认不出现在列表端点。
 - **基数来源** `damage_type`：无 / 物理 / 魔法 / 混合（2026-08-04 起改名并去掉「纯粹」——「纯粹」属于应用侧，不是基数取哪个属性）。引擎侧 Godot 仓的 `damage_type` 是**独立 taxonomy**（physical/magical/pure），两者不要互相套用。
-- **生效时机五段**：`trigger_event`（23 个枚举，9 族）/ `trigger_object`（仅 8 个事件带此槽，值必须是注册表 id）/ `trigger_source`（仅 6 个事件带此槽）/ `trigger_condition`（自由文本）/ `trigger_frequency` + `_n`。槽位约束服务端会 400（枚举与槽位表都定义在 `app/models.py`，`validation/trigger.py` 只是引用）。
+- **生效时机五段**：`trigger_event`（24 个枚举，9 族，2026-08-05 起含「命中后」）/ `trigger_object`（仅 8 个事件带此槽，值必须是注册表 id）/ `trigger_source`（仅 7 个事件带此槽）/ `trigger_condition`（自由文本）/ `trigger_frequency` + `_n`。槽位约束服务端会 400（枚举与槽位表都定义在 `app/models.py`，`validation/trigger.py` 只是引用）。天赋另有**附加触发行**子表（`talent_trigger_extra`，每卡 ≤1 行；API 字段 `extra_triggers`：缺省=不动、`[]`=清空、给列表=整组替换）。
 - **上架状态** `shelf_state`：在用 / 已归档 / 待删除，只有「在用」进池。
 - 天赋回填现状与遗留缺口见 `docs/trigger-backfill-2026-08-04.md`。
 
