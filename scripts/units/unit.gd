@@ -14,6 +14,11 @@ var attack_min_range: int = 1
 var attack_range: int = 1
 var skill_ids: Array[String] = []
 var skill_cooldowns: Dictionary = {}
+# 该单位持有的天赋 id（Wave 1 · A1）。默认空 = 现有战斗零影响；
+# 填充方（肉鸽层选天赋 / 测试）自行写入，分发见 tactical_manager._dispatch_talents。
+# 只有在 TalentRegistry 里注册成功的 id 才会真正触发——写进来但被拒收的卡不会生效，
+# 且拒收理由可从 TalentRegistry.rejection_reason() 查到。
+var talent_ids: Array[String] = []
 
 # ── 位置（ADR-3 双向引用）──────────────────────────
 var grid_position: Vector2i = Vector2i.ZERO

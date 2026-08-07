@@ -15,6 +15,6 @@
   "engine_status": "evaluable",
   "engine_blocker": "",
 
-  "_mirror": "definition / kind / duration_kind / resistable / rule_code 五字段是设计库 /api/states 的只读镜像，2026-08-07 同步。引擎侧不改这五个字段；要改回设计库改，再重新同步（lane 文档 §2.2 字段归属表）。",
+  "_mirror": "definition / kind / duration_kind / resistable / rule_code 五字段是设计库 State 注册表的只读镜像。版本锚点 = 设计库仓 snapshots/states.json @ fb45402（按 lane 文档 §6.1「快照 diff 是唯一交接界面」，锚 commit sha 而非日期）。引擎侧不改这五个字段；要改回设计库改，重导快照后按新 sha 重新同步（lane 文档 §2.2 字段归属表）。",
   "_engine_note": "predicate / engine_status / engine_blocker 是引擎侧字段，设计库无对应列，不回流。阈值 30 取自 definition 原文，改数值前先改设计库定义。判定用「不高于」即 <=，与 definition 的措辞一致——注意与词条 afs_frenzy 的 < 严格小于不同。"
 }

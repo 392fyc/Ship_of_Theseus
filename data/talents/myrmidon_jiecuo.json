@@ -1,0 +1,26 @@
+{
+  "id": "myrmidon_jiecuo",
+  "name": "介错",
+  "class_id": "myrmidon",
+  "rarity": "稀有",
+  "tags": ["击杀", "资源"],
+
+  "trigger_event": "击杀时",
+  "trigger_object": "",
+  "trigger_source": "",
+  "trigger_condition": "",
+  "trigger_frequency": "每次",
+  "trigger_frequency_n": 1,
+  "effect": "获得 20 点剑气。",
+  "rules": "击杀的结算时机为 after-damage（R1.4）；与居合的击杀返气各自独立结算，两者可以同时获得。",
+
+  "requires_states": [],
+  "condition_model": "none",
+  "engine_effects": [
+    { "type": "gain_resource", "resource": "qi", "amount": 20 }
+  ],
+  "engine_note": "A1 首张接线天赋。trigger_condition 为空故 condition_model=none。与 _apply_sword_qi_on_hit 的 qi_gain_on_kill 不冲突——那一路读的是技能 JSON 字段（技能自带的击杀返气），本条是天赋层的额外获得，rules 里「与居合的击杀返气各自独立结算」说的就是这个叠加关系。",
+
+  "_mirror": "id / name / class_id / rarity / tags / trigger 五段 / effect / rules 是设计库天赋条目的只读镜像。版本锚点 = 设计库仓 snapshots/talents.json @ 319993a（按 lane 文档 §6.1，锚 commit sha 而非日期）。引擎侧不改这些字段；要改回设计库改，重导快照后按新 sha 重新同步（lane 文档 §2.2 字段归属表）。",
+  "_engine_note": "requires_states / condition_model / engine_effects / engine_note 是引擎侧字段，设计库无对应列、不回流；四者已于 2026-08-08 先入 §2.2 归属表（设计库仓 1fbfcb2）再写代码。"
+}
