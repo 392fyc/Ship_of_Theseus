@@ -9,6 +9,17 @@ extends Node
 var grid: Grid = Grid.new()
 var units: Array = []
 var battle_active: bool = false
+# 天赋载体（Wave 1 · A1）。懒构造：首次分发时按 DataLoader 的 states/talents 建立。
+# 无天赋数据或全部被拒收时，_dispatch_talents 立即 return，正式战斗零影响。
+#
+# ★ 必须用 preload 而不是写 `StateRegistry.new()`：Godot 的全局类名缓存
+# （.godot/global_script_class_cache.cfg）只在**编辑器导入时**重建，headless
+# `--script` 与 `--headless` 启动都不会重建它。新加的 class_name 在编辑器里能用、
+# 在 headless 下会直接 "Identifier not declared in the current scope" 解析失败，
+# 整个 tactical_manager.gd 加载不了。preload 走的是资源路径，编译期解析，两边都稳。
+const StateRegistryScript := preload("res://scripts/data/state_registry.gd")
+const TalentRegistryScript := preload("res://scripts/data/talent_registry.gd")
+var _talent_registry: RefCounted = null
 
 signal battle_started
 signal unit_killed(unit: Unit)
@@ -1627,6 +1638,21 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 	if result.defender_died:
 		_apply_affixes(attacker, "on_kill", {"defender": defender, "result": result})
 
+	# ── 天赋：after-damage 族三事件分发（Wave 1 · A1，零新钩子）──────────
+	# 与上面的词条分发同一时点——都在 defender.take_damage() 之后，故三者都是
+	# after-damage 语义（R1.4）。纯加法：单位无 talent_ids 时立即 return。
+	# 三事件的判据差别（照设计库 trigger_event 定义）：
+	#   命中后     = 该次命中的伤害结算完成后，按命中计一次，**实际伤害为 0 也触发**
+	#   造成伤害时 = 实际造成了伤害（damage > 0）才触发
+	#   击杀时     = 该次攻击导致目标死亡
+	var talent_ctx: Dictionary = {"defender": defender, "result": result}
+	if result.hit:
+		_dispatch_talents(attacker, "命中后", talent_ctx)
+		if result.damage > 0:
+			_dispatch_talents(attacker, "造成伤害时", talent_ctx)
+	if result.defender_died:
+		_dispatch_talents(attacker, "击杀时", talent_ctx)
+
 	# 自动反击已整体移除（2026-07-11 用户裁决）：未来以天赋/敌方特性形式回归，
 	# 伤害与特效将与天赋/特性深度绑定，不预设反击框架。
 
@@ -2324,6 +2350,63 @@ func _apply_sword_qi_on_hit(attacker: Unit,
 			attacker.skill_cooldowns[origin_skill_id] = new_cd
 		print("[SwordQi] %s %s CD %d→%d on kill" % [
 			attacker.unit_name, origin_skill_id, current_cd, new_cd])
+
+
+# ── 天赋时机分发器（Wave 1 · A1）────────────────────────
+# 纯加法：单位 talent_ids 为空 → 立即 return，正式战斗零影响。
+# 只分发在 TalentRegistry 里**注册成功**的天赋；被拒收的 id 即使写进 talent_ids
+# 也不会触发，且拒收时已 push_warning、理由可从 rejection_reason() 查到
+# （Wave 1 §2.3：unevaluable 必须响亮失败，不许静默当条件不成立）。
+
+
+## 懒构造天赋注册器。放在这里而非 _ready，是为了让 headless 测试能在
+## 场景实例化之后再注入数据；DataLoader 是 autoload，此处只读不写。
+func _ensure_talent_registry() -> RefCounted:
+	if _talent_registry == null:
+		var state_registry: RefCounted = StateRegistryScript.new(DataLoader.states)
+		_talent_registry = TalentRegistryScript.new(DataLoader.talents, state_registry)
+	return _talent_registry
+
+
+func _dispatch_talents(unit: Unit, event: String, ctx: Dictionary) -> void:
+	if unit == null or unit.talent_ids.is_empty():
+		return
+	var registry: RefCounted = _ensure_talent_registry()
+	for entry: Dictionary in registry.talents_for_event(event):
+		var talent_id: String = str(entry.get("id", ""))
+		if talent_id not in unit.talent_ids:
+			continue
+		for item: Variant in (entry.get("engine_effects", []) as Array):
+			if item is Dictionary:
+				_apply_talent_effect(unit, talent_id, item, ctx)
+
+
+## 执行一条结构化天赋效果。未知类型在注册期就已被拒收，走到这里仍要兜底告警——
+## 静默 default 分支正是路径 C 留档里点名的失效模式。
+func _apply_talent_effect(unit: Unit, talent_id: String,
+		effect: Dictionary, _ctx: Dictionary) -> void:
+	var effect_type: String = str(effect.get("type", ""))
+	match effect_type:
+		"gain_resource":
+			var resource: String = str(effect.get("resource", ""))
+			var amount: int = int(effect.get("amount", 0))
+			match resource:
+				"qi":
+					unit.set_sword_qi(unit.sword_qi + amount)
+					print("[Talent] %s 「%s」→ +%d 剑气 → %d" % [
+						unit.unit_name, talent_id, amount, unit.sword_qi])
+				"mark":
+					for _i: int in range(amount):
+						var gained: String = unit.gain_random_mark()
+						if gained == "":
+							break
+					print("[Talent] %s 「%s」→ +%d 印记 → %d" % [
+						unit.unit_name, talent_id, amount, unit.get_mark_count()])
+				_:
+					push_warning("[Talent] %s 的 gain_resource 资源「%s」无执行分支"
+						% [talent_id, resource])
+		_:
+			push_warning("[Talent] %s 的效果类型「%s」无执行分支" % [talent_id, effect_type])
 
 
 # ── 敌人词条时机分发器（触发类词条）──────────────────────
