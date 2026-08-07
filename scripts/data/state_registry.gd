@@ -8,18 +8,18 @@ extends RefCounted
 ## 为什么不落 `data/buffs/`（2026-08-07 路径 C 决策，2026-08-08 经 Mercury 验收补全论证）：
 ##
 ##   理由一 · 模型不兼容。BuffEffect 是「实例 + 时长」模型——必须由技能 effects 显式
-##   `add_buff` 挂载（tactical_manager.gd:1751 是当前唯一接线的挂载入口），此后按回合
-##   递减 duration（unit.gd:254-264）。而条件类状态没有挂载动作、没有时长，其成立与否
+##   `add_buff` 挂载（`tactical_manager._execute_hostile_action` 里的那次 `add_buff` 是当前唯一接线的挂载入口），此后按回合
+##   递减 duration（`Unit.process_turn_end_buffs`）。而条件类状态没有挂载动作、没有时长，其成立与否
 ##   必须在每次读取时以当时的战场数据重新求值。做成 buff 则 HP 回升后旧实例不会自动
 ##   脱离，直接违反 definition 的「HP 高于 30% 时脱离」。
 ##
 ##   理由二 · 没有对应的兑现类型。四种 effect_type（stat_mod / dot / control / special）
 ##   没有一种对应「纯条件、不给加成」：前三种都要给加成或造成效果；只剩 special，而
-##   buff_effect.gd:31-44 的 tick() match 里根本没有 special 分支，落它就是又一个无
+##   `BuffEffect.tick()` 的 match 里根本没有 special 分支，落它就是又一个无
 ##   兑现器的死标记（先例 swordsman_parry_stance 挂上后全库零消费方）。
 ##
 ##   理由三 · stackable/max_stacks 的「现成承接」不适用。条件类状态不叠层；且该叠层
-##   分支（unit.gd:204-207）是未验证代码——10 个 buff 文件 stackable 全 false、
+##   分支（`Unit.add_buff` 里的 stackable 支路）是未验证代码——10 个 buff 文件 stackable 全 false、
 ##   max_stacks 全 1，无数据或测试走过。
 ##
 ## 被否决的替代路（显式记下，免得日后重新翻账）：
@@ -28,7 +28,7 @@ extends RefCounted
 ##   路径 C 明令不碰。
 ##
 ##   替代路 B · 复用现成的每回合钩子 process_turn_start_buffs()
-##   （tactical_manager.gd:326 → unit.gd:240），加一个分支重算 HP 条件。这条**确实与
+##   （`TacticalManager._on_turn_started` → `Unit.process_turn_start_buffs`），加一个分支重算 HP 条件。这条**确实与
 ##   take_damage / heal 无关、无需新开钩子**，是最像样的替代方案，但仍在两个独立点上
 ##   不够格：
 ##     ① 条件态根本没有挂载动作——没有任何技能会去 `add_buff` 一个纯条件态，连「进入」
@@ -41,9 +41,9 @@ extends RefCounted
 ## 因此条件类状态走本注册表：只读 `data/states/*.json`，只提供查询，不进任何结算路径。
 ## 真正的消费方是 Wave 1 的天赋载体（把「处于〔X〕状态」的条件段接到这里）。
 ##
-## 留档 · 理由一的前提有一处脆弱点：unit.gd:352 的 load_buffs_from_state() 是全仓
-## 零调用的死代码，内含一处 `buffs.append`。「tactical_manager.gd:1751 是唯一入口」
-## 在当下成立，但这条未接线的第二路径一旦被接上（例如做存档读档时），理由一里
+## 留档 · 理由一的前提有一处脆弱点：`Unit.load_buffs_from_state()` 是全仓
+## 零调用的死代码，内含一处 `buffs.append`。「技能挂载是唯一入口」在当下成立，
+## 但这条未接线的第二路径一旦被接上（例如做存档读档时），理由一里
 ## 「必须由技能显式挂载」的前提即失效，届时需重新评估本决策。
 ##
 ## 用法：
@@ -128,7 +128,11 @@ func _evaluate(unit: Unit, predicate_type: String, params: Dictionary) -> bool:
 		"hp_ratio_at_most":
 			# 当前 HP 占上限的百分比不高于阈值。措辞取自设计库 definition 的
 			# 「不高于 30%」→ 用 <=（注意词条 afs_frenzy 的低血判定用的是严格 <，两者不同）。
+			# 数据不全同样要响亮——这是本类「一律告警、不静默」口径的一部分，
+			# 不是「条件不成立」。静默的话，一个没 setup 的单位会表现得跟满血一样。
 			if unit == null or unit.stats == null or unit.stats.max_hp <= 0:
+				push_warning("[StateRegistry] hp_ratio_at_most 无法求值：单位或 stats 缺失、"
+					+ "或 max_hp<=0，按不成立处理")
 				return false
 			# 阈值必须来自 JSON（项目禁则：不在代码里硬编码数值）。缺键时不能
 			# 静默退化成 0——那会让状态永远不成立且无人察觉，与本函数其他

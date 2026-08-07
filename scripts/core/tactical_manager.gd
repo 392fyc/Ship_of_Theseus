@@ -20,6 +20,7 @@ var battle_active: bool = false
 const StateRegistryScript := preload("res://scripts/data/state_registry.gd")
 const TalentRegistryScript := preload("res://scripts/data/talent_registry.gd")
 var _talent_registry: RefCounted = null
+var _state_registry: RefCounted = null
 
 signal battle_started
 signal unit_killed(unit: Unit)
@@ -2361,10 +2362,16 @@ func _apply_sword_qi_on_hit(attacker: Unit,
 
 ## 懒构造天赋注册器。放在这里而非 _ready，是为了让 headless 测试能在
 ## 场景实例化之后再注入数据；DataLoader 是 autoload，此处只读不写。
+func _ensure_state_registry() -> RefCounted:
+	if _state_registry == null:
+		_state_registry = StateRegistryScript.new(DataLoader.states)
+	return _state_registry
+
+
 func _ensure_talent_registry() -> RefCounted:
 	if _talent_registry == null:
-		var state_registry: RefCounted = StateRegistryScript.new(DataLoader.states)
-		_talent_registry = TalentRegistryScript.new(DataLoader.talents, state_registry)
+		_talent_registry = TalentRegistryScript.new(
+			DataLoader.talents, _ensure_state_registry())
 	return _talent_registry
 
 
@@ -2376,9 +2383,38 @@ func _dispatch_talents(unit: Unit, event: String, ctx: Dictionary) -> void:
 		var talent_id: String = str(entry.get("id", ""))
 		if talent_id not in unit.talent_ids:
 			continue
-		for item: Variant in (entry.get("engine_effects", []) as Array):
+		if not _talent_conditions_hold(unit, entry):
+			continue
+		var effects: Variant = entry.get("engine_effects", [])
+		if not effects is Array:
+			push_warning("[Talent] %s 的 engine_effects 不是数组，跳过" % talent_id)
+			continue
+		for item: Variant in (effects as Array):
 			if item is Dictionary:
 				_apply_talent_effect(unit, talent_id, item, ctx)
+			else:
+				push_warning("[Talent] %s 的 engine_effects 含非字典项，跳过该项" % talent_id)
+
+
+## 运行期条件求值：`requires_states` 里每个状态**此刻**都必须成立，否则不触发。
+##
+## 这一步与注册期的闸门是两件事，缺一不可：
+##   注册期（TalentRegistry）问的是「引擎有没有能力判定这个条件」——判不了的卡
+##   （如依赖〔双持〕的 5 张）直接拒收，根本进不了池。
+##   运行期（这里）问的是「此刻条件成立不成立」——判得了但当前不成立的，跳过不触发。
+## 只做前者不做后者，`condition_model=states` 的卡会在条件不成立时照常触发，
+## 那正是 talent_registry.gd 头部所说「比不触发危险得多」的情形。
+##
+## 即时求值、不缓存，照 State 定义的「每次结算重新计算、不在进入时做快照」。
+func _talent_conditions_hold(unit: Unit, entry: Dictionary) -> bool:
+	var required: Variant = entry.get("requires_states", [])
+	if not required is Array or (required as Array).is_empty():
+		return true
+	var state_registry: RefCounted = _ensure_state_registry()
+	for item: Variant in (required as Array):
+		if not state_registry.is_in_state(unit, str(item)):
+			return false
+	return true
 
 
 ## 执行一条结构化天赋效果。未知类型在注册期就已被拒收，走到这里仍要兜底告警——
