@@ -1,0 +1,20 @@
+{
+  "id": "beishui",
+  "name": "背水",
+
+  "definition": "一种持续状态：HP 不高于 30% 时处于背水状态，HP 高于 30% 时脱离该状态。背水采用即时判定，每次结算都以当前 HP 重新计算，不在进入时做快照。背水本身不提供任何加成，而是作为其他效果的触发条件。",
+  "kind": "条件",
+  "duration_kind": "条件维持",
+  "resistable": false,
+  "rule_code": "",
+
+  "predicate": {
+    "type": "hp_ratio_at_most",
+    "params": { "hp_ratio_pct": 30 }
+  },
+  "engine_status": "evaluable",
+  "engine_blocker": "",
+
+  "_mirror": "definition / kind / duration_kind / resistable / rule_code 五字段是设计库 /api/states 的只读镜像，2026-08-07 同步。引擎侧不改这五个字段；要改回设计库改，再重新同步（lane 文档 §2.2 字段归属表）。",
+  "_engine_note": "predicate / engine_status / engine_blocker 是引擎侧字段，设计库无对应列，不回流。阈值 30 取自 definition 原文，改数值前先改设计库定义。判定用「不高于」即 <=，与 definition 的措辞一致——注意与词条 afs_frenzy 的 < 严格小于不同。"
+}

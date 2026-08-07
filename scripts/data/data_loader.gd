@@ -12,6 +12,9 @@ var affixes:   Dictionary = {}
 var waves:     Dictionary = {}
 var equipment: Dictionary = {}
 var weapons:   Dictionary = {}
+# 设计库 State 注册表的引擎镜像（条件类状态：即时判定、不快照、本身不给加成）。
+# 访问与求值走 scripts/data/state_registry.gd，不走 BuffEffect——理由见该文件头注释。
+var states:    Dictionary = {}
 
 
 func _ready() -> void:
@@ -32,8 +35,9 @@ func load_all() -> void:
 	_load_directory("res://data/waves/", waves)
 	_load_directory("res://data/equipment/", equipment)
 	_load_directory("res://data/weapons/", weapons)
-	print("[DataLoader] Loaded: %d classes, %d skills, %d buffs, %d enemies, %d maps" \
-		% [classes.size(), skills.size(), buffs.size(), enemies.size(), maps.size()])
+	_load_directory("res://data/states/", states)
+	print("[DataLoader] Loaded: %d classes, %d skills, %d buffs, %d enemies, %d maps, %d states" \
+		% [classes.size(), skills.size(), buffs.size(), enemies.size(), maps.size(), states.size()])
 
 
 func _load_directory(path: String, target: Dictionary) -> void:

@@ -1,0 +1,20 @@
+{
+  "id": "shuangchi",
+  "name": "双持",
+
+  "definition": "条件类。经〔二天一流〕等效果使副手装备武器时处于双持状态；副手武器卸下或前置失效时立即脱离。即时判定，不快照。本身不提供任何加成，仅作为其他效果的触发与生效条件被引用。不可抵抗。",
+  "kind": "条件",
+  "duration_kind": "条件维持",
+  "resistable": false,
+  "rule_code": "",
+
+  "predicate": {
+    "type": "offhand_weapon_equipped",
+    "params": {}
+  },
+  "engine_status": "unevaluable",
+  "engine_blocker": "引擎当前无副手武器槽，判定恒为不成立。两处缺口：① 装备槽位模型只有 weapon / armor 两种（data/equipment/*.json 的 slot 字段，8 个条目全部落这两值），队伍成员装备结构 run_state.gd 的 equipment 也是 {weapon, armor} 两键硬编码；② 装备尚未接到战斗单位 Unit 上（unit.gd 无任何装备接口，DataLoader.equipment 唯一消费方是 run_scene.gd 传给 roguelite 层）。要让本条可判定，先建副手槽并把装备接进 Unit——属装备系统建设，不在路径 C 范围内。",
+
+  "_mirror": "definition / kind / duration_kind / resistable / rule_code 五字段是设计库 /api/states 的只读镜像，2026-08-07 同步。引擎侧不改这五个字段；要改回设计库改，再重新同步（lane 文档 §2.2 字段归属表）。",
+  "_engine_note": "predicate / engine_status / engine_blocker 是引擎侧字段，设计库无对应列，不回流。本条目先落注册、不落实现：注册在此是为了让「处于〔双持〕状态」这类条件在 Wave 1 接天赋载体时有唯一的 id 落点，而不是散在各处硬编码字符串。engine_status=unevaluable 的条目求值恒 false，且调用方可用 is_evaluable / get_blocker 区分「判定为否」与「判不了」——不许把判不了当成判定为否来消费。"
+}
