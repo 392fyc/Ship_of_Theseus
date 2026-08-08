@@ -63,7 +63,11 @@ func _init(states: Dictionary = {}) -> void:
 
 
 ## 该状态此刻是否成立。即时求值，不缓存、不快照。
-## 未注册的 id、判不了的条目、缺 predicate 的条目一律返回 false（并告警，不静默）。
+##
+## **本函数内**的三条异常路径——未注册的 id、判不了的条目（unevaluable）、缺
+## predicate 的条目——一律返回 false 并告警，不静默。
+## 注意这句话的作用域**只到本函数**：谓词求值里的数据缺失分支在 `_evaluate()`，
+## 不在这三条之列，它的告警是另一次补的（见文件末尾「告警补齐的两次提交」留档）。
 func is_in_state(unit: Unit, state_id: String) -> bool:
 	var entry: Dictionary = _entry(state_id)
 	if entry.is_empty():
@@ -152,3 +156,27 @@ func _evaluate(unit: Unit, predicate_type: String, params: Dictionary) -> bool:
 		_:
 			push_warning("[StateRegistry] 未知的 predicate.type: " + predicate_type)
 			return false
+
+
+# ── 留档 · 告警补齐的两次提交（2026-08-08 按 Mercury A1 验收条件 A 补记）──
+#
+# 本文件的「异常路径一律告警、不静默」不是一次做到位的，是两次提交先后补齐的。
+# 之前的交付叙述把它们捏合成了同一个动作，会让下一轮误以为路径 C 的 C3 一次到位，
+# 故在此如实分开记录：
+#
+#   `459f609`（路径 C 验收补丁 C3）
+#       补 `is_in_state()` 里 **unevaluable 分支**的 push_warning。
+#       触发动机 = Mercury 在 #550 点名该分支静默。
+#
+#   `09f6258`（A1 独立验证修复，39 分钟后）
+#       补 `_evaluate()` 里 **`hp_ratio_at_most` 数据缺失分支**的 push_warning。
+#       触发动机 = 自带独立验证方指出 C3 之后仍有残留静默分支。
+#
+#   （这里刻意只写函数名与分支名、不写行号——上一轮留档的 5 处行号在一次提交内
+#    就漂了 2~26 行，行号会漂、函数名不会。）
+#
+# 关于 `459f609` 提交信息里「它原是唯一不告警的异常分支」这句：**问题是作用域
+# 没写清，不是陈述失实**。「它」紧承前一句主语 `is_in_state()`，所引的类文档头
+# 枚举的也正是该函数的三个分支——限定在 `is_in_state()` 内，该断言当时为真；
+# 只有把作用域扩到整个文件才为假（当时 `_evaluate()` 的数据缺失分支仍静默）。
+# 类文档头现已标明作用域，本留档记录先后，两处合起来消除歧义。
