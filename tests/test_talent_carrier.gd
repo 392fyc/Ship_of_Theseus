@@ -605,15 +605,15 @@ func _test_offhand_precision(dl: Object) -> void:
 	enemy.stats.hp = 999
 	tm._execute_hostile_action(attacker, enemy, {})
 	var offhand_dummy: int = (999 - enemy.stats.hp) - main_only
-	_eq("副手细剑(might=3) 伤害 == floor(STR + 3×50%)",
-		offhand_dummy, int(floor(float(strv) + 3.0 * 0.5)))
+	_eq("副手细剑(might=3) 伤害 == floor((STR + 3) × 50%)",
+		offhand_dummy, int(floor(float(strv + 3) * 0.5)))
 
 	attacker.equip_offhand("eq_wpn_regal_blade")        # 王者之剑 might=20
 	enemy.stats.hp = 999
 	tm._execute_hostile_action(attacker, enemy, {})
 	var offhand_sword: int = (999 - enemy.stats.hp) - main_only
-	_eq("副手王者之剑(might=20) 伤害 == floor(STR + 20×50%)",
-		offhand_sword, int(floor(float(strv) + 20.0 * 0.5)))
+	_eq("副手王者之剑(might=20) 伤害 == floor((STR + 20) × 50%)",
+		offhand_sword, int(floor(float(strv + 20) * 0.5)))
 	_check("换副手剑 → 副手伤害跟着变（证明读的是副手武器数据）",
 		offhand_sword > offhand_dummy,
 		"dummy=%d sword=%d" % [offhand_dummy, offhand_sword])
@@ -629,8 +629,8 @@ func _test_offhand_precision(dl: Object) -> void:
 	enemy.stats.hp = 999
 	tm._execute_hostile_action(attacker, enemy, {})
 	var offhand_25: int = (999 - enemy.stats.hp) - main_only
-	_eq("damage_pct=25 的卡 → 副手 might 按 25% 折（不是写死的 50%）",
-		offhand_25, int(floor(float(strv) + 20.0 * 0.25)))
+	_eq("damage_pct=25 的卡 → 最终伤害按 25% 折（不是写死的 50%）",
+		offhand_25, int(floor(float(strv + 20) * 0.25)))
 	_check("25% < 50%（两张卡确实读到了不同的 damage_pct）",
 		offhand_25 < offhand_sword, "25pct=%d 50pct=%d" % [offhand_25, offhand_sword])
 
@@ -642,7 +642,7 @@ func _test_offhand_precision(dl: Object) -> void:
 	tm._execute_hostile_action(attacker, enemy, {})
 	var offhand_mag: int = (999 - enemy.stats.hp) - main_only
 	_eq("damage_type=magical 的卡 → 副手按 MAG 结算（不是写死的 physical）",
-		offhand_mag, int(floor(float(magv) + 20.0 * 0.5)))
+		offhand_mag, int(floor(float(magv + 20) * 0.5)))
 	_check("魔法版与物理版伤害不同（证明 damage_type 确实读了 JSON）",
 		offhand_mag != offhand_sword,
 		"mag=%d phys=%d (MAG=%d STR=%d)" % [offhand_mag, offhand_sword, magv, strv])
@@ -813,16 +813,16 @@ func _test_offhand_weapon_effect(dl: Object) -> void:
 	enemy.stats.hp = 9999
 	tm._execute_hostile_action(attacker, enemy, {})
 	var no_effect: int = (9999 - enemy.stats.hp) - main_only
-	_eq("只有二天一流 → 副手特效不生效，伤害 == floor(STR + 20×50%)",
-		no_effect, int(floor(float(strv) + 20.0 * 0.5)))
+	_eq("只有二天一流 → 副手特效不生效，伤害 == floor((STR + 20) × 50%)",
+		no_effect, int(floor(float(strv + 20) * 0.5)))
 
 	# 加上二刀开刃 → 特效按 50% 生效（+4 STR → +2）
 	attacker.talent_ids = ["kensei_ertianyiliu", "kensei_erdaokairen"]
 	enemy.stats.hp = 9999
 	tm._execute_hostile_action(attacker, enemy, {})
 	var with_effect: int = (9999 - enemy.stats.hp) - main_only
-	_eq("加二刀开刃 → 特效按 50% 生效，伤害 == floor(STR + 20×50% + 4×50%)",
-		with_effect, int(floor(float(strv) + 20.0 * 0.5 + 4.0 * 0.5)))
+	_eq("加二刀开刃 → 特效按 50% 进 base，伤害 == floor((STR + 20 + 4×50%) × 50%)",
+		with_effect, int(floor((float(strv + 20) + 4.0 * 0.5) * 0.5)))
 	_check("二刀开刃确实提高了副手伤害",
 		with_effect > no_effect, "无=%d 有=%d" % [no_effect, with_effect])
 
@@ -831,8 +831,8 @@ func _test_offhand_weapon_effect(dl: Object) -> void:
 	enemy.stats.hp = 9999
 	tm._execute_hostile_action(attacker, enemy, {})
 	var iron: int = (9999 - enemy.stats.hp) - main_only
-	_eq("换铁剑(might=5, 特效 STR+2) → floor(STR + 5×50% + 2×50%)",
-		iron, int(floor(float(strv) + 5.0 * 0.5 + 2.0 * 0.5)))
+	_eq("换铁剑(might=5, 特效 STR+2) → floor((STR + 5 + 2×50%) × 50%)",
+		iron, int(floor((float(strv + 5) + 2.0 * 0.5) * 0.5)))
 
 	# 二刀开刃是常驻卡但**有条件**：卸下副手 → 不处于双持 → 连带不生效
 	attacker.unequip_offhand()

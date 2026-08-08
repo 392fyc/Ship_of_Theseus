@@ -2517,16 +2517,16 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 	var data: Dictionary = {
 		# 不继承主手的 damage_type（主手可能是魔法技能）。
 		"damage_type": damage_type,
-		# ★ damage_pct 作用在 **weapon_might** 上，不是作用在最终伤害上
-		#   （2026-08-09 用户澄清）。两者差别很大：
-		#     作用在 might：STR + (might × 50%) − DEF
-		#     作用在最终伤害：(STR + might − DEF) × 50%   ← 上一版写错成这个
-		#   前者 STR 不打折，副手伤害显著更高。
-		#   **weapon_hit / weapon_crit 不受影响，维持原数据**——副手照 R1.2/R1.3
-		#   用自己的原始 hit / crit 独立掷骰，只有威力打折。
-		#   这里不取整：R1.8「中间量不取整、floor 在最外层」，故传 float，
-		#   由 damage_calculator 在最终伤害处统一 floor。
-		"weapon_might": float(offhand.get("weapon_might", 0)) * damage_pct / 100.0
+		# ★ damage_pct 作用在**最终伤害**上（2026-08-09 用户澄清，此前反复过两次，
+		#   以此为准）：**计算过程的数值一律不变，只在最后乘 0.5 结算伤害**。
+		#     对： (STR + might − DEF) × … × 50%
+		#     错： STR + (might × 50%) − DEF      ← 别再改回这个
+		#   所以 weapon_might 原样传入、不打折；weapon_hit / weapon_crit 同样原样，
+		#   副手照 R1.2/R1.3 用自己的原始值独立掷骰。折算见下面的 final_multiplier。
+		#
+		#   武器特效带来的属性加成是**另一回事**：它按二刀开刃的 effect_scale 折算后
+		#   并入 base（与 weapon_might 同层加算，等价），再随整体吃副手的 50%。
+		"weapon_might": float(offhand.get("weapon_might", 0))
 			+ _offhand_effect_might_bonus(
 				offhand, damage_type, _offhand_effect_scale(attacker)),
 		"weapon_hit": int(offhand.get("weapon_hit", 0)),
@@ -2535,6 +2535,11 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 		"terrain_evade_bonus": int(main_action_data.get("terrain_evade_bonus", 0)),
 		"terrain_def_bonus": int(main_action_data.get("terrain_def_bonus", 0)),
 		"terrain_res_bonus": int(main_action_data.get("terrain_res_bonus", 0)),
+		# 副手的 50% 折算落在**最外层乘区**：damage_calculator 里 final_multiplier
+		# 在暴击倍率之后（`final_dmg *= relic_multiplier * final_multiplier`），
+		# 正是「最后乘 0.5」该在的位置。用它而不是 skill_multiplier——后者在暴击
+		# 之前，虽然乘法可交换、当前结果相同，但语义上「最终伤害的 50%」就是最外层。
+		"final_multiplier": damage_pct / 100.0,
 		"affix_defense_multiplier": float(
 			main_action_data.get("affix_defense_multiplier", 1.0)),
 		# ★ 刻意不放 area_damage_multiplier：2026-08-09 用户裁决「副手不吃溅射衰减」。
