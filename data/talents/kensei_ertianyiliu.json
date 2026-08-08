@@ -31,7 +31,7 @@
   "requires_states": [],
   "condition_model": "none",
   "engine_effects": [
-    { "type": "offhand_followup", "damage_pct": 50 }
+    { "type": "offhand_followup", "damage_pct": 50, "damage_type": "physical" }
   ],
   "engine_note": "主行 trigger_event=永久生效 属常驻类，引擎不分发（PASSIVE_EVENTS），机制主体挂在附加触发行上——这正是 Wave 2 要接附加行的原因。effect 前半段「失去防具槽、该槽改副手武器槽、可装第二把武器」是**装备层**的职责，引擎侧目前只提供 Unit.equip_offhand() 通道，谁来调它（肉鸽装备界面 / 掉落）尚未接线；本条目只兑现后半段「执行攻击动作时追加一次副手 50% 物理伤害」。damage_pct 取自 effect 原文的 50，是游戏数值、从本 JSON 读，代码不写死。「不触发武器特效」当前自动满足——data/weapons/ 只有 might/hit/crit 三个参数，引擎无武器特效系统。",
 

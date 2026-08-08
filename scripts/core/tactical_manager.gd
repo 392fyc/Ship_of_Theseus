@@ -2465,6 +2465,23 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 	if not attacker.is_dual_wielding():
 		# 正常情况下走不到：注册期要求〔双持〕、分发期又求值过一次。
 		# 留守卫是因为这里离条件判定隔了整个主手结算，中途状态可能已变。
+		# ★ 注意这道守卫会**掩护**分发期条件求值的错误：两处都对时它是冗余的，
+		# 分发期若漏判，它会把后果吞掉、外部观测不到。所以行级条件求值的正确性
+		# 必须由一条**绕开本守卫**的测试来钉（见 test_talent_carrier 的
+		# 「行级条件真的被用了」一组），不能指望副手追加的用例。
+		return
+	# ── AOE 岔口：技能路径暂不追加，等设计裁决 ──────────────
+	# _execute_hostile_action 也被技能的 per-target 循环调用，一个 AOE 技能会对每个
+	# 目标各跑一次。若照常追加，实测结果是「5 个溅射目标 = 5 次满额副手追加」，而且
+	# 副手的最小 action_data 不含 area_damage_multiplier → 副手对溅射目标反而比主手
+	# 还不打折。设计库 effect 逐字是「执行攻击动作时，追加**一次**……」——一次 AOE
+	# 是一个攻击动作还是 N 个，属设计裁决，引擎不自行默认。
+	# 按「宁可不触发，不可错误触发」：技能路径先不追加，并响亮告警登记。
+	# 裁决落定前，普攻路径（无 skill_id）行为不变。
+	if str(main_action_data.get("skill_id", "")) != "":
+		push_warning("[Offhand] 技能路径暂不追加副手伤害（技能 %s）——"
+			% str(main_action_data.get("skill_id", ""))
+			+ "「追加一次」按攻击动作算还是按目标算尚未裁决，见 Issue #550")
 		return
 	var offhand: Dictionary = DataLoader.weapons.get(attacker.offhand_weapon_id, {})
 	if offhand.is_empty():
@@ -2478,9 +2495,16 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 			% [str(followup.get("talent_id", "")), str(damage_pct)])
 		return
 
+	# damage_type 与 damage_pct 出自设计库同一句 effect（「50%物理伤害」），两个值
+	# 都该从 JSON 读——一个进 JSON 一个写死在代码里是口径不一致。
+	var damage_type: String = str(followup.get("damage_type", ""))
+	if damage_type == "":
+		push_warning("[Offhand] %s 未声明 damage_type，追加取消"
+			% str(followup.get("talent_id", "")))
+		return
 	var data: Dictionary = {
-		# 设计库写死物理伤害；不继承主手的 damage_type（主手可能是魔法技能）。
-		"damage_type": "physical",
+		# 不继承主手的 damage_type（主手可能是魔法技能）。
+		"damage_type": damage_type,
 		"skill_multiplier": damage_pct / 100.0,
 		# 只取副手武器的三参数——R1.2 base_hit = weapon_hit + DEX×2、
 		# R1.3 base_crit = weapon_crit + DEX/2 都由 resolve_attack 内部各自掷骰，
@@ -2503,8 +2527,8 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 	if result.hit:
 		# segment_index=1：与主手的飘字错开，否则同坐标同帧两个数字会叠在一起。
 		DamagePopup.spawn(popup_layer, defender.position,
-			result.damage, "physical", result.crit, 1)
-		defender.take_damage(result.damage, "physical")
+			result.damage, damage_type, result.crit, 1)
+		defender.take_damage(result.damage, damage_type)
 	else:
 		DamagePopup.spawn_miss(popup_layer, defender.position, 1)
 
@@ -2550,6 +2574,7 @@ func _apply_talent_effect(unit: Unit, talent_id: String,
 			(ctx["pending_offhand"] as Array).append({
 				"talent_id": talent_id,
 				"damage_pct": float(effect.get("damage_pct", 0.0)),
+				"damage_type": str(effect.get("damage_type", "")),
 			})
 		_:
 			push_warning("[Talent] %s 的效果类型「%s」无执行分支" % [talent_id, effect_type])

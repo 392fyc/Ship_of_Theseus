@@ -89,6 +89,10 @@ const SUPPORTED_EFFECT_TYPES: Array[String] = ["gain_resource", "offhand_followu
 ## `offhand_followup` 的伤害百分比合理上限（护栏，不是游戏数值——数值从 JSON 读）。
 const MAX_FOLLOWUP_PCT: int = 1000
 
+## 引擎侧的伤害类型 taxonomy。注意它与设计库的 `damage_type`（无/物理/魔法/混合）
+## 是**两套独立枚举**，不要互相套用（见 sot-designlib SKILL.md 第七节）。
+const SUPPORTED_DAMAGE_TYPES: Array[String] = ["physical", "magical", "pure"]
+
 ## `gain_resource` 支持的资源 id（设计库 `/api/resources` 的 id）。
 const SUPPORTED_RESOURCES: Array[String] = ["qi", "mark"]
 
@@ -303,6 +307,12 @@ func _effects_rejection_reason(entry: Dictionary) -> String:
 			if pct > float(MAX_FOLLOWUP_PCT):
 				return "offhand_followup 的 damage_pct %s 超出合理上限 %d" \
 					% [str(pct_raw), MAX_FOLLOWUP_PCT]
+			# damage_type 与 damage_pct 出自设计库同一句 effect（「50%物理伤害」），
+			# 两个值都要从 JSON 读——一个进 JSON、一个写死在代码里是口径不一致。
+			var dtype: String = str(effect.get("damage_type", ""))
+			if dtype not in SUPPORTED_DAMAGE_TYPES:
+				return "offhand_followup 的 damage_type「%s」未支持（当前支持 %s）" \
+					% [dtype, str(SUPPORTED_DAMAGE_TYPES)]
 
 	return ""
 

@@ -71,6 +71,39 @@ const SYNTHETIC: Dictionary = {
 		"condition_model": "states", "requires_states": ["beishui"],
 		"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 7}],
 	},
+	"test_ok_offhand_25": {
+		"id": "test_ok_offhand_25", "name": "测试·副手 25%", "class_id": "kensei",
+		"trigger_event": "执行攻击动作时", "trigger_condition": "处于〔双持〕状态",
+		"trigger_frequency": "每次", "trigger_frequency_n": 1,
+		"condition_model": "states", "requires_states": ["shuangchi"],
+		"engine_effects": [{
+			"type": "offhand_followup", "damage_pct": 25, "damage_type": "physical",
+		}],
+	},
+	# 行级条件的专用卡：主行「命中后」无条件、附加行「击杀时」要求〔双持〕，
+	# 效果是 gain_resource——**刻意不走 offhand_followup**，这样就绕开了
+	# _execute_offhand_followup 里的 is_dual_wielding 守卫，能单独钉住
+	# 「分发时条件确实读的是行级 requires_states」。
+	"test_ok_rowlevel": {
+		"id": "test_ok_rowlevel", "name": "测试·行级条件", "class_id": "kensei",
+		"trigger_event": "命中后", "trigger_condition": "",
+		"trigger_frequency": "每次", "trigger_frequency_n": 1,
+		"condition_model": "none", "requires_states": [],
+		"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 5}],
+		"extra_triggers": [{
+			"trigger_event": "击杀时", "trigger_condition": "处于〔双持〕状态",
+			"trigger_frequency": "每次", "trigger_frequency_n": 1,
+			"requires_states": ["shuangchi"], "condition_model": "states",
+		}],
+	},
+	# 击杀计数卡：用来验 on_kill / 「击杀时」恰好触发一次（不是 0 次也不是 2 次）。
+	"test_ok_killcount": {
+		"id": "test_ok_killcount", "name": "测试·击杀计数", "class_id": "kensei",
+		"trigger_event": "击杀时", "trigger_condition": "",
+		"trigger_frequency": "每次", "trigger_frequency_n": 1,
+		"condition_model": "none", "requires_states": [],
+		"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 5}],
+	},
 	"test_rej_unevaluable": {
 		"id": "test_rej_unevaluable", "name": "测试·依赖判不了的状态", "class_id": "kensei",
 		"trigger_event": "命中后", "trigger_condition": "处于〔测试·判不了的状态〕状态",
@@ -229,6 +262,23 @@ const SYNTHETIC: Dictionary = {
 		"condition_model": "none", "requires_states": [],
 		"engine_effects": ["gain_resource"],
 	},
+	"test_rej_offhand_no_dtype": {
+		"id": "test_rej_offhand_no_dtype", "name": "测试·副手缺伤害类型", "class_id": "kensei",
+		"trigger_event": "执行攻击动作时", "trigger_condition": "",
+		"trigger_frequency": "每次", "trigger_frequency_n": 1,
+		"condition_model": "none", "requires_states": [],
+		"engine_effects": [{"type": "offhand_followup", "damage_pct": 50}],
+	},
+	"test_rej_offhand_bad_pct": {
+		"id": "test_rej_offhand_bad_pct", "name": "测试·副手 damage_pct 非数字",
+		"class_id": "kensei",
+		"trigger_event": "执行攻击动作时", "trigger_condition": "",
+		"trigger_frequency": "每次", "trigger_frequency_n": 1,
+		"condition_model": "none", "requires_states": [],
+		"engine_effects": [{
+			"type": "offhand_followup", "damage_pct": "50", "damage_type": "physical",
+		}],
+	},
 	"test_rej_id_mismatch": {
 		"id": "另一个id", "name": "测试·内部 id 与键不符", "class_id": "kensei",
 		"trigger_event": "击杀时", "trigger_condition": "",
@@ -279,6 +329,7 @@ func _run() -> void:
 	_test_extra_triggers(dl)
 	_test_dispatch_integration()
 	_test_offhand_followup(dl)
+	_test_offhand_precision(dl)
 
 	dl.free()
 	print("\n--- 结果：%d 过 / %d 失败 ---" % [_pass, _fail])
@@ -449,6 +500,188 @@ func _test_offhand_followup(dl: Object) -> void:
 	scene.free()
 
 
+## 某事件下应有的触发行数——从夹具与生产数据推导，不写死。
+## 规则与 TalentRegistry 一致：`test_rej_*` 不该注册；主行「永久生效」是常驻、不进桶；
+## 附加行各自按自己的事件入桶。
+func _expected_rows_for_event(all_talents: Dictionary, event: String) -> int:
+	var n: int = 0
+	for key: Variant in all_talents.keys():
+		var tid: String = str(key)
+		if tid.begins_with("test_rej"):
+			continue
+		var e: Variant = all_talents[key]
+		if not e is Dictionary:
+			continue
+		var entry: Dictionary = e
+		var main_event: String = str(entry.get("trigger_event", ""))
+		if main_event == event and main_event != "永久生效":
+			n += 1
+		var extras: Variant = entry.get("extra_triggers", [])
+		if extras is Array:
+			for item: Variant in (extras as Array):
+				if item is Dictionary and str((item as Dictionary).get("trigger_event", "")) == event:
+					n += 1
+	return n
+
+
+
+# ── G. 补 2026-08-08 独立验证抓到的 4 个存活变异体（必修项）──
+#
+# 上一版 [F] 组只有不等式（with_offhand > main_only），副手打 50% 还是 100% 都满足，
+# 于是「50%」「只取副手武器数据」「行级条件真被用了」「主手已杀不追加」四条规格
+# 在测试层是裸奔的。本组把它们逐条钉死。
+
+func _test_offhand_precision(dl: Object) -> void:
+	print("
+[G] 副手规格钉死（伤害量 / 行级条件 / 击杀恰好一次 / AOE）")
+	var autoload_dl: Node = root.get_node_or_null("/root/DataLoader")
+	if autoload_dl == null:
+		_check("autoload DataLoader 可达", false)
+		return
+	for key: String in SYNTHETIC.keys():
+		autoload_dl.talents[key] = (SYNTHETIC[key] as Dictionary).duplicate(true)
+
+	var scene: Node = load("res://scenes/tactical/TacticalScene.tscn").instantiate()
+	root.add_child(scene)
+	var tm: Object = scene.tactical_manager
+	tm._talent_registry = null
+	tm._state_registry = null
+	tm.debug_harness_active = true
+	tm.debug_deterministic = true
+	tm.debug_crit_mode = 2
+
+	var attacker: Unit = null
+	var enemy: Unit = null
+	for u: Unit in tm.units:
+		if u.faction == "player" and u.unit_id == "kensei":
+			attacker = u
+		elif u.faction == "enemy" and enemy == null:
+			enemy = u
+	if attacker == null or enemy == null:
+		_check("场景中找到剑圣与敌人", false)
+		scene.free()
+		return
+	enemy.stats.def_attr = 0
+
+	# ── G1. 钉死副手伤害量（杀 M6：副手复用主手 action_data）──
+	# 物理基础伤害 = STR + weapon_might − DEF，再乘 skill_multiplier(=damage_pct/100)。
+	# 主副手用 might 差异明显的两把：主手 swordsman_starter(6) / 副手 training_dummy(1)。
+	var strv: int = attacker.get_effective_stat("STR")
+	attacker.talent_ids = ["kensei_ertianyiliu"]
+
+	attacker.unequip_offhand()
+	enemy.stats.max_hp = 999
+	enemy.stats.hp = 999
+	tm._execute_hostile_action(attacker, enemy, {})
+	var main_only: int = 999 - enemy.stats.hp
+
+	attacker.equip_offhand("wpn_training_dummy")        # might = 1
+	enemy.stats.hp = 999
+	tm._execute_hostile_action(attacker, enemy, {})
+	var offhand_dummy: int = (999 - enemy.stats.hp) - main_only
+	_eq("副手(might=1) 伤害 == floor((STR + 1) × 50%)",
+		offhand_dummy, int(floor(float(strv + 1) * 0.5)))
+
+	attacker.equip_offhand("wpn_swordsman_starter")     # might = 6
+	enemy.stats.hp = 999
+	tm._execute_hostile_action(attacker, enemy, {})
+	var offhand_sword: int = (999 - enemy.stats.hp) - main_only
+	_eq("副手(might=6) 伤害 == floor((STR + 6) × 50%)",
+		offhand_sword, int(floor(float(strv + 6) * 0.5)))
+	_check("换副手武器 → 副手伤害跟着变（证明读的是副手武器数据）",
+		offhand_sword > offhand_dummy,
+		"dummy=%d sword=%d" % [offhand_dummy, offhand_sword])
+	# 若副手复用了主手 action_data，副手伤害会等于主手（含主手 might 与乘区）。
+	_check("副手伤害 ≠ 主手伤害（没有复用主手 action_data）",
+		offhand_sword != main_only, "offhand=%d main=%d" % [offhand_sword, main_only])
+
+	# ── G2. damage_pct 确实来自 JSON（杀 M4：写死 50）──
+	attacker.talent_ids = ["test_ok_offhand_25"]
+	attacker.equip_offhand("wpn_swordsman_starter")
+	enemy.stats.hp = 999
+	tm._execute_hostile_action(attacker, enemy, {})
+	var offhand_25: int = (999 - enemy.stats.hp) - main_only
+	_eq("damage_pct=25 的卡 → 副手伤害按 25% 走（不是写死的 50%）",
+		offhand_25, int(floor(float(strv + 6) * 0.25)))
+	_check("25% < 50%（两张卡确实读到了不同的 damage_pct）",
+		offhand_25 < offhand_sword, "25pct=%d 50pct=%d" % [offhand_25, offhand_sword])
+
+	# ── G3. 行级条件真的被用了（杀 M1：退回卡级）──
+	# 这张卡的效果是 gain_resource，**不走** offhand_followup，因此绕开了
+	# _execute_offhand_followup 里的 is_dual_wielding 守卫——那道守卫会掩护
+	# 条件求值的错误，必须用一条不经过它的路径来钉。
+	attacker.talent_ids = ["test_ok_rowlevel"]
+	attacker.unequip_offhand()
+	enemy.stats.max_hp = 1
+	enemy.stats.hp = 1
+	attacker.set_sword_qi(0)
+	tm._execute_hostile_action(attacker, enemy, {})
+	# 主行「命中后」无条件 → +5；附加行「击杀时」要求双持、未装副手 → 不触发。
+	_eq("未装副手 + 击杀 → 只有主行触发（10 普攻 + 5）", attacker.sword_qi, 15)
+
+	var enemy2: Unit = _find_living_enemy(tm)
+	if enemy2 != null:
+		enemy2.stats.def_attr = 0
+		enemy2.stats.max_hp = 1
+		enemy2.stats.hp = 1
+		attacker.equip_offhand("wpn_swordsman_starter")
+		attacker.set_sword_qi(0)
+		tm._execute_hostile_action(attacker, enemy2, {})
+		# 装上副手 → 附加行条件成立 → 主行 +5、附加行 +5。
+		_eq("装副手 + 击杀 → 主行与附加行都触发（10 + 5 + 5）", attacker.sword_qi, 20)
+
+	# ── G4. 击杀归属恰好一次（杀 M3：删掉「主手已杀不追加」守卫）──
+	attacker.talent_ids = ["kensei_ertianyiliu", "test_ok_killcount"]
+	attacker.equip_offhand("wpn_swordsman_starter")
+
+	# 场景 A：主手打不死、副手补刀致死 → 「击杀时」恰好一次（不是 0 次）
+	var enemy3: Unit = _find_living_enemy(tm)
+	if enemy3 != null:
+		enemy3.stats.def_attr = 0
+		enemy3.stats.max_hp = 999
+		enemy3.stats.hp = main_only + 1      # 主手打完剩 1 血，副手补刀
+		attacker.set_sword_qi(0)
+		tm._execute_hostile_action(attacker, enemy3, {})
+		_check("场景A 敌人已死（副手补的刀）", not enemy3.stats.is_alive())
+		_eq("副手击杀 → 「击杀时」恰好触发一次（10 普攻 + 5）",
+			attacker.sword_qi, 15)
+
+	# 场景 B：主手直接击杀 → 恰好一次，且副手不再对尸体追加
+	var enemy4: Unit = _find_living_enemy(tm)
+	if enemy4 != null:
+		enemy4.stats.def_attr = 0
+		enemy4.stats.max_hp = 1
+		enemy4.stats.hp = 1
+		attacker.set_sword_qi(0)
+		tm._execute_hostile_action(attacker, enemy4, {})
+		_eq("主手击杀 → 「击杀时」也恰好一次、副手不追加（10 + 5，不是 10 + 10）",
+			attacker.sword_qi, 15)
+
+	# ── G5. AOE 岔口的当前行为（技能路径暂不追加，等裁决）──
+	# 一次 AOE 是一个攻击动作还是 N 个，属设计裁决；在裁决落定前引擎不追加，
+	# 免得出现「5 个溅射目标 = 5 次满额副手伤害、且副手还不吃溅射衰减」。
+	var enemy5: Unit = _find_living_enemy(tm)
+	if enemy5 != null:
+		enemy5.stats.def_attr = 0
+		enemy5.stats.max_hp = 999
+		enemy5.stats.hp = 999
+		attacker.talent_ids = ["kensei_ertianyiliu"]
+		attacker.equip_offhand("wpn_swordsman_starter")
+		tm._execute_hostile_action(attacker, enemy5, {"skill_id": "swordsman_badao"})
+		_eq("技能路径（带 skill_id）暂不追加副手伤害",
+			999 - enemy5.stats.hp, main_only)
+
+	scene.free()
+
+
+## 找一个还活着的敌方单位；没有则返回 null。
+func _find_living_enemy(tm: Object) -> Unit:
+	for u: Unit in tm.units:
+		if u.faction == "enemy" and u.stats != null and u.stats.is_alive():
+			return u
+	return null
+
+
 # ── 断言工具（照 tests/test_affix_effects.gd）─────────────
 
 func _check(name: String, cond: bool, detail: String = "") -> void:
@@ -555,6 +788,8 @@ func _test_rejection_discipline(dl: Object) -> void:
 		"test_rej_effects_not_array": "engine_effects 必须是数组",
 		"test_rej_effects_item_not_dict": "含非字典项",
 		"test_rej_id_mismatch": "与注册键",
+		"test_rej_offhand_no_dtype": "damage_type",
+		"test_rej_offhand_bad_pct": "damage_pct 必须是数字",
 	}
 	for tid: String in cases.keys():
 		_check("%s → 拒绝注册" % tid, not reg.is_registered(tid))
@@ -591,9 +826,9 @@ func _test_event_index(dl: Object) -> void:
 		mixed[key] = (SYNTHETIC[key] as Dictionary).duplicate(true)
 	var reg: Object = _make_registry(mixed, dl.states)
 
-	_eq("「击杀时」下 1 张（介错）", reg.talents_for_event("击杀时").size(), 1)
-	_eq("「命中后」下 2 张（两张合法合成）", reg.talents_for_event("命中后").size(), 2)
-	_eq("「造成伤害时」下 2 张（含 JSON 式 float amount 的那张）", reg.talents_for_event("造成伤害时").size(), 2)
+	for ev: String in ["击杀时", "命中后", "造成伤害时", "执行攻击动作时"]:
+		_eq("「%s」桶里的行数与夹具推导一致" % ev,
+			reg.talents_for_event(ev).size(), _expected_rows_for_event(mixed, ev))
 	# A2 事件即使有数据也索引不到——它在注册期就被拒了。
 	_eq("「暴击时」下 0 张（A2 不接）", reg.talents_for_event("暴击时").size(), 0)
 	_eq("「命中时」下 0 张（A2 不接）", reg.talents_for_event("命中时").size(), 0)

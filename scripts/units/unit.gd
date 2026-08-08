@@ -24,6 +24,12 @@ var talent_ids: Array[String] = []
 # 主手武器 id，setup() 时从 class/enemy JSON 的 weapon_id 读入。值指向 data/weapons/。
 # 存在 Unit 上是为了让状态判定能自包含——StateRegistry 是独立类、拿不到 DataLoader，
 # 而〔双持〕的判据「武器栏与副手武器槽同时装备武器」必须能从单位本身读出来。
+#
+# ⚠ **这是主手武器 id 的第二份存储**。真正决定伤害结算的那一份在
+# `TacticalManager._get_unit_weapon_data()`，它每次直接从 class/enemy 档案读
+# `weapon_id`。两份现在恒等（都源自同一个 setup 输入），但没有任何机制保证不分叉——
+# 将来装备层能换主手武器时，**必须同时更新这里**，否则 is_dual_wielding() 会用旧值
+# 判定、而伤害结算用新值，正是 lane §2.2 要封杀的双写静默分叉（只不过发生在引擎内部）。
 var weapon_id: String = ""
 # 副手武器 id。空 = 未装备副手 = 不处于双持。**职业专属特例**，不进通用装备槽枚举
 # （设计库 EquipSlot 两槽定稿，2026-07-05 用户裁决 Q7：「职业特殊机制作专属特例」）。
