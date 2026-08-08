@@ -33,22 +33,48 @@ extends RefCounted
 ## 依赖〔背水〕的天赋），修法就是补上第二层。改动本文件的拒收逻辑时，别把这段
 ## 分工忘了：放宽注册期而运行期没有对应的求值，等于开洞。
 ##
-## ── A1 不处理的东西（明确记下，免得误以为已覆盖）──────
+## ── 附加触发行（Wave 2 起支持）─────────────────────
 ##
-##   - **附加触发行**（设计库 `talent_trigger_extra` / `extra_triggers` 子表）：
-##     引擎侧零认知，既不读也不分发。当前唯一在用附加行的两张卡（二天一流、
-##     剑气回荡）都是双持系、已被排除，故暂无影响；将来接附加行要在这里扩。
-##   - **`trigger_object` / `trigger_source` 两个槽**：同样不读。
+## 设计库的 `talent_trigger_extra` / `extra_triggers` 子表承载**另一组触发五段**，
+## 效果仍共用卡级 `engine_effects`（子表本身没有效果字段）。引擎侧的条件字段
+## （`requires_states` / `condition_model`）附加行**各自独立**——二天一流的机制主体
+## 就只挂在附加行上（事件「执行攻击动作时」、条件「处于〔双持〕状态」），主行则是
+## 永久生效无条件。两者必须分开求值，退回卡级就错了。
+##
+## 注册时整卡摊平成触发行列表（`_trigger_rows`），逐行校验；**任一行不合格整卡拒收**
+## ——不做「主行注册、附加行丢弃」，那会让一张卡半生效，而设计库那边看到的是完整的卡。
+##
+## ── 仍然不处理的东西（明确记下，免得误以为已覆盖）──────
+##
+##   - **`trigger_object` / `trigger_source` 两个槽**：不读。设计库侧 `trigger_source`
+##     是「主手 / 副手」闭集，当前 3 张卡在用；引擎分发时不区分来源手别。
 ##   - **超出 `requires_states` 的条件**：一律走 `condition_model=unsupported` 拒收，
 ##     不做部分执行。
+##   - **命中时 / 暴击时**两个真 on-hit 事件：属 A2，未接，注册期拒收。
 ##
 ## 用法：
 ##     var states := StateRegistry.new(DataLoader.states)
 ##     var talents := TalentRegistry.new(DataLoader.talents, states)
 ##     for t in talents.talents_for_event("击杀时"): ...
 
-## A1 接的三个事件（设计库 trigger_event 的中文原值，不另造英文枚举避免双写）。
+## A1 接的三个 after-damage 事件（设计库 trigger_event 的中文原值，不另造英文枚举避免双写）。
 const AFTER_DAMAGE_EVENTS: Array[String] = ["命中后", "造成伤害时", "击杀时"]
+
+## Wave 2 新接的动作级事件。它比「命中时」还早——在命中判定之前，
+## 分发点在 `_execute_hostile_action` 开头（`resolve_attack` 之前）。
+## 与 A2 的真 on-hit 钩子（命中时 / 暴击时）**不是同一处**，故不越 A2 的界。
+const ACTION_EVENTS: Array[String] = ["执行攻击动作时"]
+
+## 引擎当前能分发的全部事件。
+const SUPPORTED_EVENTS: Array[String] = [
+	"命中后", "造成伤害时", "击杀时", "执行攻击动作时",
+]
+
+## 常驻类事件——**不是**触发时机，而是「一直生效」。这类行不进事件桶（没有可分发的
+## 时点），也不因此拒卡；它对应的机制由别处承载（例如二天一流的「失去防具槽、该槽改
+## 副手武器槽」是装备层的事，不是战斗事件）。一张卡若**只有**常驻行、无任何可分发行，
+## 仍会被拒——引擎当前没有承载纯常驻天赋的通道，宁可不注册。
+const PASSIVE_EVENTS: Array[String] = ["永久生效"]
 
 ## A1 支持的触发频率。「每次」= 不限次；其余（每回合 N 次等）需要计数器状态，
 ## 未实装故拒收——按「宁可不注册」处理，不是当成不限次放行。
@@ -58,7 +84,14 @@ const SUPPORTED_FREQUENCIES: Array[String] = ["每次"]
 const CONDITION_MODELS: Array[String] = ["none", "states", "unsupported"]
 
 ## `engine_effects` 支持的指令类型。
-const SUPPORTED_EFFECT_TYPES: Array[String] = ["gain_resource"]
+const SUPPORTED_EFFECT_TYPES: Array[String] = ["gain_resource", "offhand_followup"]
+
+## `offhand_followup` 的伤害百分比合理上限（护栏，不是游戏数值——数值从 JSON 读）。
+const MAX_FOLLOWUP_PCT: int = 1000
+
+## 引擎侧的伤害类型 taxonomy。注意它与设计库的 `damage_type`（无/物理/魔法/混合）
+## 是**两套独立枚举**，不要互相套用（见 sot-designlib SKILL.md 第七节）。
+const SUPPORTED_DAMAGE_TYPES: Array[String] = ["physical", "magical", "pure"]
 
 ## `gain_resource` 支持的资源 id（设计库 `/api/resources` 的 id）。
 const SUPPORTED_RESOURCES: Array[String] = ["qi", "mark"]
@@ -70,7 +103,11 @@ const MAX_RESOURCE_GAIN: int = 999
 
 var _registered: Dictionary = {}   # id -> 条目
 var _rejected: Dictionary = {}     # id -> 拒绝理由
-var _by_event: Dictionary = {}     # 事件中文名 -> Array[Dictionary]
+# 事件中文名 -> Array[Dictionary]，元素是**触发行包裹**而非整条天赋：
+#   { "talent": <整条天赋条目>, "trigger": <该触发行的五段+引擎条件字段>, "row": "main"|"extra[i]" }
+# 一张卡有主行和附加行时会在**多个事件桶**里各出现一次，分发时必须用行级的
+# requires_states / condition_model 求值，不能退回卡级——那正是附加行的意义所在。
+var _by_event: Dictionary = {}
 
 
 ## state_registry 形参类型写 RefCounted 而不是 StateRegistry：Godot 的全局类名缓存
@@ -93,15 +130,63 @@ func _build(talents: Dictionary, state_registry: RefCounted) -> void:
 		if inner_id != tid:
 			_reject(tid, "条目内 id「%s」与注册键「%s」不一致" % [inner_id, tid])
 			continue
-		var reason: String = _rejection_reason(entry, state_registry)
+		var rows: Array = _trigger_rows(entry)
+		if rows.is_empty():
+			_reject(tid, "无任何可分发的触发行（主行缺 trigger_event 或只是常驻 %s，且无 extra_triggers）——"
+				% str(PASSIVE_EVENTS) + "引擎当前没有承载纯常驻天赋的通道")
+			continue
+		# 整卡拒收粒度：任一触发行不合格就整卡拒。不做「主行注册、附加行丢弃」——
+		# 那会让一张卡半生效，而设计库那边看到的是完整的卡，两边理解不一致。
+		var reason: String = ""
+		for row: Dictionary in rows:
+			reason = _row_rejection_reason(row, state_registry)
+			if reason != "":
+				break
+		if reason == "":
+			reason = _effects_rejection_reason(entry)
 		if reason != "":
 			_reject(tid, reason)
 			continue
 		_registered[tid] = entry
-		var event: String = str(entry.get("trigger_event", ""))
-		if not _by_event.has(event):
-			_by_event[event] = []
-		_by_event[event].append(entry)
+		for row: Dictionary in rows:
+			var trigger: Dictionary = row["trigger"]
+			var event: String = str(trigger.get("trigger_event", ""))
+			if not _by_event.has(event):
+				_by_event[event] = []
+			_by_event[event].append({
+				"talent": entry, "trigger": trigger, "row": str(row["row"]),
+			})
+
+
+## 把一张天赋摊平成触发行列表：主行 + 每条附加行各一项。
+##
+## 附加触发行（设计库 `talent_trigger_extra` 子表）承载的是**另一组触发五段**，
+## 效果仍共用卡级 `engine_effects`——设计库那边子表只有触发字段、没有效果字段。
+## 引擎侧的条件字段（`requires_states` / `condition_model`）附加行**各自独立**：
+## 二天一流的附加行条件是「处于〔双持〕状态」，主行则是永久生效无条件，
+## 两者必须分开求值，退回卡级就错了。
+##
+## 返回 `[{"trigger": <五段+条件字段>, "row": "main"|"extra[i]"}, ...]`。
+## 主行 trigger_event 为空视为「这张卡没有主触发行」（例如机制全挂在附加行上），
+## 此时只返回附加行——但整卡至少要有一行，否则 `_build` 会拒收。
+func _trigger_rows(entry: Dictionary) -> Array:
+	var rows: Array = []
+	var main_event: String = str(entry.get("trigger_event", ""))
+	# 常驻主行不进桶（没有分发时点），但也不算这张卡缺行——它的机制由别处承载。
+	if main_event != "" and main_event not in PASSIVE_EVENTS:
+		rows.append({"trigger": entry, "row": "main"})
+	var extras: Variant = entry.get("extra_triggers", [])
+	if extras is Array:
+		var idx: int = 0
+		for item: Variant in (extras as Array):
+			if item is Dictionary:
+				rows.append({"trigger": item, "row": "extra[%d]" % idx})
+			else:
+				# 形状不对不能静默丢——丢了就等于「附加行不存在」，
+				# 而设计库那边它是存在的，两边理解会分叉。塞一个必被拒的空行。
+				rows.append({"trigger": {}, "row": "extra[%d]" % idx})
+			idx += 1
+	return rows
 
 
 func _reject(tid: String, reason: String) -> void:
@@ -109,22 +194,26 @@ func _reject(tid: String, reason: String) -> void:
 	push_warning("[TalentRegistry] 拒绝注册天赋 %s：%s" % [tid, reason])
 
 
-## 返回拒绝理由；空串表示可以注册。检查顺序按「最有信息量的理由优先」排。
-func _rejection_reason(entry: Dictionary, state_registry: RefCounted) -> String:
+## 单条触发行的拒绝理由；空串表示这一行合格。**逐行调用**，主行与每条附加行各一次。
+## 检查顺序按「最有信息量的理由优先」排。
+func _row_rejection_reason(row: Dictionary, state_registry: RefCounted) -> String:
+	var entry: Dictionary = row["trigger"]
+	var where: String = str(row["row"])
 	var event: String = str(entry.get("trigger_event", ""))
 	if event == "":
-		return "缺 trigger_event"
-	if event not in AFTER_DAMAGE_EVENTS:
-		return "事件「%s」不在 A1 范围（A1 只接 after-damage 三事件 %s；命中时/暴击时属 A2）" \
-			% [event, str(AFTER_DAMAGE_EVENTS)]
+		return "触发行 %s 缺 trigger_event" % where
+	if event not in SUPPORTED_EVENTS:
+		return "触发行 %s 的事件「%s」引擎不分发（当前支持 %s；命中时/暴击时属 A2 未接）" \
+			% [where, event, str(SUPPORTED_EVENTS)]
 
 	var model: String = str(entry.get("condition_model", ""))
 	if model == "":
-		return "缺 condition_model（必须显式声明条件的引擎表达力）"
+		return "触发行 %s 缺 condition_model（必须显式声明条件的引擎表达力）" % where
 	if model not in CONDITION_MODELS:
-		return "condition_model「%s」非法，合法值 %s" % [model, str(CONDITION_MODELS)]
+		return "触发行 %s 的 condition_model「%s」非法，合法值 %s" \
+			% [where, model, str(CONDITION_MODELS)]
 	if model == "unsupported":
-		return "condition_model=unsupported：条件含引擎尚不能表达的部分，按「宁可不注册」拒收"
+		return "触发行 %s 的 condition_model=unsupported：条件含引擎尚不能表达的部分，按「宁可不注册」拒收" % where
 
 	var condition: String = str(entry.get("trigger_condition", ""))
 	# 形状先于语义：`as Array` 对非数组会抛 cast 错误然后**放行**，一个漏写的
@@ -159,6 +248,13 @@ func _rejection_reason(entry: Dictionary, state_registry: RefCounted) -> String:
 		return "触发频率「%s」未实装（当前只支持 %s），拒收而非当作不限次" \
 			% [frequency, str(SUPPORTED_FREQUENCIES)]
 
+	return ""
+
+
+## 卡级效果检查（`engine_effects` 由主行与全部附加行共用，只查一次）。
+## 设计库的 `talent_trigger_extra` 子表只承载触发五段、没有效果字段，所以效果
+## 天然是卡级的——附加行触发时执行的是同一组 `engine_effects`。
+func _effects_rejection_reason(entry: Dictionary) -> String:
 	var effects_raw: Variant = entry.get("engine_effects", [])
 	if not effects_raw is Array:
 		return "engine_effects 必须是数组，实际是 %s" % type_string(typeof(effects_raw))
@@ -197,11 +293,36 @@ func _rejection_reason(entry: Dictionary, state_registry: RefCounted) -> String:
 			if amount > MAX_RESOURCE_GAIN:
 				return "gain_resource 的 amount %d 超出合理上限 %d（疑似手误多打了位数）" \
 					% [amount, MAX_RESOURCE_GAIN]
+		elif effect_type == "offhand_followup":
+			# 副手追加攻击。damage_pct 是游戏数值，必须来自 JSON（设计库二天一流的
+			# effect 逐字写的是 50%），代码只做类型与合理性校验，不写死数值。
+			var pct_raw: Variant = effect.get("damage_pct", null)
+			var pct_type: int = typeof(pct_raw)
+			if pct_type != TYPE_INT and pct_type != TYPE_FLOAT:
+				return "offhand_followup 的 damage_pct 必须是数字，实际是 %s" \
+					% type_string(pct_type)
+			var pct: float = float(pct_raw)
+			if pct <= 0.0:
+				return "offhand_followup 的 damage_pct 必须为正，实际 %s" % str(pct_raw)
+			if pct > float(MAX_FOLLOWUP_PCT):
+				return "offhand_followup 的 damage_pct %s 超出合理上限 %d" \
+					% [str(pct_raw), MAX_FOLLOWUP_PCT]
+			# damage_type 与 damage_pct 出自设计库同一句 effect（「50%物理伤害」），
+			# 两个值都要从 JSON 读——一个进 JSON、一个写死在代码里是口径不一致。
+			var dtype: String = str(effect.get("damage_type", ""))
+			if dtype not in SUPPORTED_DAMAGE_TYPES:
+				return "offhand_followup 的 damage_type「%s」未支持（当前支持 %s）" \
+					% [dtype, str(SUPPORTED_DAMAGE_TYPES)]
 
 	return ""
 
 
-## 该事件下已注册的天赋条目（副本列表，元素是活引用——调用方只读）。
+## 该事件下的**触发行包裹**列表，每项 = `{"talent": 整条天赋, "trigger": 该触发行,
+## "row": "main"|"extra[i]"}`。同一张卡若有多行落在不同事件，会在各自的桶里出现。
+##
+## ★ 分发时的条件求值必须读 `["trigger"]` 里的 `requires_states`，**不是**
+## `["talent"]` 里的——附加行有自己的条件，退回卡级会让二天一流那种
+## 「主行无条件、附加行要求双持」的卡在不该触发时触发。
 func talents_for_event(event: String) -> Array:
 	var found: Variant = _by_event.get(event, [])
 	return (found as Array).duplicate() if found is Array else []

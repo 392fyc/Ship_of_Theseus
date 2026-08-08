@@ -149,10 +149,14 @@ func _evaluate(unit: Unit, predicate_type: String, params: Dictionary) -> bool:
 				/ float(unit.stats.max_hp) * 100.0
 			return hp_ratio_pct <= threshold_pct
 		"offhand_weapon_equipped":
-			# 引擎无副手武器槽，恒不成立；原因见 shuangchi.json 的 engine_blocker。
-			# 该分支不会被 is_in_state 走到（engine_status=unevaluable 已先行拦截），
-			# 留在这里是为了标出将来副手槽建好后的接线位置。
-			return false
+			# 判据照设计库〔双持〕definition 逐字：「武器栏与副手武器槽同时装备武器时，
+			# 即视为双持」——只看两个槽是否都非空，不看武器种类。即时判定、不快照：
+			# 副手被卸下或前置失效的下一次求值就会返回 false。
+			# （Wave 2 之前这里是 `return false` 占位，因为引擎当时无副手槽。）
+			if unit == null:
+				push_warning("[StateRegistry] offhand_weapon_equipped 无法求值：单位缺失")
+				return false
+			return unit.is_dual_wielding()
 		_:
 			push_warning("[StateRegistry] 未知的 predicate.type: " + predicate_type)
 			return false

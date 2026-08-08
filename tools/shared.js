@@ -95,11 +95,13 @@ const RARITY_DEFS = {
 // 游戏常量 — 装备槽位
 // ============================================================
 
+// 两槽定稿（2026-07-05 用户裁决 Q7）。原先这里还有 sub_weapon（副手）与
+// accessory（饰品）两项 4 槽 Demo 残留，2026-08-08 Wave 2 按定稿清掉。
+// 剑圣双持不走通用槽位，是**职业专属特例**——引擎侧实现在 Unit.offhand_weapon_id，
+// 不进本枚举，也不进设计库的 EquipSlot。
 const EQUIP_SLOTS = {
-  weapon:    { name: '武器(主手)', icon: '⚔' },
-  sub_weapon:{ name: '副手',      icon: '🗡' },
-  armor:     { name: '护甲',      icon: '🛡' },
-  accessory: { name: '饰品',      icon: '💎' },
+  weapon: { name: '武器', icon: '⚔' },
+  armor:  { name: '护甲', icon: '🛡' },
 };
 
 // ============================================================

@@ -4,7 +4,9 @@ extends SceneTree
 ## 覆盖三件事：
 ##   1. 装载回读——data/states/*.json 确实被 DataLoader 读进 states 字典（不是「文件写了就算」）。
 ##   2. 背水的即时判定——含 30% 边界，以及 HP 回升后自动脱离（证明不快照）。
-##   3. 双持的「判不了」与「判定为否」可区分——引擎无副手槽，不许静默当成条件不成立。
+##   3. 双持的即时判定（Wave 2 起 evaluable：主手+副手同时装备武器），以及
+##      「判不了」与「判定为否」可区分——后者改用合成的 unevaluable 状态锁住，
+##      不再依赖生产库恰好有一个判不了的状态。
 ##
 ## 另附零影响对照：新增 states 注册表不动 buffs 命名空间、不改既有注册表。
 ##
@@ -61,7 +63,8 @@ func _run() -> void:
 	_test_loading(dl)
 	_test_mirror_fidelity(dl)
 	_test_beishui_live_evaluation(dl)
-	_test_shuangchi_unevaluable(dl)
+	_test_shuangchi_evaluable(dl)
+	_test_unevaluable_distinction(dl)
 	_test_robustness(dl)
 	_test_threshold_from_json(dl)
 	_test_zero_impact(dl)
@@ -189,20 +192,67 @@ func _test_beishui_live_evaluation(dl: Object) -> void:
 	u.free()
 
 
-# ── 4. 双持：判不了 ≠ 判定为否 ──
+# ── 4. 双持：Wave 2 起可判定，判据 = 两个武器槽同时非空 ──
 
-func _test_shuangchi_unevaluable(dl: Object) -> void:
-	print("\n[4] 双持：引擎无副手槽 → 标记为判不了，且与「判定为否」可区分")
+func _test_shuangchi_evaluable(dl: Object) -> void:
+	print("\n[4] 双持即时判定（Wave 2 起 evaluable：主手+副手同时装备武器）")
 	var reg: Object = load("res://scripts/data/state_registry.gd").new(dl.states)
 	var u: Unit = _make_unit(dl.enemies["goblin_melee"], "enemy")
 
-	_eq("双持不可判定（is_evaluable=false）", reg.is_evaluable("shuangchi"), false)
-	_check("双持给出了阻塞原因（get_blocker 非空）", reg.get_blocker("shuangchi") != "")
-	_check("阻塞原因点明副手槽缺失", reg.get_blocker("shuangchi").contains("副手"))
-	_eq("双持求值恒为不成立", reg.is_in_state(u, "shuangchi"), false)
+	_eq("双持已可判定（Wave 2 建了副手槽）", reg.is_evaluable("shuangchi"), true)
+	_eq("可判定的状态没有阻塞原因", reg.get_blocker("shuangchi"), "")
 
-	# 对照：背水在满血时同样返回 false，但它是「判定为否」而非「判不了」。
-	# 消费方靠 is_evaluable 区分这两种 false，本断言锁住这个区别不被抹平。
+	# goblin_melee 的 class/enemy JSON 带 weapon_id，故主手非空、副手默认空。
+	_check("单位主手武器非空（来自 enemy JSON 的 weapon_id）", u.weapon_id != "")
+	_eq("只有主手 → 不处于双持", reg.is_in_state(u, "shuangchi"), false)
+
+	u.equip_offhand("wpn_physical_melee_basic")
+	_eq("装上副手 → 处于双持", reg.is_in_state(u, "shuangchi"), true)
+
+	u.unequip_offhand()
+	_eq("卸下副手 → 立即脱离双持（即时判定、不快照）",
+		reg.is_in_state(u, "shuangchi"), false)
+
+	# 前置失效：主手被卸掉时，即便副手还在也不算双持
+	# （设计库 definition：「武器栏与副手武器槽**同时**装备武器」）。
+	u.equip_offhand("wpn_physical_melee_basic")
+	var saved_main: String = u.weapon_id
+	u.weapon_id = ""
+	_eq("主手为空（前置失效）→ 即便副手在也不算双持",
+		reg.is_in_state(u, "shuangchi"), false)
+	u.weapon_id = saved_main
+	_eq("主手恢复 → 又处于双持", reg.is_in_state(u, "shuangchi"), true)
+	u.unequip_offhand()
+
+	u.free()
+
+
+# ── 5. 判不了 ≠ 判定为否（用合成的 unevaluable 状态锁住这条纪律）──
+
+func _test_unevaluable_distinction(dl: Object) -> void:
+	print("\n[5] 判不了 ≠ 判定为否")
+	# 生产库现已没有 unevaluable 的状态（双持在 Wave 2 转正了），但这条纪律必须
+	# 继续被锁住——将来任何新状态在引擎补上判定之前都是 unevaluable。
+	# 故用合成注册表构造一个，不依赖生产数据恰好有一个判不了的状态。
+	var synthetic: Dictionary = dl.states.duplicate(true)
+	synthetic["test_unevaluable"] = {
+		"id": "test_unevaluable",
+		"name": "测试·判不了的状态",
+		"engine_status": "unevaluable",
+		"engine_blocker": "引擎尚未实现该判定（合成夹具）",
+		"predicate": {"type": "hp_ratio_at_most", "params": {"hp_ratio_pct": 100}},
+	}
+	var reg: Object = load("res://scripts/data/state_registry.gd").new(synthetic)
+	var u: Unit = _make_unit(dl.enemies["goblin_melee"], "enemy")
+	_set_hp_pct(u, 1)   # 谓词本身必然成立——若被求值就会返回 true
+
+	_eq("unevaluable 状态不可判定", reg.is_evaluable("test_unevaluable"), false)
+	_check("给出了阻塞原因", reg.get_blocker("test_unevaluable") != "")
+	# 关键：谓词若被执行会是 true（HP 1% ≤ 100%），但 engine_status 先行拦截 → false。
+	_eq("unevaluable 求值恒为不成立（谓词本身成立也不放行）",
+		reg.is_in_state(u, "test_unevaluable"), false)
+
+	# 对照：背水满血时同样返回 false，但它是「判定为否」而非「判不了」。
 	_set_hp_pct(u, 100)
 	_eq("对照·背水满血也返回 false", reg.is_in_state(u, "beishui"), false)
 	_eq("但背水 is_evaluable=true（两种 false 可区分）", reg.is_evaluable("beishui"), true)
@@ -211,10 +261,10 @@ func _test_shuangchi_unevaluable(dl: Object) -> void:
 	u.free()
 
 
-# ── 5. 健壮性：未知 id / 空 unit 不崩、不误报成立 ──
+# ── 6. 健壮性：未知 id / 空 unit 不崩、不误报成立 ──
 
 func _test_robustness(dl: Object) -> void:
-	print("\n[5] 健壮性（未知 id / null 单位）")
+	print("\n[6] 健壮性（未知 id / null 单位）")
 	var reg: Object = load("res://scripts/data/state_registry.gd").new(dl.states)
 	var u: Unit = _make_unit(dl.enemies["goblin_melee"], "enemy")
 	_set_hp_pct(u, 1)
@@ -240,10 +290,10 @@ func _test_robustness(dl: Object) -> void:
 	u.free()
 
 
-# ── 6. 阈值必须来自 JSON（项目禁则：不硬编码数值）──
+# ── 7. 阈值必须来自 JSON（项目禁则：不硬编码数值）──
 
 func _test_threshold_from_json(dl: Object) -> void:
-	print("\n[6] 阈值来自 JSON 而非代码写死")
+	print("\n[7] 阈值来自 JSON 而非代码写死")
 	var u: Unit = _make_unit(dl.enemies["goblin_melee"], "enemy")
 	var loader: Resource = load("res://scripts/data/state_registry.gd")
 
@@ -295,10 +345,10 @@ func _test_threshold_from_json(dl: Object) -> void:
 	u.free()
 
 
-# ── 7. 零影响对照：不动 buffs 命名空间、不改既有注册表 ──
+# ── 8. 零影响对照：不动 buffs 命名空间、不改既有注册表 ──
 
 func _test_zero_impact(dl: Object) -> void:
-	print("\n[7] 零影响对照（新注册表不污染既有数据层）")
+	print("\n[8] 零影响对照（新注册表不污染既有数据层）")
 	# states 与 buffs 是两套独立命名空间，id 不得交叉——交叉会让
 	# tactical_manager._make_buff_effect_instance 误把状态当 buff 模板取走。
 	var overlap: Array[String] = []

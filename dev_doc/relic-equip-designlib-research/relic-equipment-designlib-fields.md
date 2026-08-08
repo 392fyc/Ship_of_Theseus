@@ -396,7 +396,7 @@ Talent 的做法就是本研究声明的「只读镜像」纪律的正确范本�
 | **Q4** | **遗物 unique / stackable 规则**是否设计、如何取值？KB 零规定。且「每角色独立掉落×4」下「唯一」语义歧义（跨 4 角色互斥 vs 单角色池内互斥）。 | **推荐：v1 先不做**（KB 无要求）；若做，先明确「唯一」的作用域。属引擎抽取逻辑 → 放 engine_json。 |
 | **Q5** | **遗物是否升级为结构化 `trigger_timing` 枚举**（还是维持自由文本 trigger）？v0 遗物全 `is_passive:true`，是否设计主动/触发型遗物？ | **推荐：v1 维持自由文本 trigger**；若引入触发型，只用回合制词表（`on_turn_start`/`on_attack`/`on_kill`/`on_damage_taken`），**禁即时制 proc coefficient**（R1 critic）。 |
 | **Q6** | **装备是否引入 affix/词缀维度？** D4 提案（5 大类/单词缀≤±15%或≤1 触发/4 tier/50 模板）从未 locked；引擎现只有 `stats{}`。 | **推荐：v1 维持纯 stats 加值**（不引入 affix）。装备非 build-defining，纯品阶替换够用；affix 是显著复杂度，等玩法验证需要再引入。 |
-| **Q7** | **装备槽收敛**。两槽（武器+防具，run-loop 定稿）vs class-system 4 槽 Demo（含 off-hand 剑圣双持 / accessory-TBD）。 | **推荐：以两槽定稿为准**（更晚、更权威）；剑圣双持若保留，作为**职业专属特例**单独处理，不进通用 EquipSlot 枚举。需用户确认 class-system 4 槽 Demo 是否作废。 |
+| **Q7** | **装备槽收敛**。两槽（武器+防具，run-loop 定稿）vs class-system 4 槽 Demo（含 off-hand 剑圣双持 / accessory-TBD）。 | **推荐：以两槽定稿为准**（更晚、更权威）；剑圣双持若保留，作为**职业专属特例**单独处理，不进通用 EquipSlot 枚举。需用户确认 class-system 4 槽 Demo 是否作废。<br>**【2026-08-08 · Wave 2 执行状态】引擎侧已按推荐执行**：副手做成职业专属特例（`Unit.offhand_weapon_id`），未动通用两槽模型——`data/equipment/` 的 `slot` 仍只有 weapon/armor，`run_state.gd` 的 `{weapon, armor}` 未改，`tests/test_runloop_data_smoke.gd` 的两槽白名单未改。**KB `class-system.md:448-455` 的 4 槽 Demo 是否正式作废，仍是未回收的用户确认项**——引擎侧不依赖它，但 KB 那份文档目前与定稿不一致。 |
 | **Q8** | **遗物/装备品质维度是否对称？** 现状遗物只 `rarity`、装备 `rarity`+`tier` 两维。 | **推荐：保持非对称**（遗物按稀有度、装备按品阶+稀有度）——契合「装备渐进品阶替换 vs 遗物按稀有度构筑」的不同定位。或统一，需裁决。 |
 | **Q9** | **遗物掉落权重模型**：每遗物独立 `pool_weight` vs「rarity 即权重」简单模型？ | **推荐：先用 rarity 分桶**（`reward_resolver` 现状）跑通；20+ 小池下独立 pool_weight 可能过度设计（R3 critic）。 |
 
