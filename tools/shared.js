@@ -454,7 +454,7 @@ const UIHelper = {
 const CrossToolData = {
   /**
    * 获取装备设计器中的所有装备
-   * @param {string|null} slotFilter - 按slot筛选（weapon/armor/accessory）
+   * @param {string|null} slotFilter - 按slot筛选（weapon/armor）
    */
   getEquipments(slotFilter = null) {
     const data = StorageHelper.getJSON('equipDesigner_equipments', []);
@@ -616,7 +616,7 @@ const I18N = {
       eq_batch_export: '批量导出全部', eq_search_placeholder: '搜索装备...',
       eq_all_slots: '全部槽位', eq_all_rarity: '全部稀有度',
       eq_all_tiers: '全部阶段',
-      eq_slot_weapon: '武器', eq_slot_armor: '护甲', eq_slot_accessory: '饰品',
+      eq_slot_weapon: '武器', eq_slot_armor: '护甲',
       eq_no_selection: '← 从左侧选择或新建装备',
       eq_copy_equip: '复制装备', eq_delete_equip: '删除',
       // 地图设计器
@@ -716,14 +716,14 @@ const I18N = {
       idx_talent_tree: '天赋树编辑器',
       idx_talent_desc: '可视化设计天赋树拓扑结构、节点属性和连接关系。支持DAG验证、路径成本分析、互斥可视化。',
       idx_equipment: '装备设计器',
-      idx_equip_desc: '设计武器、护甲、饰品的属性数值和特殊效果。内含阶段数值参考和装备预览卡片。',
+      idx_equip_desc: '设计武器、护甲的属性数值和特殊效果。内含阶段数值参考和装备预览卡片。',
       idx_map: '地图设计器',
       idx_map_desc: '像素级地图编辑器，支持9种基础地形、特殊地形、建筑、出生点和建造区域的三层绘制。',
       idx_damage: '伤害模拟器',
       idx_damage_desc: '基于完整战斗公式的伤害计算器，支持职业预设、天赋层加成、蒙特卡洛模拟和节点对比。',
       idx_data_status: '本地数据状态',
       idx_custom_trees: '自定义天赋树',
-      idx_equipment_label: '装备 (武器/护甲/饰品)',
+      idx_equipment_label: '装备 (武器/护甲)',
       idx_maps: '地图',
       idx_storage: 'localStorage 占用',
       idx_count_unit: '个',
@@ -834,7 +834,7 @@ const I18N = {
       eq_batch_export: 'Export All', eq_search_placeholder: 'Search equipment...',
       eq_all_slots: 'All Slots', eq_all_rarity: 'All Rarity',
       eq_all_tiers: 'All Tiers',
-      eq_slot_weapon: 'Weapon', eq_slot_armor: 'Armor', eq_slot_accessory: 'Accessory',
+      eq_slot_weapon: 'Weapon', eq_slot_armor: 'Armor',
       eq_no_selection: '← Select or create equipment from left panel',
       eq_copy_equip: 'Copy Equipment', eq_delete_equip: 'Delete',
       map_title: 'Map Designer',
@@ -933,7 +933,7 @@ const I18N = {
       idx_talent_tree: 'Talent Tree Editor',
       idx_talent_desc: 'Visual talent tree topology editor with node properties and connections. Supports DAG validation, path cost analysis, mutual exclusion visualization.',
       idx_equipment: 'Equipment Designer',
-      idx_equip_desc: 'Design weapon, armor and accessory stats and special effects. Includes tier reference and equipment preview cards.',
+      idx_equip_desc: 'Design weapon and armor stats and special effects. Includes tier reference and equipment preview cards.',
       idx_map: 'Map Designer',
       idx_map_desc: 'Pixel-level map editor supporting 9 terrain types, special terrain, buildings, spawn points and build zones in three layers.',
       idx_damage: 'Damage Simulator',

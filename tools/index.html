@@ -168,9 +168,9 @@ h1 {
   <a class="tool-card" href="equipment-designer.html">
     <span class="tool-icon">⚔</span>
     <div class="tool-name" data-i18n="idx_equipment">装备设计器</div>
-    <div class="tool-desc" data-i18n="idx_equip_desc">设计武器、护甲、饰品的属性数值和特殊效果。内含阶段数值参考和装备预览卡片。</div>
+    <div class="tool-desc" data-i18n="idx_equip_desc">设计武器、护甲的属性数值和特殊效果。内含阶段数值参考和装备预览卡片。</div>
     <div class="tool-features" data-i18n-features="equip">
-      <span>武器/护甲/饰品</span>
+      <span>武器/护甲</span>
       <span>稀有度系统</span>
       <span>属性编辑</span>
       <span>预览卡片</span>
@@ -221,7 +221,7 @@ h1 {
 const FEATURE_TAGS = {
   zh: {
     talent: ['拖拽编辑', 'DAG验证', '路径分析', 'Mermaid导出', 'PNG导出'],
-    equip: ['武器/护甲/饰品', '稀有度系统', '属性编辑', '预览卡片', '批量导出'],
+    equip: ['武器/护甲', '稀有度系统', '属性编辑', '预览卡片', '批量导出'],
     map: ['10×10网格', '9种地形', '特殊地形', '建筑放置', '出生点/建造区域'],
     damage: ['6职业预设', '完整公式', '1000轮模拟', '节点对比', '天赋层加成'],
   },
@@ -264,7 +264,6 @@ function updateStatus() {
 
   const weaponCount = equipments.filter(e => e.slot === 'weapon').length;
   const armorCount = equipments.filter(e => e.slot === 'armor').length;
-  const accessoryCount = equipments.filter(e => e.slot === 'accessory').length;
 
   container.innerHTML = `
     <div class="status-row">
@@ -273,7 +272,7 @@ function updateStatus() {
     </div>
     <div class="status-row">
       <span>⚔ ${t('idx_equipment_label')}</span>
-      <span class="status-count">${weaponCount} / ${armorCount} / ${accessoryCount}</span>
+      <span class="status-count">${weaponCount} / ${armorCount}</span>
     </div>
     <div class="status-row">
       <span>🗺 ${t('idx_maps')}</span>

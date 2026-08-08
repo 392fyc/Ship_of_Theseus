@@ -679,19 +679,49 @@ func _test_offhand_precision(dl: Object) -> void:
 		_eq("主手击杀 → 「击杀时」也恰好一次、副手不追加（10 + 5，不是 10 + 10）",
 			attacker.sword_qi, 15)
 
-	# ── G5. AOE 岔口的当前行为（技能路径暂不追加，等裁决）──
-	# 一次 AOE 是一个攻击动作还是 N 个，属设计裁决；在裁决落定前引擎不追加，
-	# 免得出现「5 个溅射目标 = 5 次满额副手伤害、且副手还不吃溅射衰减」。
+	# ── G5. AOE 语义（2026-08-09 用户裁决 C：每目标各追加、不吃溅射衰减）──
+	# _execute_hostile_action 是 per-target 的，一个 AOE 技能对每个目标各跑一次，
+	# 副手也就对每个目标各追加一次。「不吃衰减」是有意的：副手的 action_data 刻意
+	# 不放 area_damage_multiplier，所以副手对溅射目标的单次伤害会**高于**主手。
 	var enemy5: Unit = _find_living_enemy(tm)
 	if enemy5 != null:
 		enemy5.stats.def_attr = 0
-		enemy5.stats.max_hp = 999
-		enemy5.stats.hp = 999
+		enemy5.stats.max_hp = 9999
 		attacker.talent_ids = ["kensei_ertianyiliu"]
 		attacker.equip_offhand("wpn_swordsman_starter")
+
+		# 技能路径（带 skill_id）同样追加——与普攻一致。
+		enemy5.stats.hp = 9999
 		tm._execute_hostile_action(attacker, enemy5, {"skill_id": "swordsman_badao"})
-		_eq("技能路径（带 skill_id）暂不追加副手伤害",
-			999 - enemy5.stats.hp, main_only)
+		var skill_total: int = 9999 - enemy5.stats.hp
+		_check("技能路径也追加副手伤害（按目标算，不是按动作算）",
+			skill_total > main_only, "skill_total=%d main_only=%d" % [skill_total, main_only])
+		_eq("技能路径的副手伤害量与普攻一致",
+			skill_total - main_only, offhand_sword)
+
+		# 溅射目标：主手吃 area_damage_multiplier 衰减，副手**不吃**。
+		# 用 0.25 而不是 0.5——0.5 时主手衰减后恰好等于副手，看不出差别。
+		enemy5.stats.hp = 9999
+		tm._execute_hostile_action(attacker, enemy5, {
+			"skill_id": "swordsman_badao", "area_damage_multiplier": 0.25,
+		})
+		var splash_total: int = 9999 - enemy5.stats.hp
+		var splash_main: int = int(floor(float(main_only) * 0.25))
+		_eq("溅射目标：主手衰减、副手不衰减（副手仍是满额）",
+			splash_total, splash_main + offhand_sword)
+		# 这一条把「副手对溅射目标可能打得比主手还高」显式钉住——它是 2026-08-09
+		# 用户裁决 C 的已知后果、被接受的设计取向，不是数值 bug。若哪天改回
+		# 「副手也吃衰减」，这条会红，提醒改的人这是在推翻一次裁决。
+		_check("溅射目标上副手单次伤害高于主手（裁决 C 的已知后果）",
+			offhand_sword > splash_main,
+			"副手=%d 主手(衰减后)=%d" % [offhand_sword, splash_main])
+
+		# per-target 循环的等效验证：连打两次 = 两次追加（AOE 打 2 个人的效果）。
+		enemy5.stats.hp = 9999
+		tm._execute_hostile_action(attacker, enemy5, {"skill_id": "swordsman_badao"})
+		tm._execute_hostile_action(attacker, enemy5, {"skill_id": "swordsman_badao"})
+		_eq("两个目标 = 两次追加（每目标各一次）",
+			9999 - enemy5.stats.hp, (main_only + offhand_sword) * 2)
 
 	scene.free()
 

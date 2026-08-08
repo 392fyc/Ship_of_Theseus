@@ -2470,19 +2470,19 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 		# 必须由一条**绕开本守卫**的测试来钉（见 test_talent_carrier 的
 		# 「行级条件真的被用了」一组），不能指望副手追加的用例。
 		return
-	# ── AOE 岔口：技能路径暂不追加，等设计裁决 ──────────────
-	# _execute_hostile_action 也被技能的 per-target 循环调用，一个 AOE 技能会对每个
-	# 目标各跑一次。若照常追加，实测结果是「5 个溅射目标 = 5 次满额副手追加」，而且
-	# 副手的最小 action_data 不含 area_damage_multiplier → 副手对溅射目标反而比主手
-	# 还不打折。设计库 effect 逐字是「执行攻击动作时，追加**一次**……」——一次 AOE
-	# 是一个攻击动作还是 N 个，属设计裁决，引擎不自行默认。
-	# 按「宁可不触发，不可错误触发」：技能路径先不追加，并响亮告警登记。
-	# 裁决落定前，普攻路径（无 skill_id）行为不变。
-	if str(main_action_data.get("skill_id", "")) != "":
-		push_warning("[Offhand] 技能路径暂不追加副手伤害（技能 %s）——"
-			% str(main_action_data.get("skill_id", ""))
-			+ "「追加一次」按攻击动作算还是按目标算尚未裁决，见 Issue #550")
-		return
+	# ── AOE 语义（2026-08-09 用户裁决）：每个目标各追加一次，且**不吃溅射衰减** ──
+	#
+	# `_execute_hostile_action` 被技能的 per-target 循环调用，一个 AOE 技能会对每个
+	# 目标各跑一次，所以副手也对每个目标各追加一次——「追加一次」按**目标**算，
+	# 不按攻击动作算。
+	#
+	# 「不吃溅射衰减」是**有意的**，不是漏传参数：下面构造 data 时刻意不放
+	# `area_damage_multiplier`。已知后果并已被接受——主手对溅射目标会衰减，副手不会，
+	# 因此在 AOE 场景下**副手对非主目标的单次伤害会高于主手**。这是设计取向
+	# （双刀在 AOE 下收益显著），不是数值 bug；要改回来就改这里并同步 KB 双持章节。
+	#
+	# 用户在裁决时看到的对照（一发拔刀打中 3 人）：
+	#   主手 8 / 4 / 4（主目标满额，其余衰减）；副手 5 / 5 / 5，副手总伤害 15。
 	var offhand: Dictionary = DataLoader.weapons.get(attacker.offhand_weapon_id, {})
 	if offhand.is_empty():
 		push_warning("[Offhand] %s 的副手武器「%s」在 data/weapons/ 里找不到，追加取消"
@@ -2518,6 +2518,8 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 		"terrain_res_bonus": int(main_action_data.get("terrain_res_bonus", 0)),
 		"affix_defense_multiplier": float(
 			main_action_data.get("affix_defense_multiplier", 1.0)),
+		# ★ 刻意不放 area_damage_multiplier：2026-08-09 用户裁决「副手不吃溅射衰减」。
+		# resolve_attack 缺该键时默认 1.0，正是这里想要的。别"顺手补上"。
 	}
 	_apply_debug_determinism(data)
 

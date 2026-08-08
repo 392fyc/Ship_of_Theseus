@@ -859,7 +859,6 @@ body {
           <option value="" data-i18n="eq_all_slots">全部槽位</option>
           <option value="weapon" data-i18n="eq_slot_weapon">武器</option>
           <option value="armor" data-i18n="eq_slot_armor">护甲</option>
-          <option value="accessory" data-i18n="eq_slot_accessory">饰品</option>
         </select>
         <select id="filter-rarity">
           <option value="" data-i18n="eq_all_rarity">全部稀有度</option>
@@ -919,7 +918,6 @@ body {
               <select id="ed-slot">
                 <option value="weapon" data-i18n="eq_slot_weapon">武器 (Weapon)</option>
                 <option value="armor" data-i18n="eq_slot_armor">护甲 (Armor)</option>
-                <option value="accessory" data-i18n="eq_slot_accessory">饰品 (Accessory)</option>
               </select>
             </div>
             <div class="field" id="weapon-type-field">
@@ -1169,7 +1167,6 @@ const LOCAL_DICT = {
     // Slot/rarity/weapon names (zh)
     slot_weapon: '武器',
     slot_armor: '护甲',
-    slot_accessory: '饰品',
     wt_sword: '剑',
     wt_bow: '弓',
     wt_tome: '魔法书',
@@ -1250,7 +1247,6 @@ const LOCAL_DICT = {
     // Slot/rarity/weapon names (en)
     slot_weapon: 'Weapon',
     slot_armor: 'Armor',
-    slot_accessory: 'Accessory',
     wt_sword: 'Sword',
     wt_bow: 'Bow',
     wt_tome: 'Tome',
@@ -1347,7 +1343,7 @@ function getWeaponTypeName(wt) {
 const SLOT_ICONS = {
   weapon: { sword: '\u2694', bow: '\u{1F3F9}', tome: '\u{1F4D6}' },
   armor: '\u{1F6E1}',
-  accessory: '\u{1F48D}'
+  // accessory 槽已于 2026-08-09 用户裁决作废（装备栏收敛为武器 + 护甲两槽）
 };
 
 function getStatLabel(key) {
