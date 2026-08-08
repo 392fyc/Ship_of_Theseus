@@ -1614,6 +1614,16 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 		data: Dictionary) -> void:
 	var action_data: Dictionary = _build_hostile_action_context(attacker, defender, data)
 	var damage_type: String = str(action_data.get("damage_type", "physical"))
+
+	# ── 天赋：动作级事件「执行攻击动作时」（Wave 2）────────────────
+	# 这里比「命中时」还早——在命中判定之前，与 A2 要开的真 on-hit 钩子不是同一处。
+	# 该事件的效果不在此刻结算，只登记待办（见 _apply_talent_effect 的
+	# offhand_followup 分支）：条件在动作开始时判定，伤害在主手那一下之后追加。
+	var action_ctx: Dictionary = {
+		"defender": defender, "pending_offhand": [],
+	}
+	_dispatch_talents(attacker, "执行攻击动作时", action_ctx)
+
 	defender.handle_attacked()
 
 	# Main attack: calculate → popup → apply
@@ -1653,6 +1663,12 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 			_dispatch_talents(attacker, "造成伤害时", talent_ctx)
 	if result.defender_died:
 		_dispatch_talents(attacker, "击杀时", talent_ctx)
+
+	# ── 副手追加攻击（Wave 2）：主手全部副作用结算完之后 ──────────
+	# 放在最末尾是有意的——主手的 popup / 词条 / 天赋 / 剑气都已跑完，副手不打断
+	# 也不穿插；主手是否击杀已判定，副手可用存活守卫天然处理「主手已杀就不追加」。
+	for followup: Dictionary in (action_ctx["pending_offhand"] as Array):
+		_execute_offhand_followup(attacker, defender, action_data, followup)
 
 	# 自动反击已整体移除（2026-07-11 用户裁决）：未来以天赋/敌方特性形式回归，
 	# 伤害与特效将与天赋/特性深度绑定，不预设反击框架。
@@ -2379,11 +2395,16 @@ func _dispatch_talents(unit: Unit, event: String, ctx: Dictionary) -> void:
 	if unit == null or unit.talent_ids.is_empty():
 		return
 	var registry: RefCounted = _ensure_talent_registry()
-	for entry: Dictionary in registry.talents_for_event(event):
+	for row: Dictionary in registry.talents_for_event(event):
+		var entry: Dictionary = row["talent"]
+		# ★ 条件读的是**触发行**而非整卡：附加行有自己的 requires_states。
+		# 二天一流就是主行永久生效无条件、附加行要求〔双持〕——退回卡级会让它
+		# 在没装副手武器时也追加伤害。
+		var trigger: Dictionary = row["trigger"]
 		var talent_id: String = str(entry.get("id", ""))
 		if talent_id not in unit.talent_ids:
 			continue
-		if not _talent_conditions_hold(unit, entry):
+		if not _talent_conditions_hold(unit, trigger):
 			continue
 		var effects: Variant = entry.get("engine_effects", [])
 		if not effects is Array:
@@ -2406,8 +2427,8 @@ func _dispatch_talents(unit: Unit, event: String, ctx: Dictionary) -> void:
 ## 那正是 talent_registry.gd 头部所说「比不触发危险得多」的情形。
 ##
 ## 即时求值、不缓存，照 State 定义的「每次结算重新计算、不在进入时做快照」。
-func _talent_conditions_hold(unit: Unit, entry: Dictionary) -> bool:
-	var required: Variant = entry.get("requires_states", [])
+func _talent_conditions_hold(unit: Unit, trigger_row: Dictionary) -> bool:
+	var required: Variant = trigger_row.get("requires_states", [])
 	if not required is Array or (required as Array).is_empty():
 		return true
 	var state_registry: RefCounted = _ensure_state_registry()
@@ -2417,10 +2438,86 @@ func _talent_conditions_hold(unit: Unit, entry: Dictionary) -> bool:
 	return true
 
 
+## 副手追加攻击（Wave 2）。设计库二天一流的两段逐字要求：
+##   effect：「执行攻击动作时，追加一次由副手武器计算的50%物理伤害。 不触发武器特效。」
+##   rules ：「副手的追加伤害单独结算命中与暴击（R1.2、R1.3）；计算时只取副手武器的
+##           数据，不套用主手武器的属性与特效。」
+##
+## ★ 刻意**不复用** `_execute_hostile_action`，而是只做 resolve → popup → take_damage
+## 三步。那个函数带着八类副作用（技能效果挂载 / 剑气 / 印记 / 击杀减 CD / 词条
+## on_hit+on_kill / 天赋三事件），副手若复用会把它们全部重跑一遍——剑气翻倍、上状态
+## 概率翻倍（`_roll_effect_application` 会二次掷骰）、天赋触发翻倍。副手是「同一次
+## 攻击动作里的第二段伤害」，不是第二次攻击动作。
+##
+## `action_data` 也不继承主手的：新建一份最小字典，只放副手武器三参数 + 伤害倍率 +
+## 地形修正（同一个目标、同一块地形，这三项该一致），这就是「只取副手武器的数据，
+## 不套用主手属性与特效」。调试确定性开关照常注入，否则 headless 测试没法确定。
+##
+## 击杀归属：主手没杀、副手杀了 → 在这里补发 on_kill 词条与「击杀时」天赋，
+## 否则那次击杀会被整个吞掉。
+func _execute_offhand_followup(attacker: Unit, defender: Unit,
+		main_action_data: Dictionary, followup: Dictionary) -> void:
+	if attacker == null or defender == null:
+		return
+	# 主手已经把目标打死了就不再追加——「追加一次伤害」的对象已经不在了。
+	if not defender.stats.is_alive():
+		return
+	if not attacker.is_dual_wielding():
+		# 正常情况下走不到：注册期要求〔双持〕、分发期又求值过一次。
+		# 留守卫是因为这里离条件判定隔了整个主手结算，中途状态可能已变。
+		return
+	var offhand: Dictionary = DataLoader.weapons.get(attacker.offhand_weapon_id, {})
+	if offhand.is_empty():
+		push_warning("[Offhand] %s 的副手武器「%s」在 data/weapons/ 里找不到，追加取消"
+			% [attacker.unit_name, attacker.offhand_weapon_id])
+		return
+
+	var damage_pct: float = float(followup.get("damage_pct", 0.0))
+	if damage_pct <= 0.0:
+		push_warning("[Offhand] %s 的 damage_pct 非正（%s），追加取消"
+			% [str(followup.get("talent_id", "")), str(damage_pct)])
+		return
+
+	var data: Dictionary = {
+		# 设计库写死物理伤害；不继承主手的 damage_type（主手可能是魔法技能）。
+		"damage_type": "physical",
+		"skill_multiplier": damage_pct / 100.0,
+		# 只取副手武器的三参数——R1.2 base_hit = weapon_hit + DEX×2、
+		# R1.3 base_crit = weapon_crit + DEX/2 都由 resolve_attack 内部各自掷骰，
+		# 这就是「单独结算命中与暴击」。
+		"weapon_might": int(offhand.get("weapon_might", 0)),
+		"weapon_hit": int(offhand.get("weapon_hit", 0)),
+		"weapon_crit": int(offhand.get("weapon_crit", 0)),
+		# 地形三项跟随主手（同目标同地块）。
+		"terrain_evade_bonus": int(main_action_data.get("terrain_evade_bonus", 0)),
+		"terrain_def_bonus": int(main_action_data.get("terrain_def_bonus", 0)),
+		"terrain_res_bonus": int(main_action_data.get("terrain_res_bonus", 0)),
+		"affix_defense_multiplier": float(
+			main_action_data.get("affix_defense_multiplier", 1.0)),
+	}
+	_apply_debug_determinism(data)
+
+	var result: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(
+		attacker, defender, data)
+	_log_attack(attacker, defender, result, "副手")
+	if result.hit:
+		# segment_index=1：与主手的飘字错开，否则同坐标同帧两个数字会叠在一起。
+		DamagePopup.spawn(popup_layer, defender.position,
+			result.damage, "physical", result.crit, 1)
+		defender.take_damage(result.damage, "physical")
+	else:
+		DamagePopup.spawn_miss(popup_layer, defender.position, 1)
+
+	# 主手未击杀而副手击杀 → 补发击杀链，否则这次击杀无人知晓。
+	if result.defender_died:
+		_apply_affixes(attacker, "on_kill", {"defender": defender, "result": result})
+		_dispatch_talents(attacker, "击杀时", {"defender": defender, "result": result})
+
+
 ## 执行一条结构化天赋效果。未知类型在注册期就已被拒收，走到这里仍要兜底告警——
 ## 静默 default 分支正是路径 C 留档里点名的失效模式。
 func _apply_talent_effect(unit: Unit, talent_id: String,
-		effect: Dictionary, _ctx: Dictionary) -> void:
+		effect: Dictionary, ctx: Dictionary) -> void:
 	var effect_type: String = str(effect.get("type", ""))
 	match effect_type:
 		"gain_resource":
@@ -2441,6 +2538,19 @@ func _apply_talent_effect(unit: Unit, talent_id: String,
 				_:
 					push_warning("[Talent] %s 的 gain_resource 资源「%s」无执行分支"
 						% [talent_id, resource])
+		"offhand_followup":
+			# 副手追加攻击。这里**只登记待办、不立即打**——事件是「执行攻击动作时」
+			# （主手结算之前），而设计库 effect 说的是「追加一次」，追加必须发生在
+			# 主手那一下之后。所以在动作开头判定条件、把待办塞进 ctx，由
+			# _execute_hostile_action 末尾统一执行。
+			if not ctx.has("pending_offhand"):
+				push_warning("[Talent] %s 的 offhand_followup 在不支持追加的时机触发（%s）"
+					% [talent_id, str(ctx.keys())])
+				return
+			(ctx["pending_offhand"] as Array).append({
+				"talent_id": talent_id,
+				"damage_pct": float(effect.get("damage_pct", 0.0)),
+			})
 		_:
 			push_warning("[Talent] %s 的效果类型「%s」无执行分支" % [talent_id, effect_type])
 

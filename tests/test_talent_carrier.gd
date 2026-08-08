@@ -34,6 +34,18 @@ const TALENT_REGISTRY_PATH := "res://scripts/data/talent_registry.gd"
 const STATE_REGISTRY_PATH := "res://scripts/data/state_registry.gd"
 const DATA_LOADER_PATH := "res://scripts/data/data_loader.gd"
 
+## 合成的「判不了」状态。Wave 2 之后生产库里的双持已转 evaluable，没有现成的
+## unevaluable 状态可用了——但 Wave 1 §2.3 的硬判据必须继续被锁住，故自造一个。
+## 这样测试也不再依赖「生产库恰好有一个判不了的状态」这个会过期的前提。
+const UNEVALUABLE_STATE_ID := "test_state_unevaluable"
+const UNEVALUABLE_STATE: Dictionary = {
+	"id": UNEVALUABLE_STATE_ID,
+	"name": "测试·判不了的状态",
+	"engine_status": "unevaluable",
+	"engine_blocker": "引擎尚未实现该判定（合成夹具）",
+	"predicate": {"type": "hp_ratio_at_most", "params": {"hp_ratio_pct": 100}},
+}
+
 ## 合成天赋夹具。前两条是可注册的（补生产数据缺的两个事件——全库当前只有
 ## 「击杀时」有真卡，「造成伤害时」0 张、「命中后」2 处全是被排除的双持系）；
 ## 其余八条各自触碰一条拒收规则。
@@ -61,9 +73,9 @@ const SYNTHETIC: Dictionary = {
 	},
 	"test_rej_unevaluable": {
 		"id": "test_rej_unevaluable", "name": "测试·依赖判不了的状态", "class_id": "kensei",
-		"trigger_event": "命中后", "trigger_condition": "处于〔双持〕状态",
+		"trigger_event": "命中后", "trigger_condition": "处于〔测试·判不了的状态〕状态",
 		"trigger_frequency": "每次", "trigger_frequency_n": 1,
-		"condition_model": "states", "requires_states": ["shuangchi"],
+		"condition_model": "states", "requires_states": ["test_state_unevaluable"],
 		"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 99}],
 	},
 	"test_rej_unknown_state": {
@@ -193,14 +205,14 @@ const SYNTHETIC: Dictionary = {
 		"id": "test_rej_states_not_array", "name": "测试·依赖写成裸字符串", "class_id": "kensei",
 		"trigger_event": "命中后", "trigger_condition": "处于〔双持〕状态",
 		"trigger_frequency": "每次", "trigger_frequency_n": 1,
-		"condition_model": "states", "requires_states": "shuangchi",
+		"condition_model": "states", "requires_states": "test_state_unevaluable",
 		"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 99}],
 	},
 	"test_rej_states_item_not_str": {
 		"id": "test_rej_states_item_not_str", "name": "测试·依赖元素非字符串", "class_id": "kensei",
 		"trigger_event": "命中后", "trigger_condition": "处于某状态",
 		"trigger_frequency": "每次", "trigger_frequency_n": 1,
-		"condition_model": "states", "requires_states": [{"id": "shuangchi"}],
+		"condition_model": "states", "requires_states": [{"id": "test_state_unevaluable"}],
 		"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 99}],
 	},
 	"test_rej_effects_not_array": {
@@ -264,7 +276,9 @@ func _run() -> void:
 	_test_loading(dl)
 	_test_rejection_discipline(dl)
 	_test_event_index(dl)
+	_test_extra_triggers(dl)
 	_test_dispatch_integration()
+	_test_offhand_followup(dl)
 
 	dl.free()
 	print("\n--- 结果：%d 过 / %d 失败 ---" % [_pass, _fail])
@@ -273,6 +287,166 @@ func _run() -> void:
 		for f: String in _fails:
 			print("  ✗ " + f)
 	quit(0 if _fail == 0 else 1)
+
+
+# ── E. 附加触发行（Wave 2）──────────────────────────
+
+func _test_extra_triggers(dl: Object) -> void:
+	print("
+[E] 附加触发行（extra_triggers 子表）")
+	var reg: Object = _make_registry(dl.talents, dl.states)
+
+	# 二天一流：主行「永久生效」属常驻不进桶，机制主体在附加行「执行攻击动作时」。
+	_check("二天一流已装载", dl.talents.has("kensei_ertianyiliu"))
+	_check("二天一流注册成功（主行常驻不算缺行）",
+		reg.is_registered("kensei_ertianyiliu"),
+		reg.rejection_reason("kensei_ertianyiliu"))
+	_eq("常驻事件「永久生效」不进事件桶", reg.talents_for_event("永久生效").size(), 0)
+	var action_rows: Array = reg.talents_for_event("执行攻击动作时")
+	_eq("「执行攻击动作时」桶里有 1 行", action_rows.size(), 1)
+	if action_rows.size() == 1:
+		var row: Dictionary = action_rows[0]
+		_eq("该行属于二天一流", str((row["talent"] as Dictionary).get("id", "")),
+			"kensei_ertianyiliu")
+		_eq("该行是附加行而非主行", str(row["row"]), "extra[0]")
+		# ★ 行级条件：附加行要求〔双持〕，主行则无条件。退回卡级就会丢掉这个要求。
+		var trigger: Dictionary = row["trigger"]
+		_eq("附加行带自己的 requires_states",
+			trigger.get("requires_states", []), ["shuangchi"])
+		_eq("附加行 condition_model=states", str(trigger.get("condition_model", "")), "states")
+		_eq("卡级 requires_states 为空（证明两者确实分开）",
+			(row["talent"] as Dictionary).get("requires_states", []), [])
+
+	# 纯常驻卡（只有永久生效主行、无附加行）必须被拒——引擎没有承载通道。
+	var only_passive: Dictionary = {
+		"passive_only": {
+			"id": "passive_only", "name": "测试·纯常驻", "class_id": "kensei",
+			"trigger_event": "永久生效", "trigger_condition": "",
+			"trigger_frequency": "永久", "trigger_frequency_n": 1,
+			"condition_model": "none", "requires_states": [],
+			"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 1}],
+		}
+	}
+	var reg2: Object = _make_registry(only_passive, dl.states)
+	_check("纯常驻卡被拒", not reg2.is_registered("passive_only"))
+	_check("拒绝理由说明无可分发触发行",
+		reg2.rejection_reason("passive_only").contains("无任何可分发的触发行"),
+		reg2.rejection_reason("passive_only"))
+
+	# 附加行不合格 → 整卡拒（不做「主行注册、附加行丢弃」的半生效）。
+	var bad_extra: Dictionary = {
+		"bad_extra": {
+			"id": "bad_extra", "name": "测试·附加行不合格", "class_id": "kensei",
+			"trigger_event": "击杀时", "trigger_condition": "",
+			"trigger_frequency": "每次", "trigger_frequency_n": 1,
+			"condition_model": "none", "requires_states": [],
+			"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 1}],
+			"extra_triggers": [{
+				"trigger_event": "暴击时", "trigger_condition": "",
+				"trigger_frequency": "每次", "trigger_frequency_n": 1,
+				"condition_model": "none", "requires_states": [],
+			}],
+		}
+	}
+	var reg3: Object = _make_registry(bad_extra, dl.states)
+	_check("附加行事件属 A2 → 整卡被拒", not reg3.is_registered("bad_extra"))
+	_check("拒绝理由指明是附加行",
+		reg3.rejection_reason("bad_extra").contains("extra[0]"),
+		reg3.rejection_reason("bad_extra"))
+	_eq("整卡拒后「击杀时」桶里也没有它（不半生效）",
+		reg3.talents_for_event("击杀时").size(), 0)
+
+
+# ── F. 副手追加攻击（Wave 2 · 集成）──────────────────
+
+func _test_offhand_followup(dl: Object) -> void:
+	print("
+[F] 副手追加攻击（独立结算命中/暴击，不重复主手副作用）")
+	var scene: Node = load("res://scenes/tactical/TacticalScene.tscn").instantiate()
+	root.add_child(scene)
+	var tm: Object = scene.tactical_manager
+	tm._talent_registry = null
+	tm._state_registry = null
+	tm.debug_harness_active = true
+	tm.debug_deterministic = true
+	tm.debug_crit_mode = 2          # DISABLE：去掉暴击浮动
+
+	var attacker: Unit = null
+	var enemy: Unit = null
+	for u: Unit in tm.units:
+		if u.faction == "player" and u.unit_id == "kensei":
+			attacker = u
+		elif u.faction == "enemy" and enemy == null:
+			enemy = u
+	if attacker == null or enemy == null:
+		_check("场景中找到剑圣与敌人", false)
+		scene.free()
+		return
+
+	enemy.stats.def_attr = 0
+	attacker.talent_ids = ["kensei_ertianyiliu"]
+
+	# 基准：持有二天一流但**没装副手** → 不处于双持 → 不追加。
+	attacker.unequip_offhand()
+	enemy.stats.max_hp = 999
+	enemy.stats.hp = 999
+	attacker.set_sword_qi(0)
+	tm._execute_hostile_action(attacker, enemy, {})
+	var main_only: int = 999 - enemy.stats.hp
+	_check("主手单独造成了伤害", main_only > 0)
+	_eq("未装副手 → 只有普攻 10 气（附加行条件不成立，不追加）",
+		attacker.sword_qi, 10)
+
+	# 装上副手 → 双持成立 → 追加一次。
+	attacker.equip_offhand("wpn_physical_melee_basic")
+	enemy.stats.hp = 999
+	attacker.set_sword_qi(0)
+	tm._execute_hostile_action(attacker, enemy, {})
+	var with_offhand: int = 999 - enemy.stats.hp
+	_check("装上副手 → 总伤害多于主手单独（追加确实发生了）",
+		with_offhand > main_only, "main_only=%d with_offhand=%d" % [main_only, with_offhand])
+
+	# ★ 不重复主手副作用：剑气仍是普攻的 10，没有因为副手再产一次。
+	_eq("副手不重复产气（仍是普攻的 10，不是 20）", attacker.sword_qi, 10)
+
+	# 卸下副手 → 立刻回到不追加（即时判定）。
+	attacker.unequip_offhand()
+	enemy.stats.hp = 999
+	attacker.set_sword_qi(0)
+	tm._execute_hostile_action(attacker, enemy, {})
+	_eq("卸下副手 → 伤害回到主手单独的量", 999 - enemy.stats.hp, main_only)
+
+	# 没有二天一流天赋 → 即便装着副手也不追加（追加由天赋驱动，不是双持本身）。
+	attacker.talent_ids = []
+	attacker.equip_offhand("wpn_physical_melee_basic")
+	enemy.stats.hp = 999
+	tm._execute_hostile_action(attacker, enemy, {})
+	_eq("无二天一流 → 装着副手也不追加", 999 - enemy.stats.hp, main_only)
+
+	# 主手即已击杀 → 不再追加（目标已经不在了）。
+	attacker.talent_ids = ["kensei_ertianyiliu"]
+	enemy.stats.max_hp = 1
+	enemy.stats.hp = 1
+	tm._execute_hostile_action(attacker, enemy, {})
+	_check("主手击杀后目标已死", not enemy.stats.is_alive())
+
+	# 副手武器 id 指向不存在的条目 → 告警并取消追加，不崩、不按 0 伤害打。
+	var enemy2: Unit = null
+	for u: Unit in tm.units:
+		if u.faction == "enemy" and u.stats.is_alive():
+			enemy2 = u
+			break
+	if enemy2 != null:
+		enemy2.stats.def_attr = 0
+		enemy2.stats.max_hp = 999
+		enemy2.stats.hp = 999
+		attacker.equip_offhand("wpn_does_not_exist")
+		tm._execute_hostile_action(attacker, enemy2, {})
+		_check("副手武器查不到 → 只有主手伤害，不崩",
+			(999 - enemy2.stats.hp) > 0 and (999 - enemy2.stats.hp) <= main_only)
+		attacker.unequip_offhand()
+
+	scene.free()
 
 
 # ── 断言工具（照 tests/test_affix_effects.gd）─────────────
@@ -292,7 +466,9 @@ func _eq(name: String, actual: Variant, expected: Variant) -> void:
 
 
 func _make_registry(talents: Dictionary, states: Dictionary) -> Object:
-	var state_reg: Object = load(STATE_REGISTRY_PATH).new(states)
+	var merged: Dictionary = states.duplicate(true)
+	merged[UNEVALUABLE_STATE_ID] = UNEVALUABLE_STATE.duplicate(true)
+	var state_reg: Object = load(STATE_REGISTRY_PATH).new(merged)
 	return load(TALENT_REGISTRY_PATH).new(talents, state_reg)
 
 
@@ -346,7 +522,7 @@ func _test_rejection_discipline(dl: Object) -> void:
 	var reason: String = reg.rejection_reason("test_rej_unevaluable")
 	_check("拒绝理由非空（可观测的失败信号）", reason != "")
 	_check("拒绝理由点明状态判不了", reason.contains("判不了"))
-	_check("拒绝理由带上了状态的阻塞原因（副手）", reason.contains("副手"))
+	_check("拒绝理由带上了状态的阻塞原因", reason.contains("引擎尚未实现该判定"))
 	_check("被拒 id 进了 rejected_ids 清单", "test_rej_unevaluable" in reg.rejected_ids())
 
 	# ★ 形状旁路：requires_states 漏写方括号写成裸字符串，绝不能因 cast 失败而放行
@@ -390,11 +566,15 @@ func _test_rejection_discipline(dl: Object) -> void:
 	var ok_ids: Array[String] = _expected_ok_synthetic()
 	for tid: String in ok_ids:
 		_check("合法合成卡 %s 注册成功" % tid, reg.is_registered(tid))
-	_check("生产卡 介错 仍注册成功", reg.is_registered("myrmidon_jiecuo"))
+	# 生产卡全部注册成功——这同时是「data/talents/ 里没有死卡」的守卫。
+	for tid: String in dl.talents.keys():
+		_check("生产卡 %s 注册成功" % tid, reg.is_registered(tid),
+			reg.rejection_reason(tid))
 	_eq("被拒总数 == 全部 test_rej_* 夹具数（%d）" % _expected_rejected(),
 		reg.rejected_ids().size(), _expected_rejected())
-	_eq("注册成功总数 == 介错 + 全部 test_ok_* 夹具（%d）" % (ok_ids.size() + 1),
-		reg.registered_ids().size(), ok_ids.size() + 1)
+	_eq("注册成功总数 == 全部生产卡 + 全部 test_ok_* 夹具（%d）"
+			% (dl.talents.size() + ok_ids.size()),
+		reg.registered_ids().size(), dl.talents.size() + ok_ids.size())
 
 	# 无 StateRegistry 时，依赖状态的卡不能放行（不能因为核验不了就默认通过）。
 	var no_state_reg: Object = load(TALENT_REGISTRY_PATH).new(mixed, null)

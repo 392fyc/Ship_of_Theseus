@@ -20,6 +20,16 @@ var skill_cooldowns: Dictionary = {}
 # 且拒收理由可从 TalentRegistry.rejection_reason() 查到。
 var talent_ids: Array[String] = []
 
+# ── 武器槽（Wave 2 · 副手槽）─────────────────────────
+# 主手武器 id，setup() 时从 class/enemy JSON 的 weapon_id 读入。值指向 data/weapons/。
+# 存在 Unit 上是为了让状态判定能自包含——StateRegistry 是独立类、拿不到 DataLoader，
+# 而〔双持〕的判据「武器栏与副手武器槽同时装备武器」必须能从单位本身读出来。
+var weapon_id: String = ""
+# 副手武器 id。空 = 未装备副手 = 不处于双持。**职业专属特例**，不进通用装备槽枚举
+# （设计库 EquipSlot 两槽定稿，2026-07-05 用户裁决 Q7：「职业特殊机制作专属特例」）。
+# 值同样指向 data/weapons/——R1.2/R1.3 要的 weapon_hit / weapon_crit 只有那一套有。
+var offhand_weapon_id: String = ""
+
 # ── 位置（ADR-3 双向引用）──────────────────────────
 var grid_position: Vector2i = Vector2i.ZERO
 
@@ -141,6 +151,9 @@ func setup(class_data: Dictionary) -> void:
 	priority = 0
 	stats = UnitStats.new()
 	buffs.clear()
+	# 主手武器随职业/敌人档案带入；副手槽默认空（要由天赋或装备层显式装上）。
+	weapon_id = str(class_data.get("weapon_id", ""))
+	offhand_weapon_id = ""
 	skill_ids.clear()
 	for skill_id_value: Variant in class_data.get("skill_ids", []):
 		skill_ids.append(str(skill_id_value))
@@ -228,6 +241,24 @@ func get_buff(buff_id: String) -> BuffEffect:
 		if buff.buff_id == buff_id:
 			return buff
 	return null
+
+
+## 装上副手武器（Wave 2）。weapon_id 需指向 data/weapons/ 的条目；
+## 传空串等于卸下。装备层与测试都走这里，不要直接赋值字段。
+func equip_offhand(new_weapon_id: String) -> void:
+	offhand_weapon_id = new_weapon_id
+
+
+## 卸下副手武器。
+func unequip_offhand() -> void:
+	offhand_weapon_id = ""
+
+
+## 是否处于双持——**判据照设计库〔双持〕定义逐字**：
+## 「武器栏与副手武器槽同时装备武器时，即视为双持」。
+## 只看两个槽是否都非空，不看武器种类；即时判定、不快照。
+func is_dual_wielding() -> bool:
+	return weapon_id != "" and offhand_weapon_id != ""
 
 
 func has_buff(buff_id: String) -> bool:
