@@ -80,6 +80,15 @@ const SYNTHETIC: Dictionary = {
 			"type": "offhand_followup", "damage_pct": 25, "damage_type": "physical",
 		}],
 	},
+	"test_ok_offhand_magical": {
+		"id": "test_ok_offhand_magical", "name": "测试·副手魔法", "class_id": "kensei",
+		"trigger_event": "执行攻击动作时", "trigger_condition": "处于〔双持〕状态",
+		"trigger_frequency": "每次", "trigger_frequency_n": 1,
+		"condition_model": "states", "requires_states": ["shuangchi"],
+		"engine_effects": [{
+			"type": "offhand_followup", "damage_pct": 50, "damage_type": "magical",
+		}],
+	},
 	# 行级条件的专用卡：主行「命中后」无条件、附加行「击杀时」要求〔双持〕，
 	# 效果是 gain_resource——**刻意不走 offhand_followup**，这样就绕开了
 	# _execute_offhand_followup 里的 is_dual_wielding 守卫，能单独钉住
@@ -605,6 +614,19 @@ func _test_offhand_precision(dl: Object) -> void:
 		offhand_25, int(floor(float(strv + 6) * 0.25)))
 	_check("25% < 50%（两张卡确实读到了不同的 damage_pct）",
 		offhand_25 < offhand_sword, "25pct=%d 50pct=%d" % [offhand_25, offhand_sword])
+
+	# damage_type 同样来自 JSON，不是写死的 "physical"：魔法版走 MAG−RES 而非 STR−DEF。
+	var magv: int = attacker.get_effective_stat("MAG")
+	attacker.talent_ids = ["test_ok_offhand_magical"]
+	enemy.stats.res = 0
+	enemy.stats.hp = 999
+	tm._execute_hostile_action(attacker, enemy, {})
+	var offhand_mag: int = (999 - enemy.stats.hp) - main_only
+	_eq("damage_type=magical 的卡 → 副手按 MAG 结算（不是写死的 physical）",
+		offhand_mag, int(floor(float(magv + 6) * 0.5)))
+	_check("魔法版与物理版伤害不同（证明 damage_type 确实读了 JSON）",
+		offhand_mag != offhand_sword,
+		"mag=%d phys=%d (MAG=%d STR=%d)" % [offhand_mag, offhand_sword, magv, strv])
 
 	# ── G3. 行级条件真的被用了（杀 M1：退回卡级）──
 	# 这张卡的效果是 gain_resource，**不走** offhand_followup，因此绕开了
