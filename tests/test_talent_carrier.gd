@@ -333,12 +333,14 @@ func _run() -> void:
 	dl.load_all()
 
 	_test_loading(dl)
+	_test_talent_mirror_fidelity(dl)
 	_test_rejection_discipline(dl)
 	_test_event_index(dl)
 	_test_extra_triggers(dl)
 	_test_dispatch_integration()
 	_test_offhand_followup(dl)
 	_test_offhand_precision(dl)
+	_test_offhand_weapon_effect(dl)
 
 	dl.free()
 	print("\n--- 结果：%d 过 / %d 失败 ---" % [_pass, _fail])
@@ -377,21 +379,36 @@ func _test_extra_triggers(dl: Object) -> void:
 		_eq("卡级 requires_states 为空（证明两者确实分开）",
 			(row["talent"] as Dictionary).get("requires_states", []), [])
 
-	# 纯常驻卡（只有永久生效主行、无附加行）必须被拒——引擎没有承载通道。
+	# 纯常驻卡（只有永久生效主行、无附加行）：2026-08-09 起有承载通道了——
+	# 注册成功、进常驻索引、但**不进任何事件桶**（它没有触发时点）。
+	# 此前这类卡一律拒收，二刀开刃就是被那条规则挡住的。
 	var only_passive: Dictionary = {
 		"passive_only": {
 			"id": "passive_only", "name": "测试·纯常驻", "class_id": "kensei",
 			"trigger_event": "永久生效", "trigger_condition": "",
-			"trigger_frequency": "永久", "trigger_frequency_n": 1,
+			"trigger_frequency": "每次", "trigger_frequency_n": 1,
 			"condition_model": "none", "requires_states": [],
-			"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 1}],
+			"engine_effects": [{"type": "unlock_offhand_weapon_effect", "effect_scale": 50}],
 		}
 	}
 	var reg2: Object = _make_registry(only_passive, dl.states)
-	_check("纯常驻卡被拒", not reg2.is_registered("passive_only"))
-	_check("拒绝理由说明无可分发触发行",
-		reg2.rejection_reason("passive_only").contains("无任何可分发的触发行"),
+	_check("纯常驻卡注册成功", reg2.is_registered("passive_only"),
 		reg2.rejection_reason("passive_only"))
+	_check("纯常驻卡进了常驻索引", "passive_only" in reg2.passive_ids())
+	_eq("纯常驻卡不进「永久生效」事件桶", reg2.talents_for_event("永久生效").size(), 0)
+	# 常驻行同样要过效果校验——效果类型不认的照样拒。
+	var bad_passive: Dictionary = {
+		"passive_bad": {
+			"id": "passive_bad", "name": "测试·常驻但效果不认", "class_id": "kensei",
+			"trigger_event": "永久生效", "trigger_condition": "",
+			"trigger_frequency": "每次", "trigger_frequency_n": 1,
+			"condition_model": "none", "requires_states": [],
+			"engine_effects": [{"type": "summon_dragon"}],
+		}
+	}
+	var reg2b: Object = _make_registry(bad_passive, dl.states)
+	_check("常驻卡的效果照样过校验（未知 type 仍拒）",
+		not reg2b.is_registered("passive_bad"))
 
 	# 附加行不合格 → 整卡拒（不做「主行注册、附加行丢弃」的半生效）。
 	var bad_extra: Dictionary = {
@@ -458,7 +475,7 @@ func _test_offhand_followup(dl: Object) -> void:
 		attacker.sword_qi, 10)
 
 	# 装上副手 → 双持成立 → 追加一次。
-	attacker.equip_offhand("wpn_physical_melee_basic")
+	attacker.equip_offhand("eq_wpn_regal_blade")
 	enemy.stats.hp = 999
 	attacker.set_sword_qi(0)
 	tm._execute_hostile_action(attacker, enemy, {})
@@ -478,7 +495,7 @@ func _test_offhand_followup(dl: Object) -> void:
 
 	# 没有二天一流天赋 → 即便装着副手也不追加（追加由天赋驱动，不是双持本身）。
 	attacker.talent_ids = []
-	attacker.equip_offhand("wpn_physical_melee_basic")
+	attacker.equip_offhand("eq_wpn_regal_blade")
 	enemy.stats.hp = 999
 	tm._execute_hostile_action(attacker, enemy, {})
 	_eq("无二天一流 → 装着副手也不追加", 999 - enemy.stats.hp, main_only)
@@ -500,7 +517,7 @@ func _test_offhand_followup(dl: Object) -> void:
 		enemy2.stats.def_attr = 0
 		enemy2.stats.max_hp = 999
 		enemy2.stats.hp = 999
-		attacker.equip_offhand("wpn_does_not_exist")
+		attacker.equip_offhand("eq_wpn_does_not_exist")
 		tm._execute_hostile_action(attacker, enemy2, {})
 		_check("副手武器查不到 → 只有主手伤害，不崩",
 			(999 - enemy2.stats.hp) > 0 and (999 - enemy2.stats.hp) <= main_only)
@@ -584,34 +601,36 @@ func _test_offhand_precision(dl: Object) -> void:
 	tm._execute_hostile_action(attacker, enemy, {})
 	var main_only: int = 999 - enemy.stats.hp
 
-	attacker.equip_offhand("wpn_training_dummy")        # might = 1
+	attacker.equip_offhand("eq_wpn_slim_sword")         # 细剑 might=3
 	enemy.stats.hp = 999
 	tm._execute_hostile_action(attacker, enemy, {})
 	var offhand_dummy: int = (999 - enemy.stats.hp) - main_only
-	_eq("副手(might=1) 伤害 == floor((STR + 1) × 50%)",
-		offhand_dummy, int(floor(float(strv + 1) * 0.5)))
+	_eq("副手细剑(might=3) 伤害 == floor(STR + 3×50%)",
+		offhand_dummy, int(floor(float(strv) + 3.0 * 0.5)))
 
-	attacker.equip_offhand("wpn_swordsman_starter")     # might = 6
+	attacker.equip_offhand("eq_wpn_regal_blade")        # 王者之剑 might=20
 	enemy.stats.hp = 999
 	tm._execute_hostile_action(attacker, enemy, {})
 	var offhand_sword: int = (999 - enemy.stats.hp) - main_only
-	_eq("副手(might=6) 伤害 == floor((STR + 6) × 50%)",
-		offhand_sword, int(floor(float(strv + 6) * 0.5)))
-	_check("换副手武器 → 副手伤害跟着变（证明读的是副手武器数据）",
+	_eq("副手王者之剑(might=20) 伤害 == floor(STR + 20×50%)",
+		offhand_sword, int(floor(float(strv) + 20.0 * 0.5)))
+	_check("换副手剑 → 副手伤害跟着变（证明读的是副手武器数据）",
 		offhand_sword > offhand_dummy,
 		"dummy=%d sword=%d" % [offhand_dummy, offhand_sword])
 	# 若副手复用了主手 action_data，副手伤害会等于主手（含主手 might 与乘区）。
+	# 选 might 差异大的剑：银剑(13) 折半后是 6.5，与主手 might=6 会算出同一个数，
+	# 那样这条断言就失去区分力了。王者之剑(20) 折半 10，与主手明显不同。
 	_check("副手伤害 ≠ 主手伤害（没有复用主手 action_data）",
 		offhand_sword != main_only, "offhand=%d main=%d" % [offhand_sword, main_only])
 
 	# ── G2. damage_pct 确实来自 JSON（杀 M4：写死 50）──
 	attacker.talent_ids = ["test_ok_offhand_25"]
-	attacker.equip_offhand("wpn_swordsman_starter")
+	attacker.equip_offhand("eq_wpn_regal_blade")
 	enemy.stats.hp = 999
 	tm._execute_hostile_action(attacker, enemy, {})
 	var offhand_25: int = (999 - enemy.stats.hp) - main_only
-	_eq("damage_pct=25 的卡 → 副手伤害按 25% 走（不是写死的 50%）",
-		offhand_25, int(floor(float(strv + 6) * 0.25)))
+	_eq("damage_pct=25 的卡 → 副手 might 按 25% 折（不是写死的 50%）",
+		offhand_25, int(floor(float(strv) + 20.0 * 0.25)))
 	_check("25% < 50%（两张卡确实读到了不同的 damage_pct）",
 		offhand_25 < offhand_sword, "25pct=%d 50pct=%d" % [offhand_25, offhand_sword])
 
@@ -623,7 +642,7 @@ func _test_offhand_precision(dl: Object) -> void:
 	tm._execute_hostile_action(attacker, enemy, {})
 	var offhand_mag: int = (999 - enemy.stats.hp) - main_only
 	_eq("damage_type=magical 的卡 → 副手按 MAG 结算（不是写死的 physical）",
-		offhand_mag, int(floor(float(magv + 6) * 0.5)))
+		offhand_mag, int(floor(float(magv) + 20.0 * 0.5)))
 	_check("魔法版与物理版伤害不同（证明 damage_type 确实读了 JSON）",
 		offhand_mag != offhand_sword,
 		"mag=%d phys=%d (MAG=%d STR=%d)" % [offhand_mag, offhand_sword, magv, strv])
@@ -646,7 +665,7 @@ func _test_offhand_precision(dl: Object) -> void:
 		enemy2.stats.def_attr = 0
 		enemy2.stats.max_hp = 1
 		enemy2.stats.hp = 1
-		attacker.equip_offhand("wpn_swordsman_starter")
+		attacker.equip_offhand("eq_wpn_regal_blade")
 		attacker.set_sword_qi(0)
 		tm._execute_hostile_action(attacker, enemy2, {})
 		# 装上副手 → 附加行条件成立 → 主行 +5、附加行 +5。
@@ -654,7 +673,7 @@ func _test_offhand_precision(dl: Object) -> void:
 
 	# ── G4. 击杀归属恰好一次（杀 M3：删掉「主手已杀不追加」守卫）──
 	attacker.talent_ids = ["kensei_ertianyiliu", "test_ok_killcount"]
-	attacker.equip_offhand("wpn_swordsman_starter")
+	attacker.equip_offhand("eq_wpn_regal_blade")
 
 	# 场景 A：主手打不死、副手补刀致死 → 「击杀时」恰好一次（不是 0 次）
 	var enemy3: Unit = _find_living_enemy(tm)
@@ -688,7 +707,7 @@ func _test_offhand_precision(dl: Object) -> void:
 		enemy5.stats.def_attr = 0
 		enemy5.stats.max_hp = 9999
 		attacker.talent_ids = ["kensei_ertianyiliu"]
-		attacker.equip_offhand("wpn_swordsman_starter")
+		attacker.equip_offhand("eq_wpn_regal_blade")
 
 		# 技能路径（带 skill_id）同样追加——与普攻一致。
 		enemy5.stats.hp = 9999
@@ -732,6 +751,138 @@ func _find_living_enemy(tm: Object) -> Unit:
 		if u.faction == "enemy" and u.stats != null and u.stats.is_alive():
 			return u
 	return null
+
+
+# ── H. 常驻天赋 + 副手武器特效（2026-08-09 用户规格）──
+#
+# 规格逐字：「仅二天一流时，武器修正系数威力 might×50%。hit、crit 不受影响，维持原
+# 数据。特效在有二刀开刃后生效 50%。包括特效赋予 STR 等属性加成时，也只生效 50%。」
+
+func _test_offhand_weapon_effect(dl: Object) -> void:
+	print("
+[H] 常驻天赋（二刀开刃）与副手武器特效的 50% 折算")
+	var reg: Object = _make_registry(dl.talents, dl.states)
+
+	# 常驻卡进 _passive、不进事件桶。
+	_check("二刀开刃已装载", dl.talents.has("kensei_erdaokairen"))
+	_check("二刀开刃注册成功（常驻卡现在有承载通道）",
+		reg.is_registered("kensei_erdaokairen"),
+		reg.rejection_reason("kensei_erdaokairen"))
+	_check("二刀开刃进了常驻索引", "kensei_erdaokairen" in reg.passive_ids())
+	_eq("常驻卡不进「永久生效」事件桶", reg.talents_for_event("永久生效").size(), 0)
+	var pe: Dictionary = reg.passive_entry("kensei_erdaokairen")
+	_check("常驻条目带 talent 与 trigger 两部分",
+		pe.has("talent") and pe.has("trigger"))
+	# 常驻 ≠ 无条件：二刀开刃自己要求〔双持〕。
+	_eq("常驻条目的条件是〔双持〕",
+		(pe.get("trigger", {}) as Dictionary).get("requires_states", []), ["shuangchi"])
+
+	var scene: Node = load("res://scenes/tactical/TacticalScene.tscn").instantiate()
+	root.add_child(scene)
+	var tm: Object = scene.tactical_manager
+	tm._talent_registry = null
+	tm._state_registry = null
+	tm.debug_harness_active = true
+	tm.debug_deterministic = true
+	tm.debug_crit_mode = 2
+
+	var attacker: Unit = null
+	var enemy: Unit = null
+	for u: Unit in tm.units:
+		if u.faction == "player" and u.unit_id == "kensei":
+			attacker = u
+		elif u.faction == "enemy" and enemy == null:
+			enemy = u
+	if attacker == null or enemy == null:
+		_check("场景中找到剑圣与敌人", false)
+		scene.free()
+		return
+	enemy.stats.def_attr = 0
+	var strv: int = attacker.get_effective_stat("STR")
+
+	# 基线：主手单独
+	attacker.talent_ids = ["kensei_ertianyiliu"]
+	attacker.unequip_offhand()
+	enemy.stats.max_hp = 9999
+	enemy.stats.hp = 9999
+	tm._execute_hostile_action(attacker, enemy, {})
+	var main_only: int = 9999 - enemy.stats.hp
+
+	# 只有二天一流 → 副手特效**不生效**（王者之剑 +4 STR 不计入）
+	attacker.equip_offhand("eq_wpn_regal_blade")   # might=20, 特效 STR+4
+	enemy.stats.hp = 9999
+	tm._execute_hostile_action(attacker, enemy, {})
+	var no_effect: int = (9999 - enemy.stats.hp) - main_only
+	_eq("只有二天一流 → 副手特效不生效，伤害 == floor(STR + 20×50%)",
+		no_effect, int(floor(float(strv) + 20.0 * 0.5)))
+
+	# 加上二刀开刃 → 特效按 50% 生效（+4 STR → +2）
+	attacker.talent_ids = ["kensei_ertianyiliu", "kensei_erdaokairen"]
+	enemy.stats.hp = 9999
+	tm._execute_hostile_action(attacker, enemy, {})
+	var with_effect: int = (9999 - enemy.stats.hp) - main_only
+	_eq("加二刀开刃 → 特效按 50% 生效，伤害 == floor(STR + 20×50% + 4×50%)",
+		with_effect, int(floor(float(strv) + 20.0 * 0.5 + 4.0 * 0.5)))
+	_check("二刀开刃确实提高了副手伤害",
+		with_effect > no_effect, "无=%d 有=%d" % [no_effect, with_effect])
+
+	# 换一把特效更弱的剑 → 折算跟着变（证明读的是武器数据不是写死的）
+	attacker.equip_offhand("eq_wpn_iron_sword")    # might=5, 特效 STR+2
+	enemy.stats.hp = 9999
+	tm._execute_hostile_action(attacker, enemy, {})
+	var iron: int = (9999 - enemy.stats.hp) - main_only
+	_eq("换铁剑(might=5, 特效 STR+2) → floor(STR + 5×50% + 2×50%)",
+		iron, int(floor(float(strv) + 5.0 * 0.5 + 2.0 * 0.5)))
+
+	# 二刀开刃是常驻卡但**有条件**：卸下副手 → 不处于双持 → 连带不生效
+	attacker.unequip_offhand()
+	enemy.stats.hp = 9999
+	tm._execute_hostile_action(attacker, enemy, {})
+	_eq("卸下副手 → 双持不成立，副手整个不追加", 9999 - enemy.stats.hp, main_only)
+
+	# 只有二刀开刃、没有二天一流 → 没有追加动作，特效无从谈起
+	attacker.talent_ids = ["kensei_erdaokairen"]
+	attacker.equip_offhand("eq_wpn_regal_blade")
+	enemy.stats.hp = 9999
+	tm._execute_hostile_action(attacker, enemy, {})
+	_eq("只有二刀开刃、无二天一流 → 不追加（开刃只解锁特效，不提供追加）",
+		9999 - enemy.stats.hp, main_only)
+
+	scene.free()
+
+
+## 生产天赋卡的设计库权威值（取自 snapshots/talents.json @ 2ea744b），用于镜像保真比对。
+## 加这一组是因为 2026-08-09 抄二天一流时把 trigger_frequency 从「每次」写成了「永久」——
+## 这类手抄错误不会被任何功能断言发现（那张卡只是被拒收，看起来像"引擎不支持"）。
+## 局限同 test_state_registry：比的是同一次提交里手抄的副本，抓得住事后漂移、抓不住当初抄错。
+const TALENT_MIRROR: Dictionary = {
+	"myrmidon_jiecuo": {
+		"name": "介错", "class_id": "myrmidon", "trigger_event": "击杀时",
+		"trigger_condition": "", "trigger_frequency": "每次",
+	},
+	"kensei_ertianyiliu": {
+		"name": "二天一流", "class_id": "kensei", "trigger_event": "永久生效",
+		"trigger_condition": "", "trigger_frequency": "每次",
+	},
+	"kensei_erdaokairen": {
+		"name": "二刀开刃", "class_id": "kensei", "trigger_event": "永久生效",
+		"trigger_condition": "处于〔双持〕状态（前置：二天一流且副手已装备武器）",
+		"trigger_frequency": "每次",
+	},
+}
+
+
+func _test_talent_mirror_fidelity(dl: Object) -> void:
+	print("
+[A2] 天赋镜像保真（对照设计库权威值）")
+	for tid: String in TALENT_MIRROR.keys():
+		var entry: Dictionary = dl.talents.get(tid, {})
+		_check("%s 已装载" % tid, not entry.is_empty())
+		if entry.is_empty():
+			continue
+		var truth: Dictionary = TALENT_MIRROR[tid]
+		for field: String in truth.keys():
+			_eq("%s.%s" % [tid, field], str(entry.get(field, "")), str(truth[field]))
 
 
 # ── 断言工具（照 tests/test_affix_effects.gd）─────────────

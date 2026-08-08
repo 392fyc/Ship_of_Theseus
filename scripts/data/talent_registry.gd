@@ -84,7 +84,9 @@ const SUPPORTED_FREQUENCIES: Array[String] = ["每次"]
 const CONDITION_MODELS: Array[String] = ["none", "states", "unsupported"]
 
 ## `engine_effects` 支持的指令类型。
-const SUPPORTED_EFFECT_TYPES: Array[String] = ["gain_resource", "offhand_followup"]
+const SUPPORTED_EFFECT_TYPES: Array[String] = [
+	"gain_resource", "offhand_followup", "unlock_offhand_weapon_effect",
+]
 
 ## `offhand_followup` 的伤害百分比合理上限（护栏，不是游戏数值——数值从 JSON 读）。
 const MAX_FOLLOWUP_PCT: int = 1000
@@ -108,6 +110,10 @@ var _rejected: Dictionary = {}     # id -> 拒绝理由
 # 一张卡有主行和附加行时会在**多个事件桶**里各出现一次，分发时必须用行级的
 # requires_states / condition_model 求值，不能退回卡级——那正是附加行的意义所在。
 var _by_event: Dictionary = {}
+# 常驻天赋（trigger_event ∈ PASSIVE_EVENTS）：没有触发时点，不进事件桶，改由消费方
+# 主动查询「该单位有没有这张卡、它的条件此刻成不成立」。二刀开刃就是这一类——
+# 它不是某个时机触发，而是一个持续生效的开关（解锁副手武器特效、按 50% 折算）。
+var _passive: Dictionary = {}      # id -> {"talent": 条目, "trigger": 常驻行}
 
 
 ## state_registry 形参类型写 RefCounted 而不是 StateRegistry：Godot 的全局类名缓存
@@ -132,8 +138,7 @@ func _build(talents: Dictionary, state_registry: RefCounted) -> void:
 			continue
 		var rows: Array = _trigger_rows(entry)
 		if rows.is_empty():
-			_reject(tid, "无任何可分发的触发行（主行缺 trigger_event 或只是常驻 %s，且无 extra_triggers）——"
-				% str(PASSIVE_EVENTS) + "引擎当前没有承载纯常驻天赋的通道")
+			_reject(tid, "无任何触发行（主行缺 trigger_event 且无 extra_triggers）")
 			continue
 		# 整卡拒收粒度：任一触发行不合格就整卡拒。不做「主行注册、附加行丢弃」——
 		# 那会让一张卡半生效，而设计库那边看到的是完整的卡，两边理解不一致。
@@ -150,6 +155,9 @@ func _build(talents: Dictionary, state_registry: RefCounted) -> void:
 		_registered[tid] = entry
 		for row: Dictionary in rows:
 			var trigger: Dictionary = row["trigger"]
+			if bool(row.get("passive", false)):
+				_passive[tid] = {"talent": entry, "trigger": trigger}
+				continue
 			var event: String = str(trigger.get("trigger_event", ""))
 			if not _by_event.has(event):
 				_by_event[event] = []
@@ -172,9 +180,13 @@ func _build(talents: Dictionary, state_registry: RefCounted) -> void:
 func _trigger_rows(entry: Dictionary) -> Array:
 	var rows: Array = []
 	var main_event: String = str(entry.get("trigger_event", ""))
-	# 常驻主行不进桶（没有分发时点），但也不算这张卡缺行——它的机制由别处承载。
-	if main_event != "" and main_event not in PASSIVE_EVENTS:
-		rows.append({"trigger": entry, "row": "main"})
+	if main_event != "":
+		# 常驻行照样进 rows（要过同一套条件与频率校验），只是打上标记——
+		# _build 会把它放进 _passive 而不是事件桶。
+		rows.append({
+			"trigger": entry, "row": "main",
+			"passive": main_event in PASSIVE_EVENTS,
+		})
 	var extras: Variant = entry.get("extra_triggers", [])
 	if extras is Array:
 		var idx: int = 0
@@ -202,7 +214,12 @@ func _row_rejection_reason(row: Dictionary, state_registry: RefCounted) -> Strin
 	var event: String = str(entry.get("trigger_event", ""))
 	if event == "":
 		return "触发行 %s 缺 trigger_event" % where
-	if event not in SUPPORTED_EVENTS:
+	# 常驻行不进事件桶，它的合法事件名是 PASSIVE_EVENTS，不是可分发事件表。
+	if bool(row.get("passive", false)):
+		if event not in PASSIVE_EVENTS:
+			return "触发行 %s 被标为常驻但事件「%s」不在 %s" \
+				% [where, event, str(PASSIVE_EVENTS)]
+	elif event not in SUPPORTED_EVENTS:
 		return "触发行 %s 的事件「%s」引擎不分发（当前支持 %s；命中时/暴击时属 A2 未接）" \
 			% [where, event, str(SUPPORTED_EVENTS)]
 
@@ -293,6 +310,15 @@ func _effects_rejection_reason(entry: Dictionary) -> String:
 			if amount > MAX_RESOURCE_GAIN:
 				return "gain_resource 的 amount %d 超出合理上限 %d（疑似手误多打了位数）" \
 					% [amount, MAX_RESOURCE_GAIN]
+		elif effect_type == "unlock_offhand_weapon_effect":
+			# 解锁副手武器特效，并按 effect_scale% 折算效果量（二刀开刃）。
+			var scale_raw: Variant = effect.get("effect_scale", null)
+			var scale_type: int = typeof(scale_raw)
+			if scale_type != TYPE_INT and scale_type != TYPE_FLOAT:
+				return "unlock_offhand_weapon_effect 的 effect_scale 必须是数字，实际是 %s" 					% type_string(scale_type)
+			var scale: float = float(scale_raw)
+			if scale <= 0.0 or scale > float(MAX_FOLLOWUP_PCT):
+				return "unlock_offhand_weapon_effect 的 effect_scale 越界（0 < x <= %d），实际 %s" 					% [MAX_FOLLOWUP_PCT, str(scale_raw)]
 		elif effect_type == "offhand_followup":
 			# 副手追加攻击。damage_pct 是游戏数值，必须来自 JSON（设计库二天一流的
 			# effect 逐字写的是 50%），代码只做类型与合理性校验，不写死数值。
@@ -326,6 +352,21 @@ func _effects_rejection_reason(entry: Dictionary) -> String:
 func talents_for_event(event: String) -> Array:
 	var found: Variant = _by_event.get(event, [])
 	return (found as Array).duplicate() if found is Array else []
+
+
+## 常驻天赋条目（`{"talent":…, "trigger":…}`）；不是常驻卡则返回空字典。
+## 消费方拿到后要自己用 trigger 里的 requires_states 求值——常驻不等于无条件，
+## 二刀开刃就要求〔双持〕。
+func passive_entry(talent_id: String) -> Dictionary:
+	var e: Variant = _passive.get(talent_id, {})
+	return e if e is Dictionary else {}
+
+
+func passive_ids() -> Array[String]:
+	var ids: Array[String] = []
+	for key: Variant in _passive.keys():
+		ids.append(str(key))
+	return ids
 
 
 func is_registered(talent_id: String) -> bool:

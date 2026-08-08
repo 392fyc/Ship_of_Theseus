@@ -33,7 +33,8 @@ var talent_ids: Array[String] = []
 var weapon_id: String = ""
 # 副手武器 id。空 = 未装备副手 = 不处于双持。**职业专属特例**，不进通用装备槽枚举
 # （设计库 EquipSlot 两槽定稿，2026-07-05 用户裁决 Q7：「职业特殊机制作专属特例」）。
-# 值同样指向 data/weapons/——R1.2/R1.3 要的 weapon_hit / weapon_crit 只有那一套有。
+# 值指向 **data/equipment/**——主手与副手是同一个装备池（设计库那 22 把剑），
+# 二天一流只是让剑圣多用一个槽装第二把剑，不是另一套武器数据。
 var offhand_weapon_id: String = ""
 
 # ── 位置（ADR-3 双向引用）──────────────────────────

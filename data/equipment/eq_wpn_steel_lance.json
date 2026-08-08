@@ -4,7 +4,13 @@
   "slot": "weapon",
   "tier": 2,
   "rarity": "rare",
-  "stats": { "STR": 4, "hit": 5 },
+  "stats": {
+    "STR": 4,
+    "hit": 5
+  },
   "description": "锻钢长枪，攻高且更易命中。",
-  "_note": "[占位] v0 装备骨架，两槽渐进；equipment.md 正式规格 KB 缺口未补，数值待调"
+  "_note": "[占位] 设计库 equipment 目前只设计了剑系 22 条（剑圣线），本条无对应条目。weapon_might / hit / crit 暂取该职业初始武器 wpn_knight_starter 的同值作基线，待设计库补齐非剑武器后按镜像替换。stats 里的属性加成同为占位。",
+  "weapon_might": 6,
+  "weapon_hit": 85,
+  "weapon_crit": 0
 }

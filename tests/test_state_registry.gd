@@ -206,7 +206,7 @@ func _test_shuangchi_evaluable(dl: Object) -> void:
 	_check("单位主手武器非空（来自 enemy JSON 的 weapon_id）", u.weapon_id != "")
 	_eq("只有主手 → 不处于双持", reg.is_in_state(u, "shuangchi"), false)
 
-	u.equip_offhand("wpn_physical_melee_basic")
+	u.equip_offhand("eq_wpn_iron_sword")
 	_eq("装上副手 → 处于双持", reg.is_in_state(u, "shuangchi"), true)
 
 	u.unequip_offhand()
@@ -215,7 +215,7 @@ func _test_shuangchi_evaluable(dl: Object) -> void:
 
 	# 前置失效：主手被卸掉时，即便副手还在也不算双持
 	# （设计库 definition：「武器栏与副手武器槽**同时**装备武器」）。
-	u.equip_offhand("wpn_physical_melee_basic")
+	u.equip_offhand("eq_wpn_iron_sword")
 	var saved_main: String = u.weapon_id
 	u.weapon_id = ""
 	_eq("主手为空（前置失效）→ 即便副手在也不算双持",

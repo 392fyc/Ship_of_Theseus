@@ -4,7 +4,9 @@
   "slot": "armor",
   "tier": 1,
   "rarity": "common",
-  "stats": { "DEF": 2 },
+  "stats": {
+    "DEF": 2
+  },
   "description": "简单的皮革护甲，提供基础防护。",
-  "_note": "[占位] v0 装备骨架，两槽渐进；equipment.md 正式规格 KB 缺口未补，数值待调"
+  "_note": "[占位] 设计库 equipment 目前只有武器（剑系 22 条），尚无防具条目，故本条无镜像来源。防具不参与 R1.2/R1.3，无 weapon_* 三参数。"
 }

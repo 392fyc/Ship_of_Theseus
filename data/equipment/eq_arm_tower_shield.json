@@ -4,7 +4,10 @@
   "slot": "armor",
   "tier": 2,
   "rarity": "epic",
-  "stats": { "DEF": 5, "max_hp": 10 },
+  "stats": {
+    "DEF": 5,
+    "max_hp": 10
+  },
   "description": "厚重的塔形大盾，大幅提升防御与生存。",
-  "_note": "[占位] v0 装备骨架，两槽渐进；equipment.md 正式规格 KB 缺口未补，数值待调"
+  "_note": "[占位] 设计库 equipment 目前只有武器（剑系 22 条），尚无防具条目，故本条无镜像来源。防具不参与 R1.2/R1.3，无 weapon_* 三参数。"
 }

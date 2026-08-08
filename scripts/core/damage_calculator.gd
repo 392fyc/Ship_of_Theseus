@@ -25,7 +25,10 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	var final_multiplier: float = action_data.get("final_multiplier", 1.0)
 	var pure_atk_source: String = action_data.get("pure_atk_source", "phys")
 
-	var weapon_might: int = action_data.get("weapon_might", 0)
+	# R1.8「中间量不取整」：weapon_might 用 float 承接，因为它可能是被修正过的
+	# 中间量（例：副手追加取 might×50%，5×0.5=2.5）。提前截成 int 等于在中间层
+	# floor 一次，与 R1.8「clamp 与 floor 在最外层生效」冲突。主手传整数时行为不变。
+	var weapon_might: float = float(action_data.get("weapon_might", 0))
 	var weapon_hit: int = action_data.get("weapon_hit", 0)
 	var weapon_crit: int = action_data.get("weapon_crit", 0)
 	var terrain_evade_bonus: int = action_data.get("terrain_evade_bonus", 0)
@@ -114,7 +117,7 @@ static func preview_attack(attacker: Unit, defender: Unit,
 	var relic_multiplier: float = action_data.get("relic_multiplier", 1.0)
 	var final_multiplier: float = action_data.get("final_multiplier", 1.0)
 	var pure_atk_source: String = action_data.get("pure_atk_source", "phys")
-	var weapon_might: int = action_data.get("weapon_might", 0)
+	var weapon_might: float = float(action_data.get("weapon_might", 0))
 	var weapon_hit: int = action_data.get("weapon_hit", 0)
 	var weapon_crit: int = action_data.get("weapon_crit", 0)
 	var terrain_evade_bonus: int = action_data.get("terrain_evade_bonus", 0)
@@ -172,7 +175,7 @@ static func preview_attack(attacker: Unit, defender: Unit,
 
 static func _calc_base_damage(attacker: Unit, defender: Unit,
 		damage_type: String,
-		weapon_might: int, pure_atk_source: String,
+		weapon_might: float, pure_atk_source: String,
 		terrain_def_bonus: int, terrain_res_bonus: int) -> float:
 	## R1.1（伤害链）: Additive base damage formula.
 	## physical:  max(0, STR + weapon_might - DEF)

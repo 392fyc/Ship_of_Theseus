@@ -2483,9 +2483,21 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 	#
 	# 用户在裁决时看到的对照（一发拔刀打中 3 人）：
 	#   主手 8 / 4 / 4（主目标满额，其余衰减）；副手 5 / 5 / 5，副手总伤害 15。
-	var offhand: Dictionary = DataLoader.weapons.get(attacker.offhand_weapon_id, {})
+	# 副手武器取自 **装备池**（data/equipment/，设计库那 22 把剑）——主手与副手是
+	# 同一个池，二天一流只是让剑圣多用一个槽装第二把剑，不是另一套武器数据。
+	#
+	# ⚠ 已知不一致（登记，本波不动）：**主手**目前不走这个池，而是
+	# `_get_unit_weapon_data` 按 class/enemy 档案的 weapon_id 去 data/weapons/ 取
+	# 那 13 条职业固定初始武器。R1.7 说「每个单位始终持有一件武器…开局为每个单位
+	# 发放一件，不由职业预先绑定」，现状与之不符。把主手迁到装备池属装备系统建设，
+	# 不在 Wave 2 范围。
+	var offhand: Dictionary = DataLoader.equipment.get(attacker.offhand_weapon_id, {})
 	if offhand.is_empty():
-		push_warning("[Offhand] %s 的副手武器「%s」在 data/weapons/ 里找不到，追加取消"
+		push_warning("[Offhand] %s 的副手武器「%s」在 data/equipment/ 里找不到，追加取消"
+			% [attacker.unit_name, attacker.offhand_weapon_id])
+		return
+	if not offhand.has("weapon_might"):
+		push_warning("[Offhand] %s 的副手装备「%s」没有 weapon_might（不是武器？），追加取消"
 			% [attacker.unit_name, attacker.offhand_weapon_id])
 		return
 
@@ -2505,11 +2517,18 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 	var data: Dictionary = {
 		# 不继承主手的 damage_type（主手可能是魔法技能）。
 		"damage_type": damage_type,
-		"skill_multiplier": damage_pct / 100.0,
-		# 只取副手武器的三参数——R1.2 base_hit = weapon_hit + DEX×2、
-		# R1.3 base_crit = weapon_crit + DEX/2 都由 resolve_attack 内部各自掷骰，
-		# 这就是「单独结算命中与暴击」。
-		"weapon_might": int(offhand.get("weapon_might", 0)),
+		# ★ damage_pct 作用在 **weapon_might** 上，不是作用在最终伤害上
+		#   （2026-08-09 用户澄清）。两者差别很大：
+		#     作用在 might：STR + (might × 50%) − DEF
+		#     作用在最终伤害：(STR + might − DEF) × 50%   ← 上一版写错成这个
+		#   前者 STR 不打折，副手伤害显著更高。
+		#   **weapon_hit / weapon_crit 不受影响，维持原数据**——副手照 R1.2/R1.3
+		#   用自己的原始 hit / crit 独立掷骰，只有威力打折。
+		#   这里不取整：R1.8「中间量不取整、floor 在最外层」，故传 float，
+		#   由 damage_calculator 在最终伤害处统一 floor。
+		"weapon_might": float(offhand.get("weapon_might", 0)) * damage_pct / 100.0
+			+ _offhand_effect_might_bonus(
+				offhand, damage_type, _offhand_effect_scale(attacker)),
 		"weapon_hit": int(offhand.get("weapon_hit", 0)),
 		"weapon_crit": int(offhand.get("weapon_crit", 0)),
 		# 地形三项跟随主手（同目标同地块）。
@@ -2538,6 +2557,67 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 	if result.defender_died:
 		_apply_affixes(attacker, "on_kill", {"defender": defender, "result": result})
 		_dispatch_talents(attacker, "击杀时", {"defender": defender, "result": result})
+
+
+## 副手武器特效当前的生效比例。0 = 不生效（二天一流「不触发武器特效」的默认态）；
+## 0.5 = 二刀开刃解锁后按 50% 生效。
+##
+## 常驻天赋不进事件桶，得由消费方主动查——而且**常驻不等于无条件**：二刀开刃自己
+## 就要求〔双持〕，所以这里除了「持有这张卡」还要走一次和分发期同样的行级条件求值。
+func _offhand_effect_scale(unit: Unit) -> float:
+	if unit == null or unit.talent_ids.is_empty():
+		return 0.0
+	var registry: RefCounted = _ensure_talent_registry()
+	var scale: float = 0.0
+	for talent_id: String in unit.talent_ids:
+		var entry: Dictionary = registry.passive_entry(talent_id)
+		if entry.is_empty():
+			continue
+		if not _talent_conditions_hold(unit, entry["trigger"]):
+			continue
+		for item: Variant in ((entry["talent"] as Dictionary).get("engine_effects", []) as Array):
+			if not item is Dictionary:
+				continue
+			var effect: Dictionary = item
+			if str(effect.get("type", "")) != "unlock_offhand_weapon_effect":
+				continue
+			# 多张卡都解锁时取最大比例，不叠乘——「解锁」是开关，倍率取最宽松的那个。
+			scale = maxf(scale, float(effect.get("effect_scale", 0.0)) / 100.0)
+	return scale
+
+
+## 把副手武器的属性型特效折算成可并入 weapon_might 的加值。
+##
+## 只支持 STR / MAG 两个键：伤害公式里它们与 weapon_might 是同一层加算
+## （R1.1：physical = STR + might − DEF），所以把加成并进 might 与加进属性等价。
+## DEX 之类不支持——它会经 R1.2/R1.3 进命中与暴击链，并进 might 就错了，
+## 遇到时告警并跳过该条，不静默当 0。
+func _offhand_effect_might_bonus(offhand: Dictionary, damage_type: String,
+		scale: float) -> float:
+	if scale <= 0.0:
+		return 0.0
+	var effects: Variant = offhand.get("engine_effects", [])
+	if not effects is Array:
+		return 0.0
+	var wanted: String = "STR" if damage_type == "physical" else "MAG"
+	var bonus: float = 0.0
+	for item: Variant in (effects as Array):
+		if not item is Dictionary:
+			continue
+		var effect: Dictionary = item
+		if str(effect.get("type", "")) != "stat_bonus":
+			push_warning("[Offhand] 武器特效类型「%s」引擎未支持，跳过"
+				% str(effect.get("type", "")))
+			continue
+		var stat: String = str(effect.get("stat", ""))
+		if stat != "STR" and stat != "MAG":
+			push_warning("[Offhand] 武器特效属性「%s」暂不支持（只支持 STR / MAG——"
+				% stat + "它们与 weapon_might 同层加算；DEX 等会进命中/暴击链，需另接）")
+			continue
+		if stat != wanted:
+			continue    # 物理伤害只吃 STR、魔法只吃 MAG
+		bonus += float(effect.get("amount", 0)) * scale
+	return bonus
 
 
 ## 执行一条结构化天赋效果。未知类型在注册期就已被拒收，走到这里仍要兜底告警——

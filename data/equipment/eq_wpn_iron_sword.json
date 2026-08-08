@@ -4,7 +4,18 @@
   "slot": "weapon",
   "tier": 1,
   "rarity": "common",
-  "stats": { "STR": 2 },
-  "description": "最常见的入门单手剑，可靠但平庸。",
-  "_note": "[占位] v0 装备骨架，两槽渐进；equipment.md 正式规格 KB 缺口未补，数值待调"
+  "weapon_might": 5,
+  "weapon_hit": 90,
+  "weapon_crit": 0,
+  "stats": {},
+  "description": "最基础的制式单手剑,取材自《火焰纹章:烈火之剑》(FE7)。",
+  "_mirror": "id / name / slot / rarity / weapon_might / weapon_hit / weapon_crit / description 是设计库 equipment 条目的只读镜像。版本锚点 = 设计库仓 snapshots/equipment.json @ 2ea744b（按 lane 文档 §6.1，锚 commit sha 而非日期）。引擎不改这些字段；要改回设计库改，重导快照后按新 sha 重新同步。",
+  "_engine_note": "tier 是引擎侧派生字段（设计库 equipment 无此列），由 rarity 映射而来，供掉落池分桶用。stats 为引擎侧属性加成字典，当前全空——设计库 23 把剑只有 might/hit/crit 三参数，属性加成来自武器特效而非武器基础值。 铁剑：纯属性特效占位，用途同王者之剑（低数值样本，便于测试区分）。",
+  "engine_effects": [
+    {
+      "type": "stat_bonus",
+      "stat": "STR",
+      "amount": 2
+    }
+  ]
 }

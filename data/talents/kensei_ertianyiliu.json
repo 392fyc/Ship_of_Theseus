@@ -4,16 +4,14 @@
   "class_id": "kensei",
   "rarity": "传奇",
   "tags": [],
-
   "trigger_event": "永久生效",
   "trigger_object": "",
   "trigger_source": "",
   "trigger_condition": "",
-  "trigger_frequency": "永久",
+  "trigger_frequency": "每次",
   "trigger_frequency_n": 1,
   "effect": "失去防具槽，该槽位改为副手武器槽，可以装备第二把武器，进入双持状态。执行攻击动作时，追加一次由副手武器计算的50%物理伤害。 不触发武器特效。",
   "rules": "武器栏与副手武器槽同时装备武器时，即视为双持。副手的追加伤害单独结算命中与暴击（R1.2、R1.3）；计算时只取副手武器的数据，不套用主手武器的属性与特效。本卡是双刀相关天赋的前置节点。",
-
   "extra_triggers": [
     {
       "trigger_event": "执行攻击动作时",
@@ -22,19 +20,22 @@
       "trigger_condition": "处于〔双持〕状态",
       "trigger_frequency": "每次",
       "trigger_frequency_n": 1,
-
-      "requires_states": ["shuangchi"],
+      "requires_states": [
+        "shuangchi"
+      ],
       "condition_model": "states"
     }
   ],
-
   "requires_states": [],
   "condition_model": "none",
   "engine_effects": [
-    { "type": "offhand_followup", "damage_pct": 50, "damage_type": "physical" }
+    {
+      "type": "offhand_followup",
+      "damage_pct": 50,
+      "damage_type": "physical"
+    }
   ],
   "engine_note": "主行 trigger_event=永久生效 属常驻类，引擎不分发（PASSIVE_EVENTS），机制主体挂在附加触发行上——这正是 Wave 2 要接附加行的原因。effect 前半段「失去防具槽、该槽改副手武器槽、可装第二把武器」是**装备层**的职责，引擎侧目前只提供 Unit.equip_offhand() 通道，谁来调它（肉鸽装备界面 / 掉落）尚未接线；本条目只兑现后半段「执行攻击动作时追加一次副手 50% 物理伤害」。damage_pct 取自 effect 原文的 50，是游戏数值、从本 JSON 读，代码不写死。「不触发武器特效」当前自动满足——data/weapons/ 只有 might/hit/crit 三个参数，引擎无武器特效系统。",
-
   "_mirror": "id / name / class_id / rarity / tags / trigger 五段 / extra_triggers 的触发五段 / effect / rules 是设计库天赋条目的只读镜像。版本锚点 = 设计库仓 snapshots/talents.json @ 2ea744b（按 lane 文档 §6.1，锚 commit sha 而非日期）。effect 里「50%物理伤害。 不触发」处的两个空格异常是设计库原文，照抄未改。",
   "_engine_note": "requires_states / condition_model / engine_effects / engine_note 是引擎侧字段，设计库无对应列、不回流。附加触发行内的 requires_states / condition_model 是**行级**的——主行永久生效无条件，附加行要求〔双持〕，两者分开求值，退回卡级会让它在没装副手武器时也追加伤害。"
 }

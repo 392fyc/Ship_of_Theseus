@@ -1,0 +1,26 @@
+{
+  "id": "kensei_erdaokairen",
+  "name": "二刀开刃",
+  "class_id": "kensei",
+  "rarity": "史诗",
+  "tags": ["攻击", "被动"],
+
+  "trigger_event": "永久生效",
+  "trigger_object": "",
+  "trigger_source": "",
+  "trigger_condition": "处于〔双持〕状态（前置：二天一流且副手已装备武器）",
+  "trigger_frequency": "每次",
+  "trigger_frequency_n": 1,
+  "effect": "副手武器的特效可以生效，效果量按其原本数值的 50% 计算。",
+  "rules": "解除二天一流「副手不触发武器特效」的限制，只解锁特效本身，不改动副手 50% 的伤害系数；50% 作用于特效的效果量，特效同时带有效果量与触发率时，只作用于效果量、不改动触发率；特效在什么时机触发，按它自身属于 on-hit 还是 after-damage 判定（R1.4），本卡不改变时机。",
+
+  "requires_states": ["shuangchi"],
+  "condition_model": "states",
+  "engine_effects": [
+    { "type": "unlock_offhand_weapon_effect", "effect_scale": 50 }
+  ],
+  "engine_note": "**常驻卡**（trigger_event=永久生效、无附加行）：不进事件桶，由消费方主动查询——见 tactical_manager._offhand_effect_scale()。常驻不等于无条件：本卡要求〔双持〕，查询时会走与分发期同一套行级条件求值。effect_scale=50 取自 effect 原文，是游戏数值、从本 JSON 读，代码不写死。rules 明确「只解锁特效本身，不改动副手 50% 的伤害系数」——所以本卡不碰 offhand_followup 的 damage_pct，两者互不影响。当前引擎只兑现「属性型特效按比例折算」这一种：武器 engine_effects 里的 stat_bonus(STR/MAG) 会按 50% 并入副手那一击的 weapon_might（同层加算，等价）。rules 里「触发率不受影响」「按 R1.4 判定时机」两条尚无对应实装——引擎的武器特效体系还没有触发率与时机概念，等设计库补齐正式特效再接。",
+
+  "_mirror": "id / name / class_id / rarity / tags / trigger 五段 / effect / rules 是设计库天赋条目的只读镜像。版本锚点 = 设计库仓 snapshots/talents.json @ 2ea744b（按 lane 文档 §6.1，锚 commit sha 而非日期）。",
+  "_engine_note": "requires_states / condition_model / engine_effects / engine_note 是引擎侧字段，设计库无对应列、不回流。"
+}

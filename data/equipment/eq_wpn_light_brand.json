@@ -1,0 +1,14 @@
+{
+  "id": "eq_wpn_light_brand",
+  "name": "光之剑",
+  "slot": "weapon",
+  "tier": 3,
+  "rarity": "epic",
+  "weapon_might": 9,
+  "weapon_hit": 70,
+  "weapon_crit": 0,
+  "stats": {},
+  "description": "蕴含光魔法的魔剑,取材自 FE7 Light Brand。",
+  "_mirror": "id / name / slot / rarity / weapon_might / weapon_hit / weapon_crit / description 是设计库 equipment 条目的只读镜像。版本锚点 = 设计库仓 snapshots/equipment.json @ 2ea744b（按 lane 文档 §6.1，锚 commit sha 而非日期）。引擎不改这些字段；要改回设计库改，重导快照后按新 sha 重新同步。",
+  "_engine_note": "tier 是引擎侧派生字段（设计库 equipment 无此列），由 rarity 映射而来，供掉落池分桶用。stats 为引擎侧属性加成字典，当前全空——设计库 23 把剑只有 might/hit/crit 三参数，属性加成来自武器特效而非武器基础值。"
+}
