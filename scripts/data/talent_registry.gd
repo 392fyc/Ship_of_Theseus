@@ -134,6 +134,26 @@ const SUPPORTED_EFFECT_TYPES: Array[String] = [
 const MIN_CHANCE_DECAY_PCT: float = 1.0
 const MAX_CHANCE_DECAY_PCT: float = 99.0
 
+## 效果类型 → 它能挂在哪些**可分发事件**上。不在表里的（`gain_resource`）= 任何
+## 时机都能执行。值为**空数组** = 常驻类效果，只能挂常驻行。
+##
+## 为什么要管这个：效果的执行分支是往 ctx 里写一个键，而那个键只有特定时点的
+## 消费方会读。挂错时机时，效果**被静默吞掉**——ctx 里那个键没人读——而日志还
+## 照样打印「已生效」。这种失效最难查，所以在注册期就拦住。
+##
+## `offhand_followup` 只允许「执行攻击动作时」还有第二层作用：Wave 3 把
+## `pending_offhand` 也暴露给了副手侧的 after-damage 分发，若允许它挂在副手够得着
+## 的事件上，它就会被自己引发的事件再次触发、每次攻击一路顶到链长护栏——那正是
+## R1.10「一个效果不被自己引发的事件再次触发」禁止的。要递归请用
+## `offhand_recursive_followup`，它有 `self_retriggerable` 的显式开关。
+const EFFECT_ALLOWED_EVENTS: Dictionary = {
+	"offhand_followup": ["执行攻击动作时"],
+	"offhand_recursive_followup": ["命中后", "造成伤害时"],
+	"grant_offhand_guaranteed_crit": ["命中时", "暴击时"],
+	"more_damage_from_stat": ["命中时", "暴击时"],
+	"unlock_offhand_weapon_effect": [],
+}
+
 ## `offhand_followup` 的伤害百分比合理上限（护栏，不是游戏数值——数值从 JSON 读）。
 const MAX_FOLLOWUP_PCT: int = 1000
 
@@ -399,6 +419,39 @@ func _effects_rejection_reason(entry: Dictionary, rows: Array) -> String:
 		for name: String in row_names:
 			if bound == "" or bound == name:
 				per_row[name] = int(per_row[name]) + 1
+
+		# ── 效果类型 × 触发时机的相容性 ──────────────────
+		# 常驻行在这里被跳过：它不进事件桶，效果对它没有「时机」可言。判据因此是
+		# 「每条效果至少要落在一个相容的可分发行上」，而不是「所有行都相容」——
+		# 二天一流就是主行常驻、附加行才是真时机的形状。
+		var allowed_raw: Variant = EFFECT_ALLOWED_EVENTS.get(effect_type, null)
+		if allowed_raw is Array:
+			var allowed: Array = allowed_raw
+			var compatible: int = 0
+			var passive_hits: int = 0
+			for row: Dictionary in rows:
+				var rname: String = str(row["row"])
+				if bound != "" and bound != rname:
+					continue
+				if bool(row.get("passive", false)):
+					passive_hits += 1
+					continue
+				var ev: String = str((row["trigger"] as Dictionary).get("trigger_event", ""))
+				if allowed.is_empty():
+					return "engine_effects 第 %d 条（%s）是常驻类效果，必须落在常驻行上，实际落在触发行 %s 的事件「%s」上" \
+						% [index, effect_type, rname, ev]
+				if ev in allowed:
+					compatible += 1
+				else:
+					return "engine_effects 第 %d 条（%s）落在触发行 %s 的事件「%s」上，但该效果只能挂 %s——挂错时机会被静默吞掉" \
+						% [index, effect_type, rname, ev, str(allowed)]
+			if allowed.is_empty():
+				if passive_hits == 0:
+					return "engine_effects 第 %d 条（%s）是常驻类效果，必须落在常驻行上" \
+						% [index, effect_type]
+			elif compatible == 0:
+				return "engine_effects 第 %d 条（%s）没有落在任何相容的触发行上（只能挂 %s）" \
+					% [index, effect_type, str(allowed)]
 		if effect_type == "gain_resource":
 			var resource: String = str(effect.get("resource", ""))
 			if resource not in SUPPORTED_RESOURCES:
@@ -509,10 +562,18 @@ func _effects_rejection_reason(entry: Dictionary, rows: Array) -> String:
 					% [rec_dtype, str(SUPPORTED_DAMAGE_TYPES)]
 		# grant_offhand_guaranteed_crit 无参数，type 在闭集内即合格。
 
-	# 每一行都必须至少有一条效果落在它上面。有行没效果 = 那行触发了也什么都不做，
-	# 而设计库那边看到的是一张完整的卡，两边理解会分叉。
-	for name: String in row_names:
-		if int(per_row[name]) == 0:
+	# 每一**可分发**行都必须至少有一条效果落在它上面。有行没效果 = 那行触发了也什么
+	# 都不做，而设计库那边看到的是一张完整的卡，两边理解会分叉。
+	#
+	# ⚠ 常驻行豁免：它根本不进事件桶，没有「触发了什么都不做」这回事；而且常驻行
+	# 完全可以是纯声明性的——二天一流主行的「失去防具槽、该槽改副手武器槽」是装备层
+	# 的事，没有也不该有对应的 engine_effects。不豁免的话，一旦有人把效果正确地绑给
+	# 附加行，整卡反而会被这道校验拒掉。
+	for row: Dictionary in rows:
+		var name: String = str(row["row"])
+		if bool(row.get("passive", false)):
+			continue
+		if int(per_row.get(name, 0)) == 0:
 			return "触发行 %s 没有任何效果绑定到它（engine_effects 的 row 绑定漏了这一行）" % name
 
 	return ""

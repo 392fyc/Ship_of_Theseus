@@ -77,6 +77,34 @@ const SYNTHETIC: Dictionary = {
 			"type": "more_damage_from_stat", "stat": "DEX", "pct_per_point": 1.0,
 		}],
 	},
+	# 副手侧的「更多伤害」：用来验副手那一击的 on-hit 钩子与结算是否一致
+	# （之前只有主手侧有这条断言）。
+	"test_more_off": {
+		"id": "test_more_off", "name": "测试·副手更多伤害", "class_id": "kensei",
+		"trigger_event": "暴击时", "trigger_source": "副手", "trigger_condition": "",
+		"trigger_frequency": "每次", "trigger_frequency_n": 1,
+		"condition_model": "none", "requires_states": [],
+		"engine_effects": [{
+			"type": "more_damage_from_stat", "stat": "DEX", "pct_per_point": 1.0,
+		}],
+	},
+	# 副手侧的必暴标记：验「标记写在动作级 ctx 上」——副手分发时传进去的是临时的
+	# offhand_ctx，写在那儿会随函数返回丢掉，消费点根本读不到。
+	"test_grant_off": {
+		"id": "test_grant_off", "name": "测试·副手给必暴", "class_id": "kensei",
+		"trigger_event": "暴击时", "trigger_source": "副手", "trigger_condition": "",
+		"trigger_frequency": "每次", "trigger_frequency_n": 1,
+		"condition_model": "none", "requires_states": [],
+		"engine_effects": [{"type": "grant_offhand_guaranteed_crit"}],
+	},
+	# 挂在「命中时」的产气卡：未命中路径的观测手段（伤害为 0 时看不出事件发没发）。
+	"test_qi_on_hit_moment": {
+		"id": "test_qi_on_hit_moment", "name": "测试·命中时产气", "class_id": "kensei",
+		"trigger_event": "命中时", "trigger_source": "", "trigger_condition": "",
+		"trigger_frequency": "每次", "trigger_frequency_n": 1,
+		"condition_model": "none", "requires_states": [],
+		"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 3}],
+	},
 	# 计数用：每次副手命中 +1 气，于是「副手打了几次」== 剑气 − 普攻的 10。
 	# 刻意用 1 而不是 5——递归链最长 20 次，用 5 会撞上剑气上限 100 被 clamp，
 	# 计数就失真了。
@@ -142,6 +170,7 @@ func _run() -> void:
 	_test_on_hit_rewrites_damage()
 	_test_modifier_composes_with_offhand()
 	_test_hook_matches_resolution()
+	_test_offhand_side_gaps()
 	_test_recursive_followup()
 
 	dl.free()
@@ -372,6 +401,52 @@ func _test_contexts_gate(dl: Object) -> void:
 				}],
 			},
 			"keyword": "未支持",
+		},
+		# ── 效果类型 × 触发时机的相容性（2026-08-09 独立审查后补的闸门）──
+		# 效果的执行分支只是往 ctx 写一个键，挂错时机时那个键没人读 → 静默吞掉，
+		# 日志却照样打印「已生效」。注册期拦住。
+		"fx_more_wrong_timing": {
+			"card": {
+				"id": "fx_more_wrong_timing", "name": "测试·更多伤害挂错时机",
+				"class_id": "kensei",
+				"trigger_event": "击杀时", "trigger_source": "", "trigger_condition": "",
+				"trigger_frequency": "每次", "trigger_frequency_n": 1,
+				"condition_model": "none", "requires_states": [],
+				"engine_effects": [{
+					"type": "more_damage_from_stat", "stat": "DEX", "pct_per_point": 0.5,
+				}],
+			},
+			"keyword": "挂错时机会被静默吞掉",
+		},
+		# ★ 这条同时是 R1.10 自触发闸门的第二道：Wave 3 把 pending_offhand 也暴露给了
+		# 副手侧的 after-damage 分发，若允许普通 offhand_followup 挂在副手够得着的
+		# 事件上，它会被自己引发的事件再次触发、每次攻击一路顶到链长护栏。
+		"fx_followup_self_retrigger": {
+			"card": {
+				"id": "fx_followup_self_retrigger", "name": "测试·追加挂在副手可达事件上",
+				"class_id": "kensei",
+				"trigger_event": "命中后", "trigger_source": "副手", "trigger_condition": "",
+				"trigger_frequency": "每次", "trigger_frequency_n": 1,
+				"condition_model": "none", "requires_states": [],
+				"engine_effects": [{
+					"type": "offhand_followup", "damage_pct": 50, "damage_type": "physical",
+				}],
+			},
+			"keyword": "挂错时机会被静默吞掉",
+		},
+		# 常驻类效果挂在可分发行上 → 拒。
+		"fx_passive_on_event": {
+			"card": {
+				"id": "fx_passive_on_event", "name": "测试·常驻效果挂事件行",
+				"class_id": "kensei",
+				"trigger_event": "命中后", "trigger_source": "", "trigger_condition": "",
+				"trigger_frequency": "每次", "trigger_frequency_n": 1,
+				"condition_model": "none", "requires_states": [],
+				"engine_effects": [{
+					"type": "unlock_offhand_weapon_effect", "effect_scale": 50,
+				}],
+			},
+			"keyword": "必须落在常驻行上",
 		},
 	}
 	for tid: String in cases.keys():
@@ -811,6 +886,165 @@ func _test_hook_matches_resolution() -> void:
 			% [str(unexpected), crit_no_sixian, sixian_no_crit])
 
 	(ctx["scene"] as Node).free()
+
+
+# ── 副手侧的钩子一致性 / 递归伤害 / 未命中路径 ────────
+#
+# 这三组是 2026-08-09 独立审查 + 变异复核抓出来的真缺口：把副手的
+# precomputed_outcome 注入删掉、把递归追加的 damage_pct 改成 100%、
+# 把「未命中不发 on-hit 事件」的守卫整段删掉——三个变异体当时**全部存活**。
+
+func _test_offhand_side_gaps() -> void:
+	print("\n[W10] 副手侧钩子一致性 + 递归追加的伤害 + 未命中路径")
+
+	# ① 副手那一击的钩子结果 == 结算结果。
+	# 与 [W9] 同构，但观测对象换成副手：主手用 disable_crit 钉死不暴（伤害恒定），
+	# 副手在 RANDOM 模式下自由掷骰，装一张 source=副手 的更多伤害卡。
+	var ctx: Dictionary = _make_battle(CRIT_RANDOM)
+	if ctx.is_empty():
+		return
+	var tm: Object = ctx["tm"]
+	var attacker: Unit = ctx["attacker"]
+	var enemy: Unit = ctx["enemy"]
+	attacker.stats.str_attr = 10
+	attacker.stats.dex = 100          # 副手暴击率 ≈ (0 + 50 − 0)% = 50%
+	enemy.stats.lck = 0
+	attacker.equip_offhand(OFFHAND_WEAPON)
+	var off_might: int = _offhand_might()
+	var main_payload: Dictionary = {"weapon_might": 10, "disable_crit": true}
+
+	var dex_eff: int = attacker.get_effective_stat("DEX")
+	var more: float = 1.0 + float(dex_eff) * 1.0 / 100.0
+	var off_raw: float = float(attacker.get_effective_stat("STR") + off_might)
+	var main_fixed: int = 20                                   # (10 + 10 − 0)，钉死不暴
+	var off_plain: int = floori(off_raw * 0.5)                 # 副手不暴
+	var off_crit_more: int = floori(off_raw * 1.5 * 0.5 * more)  # 副手暴 + 更多伤害
+	var off_crit_only: int = floori(off_raw * 1.5 * 0.5)       # 脱钩：暴了但卡没触发
+	var off_more_only: int = floori(off_raw * 0.5 * more)      # 脱钩：卡触发了却没暴
+	_check("前提：四种副手取值互不相同",
+		off_plain != off_crit_more and off_crit_only != off_crit_more
+			and off_more_only != off_crit_more and off_crit_only != off_plain,
+		"不暴=%d 暴+更多=%d 只暴=%d 只更多=%d"
+			% [off_plain, off_crit_more, off_crit_only, off_more_only])
+
+	attacker.talent_ids = ["kensei_ertianyiliu", "test_more_off"]
+	var seen: Dictionary = {}
+	var crit_rounds: int = 0
+	for _i: int in range(60):
+		var off: int = _strike(tm, attacker, enemy, main_payload) - main_fixed
+		seen[off] = true
+		if off == off_crit_more:
+			crit_rounds += 1
+	_check("60 轮里副手暴击与不暴击都出现过", crit_rounds > 0 and crit_rounds < 60,
+		"副手暴击 %d 轮" % crit_rounds)
+	var bad: Array = []
+	for k: Variant in seen.keys():
+		if int(k) != off_plain and int(k) != off_crit_more:
+			bad.append(k)
+	_check("副手伤害只出现两种取值：不暴 %d / 暴且带更多伤害 %d"
+			% [off_plain, off_crit_more],
+		bad.is_empty(),
+		"意外取值 %s（%d=暴了但卡没触发，%d=卡触发了却没暴）"
+			% [str(bad), off_crit_only, off_more_only])
+
+	# ② 副手侧写的必暴标记要落在**动作级** ctx 上，否则随函数返回丢掉。
+	# 构造：主手暴 → 剑气回荡让第一次副手必暴 → 第一次副手暴 → test_grant_off
+	# 触发 → 第二次副手也必暴。敌人 LCK 拉满，副手自己绝不会暴，所以第二次若暴，
+	# 只可能来自 test_grant_off 写下的标记。
+	enemy.stats.lck = 9999
+	var crit_payload: Dictionary = {"guaranteed_crit": true}
+	var base2: int = -1
+	var with_grant: int = -1
+	for _i: int in range(40):
+		if base2 < 0:
+			attacker.talent_ids = [
+				"kensei_ertianyiliu", "kensei_jianqihuidang",
+				"test_yanfan_once", "test_count_off",
+			]
+			var t: int = _strike(tm, attacker, enemy, crit_payload)
+			if attacker.sword_qi - 10 == 22:       # 链长 2（每次 +1+10）
+				base2 = t
+		if with_grant < 0:
+			attacker.talent_ids = [
+				"kensei_ertianyiliu", "kensei_jianqihuidang",
+				"test_yanfan_once", "test_count_off", "test_grant_off",
+			]
+			var t2: int = _strike(tm, attacker, enemy, crit_payload)
+			if attacker.sword_qi - 10 == 22:
+				with_grant = t2
+		if base2 >= 0 and with_grant >= 0:
+			break
+	_check("取到了链长为 2 的对照样本", base2 >= 0 and with_grant >= 0,
+		"base2=%d with_grant=%d" % [base2, with_grant])
+	if base2 >= 0 and with_grant >= 0:
+		_check("副手侧写的必暴标记生效了（第二次副手也暴 → 伤害更高）",
+			with_grant > base2,
+			"无 test_grant_off=%d 有=%d（相等说明标记写进了临时 ctx、被丢掉）"
+				% [base2, with_grant])
+
+	(ctx["scene"] as Node).free()
+
+	# ③ 递归追加打出的伤害与第一次等量（damage_pct 走的是 JSON 里的 50，不是别的数）。
+	var ctx2: Dictionary = _make_battle(CRIT_DISABLE)
+	if ctx2.is_empty():
+		return
+	var tm2: Object = ctx2["tm"]
+	var atk2: Unit = ctx2["attacker"]
+	var foe2: Unit = ctx2["enemy"]
+	atk2.stats.str_attr = 10
+	atk2.stats.dex = 100
+	atk2.equip_offhand(OFFHAND_WEAPON)
+	var payload2: Dictionary = {"weapon_might": 10}
+
+	atk2.talent_ids = []
+	var main_alone: int = _strike(tm2, atk2, foe2, payload2)
+	atk2.talent_ids = ["kensei_ertianyiliu", "test_count_off"]
+	var one_link: int = _strike(tm2, atk2, foe2, payload2)
+	var single_off: int = one_link - main_alone
+	_eq("链长 1 时副手只打一次", atk2.sword_qi - 10, 1)
+	_check("副手单次伤害为正", single_off > 0, "single_off=%d" % single_off)
+
+	var two_link: int = -1
+	for _i: int in range(40):
+		atk2.talent_ids = ["kensei_ertianyiliu", "test_yanfan_once", "test_count_off"]
+		var t: int = _strike(tm2, atk2, foe2, payload2)
+		if atk2.sword_qi - 10 == 2:
+			two_link = t
+			break
+	_check("取到了链长为 2 的样本", two_link >= 0)
+	if two_link >= 0:
+		_eq("递归追加的那一次与第一次等量（damage_pct 同为 50%%，不是 100%%）",
+			two_link - one_link, single_off)
+
+	# ④ 未命中时不发 on-hit 事件。关掉强制命中、把回避拉满压到 1% 下限。
+	tm2.debug_deterministic = false
+	foe2.stats.spd = 9999
+	foe2.stats.lck = 9999
+	atk2.unequip_offhand()
+	atk2.talent_ids = ["test_qi_on_hit_moment"]
+	var miss_seen: int = 0
+	var miss_with_qi: int = 0
+	for _i: int in range(16):
+		foe2.stats.max_hp = 99999
+		foe2.stats.hp = 99999
+		atk2.set_sword_qi(0)
+		tm2._execute_hostile_action(atk2, foe2, payload2)
+		if foe2.stats.hp == 99999:          # 没掉血 = 这次没命中
+			miss_seen += 1
+			if atk2.sword_qi != 0:
+				miss_with_qi += 1
+	_check("16 次里至少观察到一次未命中", miss_seen > 0, "miss_seen=%d" % miss_seen)
+	_eq("每一次未命中都没触发「命中时」（一点气都没产）", miss_with_qi, 0)
+
+	(ctx2["scene"] as Node).free()
+
+
+## 副手武器的 might。`DataLoader` 标识符在 --script 主循环下编译期解析不到，走节点。
+func _offhand_might() -> int:
+	var dl: Node = root.get_node_or_null("/root/DataLoader")
+	if dl == null:
+		return 0
+	return int((dl.equipment[OFFHAND_WEAPON] as Dictionary).get("weapon_might", 0))
 
 
 # ── V. 燕返的递归追加 ─────────────────────────────

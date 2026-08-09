@@ -1694,6 +1694,11 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 	var talent_ctx: Dictionary = {
 		"defender": defender, "result": result,
 		"source": SOURCE_MAIN_HAND, "contexts": [CONTEXT_ACTIVE_ATTACK],
+		# 主手的 after-damage 事件也要能登记副手追加：它们排在下面那个队列**之前**，
+		# 登记进同一个数组就会被队列接手。少了这个键，挂在「命中后」的追加类效果
+		# 会走进 _apply_talent_effect 的告警分支、白白丢掉。
+		"pending_offhand": action_ctx["pending_offhand"],
+		"action_ctx": action_ctx,
 	}
 	if result.hit:
 		_dispatch_talents(attacker, "命中后", talent_ctx)
@@ -2522,7 +2527,12 @@ func _dispatch_on_hit_events(attacker: Unit, outcome: Dictionary,
 		ctx: Dictionary) -> void:
 	if not bool(outcome.get("hit", false)):
 		return
-	ctx["outcome"] = outcome
+	# ★ 给 ctx 的是**副本**，不是 outcome 本身。Dictionary 是引用类型，而这同一个
+	# outcome 随后会作为 precomputed_outcome 交给 resolve_attack —— 直接放进 ctx
+	# 就等于把本次的命中/暴击结果开放给天赋改写，那正是 R1.2 / R1.3 禁止的回溯改判
+	# （两条链的最终层修正必须在掷骰之前应用完）。注释里禁止是一回事，结构上做不到
+	# 才是保障。天赋想读掷骰结果可以，改不动。
+	ctx["outcome"] = outcome.duplicate(true)
 	_dispatch_talents(attacker, "命中时", ctx)
 	if bool(outcome.get("crit", false)):
 		_dispatch_talents(attacker, "暴击时", ctx)
@@ -2701,6 +2711,9 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 		"pending_offhand": [],
 		# 燕返的链序：本次是链上第几次追加，决定它下一次的概率衰减几档。
 		"offhand_chain_index": int(followup.get("chain_index", 0)),
+		# 指回本次攻击动作的 ctx。有些效果的标记必须落在动作级而不是这一击级
+		# （grant_offhand_guaranteed_crit 就是），写在本字典上会随函数返回丢掉。
+		"action_ctx": action_ctx,
 	}
 	var outcome: Dictionary = DamageCalculator.roll_outcome(attacker, defender, data)
 	_dispatch_on_hit_events(attacker, outcome, offhand_ctx)
@@ -2855,7 +2868,13 @@ func _apply_talent_effect(unit: Unit, talent_id: String,
 			# ★ 这不是回溯改判：作用对象是**随后另一次攻击**的暴击判定，不是本次。
 			# 本次的 hit / crit 已经掷完，任何回头改它的写法都违反 R1.2 / R1.3
 			# （最终层修正必须在掷骰前应用完）。
-			ctx["offhand_guaranteed_crit"] = true
+			# ★ 标记必须落在**本次攻击动作**的 ctx 上。它的消费点在
+			# _execute_offhand_followup 开头，读的是 action_ctx；而副手侧分发时
+			# 传进来的 ctx 是临时的 offhand_ctx，写在那儿会随函数返回一起丢掉
+			# ——静默失效。副手侧的 ctx 因此带一个 action_ctx 指针。
+			var owner_ctx: Variant = ctx.get("action_ctx", null)
+			var target_ctx: Dictionary = owner_ctx if owner_ctx is Dictionary else ctx
+			target_ctx["offhand_guaranteed_crit"] = true
 			print("[Talent] %s 「%s」→ 随后一次副手追加必定暴击" % [
 				unit.unit_name, talent_id])
 		"more_damage_from_stat":
