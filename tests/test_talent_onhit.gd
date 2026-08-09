@@ -520,6 +520,36 @@ func _test_row_binding_gate(dl: Object) -> void:
 		reg2.rejection_reason("bind_starved").contains("extra[0]"),
 		reg2.rejection_reason("bind_starved"))
 
+	# ★ 常驻行豁免「每行至少一条效果」：主行常驻、效果全部绑给附加行的卡必须能注册。
+	# 常驻行不进事件桶，没有「触发了什么都不做」这回事；而且它完全可以是纯声明性的
+	# ——二天一流主行的「失去防具槽、该槽改副手武器槽」是装备层的事，没有也不该有
+	# 对应的 engine_effects。不豁免的话，一旦有人把效果**正确地**绑给附加行，
+	# 整卡反而会被这道校验拒掉。
+	var passive_exempt: Dictionary = {
+		"passive_row_exempt": {
+			"id": "passive_row_exempt", "name": "测试·常驻主行无效果", "class_id": "kensei",
+			"trigger_event": "永久生效", "trigger_condition": "",
+			"trigger_frequency": "每次", "trigger_frequency_n": 1,
+			"condition_model": "none", "requires_states": [],
+			"extra_triggers": [{
+				"trigger_event": "击杀时", "trigger_condition": "",
+				"trigger_frequency": "每次", "trigger_frequency_n": 1,
+				"condition_model": "none", "requires_states": [],
+			}],
+			"engine_effects": [{
+				"type": "gain_resource", "resource": "qi", "amount": 5, "row": "extra[0]",
+			}],
+		}
+	}
+	var reg_exempt: Object = _make_registry(passive_exempt, dl.states)
+	_check("主行常驻且没有效果绑定 → 仍能注册（常驻行豁免）",
+		reg_exempt.is_registered("passive_row_exempt"),
+		reg_exempt.rejection_reason("passive_row_exempt"))
+	_eq("该卡的常驻主行看不到绑给附加行的效果",
+		reg_exempt.effects_for_row(passive_exempt["passive_row_exempt"], "main").size(), 0)
+	_eq("该卡的附加行看得到那条效果",
+		reg_exempt.effects_for_row(passive_exempt["passive_row_exempt"], "extra[0]").size(), 1)
+
 	# 不写 row = 全行共用（向后兼容）——已有三张卡都是这么写的。
 	var reg3: Object = _make_registry(dl.talents, dl.states)
 	_check("二天一流（不写 row，两行共用一条效果）仍注册成功",
