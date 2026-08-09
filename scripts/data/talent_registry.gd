@@ -125,7 +125,7 @@ const CONDITION_MODELS: Array[String] = ["none", "states", "unsupported"]
 ## `engine_effects` 支持的指令类型。
 const SUPPORTED_EFFECT_TYPES: Array[String] = [
 	"gain_resource", "offhand_followup", "unlock_offhand_weapon_effect",
-	"grant_offhand_guaranteed_crit", "more_damage_from_stat",
+	"empower_next_offhand", "more_damage_from_stat",
 	"offhand_recursive_followup",
 ]
 
@@ -149,7 +149,7 @@ const MAX_CHANCE_DECAY_PCT: float = 99.0
 const EFFECT_ALLOWED_EVENTS: Dictionary = {
 	"offhand_followup": ["执行攻击动作时"],
 	"offhand_recursive_followup": ["命中后", "造成伤害时"],
-	"grant_offhand_guaranteed_crit": ["命中时", "暴击时"],
+	"empower_next_offhand": ["命中时", "暴击时"],
 	"more_damage_from_stat": ["命中时", "暴击时"],
 	"unlock_offhand_weapon_effect": [],
 }
@@ -536,6 +536,25 @@ func _effects_rejection_reason(entry: Dictionary, rows: Array) -> String:
 			if float(per_point_raw) <= 0.0:
 				return "more_damage_from_stat 的 pct_per_point 必须为正，实际 %s" \
 					% str(per_point_raw)
+		elif effect_type == "empower_next_offhand":
+			# 强化随后那一次副手追加（剑气回荡）。两个子效果都可选，但不能全空
+			# ——全空就是一条什么也不做的效果。数值从 JSON 读，代码不写死。
+			var give_crit: bool = bool(effect.get("guaranteed_crit", false))
+			var qi_raw: Variant = effect.get("qi_on_hit", null)
+			var qi_amount: int = 0
+			if qi_raw != null:
+				var qi_type: int = typeof(qi_raw)
+				if qi_type != TYPE_INT and qi_type != TYPE_FLOAT:
+					return "empower_next_offhand 的 qi_on_hit 必须是数字，实际是 %s" \
+						% type_string(qi_type)
+				if float(qi_raw) != floorf(float(qi_raw)):
+					return "empower_next_offhand 的 qi_on_hit 必须是整数值，实际 %s" % str(qi_raw)
+				qi_amount = int(qi_raw)
+				if qi_amount <= 0 or qi_amount > MAX_RESOURCE_GAIN:
+					return "empower_next_offhand 的 qi_on_hit 越界（0 < x <= %d），实际 %d" \
+						% [MAX_RESOURCE_GAIN, qi_amount]
+			if not give_crit and qi_amount == 0:
+				return "empower_next_offhand 既不给必暴也不给剑气——这是一条什么都不做的效果"
 		elif effect_type == "offhand_recursive_followup":
 			# 燕返：副手追加命中后按概率再追加，每成功一次概率乘衰减系数，可反复。
 			#
@@ -561,19 +580,15 @@ func _effects_rejection_reason(entry: Dictionary, rows: Array) -> String:
 			if decay < MIN_CHANCE_DECAY_PCT or decay > MAX_CHANCE_DECAY_PCT:
 				return "offhand_recursive_followup 的 chance_decay_pct 越界（%s ~ %s），实际 %s——衰减必须真的衰减，填 100 就是永不收敛的无限链" \
 					% [str(MIN_CHANCE_DECAY_PCT), str(MAX_CHANCE_DECAY_PCT), str(decay_raw)]
-			var rec_pct_raw: Variant = effect.get("damage_pct", null)
-			var rec_pct_type: int = typeof(rec_pct_raw)
-			if rec_pct_type != TYPE_INT and rec_pct_type != TYPE_FLOAT:
-				return "offhand_recursive_followup 的 damage_pct 必须是数字，实际是 %s" \
-					% type_string(rec_pct_type)
-			var rec_pct: float = float(rec_pct_raw)
-			if rec_pct <= 0.0 or rec_pct > float(MAX_FOLLOWUP_PCT):
-				return "offhand_recursive_followup 的 damage_pct 越界（0 < x <= %d），实际 %s" \
-					% [MAX_FOLLOWUP_PCT, str(rec_pct_raw)]
-			var rec_dtype: String = str(effect.get("damage_type", ""))
-			if rec_dtype not in SUPPORTED_DAMAGE_TYPES:
-				return "offhand_recursive_followup 的 damage_type「%s」未支持（当前支持 %s）" \
-					% [rec_dtype, str(SUPPORTED_DAMAGE_TYPES)]
+			# ★ 本效果**不声明自己的伤害规格**（2026-08-10 用户裁决：「燕返的追加是
+			# 基于二天一流的伤害再次进行计算」）。追加出来的那一次沿用**触发它的
+			# 那一次**副手追加的 damage_pct / damage_type，链的源头就是二天一流，
+			# 所以天然跟随、不会分叉。
+			#
+			# 之前引擎在这里自带 damage_pct=50，是照二天一流抄了一份——两处各存一份
+			# 同一个设计数值，正是 lane §2.2 要封杀的双写。写了就拒，免得又抄回来。
+			if effect.has("damage_pct") or effect.has("damage_type"):
+				return "offhand_recursive_followup 不得声明 damage_pct / damage_type——追加的规格沿用触发它的那一次副手追加（用户裁决：基于二天一流的伤害再次计算），自带一份就是双写"
 		# grant_offhand_guaranteed_crit 无参数，type 在闭集内即合格。
 
 	# 每一**可分发**行都必须至少有一条效果落在它上面。有行没效果 = 那行触发了也什么

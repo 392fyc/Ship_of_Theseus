@@ -11,34 +11,19 @@
   "trigger_condition": "该次暴击发生在主动攻击动作中；处于〔双持〕状态（经二天一流装备副手武器）",
   "trigger_frequency": "每次",
   "trigger_frequency_n": 1,
-  "effect": "主手暴击时，该次副手追加伤害必定暴击；副手追加伤害命中后，获得 10 点剑气。",
-  "rules": "仅在双持状态（经二天一流装备副手武器）下生效；副手的追加伤害独立结算，暴击判定归 R1.3 暴击链；额外获得的 10 点剑气计入 R1.6 的剑气池。",
+  "effect": "主动攻击动作中，主手暴击时，该次副手的追加伤害必定暴击且额外获得 10 点剑气。",
+  "rules": "仅在双持状态（经二天一流装备副手武器）下生效；副手的追加伤害独立结算，暴击判定归 R1.3 暴击链。必定暴击与额外剑气都只作用于主手暴击之后的**那一次**副手追加，不及于燕返等效果再产生的后续追加。额外的 10 点剑气在该次副手追加命中后结算，未命中则不获得；剑气计入 R1.6 的剑气池。",
 
   "condition_model": "states",
   "requires_states": ["shuangchi"],
   "requires_contexts": ["active_attack"],
 
-  "extra_triggers": [
-    {
-      "trigger_event": "命中后",
-      "trigger_object": "",
-      "trigger_source": "副手",
-      "trigger_condition": "该次命中为副手的追加伤害，且发生在主动攻击动作中；处于〔双持〕状态",
-      "trigger_frequency": "每次",
-      "trigger_frequency_n": 1,
-      "condition_model": "states",
-      "requires_states": ["shuangchi"],
-      "requires_contexts": ["active_attack"]
-    }
-  ],
-
   "engine_effects": [
-    { "type": "grant_offhand_guaranteed_crit", "row": "main" },
-    { "type": "gain_resource", "resource": "qi", "amount": 10, "row": "extra[0]" }
+    { "type": "empower_next_offhand", "guaranteed_crit": true, "qi_on_hit": 10 }
   ],
 
-  "engine_note": "**两行两效果，靠 row 绑定分开**——这是本卡与已有三张的关键差别。effect 是两句话，各挂一行：主行（暴击时/主手）让随后那一次副手追加必定暴击；附加行（命中后/副手）给 10 点剑气。engine_effects 在 A1/Wave 2 是全行共用的，照那个模型主手暴击会连剑气一起给、副手命中又会再设一次必暴标记，语义直接错，所以 Wave 3 加了 row 绑定（见 lane §2.2 注 7）。\n\n条件逐句映射，一句都没吞：主行 trigger_condition 三句——「该次暴击」由 trigger_event=暴击时 承担；「发生在主动攻击动作中」由 requires_contexts=[active_attack] 承担；「处于〔双持〕状态」由 requires_states=[shuangchi] 承担。附加行同理，其中「该次命中为副手的追加伤害」由 trigger_source=副手 承担。\n\n跨主副手的因果：主行的效果不改本次伤害，而是给随后另一次攻击（副手追加）设必暴标记，所以不构成 R1.2/R1.3 禁止的回溯改判。标记**消费一次就清**——effect 写的是「该次副手追加伤害」，单数；燕返递归出来的后续几次不继承它，各自独立掷骰（燕返 rules 逐字要求每次独立结算）。实现见 tactical_manager 的 grant_offhand_guaranteed_crit 分支与 _execute_offhand_followup。\n\n数值 10 取自 effect 原文，从本 JSON 读，代码不写死。",
+  "engine_note": "**2026-08-10 用户裁决后改版：从两行两效果收敛成一行一效果。**\n\n改版前的卡面是两句话挂两行（主行 暴击时/主手 = 让副手必暴；附加行 命中后/副手 = 任何副手命中都给 10 点剑气），返气不依赖主手暴击，与燕返的连续追加相乘。改版后两件事合并到同一次副手追加上：必定暴击 + 命中后返气，都只作用于主手暴击带来的**那一次**。附加行随之取消（设计库侧 extra_triggers 已清空）。\n\n效果类型也随之从 grant_offhand_guaranteed_crit 换成 empower_next_offhand——后者表达的是「强化随后那一次副手追加」，两个子效果（guaranteed_crit / qi_on_hit）都从本 JSON 读，代码不写死数值。标记读完即清（effect 的「该次」是单数），燕返再产生的后续追加不继承。\n\n条件逐句映射，一句都没吞：「该次暴击」由 trigger_event=暴击时 承担；「发生在主动攻击动作中」由 requires_contexts=[active_attack] 承担；「处于〔双持〕状态」由 requires_states=[shuangchi] 承担；「主手」由 trigger_source 承担。\n\n★ 一处引擎侧的实装判断（已回写设计库 rules）：**返气要那次副手追加实际命中才结算**。用户改的卡面把两件事合并成一句，主语是那次追加，但没写命中与否；取「命中后」是因为改版前的卡面明确写着「命中后」，本次改的是「不依赖暴击」那一点，而且必定暴击并不保证命中——副手仍要照 R1.2 独立掷命中。",
 
-  "_mirror": "id / name / class_id / rarity / tags / trigger 五段 / extra_triggers 的触发五段 / effect / rules 是设计库天赋条目的只读镜像。版本锚点 = 设计库仓 snapshots/talents.json @ 2ea744b（按 lane 文档 §6.1，锚 commit sha 而非日期）。",
-  "_engine_note": "requires_states / condition_model / requires_contexts / engine_effects（含其中的 row）/ engine_note 是引擎侧字段，设计库无对应列、不回流。"
+  "_mirror": "id / name / class_id / rarity / tags / trigger 五段 / effect / rules 是设计库天赋条目的只读镜像。版本锚点 = 生产库 2026-08-09T16:38 那次 PATCH（本次改版由 SoT 侧按用户裁决写入设计库，写后已回读比对）。",
+  "_engine_note": "requires_states / condition_model / requires_contexts / engine_effects / engine_note 是引擎侧字段，设计库无对应列、不回流。"
 }

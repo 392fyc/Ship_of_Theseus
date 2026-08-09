@@ -95,7 +95,7 @@ const SYNTHETIC: Dictionary = {
 		"trigger_event": "暴击时", "trigger_source": "副手", "trigger_condition": "",
 		"trigger_frequency": "每次", "trigger_frequency_n": 1,
 		"condition_model": "none", "requires_states": [],
-		"engine_effects": [{"type": "grant_offhand_guaranteed_crit"}],
+		"engine_effects": [{"type": "empower_next_offhand", "guaranteed_crit": true}],
 	},
 	# 挂在「命中时」的产气卡：未命中路径的观测手段（伤害为 0 时看不出事件发没发）。
 	"test_qi_on_hit_moment": {
@@ -125,8 +125,7 @@ const SYNTHETIC: Dictionary = {
 		"condition_model": "none", "requires_states": [],
 		"engine_effects": [{
 			"type": "offhand_recursive_followup", "chance_stat": "DEX",
-			"chance_decay_pct": 1, "damage_pct": 50, "damage_type": "physical",
-			"self_retriggerable": true,
+			"chance_decay_pct": 1, "self_retriggerable": true,
 		}],
 	},
 	# 燕返的高衰减变体：用来撞引擎侧的链长护栏。decay=99 衰减极慢，
@@ -138,8 +137,7 @@ const SYNTHETIC: Dictionary = {
 		"condition_model": "none", "requires_states": [],
 		"engine_effects": [{
 			"type": "offhand_recursive_followup", "chance_stat": "DEX",
-			"chance_decay_pct": 99, "damage_pct": 50, "damage_type": "physical",
-			"self_retriggerable": true,
+			"chance_decay_pct": 99, "self_retriggerable": true,
 		}],
 	},
 }
@@ -272,12 +270,10 @@ func _test_new_cards_registered(dl: Object) -> void:
 	_eq("剑气回荡 主行事件", str(jqhd.get("trigger_event", "")), "暴击时")
 	_eq("剑气回荡 主行来源", str(jqhd.get("trigger_source", "")), "主手")
 	_eq("剑气回荡 频率", str(jqhd.get("trigger_frequency", "")), "每次")
-	var jqhd_extra: Array = jqhd.get("extra_triggers", [])
-	_eq("剑气回荡 附加行数", jqhd_extra.size(), 1)
-	if jqhd_extra.size() == 1:
-		var row0: Dictionary = jqhd_extra[0]
-		_eq("剑气回荡 附加行事件", str(row0.get("trigger_event", "")), "命中后")
-		_eq("剑气回荡 附加行来源", str(row0.get("trigger_source", "")), "副手")
+	# 2026-08-10 用户裁决后改版：两行合并成一行，附加行取消。返气不再是独立的
+	# 「命中后 / 副手」行，而是并进主行——只有主手暴击带来的那一次副手追加才返气。
+	_eq("剑气回荡 已无附加行（改版后两件事合并到同一次副手追加上）",
+		(jqhd.get("extra_triggers", []) as Array).size(), 0)
 	var yf: Dictionary = dl.talents["kensei_yanfan"]
 	_eq("燕返 主行事件", str(yf.get("trigger_event", "")), "命中后")
 	_eq("燕返 主行来源", str(yf.get("trigger_source", "")), "副手")
@@ -369,7 +365,7 @@ func _test_contexts_gate(dl: Object) -> void:
 				"condition_model": "none", "requires_states": [],
 				"engine_effects": [{
 					"type": "offhand_recursive_followup", "chance_stat": "DEX",
-					"chance_decay_pct": 80, "damage_pct": 50, "damage_type": "physical",
+					"chance_decay_pct": 80,
 				}],
 			},
 			"keyword": "self_retriggerable",
@@ -383,8 +379,7 @@ func _test_contexts_gate(dl: Object) -> void:
 				"condition_model": "none", "requires_states": [],
 				"engine_effects": [{
 					"type": "offhand_recursive_followup", "chance_stat": "DEX",
-					"chance_decay_pct": 100, "damage_pct": 50, "damage_type": "physical",
-					"self_retriggerable": true,
+					"chance_decay_pct": 100, "self_retriggerable": true,
 				}],
 			},
 			"keyword": "衰减必须真的衰减",
@@ -589,18 +584,18 @@ func _test_row_binding_gate(dl: Object) -> void:
 		reg3.effects_for_row(dl.talents["kensei_ertianyiliu"], "main").size(), 1)
 	_eq("不写 row 的效果对附加行也可见",
 		reg3.effects_for_row(dl.talents["kensei_ertianyiliu"], "extra[0]").size(), 1)
-	# 剑气回荡：两行各只看见自己那一条。
+	# 剑气回荡改版后只剩一行一效果：必暴与返气合并成 empower_next_offhand。
 	var jqhd: Dictionary = dl.talents["kensei_jianqihuidang"]
 	var main_fx: Array = reg3.effects_for_row(jqhd, "main")
-	var extra_fx: Array = reg3.effects_for_row(jqhd, "extra[0]")
-	_eq("剑气回荡 主行只看见 1 条效果", main_fx.size(), 1)
-	_eq("剑气回荡 主行那条是 grant_offhand_guaranteed_crit",
-		str((main_fx[0] as Dictionary).get("type", "")) if main_fx.size() > 0 else "",
-		"grant_offhand_guaranteed_crit")
-	_eq("剑气回荡 附加行只看见 1 条效果", extra_fx.size(), 1)
-	_eq("剑气回荡 附加行那条是 gain_resource",
-		str((extra_fx[0] as Dictionary).get("type", "")) if extra_fx.size() > 0 else "",
-		"gain_resource")
+	_eq("剑气回荡 主行只有 1 条效果", main_fx.size(), 1)
+	var fx0: Dictionary = main_fx[0] if main_fx.size() > 0 else {}
+	_eq("剑气回荡 那条是 empower_next_offhand",
+		str(fx0.get("type", "")), "empower_next_offhand")
+	_check("剑气回荡 该效果同时带必暴与返气（两件事在同一条上）",
+		bool(fx0.get("guaranteed_crit", false)) and int(fx0.get("qi_on_hit", 0)) > 0,
+		str(fx0))
+	# 数值从 JSON 读，不写死在代码里。
+	_eq("剑气回荡 返气量取自 JSON", int(fx0.get("qi_on_hit", 0)), 10)
 
 
 # ── I. trigger_source 双向（任务书 §1.1 验收判据）──────
@@ -662,8 +657,11 @@ func _test_source_directions() -> void:
 # ── III. 行级效果绑定（运行期）───────────────────────
 
 func _test_row_binding_runtime() -> void:
-	print("\n[W5] 行级效果绑定（运行期）—— 剑气回荡两行两效果")
-	var ctx: Dictionary = _make_battle(CRIT_FORCE)
+	print("\n[W5] 剑气回荡的返气收敛（2026-08-10 用户裁决）")
+	# 改版前：返气是独立的「命中后 / 副手」附加行，**任何**副手命中都给 10 点。
+	# 改版后：必暴与返气合并成一条，都只作用于**主手暴击带来的那一次**副手追加。
+	# 这一组锁的就是「收敛」这件事本身。
+	var ctx: Dictionary = _make_battle(CRIT_FORCE)     # 主手必暴
 	if ctx.is_empty():
 		return
 	var tm: Object = ctx["tm"]
@@ -673,16 +671,20 @@ func _test_row_binding_runtime() -> void:
 	attacker.equip_offhand(OFFHAND_WEAPON)
 	attacker.talent_ids = ["kensei_ertianyiliu", "kensei_jianqihuidang"]
 	_strike(tm, attacker, enemy)
-	# 期望 20 = 10(普攻) + 10(附加行·副手命中后)。
-	# ★ 这个数字是为区分而选的：若行级绑定失效、两行各执行全部效果，
-	#   主手暴击也会给 10 → 总数变成 30。20 与 30 一眼可辨。
-	_eq("剑气回荡：只有附加行给气，主行不给 → 10 + 10 == 20",
+	_eq("主手暴击 → 被强化的那次副手追加命中 → 10(普攻) + 10 == 20",
 		attacker.sword_qi, 20)
 
-	# 没装副手 → 主行的必暴标记没有消费者，附加行也不触发 → 只有普攻的气。
+	# ★ 收敛的核心判据：**主手没暴就一点气都不返**。
+	# 改版前这里会返 10（返气不依赖暴击），所以这条断言正是新旧口径的分水岭。
+	tm.debug_crit_mode = CRIT_DISABLE
+	_strike(tm, attacker, enemy)
+	_eq("主手未暴击 → 剑气回荡整条不触发 → 只有普攻的 10", attacker.sword_qi, 10)
+	tm.debug_crit_mode = CRIT_FORCE
+
+	# 没装副手 → 没有可强化的那一次追加 → 不返气。
 	attacker.unequip_offhand()
 	_strike(tm, attacker, enemy)
-	_eq("未装副手 → 剑气回荡两行都不生效（条件不成立）→ 10", attacker.sword_qi, 10)
+	_eq("未装副手 → 无副手追加可强化 → 10", attacker.sword_qi, 10)
 
 	(ctx["scene"] as Node).free()
 
@@ -807,7 +809,7 @@ func _test_on_hit_rewrites_damage() -> void:
 				"kensei_jianqihuidang",
 			]
 			var t2: int = _strike(tm2, atk2, foe2, crit_payload)
-			if atk2.sword_qi - 10 == 22:      # 2 次 × (1 + 10)
+			if atk2.sword_qi - 10 == 12:      # 链长 2：2 次计数 + 仅第一次返的 10
 				chain2_crit = t2
 		if chain2_plain >= 0 and chain2_crit >= 0:
 			break
@@ -1022,7 +1024,7 @@ func _test_offhand_side_gaps() -> void:
 				"test_yanfan_once", "test_count_off",
 			]
 			var t: int = _strike(tm, attacker, enemy, crit_payload)
-			if attacker.sword_qi - 10 == 22:       # 链长 2（每次 +1+10）
+			if attacker.sword_qi - 10 == 12:       # 链长 2：2 次计数 + 仅第一次返的 10
 				base2 = t
 		if with_grant < 0:
 			attacker.talent_ids = [
@@ -1030,7 +1032,7 @@ func _test_offhand_side_gaps() -> void:
 				"test_yanfan_once", "test_count_off", "test_grant_off",
 			]
 			var t2: int = _strike(tm, attacker, enemy, crit_payload)
-			if attacker.sword_qi - 10 == 22:
+			if attacker.sword_qi - 10 == 12:
 				with_grant = t2
 		if base2 >= 0 and with_grant >= 0:
 			break
@@ -1168,6 +1170,27 @@ func _test_recursive_followup() -> void:
 	attacker.talent_ids = ["kensei_ertianyiliu", "test_count_off"]
 	_strike(tm, attacker, enemy)
 	_eq("无燕返 → 副手仍只打 1 次（递归确实来自燕返）", attacker.sword_qi - 10, 1)
+
+	# ★ 返气**与链长无关**：不论燕返把副手链拉多长，剑气回荡只返一次 10 点。
+	# 上面几条是用「链长恰好为 2」筛样本间接编码这件事的，这里直接断言——
+	# DEX=100 时链长在 2 到 20 之间随机，若返气跟着链长走，总气会随轮次浮动；
+	# 只返一次则每一轮都恰好是 20。
+	tm.debug_crit_mode = CRIT_FORCE          # 主手必暴 → 剑气回荡每轮都触发
+	attacker.stats.dex = 100                 # 链长必然 ≥ 2
+	attacker.talent_ids = [
+		"kensei_ertianyiliu", "kensei_yanfan", "kensei_jianqihuidang",
+	]
+	var qi_values: Dictionary = {}
+	for _i: int in range(15):
+		_strike(tm, attacker, enemy)
+		qi_values[attacker.sword_qi] = true
+	var seen_qi: Array = qi_values.keys()
+	seen_qi.sort()
+	_eq("链长随机但返气恒为一次：15 轮的剑气总量只有一个取值",
+		seen_qi.size(), 1)
+	_eq("那个取值是 10(普攻) + 10(仅被强化的那一次) == 20",
+		int(seen_qi[0]) if seen_qi.size() > 0 else -1, 20)
+	tm.debug_crit_mode = CRIT_DISABLE
 
 	(ctx["scene"] as Node).free()
 

@@ -2693,15 +2693,19 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 		# ★ 刻意不放 area_damage_multiplier：2026-08-09 用户裁决「副手不吃溅射衰减」。
 		# resolve_attack 缺该键时默认 1.0，正是这里想要的。别"顺手补上"。
 	}
-	# 剑气回荡主行：主手暴击让**随后那一次**副手追加必定暴击。effect 原文说的是
-	# 「该次副手追加伤害」——单数，所以标记消费一次就清掉。燕返递归出来的后续几次
-	# 不继承它，各自独立掷骰（燕返 rules 逐字：「每一次追加的副手伤害都各自独立
-	# 结算命中与暴击」）。
+	# 剑气回荡：主手暴击强化**随后那一次**副手追加——必定暴击 + 命中后返气。
+	# effect 原文说的是「该次副手的追加伤害」——单数，所以标记**消费一次就清掉**；
+	# 燕返递归出来的后续几次不继承它，各自独立掷骰（燕返 rules 逐字：「每一次追加的
+	# 副手伤害都各自独立结算命中与暴击」）。
 	# 注意顺序：必须写在 _apply_debug_determinism 之前，否则调试「不暴」态
 	# （disable_crit）会被这里覆盖，headless 用例就失去确定性。
-	if bool(action_ctx.get("offhand_guaranteed_crit", false)):
-		data["guaranteed_crit"] = true
-		action_ctx["offhand_guaranteed_crit"] = false
+	var empower: Dictionary = {}
+	var empower_raw: Variant = action_ctx.get("offhand_empower", null)
+	if empower_raw is Dictionary:
+		empower = empower_raw
+		action_ctx.erase("offhand_empower")
+		if bool(empower.get("guaranteed_crit", false)):
+			data["guaranteed_crit"] = true
 	_apply_debug_determinism(data)
 
 	# ── 副手自己掷骰、自己发两个 on-hit 事件（Wave 3）────────────
@@ -2716,8 +2720,12 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 		"pending_offhand": [],
 		# 燕返的链序：本次是链上第几次追加，决定它下一次的概率衰减几档。
 		"offhand_chain_index": int(followup.get("chain_index", 0)),
+		# 本次追加的伤害规格。燕返再追加时**沿用它**而不是自带一份
+		# （2026-08-10 用户裁决：基于二天一流的伤害再次计算）。
+		"offhand_damage_pct": damage_pct,
+		"offhand_damage_type": damage_type,
 		# 指回本次攻击动作的 ctx。有些效果的标记必须落在动作级而不是这一击级
-		# （grant_offhand_guaranteed_crit 就是），写在本字典上会随函数返回丢掉。
+		# （empower_next_offhand 就是），写在本字典上会随函数返回丢掉。
 		"action_ctx": action_ctx,
 	}
 	var outcome: Dictionary = DamageCalculator.roll_outcome(attacker, defender, data)
@@ -2735,6 +2743,19 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 		defender.take_damage(result.damage, damage_type)
 	else:
 		DamagePopup.spawn_miss(popup_layer, defender.position, 1)
+
+	# 被强化的那一次追加，命中后返气（剑气回荡）。
+	# ★ 「命中才给」是引擎侧的实装判断，已回写进设计库 rules（2026-08-10）：
+	# 用户改的卡面把两件事合并成一句「该次副手的追加伤害必定暴击且额外获得
+	# 10 点剑气」，主语是那次追加，但没写命中与否。取「命中后结算」是因为
+	# ① 改版前的卡面明确写着「命中后」，这次改的是「不依赖暴击」那一点；
+	# ② 必定暴击并不保证命中——副手仍要照 R1.2 独立掷命中，miss 时暴击无意义。
+	var empower_qi: int = int(empower.get("qi_on_hit", 0))
+	if result.hit and empower_qi > 0:
+		attacker.set_sword_qi(attacker.sword_qi + empower_qi)
+		print("[Talent] %s 「%s」→ 被强化的副手追加命中 → +%d 剑气 → %d" % [
+			attacker.unit_name, str(empower.get("talent_id", "")),
+			empower_qi, attacker.sword_qi])
 
 	# ── 副手的 after-damage 三事件（Wave 3 新增）──────────────
 	# Wave 2 时这里**只**补发了「击杀时」，「命中后」/「造成伤害时」在副手命中时
@@ -2865,23 +2886,28 @@ func _apply_talent_effect(unit: Unit, talent_id: String,
 				"damage_type": str(effect.get("damage_type", "")),
 				"chain_index": 0,
 			})
-		"grant_offhand_guaranteed_crit":
-			# 剑气回荡主行：本次攻击动作里随后的副手追加必定暴击。
-			# 只在 ctx 上留个标记，真正生效在 _execute_offhand_followup——那里读完
-			# 就清掉（effect 说的是「该次副手追加伤害」，单数）。
+		"empower_next_offhand":
+			# 剑气回荡：强化**随后那一次**副手追加——让它必定暴击，并在它命中后
+			# 额外返气。effect 逐字：「主手暴击时，该次副手的追加伤害必定暴击且
+			# 额外获得 10 点剑气」——两件事都挂在同一次副手追加上，所以做成一条
+			# 效果、一个标记，读完即清（「该次」是单数，燕返再产生的后续追加不继承）。
 			#
-			# ★ 这不是回溯改判：作用对象是**随后另一次攻击**的暴击判定，不是本次。
-			# 本次的 hit / crit 已经掷完，任何回头改它的写法都违反 R1.2 / R1.3
-			# （最终层修正必须在掷骰前应用完）。
-			# ★ 标记必须落在**本次攻击动作**的 ctx 上。它的消费点在
-			# _execute_offhand_followup 开头，读的是 action_ctx；而副手侧分发时
-			# 传进来的 ctx 是临时的 offhand_ctx，写在那儿会随函数返回一起丢掉
-			# ——静默失效。副手侧的 ctx 因此带一个 action_ctx 指针。
+			# ★ 这不是回溯改判：作用对象是**随后另一次攻击**，不是本次。本次的
+			# hit / crit 已经掷完，任何回头改它的写法都违反 R1.2 / R1.3。
+			# ★ 标记必须落在**本次攻击动作**的 ctx 上。消费点在
+			# _execute_offhand_followup 开头，读的是 action_ctx；副手侧分发时传进来的
+			# 是临时的 offhand_ctx，写在那儿会随函数返回丢掉——静默失效。
 			var owner_ctx: Variant = ctx.get("action_ctx", null)
 			var target_ctx: Dictionary = owner_ctx if owner_ctx is Dictionary else ctx
-			target_ctx["offhand_guaranteed_crit"] = true
-			print("[Talent] %s 「%s」→ 随后一次副手追加必定暴击" % [
-				unit.unit_name, talent_id])
+			target_ctx["offhand_empower"] = {
+				"guaranteed_crit": bool(effect.get("guaranteed_crit", false)),
+				"qi_on_hit": int(effect.get("qi_on_hit", 0)),
+				"talent_id": talent_id,
+			}
+			print("[Talent] %s 「%s」→ 强化随后一次副手追加（必暴=%s，命中返气=%d）" % [
+				unit.unit_name, talent_id,
+				str(bool(effect.get("guaranteed_crit", false))),
+				int(effect.get("qi_on_hit", 0))])
 		"more_damage_from_stat":
 			# R1.8 的「更多」类修正：措辞「N% 更多 X」，各条独立连乘，落伤害链最外层。
 			# ★ 它**不是**「暴击倍率 ×N」那一类（拔刀走的那条），两者落层不同。
@@ -2914,10 +2940,20 @@ func _apply_talent_effect(unit: Unit, talent_id: String,
 			var chance: float = base_chance * pow(decay, float(chain_index))
 			if randf() >= chance:
 				return
+			# ★ 追加的伤害规格**沿用触发本次判定的那一次副手追加**，不由本卡声明
+			# （2026-08-10 用户裁决：「燕返的追加是基于二天一流的伤害再次进行计算」）。
+			# 链的源头就是二天一流那一次，所以这样天然跟随——二天一流将来改了系数，
+			# 燕返自动跟着变，不会像各存一份那样静默分叉。
+			var inherit_pct: float = float(ctx.get("offhand_damage_pct", 0.0))
+			var inherit_type: String = str(ctx.get("offhand_damage_type", ""))
+			if inherit_pct <= 0.0 or inherit_type == "":
+				push_warning("[Talent] %s 无法继承副手追加的伤害规格（pct=%s type=%s），本次递归取消"
+					% [talent_id, str(inherit_pct), inherit_type])
+				return
 			(ctx["pending_offhand"] as Array).append({
 				"talent_id": talent_id,
-				"damage_pct": float(effect.get("damage_pct", 0.0)),
-				"damage_type": str(effect.get("damage_type", "")),
+				"damage_pct": inherit_pct,
+				"damage_type": inherit_type,
 				"chain_index": chain_index + 1,
 			})
 			print("[Talent] %s 「%s」→ 第 %d 次递归追加命中（概率 %.1f%%）" % [
