@@ -686,6 +686,34 @@ func _test_row_binding_runtime() -> void:
 	_strike(tm, attacker, enemy)
 	_eq("未装副手 → 无副手追加可强化 → 10", attacker.sword_qi, 10)
 
+	# ★ 被强化的那一次**未命中就不返气**。
+	# 这条是引擎侧的实装判断（用户的新卡面把两件事合并成一句、没写命中与否），
+	# 已回写进设计库 rules，所以必须有断言锁住，否则那句 rules 只是文字。
+	# 造 miss：关掉强制命中开关、把守方回避拉满压到 1% 命中下限；主手则用
+	# payload 里的 guaranteed_hit / guaranteed_crit 直接钉死必中必暴
+	# ——那两个键 roll_outcome 直接读，不经调试开关。
+	attacker.equip_offhand(OFFHAND_WEAPON)
+	attacker.talent_ids = ["kensei_ertianyiliu", "kensei_jianqihuidang", "test_count_off"]
+	tm.debug_deterministic = false
+	enemy.stats.spd = 9999
+	var forced: Dictionary = {"guaranteed_hit": true, "guaranteed_crit": true}
+	var qi_seen: Dictionary = {}
+	for _i: int in range(24):
+		_strike(tm, attacker, enemy, forced)
+		qi_seen[attacker.sword_qi] = int(qi_seen.get(attacker.sword_qi, 0)) + 1
+	# 副手 miss → 10（只有普攻）；副手命中 → 10 + 1(计数) + 10(返气) = 21。
+	# 若返气不看命中，miss 那些轮会变成 20，冒出第三个取值。
+	var unexpected: Array = []
+	for k: Variant in qi_seen.keys():
+		if int(k) != 10 and int(k) != 21:
+			unexpected.append(k)
+	_check("副手未命中的轮次一点气都不返（剑气总量只有 10 / 21 两种取值）",
+		unexpected.is_empty(),
+		"意外取值 %s（20 = miss 也返了气）；分布 %s" % [str(unexpected), str(qi_seen)])
+	_check("24 轮里副手确实 miss 过（否则这条断言是空转）",
+		int(qi_seen.get(10, 0)) > 0, "分布 %s" % str(qi_seen))
+	tm.debug_deterministic = true
+
 	(ctx["scene"] as Node).free()
 
 
