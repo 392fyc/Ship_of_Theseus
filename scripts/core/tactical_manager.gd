@@ -29,9 +29,14 @@ const SOURCE_OFFHAND: String = "副手"
 ## Wave 4 的防御侧反应会加第二条，那时这个维度才真正开始区分。
 const CONTEXT_ACTIVE_ATTACK: String = "active_attack"
 
-## 一次攻击动作内副手追加的总次数上限。**护栏，不是游戏数值**：燕返的链长期望
-## 本就有限（DEX% 起始、每成功一次 ×80% 衰减），真撞上这个数说明概率或衰减参数
-## 填错了，所以撞上时要响亮告警而不是静默截断。
+## 副手追加的链长上限。**护栏，不是游戏数值**：燕返的链长期望本就有限
+## （DEX% 起始、每成功一次 ×80% 衰减），真撞上这个数说明概率或衰减参数填错了，
+## 所以撞上时要响亮告警而不是静默截断。
+##
+## 名字里的 PER_ACTION 要照 R1.10 读：范围技能对每个目标各调一次
+## `_execute_hostile_action`，所以它实际是**每目标**每次攻击动作 20 次，一发 AOE
+## 打 3 个人的总上限是 60。这是对的，不是漏算——R1.10 逐字「计次按被作用的目标
+## 单位分别进行」，每个目标本就是各自独立的一次结算。
 const MAX_OFFHAND_FOLLOWUPS_PER_ACTION: int = 20
 var _talent_registry: RefCounted = null
 var _state_registry: RefCounted = null

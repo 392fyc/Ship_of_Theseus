@@ -327,6 +327,20 @@ func _row_rejection_reason(row: Dictionary, state_registry: RefCounted) -> Strin
 		if str(item) not in SUPPORTED_CONTEXTS:
 			return "触发行 %s 依赖的产生路径「%s」引擎不注入（当前只有 %s）——依赖它的卡永不触发，拒收" \
 				% [where, str(item), str(SUPPORTED_CONTEXTS)]
+	# 常驻行不许带产生路径。理由与 trigger_source 那条对称：常驻行没有「本次伤害」，
+	# 谈不上它由哪条路径产生；而常驻天赋的消费方（_offhand_effect_scale）是主动
+	# 查询、手上没有 ctx，求值不了这个维度。允许它填写等于留一个**注册期收下、
+	# 运行期永不校验**的字段——比不支持更危险。
+	if bool(row.get("passive", false)) and not (contexts_raw as Array).is_empty():
+		return "触发行 %s 是常驻行，不能声明 requires_contexts（常驻没有「本次伤害的产生路径」，消费方也无从求值）" \
+			% where
+
+	# trigger_object 引擎不读。填了值却不读 = 静默丢掉一个限制，与 trigger_source
+	# 那条「读不懂的限制不许当空放行」是同一条纪律，所以非空一律拒收而不是忽略。
+	var obj: String = str(entry.get("trigger_object", "")).strip_edges()
+	if obj != "":
+		return "触发行 %s 声明了 trigger_object「%s」，但引擎不读这个槽——静默忽略等于丢掉一个限制，故拒收" \
+			% [where, obj]
 
 	var condition: String = str(entry.get("trigger_condition", ""))
 	# 形状先于语义：`as Array` 对非数组会抛 cast 错误然后**放行**，一个漏写的
@@ -601,7 +615,11 @@ func effects_for_row(talent: Dictionary, row: String) -> Array:
 	if not effects is Array:
 		return out
 	for item: Variant in (effects as Array):
+		# 非字典项**不在这里丢弃**——注册期已经拒过这种数据，能走到这里说明是
+		# 绕过注册器直接塞进来的。原样传下去，让分发方的告警分支去报，不然那条
+		# 告警就成了永不执行的死代码，坏数据反而更隐蔽。
 		if not item is Dictionary:
+			out.append(item)
 			continue
 		var bound: String = str((item as Dictionary).get("row", "")).strip_edges()
 		if bound == "" or bound == row:

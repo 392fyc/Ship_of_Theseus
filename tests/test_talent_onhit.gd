@@ -434,6 +434,36 @@ func _test_contexts_gate(dl: Object) -> void:
 			},
 			"keyword": "挂错时机会被静默吞掉",
 		},
+		# 常驻行不许带产生路径：常驻没有「本次伤害」，消费方（_offhand_effect_scale）
+		# 是主动查询、手上没有 ctx，求值不了这个维度。允许填写等于留一个
+		# 注册期收下、运行期永不校验的字段。
+		"ctx_on_passive_row": {
+			"card": {
+				"id": "ctx_on_passive_row", "name": "测试·常驻行带路径", "class_id": "kensei",
+				"trigger_event": "永久生效", "trigger_condition": "在主动攻击动作中",
+				"trigger_frequency": "每次", "trigger_frequency_n": 1,
+				"condition_model": "states", "requires_states": [],
+				"requires_contexts": ["active_attack"],
+				"engine_effects": [{
+					"type": "unlock_offhand_weapon_effect", "effect_scale": 50,
+				}],
+			},
+			"keyword": "常驻行，不能声明 requires_contexts",
+		},
+		# trigger_object 引擎不读 → 填了非空值一律拒收，不静默忽略。
+		# 生产库当前有 4 张在用卡带非空 trigger_object（evade / mark / kensei_badao），
+		# 它们尚未导入引擎；将来导入时会撞这道闸，那是有意的。
+		"obj_not_read": {
+			"card": {
+				"id": "obj_not_read", "name": "测试·声明了触发对象", "class_id": "kensei",
+				"trigger_event": "命中后", "trigger_object": "mark",
+				"trigger_source": "", "trigger_condition": "",
+				"trigger_frequency": "每次", "trigger_frequency_n": 1,
+				"condition_model": "none", "requires_states": [],
+				"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 1}],
+			},
+			"keyword": "引擎不读这个槽",
+		},
 		# 常驻类效果挂在可分发行上 → 拒。
 		"fx_passive_on_event": {
 			"card": {
