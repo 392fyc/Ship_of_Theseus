@@ -1,0 +1,36 @@
+{
+  "id": "kensei_yanfan",
+  "name": "燕返",
+  "class_id": "kensei",
+  "rarity": "史诗",
+  "tags": ["攻击"],
+
+  "trigger_event": "命中后",
+  "trigger_object": "",
+  "trigger_source": "副手",
+  "trigger_condition": "该次命中为副手的追加伤害，且发生在主动攻击动作中；处于〔双持〕状态",
+  "trigger_frequency": "每次",
+  "trigger_frequency_n": 1,
+  "effect": "主动攻击动作中，副手的追加伤害命中后，以 DEX% 的概率再追加一次；每成功追加一次，下一次的概率为上一次的 80%（例如 50%、40%、32%），可以反复追加。",
+  "rules": "仅在双持状态（经二天一流装备副手武器）下生效；每一次追加的副手伤害都各自独立结算命中与暴击（R1.2、R1.3）。",
+
+  "condition_model": "states",
+  "requires_states": ["shuangchi"],
+  "requires_contexts": ["active_attack"],
+
+  "engine_effects": [
+    {
+      "type": "offhand_recursive_followup",
+      "chance_stat": "DEX",
+      "chance_decay_pct": 80,
+      "damage_pct": 50,
+      "damage_type": "physical",
+      "self_retriggerable": true
+    }
+  ],
+
+  "engine_note": "**引擎侧只缺效果类型，不缺频率类型。** Wave 3 任务书 §1.3 说本卡卡在「SUPPORTED_FREQUENCIES 只有『每次』」——查设计库快照，本卡的 trigger_frequency 就是「每次」、trigger_frequency_n=1，频率字段本身没问题。真正缺的是能表达「按概率递减、可反复」的效果类型，所以新增了 offhand_recursive_followup，SUPPORTED_FREQUENCIES 一行没动。\n\nself_retriggerable 必填且必须为 true：R1.10 的默认约束逐字是「一个效果不被自己引发的事件再次触发」，豁免句是「除非效果描述显式声明可以反复追加」。本卡 effect 原文写着「可以反复追加」，是豁免适用的那一类。做成显式开关而不是代码里默认放开，是为了让将来漏写这句的卡被这道闸门挡住，而不是跟着一起递归。\n\n**damage_pct=50 是引擎侧的解释，登记备查**：effect 只说「再追加一次」，没有重写百分比，读作「再来一次同规格的副手追加伤害」——即二天一流那 50%。这里显式写出来而不是去引用二天一流的数值，是因为跨卡引用会让两张卡的数值静默耦合；若设计意图是「跟随二天一流」，需要设计侧给一个明确的表达方式。\n\n概率的实现：首次判定用 DEX%（chain_index=0），每成功追加一次 chain_index 加一、概率再乘一次 chance_decay_pct，即 DEX% × 0.8^n，与 effect 举的例子（50%、40%、32%）一致。链本身用队列迭代而不是递归调用，并有引擎侧总护栏 MAX_OFFHAND_FOLLOWUPS_PER_ACTION——那是防数据填错的闸，不是游戏数值。\n\n条件逐句映射：「该次命中为副手的追加伤害」由 trigger_source=副手 承担；「发生在主动攻击动作中」由 requires_contexts=[active_attack] 承担；「处于〔双持〕状态」由 requires_states=[shuangchi] 承担。",
+
+  "_mirror": "id / name / class_id / rarity / tags / trigger 五段 / effect / rules 是设计库天赋条目的只读镜像。版本锚点 = 设计库仓 snapshots/talents.json @ 2ea744b。",
+  "_engine_note": "requires_states / condition_model / requires_contexts / engine_effects / engine_note 是引擎侧字段，设计库无对应列、不回流。"
+}

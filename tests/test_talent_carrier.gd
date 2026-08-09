@@ -134,9 +134,13 @@ const SYNTHETIC: Dictionary = {
 		"condition_model": "unsupported", "requires_states": [],
 		"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 99}],
 	},
-	"test_rej_a2_event": {
-		"id": "test_rej_a2_event", "name": "测试·A2 事件", "class_id": "kensei",
-		"trigger_event": "暴击时", "trigger_condition": "",
+	# 「引擎不分发的事件一律拒收」这条把关本身没变，变的是**哪个事件还没接**：
+	# A1 时这里放的是「暴击时」，Wave 3 已经接了它，于是换成当前真正未接的
+	# 防御侧事件「受到攻击时」（属 Wave 4）。夹具跟着实装前沿走，断言才不会
+	# 悄悄变成永真。
+	"test_rej_defensive_event": {
+		"id": "test_rej_defensive_event", "name": "测试·防御侧事件未接", "class_id": "kensei",
+		"trigger_event": "受到攻击时", "trigger_condition": "",
 		"trigger_frequency": "每次", "trigger_frequency_n": 1,
 		"condition_model": "none", "requires_states": [],
 		"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 99}],
@@ -419,14 +423,15 @@ func _test_extra_triggers(dl: Object) -> void:
 			"condition_model": "none", "requires_states": [],
 			"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 1}],
 			"extra_triggers": [{
-				"trigger_event": "暴击时", "trigger_condition": "",
+				"trigger_event": "受到攻击时", "trigger_condition": "",
 				"trigger_frequency": "每次", "trigger_frequency_n": 1,
 				"condition_model": "none", "requires_states": [],
 			}],
 		}
 	}
 	var reg3: Object = _make_registry(bad_extra, dl.states)
-	_check("附加行事件属 A2 → 整卡被拒", not reg3.is_registered("bad_extra"))
+	_check("附加行是未接事件（防御侧，Wave 4）→ 整卡被拒",
+		not reg3.is_registered("bad_extra"))
 	_check("拒绝理由指明是附加行",
 		reg3.rejection_reason("bad_extra").contains("extra[0]"),
 		reg3.rejection_reason("bad_extra"))
@@ -973,12 +978,12 @@ func _test_rejection_discipline(dl: Object) -> void:
 	var cases: Dictionary = {
 		"test_rej_unknown_state": "未在 data/states/ 注册",
 		"test_rej_unsupported": "unsupported",
-		"test_rej_a2_event": "A2",
+		"test_rej_defensive_event": "引擎不分发",
 		"test_rej_frequency": "频率",
 		"test_rej_unknown_effect": "未知 type",
 		"test_rej_condition_mismatch": "矛盾",
 		"test_rej_no_effects": "engine_effects 为空",
-		"test_rej_states_empty": "requires_states 为空",
+		"test_rej_states_empty": "都为空",
 		"test_rej_no_event": "缺 trigger_event",
 		"test_rej_no_model": "缺 condition_model",
 		"test_rej_bad_model": "非法",
@@ -1029,12 +1034,14 @@ func _test_event_index(dl: Object) -> void:
 		mixed[key] = (SYNTHETIC[key] as Dictionary).duplicate(true)
 	var reg: Object = _make_registry(mixed, dl.states)
 
-	for ev: String in ["击杀时", "命中后", "造成伤害时", "执行攻击动作时"]:
+	# Wave 3 起「命中时」/「暴击时」也进桶，和其余四个事件走同一条推导。
+	for ev: String in ["击杀时", "命中后", "造成伤害时", "执行攻击动作时",
+			"命中时", "暴击时"]:
 		_eq("「%s」桶里的行数与夹具推导一致" % ev,
 			reg.talents_for_event(ev).size(), _expected_rows_for_event(mixed, ev))
-	# A2 事件即使有数据也索引不到——它在注册期就被拒了。
-	_eq("「暴击时」下 0 张（A2 不接）", reg.talents_for_event("暴击时").size(), 0)
-	_eq("「命中时」下 0 张（A2 不接）", reg.talents_for_event("命中时").size(), 0)
+	# 防御侧事件即使有数据也索引不到——它在注册期就被拒了（夹具 test_rej_defensive_event）。
+	_eq("「受到攻击时」下 0 张（防御侧事件属 Wave 4，未接）",
+		reg.talents_for_event("受到攻击时").size(), 0)
 	_eq("未知事件下 0 张", reg.talents_for_event("子虚乌有时").size(), 0)
 
 

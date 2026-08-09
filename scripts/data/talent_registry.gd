@@ -44,13 +44,25 @@ extends RefCounted
 ## 注册时整卡摊平成触发行列表（`_trigger_rows`），逐行校验；**任一行不合格整卡拒收**
 ## ——不做「主行注册、附加行丢弃」，那会让一张卡半生效，而设计库那边看到的是完整的卡。
 ##
+## ── 触发来源与产生路径（Wave 3 起支持）─────────────────
+##
+## `trigger_source`（设计库权威字段，闭集「主手 / 副手」）从本波起**开始读**：
+## 分发时按本次伤害由哪只手产生来过滤。**空串 = 不限来源**，主副手都触发——
+## 介错就是这一类，它的击杀返气不该因为是副手补的刀就不给。
+##
+## `requires_contexts`（引擎侧新字段，触发行级）承担条件文本里「发生在主动攻击
+## 动作中」那半句。不表达它就只能把那半句吞掉，或整卡填 `unsupported` 拒收，
+## 两者都不可接受。如实说明它当前的把关强度：引擎目前唯一的伤害产生路径就是
+## 主动攻击动作（自动反击已于 2026-07-11 整体移除），所以 `active_attack`
+## **此刻恒成立**；闭集校验是真的（依赖未知标签的卡会被拒），求值也真的在跑，
+## 但要等 Wave 4 的防御侧事件落地它才会真正开始区分。
+##
 ## ── 仍然不处理的东西（明确记下，免得误以为已覆盖）──────
 ##
-##   - **`trigger_object` / `trigger_source` 两个槽**：不读。设计库侧 `trigger_source`
-##     是「主手 / 副手」闭集，当前 3 张卡在用；引擎分发时不区分来源手别。
-##   - **超出 `requires_states` 的条件**：一律走 `condition_model=unsupported` 拒收，
-##     不做部分执行。
-##   - **命中时 / 暴击时**两个真 on-hit 事件：属 A2，未接，注册期拒收。
+##   - **`trigger_object` 槽**：不读。
+##   - **超出 `requires_states` / `requires_contexts` 的条件**：一律走
+##     `condition_model=unsupported` 拒收，不做部分执行。
+##   - **防御侧事件（受到攻击时）**：属 Wave 4，未接，注册期拒收。
 ##
 ## 用法：
 ##     var states := StateRegistry.new(DataLoader.states)
@@ -61,13 +73,40 @@ extends RefCounted
 const AFTER_DAMAGE_EVENTS: Array[String] = ["命中后", "造成伤害时", "击杀时"]
 
 ## Wave 2 新接的动作级事件。它比「命中时」还早——在命中判定之前，
-## 分发点在 `_execute_hostile_action` 开头（`resolve_attack` 之前）。
-## 与 A2 的真 on-hit 钩子（命中时 / 暴击时）**不是同一处**，故不越 A2 的界。
+## 分发点在 `_execute_hostile_action` 开头（掷骰之前）。
 const ACTION_EVENTS: Array[String] = ["执行攻击动作时"]
+
+## Wave 3 · A2 接的两个真 on-hit 事件——时点在**伤害数值结算之前**。落在这里的
+## 效果可以回过头改写本次伤害（死线的「该次暴击造成 (DEX/2)% 更多伤害」就是）；
+## after-damage 三事件在结算之后，只能产生新的后果。分野照 R1.4。
+##
+## ⚠ R1.4 逐字只把效果时机分成 on-hit 与 after-damage **两类**，规则层没有独立的
+## 「暴击时」。所以引擎把「暴击时」实现为 on-hit 的**条件化分支**：命中且暴击时，
+## 与「命中时」在同一时点、同一次分发批次里发出，而不是并列的第三类时机。
+const ON_HIT_EVENTS: Array[String] = ["命中时", "暴击时"]
 
 ## 引擎当前能分发的全部事件。
 const SUPPORTED_EVENTS: Array[String] = [
-	"命中后", "造成伤害时", "击杀时", "执行攻击动作时",
+	"命中后", "造成伤害时", "击杀时", "执行攻击动作时", "命中时", "暴击时",
+]
+
+## `trigger_source` 的闭集（不含空串——空串单独判，语义是「不限来源」）。
+const SUPPORTED_TRIGGER_SOURCES: Array[String] = ["主手", "副手"]
+
+## 带伤害来源的事件（攻击链五事件）。设计库侧 `trigger_source` 的 schema 也正是
+## 绑在这五个上。「执行攻击动作时」不在内：那一刻还没掷命中，谈不上来源。
+const SOURCE_BEARING_EVENTS: Array[String] = [
+	"命中时", "暴击时", "命中后", "造成伤害时", "击杀时",
+]
+
+## `requires_contexts` 的闭集：本次伤害的产生路径标签。
+const SUPPORTED_CONTEXTS: Array[String] = ["active_attack"]
+
+## `more_damage_from_stat` / `offhand_recursive_followup` 允许读取的属性名。
+## 照 2026-07-08 定的 9 属性模型（成长 7 + 固定 2），此处列可被效果读取的 8 个
+## （HP 不在内——按属性读 HP 做伤害系数没有已知设计意图，要用时再开）。
+const SUPPORTED_STATS: Array[String] = [
+	"STR", "MAG", "DEX", "SPD", "DEF", "RES", "LCK", "MOV",
 ]
 
 ## 常驻类事件——**不是**触发时机，而是「一直生效」。这类行不进事件桶（没有可分发的
@@ -86,7 +125,14 @@ const CONDITION_MODELS: Array[String] = ["none", "states", "unsupported"]
 ## `engine_effects` 支持的指令类型。
 const SUPPORTED_EFFECT_TYPES: Array[String] = [
 	"gain_resource", "offhand_followup", "unlock_offhand_weapon_effect",
+	"grant_offhand_guaranteed_crit", "more_damage_from_stat",
+	"offhand_recursive_followup",
 ]
+
+## 递归追加的衰减系数下限（护栏）。衰减必须真的衰减——填 100 就是永不衰减的
+## 无限链。这不是游戏数值，是防手误。
+const MIN_CHANCE_DECAY_PCT: float = 1.0
+const MAX_CHANCE_DECAY_PCT: float = 99.0
 
 ## `offhand_followup` 的伤害百分比合理上限（护栏，不是游戏数值——数值从 JSON 读）。
 const MAX_FOLLOWUP_PCT: int = 1000
@@ -148,7 +194,7 @@ func _build(talents: Dictionary, state_registry: RefCounted) -> void:
 			if reason != "":
 				break
 		if reason == "":
-			reason = _effects_rejection_reason(entry)
+			reason = _effects_rejection_reason(entry, rows)
 		if reason != "":
 			_reject(tid, reason)
 			continue
@@ -156,7 +202,9 @@ func _build(talents: Dictionary, state_registry: RefCounted) -> void:
 		for row: Dictionary in rows:
 			var trigger: Dictionary = row["trigger"]
 			if bool(row.get("passive", false)):
-				_passive[tid] = {"talent": entry, "trigger": trigger}
+				_passive[tid] = {
+					"talent": entry, "trigger": trigger, "row": str(row["row"]),
+				}
 				continue
 			var event: String = str(trigger.get("trigger_event", ""))
 			if not _by_event.has(event):
@@ -220,7 +268,7 @@ func _row_rejection_reason(row: Dictionary, state_registry: RefCounted) -> Strin
 			return "触发行 %s 被标为常驻但事件「%s」不在 %s" \
 				% [where, event, str(PASSIVE_EVENTS)]
 	elif event not in SUPPORTED_EVENTS:
-		return "触发行 %s 的事件「%s」引擎不分发（当前支持 %s；命中时/暴击时属 A2 未接）" \
+		return "触发行 %s 的事件「%s」引擎不分发（当前支持 %s；防御侧事件如「受到攻击时」属 Wave 4 未接）" \
 			% [where, event, str(SUPPORTED_EVENTS)]
 
 	var model: String = str(entry.get("condition_model", ""))
@@ -232,6 +280,34 @@ func _row_rejection_reason(row: Dictionary, state_registry: RefCounted) -> Strin
 	if model == "unsupported":
 		return "触发行 %s 的 condition_model=unsupported：条件含引擎尚不能表达的部分，按「宁可不注册」拒收" % where
 
+	# ── trigger_source（Wave 3 起读）──────────────────
+	# 空串是合法的，语义是「不限来源」；非空则必须在闭集内。填了闭集外的值
+	# （比如「双手」「远程」）不能当成空放行——那等于把一个引擎读不懂的限制
+	# 静默丢掉，卡就会在本该被排除的来源上触发。
+	var source: String = str(entry.get("trigger_source", "")).strip_edges()
+	if source != "" and source not in SUPPORTED_TRIGGER_SOURCES:
+		return "触发行 %s 的 trigger_source「%s」不在闭集 %s 内（空串=不限来源）" \
+			% [where, source, str(SUPPORTED_TRIGGER_SOURCES)]
+	# 来源只对攻击链五事件有意义（设计库 schema 也是这么绑的）。「执行攻击动作时」
+	# 发生在命中判定之前，那一刻还没有伤害、也就谈不上由哪只手产生——一张卡若把
+	# 来源挂在那种事件上，说明建卡时判断错了，拒收比静默忽略掉那个限制安全。
+	if source != "" and event not in SOURCE_BEARING_EVENTS:
+		return "触发行 %s 指定了 trigger_source「%s」，但事件「%s」不带伤害来源（带来源的只有 %s）" \
+			% [where, source, event, str(SOURCE_BEARING_EVENTS)]
+
+	# ── requires_contexts（Wave 3 新增，引擎侧字段）────
+	var contexts_raw: Variant = entry.get("requires_contexts", [])
+	if not contexts_raw is Array:
+		return "触发行 %s 的 requires_contexts 必须是数组，实际是 %s" \
+			% [where, type_string(typeof(contexts_raw))]
+	for item: Variant in (contexts_raw as Array):
+		if not item is String:
+			return "触发行 %s 的 requires_contexts 元素必须是字符串，实际含 %s" \
+				% [where, type_string(typeof(item))]
+		if str(item) not in SUPPORTED_CONTEXTS:
+			return "触发行 %s 依赖的产生路径「%s」引擎不注入（当前只有 %s）——依赖它的卡永不触发，拒收" \
+				% [where, str(item), str(SUPPORTED_CONTEXTS)]
+
 	var condition: String = str(entry.get("trigger_condition", ""))
 	# 形状先于语义：`as Array` 对非数组会抛 cast 错误然后**放行**，一个漏写的
 	# 方括号就能让下面整个状态依赖循环被跳过、绕过 §2.3 硬判据。必须显式判类型。
@@ -241,10 +317,21 @@ func _row_rejection_reason(row: Dictionary, state_registry: RefCounted) -> Strin
 			% type_string(typeof(required_raw))
 	var required: Array = required_raw
 	# 声明与镜像数据必须自洽，否则说明建卡时判断错了。
+	#
+	# ⚠ `states` 这个取值名是 A1 时定的，当时结构化判据只有 requires_states 一种。
+	# Wave 3 加了 requires_contexts 之后，它的实际语义已经是「条件文本已被引擎的
+	# 结构化判据**完整**表达」，不再专指状态。取值名沿用是为了不动已有数据与文档，
+	# 但自洽性检查必须把两种判据都算上——否则一张条件只有「发生在主动攻击动作中」
+	# 的卡会无路可走：填 states 因 requires_states 空被拒，填 none 因 condition
+	# 非空被拒。
+	var contexts: Array = contexts_raw
 	if model == "none" and condition.strip_edges() != "":
 		return "condition_model=none 但 trigger_condition 非空（「%s」）——声明与设计库镜像矛盾" % condition
-	if model == "states" and required.is_empty():
-		return "condition_model=states 但 requires_states 为空——声明与数据矛盾"
+	if model == "none" and not contexts.is_empty():
+		return "condition_model=none 但 requires_contexts 非空（%s）——none 的语义是无条件" \
+			% str(contexts)
+	if model == "states" and required.is_empty() and contexts.is_empty():
+		return "condition_model=states 但 requires_states 与 requires_contexts 都为空——声明与数据矛盾"
 
 	# ★ 硬判据：依赖的状态必须已注册且引擎判得了。
 	for item: Variant in required:
@@ -268,17 +355,36 @@ func _row_rejection_reason(row: Dictionary, state_registry: RefCounted) -> Strin
 	return ""
 
 
-## 卡级效果检查（`engine_effects` 由主行与全部附加行共用，只查一次）。
-## 设计库的 `talent_trigger_extra` 子表只承载触发五段、没有效果字段，所以效果
-## 天然是卡级的——附加行触发时执行的是同一组 `engine_effects`。
-func _effects_rejection_reason(entry: Dictionary) -> String:
+## 卡级效果检查。`engine_effects` 存在于卡级（设计库的 `talent_trigger_extra` 子表
+## 只承载触发五段、没有效果字段），但**每条效果可以用 `row` 绑定到指定触发行**。
+##
+## ── `row` 绑定要解决的问题（Wave 3 新增）──────────────
+##
+## A1/Wave 2 的模型是「全部触发行共用全部效果」。那在二天一流上成立（它两行共用
+## 同一条追加伤害），但在**剑气回荡**上直接错：它的 effect 是两句话对应两行——
+## 主行（暴击时/主手）要让随后的副手追加必定暴击，附加行（命中后/副手）要给
+## 10 点剑气。照共用模型，主手暴击会连剑气一起给、副手命中又会再设一次必暴标记。
+##
+## 所以每条效果可选地写 `"row": "main"` 或 `"row": "extra[0]"`；**不写 = 全行共用**
+## （向后兼容，已有的三张卡都不写）。绑定必须指向真实存在的行，且每一行都得至少
+## 有一条效果落在它上面——否则那一行触发了也什么都不做，是张半死的卡。
+func _effects_rejection_reason(entry: Dictionary, rows: Array) -> String:
 	var effects_raw: Variant = entry.get("engine_effects", [])
 	if not effects_raw is Array:
 		return "engine_effects 必须是数组，实际是 %s" % type_string(typeof(effects_raw))
 	var effects: Array = effects_raw
 	if effects.is_empty():
 		return "engine_effects 为空——没有可执行的效果，注册了也是死卡"
+	var row_names: Array[String] = []
+	for row: Dictionary in rows:
+		row_names.append(str(row["row"]))
+	# 每行落到了几条效果，用来查「有没有哪一行是空的」。
+	var per_row: Dictionary = {}
+	for name: String in row_names:
+		per_row[name] = 0
+	var index: int = -1
 	for item: Variant in effects:
+		index += 1
 		if not item is Dictionary:
 			return "engine_effects 含非字典项（%s）" % type_string(typeof(item))
 		var effect: Dictionary = item
@@ -286,6 +392,13 @@ func _effects_rejection_reason(entry: Dictionary) -> String:
 		if effect_type not in SUPPORTED_EFFECT_TYPES:
 			return "engine_effects 含未知 type「%s」（当前支持 %s）" \
 				% [effect_type, str(SUPPORTED_EFFECT_TYPES)]
+		var bound: String = str(effect.get("row", "")).strip_edges()
+		if bound != "" and bound not in row_names:
+			return "engine_effects 第 %d 条绑定到不存在的触发行「%s」（本卡有 %s）" \
+				% [index, bound, str(row_names)]
+		for name: String in row_names:
+			if bound == "" or bound == name:
+				per_row[name] = int(per_row[name]) + 1
 		if effect_type == "gain_resource":
 			var resource: String = str(effect.get("resource", ""))
 			if resource not in SUPPORTED_RESOURCES:
@@ -339,6 +452,68 @@ func _effects_rejection_reason(entry: Dictionary) -> String:
 			if dtype not in SUPPORTED_DAMAGE_TYPES:
 				return "offhand_followup 的 damage_type「%s」未支持（当前支持 %s）" \
 					% [dtype, str(SUPPORTED_DAMAGE_TYPES)]
+		elif effect_type == "more_damage_from_stat":
+			# R1.8 的「更多」类修正：`N% 更多 X`，各条独立连乘，落在伤害链最外层。
+			# ★ 它**不是**「暴击倍率 ×N」那一类——后者是 R1.3 暴击倍率上的乘算
+			# （拔刀的「暴击倍率 ×1.2」走那条），两者落层不同，别混用。死线写的是
+			# 「该次暴击造成 (DEX/2)% 更多伤害」，措辞是「更多 伤害」，落伤害链。
+			var stat: String = str(effect.get("stat", ""))
+			if stat not in SUPPORTED_STATS:
+				return "more_damage_from_stat 的 stat「%s」未支持（当前支持 %s）" \
+					% [stat, str(SUPPORTED_STATS)]
+			var per_point_raw: Variant = effect.get("pct_per_point", null)
+			var per_point_type: int = typeof(per_point_raw)
+			if per_point_type != TYPE_INT and per_point_type != TYPE_FLOAT:
+				return "more_damage_from_stat 的 pct_per_point 必须是数字，实际是 %s" \
+					% type_string(per_point_type)
+			if float(per_point_raw) <= 0.0:
+				return "more_damage_from_stat 的 pct_per_point 必须为正，实际 %s" \
+					% str(per_point_raw)
+		elif effect_type == "offhand_recursive_followup":
+			# 燕返：副手追加命中后按概率再追加，每成功一次概率乘衰减系数，可反复。
+			#
+			# ★ R1.10 的默认约束逐字是「一个效果不被自己引发的事件再次触发，多个
+			# 效果之间也不构成循环触发」，豁免句是「除非效果描述显式声明可以反复
+			# 追加」。所以递归**必须由数据显式开启**，代码里不预设放开——`
+			# self_retriggerable` 缺省或非 true 一律拒收。燕返的 effect 原文写着
+			# 「可以反复追加」，是豁免适用的那一类；将来若有卡漏写这句，它就该被
+			# 这道闸门挡住，而不是跟着一起递归。
+			if bool(effect.get("self_retriggerable", false)) != true:
+				return "offhand_recursive_followup 必须显式声明 self_retriggerable=true" \
+					+ "（R1.10 默认禁止自触发，豁免要求效果描述显式写明可反复追加）"
+			var chance_stat: String = str(effect.get("chance_stat", ""))
+			if chance_stat not in SUPPORTED_STATS:
+				return "offhand_recursive_followup 的 chance_stat「%s」未支持（当前支持 %s）" \
+					% [chance_stat, str(SUPPORTED_STATS)]
+			var decay_raw: Variant = effect.get("chance_decay_pct", null)
+			var decay_type: int = typeof(decay_raw)
+			if decay_type != TYPE_INT and decay_type != TYPE_FLOAT:
+				return "offhand_recursive_followup 的 chance_decay_pct 必须是数字，实际是 %s" \
+					% type_string(decay_type)
+			var decay: float = float(decay_raw)
+			if decay < MIN_CHANCE_DECAY_PCT or decay > MAX_CHANCE_DECAY_PCT:
+				return "offhand_recursive_followup 的 chance_decay_pct 越界（%s ~ %s），实际 %s——衰减必须真的衰减，填 100 就是永不收敛的无限链" \
+					% [str(MIN_CHANCE_DECAY_PCT), str(MAX_CHANCE_DECAY_PCT), str(decay_raw)]
+			var rec_pct_raw: Variant = effect.get("damage_pct", null)
+			var rec_pct_type: int = typeof(rec_pct_raw)
+			if rec_pct_type != TYPE_INT and rec_pct_type != TYPE_FLOAT:
+				return "offhand_recursive_followup 的 damage_pct 必须是数字，实际是 %s" \
+					% type_string(rec_pct_type)
+			var rec_pct: float = float(rec_pct_raw)
+			if rec_pct <= 0.0 or rec_pct > float(MAX_FOLLOWUP_PCT):
+				return "offhand_recursive_followup 的 damage_pct 越界（0 < x <= %d），实际 %s" \
+					% [MAX_FOLLOWUP_PCT, str(rec_pct_raw)]
+			var rec_dtype: String = str(effect.get("damage_type", ""))
+			if rec_dtype not in SUPPORTED_DAMAGE_TYPES:
+				return "offhand_recursive_followup 的 damage_type「%s」未支持（当前支持 %s）" \
+					% [rec_dtype, str(SUPPORTED_DAMAGE_TYPES)]
+		# grant_offhand_guaranteed_crit 无参数，type 在闭集内即合格。
+
+	# 每一行都必须至少有一条效果落在它上面。有行没效果 = 那行触发了也什么都不做，
+	# 而设计库那边看到的是一张完整的卡，两边理解会分叉。
+	for name: String in row_names:
+		if int(per_row[name]) == 0:
+			return "触发行 %s 没有任何效果绑定到它（engine_effects 的 row 绑定漏了这一行）" % name
 
 	return ""
 
@@ -352,6 +527,25 @@ func _effects_rejection_reason(entry: Dictionary) -> String:
 func talents_for_event(event: String) -> Array:
 	var found: Variant = _by_event.get(event, [])
 	return (found as Array).duplicate() if found is Array else []
+
+
+## 某条触发行实际要执行的效果。绑定规则见 `_effects_rejection_reason` 的说明：
+## 效果写了 `row` 就只在那一行执行，不写则全部行共用（向后兼容）。
+##
+## ★ 分发时必须走这里，不能直接遍历整卡的 `engine_effects`——剑气回荡是两行两
+## 效果，不过滤就会让主手暴击顺带把附加行的 10 点剑气也给了。
+func effects_for_row(talent: Dictionary, row: String) -> Array:
+	var out: Array = []
+	var effects: Variant = talent.get("engine_effects", [])
+	if not effects is Array:
+		return out
+	for item: Variant in (effects as Array):
+		if not item is Dictionary:
+			continue
+		var bound: String = str((item as Dictionary).get("row", "")).strip_edges()
+		if bound == "" or bound == row:
+			out.append(item)
+	return out
 
 
 ## 常驻天赋条目（`{"talent":…, "trigger":…}`）；不是常驻卡则返回空字典。

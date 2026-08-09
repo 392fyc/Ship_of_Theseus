@@ -14,6 +14,72 @@ class AttackResult:
 	var attacker_died: bool = false
 
 
+## 只掷命中与暴击、不算伤害，返回 `{"hit": bool, "crit": bool}`。
+##
+## 为什么要把掷骰单独抽出来（Wave 3 · A2）：设计库的「命中时」/「暴击时」两个
+## trigger_event 是**伤害数值结算之前**的时点，落在这个时点的天赋可以回过头改写
+## 本次伤害（死线的「该次暴击造成 (DEX/2)% 更多伤害」就是这种），所以调用方必须
+## 能先拿到掷骰结果、把事件分发完、再让伤害算出来。
+##
+## ★ 返回 Dictionary 而不是自定义类，是有原因的：`action_data` 会被 `duplicate(true)`
+## 深拷贝多次（`_build_hostile_action_context`、范围技能的 per-target 复制、预告路径），
+## 而 **Object 在 `duplicate(true)` 下是共享引用、不会被复制**。用类承载掷骰结果，
+## 一发范围技能的每个目标就会共用同一次命中/暴击判定——直接违反 R1.10「计次按被
+## 作用的目标单位分别进行」。Dictionary 会被真正深拷贝，没有这个陷阱。
+##
+## ★ 拆分前后 **randf() 的调用次数与顺序完全一致**，这是回归零变化的前提：
+##   未命中 → 掷 1 次（命中判定后立即返回，暴击那次永不发生）
+##   命中   → 掷 2 次（先命中、后暴击），顺序不可倒置
+##   guaranteed_hit / guaranteed_crit / 纯粹伤害 / disable_crit → 跳过对应那次掷骰
+## 三条别动的细节：① 命中失败必须立即 return；② `crit_rate <= 0` 时**照样掷**
+## （不加短路，否则高 LCK 目标上的掷骰次数会变）；③ 比较运算符原样保留——命中是
+## `randf() > hit_rate` 判未中、暴击是 `randf() < crit_rate` 判暴击，改成 >= / <=
+## 会在边界值上翻结果。另外本函数用的是全局 `randf()`，别换成新建的
+## RandomNumberGenerator 实例，那是另一条随机流。
+static func roll_outcome(attacker: Unit, defender: Unit,
+		action_data: Dictionary = {}) -> Dictionary:
+	var outcome: Dictionary = {"hit": false, "crit": false}
+	var damage_type: String = action_data.get("damage_type", "physical")
+	var weapon_hit: int = action_data.get("weapon_hit", 0)
+	var weapon_crit: int = action_data.get("weapon_crit", 0)
+	var terrain_evade_bonus: int = action_data.get("terrain_evade_bonus", 0)
+
+	# ── Step 1: Hit determination ───────────────────────
+	# Hit = weapon_hit + DEX×2
+	# Avoid = SPD×2 + terrain_evade
+	# guaranteed_hit（居合）：绕过命中判定，直接命中。
+	var guaranteed_hit: bool = bool(action_data.get("guaranteed_hit", false))
+	if guaranteed_hit:
+		outcome["hit"] = true
+	else:
+		var hit_value: int = attacker.get_hit_value(weapon_hit)
+		var avoid_value: int = defender.get_avoid_value(terrain_evade_bonus)
+		var hit_rate: float = clampf((hit_value - avoid_value) / 100.0, 0.01, 1.0)
+		if randf() > hit_rate:
+			return outcome  # miss → hit=false，暴击不掷
+		outcome["hit"] = true
+
+	# ── Step 2: Crit determination ──────────────────────
+	# Crit = weapon_crit + DEX/2 + crit_bonus;  Dodge = LCK
+	# guaranteed_crit（居合）：跳过随机判定直接暴击；纯粹伤害不参与暴击判定（R1.3），
+	# guaranteed_crit 对其无效。
+	var allow_crit: bool = (damage_type != "pure")
+	# disable_crit（调试确定性开关「不暴」态）：纯加法分支，默认 false 不影响正式战斗。
+	if bool(action_data.get("disable_crit", false)):
+		allow_crit = false
+	if allow_crit:
+		var guaranteed_crit: bool = bool(action_data.get("guaranteed_crit", false))
+		if guaranteed_crit:
+			outcome["crit"] = true
+		else:
+			var crit_value: int = attacker.get_crit_value(weapon_crit)
+			var dodge_value: int = defender.get_crit_avoid_value()
+			var crit_rate: float = maxf(0.0, (crit_value - dodge_value) / 100.0)
+			if randf() < crit_rate:
+				outcome["crit"] = true
+	return outcome
+
+
 static func resolve_attack(attacker: Unit, defender: Unit,
 		action_data: Dictionary = {}) -> AttackResult:
 	var result: AttackResult = AttackResult.new()
@@ -29,47 +95,33 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	# 中间量（例：副手追加取 might×50%，5×0.5=2.5）。提前截成 int 等于在中间层
 	# floor 一次，与 R1.8「clamp 与 floor 在最外层生效」冲突。主手传整数时行为不变。
 	var weapon_might: float = float(action_data.get("weapon_might", 0))
-	var weapon_hit: int = action_data.get("weapon_hit", 0)
-	var weapon_crit: int = action_data.get("weapon_crit", 0)
-	var terrain_evade_bonus: int = action_data.get("terrain_evade_bonus", 0)
 	var terrain_def_bonus: int = action_data.get("terrain_def_bonus", 0)
 	var terrain_res_bonus: int = action_data.get("terrain_res_bonus", 0)
 
-	# ── Step 1: Hit determination ───────────────────────
-	# Hit = weapon_hit + DEX×2
-	# Avoid = SPD×2 + terrain_evade
-	# guaranteed_hit（居合）：绕过命中判定，直接命中。
-	var guaranteed_hit: bool = bool(action_data.get("guaranteed_hit", false))
-	if guaranteed_hit:
-		result.hit = true
-	else:
-		var hit_value: int = attacker.get_hit_value(weapon_hit)
-		var avoid_value: int = defender.get_avoid_value(terrain_evade_bonus)
-		var hit_rate: float = clampf((hit_value - avoid_value) / 100.0, 0.01, 1.0)
-		if randf() > hit_rate:
-			return result  # miss → hit=false
-		result.hit = true
+	# ── Step 1+2: 命中与暴击 ────────────────────────────
+	# 掷骰逻辑统一在 roll_outcome()，那里有随机序列一致性的完整说明。
+	#
+	# `precomputed_outcome`：调用方**已经**掷过骰了。Wave 3 起主手与副手都走这条路
+	# ——必须先拿到 hit / crit，才能分发「命中时」/「暴击时」，让落在那个时点的
+	# 天赋回过头改写本次伤害。这里就不再重掷，否则一次攻击会掷两轮。
+	#
+	# ★ 这个键**只能在调用点现场注入**，绝不能放进会被 per-target 深拷贝的上游字典
+	# （技能 payload、`_build_hostile_action_context` 的输入、`_apply_debug_determinism`）
+	# ——那样一发范围技能的每个目标会共用同一次命中/暴击判定，违反 R1.10「计次按被
+	# 作用的目标单位分别进行」。
+	var precomputed: Variant = action_data.get("precomputed_outcome", null)
+	var outcome: Dictionary = precomputed if precomputed is Dictionary \
+		else roll_outcome(attacker, defender, action_data)
+	result.hit = bool(outcome.get("hit", false))
+	result.crit = bool(outcome.get("crit", false))
+	if not result.hit:
+		return result  # miss → damage 保持 0
 
-	# ── Step 2: Crit determination ──────────────────────
-	# Crit = weapon_crit + DEX/2 + crit_bonus;  Dodge = LCK
-	# guaranteed_crit（居合）：跳过随机判定直接暴击；纯粹伤害不参与暴击判定（R1.3），guaranteed_crit 对其无效。
-	var is_pure: bool = (damage_type == "pure")
-	var allow_crit: bool = true
-	if is_pure:
-		allow_crit = false
-	# disable_crit（调试确定性开关「不暴」态）：纯加法分支，默认 false 不影响正式战斗。
-	if bool(action_data.get("disable_crit", false)):
-		allow_crit = false
-	if allow_crit:
-		var guaranteed_crit: bool = bool(action_data.get("guaranteed_crit", false))
-		if guaranteed_crit:
-			result.crit = true
-		else:
-			var crit_value: int = attacker.get_crit_value(weapon_crit)
-			var dodge_value: int = defender.get_crit_avoid_value()
-			var crit_rate: float = maxf(0.0, (crit_value - dodge_value) / 100.0)
-			if randf() < crit_rate:
-				result.crit = true
+	# 纯粹伤害不参与暴击判定（R1.1 与 R1.3 各自逐字重申过一次），这是无条件的。
+	# roll_outcome 已经守住了；这里再守一次，防的是**外部传进来的**
+	# precomputed_outcome——它可能是手工构造的，绕过了上面那道。disable_crit 同理。
+	if damage_type == "pure" or bool(action_data.get("disable_crit", false)):
+		result.crit = false
 
 	# ── Step 3: Base damage (additive, FE-style) ────────
 	var base_damage: float = _calc_base_damage(

@@ -19,6 +19,20 @@ var battle_active: bool = false
 # 整个 tactical_manager.gd 加载不了。preload 走的是资源路径，编译期解析，两边都稳。
 const StateRegistryScript := preload("res://scripts/data/state_registry.gd")
 const TalentRegistryScript := preload("res://scripts/data/talent_registry.gd")
+
+## 伤害来源标签（对应设计库 `trigger_source` 的闭集值）。用常量而不是散落的
+## 字面量——某处多打一个空格就会静默失配，而失配的表现是「卡不触发」，最难查。
+const SOURCE_MAIN_HAND: String = "主手"
+const SOURCE_OFFHAND: String = "副手"
+
+## 伤害产生路径标签（对应天赋的 `requires_contexts`）。当前只有主动攻击一条路径；
+## Wave 4 的防御侧反应会加第二条，那时这个维度才真正开始区分。
+const CONTEXT_ACTIVE_ATTACK: String = "active_attack"
+
+## 一次攻击动作内副手追加的总次数上限。**护栏，不是游戏数值**：燕返的链长期望
+## 本就有限（DEX% 起始、每成功一次 ×80% 衰减），真撞上这个数说明概率或衰减参数
+## 填错了，所以撞上时要响亮告警而不是静默截断。
+const MAX_OFFHAND_FOLLOWUPS_PER_ACTION: int = 20
 var _talent_registry: RefCounted = null
 var _state_registry: RefCounted = null
 
@@ -1621,10 +1635,31 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 	# offhand_followup 分支）：条件在动作开始时判定，伤害在主手那一下之后追加。
 	var action_ctx: Dictionary = {
 		"defender": defender, "pending_offhand": [],
+		"contexts": [CONTEXT_ACTIVE_ATTACK],
 	}
 	_dispatch_talents(attacker, "执行攻击动作时", action_ctx)
 
 	defender.handle_attacked()
+
+	# ── A2（Wave 3）：先掷骰 → 发两个真 on-hit 事件 → 再算伤害 ──────────
+	# 「命中时」/「暴击时」的时点在伤害数值结算**之前**（R1.4 的 on-hit），所以落在
+	# 这里的天赋可以回过头改写本次伤害——死线的「该次暴击造成 (DEX/2)% 更多伤害」
+	# 就是这么生效的。
+	#
+	# ★ `roll_outcome` 必须**恰好**在原来 `resolve_attack` 那一行的时点调用。全局
+	# 随机流还有别的消费者（`_roll_effect_application` 的 randf、`gain_random_mark`
+	# 的 randi 都排在本次 resolve 之后），把掷骰提前、或把主手与副手批量预掷，
+	# 都会改变随机序列，让固定 seed 的用例漂移。
+	#
+	# ★ 钩子**不得回溯改判本次 hit / crit**，理由见 `_merge_on_hit_modifiers`。
+	# 剑气回荡的「让副手那次必定暴击」作用对象是**随后另一次攻击**、不是本次，
+	# 所以不构成回溯改判。
+	var outcome: Dictionary = DamageCalculator.roll_outcome(
+		attacker, defender, action_data)
+	action_ctx["source"] = SOURCE_MAIN_HAND
+	_dispatch_on_hit_events(attacker, outcome, action_ctx)
+	_merge_on_hit_modifiers(action_data, action_ctx)
+	action_data["precomputed_outcome"] = outcome
 
 	# Main attack: calculate → popup → apply
 	var result: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(
@@ -1656,7 +1691,10 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 	#   命中后     = 该次命中的伤害结算完成后，按命中计一次，**实际伤害为 0 也触发**
 	#   造成伤害时 = 实际造成了伤害（damage > 0）才触发
 	#   击杀时     = 该次攻击导致目标死亡
-	var talent_ctx: Dictionary = {"defender": defender, "result": result}
+	var talent_ctx: Dictionary = {
+		"defender": defender, "result": result,
+		"source": SOURCE_MAIN_HAND, "contexts": [CONTEXT_ACTIVE_ATTACK],
+	}
 	if result.hit:
 		_dispatch_talents(attacker, "命中后", talent_ctx)
 		if result.damage > 0:
@@ -1667,8 +1705,23 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 	# ── 副手追加攻击（Wave 2）：主手全部副作用结算完之后 ──────────
 	# 放在最末尾是有意的——主手的 popup / 词条 / 天赋 / 剑气都已跑完，副手不打断
 	# 也不穿插；主手是否击杀已判定，副手可用存活守卫天然处理「主手已杀就不追加」。
-	for followup: Dictionary in (action_ctx["pending_offhand"] as Array):
-		_execute_offhand_followup(attacker, defender, action_data, followup)
+	# 燕返（Wave 3）会在自己命中后再登记新的追加，所以这里是**队列而不是递归**
+	# ——用调用栈会越套越深。上限撞上时响亮告警：燕返的链长期望本就有限
+	# （DEX% 起始、每成功一次 ×80% 衰减），真撞上说明参数填错了。
+	var queue: Array = (action_ctx["pending_offhand"] as Array).duplicate()
+	var executed: int = 0
+	while not queue.is_empty():
+		if executed >= MAX_OFFHAND_FOLLOWUPS_PER_ACTION:
+			push_warning("[Offhand] %s 一次攻击动作内的副手追加已达上限 %d 次，剩余 %d 次丢弃——检查递归追加的概率与衰减参数"
+				% [attacker.unit_name, MAX_OFFHAND_FOLLOWUPS_PER_ACTION, queue.size()])
+			break
+		var followup: Variant = queue.pop_front()
+		if not followup is Dictionary:
+			continue
+		executed += 1
+		for spawned: Variant in _execute_offhand_followup(
+				attacker, defender, action_data, followup, action_ctx):
+			queue.append(spawned)
 
 	# 自动反击已整体移除（2026-07-11 用户裁决）：未来以天赋/敌方特性形式回归，
 	# 伤害与特效将与天赋/特性深度绑定，不预设反击框架。
@@ -2404,17 +2457,94 @@ func _dispatch_talents(unit: Unit, event: String, ctx: Dictionary) -> void:
 		var talent_id: String = str(entry.get("id", ""))
 		if talent_id not in unit.talent_ids:
 			continue
+		# 三道行级把关，缺一不可（都读**触发行**而非整卡）：
+		#   来源 —— 本次伤害由哪只手产生（`trigger_source`，空 = 不限）
+		#   路径 —— 本次伤害走的哪条产生路径（`requires_contexts`）
+		#   状态 —— `requires_states` 此刻成不成立
+		if not _talent_source_matches(trigger, ctx):
+			continue
+		if not _talent_contexts_hold(trigger, ctx):
+			continue
 		if not _talent_conditions_hold(unit, trigger):
 			continue
 		var effects: Variant = entry.get("engine_effects", [])
 		if not effects is Array:
 			push_warning("[Talent] %s 的 engine_effects 不是数组，跳过" % talent_id)
 			continue
-		for item: Variant in (effects as Array):
+		# ★ 按**行**取效果，不是整卡的 engine_effects：剑气回荡是两行两效果
+		# （主行让副手必暴 / 附加行给 10 点剑气），不过滤就会两行各执行全部效果。
+		for item: Variant in registry.effects_for_row(entry, str(row["row"])):
 			if item is Dictionary:
 				_apply_talent_effect(unit, talent_id, item, ctx)
 			else:
 				push_warning("[Talent] %s 的 engine_effects 含非字典项，跳过该项" % talent_id)
+
+
+## 触发来源匹配（Wave 3）。设计库 `trigger_source` 是「主手 / 副手」闭集，
+## **空串 = 不限来源**——介错的击杀返气不该因为是副手补的那一刀就不给。
+##
+## 分发点没声明来源时（ctx 无 `source` 键），指定了来源的卡一律不触发。注册期
+## 已经拦掉了「把来源挂在不带来源的事件上」这种卡，所以走到这里还失配，说明是
+## 分发点漏传了 —— 宁可不触发，不可错误触发。
+func _talent_source_matches(trigger_row: Dictionary, ctx: Dictionary) -> bool:
+	var want: String = str(trigger_row.get("trigger_source", "")).strip_edges()
+	if want == "":
+		return true
+	return want == str(ctx.get("source", ""))
+
+
+## 产生路径匹配（Wave 3）：`requires_contexts` 里每个标签，本次分发都得带上。
+##
+## 如实记下当前的把关强度：引擎目前唯一的伤害产生路径就是主动攻击动作（自动反击
+## 已于 2026-07-11 整体移除），所以 `active_attack` **此刻恒成立**，这个函数当前
+## 返回不了 false。它不是装饰——注册期的闭集校验是真的（依赖未知标签的卡会被拒），
+## 求值也真的在跑；但要等 Wave 4 的防御侧事件落地，它才会真正开始区分。
+## 结构先立起来，是为了今天不吞掉条件文本里「发生在主动攻击动作中」那半句。
+func _talent_contexts_hold(trigger_row: Dictionary, ctx: Dictionary) -> bool:
+	var required: Variant = trigger_row.get("requires_contexts", [])
+	if not required is Array or (required as Array).is_empty():
+		return true
+	var actual: Variant = ctx.get("contexts", [])
+	if not actual is Array:
+		return false
+	for item: Variant in (required as Array):
+		if str(item) not in (actual as Array):
+			return false
+	return true
+
+
+## 分发「命中时」/「暴击时」两个真 on-hit 事件（Wave 3 · A2）。
+##
+## ⚠ R1.4 逐字只把效果时机分成 on-hit 与 after-damage **两类**，规则层没有独立的
+## 「暴击时」。所以这里把它实现成 on-hit 的**条件化分支**——命中就发「命中时」，
+## 其中暴击的再发一次「暴击时」，同一时点、同一批次。不是并列的第三类时机。
+func _dispatch_on_hit_events(attacker: Unit, outcome: Dictionary,
+		ctx: Dictionary) -> void:
+	if not bool(outcome.get("hit", false)):
+		return
+	ctx["outcome"] = outcome
+	_dispatch_talents(attacker, "命中时", ctx)
+	if bool(outcome.get("crit", false)):
+		_dispatch_talents(attacker, "暴击时", ctx)
+
+
+## 把 on-hit 钩子里天赋写下的伤害修正合进 `action_data`，供随后的 `resolve_attack` 读。
+##
+## 目前只有一类：R1.8 的「更多」修正（措辞「N% 更多 X」），各条独立连乘、落在伤害链
+## 最外层，对应引擎的 `final_multiplier`。**用乘不用赋值**——副手追加的 50% 也住在
+## `final_multiplier` 里，直接覆写会把它抹掉。
+##
+## ⚠ 这里只合**伤害链**修正。命中链与暴击链的任何层修正都不许经此写回：那两条链的
+## 最终层修正必须在掷骰之前应用完（R1.2 第四层的 clamp(1,100)、R1.3 第四层的取
+## 大于 0 都发生在掷骰前），掷完再改就是回溯改判。「无视闪避 / 无视暴击回避」这类
+## 效果同理——它们的生效时点在 `roll_outcome` 内部（闪避与暴击回避被消耗的那一刻），
+## 必须在进入掷骰前就备齐，绝不能走这个钩子。
+func _merge_on_hit_modifiers(action_data: Dictionary, ctx: Dictionary) -> void:
+	var more: float = float(ctx.get("more_damage_multiplier", 1.0))
+	if more == 1.0:
+		return
+	action_data["final_multiplier"] = \
+		float(action_data.get("final_multiplier", 1.0)) * more
 
 
 ## 运行期条件求值：`requires_states` 里每个状态**此刻**都必须成立，否则不触发。
@@ -2456,12 +2586,15 @@ func _talent_conditions_hold(unit: Unit, trigger_row: Dictionary) -> bool:
 ## 击杀归属：主手没杀、副手杀了 → 在这里补发 on_kill 词条与「击杀时」天赋，
 ## 否则那次击杀会被整个吞掉。
 func _execute_offhand_followup(attacker: Unit, defender: Unit,
-		main_action_data: Dictionary, followup: Dictionary) -> void:
+		main_action_data: Dictionary, followup: Dictionary,
+		action_ctx: Dictionary) -> Array:
+	# 返回本次追加**自己又登记出来的**后续追加（燕返的递归链），由调用方的队列接手。
+	var spawned: Array = []
 	if attacker == null or defender == null:
-		return
+		return spawned
 	# 主手已经把目标打死了就不再追加——「追加一次伤害」的对象已经不在了。
 	if not defender.stats.is_alive():
-		return
+		return spawned
 	if not attacker.is_dual_wielding():
 		# 正常情况下走不到：注册期要求〔双持〕、分发期又求值过一次。
 		# 留守卫是因为这里离条件判定隔了整个主手结算，中途状态可能已变。
@@ -2469,7 +2602,7 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 		# 分发期若漏判，它会把后果吞掉、外部观测不到。所以行级条件求值的正确性
 		# 必须由一条**绕开本守卫**的测试来钉（见 test_talent_carrier 的
 		# 「行级条件真的被用了」一组），不能指望副手追加的用例。
-		return
+		return spawned
 	# ── AOE 语义（2026-08-09 用户裁决）：每个目标各追加一次，且**不吃溅射衰减** ──
 	#
 	# `_execute_hostile_action` 被技能的 per-target 循环调用，一个 AOE 技能会对每个
@@ -2495,17 +2628,17 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 	if offhand.is_empty():
 		push_warning("[Offhand] %s 的副手武器「%s」在 data/equipment/ 里找不到，追加取消"
 			% [attacker.unit_name, attacker.offhand_weapon_id])
-		return
+		return spawned
 	if not offhand.has("weapon_might"):
 		push_warning("[Offhand] %s 的副手装备「%s」没有 weapon_might（不是武器？），追加取消"
 			% [attacker.unit_name, attacker.offhand_weapon_id])
-		return
+		return spawned
 
 	var damage_pct: float = float(followup.get("damage_pct", 0.0))
 	if damage_pct <= 0.0:
 		push_warning("[Offhand] %s 的 damage_pct 非正（%s），追加取消"
 			% [str(followup.get("talent_id", "")), str(damage_pct)])
-		return
+		return spawned
 
 	# damage_type 与 damage_pct 出自设计库同一句 effect（「50%物理伤害」），两个值
 	# 都该从 JSON 读——一个进 JSON 一个写死在代码里是口径不一致。
@@ -2513,7 +2646,7 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 	if damage_type == "":
 		push_warning("[Offhand] %s 未声明 damage_type，追加取消"
 			% str(followup.get("talent_id", "")))
-		return
+		return spawned
 	var data: Dictionary = {
 		# 不继承主手的 damage_type（主手可能是魔法技能）。
 		"damage_type": damage_type,
@@ -2545,7 +2678,34 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 		# ★ 刻意不放 area_damage_multiplier：2026-08-09 用户裁决「副手不吃溅射衰减」。
 		# resolve_attack 缺该键时默认 1.0，正是这里想要的。别"顺手补上"。
 	}
+	# 剑气回荡主行：主手暴击让**随后那一次**副手追加必定暴击。effect 原文说的是
+	# 「该次副手追加伤害」——单数，所以标记消费一次就清掉。燕返递归出来的后续几次
+	# 不继承它，各自独立掷骰（燕返 rules 逐字：「每一次追加的副手伤害都各自独立
+	# 结算命中与暴击」）。
+	# 注意顺序：必须写在 _apply_debug_determinism 之前，否则调试「不暴」态
+	# （disable_crit）会被这里覆盖，headless 用例就失去确定性。
+	if bool(action_ctx.get("offhand_guaranteed_crit", false)):
+		data["guaranteed_crit"] = true
+		action_ctx["offhand_guaranteed_crit"] = false
 	_apply_debug_determinism(data)
+
+	# ── 副手自己掷骰、自己发两个 on-hit 事件（Wave 3）────────────
+	# **绝不能复用主手的 outcome**：二天一流 rules 逐字要求「副手的追加伤害单独结算
+	# 命中与暴击（R1.2、R1.3）」。掷骰时点也必须留在原来 resolve_attack 那一行的
+	# 位置——主手全部副作用（含 _roll_effect_application 的 randf 与 gain_random_mark
+	# 的 randi）都排在它之前，提前掷会打乱全局随机序列。
+	var offhand_ctx: Dictionary = {
+		"defender": defender,
+		"source": SOURCE_OFFHAND,
+		"contexts": [CONTEXT_ACTIVE_ATTACK],
+		"pending_offhand": [],
+		# 燕返的链序：本次是链上第几次追加，决定它下一次的概率衰减几档。
+		"offhand_chain_index": int(followup.get("chain_index", 0)),
+	}
+	var outcome: Dictionary = DamageCalculator.roll_outcome(attacker, defender, data)
+	_dispatch_on_hit_events(attacker, outcome, offhand_ctx)
+	_merge_on_hit_modifiers(data, offhand_ctx)
+	data["precomputed_outcome"] = outcome
 
 	var result: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(
 		attacker, defender, data)
@@ -2558,10 +2718,30 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 	else:
 		DamagePopup.spawn_miss(popup_layer, defender.position, 1)
 
+	# ── 副手的 after-damage 三事件（Wave 3 新增）──────────────
+	# Wave 2 时这里**只**补发了「击杀时」，「命中后」/「造成伤害时」在副手命中时
+	# 根本不发。燕返（命中后 / 副手）与剑气回荡的附加行（命中后 / 副手）都挂在这两个
+	# 事件上，不补发它们就永远不触发——这是 trigger_source 接线之外，副手侧的另一半
+	# 缺口。
+	#
+	# 补的只有**天赋事件**。主手那一套副作用（技能效果挂载 / 剑气 / 印记 / 击杀减 CD）
+	# 仍然不重跑：副手是「同一次攻击动作里的第二段伤害」，不是第二次攻击动作
+	# ——按 R1.10，挂在「执行攻击动作时」的效果一次攻击动作只触发一次，所以副手也
+	# 不发那个事件（否则二天一流会自己再登记一次追加，成死循环）。
+	offhand_ctx["result"] = result
+	if result.hit:
+		_dispatch_talents(attacker, "命中后", offhand_ctx)
+		if result.damage > 0:
+			_dispatch_talents(attacker, "造成伤害时", offhand_ctx)
 	# 主手未击杀而副手击杀 → 补发击杀链，否则这次击杀无人知晓。
 	if result.defender_died:
 		_apply_affixes(attacker, "on_kill", {"defender": defender, "result": result})
-		_dispatch_talents(attacker, "击杀时", {"defender": defender, "result": result})
+		_dispatch_talents(attacker, "击杀时", offhand_ctx)
+
+	for item: Variant in (offhand_ctx["pending_offhand"] as Array):
+		if item is Dictionary:
+			spawned.append(item)
+	return spawned
 
 
 ## 副手武器特效当前的生效比例。0 = 不生效（二天一流「不触发武器特效」的默认态）；
@@ -2580,7 +2760,10 @@ func _offhand_effect_scale(unit: Unit) -> float:
 			continue
 		if not _talent_conditions_hold(unit, entry["trigger"]):
 			continue
-		for item: Variant in ((entry["talent"] as Dictionary).get("engine_effects", []) as Array):
+		# 与分发期同样按行取效果（常驻行恒为 "main"）——一张常驻卡若把某条效果绑给了
+		# 别的行，这里不该把它也算进来。
+		for item: Variant in registry.effects_for_row(
+				entry["talent"] as Dictionary, str(entry.get("row", "main"))):
 			if not item is Dictionary:
 				continue
 			var effect: Dictionary = item
@@ -2662,7 +2845,59 @@ func _apply_talent_effect(unit: Unit, talent_id: String,
 				"talent_id": talent_id,
 				"damage_pct": float(effect.get("damage_pct", 0.0)),
 				"damage_type": str(effect.get("damage_type", "")),
+				"chain_index": 0,
 			})
+		"grant_offhand_guaranteed_crit":
+			# 剑气回荡主行：本次攻击动作里随后的副手追加必定暴击。
+			# 只在 ctx 上留个标记，真正生效在 _execute_offhand_followup——那里读完
+			# 就清掉（effect 说的是「该次副手追加伤害」，单数）。
+			#
+			# ★ 这不是回溯改判：作用对象是**随后另一次攻击**的暴击判定，不是本次。
+			# 本次的 hit / crit 已经掷完，任何回头改它的写法都违反 R1.2 / R1.3
+			# （最终层修正必须在掷骰前应用完）。
+			ctx["offhand_guaranteed_crit"] = true
+			print("[Talent] %s 「%s」→ 随后一次副手追加必定暴击" % [
+				unit.unit_name, talent_id])
+		"more_damage_from_stat":
+			# R1.8 的「更多」类修正：措辞「N% 更多 X」，各条独立连乘，落伤害链最外层。
+			# ★ 它**不是**「暴击倍率 ×N」那一类（拔刀走的那条），两者落层不同。
+			#
+			# 中间量不取整（R1.8：只有最终伤害向下取整）——死线 pct_per_point=0.5、
+			# DEX=7 时系数是 3.5%，不能先取整成 3 或 4。
+			var stat: String = str(effect.get("stat", ""))
+			var stat_value: int = unit.get_effective_stat(stat)
+			var factor: float = 1.0 + float(stat_value) \
+				* float(effect.get("pct_per_point", 0.0)) / 100.0
+			ctx["more_damage_multiplier"] = \
+				float(ctx.get("more_damage_multiplier", 1.0)) * factor
+			print("[Talent] %s 「%s」→ %s=%d → ×%.4f 更多伤害" % [
+				unit.unit_name, talent_id, stat, stat_value, factor])
+		"offhand_recursive_followup":
+			# 燕返：副手的追加伤害命中后，按概率再追加一次。
+			# 概率 = chance_stat 的当前值%，每成功追加一次再乘一次衰减系数
+			# （effect 原文：「每成功追加一次，下一次的概率为上一次的 80%」）。
+			#
+			# 注册期已要求这条效果显式声明 self_retriggerable=true——R1.10 默认禁止
+			# 自触发，豁免句要求「效果描述显式声明可以反复追加」，燕返正是那一类。
+			if not ctx.has("pending_offhand"):
+				push_warning("[Talent] %s 的 offhand_recursive_followup 在不支持追加的时机触发（%s）"
+					% [talent_id, str(ctx.keys())])
+				return
+			var chain_index: int = int(ctx.get("offhand_chain_index", 0))
+			var decay: float = float(effect.get("chance_decay_pct", 0.0)) / 100.0
+			var base_chance: float = float(unit.get_effective_stat(
+				str(effect.get("chance_stat", "")))) / 100.0
+			var chance: float = base_chance * pow(decay, float(chain_index))
+			if randf() >= chance:
+				return
+			(ctx["pending_offhand"] as Array).append({
+				"talent_id": talent_id,
+				"damage_pct": float(effect.get("damage_pct", 0.0)),
+				"damage_type": str(effect.get("damage_type", "")),
+				"chain_index": chain_index + 1,
+			})
+			print("[Talent] %s 「%s」→ 第 %d 次递归追加命中（概率 %.1f%%）" % [
+				unit.unit_name, talent_id, chain_index + 1, chance * 100.0])
 		_:
 			push_warning("[Talent] %s 的效果类型「%s」无执行分支" % [talent_id, effect_type])
 

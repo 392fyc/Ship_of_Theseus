@@ -1,0 +1,29 @@
+{
+  "id": "myrmidon_sixian",
+  "name": "死线",
+  "class_id": "myrmidon",
+  "rarity": "稀有",
+  "tags": ["攻击", "被动"],
+
+  "trigger_event": "暴击时",
+  "trigger_object": "",
+  "trigger_source": "主手",
+  "trigger_condition": "",
+  "trigger_frequency": "每次",
+  "trigger_frequency_n": 1,
+  "effect": "该次暴击造成 (DEX/2)% 更多伤害。",
+  "rules": "「(DEX/2)% 更多伤害」按 R1.8 独立连乘，每条各为一个独立实例：既不与其他「更多」合并，也不进入同层提升的加总；DEX/2 不取整（按 R1.8：中间量不取整，只在最终伤害量向下取整）。",
+
+  "condition_model": "none",
+  "requires_states": [],
+  "requires_contexts": [],
+
+  "engine_effects": [
+    { "type": "more_damage_from_stat", "stat": "DEX", "pct_per_point": 0.5 }
+  ],
+
+  "engine_note": "**本卡是「暴击时」钩子确实能改写本次伤害的生产级证明。** 剑气回荡的主行虽然也挂在「暴击时」，但它的效果作用于随后另一次攻击，验证不到「钩子回写本次伤害」这条能力；死线才验证得到。同时它是 trigger_source=主手 的真实生产用例，与燕返（副手）构成 §1.1 验收判据要的双向对照。\n\n落层：R1.8 的措辞规范里，「N% 更多 X」是**更多**类，各条独立连乘、落在伤害链最外层（引擎的 final_multiplier）。★ 它**不是**「暴击倍率 ×N」那一类——后者是 R1.3 暴击倍率上的乘算（拔刀的「暴击倍率 ×1.2」走那条，引擎键是 crit_damage_mult），两者落层不同，别混用。本卡 rules 也明说「按 R1.8 独立连乘…不进入同层提升的加总」。\n\npct_per_point=0.5 是「(DEX/2)%」的逐字译法：DEX 每点 0.5%。中间量不取整（R1.8：只有最终伤害向下取整）——DEX=7 时系数是 3.5%，不能先取整成 3 或 4，rules 里也专门写了这一句。\n\n本卡是剑士线（myrmidon）而非剑圣线，与介错同属剑士。引擎当前不按 class_id 过滤 talent_ids，行为与介错一致。",
+
+  "_mirror": "id / name / class_id / rarity / tags / trigger 五段 / effect / rules 是设计库天赋条目的只读镜像。版本锚点 = 设计库仓 snapshots/talents.json @ 2ea744b。设计库该条目的 levels_json 里还留着一个旧版本（「忽视对应防御20%」），不是当前生效文本，未镜像。",
+  "_engine_note": "requires_states / condition_model / requires_contexts / engine_effects / engine_note 是引擎侧字段，设计库无对应列、不回流。"
+}

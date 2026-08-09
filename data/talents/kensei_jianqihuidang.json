@@ -1,0 +1,44 @@
+{
+  "id": "kensei_jianqihuidang",
+  "name": "剑气回荡",
+  "class_id": "kensei",
+  "rarity": "稀有",
+  "tags": ["攻击", "资源"],
+
+  "trigger_event": "暴击时",
+  "trigger_object": "",
+  "trigger_source": "主手",
+  "trigger_condition": "该次暴击发生在主动攻击动作中；处于〔双持〕状态（经二天一流装备副手武器）",
+  "trigger_frequency": "每次",
+  "trigger_frequency_n": 1,
+  "effect": "主手暴击时，该次副手追加伤害必定暴击；副手追加伤害命中后，获得 10 点剑气。",
+  "rules": "仅在双持状态（经二天一流装备副手武器）下生效；副手的追加伤害独立结算，暴击判定归 R1.3 暴击链；额外获得的 10 点剑气计入 R1.6 的剑气池。",
+
+  "condition_model": "states",
+  "requires_states": ["shuangchi"],
+  "requires_contexts": ["active_attack"],
+
+  "extra_triggers": [
+    {
+      "trigger_event": "命中后",
+      "trigger_object": "",
+      "trigger_source": "副手",
+      "trigger_condition": "该次命中为副手的追加伤害，且发生在主动攻击动作中；处于〔双持〕状态",
+      "trigger_frequency": "每次",
+      "trigger_frequency_n": 1,
+      "condition_model": "states",
+      "requires_states": ["shuangchi"],
+      "requires_contexts": ["active_attack"]
+    }
+  ],
+
+  "engine_effects": [
+    { "type": "grant_offhand_guaranteed_crit", "row": "main" },
+    { "type": "gain_resource", "resource": "qi", "amount": 10, "row": "extra[0]" }
+  ],
+
+  "engine_note": "**两行两效果，靠 row 绑定分开**——这是本卡与已有三张的关键差别。effect 是两句话，各挂一行：主行（暴击时/主手）让随后那一次副手追加必定暴击；附加行（命中后/副手）给 10 点剑气。engine_effects 在 A1/Wave 2 是全行共用的，照那个模型主手暴击会连剑气一起给、副手命中又会再设一次必暴标记，语义直接错，所以 Wave 3 加了 row 绑定（见 lane §2.2 注 7）。\n\n条件逐句映射，一句都没吞：主行 trigger_condition 三句——「该次暴击」由 trigger_event=暴击时 承担；「发生在主动攻击动作中」由 requires_contexts=[active_attack] 承担；「处于〔双持〕状态」由 requires_states=[shuangchi] 承担。附加行同理，其中「该次命中为副手的追加伤害」由 trigger_source=副手 承担。\n\n跨主副手的因果：主行的效果不改本次伤害，而是给随后另一次攻击（副手追加）设必暴标记，所以不构成 R1.2/R1.3 禁止的回溯改判。标记**消费一次就清**——effect 写的是「该次副手追加伤害」，单数；燕返递归出来的后续几次不继承它，各自独立掷骰（燕返 rules 逐字要求每次独立结算）。实现见 tactical_manager 的 grant_offhand_guaranteed_crit 分支与 _execute_offhand_followup。\n\n数值 10 取自 effect 原文，从本 JSON 读，代码不写死。",
+
+  "_mirror": "id / name / class_id / rarity / tags / trigger 五段 / extra_triggers 的触发五段 / effect / rules 是设计库天赋条目的只读镜像。版本锚点 = 设计库仓 snapshots/talents.json @ 2ea744b（按 lane 文档 §6.1，锚 commit sha 而非日期）。",
+  "_engine_note": "requires_states / condition_model / requires_contexts / engine_effects（含其中的 row）/ engine_note 是引擎侧字段，设计库无对应列、不回流。"
+}
