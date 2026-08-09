@@ -64,6 +64,19 @@ const SYNTHETIC: Dictionary = {
 		"condition_model": "none", "requires_states": [],
 		"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 7}],
 	},
+	# 不限来源的「更多伤害」卡：用来锁住「伤害修正是连乘进 final_multiplier、
+	# 不是覆写它」。副手追加的 50% 也住在 final_multiplier 里，写成赋值会把它抹掉
+	# ——而生产卡里唯一的更多伤害卡（死线）是 source=主手，永远碰不到副手那一次，
+	# 所以这个坑只有合成卡测得出来。
+	"test_more_any": {
+		"id": "test_more_any", "name": "测试·不限来源的更多伤害", "class_id": "kensei",
+		"trigger_event": "命中时", "trigger_source": "", "trigger_condition": "",
+		"trigger_frequency": "每次", "trigger_frequency_n": 1,
+		"condition_model": "none", "requires_states": [],
+		"engine_effects": [{
+			"type": "more_damage_from_stat", "stat": "DEX", "pct_per_point": 1.0,
+		}],
+	},
 	# 计数用：每次副手命中 +1 气，于是「副手打了几次」== 剑气 − 普攻的 10。
 	# 刻意用 1 而不是 5——递归链最长 20 次，用 5 会撞上剑气上限 100 被 clamp，
 	# 计数就失真了。
@@ -120,12 +133,15 @@ func _run() -> void:
 	var dl: Object = load(DATA_LOADER_PATH).new()
 	dl.load_all()
 
+	_test_roll_outcome_randomness()
 	_test_new_cards_registered(dl)
 	_test_contexts_gate(dl)
 	_test_row_binding_gate(dl)
 	_test_source_directions()
 	_test_row_binding_runtime()
 	_test_on_hit_rewrites_damage()
+	_test_modifier_composes_with_offhand()
+	_test_hook_matches_resolution()
 	_test_recursive_followup()
 
 	dl.free()
@@ -135,6 +151,81 @@ func _run() -> void:
 		for f: String in _fails:
 			print("  ✗ " + f)
 	quit(0 if _fail == 0 else 1)
+
+
+# ── W0. roll_outcome 的随机数消耗（回归零变化的地基）───────
+
+## 把命中与暴击的掷骰从 resolve_attack 里抽出来，前提是**随机数的消耗次数与顺序
+## 一字不差**。次数一变，全局随机流就整体漂移——`_roll_effect_application` 的
+## randf、`gain_random_mark` 的 randi 都排在同一条流上，所有固定 seed 的用例跟着漂。
+##
+## 这一组直接对着随机流断言，而不是间接看伤害：先用固定种子记下序列，再重置种子
+## 跑一次掷骰，然后看「下一个取到的值」落在序列的第几位——落在第 N 位就说明掷骰
+## 消耗了 N−1 次。
+func _test_roll_outcome_randomness() -> void:
+	print("\n[W0] roll_outcome 的随机数消耗次数（掷骰抽取的零回退前提）")
+	var scene: Node = load("res://scenes/tactical/TacticalScene.tscn").instantiate()
+	root.add_child(scene)
+	var tm: Object = scene.tactical_manager
+	var attacker: Unit = null
+	var enemy: Unit = null
+	for u: Unit in tm.units:
+		if u.faction == "player" and u.unit_id == "kensei":
+			attacker = u
+		elif u.faction == "enemy" and enemy == null:
+			enemy = u
+	if attacker == null or enemy == null:
+		_check("场景中找到剑圣与敌人", false)
+		scene.free()
+		return
+
+	const SEED: int = 20260809
+	seed(SEED)
+	var seq: Array[float] = [randf(), randf(), randf()]
+
+	# ① 未命中 → 只掷 1 次（命中判定后立即返回，**不再掷暴击**）。
+	# 命中率有 1% 下限，所以「必未命中」靠的是序列首值大于 0.01——先确认这个前提，
+	# 前提不成立时这条断言没有意义，宁可显式失败也不要假通过。
+	_check("前提：种子序列首值 > 0.01（下面那次才必然未命中）", seq[0] > 0.01,
+		"seq[0]=%f" % seq[0])
+	seed(SEED)
+	var miss: Dictionary = DamageCalculator.roll_outcome(attacker, enemy,
+		{"weapon_hit": -99999, "terrain_evade_bonus": 99999})
+	_check("未命中时 hit=false", not bool(miss.get("hit", true)))
+	_eq("未命中只消耗 1 次随机数（下一个值 == 序列第 2 个）", randf(), seq[1])
+
+	# ② 命中 → 掷 2 次（命中 + 暴击）。**暴击那次不因 crit_rate<=0 而短路**——
+	# 生产里「攻方 DEX 低、守方 LCK 高」使暴击率恒为 0 是常见配置，一旦在那里加了
+	# 短路，那些场景的随机流就会与现在不同。
+	enemy.stats.lck = 9999          # crit_rate = max(0, crit − LCK) = 0
+	seed(SEED)
+	var hit: Dictionary = DamageCalculator.roll_outcome(attacker, enemy,
+		{"weapon_hit": 99999, "weapon_crit": 0})
+	_check("命中率拉满时 hit=true", bool(hit.get("hit", false)))
+	_check("暴击率为 0 时 crit=false", not bool(hit.get("crit", true)))
+	_eq("命中时消耗 2 次随机数（暴击率为 0 也照样掷）", randf(), seq[2])
+
+	# ③ guaranteed_hit → 跳过命中那次，只掷暴击 → 1 次。
+	seed(SEED)
+	DamageCalculator.roll_outcome(attacker, enemy, {"guaranteed_hit": true})
+	_eq("guaranteed_hit → 只消耗 1 次（暴击那次）", randf(), seq[1])
+
+	# ④ guaranteed_hit + 纯粹伤害 → 两次都跳过 → 0 次。
+	# 纯粹伤害不参与暴击判定（R1.1 与 R1.3 各自逐字重申过）。
+	seed(SEED)
+	var pure: Dictionary = DamageCalculator.roll_outcome(attacker, enemy,
+		{"guaranteed_hit": true, "damage_type": "pure", "guaranteed_crit": true})
+	_check("纯粹伤害不暴击（guaranteed_crit 对它无效）",
+		not bool(pure.get("crit", true)))
+	_eq("guaranteed_hit + 纯粹伤害 → 一次都不消耗", randf(), seq[0])
+
+	# ⑤ guaranteed_hit + disable_crit → 同样 0 次。
+	seed(SEED)
+	DamageCalculator.roll_outcome(attacker, enemy,
+		{"guaranteed_hit": true, "disable_crit": true})
+	_eq("guaranteed_hit + disable_crit → 一次都不消耗", randf(), seq[0])
+
+	scene.free()
 
 
 # ── 装载：三张新卡进得来 ───────────────────────────
@@ -238,6 +329,49 @@ func _test_contexts_gate(dl: Object) -> void:
 				"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 1}],
 			},
 			"keyword": "不在闭集",
+		},
+		# 递归追加没有显式声明可自触发 → 拒。R1.10 默认禁止自触发，豁免要求
+		# 效果描述显式写明可以反复追加；引擎不替数据做这个决定。
+		"rec_no_optin": {
+			"card": {
+				"id": "rec_no_optin", "name": "测试·递归未显式开启", "class_id": "kensei",
+				"trigger_event": "命中后", "trigger_source": "副手", "trigger_condition": "",
+				"trigger_frequency": "每次", "trigger_frequency_n": 1,
+				"condition_model": "none", "requires_states": [],
+				"engine_effects": [{
+					"type": "offhand_recursive_followup", "chance_stat": "DEX",
+					"chance_decay_pct": 80, "damage_pct": 50, "damage_type": "physical",
+				}],
+			},
+			"keyword": "self_retriggerable",
+		},
+		# 衰减填 100 = 永不衰减的无限链 → 拒。
+		"rec_no_decay": {
+			"card": {
+				"id": "rec_no_decay", "name": "测试·衰减不衰减", "class_id": "kensei",
+				"trigger_event": "命中后", "trigger_source": "副手", "trigger_condition": "",
+				"trigger_frequency": "每次", "trigger_frequency_n": 1,
+				"condition_model": "none", "requires_states": [],
+				"engine_effects": [{
+					"type": "offhand_recursive_followup", "chance_stat": "DEX",
+					"chance_decay_pct": 100, "damage_pct": 50, "damage_type": "physical",
+					"self_retriggerable": true,
+				}],
+			},
+			"keyword": "衰减必须真的衰减",
+		},
+		# 更多伤害读了引擎不认的属性 → 拒。
+		"more_bad_stat": {
+			"card": {
+				"id": "more_bad_stat", "name": "测试·未知属性", "class_id": "kensei",
+				"trigger_event": "暴击时", "trigger_source": "主手", "trigger_condition": "",
+				"trigger_frequency": "每次", "trigger_frequency_n": 1,
+				"condition_model": "none", "requires_states": [],
+				"engine_effects": [{
+					"type": "more_damage_from_stat", "stat": "CHA", "pct_per_point": 0.5,
+				}],
+			},
+			"keyword": "未支持",
 		},
 	}
 	for tid: String in cases.keys():
@@ -549,6 +683,134 @@ func _test_on_hit_rewrites_damage() -> void:
 			chain2_crit - chain2_plain, one_crit_gain)
 
 	(ctx2["scene"] as Node).free()
+
+
+# ── 伤害修正与副手 50% 的复合 ──────────────────────
+
+## 「更多伤害」修正与副手的 50% 都住在 final_multiplier 里，所以合并时必须**连乘**，
+## 不能覆写。生产卡里唯一的更多伤害卡是死线（source=主手），永远碰不到副手那一次，
+## 这个坑只有不限来源的合成卡测得出来——变异测试正是在这里发现测试有缺口的。
+func _test_modifier_composes_with_offhand() -> void:
+	print("\n[W8] 「更多伤害」与副手 50% 的复合（连乘，不是覆写）")
+	var ctx: Dictionary = _make_battle(CRIT_DISABLE)
+	if ctx.is_empty():
+		return
+	var tm: Object = ctx["tm"]
+	var attacker: Unit = ctx["attacker"]
+	var enemy: Unit = ctx["enemy"]
+
+	attacker.stats.str_attr = 10
+	var payload: Dictionary = {"weapon_might": 10}
+	var dex_eff: int = attacker.get_effective_stat("DEX")
+	var factor: float = 1.0 + float(dex_eff) * 1.0 / 100.0
+	_check("前提：DEX 生效值大于 0（否则倍率恒为 1，这组失去区分力）",
+		dex_eff > 0, "dex_eff=%d" % dex_eff)
+
+	# 先量出「无更多伤害」时主手与副手各自的量。
+	attacker.unequip_offhand()
+	attacker.talent_ids = []
+	var main_plain: int = _strike(tm, attacker, enemy, payload)
+	attacker.equip_offhand(OFFHAND_WEAPON)
+	attacker.talent_ids = ["kensei_ertianyiliu"]
+	var off_plain: int = _strike(tm, attacker, enemy, payload) - main_plain
+
+	# 再量「有更多伤害」时的两边。
+	attacker.unequip_offhand()
+	attacker.talent_ids = ["test_more_any"]
+	var main_more: int = _strike(tm, attacker, enemy, payload)
+	attacker.equip_offhand(OFFHAND_WEAPON)
+	attacker.talent_ids = ["kensei_ertianyiliu", "test_more_any"]
+	var off_more: int = _strike(tm, attacker, enemy, payload) - main_more
+
+	_eq("主手吃到更多伤害：%d × %.2f" % [main_plain, factor],
+		main_more, floori(float(main_plain) * factor))
+	# 副手：本体是 (STR + 副手 might) × 50%，再乘更多倍率。若合并写成覆写，
+	# 50% 会被抹掉，副手伤害会变成两倍于此。
+	# 副手武器的 might 从 autoload 取——`DataLoader` 这个标识符在 --script 主循环下
+	# 编译期解析不到（"Identifier not found"），但节点确实挂在 /root。
+	var autoload_dl: Node = root.get_node_or_null("/root/DataLoader")
+	var off_might: int = 0
+	if autoload_dl != null:
+		off_might = int(
+			(autoload_dl.equipment[OFFHAND_WEAPON] as Dictionary).get("weapon_might", 0))
+	_check("取到了副手武器的 might", off_might > 0, "off_might=%d" % off_might)
+	var off_base_raw: float = float(
+		attacker.get_effective_stat("STR") + off_might)
+	_eq("副手同时吃 50%% 与更多倍率（连乘）：floor(%.1f × 0.5 × %.2f)"
+			% [off_base_raw, factor],
+		off_more, floori(off_base_raw * 0.5 * factor))
+	_check("副手的 50% 没有被更多倍率覆写掉（覆写会让它约等于两倍）",
+		off_more < floori(off_base_raw * factor),
+		"off_more=%d 覆写时会是 %d" % [off_more, floori(off_base_raw * factor)])
+	_check("对照：不带更多倍率时副手就是 50% 本体",
+		off_plain == floori(off_base_raw * 0.5),
+		"off_plain=%d 期望 %d" % [off_plain, floori(off_base_raw * 0.5)])
+
+	(ctx["scene"] as Node).free()
+
+
+# ── 钩子看到的结果 == 实际结算的结果 ────────────────
+
+## on-hit 钩子拿到的 hit/crit，必须**就是**随后伤害结算用的那一组。若 resolve_attack
+## 无视传进来的结果自己重掷，两者就会脱钩——天赋按「暴击了」触发，伤害却按「没暴」
+## 算（或反过来），而且多消耗一次随机数。
+##
+## 之前的用例全跑在确定性开关下（强制命中 + 强制暴/禁暴），重掷的结果必然与预掷
+## 相同，观测不到脱钩。所以这一组特意把暴击率放在中间值，让随机真的起作用：
+## 一致时伤害只可能是两种取值；脱钩时会冒出第三种。
+func _test_hook_matches_resolution() -> void:
+	print("\n[W9] on-hit 钩子看到的结果 == 实际结算的结果")
+	var ctx: Dictionary = _make_battle(CRIT_RANDOM)
+	if ctx.is_empty():
+		return
+	var tm: Object = ctx["tm"]
+	var attacker: Unit = ctx["attacker"]
+	var enemy: Unit = ctx["enemy"]
+
+	attacker.stats.str_attr = 10
+	# DEX 要够大，否则死线的加成太小，「死线触发了却没暴」会与「什么都没触发」
+	# 算出同一个数，脱钩的一种表现就隐形了（默认 DEX 下实测正是如此）。
+	attacker.stats.dex = 40
+	attacker.unequip_offhand()
+	enemy.stats.lck = 0
+	# 暴击率放在中间：weapon_crit 20 + DEX/2(=20) − LCK 0 → 约 40%。
+	var payload: Dictionary = {"weapon_might": 10, "weapon_crit": 20}
+	attacker.talent_ids = ["myrmidon_sixian"]
+
+	var dex_eff: int = attacker.get_effective_stat("DEX")
+	var plain: int = 20                                    # (10 + 10 − 0)
+	var crit_with_sixian: int = floori(
+		20.0 * 1.5 * (1.0 + float(dex_eff) * 0.5 / 100.0))
+	# 脱钩时会出现的两种伤害：暴了但死线没触发 / 死线触发了但没暴。
+	var crit_no_sixian: int = floori(20.0 * 1.5)
+	var sixian_no_crit: int = floori(
+		20.0 * (1.0 + float(dex_eff) * 0.5 / 100.0))
+	_check("前提：四种取值互不相同（否则这组分辨不出脱钩）",
+		crit_with_sixian != crit_no_sixian and plain != sixian_no_crit
+			and crit_with_sixian != sixian_no_crit,
+		"plain=%d crit+死线=%d 只暴=%d 只死线=%d"
+			% [plain, crit_with_sixian, crit_no_sixian, sixian_no_crit])
+
+	var seen: Dictionary = {}
+	var crit_rounds: int = 0
+	for _i: int in range(60):
+		var dmg: int = _strike(tm, attacker, enemy, payload)
+		seen[dmg] = int(seen.get(dmg, 0)) + 1
+		if dmg == crit_with_sixian:
+			crit_rounds += 1
+	_check("60 轮里暴击与不暴击都出现过（暴击率确实在中间，随机真的起作用了）",
+		crit_rounds > 0 and crit_rounds < 60, "暴击 %d 轮" % crit_rounds)
+	var unexpected: Array = []
+	for key: Variant in seen.keys():
+		if int(key) != plain and int(key) != crit_with_sixian:
+			unexpected.append(key)
+	_check("伤害只出现两种取值：不暴 %d / 暴且带死线加成 %d"
+			% [plain, crit_with_sixian],
+		unexpected.is_empty(),
+		"意外取值 %s（%d=暴了但死线没触发，%d=死线触发了却没暴）"
+			% [str(unexpected), crit_no_sixian, sixian_no_crit])
+
+	(ctx["scene"] as Node).free()
 
 
 # ── V. 燕返的递归追加 ─────────────────────────────
