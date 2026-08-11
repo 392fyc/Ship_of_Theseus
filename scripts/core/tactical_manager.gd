@@ -25,9 +25,24 @@ const TalentRegistryScript := preload("res://scripts/data/talent_registry.gd")
 const SOURCE_MAIN_HAND: String = "主手"
 const SOURCE_OFFHAND: String = "副手"
 
-## 伤害产生路径标签（对应天赋的 `requires_contexts`）。当前只有主动攻击一条路径；
-## Wave 4 的防御侧反应会加第二条，那时这个维度才真正开始区分。
+## 伤害产生路径标签（对应天赋的 `requires_contexts`）。当前只有主动攻击一条路径。
+##
+## ⚠ 这里原先写着「Wave 4 的防御侧反应会加第二条，那时这个维度才真正开始区分」
+## ——**Wave 4 做完了，那句话是错的**。防御侧事件分发的仍然是同一次主动攻击产生的
+## 伤害，只是收件人换成被攻击者；产生路径没多出第二条。要等**反击 / 回合外反应
+## 攻击**回归，这个维度才会开始区分。
 const CONTEXT_ACTIVE_ATTACK: String = "active_attack"
+
+## 事件相对**被作用者**回合的位置（对应天赋的 `requires_turn_phase`）。
+## 与上面那条同病相怜：引擎目前没有任何能让单位在自己回合内被攻击的路径
+## （`_execute_hostile_action` 只可能由当前行动单位发起），所以它此刻恒成立。
+const TURN_PHASE_OUTSIDE_OWN: String = "outside_own_turn"
+const TURN_PHASE_OWN: String = "own_turn"
+
+## 招架架势的 buff id。减伤参数（概率属性 / 基础幅度 / 幅度属性）读它的 JSON
+## `parry` 段——招架架势与交刃**共读这一份**，这就是设计库「按招架的减伤结算」
+## 那句话在引擎侧的落法。
+const PARRY_STANCE_BUFF_ID: String = "swordsman_parry_stance"
 
 ## 副手追加的链长上限。**护栏，不是游戏数值**：燕返的链长期望本就有限
 ## （DEX% 起始、每成功一次 ×80% 衰减），真撞上这个数说明概率或衰减参数填错了，
@@ -1671,11 +1686,21 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 	action_ctx["source"] = SOURCE_MAIN_HAND
 	_dispatch_on_hit_events(attacker, outcome, action_ctx)
 	_merge_on_hit_modifiers(action_data, action_ctx)
+
+	# ── Wave 4：防御侧反应（受到攻击时 + 招架减伤）────────────────
+	# 同一时点的另一半——攻击者的钩子写增伤，被攻击者的写减伤，两边都落
+	# `final_multiplier` 且**相乘**，所以先后不影响结果。放在这里是取「离伤害数值
+	# 结算最近」的位置，对应交刃 rules 的「伤害数值结算前介入」。
+	var defense: Dictionary = _resolve_defense(
+		attacker, defender, outcome, SOURCE_MAIN_HAND)
+	_apply_defense_to_action(action_data, defense)
+
 	action_data["precomputed_outcome"] = outcome
 
 	# Main attack: calculate → popup → apply
 	var result: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(
 		attacker, defender, action_data)
+	_record_parry_prevented(attacker, defender, action_data, result, defense)
 	_log_attack(attacker, defender, result, "")
 	if result.hit:
 		DamagePopup.spawn(popup_layer, defender.position,
@@ -2474,13 +2499,16 @@ func _dispatch_talents(unit: Unit, event: String, ctx: Dictionary) -> void:
 		var talent_id: String = str(entry.get("id", ""))
 		if talent_id not in unit.talent_ids:
 			continue
-		# 三道行级把关，缺一不可（都读**触发行**而非整卡）：
+		# 四道行级把关，缺一不可（都读**触发行**而非整卡）：
 		#   来源 —— 本次伤害由哪只手产生（`trigger_source`，空 = 不限）
 		#   路径 —— 本次伤害走的哪条产生路径（`requires_contexts`）
+		#   回合 —— 本次事件落在被作用者回合内还是回合外（`requires_turn_phase`）
 		#   状态 —— `requires_states` 此刻成不成立
 		if not _talent_source_matches(trigger, ctx):
 			continue
 		if not _talent_contexts_hold(trigger, ctx):
+			continue
+		if not _talent_turn_phase_holds(trigger, ctx):
 			continue
 		if not _talent_conditions_hold(unit, trigger):
 			continue
@@ -2517,6 +2545,34 @@ func _talent_source_matches(trigger_row: Dictionary, ctx: Dictionary) -> bool:
 ## 返回不了 false。它不是装饰——注册期的闭集校验是真的（依赖未知标签的卡会被拒），
 ## 求值也真的在跑；但要等 Wave 4 的防御侧事件落地，它才会真正开始区分。
 ## 结构先立起来，是为了今天不吞掉条件文本里「发生在主动攻击动作中」那半句。
+## 回合位置匹配（Wave 4）：`requires_turn_phase` 非空时，本次分发必须带上同一个值。
+##
+## 形状照 `_talent_source_matches`（单值 + 空串=不限），不照 `_talent_contexts_hold`
+## （数组、逐个都要满足）——理由见 talent_registry 的 SUPPORTED_TURN_PHASES 注释。
+##
+## 分发点没声明回合位置时（ctx 无 `turn_phase` 键），指定了回合位置的卡一律不触发：
+## 宁可不触发，不可错误触发。攻击链五事件就是这一类——它们发给攻击者，而攻击者
+## 必然在自己回合内，「不处于自身回合内」这种要求挂上去本身就是建卡错误。
+##
+## ⚠ 如实记下当前的把关强度：引擎没有任何能让单位在自己回合内被攻击的路径，
+## 所以走到这里的 `outside_own_turn` 恒成立，本函数在防御侧返回不了 false。
+## 它在**攻击侧**倒是真的会返回 false（那些 ctx 根本不带 turn_phase 键），
+## 所以这个函数不是死代码——但那条分支拦的是建卡错误，不是游戏机制。
+func _talent_turn_phase_holds(trigger_row: Dictionary, ctx: Dictionary) -> bool:
+	var want: String = str(trigger_row.get("requires_turn_phase", "")).strip_edges()
+	if want == "":
+		return true
+	return want == str(ctx.get("turn_phase", ""))
+
+
+## 本次事件落在 `unit` 自己的回合内还是回合外。
+## `turn_manager.current_unit` 是当前正在行动的单位；被攻击者不是它就是回合外。
+func _turn_phase_of(unit: Unit) -> String:
+	if turn_manager != null and turn_manager.current_unit == unit:
+		return TURN_PHASE_OWN
+	return TURN_PHASE_OUTSIDE_OWN
+
+
 func _talent_contexts_hold(trigger_row: Dictionary, ctx: Dictionary) -> bool:
 	var required: Variant = trigger_row.get("requires_contexts", [])
 	if not required is Array or (required as Array).is_empty():
@@ -2548,6 +2604,171 @@ func _dispatch_on_hit_events(attacker: Unit, outcome: Dictionary,
 	_dispatch_talents(attacker, "命中时", ctx)
 	if bool(outcome.get("crit", false)):
 		_dispatch_talents(attacker, "暴击时", ctx)
+
+
+## 防御侧反应（Wave 4）：分发「受到攻击时」并结算招架减伤，返回本次的减伤结果。
+##
+## ★ **收件人是被攻击者**，不是攻击者。攻击链五事件全部发给攻击者，只有这一个反过来
+## ——`_dispatch_talents` 的第一个参数写错就会变成「我打人时我自己的交刃触发」。
+##
+## 时点：命中判定之后、伤害数值结算之前。交刃 rules 逐字要求「在该次攻击判定命中后、
+## 伤害数值结算前介入」，正是 Wave 3 攻击侧两阶段结构的镜像。
+##
+## **未命中就整个不发**：交刃 rules 逐字「攻击未命中则不触发、不消耗剑气」。把这条
+## 落在最前面，剑气就不可能被白扣——不必依赖下游每个分支各自记得判一次。
+##
+## 返回 `{applied, multiplier, reduction_pct, via, prevented}`。`prevented`（实际减免
+## 了多少伤害）要等伤害算完才知道，由 `_record_parry_prevented` 回填。
+func _resolve_defense(attacker: Unit, defender: Unit, outcome: Dictionary,
+		source: String) -> Dictionary:
+	var defense: Dictionary = {
+		"applied": false, "multiplier": 1.0, "reduction_pct": 0.0,
+		"via": "", "prevented": 0,
+	}
+	if defender == null or not bool(outcome.get("hit", false)):
+		return defense
+
+	# ── 第一步：分发「受到攻击时」，让防御侧天赋登记意图 ──────────
+	# 天赋在这里**只登记不结算**（同 offhand_followup 的做法）。真正的取舍在下面
+	# 那个唯一的结算点做——不然「架势已经减过了就不该再减一次、也不该白扣剑气」
+	# 这条没有地方判，两条入口会各减各的。
+	var defense_ctx: Dictionary = {
+		"attacker": attacker, "defender": defender,
+		"source": source, "contexts": [CONTEXT_ACTIVE_ATTACK],
+		"turn_phase": _turn_phase_of(defender),
+		# 给副本，理由同 _dispatch_on_hit_events：不开放本次 hit/crit 给天赋改写。
+		"outcome": outcome.duplicate(true),
+		"pending_parry": [],
+	}
+	_dispatch_talents(defender, "受到攻击时", defense_ctx)
+
+	var params: Dictionary = _parry_params()
+	if params.is_empty():
+		return defense
+
+	# ── 第二步：架势先行（它是免费的）────────────────────────
+	# ★ `randf()` 只在**确实挂着架势**时才掷。多掷一次会整体平移全局随机序列，
+	# 让所有固定 seed 的用例漂移——这也是为什么这道 has_buff 守卫不能写成
+	# 「先掷再看有没有架势」。
+	if defender.has_buff(PARRY_STANCE_BUFF_ID):
+		var chance_stat: String = str(params.get("chance_stat", ""))
+		var chance: float = float(defender.get_effective_stat(chance_stat)) / 100.0
+		if randf() < chance:
+			_fill_parry_result(defense, defender, params, "stance:" + PARRY_STANCE_BUFF_ID)
+			print("[Parry] %s 招架成功（%s=%d%%）→ 减伤 %.1f%%" % [
+				defender.unit_name, chance_stat,
+				defender.get_effective_stat(chance_stat), defense["reduction_pct"]])
+
+	# ── 第三步：架势没生效时，才轮到付费入口（交刃）──────────
+	# **减伤每次攻击至多结算一次。** 两条入口给的是同一份减伤（设计库交刃逐字：
+	# 「按招架的减伤结算」），叠乘等于凭空双倍，而设计库两边都没写可叠加。
+	# 顺序上让免费的先掷、付费的兜底，正合交刃「花剑气买必定」的定位：白掷中了
+	# 就不用付钱。**这是一处实装判断**，设计库没有明文，已在交付回执里登记。
+	if not bool(defense["applied"]):
+		for intent: Variant in (defense_ctx["pending_parry"] as Array):
+			if not intent is Dictionary:
+				continue
+			var wish: Dictionary = intent
+			var qi_cost: int = int(wish.get("qi_cost", 0))
+			# 剑气不够就跳过，且**不扣**——交刃 trigger_condition 逐字含「当前剑气 ≥ 10」。
+			if defender.sword_qi < qi_cost:
+				continue
+			if qi_cost > 0:
+				defender.set_sword_qi(defender.sword_qi - qi_cost)
+			_fill_parry_result(defense, defender, params,
+				"talent:" + str(wish.get("talent_id", "")))
+			print("[Parry] %s 「%s」→ 消耗 %d 剑气换必定减伤 %.1f%%（剩余 %d）" % [
+				defender.unit_name, str(wish.get("talent_id", "")), qi_cost,
+				defense["reduction_pct"], defender.sword_qi])
+			break
+	return defense
+
+
+## 招架减伤的参数：`data/buffs/swordsman_parry_stance.json` 的 `parry` 段。
+##
+## **这是减伤幅度在引擎侧的唯一权威**，招架架势与交刃共读它。设计库招架 `effect`
+## 的叙述文本「按 SPD% 概率减少 (40+DEX)% 的伤害」是设计权威，这一段是它的机器
+## 可执行译文（同 `engine_effects` 的模式），所以代码里不写死这三个值。
+func _parry_params() -> Dictionary:
+	var buff: Variant = DataLoader.buffs.get(PARRY_STANCE_BUFF_ID, {})
+	if not buff is Dictionary:
+		push_warning("[Parry] %s 的 buff 数据形状不对，减伤放弃" % PARRY_STANCE_BUFF_ID)
+		return {}
+	var params: Variant = (buff as Dictionary).get("parry", {})
+	if not params is Dictionary or (params as Dictionary).is_empty():
+		push_warning("[Parry] %s 缺 parry 段（减伤参数），减伤放弃——数据没接上时必须响亮，不能静默当作不减伤"
+			% PARRY_STANCE_BUFF_ID)
+		return {}
+	return params
+
+
+## 按 `parry` 段算出本次的减伤幅度与乘项，就地填进 `defense`。
+##
+## 减伤是**乘项不是减项**：`(base_pct + stat 当前值)%` 的「减少伤害」= 乘以
+## `1 − pct/100`，落在 `final_multiplier`（R1.1 最终乘区）。设计库 rules 写的
+## `final_modifier` 在引擎里不存在这个键名，已走转交协议提给 Mercury，未擅自改设计库。
+func _fill_parry_result(defense: Dictionary, defender: Unit,
+		params: Dictionary, via: String) -> void:
+	var base_pct: float = float(params.get("reduction_base_pct", 0.0))
+	var stat_key: String = str(params.get("reduction_stat", ""))
+	var stat_value: int = defender.get_effective_stat(stat_key) if stat_key != "" else 0
+	var pct: float = base_pct + float(stat_value)
+	# 上限不钳（问题①答 (c)）：照数值原样实装，越界由数值设计负责，引擎不擅自加
+	# 规则——钳一个设计库没写的上限就是引擎替设计做决定。但要**让它看得见**：
+	# 算到 100% 及以上时响亮告警，否则「DEX 到 60 就永久免疫」会静默生效到没人发现。
+	# 与 MAX_OFFHAND_FOLLOWUPS_PER_ACTION 同源——护栏让错数据可见，不改变行为。
+	if pct >= 100.0:
+		push_warning("[Parry] %s 的招架减伤算到 %.1f%%（>=100%%，本次攻击伤害归零）——%s=%d 已使 (%s+%s) 越界，请检查数值设计"
+			% [defender.unit_name, pct, stat_key, stat_value,
+				str(base_pct), stat_key])
+	defense["applied"] = true
+	defense["reduction_pct"] = pct
+	defense["multiplier"] = maxf(0.0, 1.0 - pct / 100.0)
+	defense["via"] = via
+
+
+## 把减伤乘项并进 `action_data`，供随后的 `resolve_attack` 读。
+##
+## **用乘不用赋值**——`final_multiplier` 里还住着副手追加的 50% 与 on-hit 钩子写下的
+## 「更多伤害」，直接覆写会把它们抹掉。
+func _apply_defense_to_action(action_data: Dictionary, defense: Dictionary) -> void:
+	if not bool(defense.get("applied", false)):
+		return
+	var before: float = float(action_data.get("final_multiplier", 1.0))
+	# 记下减伤**之前**的值，供 _record_parry_prevented 精确还原基准伤害。
+	# 不用「事后除回去」：减伤 100% 时乘项是 0，除不回来，而那正是最该报准的一档。
+	defense["multiplier_before"] = before
+	action_data["final_multiplier"] = before * float(defense.get("multiplier", 1.0))
+
+
+## 回填「本次减伤实际挡下了多少点伤害」（借力的蓄劲要读这个数）。
+##
+## ★ 为什么要再算一次而不是拿乘项反推：`resolve_attack` 的最终量向下取整（R1.8），
+## 反推 `damage / multiplier` 会因取整误差得到一个不精确的数，而蓄劲存的是「被减免
+## 的伤害」，那必须是精确值。这里用**同一个 `precomputed_outcome`** 再算一次不带减伤
+## 的伤害，两次都不掷骰、不改状态，差值就是精确减免量。
+##
+## ⚠ 本波不实装借力，这个数当前无人读取——但接口按它的需要设计好（Wave 4 任务书
+## §2 问题②答 (a)），免得借力落地时回头再改减伤实现。取的是**两个已取整最终量的
+## 差**，即「实际少挨了多少点」；若将来裁定蓄劲要存取整前的量，改这里一处即可。
+func _record_parry_prevented(attacker: Unit, defender: Unit,
+		action_data: Dictionary, result: DamageCalculator.AttackResult,
+		defense: Dictionary) -> void:
+	if not bool(defense.get("applied", false)) or not result.hit:
+		return
+	if not defense.has("multiplier_before"):
+		# 走到这里说明 _apply_defense_to_action 没跑过（减伤算出来了却没并进
+		# action_data），那是接线错误，必须响亮，不能报一个错的 prevented 出去。
+		push_warning("[Parry] defense 缺 multiplier_before，无法计算减免量——减伤可能没并进 action_data")
+		return
+	var baseline_data: Dictionary = action_data.duplicate(true)
+	# 深拷贝会把 precomputed_outcome 一并带过来（它是 Dictionary，会被真正深拷贝
+	# ——见 DamageCalculator.roll_outcome 的类型说明），所以这一次**不掷骰**：
+	# 同一次命中/暴击判定，只是不乘减伤那一项。
+	baseline_data["final_multiplier"] = float(defense["multiplier_before"])
+	var baseline: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(
+		attacker, defender, baseline_data)
+	defense["prevented"] = maxi(0, baseline.damage - result.damage)
 
 
 ## 把 on-hit 钩子里天赋写下的伤害修正合进 `action_data`，供随后的 `resolve_attack` 读。
@@ -2738,10 +2959,22 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 	var outcome: Dictionary = DamageCalculator.roll_outcome(attacker, defender, data)
 	_dispatch_on_hit_events(attacker, outcome, offhand_ctx)
 	_merge_on_hit_modifiers(data, offhand_ctx)
+
+	# ── Wave 4：副手这一击同样走防御侧反应 ────────────────────
+	# **为什么副手也发**：副手追加是独立结算命中与暴击的一次伤害（二天一流 rules
+	# 逐字），Wave 3 问题①已按这个理由裁定 on-hit 两事件主副手各发一次。防御侧是
+	# 它的镜像，只发主手会在被双持者攻击时留一个**减伤打不到的洞**——那比多发一次
+	# 更坏。代价是交刃在被双持者攻击时一次动作里可能扣两次剑气（每次伤害各一次），
+	# 已在交付回执里登记为已知疑点。
+	var offhand_defense: Dictionary = _resolve_defense(
+		attacker, defender, outcome, SOURCE_OFFHAND)
+	_apply_defense_to_action(data, offhand_defense)
+
 	data["precomputed_outcome"] = outcome
 
 	var result: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(
 		attacker, defender, data)
+	_record_parry_prevented(attacker, defender, data, result, offhand_defense)
 	_log_attack(attacker, defender, result, "副手")
 	if result.hit:
 		# segment_index=1：与主手的飘字错开，否则同坐标同帧两个数字会叠在一起。
@@ -2915,6 +3148,25 @@ func _apply_talent_effect(unit: Unit, talent_id: String,
 				unit.unit_name, talent_id,
 				str(bool(effect.get("guaranteed_crit", false))),
 				int(effect.get("qi_on_hit", 0))])
+		"parry_damage_reduction":
+			# 交刃（Wave 4）：花剑气买一次必定的招架减伤。
+			#
+			# ★ 这里**只登记意图、不当场结算**，同 offhand_followup 的做法。理由是
+			# 「减伤每次攻击至多结算一次」这条取舍需要同时看到架势与本卡两条入口，
+			# 而分发期只看得到本卡；当场扣剑气就会出现「架势本来也成功了、剑气却
+			# 已经白扣」。真正的结算与扣费在 _resolve_defense 里。
+			#
+			# ★ 减伤幅度**不由本卡声明**（注册期已拒收 reduction_base_pct /
+			# reduction_stat）：设计库逐字「按招架的减伤结算」，幅度的权威在招架
+			# 架势的 parry 段，两条入口共读一份。
+			if not ctx.has("pending_parry"):
+				push_warning("[Talent] %s 的 parry_damage_reduction 在不支持防御反应的时机触发（%s）"
+					% [talent_id, str(ctx.keys())])
+				return
+			(ctx["pending_parry"] as Array).append({
+				"talent_id": talent_id,
+				"qi_cost": int(effect.get("qi_cost", 0)),
+			})
 		"more_damage_from_stat":
 			# R1.8 的「更多」类修正：措辞「N% 更多 X」，各条独立连乘，落伤害链最外层。
 			# ★ 它**不是**「暴击倍率 ×N」那一类（拔刀走的那条），两者落层不同。

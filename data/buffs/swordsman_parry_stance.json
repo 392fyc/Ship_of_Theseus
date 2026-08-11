@@ -12,5 +12,12 @@
   "source_unit_id": "",
   "stackable": false,
   "max_stacks": 1,
-  "refresh_on_reapply": true
+  "refresh_on_reapply": true,
+
+  "parry": {
+    "chance_stat": "SPD",
+    "reduction_base_pct": 40,
+    "reduction_stat": "DEX"
+  },
+  "_engine_note": "parry 段是引擎侧字段，设计库无对应列、不回流（lane §2.2 注 8）。它是设计库招架 effect 那句叙述文本「受攻击时按 SPD% 概率减少 (40+DEX)% 的伤害」的机器可执行译文——同 engine_effects 的模式，设计库的叙述文本仍是权威，代码里不写死这三个值。\n\n★ 招架架势与交刃**共读这一段**。这就是设计库交刃 effect「该次攻击对你造成的伤害按**招架的**减伤结算」在引擎侧的落法：一份数据两条入口，分叉在结构上不可能发生。交刃自己的 JSON 若写了 reduction_base_pct / reduction_stat 会在注册期被拒收，正是为了挡住「照招架抄一份过来」。\n\nchance_stat 只有架势那条入口用（交刃是花剑气买必定，不掷概率）。减伤是乘项不是减项：乘以 1 −（reduction_base_pct + reduction_stat 当前值）/100，落 final_multiplier。\n\nBuffEffect.from_dict 不读本段（它只认固定 schema 的那些键），本段由 tactical_manager._parry_params() 直接从 DataLoader.buffs 读原始字典。所以运行时的 BuffEffect 实例只负责「架势在不在」，参数走数据文件。"
 }

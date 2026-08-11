@@ -25,5 +25,5 @@
   "guaranteed_hit": false,
   "slot_swap_trigger": "marks_full",
   "slot_swap_target": "swordsman_badao",
-  "description": "迅捷·进入招架架势。消耗 10 点剑气。集满 3 枚印记时，此槽位变为「拔刀」。（招架的反应减伤效果待后续实装。）"
+  "description": "迅捷·进入招架架势。受攻击时按 SPD% 概率减少 (40+DEX)% 的伤害。消耗 10 点剑气。集满 3 枚印记时，此槽位变为「拔刀」。"
 }

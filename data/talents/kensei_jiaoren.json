@@ -1,0 +1,31 @@
+{
+  "id": "kensei_jiaoren",
+  "name": "交刃",
+  "class_id": "kensei",
+  "rarity": "史诗",
+  "tags": ["反应"],
+
+  "trigger_event": "受到攻击时",
+  "trigger_object": "",
+  "trigger_source": "",
+  "trigger_condition": "不处于自身回合内；处于〔双持〕状态；当前剑气 ≥ 10",
+  "trigger_frequency": "每次",
+  "trigger_frequency_n": 1,
+  "effect": "消耗 10 点剑气，该次攻击对你造成的伤害按招架的减伤结算。",
+  "rules": "结算时序：在该次攻击判定命中后、伤害数值结算前介入，减伤只作用于该次攻击；攻击未命中则不触发、不消耗剑气。减伤作为 R1.1 最终乘区（final_modifier）里的一个乘项结算，与地形修正、暴击修正、遗物修正逐个相乘；仅在双持状态（经二天一流装备副手武器）下生效；本卡是反应动作，被动触发，不消耗主动资源（R3.2、R3.3）；消耗的剑气与 R1.6 的剑气池同源。",
+
+  "condition_model": "states",
+  "requires_states": ["shuangchi"],
+  "requires_contexts": ["active_attack"],
+  "requires_turn_phase": "outside_own_turn",
+
+  "engine_effects": [
+    { "type": "parry_damage_reduction", "qi_cost": 10 }
+  ],
+
+  "engine_note": "**本卡不声明减伤幅度。** effect 逐字是「按**招架的**减伤结算」——幅度的权威在招架那边，引擎侧落在 data/buffs/swordsman_parry_stance.json 的 parry 段（reduction_base_pct=40 / reduction_stat=DEX），招架架势与本卡共读那一份。注册期**主动拒收**带 reduction_base_pct / reduction_stat 的写法：照招架抄一份过来就是把同一个设计数值存两处，正是 lane §2.2 要封杀的双写。这与燕返拒收 damage_pct / damage_type 是同一条纪律。\n\n条件逐句映射，一句都没吞：「不处于自身回合内」由 requires_turn_phase=outside_own_turn 承担；「处于〔双持〕状态」由 requires_states=[shuangchi] 承担；「当前剑气 ≥ 10」由 engine_effects 的 qi_cost=10 承担——剑气不足时不减伤且不扣气，与写成触发条件的可观测行为一致（差别只在「不触发」与「触发了但什么都不做」，本卡没有频率计数器，两者外部不可区分）。rules 的「发生在主动攻击动作中」由 requires_contexts=[active_attack] 承担。\n\n**「攻击未命中则不触发、不消耗剑气」落在最前面**：_resolve_defense 开头就判 outcome.hit，未命中直接返回、连事件都不分发。把这条放在最前而不是让每个下游分支各自记得判一次，是因为「白扣剑气」这种错一旦发生，玩家侧看到的只是剑气莫名变少，最难查。\n\n**减伤每次攻击至多结算一次**（实装判断，设计库无明文）：招架架势与本卡给的是同一份减伤，叠乘等于凭空双倍。顺序是免费的架势先掷、本卡兜底——正合「花剑气买必定」的定位：架势白掷中了就不用付钱。\n\n**主手与副手追加各分发一次本事件**（沿用 Wave 3 问题①的 (c) 口径：副手是独立结算命中与暴击的一次伤害）。所以被双持者攻击时，本卡一次攻击动作内可能扣两次剑气。只发主手会留一个「副手那一击减伤打不到」的洞，比多扣一次更坏——但这一条是已知疑点，待用户裁决。\n\n**requires_turn_phase 当前恒成立**：引擎没有任何能让单位在自己回合内被攻击的路径（_execute_hostile_action 只可能由当前行动单位发起，自动反击已于 2026-07-11 移除）。闭集校验与运行期求值都真的在跑，但要等反击 / 回合外反应攻击回归才会开始区分。与 requires_contexts 的 active_attack 是同一类情形。",
+
+  "_mirror": "id / name / class_id / rarity / tags / trigger 五段 / effect / rules 是设计库天赋条目的只读镜像。版本锚点 = 生产库 /api/talents 的 kensei_jiaoren，updated_at 2026-08-08T07:57:03.152679（status=待审阅 / shelf_state=在用）。",
+  "_engine_note": "requires_states / condition_model / requires_contexts / requires_turn_phase / engine_effects / engine_note 是引擎侧字段，设计库无对应列、不回流。",
+  "_designlib_wording": "rules 镜像里的「final_modifier」是设计库原文，引擎里实际键名是 final_multiplier。按 lane §3 界线不擅自改设计库措辞，已走转交协议提给 Mercury。"
+}

@@ -55,14 +55,32 @@ extends RefCounted
 ## 两者都不可接受。如实说明它当前的把关强度：引擎目前唯一的伤害产生路径就是
 ## 主动攻击动作（自动反击已于 2026-07-11 整体移除），所以 `active_attack`
 ## **此刻恒成立**；闭集校验是真的（依赖未知标签的卡会被拒），求值也真的在跑，
-## 但要等 Wave 4 的防御侧事件落地它才会真正开始区分。
+## 但它至今还没有开始区分。
+##
+## ── 防御侧事件（Wave 4 起支持）─────────────────────
+##
+## `受到攻击时` 与前面五个攻击链事件的根本差别是**分发对象**：攻击链事件发给
+## **攻击者**的天赋，本事件发给**被攻击者**的天赋。时点是命中判定之后、伤害数值
+## 结算之前，即 Wave 3 攻击侧两阶段结构的防御侧镜像。它同样带伤害来源——主手那
+## 一击与副手追加各分发一次、各自带 `trigger_source` 标签。
+##
+## `requires_turn_phase`（引擎侧新字段，触发行级）承担交刃条件里「不处于自身回合
+## 内」那一句。形状照 `trigger_source`（单值字符串 + 空串=不限），**不照**
+## `requires_contexts`（数组）：它和来源一样是「本次事件的某个属性必须等于某值」，
+## 不是一组必须同时成立的标签。
+##
+## ⚠ **如实说明它当前的把关强度**：引擎目前**没有任何**能让单位在自己回合内被攻击
+## 的路径（`_execute_hostile_action` 只可能由当前行动单位发起），所以
+## `outside_own_turn` 与 `active_attack` 一样**此刻恒成立**，求值分支产生不了 false。
+## Wave 4 任务书 §1.3 说本波是「这个判据第一次要真正区分的时候」——那句不成立，
+## 两者都要等反击 / 回合外反应攻击回归才会开始区分。结构先立起来仍是为了不吞掉
+## 条件里的那半句，不是因为它今天就有判别力。
 ##
 ## ── 仍然不处理的东西（明确记下，免得误以为已覆盖）──────
 ##
 ##   - **`trigger_object` 槽**：不读。
-##   - **超出 `requires_states` / `requires_contexts` 的条件**：一律走
-##     `condition_model=unsupported` 拒收，不做部分执行。
-##   - **防御侧事件（受到攻击时）**：属 Wave 4，未接，注册期拒收。
+##   - **超出 `requires_states` / `requires_contexts` / `requires_turn_phase`
+##     的条件**：一律走 `condition_model=unsupported` 拒收，不做部分执行。
 ##
 ## 用法：
 ##     var states := StateRegistry.new(DataLoader.states)
@@ -85,22 +103,36 @@ const ACTION_EVENTS: Array[String] = ["执行攻击动作时"]
 ## 与「命中时」在同一时点、同一次分发批次里发出，而不是并列的第三类时机。
 const ON_HIT_EVENTS: Array[String] = ["命中时", "暴击时"]
 
+## Wave 4 接的防御侧事件——**分发给被攻击者**，不是攻击者。时点与 ON_HIT_EVENTS
+## 相同（命中判定之后、伤害数值结算之前），所以落在这里的效果同样能改写本次伤害；
+## 交刃的减伤就是这么生效的。
+const DEFENSIVE_EVENTS: Array[String] = ["受到攻击时"]
+
 ## 引擎当前能分发的全部事件。
 const SUPPORTED_EVENTS: Array[String] = [
 	"命中后", "造成伤害时", "击杀时", "执行攻击动作时", "命中时", "暴击时",
+	"受到攻击时",
 ]
 
 ## `trigger_source` 的闭集（不含空串——空串单独判，语义是「不限来源」）。
 const SUPPORTED_TRIGGER_SOURCES: Array[String] = ["主手", "副手"]
 
-## 带伤害来源的事件（攻击链五事件）。设计库侧 `trigger_source` 的 schema 也正是
-## 绑在这五个上。「执行攻击动作时」不在内：那一刻还没掷命中，谈不上来源。
+## 带伤害来源的事件。设计库侧 `trigger_source` 的 schema 绑在攻击链五事件上；
+## 引擎再加上防御侧的「受到攻击时」——被打的那一下同样分得清是主手还是副手打的，
+## 主手与副手追加会各分发一次。「执行攻击动作时」不在内：那一刻还没掷命中，
+## 谈不上来源。
 const SOURCE_BEARING_EVENTS: Array[String] = [
-	"命中时", "暴击时", "命中后", "造成伤害时", "击杀时",
+	"命中时", "暴击时", "命中后", "造成伤害时", "击杀时", "受到攻击时",
 ]
 
 ## `requires_contexts` 的闭集：本次伤害的产生路径标签。
 const SUPPORTED_CONTEXTS: Array[String] = ["active_attack"]
+
+## `requires_turn_phase` 的闭集（不含空串——空串单独判，语义是「不限」）。
+## 只收当前真有消费方的那一个值：交刃要求「不处于自身回合内」。
+## 反向的 `own_turn` 没有任何卡需要，故不预先造——`swordsman_parry_stance` 那个
+## 挂上后全库零消费方的死标记就是先例。
+const SUPPORTED_TURN_PHASES: Array[String] = ["outside_own_turn"]
 
 ## `more_damage_from_stat` / `offhand_recursive_followup` 允许读取的属性名。
 ## 照 2026-07-08 定的 9 属性模型（成长 7 + 固定 2），此处列可被效果读取的 8 个
@@ -126,7 +158,7 @@ const CONDITION_MODELS: Array[String] = ["none", "states", "unsupported"]
 const SUPPORTED_EFFECT_TYPES: Array[String] = [
 	"gain_resource", "offhand_followup", "unlock_offhand_weapon_effect",
 	"empower_next_offhand", "more_damage_from_stat",
-	"offhand_recursive_followup",
+	"offhand_recursive_followup", "parry_damage_reduction",
 ]
 
 ## 递归追加的衰减系数下限（护栏）。衰减必须真的衰减——填 100 就是永不衰减的
@@ -152,6 +184,7 @@ const EFFECT_ALLOWED_EVENTS: Dictionary = {
 	"empower_next_offhand": ["命中时", "暴击时"],
 	"more_damage_from_stat": ["命中时", "暴击时"],
 	"unlock_offhand_weapon_effect": [],
+	"parry_damage_reduction": ["受到攻击时"],
 }
 
 ## `offhand_followup` 的伤害百分比合理上限（护栏，不是游戏数值——数值从 JSON 读）。
@@ -288,7 +321,7 @@ func _row_rejection_reason(row: Dictionary, state_registry: RefCounted) -> Strin
 			return "触发行 %s 被标为常驻但事件「%s」不在 %s" \
 				% [where, event, str(PASSIVE_EVENTS)]
 	elif event not in SUPPORTED_EVENTS:
-		return "触发行 %s 的事件「%s」引擎不分发（当前支持 %s；防御侧事件如「受到攻击时」属 Wave 4 未接）" \
+		return "触发行 %s 的事件「%s」引擎不分发（当前支持 %s）" \
 			% [where, event, str(SUPPORTED_EVENTS)]
 
 	var model: String = str(entry.get("condition_model", ""))
@@ -335,6 +368,21 @@ func _row_rejection_reason(row: Dictionary, state_registry: RefCounted) -> Strin
 		return "触发行 %s 是常驻行，不能声明 requires_contexts（常驻没有「本次伤害的产生路径」，消费方也无从求值）" \
 			% where
 
+	# ── requires_turn_phase（Wave 4 新增，引擎侧字段）──
+	# 单值 + 空串=不限，形状照 trigger_source。非空必须在闭集内：填闭集外的值
+	# （「敌方回合」「我方阶段」之类）不能当空放行，那等于把一个引擎读不懂的限制
+	# 静默丢掉，卡就会在本该被排除的时机触发。
+	var turn_phase: String = str(entry.get("requires_turn_phase", "")).strip_edges()
+	if turn_phase != "" and turn_phase not in SUPPORTED_TURN_PHASES:
+		return "触发行 %s 的 requires_turn_phase「%s」不在闭集 %s 内（空串=不限）" \
+			% [where, turn_phase, str(SUPPORTED_TURN_PHASES)]
+	# 常驻行不许带回合位置，理由与 requires_contexts 那条对称：常驻行没有「本次
+	# 事件」，谈不上它发生在谁的回合里；常驻天赋的消费方是主动查询、手上没有 ctx，
+	# 求值不了这个维度。允许它填写等于留一个注册期收下、运行期永不校验的字段。
+	if bool(row.get("passive", false)) and turn_phase != "":
+		return "触发行 %s 是常驻行，不能声明 requires_turn_phase（常驻没有「本次事件」，消费方也无从求值）" \
+			% where
+
 	# trigger_object 引擎不读。填了值却不读 = 静默丢掉一个限制，与 trigger_source
 	# 那条「读不懂的限制不许当空放行」是同一条纪律，所以非空一律拒收而不是忽略。
 	var obj: String = str(entry.get("trigger_object", "")).strip_edges()
@@ -364,8 +412,14 @@ func _row_rejection_reason(row: Dictionary, state_registry: RefCounted) -> Strin
 	if model == "none" and not contexts.is_empty():
 		return "condition_model=none 但 requires_contexts 非空（%s）——none 的语义是无条件" \
 			% str(contexts)
-	if model == "states" and required.is_empty() and contexts.is_empty():
-		return "condition_model=states 但 requires_states 与 requires_contexts 都为空——声明与数据矛盾"
+	if model == "none" and turn_phase != "":
+		return "condition_model=none 但 requires_turn_phase 非空（%s）——none 的语义是无条件" \
+			% turn_phase
+	# ⚠ 每新增一种结构化判据，这一条都必须把它算进来，否则「条件只由新判据表达」的卡
+	# 会无路可走：填 states 因旧判据都为空被拒、填 none 因 condition 非空被拒。
+	# Wave 3 加 requires_contexts 时踩过一次，Wave 4 的 requires_turn_phase 同理。
+	if model == "states" and required.is_empty() and contexts.is_empty() and turn_phase == "":
+		return "condition_model=states 但 requires_states / requires_contexts / requires_turn_phase 全为空——声明与数据矛盾"
 
 	# ★ 硬判据：依赖的状态必须已注册且引擎判得了。
 	for item: Variant in required:
@@ -589,6 +643,30 @@ func _effects_rejection_reason(entry: Dictionary, rows: Array) -> String:
 			# 同一个设计数值，正是 lane §2.2 要封杀的双写。写了就拒，免得又抄回来。
 			if effect.has("damage_pct") or effect.has("damage_type"):
 				return "offhand_recursive_followup 不得声明 damage_pct / damage_type——追加的规格沿用触发它的那一次副手追加（用户裁决：基于二天一流的伤害再次计算），自带一份就是双写"
+		elif effect_type == "parry_damage_reduction":
+			# 交刃：花剑气买一次必定的招架减伤。
+			#
+			# ★ 本效果**不声明减伤幅度**。设计库 effect 逐字是「该次攻击对你造成的
+			# 伤害按**招架的**减伤结算」——幅度的权威在招架那边，引擎侧落在
+			# data/buffs/swordsman_parry_stance.json 的 parry 段，两条入口共读。
+			# 自带一份 (40+DEX) 就是把同一个设计数值存两处，正是 lane §2.2 要封杀
+			# 的双写；写了就拒，免得日后有人照招架抄一份过来。
+			if effect.has("reduction_base_pct") or effect.has("reduction_stat"):
+				return "parry_damage_reduction 不得声明 reduction_base_pct / reduction_stat——减伤幅度的权威是招架架势的 parry 段（设计库逐字：「按招架的减伤结算」），自带一份就是双写"
+			# qi_cost 是游戏数值（设计库 effect 逐字「消耗 10 点剑气」），必须来自
+			# JSON。允许为 0：将来若有「不花剑气的必定减伤」类卡，写 0 比省略更明确。
+			var qi_cost_raw: Variant = effect.get("qi_cost", null)
+			var qi_cost_type: int = typeof(qi_cost_raw)
+			if qi_cost_type != TYPE_INT and qi_cost_type != TYPE_FLOAT:
+				return "parry_damage_reduction 的 qi_cost 必须是数字，实际是 %s" \
+					% type_string(qi_cost_type)
+			if float(qi_cost_raw) != floorf(float(qi_cost_raw)):
+				return "parry_damage_reduction 的 qi_cost 必须是整数值，实际 %s 含小数部分" \
+					% str(qi_cost_raw)
+			var qi_cost: int = int(qi_cost_raw)
+			if qi_cost < 0 or qi_cost > MAX_RESOURCE_GAIN:
+				return "parry_damage_reduction 的 qi_cost 越界（0 <= x <= %d），实际 %d" \
+					% [MAX_RESOURCE_GAIN, qi_cost]
 		# grant_offhand_guaranteed_crit 无参数，type 在闭集内即合格。
 
 	# 每一**可分发**行都必须至少有一条效果落在它上面。有行没效果 = 那行触发了也什么

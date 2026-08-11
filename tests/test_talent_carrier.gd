@@ -135,12 +135,13 @@ const SYNTHETIC: Dictionary = {
 		"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 99}],
 	},
 	# 「引擎不分发的事件一律拒收」这条把关本身没变，变的是**哪个事件还没接**：
-	# A1 时这里放的是「暴击时」，Wave 3 已经接了它，于是换成当前真正未接的
-	# 防御侧事件「受到攻击时」（属 Wave 4）。夹具跟着实装前沿走，断言才不会
-	# 悄悄变成永真。
-	"test_rej_defensive_event": {
-		"id": "test_rej_defensive_event", "name": "测试·防御侧事件未接", "class_id": "kensei",
-		"trigger_event": "受到攻击时", "trigger_condition": "",
+	# A1 时这里放的是「暴击时」，Wave 3 接了它，于是换成防御侧的「受到攻击时」；
+	# Wave 4 又接了那个，现在换成「单位回合开始时」——它是设计库 TriggerEvent
+	# 枚举里真实存在、真有卡在用（1 张）、而引擎确实不分发的事件。
+	# **夹具必须跟着实装前沿走**，否则这条断言会悄悄变成永真。
+	"test_rej_unsupported_event": {
+		"id": "test_rej_unsupported_event", "name": "测试·回合结构事件未接", "class_id": "kensei",
+		"trigger_event": "单位回合开始时", "trigger_condition": "",
 		"trigger_frequency": "每次", "trigger_frequency_n": 1,
 		"condition_model": "none", "requires_states": [],
 		"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 99}],
@@ -423,14 +424,14 @@ func _test_extra_triggers(dl: Object) -> void:
 			"condition_model": "none", "requires_states": [],
 			"engine_effects": [{"type": "gain_resource", "resource": "qi", "amount": 1}],
 			"extra_triggers": [{
-				"trigger_event": "受到攻击时", "trigger_condition": "",
+				"trigger_event": "单位回合开始时", "trigger_condition": "",
 				"trigger_frequency": "每次", "trigger_frequency_n": 1,
 				"condition_model": "none", "requires_states": [],
 			}],
 		}
 	}
 	var reg3: Object = _make_registry(bad_extra, dl.states)
-	_check("附加行是未接事件（防御侧，Wave 4）→ 整卡被拒",
+	_check("附加行是未接事件（回合结构，仍未接）→ 整卡被拒",
 		not reg3.is_registered("bad_extra"))
 	_check("拒绝理由指明是附加行",
 		reg3.rejection_reason("bad_extra").contains("extra[0]"),
@@ -978,12 +979,12 @@ func _test_rejection_discipline(dl: Object) -> void:
 	var cases: Dictionary = {
 		"test_rej_unknown_state": "未在 data/states/ 注册",
 		"test_rej_unsupported": "unsupported",
-		"test_rej_defensive_event": "引擎不分发",
+		"test_rej_unsupported_event": "引擎不分发",
 		"test_rej_frequency": "频率",
 		"test_rej_unknown_effect": "未知 type",
 		"test_rej_condition_mismatch": "矛盾",
 		"test_rej_no_effects": "engine_effects 为空",
-		"test_rej_states_empty": "都为空",
+		"test_rej_states_empty": "全为空",
 		"test_rej_no_event": "缺 trigger_event",
 		"test_rej_no_model": "缺 condition_model",
 		"test_rej_bad_model": "非法",
@@ -1039,9 +1040,17 @@ func _test_event_index(dl: Object) -> void:
 			"命中时", "暴击时"]:
 		_eq("「%s」桶里的行数与夹具推导一致" % ev,
 			reg.talents_for_event(ev).size(), _expected_rows_for_event(mixed, ev))
-	# 防御侧事件即使有数据也索引不到——它在注册期就被拒了（夹具 test_rej_defensive_event）。
-	_eq("「受到攻击时」下 0 张（防御侧事件属 Wave 4，未接）",
-		reg.talents_for_event("受到攻击时").size(), 0)
+	# ── Wave 4 把这条锁翻面了 ──────────────────────────
+	# 原先这里断言「受到攻击时」下 0 张（属 Wave 4 未接）。Wave 4 接上之后**不删这条
+	# 断言，而是改成正向的**：交刃已进事件桶。删掉等于放弃对这个事件的索引覆盖。
+	_eq("「受到攻击时」下 1 张（Wave 4 已接，交刃）",
+		reg.talents_for_event("受到攻击时").size(), 1)
+	var defensive_rows: Array = reg.talents_for_event("受到攻击时")
+	_eq("那一张是交刃",
+		str((defensive_rows[0]["talent"] as Dictionary).get("id", "")), "kensei_jiaoren")
+	# 换上前沿事件后，未接事件这条把关仍然是真的（不是永真断言）。
+	_eq("「单位回合开始时」下 0 张（回合结构事件仍未接）",
+		reg.talents_for_event("单位回合开始时").size(), 0)
 	_eq("未知事件下 0 张", reg.talents_for_event("子虚乌有时").size(), 0)
 
 

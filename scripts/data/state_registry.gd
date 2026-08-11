@@ -16,7 +16,15 @@ extends RefCounted
 ##   理由二 · 没有对应的兑现类型。四种 effect_type（stat_mod / dot / control / special）
 ##   没有一种对应「纯条件、不给加成」：前三种都要给加成或造成效果；只剩 special，而
 ##   `BuffEffect.tick()` 的 match 里根本没有 special 分支，落它就是又一个无
-##   兑现器的死标记（先例 swordsman_parry_stance 挂上后全库零消费方）。
+##   兑现器的死标记。
+##
+##   ⚠ 2026-08-12（Wave 4）更正：这里原先举的先例是「swordsman_parry_stance 挂上后
+##   全库零消费方」。**那条先例已经不成立**——Wave 4 给招架架势接上了消费方
+##   （TacticalManager._resolve_defense 按 has_buff 判架势在不在，减伤参数读它 JSON
+##   的 parry 段）。**理由二本身不受影响**：它讲的是 BuffEffect.tick() 没有 special
+##   分支，那仍然为真——招架架势的兑现根本不走 tick()，是结算路径主动来查它。
+##   也就是说「special 类 buff 没有自动兑现器」依旧成立，被消掉的只是「挂上就永远
+##   没人管」这个具体先例。
 ##
 ##   理由三 · stackable/max_stacks 的「现成承接」不适用。条件类状态不叠层；且该叠层
 ##   分支（`Unit.add_buff` 里的 stackable 支路）是未验证代码——10 个 buff 文件 stackable 全 false、
@@ -74,8 +82,9 @@ func is_in_state(unit: Unit, state_id: String) -> bool:
 		push_warning("[StateRegistry] 未注册的状态 id: " + state_id)
 		return false
 	if not is_evaluable(state_id):
-		# 判不了必须响亮，不能静默返回 false——静默正是 swordsman_parry_stance 那种
-		# 「挂着没人管、运行时一声不吭」的失效模式。消费方应当先问 is_evaluable()，
+		# 判不了必须响亮，不能静默返回 false——静默就是「挂着没人管、运行时一声不吭」
+		# 那种失效模式（swordsman_parry_stance 曾是它的先例，Wave 4 已给它接上消费方，
+		# 但这里要防的失效**形态**不因此改变）。消费方应当先问 is_evaluable()，
 		# 走到这里说明它没问就直接取值了，属于误用，要能在日志里看见。
 		push_warning("[StateRegistry] 状态判不了（engine_status=unevaluable），求值按不成立处理: "
 			+ state_id + "；原因: " + get_blocker(state_id))
