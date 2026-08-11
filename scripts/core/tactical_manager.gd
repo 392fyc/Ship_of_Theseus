@@ -1554,6 +1554,15 @@ func _execute_skill_action(action: GameAction) -> bool:
 	user.consume_skill(skill_id, cooldown_turns)
 	user.refresh_status_icons()
 	var skill_name: String = str(data.get("skill_name", skill_id))
+	# ★ 这里刻意**不早退**（2026-08-11 修）。原本辅助类技能（`power <= 0`）在这里
+	# 直接 `return true`，于是下面的位移块**永远走不到**——`displacement: true` 且
+	# `power <= 0` 的技能施放后单位站着不动，而且一声不吭。瞬身（无伤害的瞬移）
+	# 正好是这个组合。改成 if / else 让两条路径汇到同一个收尾，扣印记与位移的
+	# 逻辑也因此各只剩一份，不会再出现「改了一处漏了另一处」。
+	#
+	# ⚠ **位移必须留在伤害结算之后**，不能为了让辅助技能走到就把整块提前：
+	# 一闪的途经伤害靠 `_get_displacement_path_cells(user.grid_position, target_pos)`
+	# 算路径，先位移会让起点变成落点，路径整个算错。
 	if _is_support_skill(skill_data):
 		print("[Skill] %s uses %s (%d target(s))" % [
 			user.unit_name,
@@ -1561,33 +1570,31 @@ func _execute_skill_action(action: GameAction) -> bool:
 			target_units.size(),
 		])
 		_apply_support_skill(user, skill_data, target_units)
-		_spend_skill_marks(user, mark_cost)
-		return true
-
-	var hostile_payload: Dictionary = data.duplicate(true)
-	if target_units.is_empty():
-		print("[Skill] %s uses %s on empty area %s" % [
-			user.unit_name,
-			skill_name,
-			target_pos,
-		])
 	else:
-		var splash_pct: int = int(skill_data.get("splash_damage_pct", 100))
-		for target_unit: Unit in target_units:
-			if not _can_execute_hostile_action(user, target_unit):
-				continue
-			print("[Skill] %s uses %s on %s" % [
+		var hostile_payload: Dictionary = data.duplicate(true)
+		if target_units.is_empty():
+			print("[Skill] %s uses %s on empty area %s" % [
 				user.unit_name,
 				skill_name,
-				target_unit.unit_name,
+				target_pos,
 			])
-			# 主目标（落点格单位）吃满；其余溅射目标按 splash_damage_pct 衰减（JSON 驱动）。
-			var per_target_payload: Dictionary = hostile_payload.duplicate(true)
-			if target_unit.grid_position == target_pos:
-				per_target_payload["area_damage_multiplier"] = 1.0
-			else:
-				per_target_payload["area_damage_multiplier"] = float(splash_pct) / 100.0
-			_execute_hostile_action(user, target_unit, per_target_payload)
+		else:
+			var splash_pct: int = int(skill_data.get("splash_damage_pct", 100))
+			for target_unit: Unit in target_units:
+				if not _can_execute_hostile_action(user, target_unit):
+					continue
+				print("[Skill] %s uses %s on %s" % [
+					user.unit_name,
+					skill_name,
+					target_unit.unit_name,
+				])
+				# 主目标（落点格单位）吃满；其余溅射目标按 splash_damage_pct 衰减（JSON 驱动）。
+				var per_target_payload: Dictionary = hostile_payload.duplicate(true)
+				if target_unit.grid_position == target_pos:
+					per_target_payload["area_damage_multiplier"] = 1.0
+				else:
+					per_target_payload["area_damage_multiplier"] = float(splash_pct) / 100.0
+				_execute_hostile_action(user, target_unit, per_target_payload)
 
 	# 伤害结算完成后才扣印记（修复 P0-②：使拔刀吃到自身消耗的势加成）。
 	_spend_skill_marks(user, mark_cost)
