@@ -75,7 +75,7 @@ var _slots_holder: HBoxContainer = null
 var _marks_holder: HBoxContainer = null
 var _qi_bar: Control = null   # SwordQiBar 实例（preload，避免 headless class_name 未注册）
 var _qi_value_label: Label = null
-var _forecaster: DamageForecaster = null
+var _forecaster: _ForecastPanel = null
 var _target_marker: Control = null
 var _hud_label: Label = null
 
@@ -441,12 +441,12 @@ func _build_target_and_forecaster() -> void:
 	_target_marker.add_child(hint)
 
 	# 伤害预测器（浮于目标头顶上方，三角向下指向目标）
-	_forecaster = DamageForecaster.new()
-	_forecaster.size = DamageForecaster.PANEL_SIZE
+	_forecaster = _ForecastPanel.new()
+	_forecaster.size = _ForecastPanel.PANEL_SIZE
 	# 锚到目标头顶：x 居中目标、底部三角尖对准目标上缘
 	_forecaster.position = Vector2(
-		target_center.x - DamageForecaster.PANEL_SIZE.x * 0.5,
-		target_center.y - 32.0 - DamageForecaster.PANEL_SIZE.y - DamageForecaster.TRIANGLE_H)
+		target_center.x - _ForecastPanel.PANEL_SIZE.x * 0.5,
+		target_center.y - 32.0 - _ForecastPanel.PANEL_SIZE.y - _ForecastPanel.TRIANGLE_H)
 	_forecaster.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_forecaster)
 
@@ -932,7 +932,21 @@ class ItemSlot extends Control:
 #  三态：单段「物理 · 24」/ 多段「物理 3 × 12（36）」/ 治疗「治疗 · +16」
 # ═══════════════════════════════════════════════════════════════
 
-class DamageForecaster extends Control:
+## ⚠ 名字里的下划线前缀不是风格偏好，是**防再次撞车**。
+##
+## 本类原名 `DamageForecaster`，与 `scripts/ui/damage_forecaster.gd` 顶部的全局
+## `class_name DamageForecaster` 同名 —— 内部类名 hides a global script class，
+## 整个 playground 脚本 **parse 失败**。它从 `15aebaa`（那次把预测浮窗抽成全局类、
+## 同时也改了本文件，但漏删这个内部类）起就坏着，两个月无人发现：唯一会碰它的
+## `tests/test_skillbar_playground_load.gd` 当时只检查 `load()` 与 `instantiate()`
+## 的返回非 null，而**场景在附着脚本 parse 失败时照样实例化得出来**（脚本变成
+## null、节点还在），于是它照常打印 OK 并退出 0。
+##
+## 保留这份与全局类近乎重复的实现是**有意的**：收敛两份实现要先逐字比对确认没有
+## playground 专属差异，那是一次行为等价性判断，而 playground 是 `scenes/dev/` 下的
+## 开发期原型、不在出货路径上，为它冒行为改变的风险收益不对等。要收敛该另开一件事，
+## 不混进「修假绿测试」这次改动里。
+class _ForecastPanel extends Control:
 	const PANEL_SIZE: Vector2 = Vector2(180.0, 78.0)
 	const TRIANGLE_H: float = 8.0
 
