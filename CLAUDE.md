@@ -32,6 +32,21 @@
 - **可靠的是**：实例化后断言 `node.get_script() != null`（脚本真挂上了），再断言 `get_script().resource_path` 就是期望的那个（挂的是对的那一个）。
 - 要一条真正等价于 `--check-only` 的，得在**回归脚本层面**对关键脚本各跑一次 `--check-only` 并断言退出码——那是测试基础设施改动，**尚未做**。
 
+### 「升级」在本项目是两个意思，查证时别混
+
+中文「升级」同时指两件**毫不相干**的事，扫全库时最容易在这里得出反的结论：
+
+| 说的是 | 引擎里有没有 | 怎么查 |
+|---|---|---|
+| **角色升级**（Lv1→Lv5 成长、升级得天赋点） | **有** | `data/classes/myrmidon.json` 的转职成长说明、`data/relics/relic_mentor_tome.json`、`data/runloop/act1_config.json` |
+| **技能升级链**（回忆天赋永久把某技能换成升级版；设计库 `Talent.upgrade_skill_id` ↔ `Skill.upgrade_of`，12 张在用） | **没有，零承载** | `grep -rni upgrade scripts/` → 零命中；`data/talents/` `data/skills/` 均无该字段 |
+
+**查后者请用 `upgrade` 而不是「升级」**：用 `upgrade` 查是干净的（零命中）；用「升级」扫 `data/` 会撞上表第一行那三个文件的假阳性，看到 3 处命中很容易误判成「引擎已经有升级概念」。
+
+引擎现有的 `slot_swap_trigger` / `slot_swap_target` / `slot_swap_provider` 是**局内动态替换**（印记满 3 → 招架换拔刀），**不是**技能升级链，两者别互相套用。
+
+（2026-08-12 实测登记。这一栏是否要补承载字段尚未裁决，届时按 lane §2.2 先入字段归属表再写代码。）
+
 ## DO NOT — KB
 
 - **禁止** PowerShell 写入 KB 文件（UTF-8 BOM 问题）
