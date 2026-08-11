@@ -9,10 +9,17 @@ extends SceneTree
 ## 这一组锁三件事：
 ##   A. 辅助类位移技能确实会位移（修复本身）
 ##   B. 有伤害的位移技能仍然位移（一闪，回归）
-##   C. ★ 位移仍发生在伤害结算**之后** —— 一闪的途经伤害用
-##      `_get_displacement_path_cells(user.grid_position, target_pos)` 算路径，
-##      若为了让辅助技能走到而把位移整块提前，起点会变成落点、路径全错。
-##      这条是修复时最容易踩的坑，必须有断言压着。
+##   C. ★ 位移不能被提到**受伤格计算之前** —— 一闪的途经格由
+##      `_get_displacement_path_cells(user.grid_position, target_pos)` 算，起点取的是
+##      施法者**当前**位置；先位移会让起点变成落点，`origin == landing` 直接返回空路径，
+##      途中的敌人一个都打不到。
+##
+##      风险窗口比「位移要放在最后」更窄，2026-08-11 用三个变异体量过：
+##        · 还原成「support 分支早退」          → 被 [A] 抓到
+##        · 位移提到 `_is_support_skill` 分支之前 → **无害**（受伤格在更早的
+##          第 1520 行一带就算完了），测试放行是对的
+##        · 位移提到 `_compute_skill_area_cells` 之前 → 被 [C] 抓到
+##      所以真正的红线是**别越过受伤格计算那一行**，而不是「必须待在函数末尾」。
 ##
 ## 运行：
 ##   <Godot_console.exe> --headless --path D:/ShipOfTheseus/Ship_of_Theseus \
@@ -138,11 +145,14 @@ func _test_hostile_displacement_still_works(tm: Object, user: Unit) -> void:
 		"施放前 %s 施放后 %s" % [str(before), str(user.grid_position)])
 
 
-## C. ★ 位移必须仍在伤害结算之后。
+## C. ★ 位移不能被提到受伤格计算之前。
 ##
-## 判据不看时序看**受伤格**：途经格由 `_get_displacement_path_cells(起点, 落点)` 算，
-## 若位移被提前，起点会变成落点、路径退化成空，途中的敌人就一个都打不到。
-## 所以「途中敌人掉了血」这一条，等价于「算路径时用的还是起点」。
+## 判据不看时序看**结果**：途经格由 `_get_displacement_path_cells(起点, 落点)` 算，
+## 位移若抢在它前面，起点就变成了落点，`origin == landing` 返回空路径，途中的敌人
+## 一个都打不到。所以「途中敌人掉了血」这一条，等价于「算路径时用的还是起点」。
+##
+## 精确的红线见文件头 [C] 那段：越过受伤格计算那一行才出事，放在 support 分支之前
+## 是无害的。
 func _test_displacement_after_damage(tm: Object, user: Unit) -> void:
 	print("\n[C] 位移仍发生在伤害结算之后（途经格用起点算）")
 	var victim: Unit = null
