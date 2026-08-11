@@ -21,8 +21,16 @@
 ## DO NOT — GDScript
 
 - class_name 与 autoload 同名 → autoload 脚本**移除 class_name**
+- **内部类（`class Foo extends X:`）与某个全局 `class_name Foo` 同名** → `Parse Error: Class "Foo" hides a global script class`，**整个文件 parse 失败**。与上一条是两回事（那条是 autoload，这条是普通全局类）。抽出全局类时**记得删掉原文件里的同名内部类**——`skillbar_playground.gd` 就是抽出 `DamageForecaster` 时漏删，坏了两个月（2026-08-12 修，内部类改名 `_ForecastPanel`）
 - Variant 类型推断 → **显式声明变量类型**
 - **禁止**在代码中硬编码数值，必须从JSON读取
+
+### 测试里不要这样判「脚本 parse 成功没有」
+
+- **`load(脚本路径) != null` 不是 parse 判据**（2026-08-12 实测）：脚本 parse 失败时 `load()` **仍可能返回非 null**，且行为随调用时机与资源缓存状态而变（在 `_initialize` 里探测与在 `_process` 里探测结果不一样）。拿它当护栏会得到一条永远绿的假断言。
+- **`packed.instantiate() != null` 更不行**：场景在附着脚本 parse 失败时照样实例化得出来——脚本变成 null、节点还在。`test_skillbar_playground_load.gd` 旧版就是只查这两条，于是上面那个 parse 错误坏了两个月而回归全绿。
+- **可靠的是**：实例化后断言 `node.get_script() != null`（脚本真挂上了），再断言 `get_script().resource_path` 就是期望的那个（挂的是对的那一个）。
+- 要一条真正等价于 `--check-only` 的，得在**回归脚本层面**对关键脚本各跑一次 `--check-only` 并断言退出码——那是测试基础设施改动，**尚未做**。
 
 ## DO NOT — KB
 
