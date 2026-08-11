@@ -27,5 +27,5 @@
 
   "_mirror": "id / name / class_id / rarity / tags / trigger 五段 / effect / rules 是设计库天赋条目的只读镜像。版本锚点 = 生产库 /api/talents 的 kensei_jiaoren，updated_at 2026-08-08T07:57:03.152679（status=待审阅 / shelf_state=在用）。",
   "_engine_note": "requires_states / condition_model / requires_contexts / requires_turn_phase / engine_effects / engine_note 是引擎侧字段，设计库无对应列、不回流。",
-  "_designlib_wording": "rules 镜像里的「final_modifier」是设计库原文，引擎里实际键名是 final_multiplier。按 lane §3 界线不擅自改设计库措辞，已走转交协议提给 Mercury。"
+  "_designlib_wording": "rules 镜像里的「final_modifier」**是对的，不要改**。它引的是规则表 R1.1（状态=锁定）的术语——R1.1 逐字写 final_damage = base_damage × skill_multiplier × terrain_modifier × crit_modifier × relic_modifier × final_modifier；舍身（myrmidon_sheshen）也在用同一个词。\n\n偏离的是**引擎这一侧**：引擎把其中三层叫成 _multiplier（terrain_ / relic_ / final_），只有 skill_multiplier 与 R1.1 一致。所以本卡实装读的是引擎的 final_multiplier，但设计库措辞无需变更。要对齐就该改引擎去贴 R1.1，那是一次纯机械的跨多处改名，与本波无关，未做。\n\n（初版这条备注写反了方向，说成「设计库原文与引擎键名不一致、已转交 Mercury 改措辞」——那是没查规则表就下的结论，2026-08-12 查 R1.1 后更正。）"
 }

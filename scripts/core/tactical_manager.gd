@@ -2705,8 +2705,17 @@ func _parry_params() -> Dictionary:
 ## 按 `parry` 段算出本次的减伤幅度与乘项，就地填进 `defense`。
 ##
 ## 减伤是**乘项不是减项**：`(base_pct + stat 当前值)%` 的「减少伤害」= 乘以
-## `1 − pct/100`，落在 `final_multiplier`（R1.1 最终乘区）。设计库 rules 写的
-## `final_modifier` 在引擎里不存在这个键名，已走转交协议提给 Mercury，未擅自改设计库。
+## `1 − pct/100`，落在本引擎的 `final_multiplier`。
+##
+## ⚠ **命名偏离的方向是引擎这一侧，不是设计库。** 规则表 R1.1（状态=锁定）逐字把
+## 这一层写作 `final_modifier`：
+##   `final_damage = base_damage × skill_multiplier × terrain_modifier
+##                   × crit_modifier × relic_modifier × final_modifier`
+## 引擎对其中三层用了 `_multiplier`（`terrain_` / `relic_` / `final_`），只有
+## `skill_multiplier` 与 R1.1 一致。所以交刃 rules 写 `final_modifier` **是对的**
+## ——它引的是锁定规则的术语，不是抄了个引擎键名；舍身（`myrmidon_sheshen`）也在用
+## 同一个词。要对齐就该改引擎去贴 R1.1，而不是改设计库。本波不做那个改名（纯机械、
+## 跨多处、与本波无关），登记在此。
 func _fill_parry_result(defense: Dictionary, defender: Unit,
 		params: Dictionary, via: String) -> void:
 	var base_pct: float = float(params.get("reduction_base_pct", 0.0))
