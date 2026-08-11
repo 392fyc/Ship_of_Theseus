@@ -148,6 +148,7 @@ func _run() -> void:
 	_test_parry_stance_edges()
 	_test_at_most_once()
 	_test_prevented_exact()
+	_test_offhand_side_defense()
 
 	dl.free()
 	print("\n--- 结果：%d 过 / %d 失败 ---" % [_pass, _fail])
@@ -516,6 +517,50 @@ func _test_prevented_exact() -> void:
 		int(defense.get("prevented", 0)) > 0,
 		"prevented=%d base=%d after=%d" % [
 			int(defense.get("prevented", 0)), base, result.damage])
+
+	(ctx["scene"] as Node).free()
+
+
+# ── D10. 副手那一击也走防御侧 ──────────────────────
+
+## 攻击方双持时，主手与副手追加**各分发一次**「受到攻击时」（沿用 Wave 3 问题①
+## 的 (c)：副手是独立结算命中与暴击的一次伤害）。
+##
+## 这一组同时把那个已知疑点变成**可观测的事实**而不是推测：交刃在被双持者攻击时，
+## 一次攻击动作内会扣两次剑气。数字摆出来，用户才好裁决要不要改成每动作一次。
+func _test_offhand_side_defense() -> void:
+	print("\n[D10] 攻击方双持时，主手与副手各分发一次防御侧事件")
+	var ctx: Dictionary = _make_battle()
+	if ctx.is_empty():
+		return
+	var tm: Object = ctx["tm"]
+	var kensei: Unit = ctx["kensei"]
+	var enemy: Unit = ctx["enemy"]
+
+	# 先测单手基线：观测卡只加一次气。
+	kensei.talent_ids = ["test_def_any"]
+	enemy.talent_ids = []
+	_incoming(tm, enemy, kensei, 0)
+	_eq("攻击方单手 → 防御侧事件发 1 次（+3）", kensei.sword_qi, 3)
+
+	# 让**攻击方**双持并装上二天一流，制造副手追加。
+	if enemy.weapon_id == "":
+		enemy.weapon_id = "sword_basic"
+	enemy.equip_offhand(OFFHAND_WEAPON)
+	enemy.talent_ids = ["kensei_ertianyiliu"]
+	_check("前提：攻击方确实双持", enemy.is_dual_wielding())
+	_incoming(tm, enemy, kensei, 0)
+	_eq("攻击方双持 → 主手与副手各发一次（+3×2）", kensei.sword_qi, 6)
+
+	# 交刃在这种局面下会扣两次剑气 —— 已知疑点，用断言把它钉成事实。
+	_arm_jiaoren(tm, kensei, enemy)
+	_incoming(tm, enemy, kensei, 30)
+	_eq("被双持者攻击 → 交刃一次动作内扣两次剑气（30−10−10=10）【已知疑点，待用户裁决】",
+		kensei.sword_qi, 10)
+
+	# 剑气只够一次时，只扣一次、扣完就没了（不会扣成负数）。
+	_incoming(tm, enemy, kensei, 10)
+	_eq("剑气只够一次 → 只扣一次，不扣成负数", kensei.sword_qi, 0)
 
 	(ctx["scene"] as Node).free()
 
