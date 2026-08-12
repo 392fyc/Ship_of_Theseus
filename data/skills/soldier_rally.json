@@ -1,5 +1,6 @@
 {
   "id": "soldier_rally",
+  "target_mode": "单位",
   "name": "Rally",
   "damage_type": "physical",
   "power": 0,

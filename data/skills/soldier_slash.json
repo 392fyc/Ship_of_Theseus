@@ -1,5 +1,6 @@
 {
   "id": "soldier_slash",
+  "target_mode": "单位",
   "name": "Slash",
   "damage_type": "physical",
   "power": 100,

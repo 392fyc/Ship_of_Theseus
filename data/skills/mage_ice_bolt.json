@@ -1,5 +1,6 @@
 {
   "id": "mage_ice_bolt",
+  "target_mode": "单位",
   "name": "Ice Bolt",
   "damage_type": "magical",
   "power": 95,

@@ -1,5 +1,6 @@
 {
   "id": "archer_eagle_eye",
+  "target_mode": "自身",
   "name": "Eagle Eye",
   "damage_type": "physical",
   "power": 0,

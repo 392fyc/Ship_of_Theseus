@@ -1,5 +1,6 @@
 {
   "id": "cleric_heal",
+  "target_mode": "单位",
   "name": "Heal",
   "damage_type": "magical",
   "power": 0,

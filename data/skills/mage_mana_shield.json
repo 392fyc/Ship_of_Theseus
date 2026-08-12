@@ -1,5 +1,6 @@
 {
   "id": "mage_mana_shield",
+  "target_mode": "自身",
   "name": "Mana Shield",
   "damage_type": "magical",
   "power": 0,

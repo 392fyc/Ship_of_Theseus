@@ -1,5 +1,6 @@
 {
   "id": "swordsman_badao",
+  "target_mode": "单位",
   "name": "拔刀",
   "damage_type": "physical",
   "power": 180,

@@ -1,5 +1,6 @@
 {
   "id": "knight_charge",
+  "target_mode": "单位",
   "name": "Charge",
   "damage_type": "physical",
   "power": 110,

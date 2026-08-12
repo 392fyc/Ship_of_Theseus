@@ -1,5 +1,6 @@
 {
   "id": "archer_aimed_shot",
+  "target_mode": "单位",
   "name": "Aimed Shot",
   "damage_type": "physical",
   "power": 110,

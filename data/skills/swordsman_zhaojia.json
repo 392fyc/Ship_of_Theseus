@@ -1,5 +1,6 @@
 {
   "id": "swordsman_zhaojia",
+  "target_mode": "自身",
   "name": "招架",
   "damage_type": "physical",
   "power": 0,

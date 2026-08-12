@@ -1,5 +1,6 @@
 {
   "id": "mage_fireball",
+  "target_mode": "格子",
   "name": "Fireball",
   "damage_type": "magical",
   "power": 120,

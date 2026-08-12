@@ -1,5 +1,6 @@
 {
   "id": "soldier_shield_bash",
+  "target_mode": "单位",
   "name": "Shield Bash",
   "damage_type": "physical",
   "power": 85,

@@ -1,5 +1,6 @@
 {
   "id": "knight_heavy_strike",
+  "target_mode": "单位",
   "name": "Heavy Strike",
   "damage_type": "physical",
   "power": 150,

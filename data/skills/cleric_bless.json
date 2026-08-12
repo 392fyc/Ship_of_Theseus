@@ -1,5 +1,6 @@
 {
   "id": "cleric_bless",
+  "target_mode": "格子",
   "name": "Bless",
   "damage_type": "magical",
   "power": 0,

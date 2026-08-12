@@ -1,5 +1,6 @@
 {
   "id": "swordsman_yishan",
+  "target_mode": "方向",
   "name": "一闪",
   "damage_type": "physical",
   "power": 50,

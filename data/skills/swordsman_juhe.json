@@ -1,5 +1,6 @@
 {
   "id": "swordsman_juhe",
+  "target_mode": "单位",
   "name": "居合",
   "damage_type": "physical",
   "power": 300,

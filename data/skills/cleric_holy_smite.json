@@ -1,5 +1,6 @@
 {
   "id": "cleric_holy_smite",
+  "target_mode": "单位",
   "name": "Holy Smite",
   "damage_type": "pure",
   "pure_atk_source": "mag",

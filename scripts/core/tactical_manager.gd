@@ -25,6 +25,21 @@ const TalentRegistryScript := preload("res://scripts/data/talent_registry.gd")
 const SOURCE_MAIN_HAND: String = "主手"
 const SOURCE_OFFHAND: String = "副手"
 
+## 目标选择方式（对应设计库 `Skill.target_mode` 的闭集值，**引擎只读镜像**）。
+## 用中文原值、不另造英文枚举，同 trigger 五段的既有决定（`talent_registry.gd` 逐字：
+## 「设计库 trigger_event 的中文原值，不另造英文枚举避免双写」）。
+##
+## ⚠ 别拿 `damage_type` 的 physical/magical/pure 当反例——那是**引擎独有 taxonomy**、
+## 不是镜像（见 `talent_registry.gd` 的 SUPPORTED_DAMAGE_TYPES 注释）。英文用于引擎自有
+## 概念，中文用于镜像。收成常量而非散落字面量的理由同 SOURCE_MAIN_HAND 那条。
+const TARGET_MODE_UNIT: String = "单位"
+const TARGET_MODE_CELL: String = "格子"
+const TARGET_MODE_DIRECTION: String = "方向"
+const TARGET_MODE_SELF: String = "自身"
+const SUPPORTED_TARGET_MODES: Array[String] = [
+	TARGET_MODE_UNIT, TARGET_MODE_CELL, TARGET_MODE_DIRECTION, TARGET_MODE_SELF,
+]
+
 ## 伤害产生路径标签（对应天赋的 `requires_contexts`）。当前只有主动攻击一条路径。
 ##
 ## ⚠ 这里原先写着「Wave 4 的防御侧反应会加第二条，那时这个维度才真正开始区分」
@@ -1809,11 +1824,13 @@ func _get_units_in_skill_area(user: Unit, skill_data: Dictionary,
 	return units_in_area
 
 
+## 这个技能要瞄准谁：自己 / 友军 / 敌军。
+##
+## 「自己」这一档从 `target_mode` 读（2026-08-12），不再由 `range.type=="self" and
+## area.type=="single"` 反推——理由见 `_is_ground_target_skill` 的说明，两处是同一个病。
+## 友军 / 敌军仍按 `_is_support_skill` 分（那是**效果**的性质，不是选择模型的事）。
 func _get_skill_target_relation(skill_data: Dictionary) -> String:
-	var range_data: Dictionary = skill_data.get("range", {})
-	var area_data: Dictionary = skill_data.get("area", {})
-	if str(range_data.get("type", "")) == "self" \
-			and str(area_data.get("type", "single")) == "single":
+	if _skill_target_mode(skill_data) == TARGET_MODE_SELF:
 		return "self"
 	if _is_support_skill(skill_data):
 		return "ally"
@@ -1839,12 +1856,56 @@ func _is_support_skill(skill_data: Dictionary) -> bool:
 	return int(skill_data.get("power", 0)) <= 0
 
 
+## 释放这个技能时，玩家能不能点一个**没有单位**的格子。
+##
+## ── 2026-08-12：从「反推 area」改成「读 target_mode」──────────────
+##
+## 旧实现是 `range.type != "self" and area.type != "single"`。**那是拿伤害波及的形状
+## 去猜选择模型**，设计库 `app/models.py::TargetMode` 立字段时就把它判定失效了，逐字：
+##
+##   「引擎原先从 area 形状反推是否选地面（`_is_ground_target_skill`：area.type !=
+##     "single" 即算选地面），于是斩击/居合被判为选单位、**拔刀被判为选地面**。而 R4.4
+##     规定多格单位『其占据格逐格均为合法瞄准点』——斩击也要能选打哪一格，这个反推在
+##     多格单位下直接失效。故把目标选择语义提升为独立字段。」
+##
+## 那之后设计库有了 `target_mode`，引擎侧却一直零承载，于是**拔刀在游戏里一直能点空地
+## 释放**（它 `area=diamond/1` → 旧反推判它选地面），与设计库 `target_mode=单位` 矛盾。
+## 本次把这一半接上：选择读 `target_mode`，`area` 只管伤害波及与派生分类，不再兼职。
+##
+## 映射：`格子` / `方向` → 可点空格；`单位` / `自身` → 必须点到符合关系的单位。
+## 「方向」也归可点空格一侧——一闪要先点一个空格当落点，方向由 `_targeting_direction`
+## 另行捕获（见 `_get_skill_area_direction`）。
 func _is_ground_target_skill(skill_data: Dictionary) -> bool:
+	return _skill_target_mode(skill_data) in [TARGET_MODE_CELL, TARGET_MODE_DIRECTION]
+
+
+## 读技能的目标选择方式。缺字段时**响亮退回旧反推**——不静默：静默会让一个漏填
+## `target_mode` 的新技能悄悄回到那个已判定失效的猜法上，而表现只是「这技能能点空地」，
+## 与本次要修的 bug 一模一样，最难查。
+func _skill_target_mode(skill_data: Dictionary) -> String:
+	var mode: String = str(skill_data.get("target_mode", "")).strip_edges()
+	if mode in SUPPORTED_TARGET_MODES:
+		return mode
+	if mode != "":
+		push_warning("[Skill] %s 的 target_mode「%s」不在闭集 %s 内，退回旧的 area 反推"
+			% [str(skill_data.get("id", "?")), mode, str(SUPPORTED_TARGET_MODES)])
+	else:
+		push_warning("[Skill] %s 缺 target_mode，退回旧的 area 反推（该反推已被设计库判定失效，请补字段）"
+			% str(skill_data.get("id", "?")))
+	return _legacy_target_mode_from_area(skill_data)
+
+
+## 旧的 area 反推，**只在缺字段时兜底**，不是正常路径。保留它而不是直接报错，是为了让
+## 一个漏填字段的技能仍能按老样子跑（退化而非崩掉），同时靠上面那条告警把问题喊出来。
+func _legacy_target_mode_from_area(skill_data: Dictionary) -> String:
 	var range_data: Dictionary = skill_data.get("range", {})
-	if str(range_data.get("type", "")) == "self":
-		return false
 	var area_data: Dictionary = skill_data.get("area", {})
-	return str(area_data.get("type", "single")) != "single"
+	if str(range_data.get("type", "")) == "self":
+		return TARGET_MODE_SELF if str(area_data.get("type", "single")) == "single" \
+			else TARGET_MODE_UNIT
+	if str(area_data.get("type", "single")) != "single":
+		return TARGET_MODE_CELL
+	return TARGET_MODE_UNIT
 
 
 func _apply_support_skill(user: Unit, skill_data: Dictionary,

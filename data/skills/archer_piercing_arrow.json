@@ -1,5 +1,6 @@
 {
   "id": "archer_piercing_arrow",
+  "target_mode": "方向",
   "name": "Piercing Arrow",
   "damage_type": "physical",
   "power": 95,

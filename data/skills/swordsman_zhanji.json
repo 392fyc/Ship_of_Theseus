@@ -1,5 +1,6 @@
 {
   "id": "swordsman_zhanji",
+  "target_mode": "单位",
   "name": "斩击",
   "damage_type": "physical",
   "power": 100,
