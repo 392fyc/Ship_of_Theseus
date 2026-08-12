@@ -75,6 +75,8 @@ func _run() -> void:
 	_test_behavior_preserved(dl, tm)
 	_test_acceptance(dl, tm)
 	_test_missing_field_is_loud(tm)
+	_test_area_direction_decoupled(dl, tm)
+	_test_direction_capture_is_range_driven(dl, tm)
 
 	scene.free()
 	dl.free()
@@ -212,6 +214,120 @@ func _test_missing_field_is_loud(tm: Object) -> void:
 		tm._legacy_target_mode_from_area(self_like), tm.TARGET_MODE_SELF)
 	_eq("退回后瞄准关系仍是 self",
 		tm._get_skill_target_relation(self_like), "self")
+
+
+# ── T5. 方向捕获与 area 脱钩（2026-08-12）──────────────
+
+## `_get_skill_area_direction` 的**旧**判据，独立重实现（不调被测代码，理由同 [T2]）。
+func _old_area_direction(origin: Vector2i, target_pos: Vector2i,
+		sk: Dictionary, captured: Vector2i) -> Vector2i:
+	if str((sk.get("area", {}) as Dictionary).get("type", "")) == "line" \
+			and captured != Vector2i.ZERO:
+		return captured
+	return RangeCalculator.direction_from_to(origin, target_pos)
+
+
+## ★ 本组的判据是**受伤格**，不是函数返回值 —— 两者结论不同，必须分开说。
+##
+## `knight_charge`（range=line / area=single）的**函数返回值确实变了**：旧实现因
+## area 非 line 而丢弃玩家选的方向、改用推导方向；新实现直接用玩家选的。但
+## `AreaCalculator.calculate_cells` **只在 line 分支使用 direction**（single/diamond/
+## cross/square 四个分支都不读它），所以它的**受伤格一格没变**。
+##
+## 笼统说「零变化」是不准的；准确说法是「受伤格零变化，函数级有一处差异且无观测后果」。
+## 这一组把两条都断言出来，包括「那处差异确实存在」——否则那是一条永真断言。
+func _test_area_direction_decoupled(dl: Object, tm: Object) -> void:
+	print("\n[T5] 方向捕获与 area 脱钩：受伤格零变化，函数级差异仅 knight_charge")
+	var origin: Vector2i = Vector2i(2, 2)
+	var target: Vector2i = Vector2i(5, 2)
+	var captured: Vector2i = Vector2i(0, 1)   # 刻意不等于 origin→target 的方向
+	_check("前提：模拟的捕获方向与推导方向不同（否则整组失去区分力）",
+		captured != RangeCalculator.direction_from_to(origin, target))
+
+	var saved: Vector2i = tm._targeting_direction
+
+	var cells_changed: Array[String] = []
+	var dir_changed: Array[String] = []
+	for key: Variant in dl.skills.keys():
+		var sid: String = str(key)
+		var sk: Dictionary = dl.skills[key]
+		# ★ 每条技能用它**实际可能处于**的捕获状态，不能一律强设成「已捕获」。
+		# 方向捕获只在 `range.type == "line"` 时发生（`_is_waiting_for_line_direction`），
+		# 所以对其余技能 `_targeting_direction` 恒为 ZERO。一律强设会把新旧实现放到一个
+		# **现实中不可能出现的状态**下比较，得出 18 条「差异」——那是测试造出来的，不是
+		# 代码的。（初版就是这么写的，被这一组自己抓了出来。）
+		var can_capture: bool = \
+			str((sk.get("range", {}) as Dictionary).get("type", "")) == "line"
+		var actual: Vector2i = captured if can_capture else Vector2i.ZERO
+		tm._targeting_direction = actual
+		var new_dir: Vector2i = tm._get_skill_area_direction(origin, target)
+		var old_dir: Vector2i = _old_area_direction(origin, target, sk, actual)
+		if new_dir != old_dir:
+			dir_changed.append(sid)
+		var area: Dictionary = sk.get("area", {})
+		var new_cells: Array[Vector2i] = AreaCalculator.calculate_cells(
+			tm.grid, target, area, new_dir)
+		var old_cells: Array[Vector2i] = AreaCalculator.calculate_cells(
+			tm.grid, target, area, old_dir)
+		if str(new_cells) != str(old_cells):
+			cells_changed.append(sid)
+	tm._targeting_direction = saved
+
+	cells_changed.sort()
+	dir_changed.sort()
+	_eq("★ 受伤格：20 条一格没变", str(cells_changed), str([]))
+	# 函数级差异 == 「range=line 且 area 非 line」的那一批，当前恰好只有 knight_charge。
+	_eq("函数级差异只有 knight_charge", str(dir_changed), str(["knight_charge"]))
+	_check("对照：那处差异确实存在（否则上一条是永真断言）", dir_changed.size() == 1)
+
+	# 差异无观测后果的**机制**要单独钉住：AreaCalculator 对 single 忽略 direction。
+	var single_a: Dictionary = {"type": "single", "size": 0}
+	_eq("机制：area=single 时 direction 不影响受伤格",
+		str(AreaCalculator.calculate_cells(tm.grid, target, single_a, Vector2i(0, 1))),
+		str(AreaCalculator.calculate_cells(tm.grid, target, single_a, Vector2i(1, 0))))
+
+
+## 如实锁住「格子 / 方向 **尚未**完全声明式」这个状态。
+##
+## 任务书要求「`target_mode=格子` 的技能不再捕获方向」——**本次改动做不到这件事**，
+## 因为方向捕获由 `range.type == "line"` 驱动，而那一处按界线不动（它是射程形状要不要
+## 定方向，本就归射程管，不属于「拿 area 猜」）。
+##
+## 与其假装做到了，不如把现状钉成断言：构造一条 `格子 + range=line` 的合成技能，
+## 断言它**仍会**进入方向选择模式。哪天有人把捕获改成声明式，这条会红——那时它是提醒
+## 「该更新这条用例了」，而不是一条掩盖现状的绿灯。
+func _test_direction_capture_is_range_driven(dl: Object, tm: Object) -> void:
+	print("\n[T6] 方向捕获仍由 range 驱动（如实登记：格子/方向尚未完全声明式）")
+	# 真实数据：两条「格子」技能的 range 都不是 line，故不进方向选择模式。
+	for sid: String in ["cleric_bless", "mage_fireball"]:
+		var sk: Dictionary = dl.skills.get(sid, {})
+		_eq("%s 是 target_mode=格子" % sid, str(sk.get("target_mode", "")), "格子")
+		_check("%s 的 range 不是 line → 不进方向选择" % sid,
+			str((sk.get("range", {}) as Dictionary).get("type", "")) != "line")
+
+	# 合成夹具：格子 + range=line。**当前仍会进方向选择模式** —— 这就是未完成的那一半。
+	var autoload_dl: Node = root.get_node_or_null("/root/DataLoader")
+	if autoload_dl == null:
+		_check("autoload DataLoader 可达", false)
+		return
+	autoload_dl.skills["test_cell_with_line_range"] = {
+		"id": "test_cell_with_line_range", "target_mode": "格子",
+		"range": {"type": "line", "min": 1, "max": 3},
+		"area": {"type": "single", "size": 0}, "power": 100,
+	}
+	var saved_state: int = tm.input_state
+	var saved_skill: String = tm._selected_skill_id
+	var saved_dir: Vector2i = tm._targeting_direction
+	tm.input_state = tm.InputState.SKILL_TARGETING
+	tm._selected_skill_id = "test_cell_with_line_range"
+	tm._targeting_direction = Vector2i.ZERO
+	_check("【已知未完成】格子 + range=line 仍会进方向选择模式",
+		tm._is_waiting_for_line_direction(),
+		"若这条红了，说明捕获已改成声明式，请更新本用例与 lane §2.2 注 10")
+	tm.input_state = saved_state
+	tm._selected_skill_id = saved_skill
+	tm._targeting_direction = saved_dir
+	autoload_dl.skills.erase("test_cell_with_line_range")
 
 
 func _check(name: String, cond: bool, detail: String = "") -> void:

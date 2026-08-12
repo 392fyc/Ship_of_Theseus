@@ -748,7 +748,7 @@ func _recalculate_hover_artifacts() -> void:
 			and _hover_cell in _attack_cells:
 		var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
 		var area_direction: Vector2i = _get_skill_area_direction(
-			current_unit.grid_position, _hover_cell, skill_data)
+			current_unit.grid_position, _hover_cell)
 		_area_preview_cells = _compute_skill_area_cells(
 			current_unit, skill_data, _hover_cell, area_direction)
 		_combat_forecast = _build_skill_forecast_for_hover(_hover_cell)
@@ -1348,7 +1348,7 @@ func _build_skill_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 		return {}
 
 	var area_direction: Vector2i = _get_skill_area_direction(
-		current_unit.grid_position, grid_pos, skill_data)
+		current_unit.grid_position, grid_pos)
 	var area_cells: Array[Vector2i] = _compute_skill_area_cells(
 		current_unit, skill_data, grid_pos, area_direction)
 	var target_units: Array[Unit] = _get_units_in_skill_area(
@@ -1551,7 +1551,7 @@ func _execute_skill_action(action: GameAction) -> bool:
 		data.get("affected_cells", []))
 	if area_cells.is_empty():
 		area_direction = _get_skill_area_direction(
-			user.grid_position, target_pos, skill_data)
+			user.grid_position, target_pos)
 		area_cells = _compute_skill_area_cells(
 			user, skill_data, target_pos, area_direction)
 	var target_units: Array[Unit] = _get_units_in_skill_area(
@@ -2072,11 +2072,29 @@ func _filter_enemy_target_cells(candidate_cells: Array[Vector2i]) -> Array[Vecto
 	return filtered_cells
 
 
-func _get_skill_area_direction(origin: Vector2i, target_pos: Vector2i,
-		skill_data: Dictionary) -> Vector2i:
-	var area_data: Dictionary = skill_data.get("area", {})
-	if str(area_data.get("type", "")) == "line" \
-			and _targeting_direction != Vector2i.ZERO:
+## 算受伤格时用哪个方向：玩家选的那个，还是「起点 → 目标」推出来的那个。
+##
+## ── 2026-08-12：判据从 `area.type == "line"` 改成「本次有没有捕获到方向」──
+##
+## 旧实现是 `area.type == "line" and _targeting_direction != ZERO`，即**再一次拿伤害
+## 波及的形状去猜**（同 `_is_ground_target_skill` 那个已修的病）。现在只问一件事：
+## **这次玩家到底选没选过方向**。选了就用它，没选就按起点→目标推。
+##
+## 语义上这才是对的：`_targeting_direction` 非零本身就表示「玩家做过一次方向选择」，
+## 那个选择该不该被采用，与受伤格恰好是什么形状无关——形状由 `AreaCalculator` 自己
+## 按 `area` 处理，它对非 line 形状本就忽略 direction 参数。
+##
+## 零行为变化的依据：方向捕获只在 `range.type == "line"` 时发生（见
+## `_is_waiting_for_line_direction`），而现有 `area.type == "line"` 的两条技能
+## （`swordsman_yishan` / `archer_piercing_arrow`）恰好都是 `range.type == "line"`；
+## 反过来 `range.type == "line"` 但 area 非 line 的 `knight_charge`，其 direction
+## 交给 `AreaCalculator` 后按 `single` 处理、本就不参与受伤格计算。
+##
+## ⚠ **这不等于「格子 / 方向」已经变成声明式**：要不要定方向仍由 `range.type` 决定，
+## 不由 `target_mode=方向` 声明。完全声明式要先处理 `knight_charge`（range=line 却是
+## target_mode=单位），那会改变它的选择行为，属设计裁决，未做。见 lane §2.2 注 10。
+func _get_skill_area_direction(origin: Vector2i, target_pos: Vector2i) -> Vector2i:
+	if _targeting_direction != Vector2i.ZERO:
 		return _targeting_direction
 	return RangeCalculator.direction_from_to(origin, target_pos)
 
@@ -2136,7 +2154,7 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 	var area_data: Dictionary = skill_data.get("area", {})
 	var area_type: String = str(area_data.get("type", "single"))
 	var area_direction: Vector2i = _get_skill_area_direction(
-		user.grid_position, target_pos, skill_data)
+		user.grid_position, target_pos)
 	var affected_cells: Array[Vector2i] = _compute_skill_area_cells(
 		user, skill_data, target_pos, area_direction)
 	var basic_attack_profile: Dictionary = _get_unit_basic_attack_profile(user)
