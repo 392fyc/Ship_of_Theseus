@@ -184,9 +184,15 @@ func _test_wiring(dl: Object, tm: Object) -> void:
 ## 落点必与起点共线。真正会撞上这一条的是瞬身（设计库 `kensei_huizhan`：位移 +
 ## `target_mode=单位` + 射程菱形 1–5，菱形射程含非共线格），而它**引擎侧还没有数据文件**。
 ##
+## ⚠ 对瞬身来说，走偏的后果**不是「打偏」** —— 它 `damage_type=无`，`_is_support_skill`
+## 为真，路径格在它身上喂的是 `_get_units_in_skill_area`（收集目标单位），而
+## `_execute_skill_action` 有一道闸：`target_mode` 非「格子 / 方向」且 `target_units`
+## 为空就 `return false`。所以一条走偏的对角线让瞬身**整个不执行**，不是少打一格。
+##
 ## 所以本组锁的是**现状**，不是期望行为：如实登记「今天是这样」，将来实装瞬身时这条会
-## 提醒实装者先处理落点求解，而不是让它安静地打偏。这与 test_skill_target_mode.gd [T6]
-## 是同一种写法 —— 别看到它就以为这里有活没干完；要动它的时机是瞬身进引擎的那一次。
+## 提醒实装者先处理落点求解。这与 test_skill_target_mode.gd [T6] 是同一种写法 ——
+## 别看到它就以为这里有活没干完；要动它的时机是瞬身进引擎的那一次。而那一次要处理的
+## 不止这一条，瞬身与当前位移模型的结构性错配见跨组收件箱 2026-08-12 那条。
 func _test_non_collinear_is_registered(tm: Object) -> void:
 	print("\n[P5] 如实登记：非共线落点当前走不到落点（瞬身实装前触发不到）")
 	var landing: Vector2i = Vector2i(3, 2)
