@@ -2091,8 +2091,13 @@ func _filter_enemy_target_cells(candidate_cells: Array[Vector2i]) -> Array[Vecto
 ## 交给 `AreaCalculator` 后按 `single` 处理、本就不参与受伤格计算。
 ##
 ## ⚠ **这不等于「格子 / 方向」已经变成声明式**：要不要定方向仍由 `range.type` 决定，
-## 不由 `target_mode=方向` 声明。完全声明式要先处理 `knight_charge`（range=line 却是
-## target_mode=单位），那会改变它的选择行为，属设计裁决，未做。见 lane §2.2 注 10。
+## 不由 `target_mode=方向` 声明。
+##
+## **而这是「已裁决现在不做」，不是待办**（2026-08-12）：真实设计内容里 `方向` ⟺
+## `直线` 精确对应，改成声明式在所有真实数据上结果一样；唯一分歧点 `knight_charge`
+## （range=line 却 target_mode=单位）自己就是引擎自有测试技能、没有权威定性，为一个
+## 待重判的值改架构是本末倒置。**要翻过来的条件**：测试单位正式化、`knight_charge`
+## 拿到真定性之后。在此之前别动。完整理由见 lane §2.2 注 10 第四条。
 func _get_skill_area_direction(origin: Vector2i, target_pos: Vector2i) -> Vector2i:
 	if _targeting_direction != Vector2i.ZERO:
 		return _targeting_direction
