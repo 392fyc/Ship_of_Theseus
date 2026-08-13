@@ -8,7 +8,7 @@
   "range": { "type": "diamond", "min": 1, "max": 2 },
   "area": { "type": "diamond", "size": 1 },
   "attack_type": "area",
-  "cooldown": 2,
+  "cooldown": 0,
   "action_cost": "standard",
   "timing_constraint": "any",
   "effects": [],
