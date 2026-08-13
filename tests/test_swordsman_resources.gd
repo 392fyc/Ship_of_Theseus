@@ -107,7 +107,10 @@ func _test_data_layer(dl: Object) -> void:
 	_eq("skill_ids 长度==5", (cls.get("skill_ids", []) as Array).size(), 5)
 
 	var zhanji: Dictionary = dl.skills.get("swordsman_zhanji", {})
-	_eq("斩击 qi_gain_on_hit==10", zhanji.get("qi_gain_on_hit"), 10)
+	# 斩击产气 25（用户 2026-08-13 裁决，由 +10 提上来）：斩击是剑气经济的起点，
+	# +10 撑不住「三刀攒满印记 + 一次拔刀 + 每回合招架」这个循环。设计库
+	# kensei_zhanji / myrmidon_zhanji 的 effect 是权威，本行是它的镜像。
+	_eq("斩击 qi_gain_on_hit==25", zhanji.get("qi_gain_on_hit"), 25)
 	_eq("斩击 qi_cost==0", zhanji.get("qi_cost"), 0)
 	_eq("斩击 power==100", zhanji.get("power"), 100)
 

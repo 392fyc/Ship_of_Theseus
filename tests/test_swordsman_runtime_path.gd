@@ -103,7 +103,12 @@ func _test_zhanji_qi_runtime(tm: Object, sword: Unit) -> void:
 	var qi_before: int = sword.sword_qi
 	var ok: bool = tm._execute_skill_action(action)
 	_check("斩击 _execute_skill_action 返回 true", ok)
-	_eq("斩击命中 → sword_qi +10（运行时真实链路）", sword.sword_qi, qi_before + 10)
+	# 产气量不写死：从技能 JSON 读，跟着设计库走（2026-08-13 由 +10 提到 +25 时，
+	# 这一行原本写死的 10 是唯一一处需要人手改的地方——改成读数据后不会再有这种滞后）。
+	var zhanji_qi_gain: int = int(tm._get_skill_data("swordsman_zhanji").get("qi_gain_on_hit", 0))
+	_check("前提：斩击的 qi_gain_on_hit 为正（否则下一条是空转）", zhanji_qi_gain > 0)
+	_eq("斩击命中 → sword_qi +%d（运行时真实链路）" % zhanji_qi_gain,
+		sword.sword_qi, qi_before + zhanji_qi_gain)
 	# 剑圣=转职后职业 → 斩击命中随机获得一枚未持印记（mark_gain=1）
 	_eq("斩击命中 → 得1印记（剑圣转职后，mark_gain=1）", sword.get_mark_count(), 1)
 
