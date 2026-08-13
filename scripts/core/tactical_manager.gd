@@ -59,6 +59,14 @@ const TURN_PHASE_OWN: String = "own_turn"
 ## 那句话在引擎侧的落法。
 const PARRY_STANCE_BUFF_ID: String = "swordsman_parry_stance"
 
+## 九属性的显示名（R2.1 的九项，中文名取 KB `01-Game-Design/Core-Systems/battle-calculation.md`
+## 的 UnitStats 表）。只用于**给玩家看的文案**，不参与任何结算；属性键本身仍是英文
+## （引擎自有 taxonomy），查不到就原样回退英文键，不静默变空。
+const STAT_DISPLAY_NAMES: Dictionary = {
+	"HP": "生命", "STR": "力量", "MAG": "魔力", "DEX": "技巧", "SPD": "速度",
+	"LCK": "幸运", "DEF": "防御", "RES": "抗性", "MOV": "移动力",
+}
+
 ## 副手追加的链长上限。**护栏，不是游戏数值**：燕返的链长期望本就有限
 ## （DEX% 起始、每成功一次 ×80% 衰减），真撞上这个数说明概率或衰减参数填错了，
 ## 所以撞上时要响亮告警而不是静默截断。
@@ -934,11 +942,34 @@ func _get_skill_entries() -> Array[Dictionary]:
 
 ## 心眼被动条目：技能栏最左侧、不可点、无键位、无冷却（仅剑气类=剑圣）。
 ## 描述只放效果本体（名字由 UI 的悬停标题补「【心眼】（被动）」）。
+##
+## ★ 说明文字必须照 _apply_xinyan_passive / Unit._get_xinyan_stat_bonus 的**实际**口径写。
+## 2026-08-13 修正前这里写的是「每点剑气 +N% 暴击率；剑气达到 M 时速度 +K」，三处都不对：
+## ① 暴击是每 qi_per_crit_pct（10）点剑气加 crit_per_qi（2）**点**，不是每 1 点加 2%，
+##    而且它落 R1.3 暴击链的暴击层、是点数不是百分比；
+## ② 分档方向是反的——剑气 **≤** 上限比例时给低气段属性（速度），**高于**时换成高气段
+##    属性（技巧）。旧文案的「达到 50 时速度 +2」读起来是「攒够就有速度」，恰好相反，
+##    会把玩家的经营决策带到反方向；
+## ③ 完全没提印记的持有加成，而那是设计库 kensei_xinyan effect 的一整句。
+## 旧文案读的 _xinyan_speed_threshold / _xinyan_speed_bonus 是 2026-08-03 换新口径时为兼容
+## 它而**派生**出来的两个量（见 unit.gd 的声明），本函数改用新口径的原始配置，不再读它们。
 func _build_passive_entry(unit: Unit) -> Dictionary:
 	if unit._qi_max <= 0:
 		return {}
-	var desc: String = "每点剑气 +%d%% 暴击率；剑气达到 %d 时速度 +%d。" % [
-		unit._xinyan_crit_per_qi, unit._xinyan_speed_threshold, unit._xinyan_speed_bonus]
+	var threshold_qi: int = unit._qi_max * unit._xinyan_qi_ratio_threshold_pct / 100
+	var desc: String = "每 %d 点剑气，暴击 +%d（向下取整）。剑气不高于 %d 时 %s +%d，高于 %d 时 %s +%d。" % [
+		unit._xinyan_qi_per_crit_pct, unit._xinyan_crit_per_qi,
+		threshold_qi, _stat_display_name(unit._xinyan_low_qi_stat_key),
+		unit._xinyan_low_qi_stat_bonus,
+		threshold_qi, _stat_display_name(unit._xinyan_high_qi_stat_key),
+		unit._xinyan_high_qi_stat_bonus]
+	# 印记持有加成：只在真的有印记的单位上说（_mark_max<=0 的单位拿不到印记）。
+	# 三种印记对应哪个属性写死在 Unit.get_effective_stat 里，加成值从职业 JSON 读。
+	if unit._mark_max > 0:
+		desc += "持有的每枚印记按种类提供属性加成：心 → %s +%d，道 → %s +%d，势 → %s +%d。" % [
+			_stat_display_name("DEX"), unit._mark_dex_bonus,
+			_stat_display_name("SPD"), unit._mark_spd_bonus,
+			_stat_display_name("STR"), unit._mark_str_bonus]
 	return {
 		"skill_id": "swordsman_xinyan",
 		"name": "心眼",
@@ -953,6 +984,11 @@ func _build_passive_entry(unit: Unit) -> Dictionary:
 		"mark_cost": 0,
 		"slot_origin_id": "swordsman_xinyan",
 	}
+
+
+## 属性键 → 玩家可见的中文名。查不到就原样返回英文键（宁可露出 "SPE" 也不要显示空白）。
+func _stat_display_name(stat_key: String) -> String:
+	return str(STAT_DISPLAY_NAMES.get(stat_key, stat_key))
 
 
 func _emit_dashboard_state_changed() -> void:
@@ -1237,8 +1273,25 @@ func _handle_post_skill_execution(previous_state: InputState,
 			_restore_action_phase_state()
 
 
+## 这个单位此刻还有迅捷技能可用吗（决定标准动作用完之后进迅捷阶段还是直接结束回合）。
+##
+## ★ 必须与 `_get_skill_entries` 看到**同一批槽**，否则会出现「进了迅捷阶段，可技能栏里
+## 一个迅捷技能都没有」。2026-08-13 修：此前这里遍历的是 `unit.skill_ids` 原始 id，不走
+## `Unit.get_visible_skill_id` 的槽位替换，于是剑圣印记满 3 时它仍然看到招架（swift、剑气
+## 够、冷却好）判为「有迅捷可用」，而技能栏那一格已经换成拔刀（standard，攻击机会已用完）。
+## 玩家因此被送进一个什么都点不出来的阶段。病根与招架架势那条同型：一个查询函数忘了套用
+## 另一处已经做了的变换。
 func _has_available_swift_skill(unit: Unit) -> bool:
-	for skill_id: String in unit.skill_ids:
+	for slot_id: String in unit.skill_ids:
+		var slot_data: Dictionary = _get_skill_data(slot_id)
+		# 槽位提供者（拔刀）不独立占槽，口径同 _get_skill_entries。当前它是 standard、
+		# 下面那道 action_cost 闸也会滤掉它；这一行是为了让两个函数的取槽规则逐条对齐，
+		# 将来出现迅捷型 provider 时不必再想起还有这里。
+		if bool(slot_data.get("slot_swap_provider", false)):
+			continue
+		var skill_id: String = unit.get_visible_skill_id(slot_id,
+			str(slot_data.get("slot_swap_trigger", "")),
+			str(slot_data.get("slot_swap_target", "")))
 		var skill_data: Dictionary = _get_skill_data(skill_id)
 		if str(skill_data.get("action_cost", "")) != "swift":
 			continue

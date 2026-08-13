@@ -3,7 +3,7 @@
   "name": "二天一流",
   "class_id": "kensei",
   "rarity": "传奇",
-  "tags": [],
+  "tags": ["攻击", "破格", "被动"],
   "trigger_event": "永久生效",
   "trigger_object": "",
   "trigger_source": "",

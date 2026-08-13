@@ -95,6 +95,12 @@ func _run() -> void:
 	# ⑥ forecast 数据契约：targets / target_hp 字段（counter_* 已随自动反击移除）
 	_test_forecast_data_contract(tm, sword)
 
+	# ⑦ 迅捷可用性判定必须走槽位替换（2026-08-13 修）
+	_test_swift_availability_respects_slot_swap(tm, sword)
+
+	# ⑧ 心眼被动说明文字与实际口径一致（2026-08-13 修）
+	_test_passive_description_matches_behavior(tm, sword)
+
 	_finish(scene)
 
 
@@ -204,6 +210,98 @@ func _test_forecast_data_contract(tm: Object, sword: Unit) -> void:
 		_check("AoE forecast 含 target_hp_max", fc_aoe.has("target_hp_max"))
 		_check("AoE forecast 无 counter_damage（自动反击已移除）",
 			not fc_aoe.has("counter_damage"))
+
+
+# ── ⑦ 迅捷可用性判定必须走槽位替换 ─────────────────────
+# `_resolve_post_action_phase` 用 `_has_available_swift_skill` 决定标准动作用完之后
+# 是进迅捷阶段还是直接结束回合。它必须与 `_get_skill_entries` 看到同一批槽 ——
+# 剑圣印记满 3 时招架槽已经换成拔刀（standard），此时不应再判「有迅捷可用」，
+# 否则玩家被送进一个一个技能都点不出来的阶段。
+#
+# 第三条断言（剑士对照）是这组的关键：它把「修复靠槽位替换」与「修复靠 is_marks_full
+# 一刀切」区分开 —— 剑士没有拔刀、满印也不替换，所以它必须仍然判为有迅捷可用。
+func _test_swift_availability_respects_slot_swap(tm: Object, sword: Unit) -> void:
+	print("\n[⑦] 迅捷可用性判定走槽位替换（满印时招架槽已是拔刀）")
+	var zhaojia: Dictionary = tm._get_skill_data("swordsman_zhaojia")
+	var trig: String = str(zhaojia.get("slot_swap_trigger", ""))
+	var tgt: String = str(zhaojia.get("slot_swap_target", ""))
+
+	sword.set_sword_qi(50)      # 招架 qi_cost=10，够用
+	sword.skill_cooldowns.clear()
+	sword.swift_used = false
+	sword.clear_marks()
+	_check("前提：剑圣 skill_ids 含拔刀（替换目标确实在表内）",
+		sword.skill_ids.has("swordsman_badao"))
+	_check("印记未满 → 判为有迅捷可用（招架在槽上）",
+		tm._has_available_swift_skill(sword))
+
+	sword.marks["心"] = true
+	sword.marks["道"] = true
+	sword.marks["势"] = true
+	_check("前提：印记确实满了", sword.is_marks_full())
+	_eq("前提：招架槽此刻显示的是拔刀",
+		sword.get_visible_skill_id("swordsman_zhaojia", trig, tgt), "swordsman_badao")
+	_check("印记满 → 判为无迅捷可用（招架槽已变拔刀，standard）",
+		not tm._has_available_swift_skill(sword))
+
+	# 剑士对照：拔刀不在其 skill_ids 内 → 满印也不替换 → 招架仍在槽上 → 仍有迅捷可用。
+	var dl: Object = load("res://scripts/data/data_loader.gd").new()
+	dl.load_all()
+	var mm_class: Dictionary = dl.classes.get("myrmidon", {})
+	_check("myrmidon 职业数据存在", not mm_class.is_empty())
+	if not mm_class.is_empty():
+		var mm: Unit = load("res://scenes/tactical/Unit.tscn").instantiate()
+		root.add_child(mm)
+		mm.setup(mm_class)
+		mm.set_sword_qi(50)
+		mm.skill_cooldowns.clear()
+		mm.swift_used = false
+		mm.marks["心"] = true
+		mm.marks["道"] = true
+		mm.marks["势"] = true
+		_check("前提：剑士 skill_ids 不含拔刀", not mm.skill_ids.has("swordsman_badao"))
+		_check("前提：剑士印记同样能满", mm.is_marks_full())
+		_check("剑士印记满 → 仍判为有迅捷可用（槽位不替换，招架还在）",
+			tm._has_available_swift_skill(mm))
+		mm.free()
+	dl.free()
+
+	sword.clear_marks()
+
+
+# ── ⑧ 心眼被动说明文字与实际口径一致 ───────────────────
+# 说明文字是玩家据以做剑气经营决策的唯一信息源，写错的代价不是「文案不好看」，
+# 而是把决策带向反方向。2026-08-13 修前它写的是「每点剑气 +2% 暴击率；剑气达到 50
+# 时速度 +2」，三处都不对（倍率错 10 倍 / 分档方向反了 / 缺印记加成整句）。
+func _test_passive_description_matches_behavior(tm: Object, sword: Unit) -> void:
+	print("\n[⑧] 心眼被动说明文字 vs 实际口径")
+	var desc: String = str(tm._build_passive_entry(sword).get("description", ""))
+	_check("说明非空", desc != "")
+	# ① 暴击：每 qi_per_crit_pct 点剑气 +crit_per_qi 点（不是每 1 点 +N%）。
+	_check("含「每 %d 点剑气」" % sword._xinyan_qi_per_crit_pct,
+		("每 %d 点剑气" % sword._xinyan_qi_per_crit_pct) in desc, desc)
+	_check("含「暴击 +%d」" % sword._xinyan_crit_per_qi,
+		("暴击 +%d" % sword._xinyan_crit_per_qi) in desc, desc)
+	_check("不再出现旧文案的「每点剑气」", not ("每点剑气" in desc), desc)
+	_check("不再把暴击说成百分比（无「暴击率」字样）", not ("暴击率" in desc), desc)
+	# ② 分档方向：≤ 阈值给低气段属性，> 阈值给高气段属性。方向反了是修复前的主要错误。
+	var threshold_qi: int = sword._qi_max * sword._xinyan_qi_ratio_threshold_pct / 100
+	_check("含「不高于 %d」（低气段判据）" % threshold_qi,
+		("不高于 %d" % threshold_qi) in desc, desc)
+	_check("含「高于 %d」（高气段判据）" % threshold_qi,
+		("高于 %d" % threshold_qi) in desc, desc)
+	_check("低气段给的是速度（SPD）", "速度 +%d" % sword._xinyan_low_qi_stat_bonus in desc, desc)
+	_check("高气段给的是技巧（DEX）", "技巧 +%d" % sword._xinyan_high_qi_stat_bonus in desc, desc)
+	# 方向断言：「不高于 N」必须排在「速度」之前、「高于 N」排在「技巧」之前。
+	# 只查两个词都在场是抓不到方向写反的 —— 反着写这两个词照样都在。
+	_check("方向正确：低气段那句在前、给速度",
+		desc.find("不高于 %d 时 速度" % threshold_qi) >= 0
+		or desc.find("不高于 %d 时 %s" % [threshold_qi, "速度"]) >= 0, desc)
+	# ③ 印记持有加成整句（剑圣 _mark_max>0）。
+	if sword._mark_max > 0:
+		_check("含印记持有加成：心 → 技巧", ("心 → 技巧 +%d" % sword._mark_dex_bonus) in desc, desc)
+		_check("含印记持有加成：道 → 速度", ("道 → 速度 +%d" % sword._mark_spd_bonus) in desc, desc)
+		_check("含印记持有加成：势 → 力量", ("势 → 力量 +%d" % sword._mark_str_bonus) in desc, desc)
 
 
 func _find_enemy_other(tm: Object, exclude: Unit) -> Unit:
