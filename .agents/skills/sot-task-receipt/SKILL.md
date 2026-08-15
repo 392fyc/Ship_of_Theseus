@@ -15,6 +15,7 @@ description: "向主代理返回结构化子代理交付回执，包含 objectiv
 - `commit`: 提交 SHA 或 `not committed`  
 - `push`: `true/false` 与远端引用
 - `residual_risks`: 风险数组
+- `protected_dirty`: 本次执行中不得改变但需识别的用户保护项清单（可空）
 
 要求：
 - 明确写 `branch`，并说明仅执行当前 task scope。
@@ -35,6 +36,7 @@ description: "向主代理返回结构化子代理交付回执，包含 objectiv
   ],
   "commit": "abcdef123456",
   "push": true,
-  "residual_risks": []
+  "residual_risks": [],
+  "protected_dirty": []
 }
 ```

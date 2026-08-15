@@ -67,6 +67,10 @@ def test_sot_skill_contracts_static():
     assert "MEMORY.md" in session_start and "session-checkpoint.md" in session_start
 
     session_end = read_text(SKILL_PATHS["sot-session-end"])
+    assert "projects\\<project-bucket>\\session-checkpoint.md" in session_end
+    assert "memory\\session-checkpoint.md" not in session_end
+    assert "~/.Codex/projects/<project>/memory/project_session{N}_handoff.md" in session_end
+    assert "user" in session_end.lower()
     assert "handoff" in session_end.lower()
     assert "manual" in session_end.lower()
     assert "PreCompact" in session_end or "precompact" in session_end
@@ -80,5 +84,6 @@ def test_sot_skill_contracts_static():
         "commit",
         "push",
         "residual_risks",
+        "protected_dirty",
     ]:
         assert key in task_receipt, f"sot-task-receipt missing required field key '{key}'"
