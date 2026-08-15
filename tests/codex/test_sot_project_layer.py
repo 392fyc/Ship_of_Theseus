@@ -58,6 +58,20 @@ def install_publish_script(repository: Path) -> Path:
     destination = repository / "scripts" / "codex" / "sot-publish.ps1"
     destination.parent.mkdir(parents=True)
     shutil.copy2(PUBLISH_SCRIPT, destination)
+    run(["git", "add", "scripts/codex/sot-publish.ps1"], repository)
+    run(
+        [
+            "git",
+            "-c",
+            "user.name=SoT Test",
+            "-c",
+            "user.email=sot-test@example.invalid",
+            "commit",
+            "-m",
+            "install publish fixture",
+        ],
+        repository,
+    )
     return destination
 
 
@@ -249,6 +263,15 @@ def test_publish_rejects_protected_branches() -> None:
 
 
 def test_publish_exposes_no_user_supplied_refspec_parameter() -> None:
+    command = (
+        f"$command = Get-Command -Name '{PUBLISH_SCRIPT}'; "
+        "if ($command.Parameters.ContainsKey('Refspec')) { exit 1 }"
+    )
+    result = run(["pwsh", "-NoProfile", "-Command", command], ROOT, check=False)
+    assert result.returncode == 0
+
+
+def test_publish_rejects_a_dirty_working_tree() -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
         temp = Path(temp_dir)
         origin = temp / "origin.git"
@@ -256,23 +279,17 @@ def test_publish_exposes_no_user_supplied_refspec_parameter() -> None:
         origin.mkdir()
         repo.mkdir()
         run(["git", "init", "--bare"], origin)
-        init_repository(repo, "codex/fixture-arguments")
+        init_repository(repo, "codex/fixture-dirty")
         run(["git", "remote", "add", "origin", str(origin)], repo)
         fixture_script = install_publish_script(repo)
-        arbitrary = run(
-            [
-                "pwsh",
-                "-NoProfile",
-                "-File",
-                str(fixture_script),
-                "-DryRun",
-                "-Refspec",
-                "HEAD:refs/heads/main",
-            ],
+        (repo / "fixture.txt").write_text("dirty\n", encoding="utf-8")
+        result = run(
+            ["pwsh", "-NoProfile", "-File", str(fixture_script), "-DryRun"],
             repo,
             check=False,
         )
-        assert arbitrary.returncode != 0
+        assert result.returncode != 0
+        assert "not clean" in (result.stdout + result.stderr).lower()
 
 
 def test_publish_rejects_invocation_from_another_repository() -> None:

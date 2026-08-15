@@ -9,9 +9,10 @@ Set-StrictMode -Version Latest
 function Invoke-Git {
     param([Parameter(Mandatory = $true)][string[]]$GitArgs)
 
-    $output = & git @GitArgs 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        throw "Git operation failed with exit code $LASTEXITCODE."
+    $output = & git @GitArgs 2>$null
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -ne 0) {
+        throw "Git operation failed with exit code $exitCode."
     }
     return $output
 }
@@ -45,6 +46,10 @@ if ($protectedBranches -contains $branch.ToLowerInvariant()) {
 
 $null = Invoke-Git -GitArgs @("check-ref-format", "--branch", $branch)
 $null = Invoke-Git -GitArgs @("remote", "get-url", "origin")
+$status = @(Invoke-Git -GitArgs @("status", "--porcelain"))
+if ($status.Count -ne 0) {
+    throw "Working tree is not clean. Commit changes before publishing."
+}
 
 if ($DryRun) {
     Write-Output "Dry-run: current task branch '$branch' would be published to origin with the same name."
