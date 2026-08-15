@@ -1,6 +1,6 @@
 ---
 name: sot-session-end
-description: "End a Ship of Theseus development session by writing session state to KB. Trigger on session end, '会话结束', 'handoff', 'save session', or when context is running low."
+description: "End a Ship of Theseus development session with active-memory sync first, then optional KB sync, and manual handoff only on explicit user request."
 ---
 
 # SOT Session End
@@ -9,30 +9,34 @@ description: "End a Ship of Theseus development session by writing session state
 
 ### Step 1: Generate State Snapshot
 Gather: tasks completed, files modified, decisions made, issues found, next actions.
-Format as tables + bullets, **under 100 lines**, no narrative paragraphs.
+格式以要点为主，不追求 narrative 文本。
+默认不自动 handoff；只有用户明确要求时才执行 handoff 流程。
 
-### Step 2: Write to KB
-```
-1. Read:  D:\ShipOfTheseus\ShipOfTheseus-KB\03-AI-Context\Active-Context\current-session.md
-2. Write: D:\ShipOfTheseus\ShipOfTheseus-KB\03-AI-Context\Active-Context\current-session.md
-```
+### Step 2: Update Active Memory（优先）
+先读取 `D:\Mercury\Mercury\.mercury\memory\index.jsonl`，按项目 bucket 查找会话锚点后，写入：
 
-### Step 3: Sync Task Checkboxes
-Read `02-Development/Tasks/Phase{N}-Tasks.md`, update `[ ]` → `[x]` for completed tasks.
+`D:\Mercury\Mercury\.mercury\memory\projects\<project-bucket>\session-checkpoint.md`
 
-### Step 4: Verify
-`obsidian_get_file_contents("03-AI-Context/Active-Context/current-session.md")` — confirm under 100 lines.
+不得直接写入 `D:\Mercury\Mercury\.mercury\memory\` 根目录。
 
-### Step 5: Git Sync (Mandatory)
-Execute KB repo git-sync per `03-AI-Context/Handoffs/git-sync-procedure.md` "KB Repository Sync" section.
-- **Trigger**: "Before session end → Mandatory → Main Agent" (git-sync-procedure.md Trigger Timing)
-- Scope: `D:\ShipOfTheseus\ShipOfTheseus-KB\` — all files modified during this session
-- Message format: `session: close {session-id}`
-- This step is a **precondition** for session closure — see `acceptance-workflow.md` Git Sync Rule.
+### Step 3: Update KB（仅限本次需要）
+若会话对 KB 有实际修改，执行：
+1. 定位相关 KB 文件路径
+2. 读取 `03-AI-Context` 当前条目
+3. 写回修改后的状态
+4. 回读确认
 
-## Critical Rules
+### Step 4: Sync Task Checkboxes
+Read `02-Development/Tasks/Phase{N}-Tasks.md`，更新完成项：`[ ]` → `[x]`。
 
-1. **NEVER append** — always full replace. Appending = unbounded growth.
-2. **Under 100 lines** — historical data lives in git history.
-3. **No narrative** — tables and bullets only.
-4. Architecture notes = constraints only (what NOT to do wrong).
+### Step 5: Handoff（Manual only）
+只在用户明确触发时执行：
+- 生成可直接粘贴的会话起始指令（聊天直接可粘贴）
+- 写持久 handoff 文档（`~/.Codex/projects/<project>/memory/project_session{N}_handoff.md`）
+
+不得在未获用户明确要求时执行 handoff 或自动创建/更新上述持久文档。
+
+禁止自动：
+- 自动创建新 Codex 任务上下文
+- 在 PreCompact 里触发 handoff:auto
+- 自动切换任务状态
