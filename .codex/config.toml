@@ -1,0 +1,11 @@
+web_search = "live"
+
+developer_instructions = """
+Ship_of_Theseus is the default Codex working root for daily SoT development.
+Never work on or publish a protected branch (develop, main, or master); use an
+assigned task branch or worktree. Before any cross-repository write, resolve
+the target through the project root configuration, read the target AGENTS.md
+and its named canonical contract, then record the target HEAD and a concise
+contract summary in the task receipt. Preserve unrelated and pre-existing
+changes, and keep Mercury-generated files separate from the SoT-owned overlay.
+"""

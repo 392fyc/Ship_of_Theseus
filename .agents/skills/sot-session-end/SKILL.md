@@ -1,42 +1,39 @@
 ---
 name: sot-session-end
-description: "End a Ship of Theseus development session with active-memory sync first, then optional KB sync, and manual handoff only on explicit user request."
+description: "Close a Ship of Theseus Codex session by updating Mercury active memory and GitHub/Git evidence, with manual handoff only when the user explicitly requests it."
 ---
 
-# SOT Session End
+# SoT Session End
 
-## Protocol
+## 1. 收集结束状态
 
-### Step 1: Generate State Snapshot
-Gather: tasks completed, files modified, decisions made, issues found, next actions.
-格式以要点为主，不追求 narrative 文本。
-默认不自动 handoff；只有用户明确要求时才执行 handoff 流程。
+汇总已完成任务、修改文件、裁决、验证证据、受保护 dirty、遗留风险与下一步。任务与验收状态回写 GitHub/Git，不写入 KB 的旧任务清单作为第二权威。
 
-### Step 2: Update Active Memory（优先）
-先读取 `D:\Mercury\Mercury\.mercury\memory\index.jsonl`，按项目 bucket 查找会话锚点后，写入：
+## 2. 更新 Mercury 活跃记忆
 
-`D:\Mercury\Mercury\.mercury\memory\projects\<project-bucket>\session-checkpoint.md`
+按以下顺序解析 Mercury 根目录：
 
-不得直接写入 `D:\Mercury\Mercury\.mercury\memory\` 根目录。
+1. 环境变量 `MERCURY_ROOT`。
+2. 当前仓库被忽略的 `.codex/project/sot-roots.local.toml` 中 `[roots].mercury_root`。
+3. 均未配置时停止并报告，不猜测本机路径。
 
-### Step 3: Update KB（仅限本次需要）
-若会话对 KB 有实际修改，执行：
-1. 定位相关 KB 文件路径
-2. 读取 `03-AI-Context` 当前条目
-3. 写回修改后的状态
-4. 回读确认
+先读取 `<mercury-root>/.mercury/memory/index.jsonl`，再按项目 bucket 更新：
 
-### Step 4: Sync Task Checkboxes
-Read `02-Development/Tasks/Phase{N}-Tasks.md`，更新完成项：`[ ]` → `[x]`。
+`<mercury-root>/.mercury/memory/projects/<project-bucket>/session-checkpoint.md`
 
-### Step 5: Handoff（Manual only）
-只在用户明确触发时执行：
-- 生成可直接粘贴的会话起始指令（聊天直接可粘贴）
-- 写持久 handoff 文档（`~/.Codex/projects/<project>/memory/project_session{N}_handoff.md`）
+不得直接把项目 checkpoint 写到 `.mercury/memory` 根目录。
 
-不得在未获用户明确要求时执行 handoff 或自动创建/更新上述持久文档。
+## 3. 按需更新 KB
 
-禁止自动：
-- 自动创建新 Codex 任务上下文
-- 在 PreCompact 里触发 handoff:auto
-- 自动切换任务状态
+只有本次产生叙事、定性设计、用户裁决、ADR、研究或工作记录时才更新 KB。使用 `sot-kb-write` 的先读、并发保护、写后回读流程；不把活跃会话状态迁入 KB。
+
+## 4. Handoff（Manual only）
+
+默认不得自动 handoff。只有 user 明确要求时，才同时生成：
+
+1. 聊天中可直接粘贴的新会话起始指令。
+2. 持久文档，写入 `<mercury-root>/.mercury/memory/projects/<project-bucket>/` 下的明确命名 markdown 文件。
+
+manual handoff 前先确认项目 bucket，并让文档包含当前提交、受保护 dirty、验收证据、未完成风险与下一任务入口。
+
+禁止自动创建新 Codex 任务、自动切换任务状态、在压缩或会话结束事件中隐式触发 handoff。
