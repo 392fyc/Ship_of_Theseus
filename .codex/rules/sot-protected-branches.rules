@@ -1,0 +1,131 @@
+# SoT overlay: protected branches are never direct working targets. Raw push
+# commands are already denied by the Mercury-generated Git safety rule.
+
+prefix_rule(
+    pattern = ["git", "switch", "develop"],
+    decision = "forbidden",
+    justification = "Use a task branch or worktree; develop is protected.",
+    match = ["git switch develop"],
+)
+
+prefix_rule(
+    pattern = ["git", "switch", "main"],
+    decision = "forbidden",
+    justification = "Use a task branch or worktree; main is protected.",
+    match = ["git switch main"],
+)
+
+prefix_rule(
+    pattern = ["git", "switch", "master"],
+    decision = "forbidden",
+    justification = "Use a task branch or worktree; master is protected.",
+    match = ["git switch master"],
+)
+
+prefix_rule(
+    pattern = ["git", "checkout", "develop"],
+    decision = "forbidden",
+    justification = "Use a task branch or worktree; develop is protected.",
+    match = ["git checkout develop"],
+)
+
+prefix_rule(
+    pattern = ["git", "checkout", "main"],
+    decision = "forbidden",
+    justification = "Use a task branch or worktree; main is protected.",
+    match = ["git checkout main"],
+)
+
+prefix_rule(
+    pattern = ["git", "checkout", "master"],
+    decision = "forbidden",
+    justification = "Use a task branch or worktree; master is protected.",
+    match = ["git checkout master"],
+)
+
+# Creating or force-creating a protected branch is also a protected-branch
+# selection, even when the branch does not yet exist locally.
+
+prefix_rule(
+    pattern = ["git", "switch", "-c", "develop"],
+    decision = "forbidden",
+    justification = "Do not create or select the protected develop branch.",
+    match = ["git switch -c develop"],
+)
+
+prefix_rule(
+    pattern = ["git", "switch", "-c", "main"],
+    decision = "forbidden",
+    justification = "Do not create or select the protected main branch.",
+    match = ["git switch -c main"],
+)
+
+prefix_rule(
+    pattern = ["git", "switch", "-c", "master"],
+    decision = "forbidden",
+    justification = "Do not create or select the protected master branch.",
+    match = ["git switch -c master"],
+)
+
+prefix_rule(
+    pattern = ["git", "switch", "-C", "develop"],
+    decision = "forbidden",
+    justification = "Do not force-create or select the protected develop branch.",
+    match = ["git switch -C develop"],
+)
+
+prefix_rule(
+    pattern = ["git", "switch", "-C", "main"],
+    decision = "forbidden",
+    justification = "Do not force-create or select the protected main branch.",
+    match = ["git switch -C main"],
+)
+
+prefix_rule(
+    pattern = ["git", "switch", "-C", "master"],
+    decision = "forbidden",
+    justification = "Do not force-create or select the protected master branch.",
+    match = ["git switch -C master"],
+)
+
+prefix_rule(
+    pattern = ["git", "checkout", "-b", "develop"],
+    decision = "forbidden",
+    justification = "Do not create or select the protected develop branch.",
+    match = ["git checkout -b develop"],
+)
+
+prefix_rule(
+    pattern = ["git", "checkout", "-b", "main"],
+    decision = "forbidden",
+    justification = "Do not create or select the protected main branch.",
+    match = ["git checkout -b main"],
+)
+
+prefix_rule(
+    pattern = ["git", "checkout", "-b", "master"],
+    decision = "forbidden",
+    justification = "Do not create or select the protected master branch.",
+    match = ["git checkout -b master"],
+)
+
+prefix_rule(
+    pattern = ["git", "checkout", "-B", "develop"],
+    decision = "forbidden",
+    justification = "Do not force-create or select the protected develop branch.",
+    match = ["git checkout -B develop"],
+)
+
+prefix_rule(
+    pattern = ["git", "checkout", "-B", "main"],
+    decision = "forbidden",
+    justification = "Do not force-create or select the protected main branch.",
+    match = ["git checkout -B main"],
+)
+
+prefix_rule(
+    pattern = ["git", "checkout", "-B", "master"],
+    decision = "forbidden",
+    justification = "Do not force-create or select the protected master branch.",
+    match = ["git checkout -B master"],
+)

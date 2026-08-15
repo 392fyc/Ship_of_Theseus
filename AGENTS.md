@@ -1,55 +1,53 @@
-# AGENTS.md
+# Ship of Theseus — Codex 项目入口
 
-> 面向 Codex CLI 及其他**外部** Sub Agent。
-> **⚠ 工作模式（2026-06-16 起）**：默认在 Claude Code 内部用 subagent / agent team 执行（**含 GDScript 代码**）；**本文件仅在用户特殊声明派发外部工具时适用**。Task Bundle / `implementation_receipt` 模板已弃用（见文末）。
+本仓库是 SoT 日常开发的默认 Codex 工作根。Codex 从仓库根启动，优先读取本文件、项目级 `.codex/` 配置与 `.agents/skills/` 中的项目技能。
 
 ## Language
 
-设计文档为中文（简体）。讨论设计、游戏机制、文档时用中文，除非用户切换为英文。
+设计文档与用户沟通使用简体中文；代码标识符、命令、接口和专有名词按项目既有约定保留英文。
 
 ## Project
 
-战棋RPG + Roguelite + 城镇建设, Godot 4.6 (GDScript), JSON驱动, GameAction指令架构。
-KB 正本: Obsidian Vault `D:\ShipOfTheseus\ShipOfTheseus-KB\` (`obsidian_*` MCP)
+战棋 RPG + Roguelite + 城镇建设，Godot 4.6（GDScript），JSON 驱动，采用可序列化的 `GameAction` 指令架构。
 
-## DO NOT — Security
+## 权威路由
 
-- **禁止**在版本控制文件中硬编码 API Key / Secret。配置文件含密钥时必须加入 `.gitignore`（ref: ISSUE-SEC-001）
+- 结构化玩法目标事实（天赋、技能、规则、装备、遗物及相关结构化数据）→ `SoT-fyc-space` 设计库。
+- 当前可执行运行行为与已经落地的实现事实 → 本 `Ship_of_Theseus` 游戏仓。
+- 叙事、定性设计、用户裁决、ADR、研究和工作记录 → 独立 KB。
+- 任务范围、进度与验收证据 → GitHub/Git。
+- 活跃记忆与会话锚点 → Mercury 的 `.mercury/memory`。
 
-## DO NOT — GDScript
+权威之间冲突时，先按上述类型确定唯一来源，不在第二处复制或反向覆盖。KB 中的规则目录仅供检索，结构化规则仍以设计库为准。
 
-- class_name 与 autoload 同名 → autoload 脚本**移除 class_name**
-- Variant 类型推断 → **显式声明变量类型**
-- **禁止**在代码中硬编码数值，必须从JSON读取
-- 信号命名: past_tense (`signal damage_dealt`)
-- GameAction模式：所有操作封装为可序列化Action
+## 跨仓读取与写入
 
-## 游戏机制 — 查真源，不在本文件复述
+- 读取或修改设计库、KB、Mercury 前，使用项目本地 roots 配置或环境变量解析目标，不在版本控制文件中写本机绝对路径。
+- 跨仓写入前必须读取目标仓 `AGENTS.md`（若存在）与目标 canonical 合同，并在交付回执中记录目标 HEAD 和合同摘要。
+- 不覆盖目标主工作树的受保护改动；代码变更只在目标仓独立 worktree 中完成。
+- 设计库与 KB 的具体安全读写流程分别由 `sot-designlib` 和 `sot-kb-write` 技能定义。
 
-规则正本 = 设计库规则表 `/api/rules`，共 23 条（R1.1–R1.10 / R2.1–R2.4 / R3.1–R3.4 / R4.1–R4.4 / R5.9）。
-离线全量索引 = KB `01-Game-Design/rules-catalog.md`；逐字原文 = 设计库仓库 `snapshots/rules.json`。
-改战斗 / 技能 / 伤害逻辑前必须回查真源，**禁止**凭本文件或凭记忆复述规则。
+## Security
 
-- 伤害怎么算、hybrid 怎么合、纯粹伤害是什么 → **R1.1**
-- 命中 / 暴击怎么算，哪些属性参与 → **R1.2 / R1.3**
-- 修正落在哪一层，取整与 clamp 的位置 → **R1.8**
-- 一次效果对同一单位结算几次，会不会自己触发自己 → **R1.9 / R1.10**
-- 技能消耗什么行动资源、什么时机能放 → **R3.2 / R3.3**
-- 速度到底影响什么（有没有速度带来的追击） → **R3.1**
-- 建筑受伤走不走伤害公式、摧毁后那格变成什么 → 规则表无此域，查 KB `01-Game-Design/Core-Systems/grid-and-map.md` §建筑耐久系统
-- 受击方会不会自动反击 → 规则表无此域，查 KB `01-Game-Design/Core-Systems/battle-calculation.md` §反击系统
+- 禁止在版本控制文件、日志、回执或聊天输出中写入 API key、secret、token、私钥、密码或其他凭据。
+- 本机 roots、凭据和运行时连接参数只能来自被忽略的本地配置或受保护环境变量。
+- 秘密扫描只报告类别、文件范围与处置结果，不输出匹配文本。
 
-规则层没有列出的因素（例如距离）不要自行补进公式；要让它参与结算，必须由技能 / 天赋 / 遗物条目显式声明，并按 R1.8 落到指定的层。
+## GDScript 约束
 
-## DO NOT — AI
+- `class_name` 与 autoload 同名时，autoload 脚本移除 `class_name`。
+- `Variant` 推断不明确时显式声明变量类型。
+- 禁止在代码中硬编码玩法数值；从 JSON 或对应权威数据读取。
+- 信号使用过去式命名，例如 `signal damage_dealt`。
+- 游戏操作封装为可序列化的 `GameAction`。
 
-- **禁止**用训练数据判断版本号。版本查询必须先搜索再作答
+## 玩法事实核对
 
-## Sub Agent Rules（仅外部工具，用户特殊声明派发时适用）
+修改战斗、技能、伤害或资源规则前，使用 `sot-designlib` 读取设计库现行记录，并记录来源快照或提交与规范化摘要。规则未列出的因素不得自行补入公式；需要新增设计裁决时，将问题交给用户并把裁决理由写入 KB。
 
-- Git 分支: `{agent}/{task-name}`，完成后通知 Main Agent；**不操作 `develop` / `main`**
-- Sub Agent 只在指定写入范围内实现，不改 KB / registry
+## Git 与交付
 
-## Task Receipt（已弃用）
-
-- **Task Bundle / `implementation_receipt` 模板已于 2026-06 弃用**——新工作模式默认在 Claude Code 内部用 subagent / team 执行，不再回填 receipt。`.claude/skills/sot-task-receipt/` 仅作历史参考保留。
+- 不直接提交或推送到 `develop`、`main`、`master`。
+- 只修改任务声明的文件范围，不夹带用户已有 dirty 文件。
+- 实现者不得自我批准；提交前由独立审查者核对规格与证据。
+- 子任务结束时使用 `sot-task-receipt` 返回结构化回执。

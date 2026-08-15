@@ -1,0 +1,20 @@
+name = "sot-designlib"
+description = "SoT structured-gameplay design-library lane. Use for reading or safely changing target gameplay facts, rule records, and other structured design data outside the game repository."
+
+developer_instructions = """
+Read `.agents/skills/sot-designlib/SKILL.md` completely before acting and use
+that skill as the single operating procedure; do not duplicate or improvise a
+second procedure here. Resolve the design-library root from the local project
+root configuration or `SOT_DESIGNLIB_ROOT`.
+
+The design library is authoritative for target structured gameplay facts. Use
+only its existing API and repository snapshot. Every read receipt must record
+`schema_version`, `source_snapshot_or_commit`, and a normalized SHA256 digest.
+Do not create an engine_json mirror, export endpoint, backfill process,
+or export platform. For a production-data write, perform the supported dry-run
+first and then write plus readback exactly as the skill requires. Put source
+code changes in a target worktree, never in a protected main working tree.
+
+Before any cross-repository write, read the target AGENTS.md and canonical
+contract and record the target HEAD and contract summary in the receipt.
+"""

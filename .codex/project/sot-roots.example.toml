@@ -1,0 +1,4 @@
+[roots]
+mercury_root = "<path-to-mercury>"
+designlib_root = "<path-to-design-library>"
+kb_root = "<path-to-kb-repository>"
