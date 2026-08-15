@@ -1,38 +1,46 @@
 ---
 name: sot-kb-write
-description: "Reliably write to the Ship of Theseus Obsidian knowledge base. Use when creating, updating, patching, or appending content to any KB document. Provides a decision tree for choosing the most reliable write method."
+description: "Use Codex Obsidian MCP tools to create, patch, and update Ship of Theseus KB documents safely, with safe defaults and explicit verification."
 ---
 
-# SOT KB Write
+# SOT KB Write（Codex 原生）
 
-KB Location: `D:\ShipOfTheseus\ShipOfTheseus-KB\`
+KB Location: `D:\ShipOfTheseus\ShipOfTheseus-KB\`（当前仅作为设计与开发知识库，非活跃项目记忆权威）
 
 ## Decision Tree
 
-### 1. Append to End of File
-`obsidian_append_content(filepath, content)` — Always safe.
+### 1. 文件追加（append）
+`mcp__obsidian__vault_append` — 对有增量日志类内容可用。
 
-### 2. Patch Under a Heading
-**Safe** (English-only, no `()` `[]`): use `obsidian_patch_content(filepath, target_type="heading", target="Heading Text", operation, content)`
+### 2. 结构化补丁（推荐）
+先读取文档映射，再以 `ifMatch` 做条件性 patch。
+- `mcp__obsidian__vault_get_document_map`
+- `mcp__obsidian__vault_patch`
 
-**Unsafe** (Chinese, parentheses, brackets): use Read + Edit fallback with absolute path.
+### 3. 覆盖整文件（优先）
+先读后写，覆盖前后都做回读。
+- `mcp__obsidian__vault_read`
+- `mcp__obsidian__vault_write`
 
-### 3. Replace Entire File
-Read + Write (absolute path). **Read required before Write.**
+### 4. 全新建文件
+`mcp__obsidian__vault_write`，新文件无先读要求，但推荐先确认目录上下文。
 
-### 4. Create New File
-Write (absolute path). No prior Read needed.
+### 5. 先定位再写
+1. `mcp__obsidian__search_simple("term")` 定位文件
+2. `mcp__obsidian__vault_read("file.md")` 读取
+3. 再做 patch 或 overwrite
 
-### 5. Search Then Write
-1. `obsidian_simple_search("term")` → find file
-2. `obsidian_get_file_contents("file.md")` → read
-3. Read + Edit → targeted edit
+## 工作约束（必须）
+
+- 先读后写：任何非空文件更新都要先读再写，结构化 patch 不做单步盲改。
+- 结构化 patch 先读 `vault_get_document_map`，并结合 `ifMatch` 做并发保护。
+- 覆盖写入必须 `vault_read` 先后 `vault_read` 再校验，避免静默损坏。
+- 不在会话输出中写入或回传密钥、密码、Token，遇到敏感字段一律跳过。
 
 ## DO NOT
 
 | Method | Why Not |
 |---|---|
-| `obsidian_patch_content` on Chinese/`()`/`[]` headings | Silent fail or `invalid-target` |
-| PowerShell `Set-Content` / `Out-File` | UTF-8 BOM corrupts Obsidian |
-| `Write` without prior `Read` (existing file) | Tool rejects |
-| `obsidian_append_content` for session state | Unbounded growth |
+| `mcp__obsidian__vault_append` 用于会话状态 | 无界增长 |
+| 不带 `ifMatch` 的 `vault_patch` | 并发时可能覆盖他人更新 |
+| `vault_write` 覆盖已有文件时不回读 | 无法发现读写不一致 |

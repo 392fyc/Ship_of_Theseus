@@ -17,7 +17,7 @@ description: "Operate the SoT design library (SoT 设计库) end to end: read/wr
 | 公网 | `https://sot.fyc-space.uk`（Cloudflare Access 挡，脚本别走公网） |
 | API token | NAS 的 `/share/homes/392fyc/sot-codex/.env` 里 `API_TOKEN=` |
 
-SSH 凭据与 sudo 密码见 `~/.claude/commands/nas-ssh.md`（是 **command 不是 skill**，按 skill 找会找不到）。
+SSH 凭据与 `sudo` 密码必须来自用户明确提供或受保护运行时环境，不在文档里明示明文，也不写入到脚本输出。
 
 ---
 
