@@ -194,7 +194,11 @@ def test_sot_rules_reject_force_create_forms_in_execpolicy() -> None:
         "--rules",
         str(ROOT / ".codex" / "rules" / "sot-protected-branches.rules"),
     ]
-    for command in (["git", "switch", "-C", "main"], ["git", "checkout", "-B", "master"]):
+    for command in (
+        ["git", "switch", "-C", "main"],
+        ["git", "checkout", "-B", "master"],
+        ["git", "push", "origin", "HEAD"],
+    ):
         result = run(rule_args + command, ROOT)
         assert json.loads(result.stdout)["decision"] == "forbidden"
 
@@ -230,7 +234,7 @@ def test_publish_pushes_only_the_current_task_branch_to_the_same_origin_branch()
         assert branches == ["codex/fixture-publish"]
 
 
-def test_publish_rejects_protected_branches_and_user_supplied_refspecs() -> None:
+def test_publish_rejects_protected_branches() -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
         repo = Path(temp_dir)
         init_repository(repo, "main")
@@ -243,12 +247,25 @@ def test_publish_rejects_protected_branches_and_user_supplied_refspecs() -> None
         assert protected.returncode != 0
         assert "protected" in (protected.stdout + protected.stderr).lower()
 
+
+def test_publish_exposes_no_user_supplied_refspec_parameter() -> None:
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp = Path(temp_dir)
+        origin = temp / "origin.git"
+        repo = temp / "repo"
+        origin.mkdir()
+        repo.mkdir()
+        run(["git", "init", "--bare"], origin)
+        init_repository(repo, "codex/fixture-arguments")
+        run(["git", "remote", "add", "origin", str(origin)], repo)
+        fixture_script = install_publish_script(repo)
         arbitrary = run(
             [
                 "pwsh",
                 "-NoProfile",
                 "-File",
                 str(fixture_script),
+                "-DryRun",
                 "-Refspec",
                 "HEAD:refs/heads/main",
             ],
