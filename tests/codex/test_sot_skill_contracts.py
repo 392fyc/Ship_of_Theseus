@@ -82,6 +82,7 @@ def test_sot_skill_contracts_static():
         "changed_files",
         "verification",
         "commit",
+        "branch",
         "push",
         "residual_risks",
         "protected_dirty",
