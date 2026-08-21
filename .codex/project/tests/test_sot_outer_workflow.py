@@ -81,6 +81,15 @@ class SotOuterWorkflowTests(unittest.TestCase):
             paused_result = json.loads(paused.stdout)
             self.assertEqual(paused_result["status"], "paused")
             self.assertTrue((project / ".specify/workflows/runs").is_dir())
+            state = json.loads(
+                (project / ".specify/workflows/runs" / paused_result["run_id"] / "state.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            self.assertIn(
+                "authority=ship task_size=S",
+                state["step_results"]["control"]["output"]["stdout"],
+            )
 
             resumed = run_specify(
                 "resume",

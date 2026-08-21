@@ -15,7 +15,7 @@ inputs:
 steps:
   - id: control
     type: shell
-    run: "echo authority=${authority} task_size=${task_size}"
+    run: "echo authority={{ inputs.authority }} task_size={{ inputs.task_size }}"
   - id: approval_gate
     type: gate
     message: "Approve the outer workflow."
