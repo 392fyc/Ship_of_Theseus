@@ -21,6 +21,8 @@
 - Initial implementation runs focused and affected tests. A remediation runs only reproduction and directly affected tests. Full regression runs once after remediation closes.
 - One remediation review is the end of the current task loop. Remaining blocking work must be split, redesigned, or reported; it must not start a second open repair round.
 - Use repository-relative paths in records. Never write secrets, credentials, local roots, or transient runtime details to bundles or reviews.
+- `bundle_sha256` is mandatory; review validation rejects a missing digest and never substitutes a digest computed during review.
+- Repository path fields reject every `^[A-Za-z]:` drive prefix, including drive-relative Windows paths.
 
 ---
 
@@ -121,7 +123,8 @@ Expected: import failure because `validate_harness_bundle.py` does not exist.
 
 ```text
 schema_version, task_id, bundle_revision, bundle_sha256, candidate_head,
-review_mode, remediation_finding_ids, findings, verdict
+review_mode, remediation_finding_ids, checks_performed, findings,
+residual_risks, verdict
 ```
 
 Each finding requires:
@@ -167,9 +170,9 @@ DIRECT_BLOCKING_CATEGORIES = {
 
 `bundle_digest()` computes SHA256 over compact UTF-8 JSON with sorted keys after removing `bundle_sha256` from a shallow copy.
 
-`validate_bundle()` performs structural checks needed by the tests without importing `jsonschema`. It checks types strictly (`bool` is not an integer), unique IDs, safe repository-relative paths, exactly one repair round, at most one high-risk change kind, non-empty finite criteria cases, all three test tiers, and digest equality when a digest is supplied.
+`validate_bundle()` performs structural checks needed by the tests without importing `jsonschema`. It checks types strictly (`bool` is not an integer), unique IDs, safe repository-relative paths, exactly one repair round, at most one high-risk change kind, non-empty finite criteria cases, all three test tiers, required digest presence, and digest equality. Any `^[A-Za-z]:` drive prefix is unsafe.
 
-`validate_review()` first calls `validate_bundle()`, then verifies task/revision/digest binding, finding IDs, criterion references, disposition rules and verdict consistency. In remediation mode, a blocking ID must be in `remediation_finding_ids`, except a new `critical` finding with `introduced_by_candidate=true`, `in_scope=true`, and `directly_caused_by_remediation=true`.
+`validate_review()` first calls `validate_bundle()`, then verifies task/revision/digest binding without temporary digest fallback, required `checks_performed` and `residual_risks`, finding IDs, criterion references, disposition rules and verdict consistency. In remediation mode, a blocking ID must be in `remediation_finding_ids`, except a new `critical` finding with `introduced_by_candidate=true` and `directly_caused_by_remediation=true`. Public regression, security, and data-loss exceptions require `in_scope=true`; `protected_scope` may block with `in_scope=false` because it represents crossing a protected boundary.
 
 The CLI reads UTF-8 JSON, prints errors to stderr, and exits `2` on malformed JSON, missing files, or validation errors.
 
@@ -257,10 +260,12 @@ Keep the existing evidence and receipt requirements. Add `follow_up_findings`, `
 
 - require `initial` or `remediation` mode;
 - return the structured fields required by `review-result.schema.json`;
+- return non-empty `checks_performed` and required `residual_risks` on every verdict;
 - bind each ordinary blocking finding to a frozen criterion;
 - route existing, adjacent, maintainability, test-hardening, Minor and scope discoveries to follow-up;
 - in remediation mode inspect only checklist items, the repair diff and directly affected regression surface;
 - allow a new blocking item only for remediation-caused Critical breakage.
+- allow remediation-caused `protected_scope` Critical findings with `in_scope=false`; other direct categories retain the `in_scope=true` requirement.
 
 `mercury-acceptance.toml`:
 
@@ -307,6 +312,9 @@ Use a temporary directory outside tracked paths. Populate one valid bundle, calc
 - an initial ReviewResult containing only a Minor follow-up and verdict `pass`;
 - a remediation ReviewResult whose only blocking ID is in `remediation_finding_ids` and verdict `needs_changes`.
 
+Both ReviewResult records include non-empty `checks_performed` and required
+`residual_risks`.
+
 Run both through the CLI. Expected exit code is `0`.
 
 - [ ] **Step 2: Run final harness verification once**
@@ -342,4 +350,3 @@ Completion requires:
 - no gameplay/data/cross-repository files changed;
 - independent review has no blocking finding;
 - all follow-up findings are visible in the receipt.
-

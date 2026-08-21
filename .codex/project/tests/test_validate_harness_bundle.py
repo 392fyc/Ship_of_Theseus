@@ -3,9 +3,11 @@ from __future__ import annotations
 import copy
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
+import tomllib
 import unittest
 
 
@@ -81,7 +83,9 @@ def valid_review(bundle: dict[str, object]) -> dict[str, object]:
         "candidate_head": "b" * 40,
         "review_mode": "initial",
         "remediation_finding_ids": [],
+        "checks_performed": ["Inspected the frozen criteria and candidate diff."],
         "findings": [finding()],
+        "residual_risks": [],
         "verdict": "pass",
     }
 
@@ -97,6 +101,15 @@ class BundleValidationTests(unittest.TestCase):
 
     def test_valid_bundle_is_accepted(self) -> None:
         self.assertEqual(validate_bundle(valid_bundle()), [])
+
+    def test_bundle_digest_is_required(self) -> None:
+        bundle = valid_bundle()
+        bundle.pop("bundle_sha256")
+        self.assert_invalid(bundle, "bundle_sha256")
+
+        bundle = valid_bundle()
+        bundle["bundle_sha256"] = None
+        self.assert_invalid(bundle, "bundle_sha256")
 
     def test_missing_or_duplicate_criterion_ids_are_rejected(self) -> None:
         missing = copy.deepcopy(VALID_BUNDLE)
@@ -151,6 +164,19 @@ class BundleValidationTests(unittest.TestCase):
                 bundle = copy.deepcopy(VALID_BUNDLE)
                 bundle["allowed_write_paths"] = [unsafe_path]
                 self.assert_invalid(bundle, "safe repository-relative path")
+
+    def test_drive_prefixed_relative_paths_are_rejected_in_every_path_field(self) -> None:
+        for field in ("allowed_write_paths", "forbidden_paths", "impact_cone"):
+            with self.subTest(field=field):
+                bundle = valid_bundle()
+                bundle[field] = ["C:relative/file.json"]
+                bundle["bundle_sha256"] = bundle_digest(bundle)
+                self.assert_invalid(bundle, "safe repository-relative path")
+
+        bundle = valid_bundle()
+        bundle["acceptance_criteria"][0]["paths"] = ["z:artifact.json"]
+        bundle["bundle_sha256"] = bundle_digest(bundle)
+        self.assert_invalid(bundle, "safe repository-relative path")
 
     def test_stale_bundle_digest_is_rejected(self) -> None:
         bundle = valid_bundle()
@@ -264,6 +290,27 @@ class ReviewValidationTests(unittest.TestCase):
         review["bundle_sha256"] = "0" * 64
         self.assert_invalid(review, "bundle_sha256")
 
+    def test_review_rejects_bundle_without_declared_digest(self) -> None:
+        review = valid_review(self.bundle)
+        self.bundle.pop("bundle_sha256")
+        self.assert_invalid(review, "bundle_sha256")
+
+    def test_checks_and_residual_risks_are_required(self) -> None:
+        for field in ("checks_performed", "residual_risks"):
+            with self.subTest(field=field):
+                review = valid_review(self.bundle)
+                review.pop(field)
+                self.assert_invalid(review, field)
+
+    def test_checks_are_non_empty_and_residual_risks_are_strings(self) -> None:
+        review = valid_review(self.bundle)
+        review["checks_performed"] = []
+        self.assert_invalid(review, "checks_performed")
+
+        review = valid_review(self.bundle)
+        review["residual_risks"] = [""]
+        self.assert_invalid(review, "residual_risks")
+
     def test_duplicate_finding_ids_and_unknown_criteria_are_rejected(self) -> None:
         review = valid_review(self.bundle)
         review["findings"] = [finding(), finding()]
@@ -316,6 +363,52 @@ class ReviewValidationTests(unittest.TestCase):
             }
         )
         self.assertEqual(validate_review(review, self.bundle), [])
+
+    def test_remediation_accepts_out_of_scope_protected_scope_critical(self) -> None:
+        review = valid_review(self.bundle)
+        review.update(
+            {
+                "review_mode": "remediation",
+                "remediation_finding_ids": ["F-original"],
+                "findings": [
+                    finding(
+                        id="F-new",
+                        severity="critical",
+                        category="protected_scope",
+                        disposition="blocking",
+                        introduced_by_candidate=True,
+                        in_scope=False,
+                        directly_caused_by_remediation=True,
+                    )
+                ],
+                "verdict": "needs_changes",
+            }
+        )
+        self.assertEqual(validate_review(review, self.bundle), [])
+
+    def test_remediation_rejects_other_out_of_scope_direct_criticals(self) -> None:
+        for category in ("public_regression", "security", "data_loss"):
+            with self.subTest(category=category):
+                review = valid_review(self.bundle)
+                review.update(
+                    {
+                        "review_mode": "remediation",
+                        "remediation_finding_ids": ["F-original"],
+                        "findings": [
+                            finding(
+                                id="F-new",
+                                severity="critical",
+                                category=category,
+                                disposition="blocking",
+                                introduced_by_candidate=True,
+                                in_scope=False,
+                                directly_caused_by_remediation=True,
+                            )
+                        ],
+                        "verdict": "needs_changes",
+                    }
+                )
+                self.assert_invalid(review, "remediation_finding_ids")
 
     def test_unhashable_review_enum_value_is_reported_instead_of_crashing(self) -> None:
         for field in ("review_mode", "verdict"):
@@ -373,10 +466,14 @@ class SchemaContractTests(unittest.TestCase):
                 "candidate_head",
                 "review_mode",
                 "remediation_finding_ids",
+                "checks_performed",
                 "findings",
+                "residual_risks",
                 "verdict",
             },
         )
+        self.assertEqual(schema["properties"]["checks_performed"]["minItems"], 1)
+        self.assertEqual(schema["properties"]["residual_risks"]["type"], "array")
         finding_schema = schema["properties"]["findings"]["items"]
         self.assertFalse(finding_schema["additionalProperties"])
         self.assertEqual(
@@ -402,6 +499,44 @@ class SchemaContractTests(unittest.TestCase):
             set(finding_schema["properties"]["disposition"]["enum"]),
             {"blocking", "follow_up", "accepted_risk"},
         )
+
+    def test_bundle_schema_rejects_any_drive_prefix(self) -> None:
+        schema = json.loads((PROJECT_DIR / "task-bundle.schema.json").read_text("utf-8"))
+        pattern = schema["$defs"]["repositoryPath"]["pattern"]
+        self.assertIsNone(re.fullmatch(pattern, "C:relative/file.json"))
+
+
+class ContractSynchronizationTests(unittest.TestCase):
+    def test_reviewer_requires_every_top_level_review_field(self) -> None:
+        schema = json.loads((PROJECT_DIR / "review-result.schema.json").read_text("utf-8"))
+        reviewer_path = PROJECT_DIR.parent / "agents" / "mercury-reviewer.toml"
+        with reviewer_path.open("rb") as stream:
+            instructions = tomllib.load(stream)["developer_instructions"]
+        required_fields = {
+            *schema["required"],
+            "checks_performed",
+            "residual_risks",
+        }
+        for field in required_fields:
+            with self.subTest(field=field):
+                self.assertIn(f"`{field}`", instructions)
+
+    def test_remediation_scope_exception_is_consistent_across_contracts(self) -> None:
+        paths = (
+            PROJECT_DIR / "mercury-task-contract.md",
+            PROJECT_DIR.parent / "agents" / "mercury-reviewer.toml",
+            PROJECT_DIR.parents[1] / "dev_doc" / "mercury-harness-convergence-design-2026-08.md",
+            PROJECT_DIR.parents[1]
+            / "docs"
+            / "superpowers"
+            / "plans"
+            / "2026-08-22-mercury-harness-convergence.md",
+        )
+        for path in paths:
+            with self.subTest(path=path.name):
+                text = path.read_text(encoding="utf-8")
+                self.assertIn("`protected_scope`", text)
+                self.assertIn("`in_scope=false`", text)
 
 
 class CliTests(unittest.TestCase):
@@ -444,6 +579,26 @@ class CliTests(unittest.TestCase):
         self.assertEqual(missing_result.returncode, 2)
         self.assertTrue(missing_result.stderr.strip())
         self.assertNotIn("Traceback", missing_result.stderr)
+
+    def test_cli_rejects_missing_digest_and_drive_prefixed_path(self) -> None:
+        missing_digest = copy.deepcopy(VALID_BUNDLE)
+        drive_prefixed = valid_bundle()
+        drive_prefixed["allowed_write_paths"] = ["C:relative/file.json"]
+        drive_prefixed["bundle_sha256"] = bundle_digest(drive_prefixed)
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            missing_digest_path = root / "missing-digest.json"
+            drive_prefixed_path = root / "drive-prefixed.json"
+            missing_digest_path.write_text(json.dumps(missing_digest), encoding="utf-8")
+            drive_prefixed_path.write_text(json.dumps(drive_prefixed), encoding="utf-8")
+
+            missing_digest_result = self.run_cli("bundle", str(missing_digest_path))
+            drive_prefixed_result = self.run_cli("bundle", str(drive_prefixed_path))
+
+        self.assertEqual(missing_digest_result.returncode, 2)
+        self.assertIn("bundle_sha256", missing_digest_result.stderr)
+        self.assertEqual(drive_prefixed_result.returncode, 2)
+        self.assertIn("safe repository-relative path", drive_prefixed_result.stderr)
 
 
 if __name__ == "__main__":

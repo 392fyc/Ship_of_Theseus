@@ -47,7 +47,7 @@ State 权威与连携任务暴露了一个重复出现的流程问题：任务�
 - 每条验收项的有限路径矩阵或输入等价类；
 - `test_policy`；
 - `max_repair_rounds=1`；
-- 任务包规范化后的摘要值。
+- 必填的任务包规范化摘要值 `bundle_sha256`；缺失时不得派发，也不得由审查阶段临时补算。
 
 验收项不得只写“覆盖所有路径”或“拒绝任意异常”。需要覆盖集合时，必须列出有限矩阵，例如：
 
@@ -88,6 +88,9 @@ ReviewBundle 生成后先经过收束检查。以下任一情况必须先拆分�
 - `disposition`：`blocking`、`follow_up`、`accepted_risk`；
 - 直接证据和最小修正建议。
 
+ReviewResult 顶层还必须包含非空的 `checks_performed` 和可为空的
+`residual_risks`，使无 finding 的通过结论仍保留实际检查与剩余风险。
+
 只有以下问题可以标为 `blocking`：
 
 1. 明确违反冻结验收项；
@@ -120,7 +123,7 @@ ReviewBundle 生成后先经过收束检查。以下任一情况必须先拆分�
 - 本轮修复 diff；
 - 修复直接影响的回归面。
 
-只有修复新引入 Critical、使既有通过证据失效，或修改新的公开接口时，才允许增加 blocking finding。其他新发现一律进入 follow-up。
+只有修复新引入 Critical、使既有通过证据失效，或修改新的公开接口时，才允许增加 blocking finding。此例外通常要求 `in_scope=true`；`protected_scope` 表示候选越过受保护边界，因此可在 `in_scope=false` 时阻断。其他直接类别仍要求位于既定范围。其他新发现一律进入 follow-up。
 
 一次增量复审后仍有 blocking 项时，本任务停止继续修复。控制方只能：
 
@@ -173,7 +176,7 @@ ReviewBundle 必须声明三层测试：
 - `.codex/project/validate_harness_bundle.py`：只使用 Python 标准库的轻量校验器；
 - `.codex/project/tests/test_validate_harness_bundle.py`：收束规则测试。
 
-校验器不理解自然语言，也不替代控制方判断。它只保证版本、编号、有限矩阵、风险种类、测试层级、修复预算和 finding disposition 不被遗漏或互相矛盾。
+校验器不理解自然语言，也不替代控制方判断。它只保证版本、编号、必填摘要、仓库相对路径、有限矩阵、风险种类、测试层级、修复预算、审查检查记录、剩余风险和 finding disposition 不被遗漏或互相矛盾。仓库相对路径拒绝任何 `^[A-Za-z]:` 盘符前缀，包括 Windows 的盘符相对写法。
 
 ## 数据流
 
@@ -211,6 +214,10 @@ ReviewBundle 必须声明三层测试：
 - 增量复审不得加入与修复 diff 无关的普通 blocking；
 - 只有 follow-up 的 ReviewResult 可以进入盲验收；
 - bundle revision 或摘要不匹配时拒绝复用旧审查结果；
+- 缺少 `bundle_sha256` 时拒绝，审查不得回退到临时计算；
+- 任意 `^[A-Za-z]:` 盘符前缀在 API 与 CLI 中均被拒绝；
+- ReviewResult 缺少 `checks_performed` 或 `residual_risks` 时拒绝；
+- remediation 新 Critical 的 `protected_scope` 可在 `in_scope=false` 时阻断，其他直接类别仍要求 `in_scope=true`；
 - 相同提交和环境摘要下允许复用完整测试证据。
 
 ## 当前 State 任务的恢复方式
@@ -224,4 +231,3 @@ Harness 通过独立验收后，当前未提交的 Task 4 修复保持原样，�
 - 清单关闭后运行一次完整测试。
 
 随后剩余工作重新拆分为单一交付物任务：确定性快照往返、合同完整度报告、State 编辑界面、菱形示意图。每项分别通过收束检查，不再把导入导出、报告、界面和视觉修正放入同一任务包。
-

@@ -44,6 +44,9 @@ Before dispatch, validate the ReviewBundle with
 `bundle_revision`, `target_head`, one `primary_deliverable`, `change_kinds`,
 stable `acceptance_criteria`, `allowed_write_paths`, `forbidden_paths`,
 `impact_cone`, `test_policy`, `max_repair_rounds`, and `bundle_sha256`.
+`bundle_sha256` is mandatory. Review validation must reject a missing digest and
+must not fall back to a digest calculated during review. Every path field must
+reject any `^[A-Za-z]:` drive prefix, including drive-relative paths.
 
 Each acceptance criterion must name a finite, non-empty `paths` and `cases`
 matrix. The bundle becomes frozen after validation. Changing its revision,
@@ -64,6 +67,8 @@ Every finding records `id`, `criterion_id`, `introduced_by_candidate`,
 `in_scope`, `severity`, `category`, `disposition`,
 `directly_caused_by_remediation`, `evidence`, and `correction` as defined by
 `review-result.schema.json`.
+The ReviewResult also records a non-empty `checks_performed` list and a required,
+possibly empty `residual_risks` list.
 
 Only these findings may use the `blocking` disposition:
 
@@ -85,6 +90,9 @@ checklist items, the repair diff, and its directly affected regression surface.
 Do not add an ordinary blocking finding outside the checklist. A new blocking
 finding is permitted only for a remediation-caused Critical breakage that
 invalidates passing evidence or changes a new public interface.
+This exception requires `in_scope=true` for ordinary direct categories. A
+`protected_scope` Critical may instead block with `in_scope=false`, because the
+finding itself records a remediation change crossing the protected boundary.
 
 `max_repair_rounds` must equal `1`. After the remediation review, any remaining
 blocking work must end the current loop: split, redesign, or report the task.
@@ -164,6 +172,8 @@ Implementation review checks the exact candidate diff in either `initial` or
 the frozen bundle and receives no implementation reasoning. Both must state the
 exact candidate reviewed and provide fresh or validly reused evidence for their
 verdict.
+Every ReviewResult must name the concrete `checks_performed` and preserve
+`residual_risks`, including an empty list when no residual risk is known.
 
 Completion requires all criteria to pass, required verification to succeed, the
 receipt to be complete, protected state to remain unchanged, and every blocking

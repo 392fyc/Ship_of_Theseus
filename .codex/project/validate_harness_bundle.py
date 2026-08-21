@@ -77,7 +77,9 @@ REVIEW_FIELDS = {
     "candidate_head",
     "review_mode",
     "remediation_finding_ids",
+    "checks_performed",
     "findings",
+    "residual_risks",
     "verdict",
 }
 FINDING_FIELDS = {
@@ -94,7 +96,7 @@ FINDING_FIELDS = {
 }
 SHA1_PATTERN = re.compile(r"^[0-9a-fA-F]{40}$")
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
-WINDOWS_ABSOLUTE_PATTERN = re.compile(r"^[A-Za-z]:[\\/]")
+WINDOWS_DRIVE_PREFIX_PATTERN = re.compile(r"^[A-Za-z]:")
 
 
 def bundle_digest(bundle: dict[str, object]) -> str:
@@ -122,7 +124,7 @@ def _safe_repository_path(value: object) -> bool:
     if not _is_non_empty_string(value):
         return False
     path = value.replace("\\", "/")
-    if path.startswith("/") or WINDOWS_ABSOLUTE_PATTERN.match(value):
+    if path.startswith("/") or WINDOWS_DRIVE_PREFIX_PATTERN.match(value):
         return False
     return ".." not in path.split("/") and "\x00" not in path
 
@@ -161,8 +163,7 @@ def validate_bundle(bundle: dict[str, object]) -> list[str]:
     if isinstance(compatibility_deliverables, list) and len(compatibility_deliverables) > 1:
         errors.append("primary_deliverables cannot contain multiple deliverables")
 
-    required_without_digest = BUNDLE_FIELDS - {"bundle_sha256"}
-    for field in sorted(required_without_digest - set(bundle)):
+    for field in sorted(BUNDLE_FIELDS - set(bundle)):
         errors.append(f"bundle is missing required field {field}")
 
     if bundle.get("schema_version") != 1 or not _is_strict_integer(bundle.get("schema_version")):
@@ -241,7 +242,7 @@ def validate_bundle(bundle: dict[str, object]) -> list[str]:
         errors.append("max_repair_rounds must equal integer 1")
 
     supplied_digest = bundle.get("bundle_sha256")
-    if supplied_digest is not None:
+    if "bundle_sha256" in bundle:
         if not isinstance(supplied_digest, str) or not SHA256_PATTERN.fullmatch(supplied_digest):
             errors.append("bundle_sha256 must be a lowercase 64-character SHA256")
         else:
@@ -276,7 +277,7 @@ def validate_review(review: dict[str, object], bundle: dict[str, object]) -> lis
     review_revision = review.get("bundle_revision")
     if not _is_strict_integer(review_revision) or review_revision != bundle.get("bundle_revision"):
         errors.append("review bundle_revision does not match the bundle")
-    expected_digest = bundle.get("bundle_sha256", bundle_digest(bundle))
+    expected_digest = bundle["bundle_sha256"]
     if review.get("bundle_sha256") != expected_digest:
         errors.append("review bundle_sha256 does not match the bundle")
     candidate_head = review.get("candidate_head")
@@ -298,6 +299,18 @@ def validate_review(review: dict[str, object], bundle: dict[str, object]) -> lis
             errors.append("remediation_finding_ids must contain unique non-empty strings")
         if review_mode == "initial" and remediation_ids:
             errors.append("initial review remediation_finding_ids must be empty")
+
+    _validate_string_list(review.get("checks_performed"), "checks_performed", errors)
+    residual_risks = review.get("residual_risks")
+    if not isinstance(residual_risks, list):
+        errors.append("residual_risks must be a list")
+    else:
+        if any(not _is_non_empty_string(item) for item in residual_risks):
+            errors.append("residual_risks must contain non-empty strings")
+        if len(residual_risks) != len(
+            set(item for item in residual_risks if isinstance(item, str))
+        ):
+            errors.append("residual_risks must not contain duplicates")
 
     criteria = bundle.get("acceptance_criteria", [])
     criterion_ids = {
@@ -379,7 +392,10 @@ def validate_review(review: dict[str, object], bundle: dict[str, object]) -> lis
             remediation_exception = (
                 severity == "critical"
                 and item.get("introduced_by_candidate") is True
-                and item.get("in_scope") is True
+                and (
+                    item.get("in_scope") is True
+                    or category == "protected_scope"
+                )
                 and item.get("directly_caused_by_remediation") is True
             )
             if not remediation_exception:

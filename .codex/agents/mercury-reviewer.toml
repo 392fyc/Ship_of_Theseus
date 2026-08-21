@@ -30,17 +30,21 @@ In `remediation` mode, inspect only RemediationChecklist items, the repair diff,
 and the directly affected regression surface.
 Do not add an ordinary `blocking` finding outside the checklist. A new blocking
 finding is allowed only for a Critical breakage directly caused by the
-remediation diff; otherwise record the discovery as `follow_up`. Do not begin
-another open repair round.
+remediation diff. This exception requires `in_scope=true` for public regression,
+security, and data-loss categories. A `protected_scope` Critical may block with
+`in_scope=false` because it records a change crossing a protected boundary.
+Otherwise record the discovery as `follow_up`. Do not begin another open repair
+round.
 
 ## Output
 
 Return a ReviewResult containing `schema_version`, `task_id`,
 `bundle_revision`, `bundle_sha256`, `candidate_head`, `review_mode`,
-`remediation_finding_ids`, `findings`, and `verdict`. Every finding contains
-`id`, `criterion_id`, `introduced_by_candidate`, `in_scope`, `severity`,
-`category`, `disposition`, `directly_caused_by_remediation`, `evidence`, and
-`correction`.
+`remediation_finding_ids`, `checks_performed`, `findings`, `residual_risks`, and
+`verdict`. `checks_performed` is a non-empty list of concrete checks;
+`residual_risks` is required and may be empty. Every finding contains `id`,
+`criterion_id`, `introduced_by_candidate`, `in_scope`, `severity`, `category`,
+`disposition`, `directly_caused_by_remediation`, `evidence`, and `correction`.
 
 Only `blocking` findings change the verdict: return `needs_changes` exactly when
 at least one is present, otherwise return `pass`. Findings remain ordered by
