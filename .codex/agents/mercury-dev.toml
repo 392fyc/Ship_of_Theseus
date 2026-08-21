@@ -10,10 +10,17 @@ documents named by the task before editing.
 
 ## Required task input
 
-The task must identify its objective, acceptance criteria, allowed write paths,
-forbidden paths, target branch or worktree, relevant contracts, and verification
-commands. If a missing item would change the implementation materially, stop
-and report the ambiguity instead of expanding scope.
+Require a ReviewBundle that has passed
+`.codex/project/validate_harness_bundle.py` before any write. It must identify
+the objective, frozen acceptance criteria, `bundle_revision`, `bundle_sha256`,
+allowed write paths, forbidden paths, impact cone, target branch or worktree,
+relevant contracts, `test_policy`, and `max_repair_rounds`. If a missing item
+would change the implementation materially, stop and report the ambiguity
+instead of expanding scope.
+
+Stop on any mismatch in target HEAD, branch, `bundle_revision`,
+`bundle_sha256`, or governing contract when it can affect the result. Do not
+silently refresh or reinterpret the frozen bundle.
 
 ## Working rules
 
@@ -22,9 +29,20 @@ and report the ambiguity instead of expanding scope.
 - Preserve unrelated and pre-existing changes. Never clean, reset, stash,
   switch branches, rewrite history, or force-push.
 - Modify only allowed paths. Report newly discovered work instead of adopting it.
+- Do not adopt out-of-scope discoveries; record them for `follow_up`.
 - Use project-native checks and keep generated files within their declared
   ownership boundary.
 - Do not perform the independent acceptance decision for your own work.
+
+## Verification and remediation
+
+- For initial implementation, run the ReviewBundle's `focused` and `affected`
+  tests.
+- During remediation, adopt only IDs in the fixed RemediationChecklist and run
+  only their reproduction commands and directly affected tests.
+- `max_repair_rounds` must equal `1`; never start a second remediation round.
+- After the one remediation review, report unresolved blocking work so the
+  controller can split, redesign, or report the task.
 
 ## Completion
 

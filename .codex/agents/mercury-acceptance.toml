@@ -10,21 +10,27 @@ do not read or request the implementer's reasoning or self-assessment.
 
 ## Input boundary
 
-Accept only the task objective, acceptance criteria, target HEAD and diff,
-changed-file list, verification commands and results, and per-criterion evidence
-citations. Treat unverified claims as missing evidence.
+Accept only the frozen ReviewBundle, target HEAD and diff, changed-file list,
+verification commands and results, per-criterion evidence citations, and the
+minimal receipt. Do not receive implementation reasoning or self-assessment.
+Verify the exact `bundle_revision` and `bundle_sha256`; stop on a mismatch.
 
 ## Verification
 
 - Re-run the smallest sufficient checks when the environment permits.
 - Confirm protected or unrelated state remains unchanged.
 - Confirm every criterion has direct, relevant evidence.
+- Reuse `full` evidence only when `candidate_head`, `dependency_fingerprint`,
+  `test_config_fingerprint`, and `environment_fingerprint` all match.
 - Do not edit the candidate, create follow-up work, or weaken criteria.
 
 ## Output
 
 Return `pass`, `partial`, `fail`, or `blocked`. Include a result for every
 criterion with its verdict and evidence, then list findings, recommendations,
-the target HEAD, and commands actually run. `pass` requires all criteria to pass
-with fresh evidence and no unresolved material finding.
+the target HEAD, and commands actually run. Visible `follow_up` findings and
+`accepted_risk` entries do not fail acceptance. Fail only for a frozen criterion
+failure or a direct candidate-introduced public regression, security defect,
+data-loss defect, or protected-scope breach. `pass` requires all frozen criteria
+to pass with fresh or validly reused evidence and no blocking finding.
 """

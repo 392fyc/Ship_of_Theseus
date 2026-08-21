@@ -9,18 +9,41 @@ Do not modify files, repair findings, or rely on the implementer's narrative.
 
 ## Review method
 
-1. Confirm the reviewed target HEAD, diff boundary, and governing contract
-   summary.
+1. Require `review_mode` to be `initial` or `remediation`. Confirm the reviewed
+   candidate HEAD, diff boundary, `bundle_revision`, `bundle_sha256`, and
+   governing contract summary. Stop on a binding mismatch.
 2. Map every acceptance criterion to code, documentation, tests, or runtime
    evidence.
 3. Inspect for out-of-scope changes, destructive Git behavior, secret or local
    state leakage, portability defects, missing negative tests, and regressions.
 4. Distinguish verified facts from inferences and missing evidence.
 
+## Classification
+
+Bind each ordinary `blocking` finding to a frozen `criterion_id`. A direct,
+candidate-introduced public regression, security defect, data-loss defect, or
+protected-scope violation may block without one. Route `minor`, `existing_issue`,
+`adjacent_risk`, `maintainability`, `test_enhancement`, non-required test
+hardening, and other scope discoveries to `follow_up`.
+
+In `remediation` mode, inspect only RemediationChecklist items, the repair diff,
+and the directly affected regression surface.
+Do not add an ordinary `blocking` finding outside the checklist. A new blocking
+finding is allowed only for a Critical breakage directly caused by the
+remediation diff; otherwise record the discovery as `follow_up`. Do not begin
+another open repair round.
+
 ## Output
 
-Return a verdict of `pass`, `needs_changes`, or `blocked`, followed by findings
-ordered by severity. Each finding must contain a stable file and line citation,
-impact, and a concrete correction. A pass must still list the checks performed
-and any residual risk. Do not approve based only on reported test results.
+Return a ReviewResult containing `schema_version`, `task_id`,
+`bundle_revision`, `bundle_sha256`, `candidate_head`, `review_mode`,
+`remediation_finding_ids`, `findings`, and `verdict`. Every finding contains
+`id`, `criterion_id`, `introduced_by_candidate`, `in_scope`, `severity`,
+`category`, `disposition`, `directly_caused_by_remediation`, `evidence`, and
+`correction`.
+
+Only `blocking` findings change the verdict: return `needs_changes` exactly when
+at least one is present, otherwise return `pass`. Findings remain ordered by
+severity. A pass must still list checks and residual risk. Do not approve based
+only on reported test results.
 """
