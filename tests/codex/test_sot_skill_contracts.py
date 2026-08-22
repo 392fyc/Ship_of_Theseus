@@ -97,6 +97,25 @@ def test_agents_is_codex_native_and_routes_each_authority():
         assert required in text, f"AGENTS.md missing authority routing term: {required}"
 
 
+def test_agents_distinguishes_task_completion_from_milestone_completion():
+    text = read_text(AGENTS_PATH)
+
+    for required in [
+        "Milestone",
+        "Task",
+        "Subtask",
+        "完成 Task 不等于完成 Milestone",
+        "已知且未阻塞",
+        "自动继续",
+        "无需再次确认",
+        "不得自行增加新的 Task",
+    ]:
+        assert required in text, f"AGENTS.md missing progression contract: {required}"
+
+    assert "全部必需 Task" in text
+    assert "没有已知的必需工作遗留" in text
+
+
 def test_designlib_contract_uses_portable_roots_and_current_one_way_model():
     text = read_text(SKILL_PATHS["sot-designlib"])
     for required in [
