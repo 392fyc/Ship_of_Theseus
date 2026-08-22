@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 import json
 import shutil
@@ -17,10 +18,17 @@ def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def run(command: list[str], cwd: Path, *, check: bool = True) -> subprocess.CompletedProcess[str]:
+def run(
+    command: list[str],
+    cwd: Path,
+    *,
+    check: bool = True,
+    env: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(
         command,
         cwd=cwd,
+        env={**os.environ, **(env or {})},
         text=True,
         encoding="utf-8",
         errors="replace",
@@ -302,3 +310,39 @@ def test_publish_rejects_invocation_from_another_repository() -> None:
         )
         assert result.returncode != 0
         assert "controlled entrypoint" in (result.stdout + result.stderr).lower()
+
+
+def test_publish_dry_run_allows_configured_designlib_linked_worktree() -> None:
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp = Path(temp_dir)
+        origin = temp / "origin.git"
+        designlib = temp / "designlib"
+        linked_worktree = temp / "designlib-task"
+        origin.mkdir()
+        designlib.mkdir()
+        run(["git", "init", "--bare"], origin)
+        init_repository(designlib, "codex/designlib-base")
+        run(["git", "remote", "add", "origin", str(origin)], designlib)
+        run(
+            [
+                "git",
+                "worktree",
+                "add",
+                "-b",
+                "codex/designlib-publish",
+                str(linked_worktree),
+            ],
+            designlib,
+        )
+
+        result = run(
+            ["pwsh", "-NoProfile", "-File", str(PUBLISH_SCRIPT), "-DryRun"],
+            linked_worktree,
+            check=False,
+            env={"SOT_DESIGNLIB_ROOT": str(designlib)},
+        )
+
+        assert result.returncode == 0, result.stdout + result.stderr
+        assert "codex/designlib-publish" in result.stdout
+        assert str(designlib) not in result.stdout + result.stderr
+        assert str(origin) not in result.stdout + result.stderr
