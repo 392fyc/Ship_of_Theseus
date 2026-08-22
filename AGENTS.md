@@ -57,6 +57,7 @@
 ## Git 与交付
 
 - 不直接提交或推送到 `develop`、`main`、`master`。
+- Ship、设计库与 KB 的任务分支统一从目标仓 worktree 调用 Ship 根的 `scripts/codex/sot-publish.ps1`；该入口通过 `SOT_DESIGNLIB_ROOT` 与 `SOT_KB_ROOT` 授权跨仓 worktree。不得因目标仓没有同名脚本而判定发布阻断，也不得改用原始 `git push`。
 - 只修改任务声明的文件范围，不夹带用户已有 dirty 文件。
 - 实现者不得自我批准；提交前由独立审查者核对规格与证据。
 - 子任务结束时使用 `sot-task-receipt` 返回结构化回执。
