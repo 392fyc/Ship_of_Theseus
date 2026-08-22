@@ -116,6 +116,20 @@ def test_agents_distinguishes_task_completion_from_milestone_completion():
     assert "没有已知的必需工作遗留" in text
 
 
+def test_agents_points_cross_repository_publication_to_shared_entrypoint():
+    text = read_text(AGENTS_PATH)
+
+    for required in [
+        "scripts/codex/sot-publish.ps1",
+        "目标仓 worktree",
+        "SOT_DESIGNLIB_ROOT",
+        "SOT_KB_ROOT",
+        "不得因目标仓没有同名脚本而判定发布阻断",
+        "不得改用原始 `git push`",
+    ]:
+        assert required in text, f"AGENTS.md missing shared publication rule: {required}"
+
+
 def test_designlib_contract_uses_portable_roots_and_current_one_way_model():
     text = read_text(SKILL_PATHS["sot-designlib"])
     for required in [
