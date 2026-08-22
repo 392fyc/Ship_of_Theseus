@@ -1,0 +1,27 @@
+schema_version: "1.0"
+workflow:
+  id: sot-outer
+  name: SoT Outer
+inputs:
+  authority:
+    type: string
+    enum: [ship, designlib, kb]
+  task_size:
+    type: string
+    enum: [S, M, L]
+  approval:
+    type: string
+    enum: ["", approve, reject]
+steps:
+  - id: control
+    type: shell
+    run: "echo authority={{ inputs.authority }} task_size={{ inputs.task_size }}"
+  - id: approval_gate
+    type: gate
+    message: "Approve the outer workflow."
+    verdict_input: approval
+    options: [approve, reject]
+    on_reject: retry
+  - id: finish
+    type: shell
+    run: "echo sot-outer-complete"

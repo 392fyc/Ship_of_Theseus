@@ -39,3 +39,4 @@ nul
 # handoff skill — local KB-pointer marker + fallback handoff dir (transient, never commit)
 .handoff-config
 .handoff/
+.specify/workflows/runs/

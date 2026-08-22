@@ -1,81 +1,71 @@
-# Portable task, evidence, and receipt contract
+# Portable task card and receipt
 
-This contract defines the minimum information exchanged between an orchestrator,
-an implementation worker, and independent reviewers. A project may add fields or
-stricter gates, but it must not silently weaken these requirements.
+Use one task card for one primary deliverable. It is a portable boundary for a
+Main agent, an implementation worker, and one independent reviewer. Project
+contracts override this generic card where they are stricter.
 
-## Task bundle
+## Task card
 
-Before implementation begins, record:
+Before work starts, the Main agent records:
 
-- `task_id` and a bounded `objective`;
-- independently testable `acceptance_criteria`;
-- `target_repository`, `target_branch`, and exact starting `target_head`;
-- `allowed_write_paths` and `forbidden_paths`;
-- governing `contracts`, each with a path or stable identifier and a concise
-  `contract_summary` captured before the first write;
-- required `verification_commands` and protected state that must remain unchanged;
-- dependencies, known constraints, and escalation conditions.
+- one bounded objective and one primary deliverable;
+- target repository, target branch or worktree, and exact starting HEAD;
+- allowed write paths and forbidden paths;
+- governing contracts, with a short summary of each;
+- adjacent problems explicitly not handled by this task;
+- size: `S`, `M`, or `L`; and a sub-agent budget level. Main agents never set a
+  token budget. The level is qualitative: `S` is local, `M` is one clear
+  multi-file deliverable, and `L` is an unsplittable complex core problem;
+- no more than three observable acceptance conditions;
+- focused verification commands, plus the conditions that require affected or
+  full verification; and
+- whether one consolidated correction is allowed after the reviewer reports
+  blocking work.
 
-The implementer must stop when the target HEAD, branch, or governing contract no
-longer matches the bundle and the difference can affect the result.
+The card is a boundary, not a backlog. The worker stops and reports to the Main
+agent when the work exceeds its declared size, needs another deliverable,
+requires more write paths, or conflicts with a governing contract. A reviewer
+finding, test discovery, or adjacent concern does not automatically expand the
+task. The Main agent must split or issue a new card when scope changes.
 
-## Evidence contract
+## Verification and review
 
-Evidence is a reproducible observation, not an assertion. Each item records:
+Run focused verification by default. Run affected verification only when the
+task card says that the change reaches a named dependent surface, and run full
+verification only when the card's explicit full-test condition is met (for
+example, a shared framework, migration, public interface, or release change).
+Do not run broader tests merely for reassurance.
 
-- the acceptance criterion it supports;
-- the command, test, file-and-line citation, or runtime request used;
-- the observed result and exit status when applicable;
-- the target HEAD or candidate revision on which it was collected;
-- collection time when the underlying state is mutable;
-- limitations, skipped checks, and whether the result is direct evidence or an
-  explicitly labelled inference.
+After implementation, one independent, read-only reviewer checks the exact
+candidate against this card and the governing contracts. The reviewer may
+report at most three current-scope blockers. If correction is allowed, the
+worker makes at most one consolidated correction, restricted to those blockers,
+then returns the result for the Main agent to close or split. There is no
+automatic second correction cycle. A high-risk small framework task may define
+its own blind acceptance check; it is not a global requirement.
 
-Sensitive matches, credentials, and private content must never be copied into a
-receipt. Report their category, affected scope, and disposition instead.
+## Minimal implementation receipt
 
-## Implementation receipt
-
-Return a machine-readable object with at least these fields:
+Return a concise machine-readable object containing:
 
 ```json
 {
   "task_id": "stable identifier",
   "status": "completed|blocked|failed",
   "target_repository": "logical repository identity",
-  "target_branch": "assigned task branch",
+  "target_branch": "assigned branch",
   "target_head_before": "full commit identifier",
-  "candidate_head": "full commit identifier or null for an uncommitted candidate",
-  "contract_summary": [
-    {"contract": "path or identifier", "summary": "governing points"}
-  ],
+  "candidate_head": "full commit identifier or null",
+  "contract_summary": [{"contract": "path or identifier", "summary": "governing points"}],
   "changed_files": ["repository-relative path"],
-  "verification": [
-    {"command": "reproducible command", "result": "pass|fail|skipped", "evidence": "concise observation"}
-  ],
-  "criteria_evidence": [
-    {"criterion": "criterion text", "result": "pass|fail|partial", "evidence": ["citation or command result"]}
-  ],
-  "protected_state": [
-    {"subject": "protected path or repository", "result": "unchanged|changed|unverified", "evidence": "concise observation"}
-  ],
+  "verification": [{"command": "command", "result": "pass|fail|skipped", "evidence": "observation"}],
+  "criteria_evidence": [{"criterion": "observable condition", "result": "pass|fail|partial", "evidence": ["citation or result"]}],
+  "protected_state": [{"subject": "protected scope", "result": "unchanged|changed|unverified", "evidence": "observation"}],
   "residual_risks": [],
   "escalation_reason": null
 }
 ```
 
-Use repository-relative paths and logical repository identities. Do not store
-local absolute paths, secrets, tokens, service ports, or transient process state.
-
-## Review and acceptance
-
-Implementation review checks the candidate diff for correctness, scope,
-maintainability, security, and regression risk. Acceptance is a later blind pass
-against the criteria and receives no implementation reasoning. Both must state
-the exact candidate reviewed and provide fresh evidence for their verdict.
-
-Completion requires all criteria to pass, required verification to succeed, the
-receipt to be complete, protected state to remain unchanged, and material review
-findings to be resolved. A blocked or skipped check remains visible in the final
-receipt and cannot be converted into a passing claim.
+Use repository-relative paths. Record fresh evidence, including failed or
+skipped checks, without secrets or local machine details. The worker supplies
+evidence but never approves its own delivery.
