@@ -43,6 +43,20 @@ def initialize_project(project: Path) -> subprocess.CompletedProcess[str]:
 
 
 class SotOuterWorkflowTests(unittest.TestCase):
+    def test_core_project_contracts_do_not_depend_on_spec_kit(self) -> None:
+        core_contracts = [
+            ROOT / "AGENTS.md",
+            ROOT / ".codex/project/mercury-task-contract.md",
+            *sorted((ROOT / ".codex/agents").glob("mercury-*.toml")),
+            *sorted((ROOT / ".agents/skills").glob("sot-*/SKILL.md")),
+        ]
+
+        for contract in core_contracts:
+            with self.subTest(contract=contract.relative_to(ROOT)):
+                content = contract.read_text(encoding="utf-8").lower()
+                self.assertNotIn("sot-outer", content)
+                self.assertNotIn(".specify/workflows", content)
+
     def test_workflow_add_rejects_invalid_enum_inputs_and_resumes(self) -> None:
         self.assertTrue(WORKFLOW.is_file())
 

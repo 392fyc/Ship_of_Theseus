@@ -81,7 +81,6 @@ def test_codex_project_layer_is_discoverable_and_keeps_ownership_boundaries() ->
     skill_paths = sorted((ROOT / ".agents" / "skills").glob("sot-*/SKILL.md"))
 
     assert [path.name for path in agent_paths] == [
-        "mercury-acceptance.toml",
         "mercury-dev.toml",
         "mercury-reviewer.toml",
         "sot-designlib.toml",
