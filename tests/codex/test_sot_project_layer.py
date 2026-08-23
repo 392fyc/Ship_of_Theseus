@@ -18,6 +18,18 @@ def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def test_project_contract_keeps_only_current_conclusions() -> None:
+    agents = read_text(ROOT / "AGENTS.md")
+    for marker in [
+        "当前有效结论",
+        "完整命题",
+        "历史记录",
+        "默认读取链",
+        "范围外发现",
+    ]:
+        assert marker in agents
+
+
 def run(
     command: list[str],
     cwd: Path,
