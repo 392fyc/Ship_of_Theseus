@@ -108,10 +108,3 @@ func _evaluate(unit: Unit, predicate_type: String, params: Dictionary) -> bool:
 		_:
 			push_warning("[StateRegistry] 未知的 predicate.type: " + predicate_type)
 			return false
-
-
-# 关于 `459f609` 提交信息里「它原是唯一不告警的异常分支」这句：**问题是作用域
-# 没写清，不是陈述失实**。「它」紧承前一句主语 `is_in_state()`，所引的类文档头
-# 枚举的也正是该函数的三个分支——限定在 `is_in_state()` 内，该断言当时为真；
-# 只有把作用域扩到整个文件才为假（当时 `_evaluate()` 的数据缺失分支仍静默）。
-# 类文档头现已标明作用域，本留档记录先后，两处合起来消除歧义。
