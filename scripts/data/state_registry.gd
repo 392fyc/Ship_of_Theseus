@@ -1,66 +1,15 @@
 class_name StateRegistry
 extends RefCounted
-## 设计库 State 注册表（`/api/states`）的引擎侧映射与求值器。
+## 设计库条件状态的引擎侧注册表与求值器。
 ##
-## 这里承接的是设计库里 `kind=条件` / `duration_kind=条件维持` 的那一类状态：
-## 它们**即时判定、不快照、本身不提供任何加成**，只作为其他效果的触发与生效条件被引用。
-##
-## 为什么不落 `data/buffs/`（2026-08-07 路径 C 决策，2026-08-08 经 Mercury 验收补全论证）：
-##
-##   理由一 · 模型不兼容。BuffEffect 是「实例 + 时长」模型——必须由技能 effects 显式
-##   `add_buff` 挂载（`tactical_manager._execute_hostile_action` 里的那次 `add_buff` 是当前唯一接线的挂载入口），此后按回合
-##   递减 duration（`Unit.process_turn_end_buffs`）。而条件类状态没有挂载动作、没有时长，其成立与否
-##   必须在每次读取时以当时的战场数据重新求值。做成 buff 则 HP 回升后旧实例不会自动
-##   脱离，直接违反 definition 的「HP 高于 30% 时脱离」。
-##
-##   理由二 · 没有对应的兑现类型。四种 effect_type（stat_mod / dot / control / special）
-##   没有一种对应「纯条件、不给加成」：前三种都要给加成或造成效果；只剩 special，而
-##   `BuffEffect.tick()` 的 match 里根本没有 special 分支，落它就是又一个无
-##   兑现器的死标记。
-##
-##   ⚠ 2026-08-12（Wave 4）更正：这里原先举的先例是「swordsman_parry_stance 挂上后
-##   全库零消费方」。**那条先例已经不成立**——Wave 4 给招架架势接上了消费方
-##   （TacticalManager._resolve_defense 按 has_buff 判架势在不在，减伤参数读它 JSON
-##   的 parry 段）。**理由二本身不受影响**：它讲的是 BuffEffect.tick() 没有 special
-##   分支，那仍然为真——招架架势的兑现根本不走 tick()，是结算路径主动来查它。
-##   也就是说「special 类 buff 没有自动兑现器」依旧成立，被消掉的只是「挂上就永远
-##   没人管」这个具体先例。
-##
-##   理由三 · stackable/max_stacks 的「现成承接」不适用。条件类状态不叠层；且该叠层
-##   分支（`Unit.add_buff` 里的 stackable 支路）是未验证代码——10 个 buff 文件 stackable 全 false、
-##   max_stacks 全 1，无数据或测试走过。
-##
-## 被否决的替代路（显式记下，免得日后重新翻账）：
-##
-##   替代路 A · 在 take_damage / heal 之后加状态重算钩子。否决：那是结算主循环，
-##   路径 C 明令不碰。
-##
-##   替代路 B · 复用现成的每回合钩子 process_turn_start_buffs()
-##   （`TacticalManager._on_turn_started` → `Unit.process_turn_start_buffs`），加一个分支重算 HP 条件。这条**确实与
-##   take_damage / heal 无关、无需新开钩子**，是最像样的替代方案，但仍在两个独立点上
-##   不够格：
-##     ① 条件态根本没有挂载动作——没有任何技能会去 `add_buff` 一个纯条件态，连「进入」
-##        都无法发生；要让它自动挂上，就又得回到结算路径去判断何时该挂。
-##     ② 即便挂上了，刷新颗粒度是「该单位自己的回合开始时」，而 definition 原文写死
-##        「每次结算都以当前 HP 重新计算，**不在进入时做快照**」——回合级刷新恰恰就是
-##        一次跨越半个回合的快照。同一回合内被打到 30% 以下，直到下个回合开始前都不会
-##        被认定为背水，这是错的。
-##
-## 因此条件类状态走本注册表：只读 `data/states/*.json`，只提供查询，不进任何结算路径。
-## 真正的消费方是 Wave 1 的天赋载体（把「处于〔X〕状态」的条件段接到这里）。
-##
-## 留档 · 理由一的前提有一处脆弱点：`Unit.load_buffs_from_state()` 是全仓
-## 零调用的死代码，内含一处 `buffs.append`。「技能挂载是唯一入口」在当下成立，
-## 但这条未接线的第二路径一旦被接上（例如做存档读档时），理由一里
-## 「必须由技能显式挂载」的前提即失效，届时需重新评估本决策。
+## 条件状态只作为其他效果的触发条件，每次读取时按当前战场数据即时求值，
+## 不缓存、不快照，也不自行提供加成。
+## `special` Buff 没有通用自动兑现器，需要由具体消费方读取并结算。
+## `engine_status=unevaluable` 不等于条件不成立；依赖它的内容必须拒绝注册。
 ##
 ## 用法：
 ##     var reg := StateRegistry.new(DataLoader.states)
 ##     if reg.is_in_state(unit, "beishui"): ...
-##
-## 判不了 ≠ 判定为否：`engine_status=unevaluable` 的条目求值恒 false，但
-## `is_evaluable()` 会返回 false 且 `get_blocker()` 给出原因。消费方若关心区别，
-## 必须先问 `is_evaluable`，不要把「引擎还做不到」静默当成「条件不成立」。
 
 ## `data/states/*.json` 的 id → 原始 Dictionary，构造时注入（通常是 DataLoader.states）。
 var _states: Dictionary = {}
@@ -70,22 +19,15 @@ func _init(states: Dictionary = {}) -> void:
 	_states = states
 
 
-## 该状态此刻是否成立。即时求值，不缓存、不快照。
-##
-## **本函数内**的三条异常路径——未注册的 id、判不了的条目（unevaluable）、缺
-## predicate 的条目——一律返回 false 并告警，不静默。
-## 注意这句话的作用域**只到本函数**：谓词求值里的数据缺失分支在 `_evaluate()`，
-## 不在这三条之列，它的告警是另一次补的（见文件末尾「告警补齐的两次提交」留档）。
+## 该状态此刻是否成立；每次读取即时求值，不缓存或快照。
+## 未注册、不可求值或缺少 predicate 时返回 false 并告警。
 func is_in_state(unit: Unit, state_id: String) -> bool:
 	var entry: Dictionary = _entry(state_id)
 	if entry.is_empty():
 		push_warning("[StateRegistry] 未注册的状态 id: " + state_id)
 		return false
 	if not is_evaluable(state_id):
-		# 判不了必须响亮，不能静默返回 false——静默就是「挂着没人管、运行时一声不吭」
-		# 那种失效模式（swordsman_parry_stance 曾是它的先例，Wave 4 已给它接上消费方，
-		# 但这里要防的失效**形态**不因此改变）。消费方应当先问 is_evaluable()，
-		# 走到这里说明它没问就直接取值了，属于误用，要能在日志里看见。
+		# 不可求值必须告警；消费方应在注册期先用 is_evaluable() 拒收依赖。
 		push_warning("[StateRegistry] 状态判不了（engine_status=unevaluable），求值按不成立处理: "
 			+ state_id + "；原因: " + get_blocker(state_id))
 		return false
@@ -158,10 +100,7 @@ func _evaluate(unit: Unit, predicate_type: String, params: Dictionary) -> bool:
 				/ float(unit.stats.max_hp) * 100.0
 			return hp_ratio_pct <= threshold_pct
 		"offhand_weapon_equipped":
-			# 判据照设计库〔双持〕definition 逐字：「武器栏与副手武器槽同时装备武器时，
-			# 即视为双持」——只看两个槽是否都非空，不看武器种类。即时判定、不快照：
-			# 副手被卸下或前置失效的下一次求值就会返回 false。
-			# （Wave 2 之前这里是 `return false` 占位，因为引擎当时无副手槽。）
+			# 双持按当前两个武器槽即时求值，不缓存装备状态。
 			if unit == null:
 				push_warning("[StateRegistry] offhand_weapon_equipped 无法求值：单位缺失")
 				return false
@@ -171,23 +110,6 @@ func _evaluate(unit: Unit, predicate_type: String, params: Dictionary) -> bool:
 			return false
 
 
-# ── 留档 · 告警补齐的两次提交（2026-08-08 按 Mercury A1 验收条件 A 补记）──
-#
-# 本文件的「异常路径一律告警、不静默」不是一次做到位的，是两次提交先后补齐的。
-# 之前的交付叙述把它们捏合成了同一个动作，会让下一轮误以为路径 C 的 C3 一次到位，
-# 故在此如实分开记录：
-#
-#   `459f609`（路径 C 验收补丁 C3）
-#       补 `is_in_state()` 里 **unevaluable 分支**的 push_warning。
-#       触发动机 = Mercury 在 #550 点名该分支静默。
-#
-#   `09f6258`（A1 独立验证修复，39 分钟后）
-#       补 `_evaluate()` 里 **`hp_ratio_at_most` 数据缺失分支**的 push_warning。
-#       触发动机 = 自带独立验证方指出 C3 之后仍有残留静默分支。
-#
-#   （这里刻意只写函数名与分支名、不写行号——上一轮留档的 5 处行号在一次提交内
-#    就漂了 2~26 行，行号会漂、函数名不会。）
-#
 # 关于 `459f609` 提交信息里「它原是唯一不告警的异常分支」这句：**问题是作用域
 # 没写清，不是陈述失实**。「它」紧承前一句主语 `is_in_state()`，所引的类文档头
 # 枚举的也正是该函数的三个分支——限定在 `is_in_state()` 内，该断言当时为真；
