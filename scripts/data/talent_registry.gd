@@ -1,111 +1,32 @@
 class_name TalentRegistry
 extends RefCounted
-## 天赋载体（`data/talents/*.json`）的注册与按事件索引 —— Wave 1 · A1。
+## 天赋载体的注册、触发行索引与执行边界。
 ##
-## A1 范围：只接 **after-damage 族三事件**（命中后 / 造成伤害时 / 击杀时）。这三个在
-## 引擎里零新钩子可接——`tactical_manager.gd` 的 `_apply_affixes` 分发位就在
-## `defender.take_damage()` 之后。命中时 / 暴击时两个真 on-hit 事件需要新开钩子，
-## 属 A2，本注册器一律拒收。
+## 贯穿原则：宁可拒绝注册，也不可错误触发。注册期核验引擎是否能完整表达
+## `condition_model` 声明的条件；运行期再按当前状态逐行求值。
+## `requires_states` 引用的状态必须已注册且可求值，不可求值时整卡拒收并保留原因。
 ##
-## ★ 贯穿原则：**宁可不注册，不可错误触发。**
-##
-## 设计库的 `trigger_condition` 是自由文本，引擎无法通用解析。所以引擎不去猜条件，
-## 而是要求每张卡显式声明自己的可执行性（`condition_model` / `requires_states` /
-## `engine_effects`，三者已入 lane §2.2 字段归属表）。任何一项对不上就**拒绝注册**，
-## 并且拒绝必须响亮：`push_warning` + 进 `rejected_ids()` / `rejection_reason()`
-## 可查询清单。绝不静默跳过，更不允许「条件读不懂就当它没有条件」照常触发。
-##
-## 尤其是 `requires_states` 里出现 `engine_status=unevaluable` 的状态时（当前的
-## 「双持」就是），拒绝注册是硬判据（Wave 1 任务书 §2.3）：不许把「引擎还做不到」
-## 当成「条件不成立」静默消费，否则那些卡会变成永不触发且运行时一声不吭的死卡。
-##
-## ── 条件把关分两层，本文件只管第一层 ──────────────────
-##
-##   第一层 · 注册期（本文件）：问「引擎**有没有能力**判定这个条件」。判不了的、
-##   声明不自洽的、效果执行不了的，一律拒收，不进池。
-##
-##   第二层 · 运行期（`tactical_manager._talent_conditions_hold`）：问「此刻条件
-##   **成立不成立**」。对每张已注册卡的 `requires_states` 逐个调
-##   `StateRegistry.is_in_state()` 即时求值，不成立就不触发。
-##
-## 两层缺一不可。只做第一层的话，`condition_model=states` 的卡会在条件不成立时
-## 照常触发——2026-08-08 的独立验证正是在这里抓到过一个真实缺陷（满血单位触发了
-## 依赖〔背水〕的天赋），修法就是补上第二层。改动本文件的拒收逻辑时，别把这段
-## 分工忘了：放宽注册期而运行期没有对应的求值，等于开洞。
-##
-## ── 附加触发行（Wave 2 起支持）─────────────────────
-##
-## 设计库的 `talent_trigger_extra` / `extra_triggers` 子表承载**另一组触发五段**，
-## 效果仍共用卡级 `engine_effects`（子表本身没有效果字段）。引擎侧的条件字段
-## （`requires_states` / `condition_model`）附加行**各自独立**——二天一流的机制主体
-## 就只挂在附加行上（事件「执行攻击动作时」、条件「处于〔双持〕状态」），主行则是
-## 永久生效无条件。两者必须分开求值，退回卡级就错了。
-##
-## 注册时整卡摊平成触发行列表（`_trigger_rows`），逐行校验；**任一行不合格整卡拒收**
-## ——不做「主行注册、附加行丢弃」，那会让一张卡半生效，而设计库那边看到的是完整的卡。
-##
-## ── 触发来源与产生路径（Wave 3 起支持）─────────────────
-##
-## `trigger_source`（设计库权威字段，闭集「主手 / 副手」）从本波起**开始读**：
-## 分发时按本次伤害由哪只手产生来过滤。**空串 = 不限来源**，主副手都触发——
-## 介错就是这一类，它的击杀返气不该因为是副手补的刀就不给。
-##
-## `requires_contexts`（引擎侧新字段，触发行级）承担条件文本里「发生在主动攻击
-## 动作中」那半句。不表达它就只能把那半句吞掉，或整卡填 `unsupported` 拒收，
-## 两者都不可接受。如实说明它当前的把关强度：引擎目前唯一的伤害产生路径就是
-## 主动攻击动作（自动反击已于 2026-07-11 整体移除），所以 `active_attack`
-## **此刻恒成立**；闭集校验是真的（依赖未知标签的卡会被拒），求值也真的在跑，
-## 但它至今还没有开始区分。
-##
-## ── 防御侧事件（Wave 4 起支持）─────────────────────
-##
-## `受到攻击时` 与前面五个攻击链事件的根本差别是**分发对象**：攻击链事件发给
-## **攻击者**的天赋，本事件发给**被攻击者**的天赋。时点是命中判定之后、伤害数值
-## 结算之前，即 Wave 3 攻击侧两阶段结构的防御侧镜像。它同样带伤害来源——主手那
-## 一击与副手追加各分发一次、各自带 `trigger_source` 标签。
-##
-## `requires_turn_phase`（引擎侧新字段，触发行级）承担交刃条件里「不处于自身回合
-## 内」那一句。形状照 `trigger_source`（单值字符串 + 空串=不限），**不照**
-## `requires_contexts`（数组）：它和来源一样是「本次事件的某个属性必须等于某值」，
-## 不是一组必须同时成立的标签。
-##
-## ⚠ **如实说明它当前的把关强度**：引擎目前**没有任何**能让单位在自己回合内被攻击
-## 的路径（`_execute_hostile_action` 只可能由当前行动单位发起），所以
-## `outside_own_turn` 与 `active_attack` 一样**此刻恒成立**，求值分支产生不了 false。
-## Wave 4 任务书 §1.3 说本波是「这个判据第一次要真正区分的时候」——那句不成立，
-## 两者都要等反击 / 回合外反应攻击回归才会开始区分。结构先立起来仍是为了不吞掉
-## 条件里的那半句，不是因为它今天就有判别力。
-##
-## ── 仍然不处理的东西（明确记下，免得误以为已覆盖）──────
-##
-##   - **`trigger_object` 槽**：不读。
-##   - **超出 `requires_states` / `requires_contexts` / `requires_turn_phase`
-##     的条件**：一律走 `condition_model=unsupported` 拒收，不做部分执行。
+## 字段边界：`trigger_source` 来自设计库；`requires_states`、`requires_contexts`、
+## `requires_turn_phase` 与 `engine_effects` 是引擎侧结构字段；`trigger_object` 当前不读。
+## 附加触发行各自保存条件字段，效果保存在卡级并可通过 `row` 绑定触发行。
 ##
 ## 用法：
 ##     var states := StateRegistry.new(DataLoader.states)
 ##     var talents := TalentRegistry.new(DataLoader.talents, states)
-##     for t in talents.talents_for_event("击杀时"): ...
 
-## A1 接的三个 after-damage 事件（设计库 trigger_event 的中文原值，不另造英文枚举避免双写）。
+## 伤害结算后分发的三个事件，使用设计库 trigger_event 中文原值。
 const AFTER_DAMAGE_EVENTS: Array[String] = ["命中后", "造成伤害时", "击杀时"]
 
-## Wave 2 新接的动作级事件。它比「命中时」还早——在命中判定之前，
-## 分发点在 `_execute_hostile_action` 开头（掷骰之前）。
+## 动作级事件在命中判定之前分发。
 const ACTION_EVENTS: Array[String] = ["执行攻击动作时"]
 
-## Wave 3 · A2 接的两个真 on-hit 事件——时点在**伤害数值结算之前**。落在这里的
-## 效果可以回过头改写本次伤害（死线的「该次暴击造成 (DEX/2)% 更多伤害」就是）；
-## after-damage 三事件在结算之后，只能产生新的后果。分野照 R1.4。
-##
+## on-hit 事件在伤害数值结算之前分发，可修改本次伤害参数。
 ## ⚠ R1.4 逐字只把效果时机分成 on-hit 与 after-damage **两类**，规则层没有独立的
 ## 「暴击时」。所以引擎把「暴击时」实现为 on-hit 的**条件化分支**：命中且暴击时，
 ## 与「命中时」在同一时点、同一次分发批次里发出，而不是并列的第三类时机。
 const ON_HIT_EVENTS: Array[String] = ["命中时", "暴击时"]
 
-## Wave 4 接的防御侧事件——**分发给被攻击者**，不是攻击者。时点与 ON_HIT_EVENTS
-## 相同（命中判定之后、伤害数值结算之前），所以落在这里的效果同样能改写本次伤害；
-## 交刃的减伤就是这么生效的。
+## 防御侧事件分发给被攻击者，时点在命中判定之后、伤害数值结算之前。
 const DEFENSIVE_EVENTS: Array[String] = ["受到攻击时"]
 
 ## 引擎当前能分发的全部事件。
@@ -147,8 +68,7 @@ const SUPPORTED_STATS: Array[String] = [
 ## 仍会被拒——引擎当前没有承载纯常驻天赋的通道，宁可不注册。
 const PASSIVE_EVENTS: Array[String] = ["永久生效"]
 
-## A1 支持的触发频率。「每次」= 不限次；其余（每回合 N 次等）需要计数器状态，
-## 未实装故拒收——按「宁可不注册」处理，不是当成不限次放行。
+## 触发频率当前只支持「每次」；其他频率需要计数器状态，注册期拒收。
 const SUPPORTED_FREQUENCIES: Array[String] = ["每次"]
 
 ## `condition_model` 的合法取值。
@@ -173,11 +93,8 @@ const MAX_CHANCE_DECAY_PCT: float = 99.0
 ## 消费方会读。挂错时机时，效果**被静默吞掉**——ctx 里那个键没人读——而日志还
 ## 照样打印「已生效」。这种失效最难查，所以在注册期就拦住。
 ##
-## `offhand_followup` 只允许「执行攻击动作时」还有第二层作用：Wave 3 把
-## `pending_offhand` 也暴露给了副手侧的 after-damage 分发，若允许它挂在副手够得着
-## 的事件上，它就会被自己引发的事件再次触发、每次攻击一路顶到链长护栏——那正是
-## R1.10「一个效果不被自己引发的事件再次触发」禁止的。要递归请用
-## `offhand_recursive_followup`，它有 `self_retriggerable` 的显式开关。
+## `offhand_followup` 只允许动作级事件，避免被自身产生的副手事件再次触发；
+## 可递归追加必须使用带 `self_retriggerable` 明示开关的效果类型。
 const EFFECT_ALLOWED_EVENTS: Dictionary = {
 	"offhand_followup": ["执行攻击动作时"],
 	"offhand_recursive_followup": ["命中后", "造成伤害时"],
@@ -333,10 +250,7 @@ func _row_rejection_reason(row: Dictionary, state_registry: RefCounted) -> Strin
 	if model == "unsupported":
 		return "触发行 %s 的 condition_model=unsupported：条件含引擎尚不能表达的部分，按「宁可不注册」拒收" % where
 
-	# ── trigger_source（Wave 3 起读）──────────────────
-	# 空串是合法的，语义是「不限来源」；非空则必须在闭集内。填了闭集外的值
-	# （比如「双手」「远程」）不能当成空放行——那等于把一个引擎读不懂的限制
-	# 静默丢掉，卡就会在本该被排除的来源上触发。
+	# trigger_source 空串表示不限来源；非空值必须在设计库闭集内。
 	var source: String = str(entry.get("trigger_source", "")).strip_edges()
 	if source != "" and source not in SUPPORTED_TRIGGER_SOURCES:
 		return "触发行 %s 的 trigger_source「%s」不在闭集 %s 内（空串=不限来源）" \
@@ -348,7 +262,7 @@ func _row_rejection_reason(row: Dictionary, state_registry: RefCounted) -> Strin
 		return "触发行 %s 指定了 trigger_source「%s」，但事件「%s」不带伤害来源（带来源的只有 %s）" \
 			% [where, source, event, str(SOURCE_BEARING_EVENTS)]
 
-	# ── requires_contexts（Wave 3 新增，引擎侧字段）────
+	# requires_contexts 是触发行级的引擎字段。
 	var contexts_raw: Variant = entry.get("requires_contexts", [])
 	if not contexts_raw is Array:
 		return "触发行 %s 的 requires_contexts 必须是数组，实际是 %s" \
@@ -368,10 +282,7 @@ func _row_rejection_reason(row: Dictionary, state_registry: RefCounted) -> Strin
 		return "触发行 %s 是常驻行，不能声明 requires_contexts（常驻没有「本次伤害的产生路径」，消费方也无从求值）" \
 			% where
 
-	# ── requires_turn_phase（Wave 4 新增，引擎侧字段）──
-	# 单值 + 空串=不限，形状照 trigger_source。非空必须在闭集内：填闭集外的值
-	# （「敌方回合」「我方阶段」之类）不能当空放行，那等于把一个引擎读不懂的限制
-	# 静默丢掉，卡就会在本该被排除的时机触发。
+	# requires_turn_phase 是单值字段；空串表示不限，非空值必须在闭集内。
 	var turn_phase: String = str(entry.get("requires_turn_phase", "")).strip_edges()
 	if turn_phase != "" and turn_phase not in SUPPORTED_TURN_PHASES:
 		return "触发行 %s 的 requires_turn_phase「%s」不在闭集 %s 内（空串=不限）" \
@@ -398,14 +309,8 @@ func _row_rejection_reason(row: Dictionary, state_registry: RefCounted) -> Strin
 		return "requires_states 必须是数组，实际是 %s（写成裸字符串会绕过状态依赖检查）" \
 			% type_string(typeof(required_raw))
 	var required: Array = required_raw
-	# 声明与镜像数据必须自洽，否则说明建卡时判断错了。
-	#
-	# ⚠ `states` 这个取值名是 A1 时定的，当时结构化判据只有 requires_states 一种。
-	# Wave 3 加了 requires_contexts 之后，它的实际语义已经是「条件文本已被引擎的
-	# 结构化判据**完整**表达」，不再专指状态。取值名沿用是为了不动已有数据与文档，
-	# 但自洽性检查必须把两种判据都算上——否则一张条件只有「发生在主动攻击动作中」
-	# 的卡会无路可走：填 states 因 requires_states 空被拒，填 none 因 condition
-	# 非空被拒。
+	# condition_model=states 表示条件文本已由 requires_states、requires_contexts
+	# 与 requires_turn_phase 完整表达。
 	var contexts: Array = contexts_raw
 	if model == "none" and condition.strip_edges() != "":
 		return "condition_model=none 但 trigger_condition 非空（「%s」）——声明与设计库镜像矛盾" % condition
@@ -415,9 +320,7 @@ func _row_rejection_reason(row: Dictionary, state_registry: RefCounted) -> Strin
 	if model == "none" and turn_phase != "":
 		return "condition_model=none 但 requires_turn_phase 非空（%s）——none 的语义是无条件" \
 			% turn_phase
-	# ⚠ 每新增一种结构化判据，这一条都必须把它算进来，否则「条件只由新判据表达」的卡
-	# 会无路可走：填 states 因旧判据都为空被拒、填 none 因 condition 非空被拒。
-	# Wave 3 加 requires_contexts 时踩过一次，Wave 4 的 requires_turn_phase 同理。
+	# 新增结构化条件字段时必须纳入这项完整性检查。
 	if model == "states" and required.is_empty() and contexts.is_empty() and turn_phase == "":
 		return "condition_model=states 但 requires_states / requires_contexts / requires_turn_phase 全为空——声明与数据矛盾"
 
@@ -443,19 +346,8 @@ func _row_rejection_reason(row: Dictionary, state_registry: RefCounted) -> Strin
 	return ""
 
 
-## 卡级效果检查。`engine_effects` 存在于卡级（设计库的 `talent_trigger_extra` 子表
-## 只承载触发五段、没有效果字段），但**每条效果可以用 `row` 绑定到指定触发行**。
-##
-## ── `row` 绑定要解决的问题（Wave 3 新增）──────────────
-##
-## A1/Wave 2 的模型是「全部触发行共用全部效果」。那在二天一流上成立（它两行共用
-## 同一条追加伤害），但在**剑气回荡**上直接错：它的 effect 是两句话对应两行——
-## 主行（暴击时/主手）要让随后的副手追加必定暴击，附加行（命中后/副手）要给
-## 10 点剑气。照共用模型，主手暴击会连剑气一起给、副手命中又会再设一次必暴标记。
-##
-## 所以每条效果可选地写 `"row": "main"` 或 `"row": "extra[0]"`；**不写 = 全行共用**
-## （向后兼容，已有的三张卡都不写）。绑定必须指向真实存在的行，且每一行都得至少
-## 有一条效果落在它上面——否则那一行触发了也什么都不做，是张半死的卡。
+## `engine_effects` 保存在卡级，每条效果可用 `row` 绑定到指定触发行。
+## 不写 `row` 时全部触发行共享；绑定必须指向现有行，且每个可分发行都有可执行效果。
 func _effects_rejection_reason(entry: Dictionary, rows: Array) -> String:
 	var effects_raw: Variant = entry.get("engine_effects", [])
 	if not effects_raw is Array:
@@ -634,13 +526,7 @@ func _effects_rejection_reason(entry: Dictionary, rows: Array) -> String:
 			if decay < MIN_CHANCE_DECAY_PCT or decay > MAX_CHANCE_DECAY_PCT:
 				return "offhand_recursive_followup 的 chance_decay_pct 越界（%s ~ %s），实际 %s——衰减必须真的衰减，填 100 就是永不收敛的无限链" \
 					% [str(MIN_CHANCE_DECAY_PCT), str(MAX_CHANCE_DECAY_PCT), str(decay_raw)]
-			# ★ 本效果**不声明自己的伤害规格**（2026-08-10 用户裁决：「燕返的追加是
-			# 基于二天一流的伤害再次进行计算」）。追加出来的那一次沿用**触发它的
-			# 那一次**副手追加的 damage_pct / damage_type，链的源头就是二天一流，
-			# 所以天然跟随、不会分叉。
-			#
-			# 之前引擎在这里自带 damage_pct=50，是照二天一流抄了一份——两处各存一份
-			# 同一个设计数值，正是 lane §2.2 要封杀的双写。写了就拒，免得又抄回来。
+			# 递归追加沿用触发它的副手伤害规格；本效果不得另存 damage_pct / damage_type。
 			if effect.has("damage_pct") or effect.has("damage_type"):
 				return "offhand_recursive_followup 不得声明 damage_pct / damage_type——追加的规格沿用触发它的那一次副手追加（用户裁决：基于二天一流的伤害再次计算），自带一份就是双写"
 		elif effect_type == "parry_damage_reduction":
@@ -697,11 +583,8 @@ func talents_for_event(event: String) -> Array:
 	return (found as Array).duplicate() if found is Array else []
 
 
-## 某条触发行实际要执行的效果。绑定规则见 `_effects_rejection_reason` 的说明：
-## 效果写了 `row` 就只在那一行执行，不写则全部行共用（向后兼容）。
-##
-## ★ 分发时必须走这里，不能直接遍历整卡的 `engine_effects`——剑气回荡是两行两
-## 效果，不过滤就会让主手暴击顺带把附加行的 10 点剑气也给了。
+## 返回指定触发行可执行的效果；写 `row` 仅绑定该行，不写则全部行共享。
+## 分发必须走此函数，避免执行属于其他触发行的效果。
 func effects_for_row(talent: Dictionary, row: String) -> Array:
 	var out: Array = []
 	var effects: Variant = talent.get("engine_effects", [])

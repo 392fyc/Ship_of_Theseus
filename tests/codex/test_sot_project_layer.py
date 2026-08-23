@@ -18,6 +18,16 @@ def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def test_project_contract_keeps_only_current_conclusions() -> None:
+    agents = read_text(ROOT / "AGENTS.md")
+    for sentence in [
+        "- 现行设计、代码注释、handoff 和任务卡只保存当前有效结论、必要约束、真实未决问题、证据与下一步。",
+        "- 持久化审查以完整命题为单位；历史记录进入 ADR、Research、明确归档区或 Git 历史，并退出默认读取链。",
+        "- 范围外发现只登记位置、类别和所需权威，不扩展当前任务。",
+    ]:
+        assert sentence in agents
+
+
 def run(
     command: list[str],
     cwd: Path,

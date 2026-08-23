@@ -22,7 +22,7 @@
     { "type": "empower_next_offhand", "guaranteed_crit": true, "qi_on_hit": 10 }
   ],
 
-  "engine_note": "**2026-08-10 用户裁决后改版：从两行两效果收敛成一行一效果。**\n\n改版前的卡面是两句话挂两行（主行 暴击时/主手 = 让副手必暴；附加行 命中后/副手 = 任何副手命中都给 10 点剑气），返气不依赖主手暴击，与燕返的连续追加相乘。改版后两件事合并到同一次副手追加上：必定暴击 + 命中后返气，都只作用于主手暴击带来的**那一次**。附加行随之取消（设计库侧 extra_triggers 已清空）。\n\n效果类型也随之从 grant_offhand_guaranteed_crit 换成 empower_next_offhand——后者表达的是「强化随后那一次副手追加」，两个子效果（guaranteed_crit / qi_on_hit）都从本 JSON 读，代码不写死数值。标记读完即清（effect 的「该次」是单数），燕返再产生的后续追加不继承。\n\n条件逐句映射，一句都没吞：「该次暴击」由 trigger_event=暴击时 承担；「发生在主动攻击动作中」由 requires_contexts=[active_attack] 承担；「处于〔双持〕状态」由 requires_states=[shuangchi] 承担；「主手」由 trigger_source 承担。\n\n★ 一处引擎侧的实装判断（已回写设计库 rules）：**返气要那次副手追加实际命中才结算**。用户改的卡面把两件事合并成一句，主语是那次追加，但没写命中与否；取「命中后」是因为改版前的卡面明确写着「命中后」，本次改的是「不依赖暴击」那一点，而且必定暴击并不保证命中——副手仍要照 R1.2 独立掷命中。",
+  "engine_note": "`empower_next_offhand` 的 `guaranteed_crit` 与 `qi_on_hit` 两个子效果均由本 JSON 提供；返气仅在该次副手追加命中后结算。强化标记一次消费，后续追加不继承。结构映射：`trigger_event=暴击时`、`trigger_source=主手`、`requires_contexts=[active_attack]`、`requires_states=[shuangchi]`。",
 
   "_mirror": "id / name / class_id / rarity / tags / trigger 五段 / effect / rules 是设计库天赋条目的只读镜像。版本锚点 = 生产库 2026-08-09T16:38 那次 PATCH（本次改版由 SoT 侧按用户裁决写入设计库，写后已回读比对）。",
   "_engine_note": "requires_states / condition_model / requires_contexts / engine_effects / engine_note 是引擎侧字段，设计库无对应列、不回流。"

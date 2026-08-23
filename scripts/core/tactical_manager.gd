@@ -1736,29 +1736,15 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 
 	defender.handle_attacked()
 
-	# ── A2（Wave 3）：先掷骰 → 发两个真 on-hit 事件 → 再算伤害 ──────────
-	# 「命中时」/「暴击时」的时点在伤害数值结算**之前**（R1.4 的 on-hit），所以落在
-	# 这里的天赋可以回过头改写本次伤害——死线的「该次暴击造成 (DEX/2)% 更多伤害」
-	# 就是这么生效的。
-	#
-	# ★ `roll_outcome` 必须**恰好**在原来 `resolve_attack` 那一行的时点调用。全局
-	# 随机流还有别的消费者（`_roll_effect_application` 的 randf、`gain_random_mark`
-	# 的 randi 都排在本次 resolve 之后），把掷骰提前、或把主手与副手批量预掷，
-	# 都会改变随机序列，让固定 seed 的用例漂移。
-	#
-	# ★ 钩子**不得回溯改判本次 hit / crit**，理由见 `_merge_on_hit_modifiers`。
-	# 剑气回荡的「让副手那次必定暴击」作用对象是**随后另一次攻击**、不是本次，
-	# 所以不构成回溯改判。
+	# 命中与暴击事件在伤害数值结算前分发，可修改本次伤害参数，
+	# 但不得回溯改写已经掷出的 hit / crit。剑气回荡只强化随后的一次副手攻击。
 	var outcome: Dictionary = DamageCalculator.roll_outcome(
 		attacker, defender, action_data)
 	action_ctx["source"] = SOURCE_MAIN_HAND
 	_dispatch_on_hit_events(attacker, outcome, action_ctx)
 	_merge_on_hit_modifiers(action_data, action_ctx)
 
-	# ── Wave 4：防御侧反应（受到攻击时 + 招架减伤）────────────────
-	# 同一时点的另一半——攻击者的钩子写增伤，被攻击者的写减伤，两边都落
-	# `final_multiplier` 且**相乘**，所以先后不影响结果。放在这里是取「离伤害数值
-	# 结算最近」的位置，对应交刃 rules 的「伤害数值结算前介入」。
+	# 防御侧反应在伤害结算前写入减伤乘项，与攻击侧增伤共同进入 final_multiplier。
 	var defense: Dictionary = _resolve_defense(
 		attacker, defender, outcome, SOURCE_MAIN_HAND)
 	_apply_defense_to_action(action_data, defense)
@@ -1812,12 +1798,8 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 	if result.defender_died:
 		_dispatch_talents(attacker, "击杀时", talent_ctx)
 
-	# ── 副手追加攻击（Wave 2）：主手全部副作用结算完之后 ──────────
-	# 放在最末尾是有意的——主手的 popup / 词条 / 天赋 / 剑气都已跑完，副手不打断
-	# 也不穿插；主手是否击杀已判定，副手可用存活守卫天然处理「主手已杀就不追加」。
-	# 燕返（Wave 3）会在自己命中后再登记新的追加，所以这里是**队列而不是递归**
-	# ——用调用栈会越套越深。上限撞上时响亮告警：燕返的链长期望本就有限
-	# （DEX% 起始、每成功一次 ×80% 衰减），真撞上说明参数填错了。
+	# 主手全部副作用结算后，再按队列执行副手追加。
+	# 递归追加进入同一队列，并受每次攻击动作的总次数护栏限制。
 	var queue: Array = (action_ctx["pending_offhand"] as Array).duplicate()
 	var executed: int = 0
 	while not queue.is_empty():
@@ -2743,19 +2725,10 @@ func _dispatch_on_hit_events(attacker: Unit, outcome: Dictionary,
 		_dispatch_talents(attacker, "暴击时", ctx)
 
 
-## 防御侧反应（Wave 4）：分发「受到攻击时」并结算招架减伤，返回本次的减伤结果。
-##
-## ★ **收件人是被攻击者**，不是攻击者。攻击链五事件全部发给攻击者，只有这一个反过来
-## ——`_dispatch_talents` 的第一个参数写错就会变成「我打人时我自己的交刃触发」。
-##
-## 时点：命中判定之后、伤害数值结算之前。交刃 rules 逐字要求「在该次攻击判定命中后、
-## 伤害数值结算前介入」，正是 Wave 3 攻击侧两阶段结构的镜像。
-##
-## **未命中就整个不发**：交刃 rules 逐字「攻击未命中则不触发、不消耗剑气」。把这条
-## 落在最前面，剑气就不可能被白扣——不必依赖下游每个分支各自记得判一次。
-##
-## 返回 `{applied, multiplier, reduction_pct, via, prevented}`。`prevented`（实际减免
-## 了多少伤害）要等伤害算完才知道，由 `_record_parry_prevented` 回填。
+## 防御侧反应分发给被攻击者，时点在命中判定后、伤害数值结算前。
+## 未命中时不分发事件也不消耗剑气。
+## 返回 `{applied, multiplier, reduction_pct, via, prevented}`；实际减免量由
+## `_record_parry_prevented` 在伤害结算后回填。
 func _resolve_defense(attacker: Unit, defender: Unit, outcome: Dictionary,
 		source: String) -> Dictionary:
 	var defense: Dictionary = {
@@ -3082,7 +3055,7 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 			data["guaranteed_crit"] = true
 	_apply_debug_determinism(data)
 
-	# ── 副手自己掷骰、自己发两个 on-hit 事件（Wave 3）────────────
+	# 副手独立掷骰，并按自己的结果分发两个 on-hit 事件。
 	# **绝不能复用主手的 outcome**：二天一流 rules 逐字要求「副手的追加伤害单独结算
 	# 命中与暴击（R1.2、R1.3）」。掷骰时点也必须留在原来 resolve_attack 那一行的
 	# 位置——主手全部副作用（含 _roll_effect_application 的 randf 与 gain_random_mark
@@ -3094,8 +3067,7 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 		"pending_offhand": [],
 		# 燕返的链序：本次是链上第几次追加，决定它下一次的概率衰减几档。
 		"offhand_chain_index": int(followup.get("chain_index", 0)),
-		# 本次追加的伤害规格。燕返再追加时**沿用它**而不是自带一份
-		# （2026-08-10 用户裁决：基于二天一流的伤害再次计算）。
+		# 本次副手伤害规格供递归追加沿用，不在递归效果中另存一份。
 		"offhand_damage_pct": damage_pct,
 		"offhand_damage_type": damage_type,
 		# 指回本次攻击动作的 ctx。有些效果的标记必须落在动作级而不是这一击级
@@ -3106,12 +3078,8 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 	_dispatch_on_hit_events(attacker, outcome, offhand_ctx)
 	_merge_on_hit_modifiers(data, offhand_ctx)
 
-	# ── Wave 4：副手这一击同样走防御侧反应 ────────────────────
-	# **为什么副手也发**：副手追加是独立结算命中与暴击的一次伤害（二天一流 rules
-	# 逐字），Wave 3 问题①已按这个理由裁定 on-hit 两事件主副手各发一次。防御侧是
-	# 它的镜像，只发主手会在被双持者攻击时留一个**减伤打不到的洞**——那比多发一次
-	# 更坏。代价是交刃在被双持者攻击时一次动作里可能扣两次剑气（每次伤害各一次），
-	# 已在交付回执里登记为已知疑点。
+	# 主手与副手是各自结算命中与暴击的两次伤害，因此分别分发防御侧事件。
+	# 同一攻击动作中，交刃可能分别为两次伤害消耗剑气。
 	var offhand_defense: Dictionary = _resolve_defense(
 		attacker, defender, outcome, SOURCE_OFFHAND)
 	_apply_defense_to_action(data, offhand_defense)
@@ -3130,12 +3098,8 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 	else:
 		DamagePopup.spawn_miss(popup_layer, defender.position, 1)
 
-	# 被强化的那一次追加，命中后返气（剑气回荡）。
-	# ★ 「命中才给」是引擎侧的实装判断，已回写进设计库 rules（2026-08-10）：
-	# 用户改的卡面把两件事合并成一句「该次副手的追加伤害必定暴击且额外获得
-	# 10 点剑气」，主语是那次追加，但没写命中与否。取「命中后结算」是因为
-	# ① 改版前的卡面明确写着「命中后」，这次改的是「不依赖暴击」那一点；
-	# ② 必定暴击并不保证命中——副手仍要照 R1.2 独立掷命中，miss 时暴击无意义。
+	# 被强化的副手追加只在实际命中后返气：必定暴击不保证命中，
+	# 副手仍按自己的命中结果结算。
 	var empower_qi: int = int(empower.get("qi_on_hit", 0))
 	if result.hit and empower_qi > 0:
 		attacker.set_sword_qi(attacker.sword_qi + empower_qi)
@@ -3143,16 +3107,8 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 			attacker.unit_name, str(empower.get("talent_id", "")),
 			empower_qi, attacker.sword_qi])
 
-	# ── 副手的 after-damage 三事件（Wave 3 新增）──────────────
-	# Wave 2 时这里**只**补发了「击杀时」，「命中后」/「造成伤害时」在副手命中时
-	# 根本不发。燕返（命中后 / 副手）与剑气回荡的附加行（命中后 / 副手）都挂在这两个
-	# 事件上，不补发它们就永远不触发——这是 trigger_source 接线之外，副手侧的另一半
-	# 缺口。
-	#
-	# 补的只有**天赋事件**。主手那一套副作用（技能效果挂载 / 剑气 / 印记 / 击杀减 CD）
-	# 仍然不重跑：副手是「同一次攻击动作里的第二段伤害」，不是第二次攻击动作
-	# ——按 R1.10，挂在「执行攻击动作时」的效果一次攻击动作只触发一次，所以副手也
-	# 不发那个事件（否则二天一流会自己再登记一次追加，成死循环）。
+	# 副手命中后分发 after-damage 三事件；击杀链在副手造成击杀时补发。
+	# 副手属于同一次攻击动作，不再次分发动作级事件或重跑主手副作用。
 	offhand_ctx["result"] = result
 	if result.hit:
 		_dispatch_talents(attacker, "命中后", offhand_ctx)
@@ -3295,7 +3251,7 @@ func _apply_talent_effect(unit: Unit, talent_id: String,
 				str(bool(effect.get("guaranteed_crit", false))),
 				int(effect.get("qi_on_hit", 0))])
 		"parry_damage_reduction":
-			# 交刃（Wave 4）：花剑气买一次必定的招架减伤。
+			# 交刃登记一次付费的招架减伤意图。
 			#
 			# ★ 这里**只登记意图、不当场结算**，同 offhand_followup 的做法。理由是
 			# 「减伤每次攻击至多结算一次」这条取舍需要同时看到架势与本卡两条入口，

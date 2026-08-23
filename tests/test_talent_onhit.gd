@@ -1,24 +1,9 @@
 extends SceneTree
-## Wave 3：触发来源接线（trigger_source）+ 真 on-hit 两事件（A2）+ 递归副手追加。
-##
-## 单独开一个文件而不是继续往 test_talent_carrier.gd 里塞：那个文件已经 1180 行，
-## 再加四组会彻底失去可读性。分工是——A1/Wave 2 的载体、注册纪律、副手规格留在
-## 那边；本文件只管 Wave 3 新接的三件事。
-##
-## 五组：
-##   I. trigger_source 双向 —— 这是任务书 §1.1 的验收判据。「主手」的卡在副手那次
-##      不触发、「副手」的卡在主手那次不触发，**两个方向都要断言**（带方向的机制
-##      只测一边，反着接也能过）。外加空值语义：不填来源 = 两次都触发。
-##  II. requires_contexts 的注册期把关 —— 闭集、形状、与 condition_model 的自洽。
-## III. 行级效果绑定 —— 剑气回荡两行两效果，主行给必暴标记、附加行给剑气，
-##      各行只执行自己那条。这一组的期望值刻意设计成「绑定失效就会算出另一个数」。
-##  IV. A2 钩子确实能改写本次伤害 —— 死线的「(DEX/2)% 更多伤害」，精确对照。
-##      外加剑气回荡的跨主副手因果：主手暴击让副手那次必暴。
-##   V. 燕返的递归追加 —— 概率 0 不追加、概率 1 必追加、护栏不被突破，
-##      以及「副手追加不发『执行攻击动作时』」（否则二天一流会自己无限登记）。
+## 定向覆盖触发来源、on-hit 事件、条件字段校验、行级效果绑定与递归副手追加。
+## 每组断言同时验证正向行为和必要的拒收或边界行为。
 ##
 ## 运行：
-##   <Godot_console.exe> --headless --path D:/ShipOfTheseus/Ship_of_Theseus \
+##   <Godot_console.exe> --headless --path <project-root> \
 ##     --script res://tests/test_talent_onhit.gd
 ## 退出码 0=全过，1=有失败。
 
@@ -31,8 +16,7 @@ const TALENT_REGISTRY_PATH := "res://scripts/data/talent_registry.gd"
 const STATE_REGISTRY_PATH := "res://scripts/data/state_registry.gd"
 const DATA_LOADER_PATH := "res://scripts/data/data_loader.gd"
 
-## 副手武器：王者之剑（might 20）。选它是因为数值大到不会与主手的量碰巧相等——
-## Wave 2 吃过一次亏：银剑 13 的 50% 与主手 might 6 算出同一个数，断言当场失去区分力。
+## 副手武器使用较大的 might，使主手与副手期望值保持可区分。
 const OFFHAND_WEAPON := "eq_wpn_regal_blade"
 
 ## 调试暴击三态（对应 TacticalManager.CritMode）。
@@ -264,14 +248,12 @@ func _test_new_cards_registered(dl: Object) -> void:
 		_check("%s 已装载" % tid, dl.talents.has(tid))
 		_check("%s 注册成功" % tid, reg.is_registered(tid), reg.rejection_reason(tid))
 
-	# 镜像保真：Wave 2 手抄错过一次 trigger_frequency（「每次」抄成「永久」），
-	# 表现是卡被拒、看起来像「引擎不支持」。逐字对照设计库权威值。
+	# 镜像字段必须与当前设计库权威值一致。
 	var jqhd: Dictionary = dl.talents["kensei_jianqihuidang"]
 	_eq("剑气回荡 主行事件", str(jqhd.get("trigger_event", "")), "暴击时")
 	_eq("剑气回荡 主行来源", str(jqhd.get("trigger_source", "")), "主手")
 	_eq("剑气回荡 频率", str(jqhd.get("trigger_frequency", "")), "每次")
-	# 2026-08-10 用户裁决后改版：两行合并成一行，附加行取消。返气不再是独立的
-	# 「命中后 / 副手」行，而是并进主行——只有主手暴击带来的那一次副手追加才返气。
+	# 剑气回荡当前无附加行；必暴与命中返气由主行的同一效果承担。
 	_eq("剑气回荡 已无附加行（改版后两件事合并到同一次副手追加上）",
 		(jqhd.get("extra_triggers", []) as Array).size(), 0)
 	var yf: Dictionary = dl.talents["kensei_yanfan"]
@@ -397,9 +379,7 @@ func _test_contexts_gate(dl: Object) -> void:
 			},
 			"keyword": "未支持",
 		},
-		# ── 效果类型 × 触发时机的相容性（2026-08-09 独立审查后补的闸门）──
-		# 效果的执行分支只是往 ctx 写一个键，挂错时机时那个键没人读 → 静默吞掉，
-		# 日志却照样打印「已生效」。注册期拦住。
+		# 效果挂错事件时消费方不会读取结果，必须在注册期拒收。
 		"fx_more_wrong_timing": {
 			"card": {
 				"id": "fx_more_wrong_timing", "name": "测试·更多伤害挂错时机",
@@ -413,9 +393,7 @@ func _test_contexts_gate(dl: Object) -> void:
 			},
 			"keyword": "挂错时机会被静默吞掉",
 		},
-		# ★ 这条同时是 R1.10 自触发闸门的第二道：Wave 3 把 pending_offhand 也暴露给了
-		# 副手侧的 after-damage 分发，若允许普通 offhand_followup 挂在副手够得着的
-		# 事件上，它会被自己引发的事件再次触发、每次攻击一路顶到链长护栏。
+		# 普通副手追加不得挂在副手可达事件上，否则会被自身事件再次触发。
 		"fx_followup_self_retrigger": {
 			"card": {
 				"id": "fx_followup_self_retrigger", "name": "测试·追加挂在副手可达事件上",
@@ -482,9 +460,7 @@ func _test_contexts_gate(dl: Object) -> void:
 			reg.rejection_reason(tid).contains(str(case["keyword"])),
 			reg.rejection_reason(tid))
 
-	# ★ 反向：条件**只有**路径要求、没有状态依赖的卡，必须能注册。
-	# A1 的自洽性检查是「states 却 requires_states 空 → 拒」，若不把 contexts
-	# 一起算上，这种卡会无路可走：填 states 被拒、填 none 也被拒。
+	# 条件仅由 requires_contexts 表达、没有状态依赖时，也必须能够注册。
 	var only_ctx: Dictionary = {
 		"ctx_only": {
 			"id": "ctx_only", "name": "测试·只有路径要求", "class_id": "kensei",
@@ -584,7 +560,7 @@ func _test_row_binding_gate(dl: Object) -> void:
 		reg3.effects_for_row(dl.talents["kensei_ertianyiliu"], "main").size(), 1)
 	_eq("不写 row 的效果对附加行也可见",
 		reg3.effects_for_row(dl.talents["kensei_ertianyiliu"], "extra[0]").size(), 1)
-	# 剑气回荡改版后只剩一行一效果：必暴与返气合并成 empower_next_offhand。
+	# 剑气回荡当前只有一行、一条 empower_next_offhand 效果。
 	var jqhd: Dictionary = dl.talents["kensei_jianqihuidang"]
 	var main_fx: Array = reg3.effects_for_row(jqhd, "main")
 	_eq("剑气回荡 主行只有 1 条效果", main_fx.size(), 1)
@@ -598,7 +574,7 @@ func _test_row_binding_gate(dl: Object) -> void:
 	_eq("剑气回荡 返气量取自 JSON", int(fx0.get("qi_on_hit", 0)), 10)
 
 
-# ── I. trigger_source 双向（任务书 §1.1 验收判据）──────
+# ── trigger_source 双向过滤 ───────────────────────
 
 func _test_source_directions() -> void:
 	print("\n[W4] trigger_source 双向 —— 主手的卡在副手不触发、副手的卡在主手不触发")
@@ -658,9 +634,7 @@ func _test_source_directions() -> void:
 
 func _test_row_binding_runtime() -> void:
 	print("\n[W5] 剑气回荡的返气收敛（2026-08-10 用户裁决）")
-	# 改版前：返气是独立的「命中后 / 副手」附加行，**任何**副手命中都给 10 点。
-	# 改版后：必暴与返气合并成一条，都只作用于**主手暴击带来的那一次**副手追加。
-	# 这一组锁的就是「收敛」这件事本身。
+	# 剑气回荡把必暴与命中返气绑定到主手暴击产生的同一次副手追加。
 	var ctx: Dictionary = _make_battle(CRIT_FORCE)     # 主手必暴
 	if ctx.is_empty():
 		return
@@ -674,8 +648,7 @@ func _test_row_binding_runtime() -> void:
 	_eq("主手暴击 → 被强化的那次副手追加命中 → 10(普攻) + 10 == 20",
 		attacker.sword_qi, 20)
 
-	# ★ 收敛的核心判据：**主手没暴就一点气都不返**。
-	# 改版前这里会返 10（返气不依赖暴击），所以这条断言正是新旧口径的分水岭。
+	# 主手未暴击时剑气回荡不触发，因此不产生返气。
 	tm.debug_crit_mode = CRIT_DISABLE
 	_strike(tm, attacker, enemy)
 	_eq("主手未暴击 → 剑气回荡整条不触发 → 只有普攻的 10", attacker.sword_qi, 10)
@@ -686,12 +659,8 @@ func _test_row_binding_runtime() -> void:
 	_strike(tm, attacker, enemy)
 	_eq("未装副手 → 无副手追加可强化 → 10", attacker.sword_qi, 10)
 
-	# ★ 被强化的那一次**未命中就不返气**。
-	# 这条是引擎侧的实装判断（用户的新卡面把两件事合并成一句、没写命中与否），
-	# 已回写进设计库 rules，所以必须有断言锁住，否则那句 rules 只是文字。
-	# 造 miss：关掉强制命中开关、把守方回避拉满压到 1% 命中下限；主手则用
-	# payload 里的 guaranteed_hit / guaranteed_crit 直接钉死必中必暴
-	# ——那两个键 roll_outcome 直接读，不经调试开关。
+	# 被强化的副手追加未命中时不返气；测试同时确保样本中确实出现 miss。
+	# 主手由 payload 固定为必中必暴，副手命中率压到下限后独立掷骰。
 	attacker.equip_offhand(OFFHAND_WEAPON)
 	attacker.talent_ids = ["kensei_ertianyiliu", "kensei_jianqihuidang", "test_count_off"]
 	tm.debug_deterministic = false
@@ -980,9 +949,7 @@ func _test_hook_matches_resolution() -> void:
 
 # ── 副手侧的钩子一致性 / 递归伤害 / 未命中路径 ────────
 #
-# 这三组是 2026-08-09 独立审查 + 变异复核抓出来的真缺口：把副手的
-# precomputed_outcome 注入删掉、把递归追加的 damage_pct 改成 100%、
-# 把「未命中不发 on-hit 事件」的守卫整段删掉——三个变异体当时**全部存活**。
+# 副手侧测试锁定钩子结果与结算结果一致、递归伤害规格正确，以及未命中不分发 on-hit。
 
 func _test_offhand_side_gaps() -> void:
 	print("\n[W10] 副手侧钩子一致性 + 递归追加的伤害 + 未命中路径")

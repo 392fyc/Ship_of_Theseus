@@ -16,5 +16,5 @@
   "engine_blocker": "",
 
   "_mirror": "definition / kind / duration_kind / resistable / rule_code 五字段是设计库 State 注册表的只读镜像。版本锚点 = 设计库仓 snapshots/states.json @ fb45402（按 lane 文档 §6.1「快照 diff 是唯一交接界面」，锚 commit sha 而非日期）。引擎侧不改这五个字段；要改回设计库改，重导快照后按新 sha 重新同步（lane 文档 §2.2 字段归属表）。",
-  "_engine_note": "predicate / engine_status / engine_blocker 是引擎侧字段，设计库无对应列，不回流。2026-08-08 Wave 2 起本条转为 evaluable：引擎已建副手武器槽（Unit.weapon_id / Unit.offhand_weapon_id，职业专属特例、不进通用装备槽枚举），判定 = 两槽同时非空，见 Unit.is_dual_wielding()。此前 Wave 0/1 期间为 unevaluable，依赖本状态的天赋会被 TalentRegistry 拒绝注册——那条纪律仍然有效，只是本状态不再触发它。"
+  "_engine_note": "当前 `predicate` 要求主手与副手武器槽同时非空，并由 `Unit.is_dual_wielding()` 求值。`predicate` 不可求值时，依赖本状态的天赋必须拒绝注册。"
 }
