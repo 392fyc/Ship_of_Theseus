@@ -38,6 +38,10 @@ Obsidian MCP 的 vault 逻辑根用于文档读写。需要获取 Git 上下文�
 - 新文件写入后立即用 `mcp__obsidian__vault_read` 回读并核对完整内容。
 - 仅对有边界的增量日志使用 `mcp__obsidian__vault_append`；不得用它保存会话状态或无限增长的活跃记忆。
 
+## 发布任务分支
+
+在目标仓 worktree 中调用当前 Ship 工作根的 `scripts/codex/sot-publish.ps1`。目标仓无需提供同名脚本；不得误报发布阻断，也不得改用原始 `git push`。
+
 ## 安全约束
 
 - 已有文档必须先读后 patch；任何写入都必须独立回读。
