@@ -189,6 +189,29 @@ def test_project_owned_files_do_not_embed_machine_state_or_runtime_credentials()
     assert "hooks =" not in combined
 
 
+def test_designlib_skill_limits_content_audits_by_record_state() -> None:
+    skill = read_text(ROOT / ".agents" / "skills" / "sot-designlib" / "SKILL.md")
+
+    for required in [
+        "日常审计对象仅限",
+        "待审阅",
+        "待优化",
+        "不得审计或作为参考",
+        "草稿",
+        "待删除",
+        "已归档",
+        "锁定",
+        "新规则",
+        "具体矛盾",
+        "明确 ID",
+        "include_shelved=true",
+        "先排除 `shelf_state`",
+        "字段缺失或出现未知值",
+        "主代理、子代理、审查者和只读审计",
+    ]:
+        assert required in skill
+
+
 def test_sot_rules_forbid_selecting_each_protected_branch() -> None:
     rules = read_text(ROOT / ".codex" / "rules" / "sot-protected-branches.rules")
     for command in ("switch", "checkout"):

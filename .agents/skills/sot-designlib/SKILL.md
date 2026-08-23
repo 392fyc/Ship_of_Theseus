@@ -33,6 +33,8 @@ description: "Read and safely modify the SoT structured design authority through
 
 需要全量读取时沿用端点现有查询参数：talents、equipment、relics 使用 `include_shelved=true`，skills 使用 `include_upgrades=true`。连接信息与鉴权只从受保护运行时配置取得，不在命令、日志或回执中回显。
 
+内容审计必须遵守 canonical 合同 §6.5 的状态边界：先排除 `shelf_state`，再筛选 `status`；日常审计对象仅限“待审阅”和“待优化”。“草稿”、“待删除”（回收站）和“已归档”不得审计或作为参考；“锁定”只可作为参考。只有导入新规则改变适用依据，或其他流程发现有证据的具体矛盾时，才可按明确 ID 重新审计相关锁定内容，不得重开全部锁定内容。字段缺失或出现未知值时不得静默纳入。该边界适用于主代理、子代理、审查者和只读审计；使用 `include_shelved=true` 取得全量数据不代表扩大了审计集合。
+
 每次读取都要记录：
 
 - `schema_version`：响应或快照声明的版本；来源没有声明时写 `unversioned`，不得编造。
