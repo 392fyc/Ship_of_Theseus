@@ -58,6 +58,7 @@ description: "Read and safely modify the SoT structured design authority through
 - 遵守 canonical 的单写范围和目标仓 `AGENTS.md`。
 - 在目标 worktree 中修改并运行目标仓既有测试与检查命令。
 - 应用行为变更必须使用设计库既有部署流程；部署权限或配置缺失时明确报告阻断，不猜测运行时细节。
+- 发布任务分支时，在目标仓 worktree 中调用当前 Ship 工作根的 `scripts/codex/sot-publish.ps1`。目标仓无需提供同名脚本；不得误报发布阻断，也不得改用原始 `git push`。
 - 交付时记录目标分支、提交、验证命令、受保护 dirty 和未完成风险；实现者不得自行批准。
 
 ## 5. 禁止事项

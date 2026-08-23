@@ -130,6 +130,22 @@ def test_agents_points_cross_repository_publication_to_shared_entrypoint():
         assert required in text, f"AGENTS.md missing shared publication rule: {required}"
 
 
+def test_cross_repository_skills_expose_shared_publication_entrypoint():
+    for skill_name in ["sot-designlib", "sot-kb-write"]:
+        text = read_text(SKILL_PATHS[skill_name])
+        for required in [
+            "当前 Ship 工作根",
+            "scripts/codex/sot-publish.ps1",
+            "目标仓 worktree",
+            "目标仓无需提供同名脚本",
+            "不得误报发布阻断",
+            "不得改用原始 `git push`",
+        ]:
+            assert required in text, (
+                f"{skill_name} missing shared publication rule: {required}"
+            )
+
+
 def test_designlib_contract_uses_portable_roots_and_current_one_way_model():
     text = read_text(SKILL_PATHS["sot-designlib"])
     for required in [
