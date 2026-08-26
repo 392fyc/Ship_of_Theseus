@@ -20,7 +20,7 @@
 - `map_token`
   - 变体必须恰含 `single_weapon`、`dual_weapon`。
   - 方向必须声明 `NW`、`NE`、`SW`、`SE`。
-- `source_size` 在文件未提供时为 `0×0`；仅 `frame_size` 冻结为 `48×48`，透明；`nearest` 采样。
+  - `source_size` 在文件未提供时为 `0×0`；仅 `frame_size` 冻结为 `48×48`，透明；`nearest` 采样。
   - 静态待机，不含战斗动画。
 
 - `terrain`
