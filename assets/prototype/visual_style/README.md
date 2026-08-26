@@ -2,7 +2,7 @@
 
 该目录用于原型阶段的素材一致性检查，不作为正式生产入库。清单驱动五类样本槽：`ui`、`portrait`、`map_token`、`terrain`、`vfx`，顺序固定不变。`source_path` 为空表示待提供，`display_size` 仅用于检查窗口，不等同生产规格。素材文件不在此目录内导入，不能以此路径写入清单的正式文件。
 
-运行方向：`F` 切换纹理过滤方式、`R` 切换检查画布尺寸、`P` 截图。内部承载检查 UI 的是 `SubViewport`，截图仅写入 `user://visual_style_playground/`，不会写回仓库。
+运行方向：`F` 切换纹理过滤方式、`R` 切换检查画布尺寸、`P` 截图。内部承载检查 UI 的是 `SubViewport`，截图直接来自当前检查画布，不会直接写回仓库；文件只写入 `user://visual_style_playground/`，文件名包含毫秒时间戳与递增序号，连续截图不覆盖。
 
 ## 样本规则（五类）
 
@@ -20,7 +20,7 @@
 - `map_token`
   - 变体必须恰含 `single_weapon`、`dual_weapon`。
   - 方向必须声明 `NW`、`NE`、`SW`、`SE`。
-  - `source_size` 与 `frame` 为 `48×48`，透明；`nearest` 采样。
+- `source_size` 在文件未提供时为 `0×0`；仅 `frame_size` 冻结为 `48×48`，透明；`nearest` 采样。
   - 静态待机，不含战斗动画。
 
 - `terrain`
@@ -42,7 +42,7 @@
 2. `provenance_status`：`verified`，表示来源可追溯与可核验；否则是来源未核验。
 3. `rights_status`：`verified`，表示使用权依据可核验；`review_required` 与 `unverified` 都不允许加载。
 
-此外还要求 `source_path` 为仓库内 `res://` 合法路径、资源类型为 `Texture2D` 且与清单尺寸匹配。`source_path` 为空时，`approval_status`、`provenance_status`、`rights_status`、来源说明与使用权说明会显示“待提供、待用户确认、来源未核验、使用权依据未核验”。`provenance_status` 为 `verified` 时 `provenance` 必须有非空说明；`rights_status` 为 `verified` 时 `rights_basis` 必须有非空说明。空槽请使用空字符串，不要用 `pending` 充当依据。
+此外还要求 `source_path` 为仓库内 `res://` 合法路径、资源类型为 `Texture2D` 且与清单尺寸匹配。`source_path` 为空时，`status_text` 会固定显示“待提供”，并按实时门控结果追加：待确认、未核验、复核提示。`provenance_status` 为 `verified` 时 `provenance` 必须有非空说明；`rights_status` 为 `verified` 时 `rights_basis` 必须有非空说明；`review_required` 只计入“使用权需要复核”。空槽请使用空字符串，不要用 `pending` 充当依据。
 
 ## 说明边界
 

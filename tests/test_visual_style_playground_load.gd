@@ -412,6 +412,33 @@ func _check_sample_statuses(instance: Node) -> void:
 	) as Dictionary
 	_check("一个门 pending 与后续非法不会遮蔽非法枚举", pending_then_invalid.get("status_code") == "invalid_rights", str(pending_then_invalid))
 
+	var pending_provenance_verified_empty: Dictionary = instance.call(
+		"inspect_sample", _make_sample(TEXTURE_FIXTURE_PATH, Vector2i(1024, 1024), "pending_user_approval", "verified", "verified", "")
+	) as Dictionary
+	_check(
+		"approval pending + provenance verified 且 provenance 空会命中 invalid_provenance_basis",
+		pending_provenance_verified_empty.get("status_code") == "invalid_provenance_basis",
+		str(pending_provenance_verified_empty)
+	)
+
+	var pending_rights_verified_empty: Dictionary = instance.call(
+		"inspect_sample", _make_sample(TEXTURE_FIXTURE_PATH, Vector2i(1024, 1024), "pending_user_approval", "verified", "verified", "provenance_ok", "")
+	) as Dictionary
+	_check(
+		"approval pending + rights verified 且 rights_basis 空会命中 invalid_rights_basis",
+		pending_rights_verified_empty.get("status_code") == "invalid_rights_basis",
+		str(pending_rights_verified_empty)
+	)
+
+	var provenance_unverified_rights_verified_empty: Dictionary = instance.call(
+		"inspect_sample", _make_sample(TEXTURE_FIXTURE_PATH, Vector2i(1024, 1024), "approved", "unverified", "verified", "provenance_ok", "")
+	) as Dictionary
+	_check(
+		"provenance unverified + rights verified 且 rights_basis 空会命中 invalid_rights_basis",
+		provenance_unverified_rights_verified_empty.get("status_code") == "invalid_rights_basis",
+		str(provenance_unverified_rights_verified_empty)
+	)
+
 	var invalid_approval_issued: Dictionary = _make_sample(TEXTURE_FIXTURE_PATH, Vector2i(1024, 1024), "forbidden_status", "verified", "verified")
 	invalid_approval_issued["provenance"] = "reviewed"
 	var invalid_approval: Dictionary = instance.call("inspect_sample", invalid_approval_issued) as Dictionary
@@ -483,6 +510,16 @@ func _check_sample_statuses(instance: Node) -> void:
 		"inspect_sample", _make_sample(TEXTURE_FIXTURE_PATH, actual_size, "approved", "verified", "review_required")
 	) as Dictionary
 	_check("使用权待核验时状态码应为 rights_review_required", rights_review_required.get("status_code") == "rights_review_required", str(rights_review_required))
+
+	var path_missing_pending_parts_only_pending: Dictionary = instance.call(
+		"inspect_sample", _make_sample("", Vector2i(1024, 1024), "approved", "verified", "verified", "provenance_ok", "rights_ok")
+	) as Dictionary
+	_check(
+		"空路径 + approved/verified/verified 显示仅待提供",
+		path_missing_pending_parts_only_pending.get("status_code") == "pending_asset"
+		and str(path_missing_pending_parts_only_pending.get("status_text")).strip_edges() == "待提供",
+		str(path_missing_pending_parts_only_pending)
+	)
 
 
 func _make_sample(

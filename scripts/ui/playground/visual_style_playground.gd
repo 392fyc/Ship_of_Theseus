@@ -497,11 +497,31 @@ func _inspect_sample_internal(sample: Dictionary) -> Dictionary:
 	if rights_status != "unverified" and rights_status != "review_required" and rights_status != "verified":
 		return _set_sample_status(result, "invalid_rights", "使用权状态无效", "error")
 
+	if provenance_status == "verified" and provenance.strip_edges().is_empty():
+		return _set_sample_status(
+			result,
+			"invalid_provenance_basis",
+			"来源核验通过但来源说明为空",
+			"error"
+		)
+	if rights_status == "verified" and rights_basis.strip_edges().is_empty():
+		return _set_sample_status(
+			result,
+			"invalid_rights_basis",
+			"使用权核验通过但依据为空",
+			"error"
+		)
+
 	if source_path.is_empty():
 		var pending_parts: Array[String] = ["待提供"]
-		pending_parts.append("待用户确认")
-		pending_parts.append("来源未核验")
-		pending_parts.append("使用权依据未核验")
+		if approval_status != "approved":
+			pending_parts.append("待用户确认")
+		if provenance_status != "verified":
+			pending_parts.append("来源未核验")
+		if rights_status == "unverified":
+			pending_parts.append("使用权依据未核验")
+		elif rights_status == "review_required":
+			pending_parts.append("使用权需要复核")
 		return _set_sample_status(result, "pending_asset", " · ".join(pending_parts), "pending")
 
 	if approval_status != "approved":
@@ -516,13 +536,6 @@ func _inspect_sample_internal(sample: Dictionary) -> Dictionary:
 			"pending"
 		)
 
-	if provenance_status == "verified" and provenance.strip_edges().is_empty():
-		return _set_sample_status(
-			result,
-			"invalid_provenance_basis",
-		"来源核验通过但来源说明为空",
-			"error"
-		)
 	if rights_status == "unverified":
 		return _set_sample_status(
 			result,
@@ -536,13 +549,6 @@ func _inspect_sample_internal(sample: Dictionary) -> Dictionary:
 			"rights_review_required",
 			"使用权需要复核",
 			"pending"
-		)
-	if rights_status == "verified" and rights_basis.strip_edges().is_empty():
-		return _set_sample_status(
-			result,
-			"invalid_rights_basis",
-		"使用权核验通过但依据为空",
-			"error"
 		)
 
 	if not _is_valid_resource_path(source_path):
