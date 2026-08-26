@@ -14,6 +14,13 @@ const EXPECTED_CHECK_SIZES: Array[Vector2i] = [
 	Vector2i(1920, 1080),
 	Vector2i(2560, 1440),
 ]
+const EXPECTED_DISPLAY_SIZES: Dictionary = {
+	"ui": Vector2i(210, 118),
+	"portrait": Vector2i(128, 170),
+	"map_token": Vector2i(48, 48),
+	"terrain": Vector2i(140, 140),
+	"vfx": Vector2i(140, 140),
+}
 const TEXTURE_FIXTURE_PATH: String = "res://dev_doc/ui-art-research/mood/01-cold-stone.png"
 const REQUIRED_FIELDS: Array[String] = [
 	"asset_type",
@@ -30,11 +37,27 @@ const REQUIRED_FIELDS: Array[String] = [
 	"rights_basis",
 	"rights_status",
 ]
+const REQUIRED_TYPE_FIELDS: Array[String] = [
+	"texture_filter",
+	"alpha_required",
+	"required_variants",
+	"required_directions",
+]
 const APPROVAL_STATUSES: Array[String] = ["pending_user_approval", "approved"]
 const PROVENANCE_STATUSES: Array[String] = ["unverified", "verified"]
 const RIGHTS_STATUSES: Array[String] = ["unverified", "review_required", "verified"]
 const TEXTURE_FILTERS: Array[String] = ["nearest", "linear"]
 const DIRECTIONS_NWSE: Array[String] = ["NW", "NE", "SW", "SE"]
+const UI_VARIANTS_REQUIRED: Array[String] = ["bottom_action_bar", "tooltip"]
+const PORTRAIT_VARIANTS_REQUIRED: Array[String] = ["single_weapon", "dual_weapon"]
+const MAP_TOKEN_VARIANTS_REQUIRED: Array[String] = ["single_weapon", "dual_weapon"]
+const TERRAIN_VARIANTS_REQUIRED: Array[String] = ["base_ground", "transparent_overlay"]
+const VFX_VARIANTS_REQUIRED: Array[String] = ["slash", "movement", "range", "status"]
+const GRIP_SHAPES_REQUIRED: Array[String] = [
+	"traditional_chinese_sword",
+	"western_sword",
+	"long_tachi",
+]
 
 var _pass: int = 0
 var _fail: int = 0
@@ -95,6 +118,7 @@ func _check_manifest_contract() -> void:
 	var asset_types_value: Variant = manifest.get("asset_types", {})
 	_check("样本清单包含 asset_types", typeof(asset_types_value) == TYPE_DICTIONARY)
 	var asset_types: Dictionary = asset_types_value as Dictionary
+	_check("asset_types 覆盖五类类型", asset_types.size() == 5, str(asset_types.keys()))
 
 	var samples: Array = samples_value as Array
 	var actual_ids: Array[String] = []
@@ -108,11 +132,30 @@ func _check_manifest_contract() -> void:
 		var asset_type: String = str(sample.get("asset_type", ""))
 		var type_rules: Dictionary = asset_types.get(asset_type, {}) as Dictionary
 
+		_check("样本槽 %s 包含字段 asset_type" % sample_id, sample.has("asset_type"))
 		for field_name: String in REQUIRED_FIELDS:
 			_check("样本槽 %s 包含字段 %s" % [sample_id, field_name], sample.has(field_name))
 		_check("样本槽 %s asset_type 与 id 对齐" % sample_id, asset_type == sample_id)
-		_check("样本槽 %s 具有对应类型规则" % sample_id, type_rules.size() > 0, str(asset_type))
+		_check("样本槽 %s 对应类型存在于 asset_types" % sample_id, type_rules.size() > 0, str(asset_type))
+		if type_rules.size() == 0:
+			continue
+
 		_check("样本槽 %s source_path 为空" % sample_id, str(sample.get("source_path", "missing")) == "")
+		for required_type_field: String in REQUIRED_TYPE_FIELDS:
+			_check("类型规则 %s 包含字段 %s" % [sample_id, required_type_field], type_rules.has(required_type_field))
+
+		var sample_source_size: Vector2i = _array_to_size(sample.get("source_size"))
+		_check(
+			"样本槽 %s 空槽 source_size 允许 0,0" % sample_id,
+			sample_source_size == Vector2i.ZERO,
+			str(sample_source_size)
+		)
+		_check(
+			"样本槽 %s 显示尺寸为约定基线" % sample_id,
+			_array_to_size(sample.get("display_size")) == EXPECTED_DISPLAY_SIZES.get(sample_id, Vector2i.ZERO),
+			str(sample.get("display_size"))
+		)
+
 		_check(
 			"样本槽 %s approval_status 在允许枚举" % sample_id,
 			APPROVAL_STATUSES.has(str(sample.get("approval_status", "")))
@@ -126,82 +169,99 @@ func _check_manifest_contract() -> void:
 			RIGHTS_STATUSES.has(str(sample.get("rights_status", "")))
 		)
 
-		var declared_source_size: Vector2i = _array_to_size(sample.get("source_size"))
-		var declared_display_size: Vector2i = _array_to_size(sample.get("display_size"))
-		_check("样本槽 %s 有效 source_size" % sample_id, declared_source_size.x > 0 and declared_source_size.y > 0)
-		_check("样本槽 %s 有效 display_size" % sample_id, declared_display_size.x > 0 and declared_display_size.y > 0)
-		_check("样本槽 %s texture_filter 枚举有效" % sample_id, TEXTURE_FILTERS.has(str(sample.get("texture_filter", ""))))
+		_check(
+			"样本槽 %s texture_filter 在允许枚举" % sample_id,
+			TEXTURE_FILTERS.has(str(sample.get("texture_filter", "")))
+		)
 		_check("样本槽 %s alpha_required 是布尔值" % sample_id, typeof(sample.get("alpha_required", false)) == TYPE_BOOL)
 		var required_variants: Array = sample.get("required_variants", [])
 		var required_directions: Array = sample.get("required_directions", [])
-		_check("样本槽 %s required_variants 是数组" % sample_id, typeof(required_variants) == TYPE_ARRAY)
-		_check("样本槽 %s required_directions 是数组" % sample_id, typeof(required_directions) == TYPE_ARRAY)
-		_check("样本槽 %s required_variants 为字符串" % sample_id, _array_is_string_list(required_variants))
-		_check("样本槽 %s required_directions 为字符串" % sample_id, _array_is_string_list(required_directions))
+		_check("样本槽 %s required_variants 是字符串数组" % sample_id, _array_is_string_list(required_variants))
+		_check("样本槽 %s required_directions 是字符串数组" % sample_id, _array_is_string_list(required_directions))
+
+		_check(
+			"样本槽 %s 与类型规则一致的 texture_filter" % sample_id,
+			type_rules.get("texture_filter", "") == str(sample.get("texture_filter", ""))
+		)
+		_check(
+			"样本槽 %s 与类型规则一致的 alpha_required" % sample_id,
+			type_rules.get("alpha_required", false) == bool(sample.get("alpha_required", false))
+		)
+		_check(
+			"样本槽 %s 与类型规则一致的 required_variants" % sample_id,
+			_array_equal_required_order(required_variants, type_rules.get("required_variants", []))
+		)
+		_check(
+			"样本槽 %s 与类型规则一致的 required_directions" % sample_id,
+			_array_equal_required_order(required_directions, type_rules.get("required_directions", []))
+		)
 
 		match sample_id:
 			"ui":
-				_check(
-					"ui 变体至少包含 bottom_action_bar 与 tooltip",
-					_array_contains_all(required_variants, ["bottom_action_bar", "tooltip"]),
-					str(required_variants)
-				)
+				_check("ui 变体至少包含 bottom_action_bar 与 tooltip", _array_contains_all(required_variants, UI_VARIANTS_REQUIRED), str(required_variants))
+				_check("ui 规则要求 nineslice_compatible", bool(type_rules.get("nineslice_compatible", false)))
+				_check("ui 规则禁止烘焙文字", bool(type_rules.get("baked_text_forbidden", false)))
+				_check("ui 规则说明深色哥特像素", str(type_rules.get("gothic_pixel_style", "")) == "subtle" or bool(type_rules.get("requires_gothic_pixel_style", false)))
 			"portrait":
 				_check(
 					"portrait 变体恰含 single_weapon 与 dual_weapon",
-					required_variants.size() == 2
-					and required_variants.has("single_weapon")
-					and required_variants.has("dual_weapon"),
+					_array_equal_required_order(required_variants, PORTRAIT_VARIANTS_REQUIRED),
 					str(required_variants)
 				)
+				_check("portrait 规则开启第三版统一参考", str(type_rules.get("style", "")) == "third_pass_consistent_look")
+				_check("portrait 规则需真实握持", bool(type_rules.get("grip_required", false)))
+				_check("portrait 规则允许三种剑形", _array_equal_required_order(type_rules.get("allowed_weapon_shapes", []), GRIP_SHAPES_REQUIRED))
 			"map_token":
 				_check(
 					"map_token 变体恰含 single_weapon 与 dual_weapon",
-					required_variants.size() == 2
-					and required_variants.has("single_weapon")
-					and required_variants.has("dual_weapon"),
+					_array_equal_required_order(required_variants, MAP_TOKEN_VARIANTS_REQUIRED),
 					str(required_variants)
 				)
 				_check(
-					"map_token 方向恰是 NW/NE/SW/SE",
-					required_directions.size() == DIRECTIONS_NWSE.size()
-					and _array_contains_all(required_directions, DIRECTIONS_NWSE),
+					"map_token 方向顺序严格为 NW,NE,SW,SE",
+					_array_equal_required_order(required_directions, DIRECTIONS_NWSE),
 					str(required_directions)
 				)
+				_check("map_token 规则 frame_size 为 48×48", _array_to_size(type_rules.get("frame_size", [0, 0])) == Vector2i(48, 48))
+				_check("map_token 规则静态待机", bool(type_rules.get("static_idle_only", false)) and not bool(type_rules.get("combat_animation_required", true)))
 			"terrain":
+				_check("terrain 规则 tile_size 为 64×32", _array_to_size(type_rules.get("tile_size", [0, 0])) == Vector2i(64, 32))
+				_check("terrain 规则比例 2:1", bool(type_rules.get("ratio_2_1", false)) or str(type_rules.get("ratio_2_to_1", "")) == "true" or bool(type_rules.get("tile_ratio_2_to_1", false)))
 				_check(
 					"terrain 变体至少包含 base_ground 与 transparent_overlay",
-					required_variants.has("base_ground")
-					and required_variants.has("transparent_overlay"),
-					str(required_variants)
+					_array_contains_all(required_variants, TERRAIN_VARIANTS_REQUIRED)
 				)
-				_check(
-					"terrain 规则声明 tile_size 为 64×32",
-					_array_to_size(type_rules.get("tile_size", [0, 0])) == Vector2i(64, 32)
-				)
+				_check("terrain 规则支持无缝衔接", bool(type_rules.get("seamless_connections_required", false)))
+				_check("terrain 规则区分基底与覆盖物", bool(type_rules.get("separate_base_and_overlay", false)))
 			"vfx":
 				_check(
-					"vfx 变体恰含 slash、movement、range、status",
-					required_variants.size() == 4
-					and required_variants.has("slash")
-					and required_variants.has("movement")
-					and required_variants.has("range")
-					and required_variants.has("status"),
+					"vfx 变体恰含 slash、movement、range、status 且顺序稳定",
+					_array_equal_required_order(required_variants, VFX_VARIANTS_REQUIRED),
 					str(required_variants)
 				)
-				_check(
-					"vfx 规则声明为静态关键帧参考",
-					type_rules.get("animation_type", "") == "static_keyframe"
-				)
+				_check("vfx 规则为静态关键帧", str(type_rules.get("animation_type", "")) == "static_keyframe")
+				_check("vfx 规则像素核心使用 nearest", str(type_rules.get("pixel_core_filter", "")) == "nearest")
+				_check("vfx 规则核心与光晕分离", bool(type_rules.get("optional_glow_layer_separate", false)))
+				_check("vfx 规则禁止循环", bool(type_rules.get("allow_loop", true)) == false)
+				_check("vfx 规则不需要粒子系统", bool(type_rules.get("particle_system_required", true)) == false)
+				_check("vfx 规则不需要战斗动画", bool(type_rules.get("combat_animation_required", true)) == false)
+			_:
+				_check("未识别样本 id %s 不应存在" % sample_id, false)
 
-		_check(
-			"样本槽 %s 规则的 texture_filter 与样本一致" % sample_id,
-			type_rules.get("texture_filter", "") == str(sample.get("texture_filter", ""))
-		)
+	var asset_type_required: Array[String] = ["ui", "portrait", "map_token", "terrain", "vfx"]
+	var sample_has_asset_fields: Dictionary = {}
+	for sample_id: String in asset_type_required:
+		sample_has_asset_fields[sample_id] = false
+	for sample_value: Variant in samples:
+		if typeof(sample_value) != TYPE_DICTIONARY:
+			continue
+		sample_has_asset_fields[str(sample_value["id"])] = true
+	for sample_id: String in asset_type_required:
+		var rules: Dictionary = asset_types.get(sample_id, {}) as Dictionary
+		_check("类型 %s 不应使用 source_size/display_size 字段" % sample_id, not rules.has("source_size") and not rules.has("display_size"), str(rules))
+		_check("样本槽顺序固定为五类视觉样本", actual_ids == asset_type_required, str(actual_ids))
+		_check("样本槽 %s 必须存在" % sample_id, sample_has_asset_fields.get(sample_id, false))
 
-		_check("样本槽 %s 规则的 alpha_required 与样本一致" % sample_id, type_rules.get("alpha_required", false) == bool(sample.get("alpha_required", false)))
-
-	_check("样本槽顺序固定为五类视觉样本", actual_ids == EXPECTED_IDS, str(actual_ids))
 	_check("不存在 combat_animation 槽", not actual_ids.has("combat_animation"))
 
 
@@ -237,6 +297,17 @@ func _check_scene_contract() -> void:
 		_check("当前样本槽 %s 显示来源未核验" % sample_id, status_text.contains("来源未核验"), status_text)
 		_check("当前样本槽 %s 显示使用权依据未核验" % sample_id, status_text.contains("使用权依据未核验"), status_text)
 		_check("当前样本槽 %s 不伪造实际纹理尺寸" % sample_id, current_state.get("actual_texture_size") == Vector2i.ZERO, str(current_state))
+		var state_display_size: Vector2i = current_state.get("display_size", Vector2i.ZERO) as Vector2i
+		_check(
+			"当前样本槽 %s 显示尺寸与约定一致" % sample_id,
+			state_display_size == EXPECTED_DISPLAY_SIZES.get(sample_id, Vector2i.ZERO),
+			str(current_state)
+		)
+		_check(
+			"当前样本槽 %s status_text 不应误报可用" % sample_id,
+			not status_text.contains("可用"),
+			status_text
+		)
 
 	_check_sample_statuses(instance)
 
@@ -297,9 +368,10 @@ func _check_scene_contract() -> void:
 	var layout_metrics: Dictionary = instance.call("get_layout_metrics") as Dictionary
 	_check("720p 检查画布不使用横向滚动", layout_metrics.get("uses_horizontal_scroll") == false, str(layout_metrics))
 	_check("720p 检查画布实际包含五张卡", layout_metrics.get("card_count") == 5, str(layout_metrics))
+	_check("720p 检查五张卡同时可见", layout_metrics.get("all_cards_visible") == true, str(layout_metrics))
 
 	var map_state: Dictionary = instance.call("get_sample_state", "map_token") as Dictionary
-	_check("战棋人物标注源尺寸 48×48", map_state.get("source_size") == Vector2i(48, 48), str(map_state))
+	_check("战棋人物标注源尺寸 0×0", map_state.get("source_size") == Vector2i(0, 0), str(map_state))
 	_check("战棋人物显示尺寸 48×48", map_state.get("display_size") == Vector2i(48, 48), str(map_state))
 
 	var screenshot_target: String = str(instance.call("get_screenshot_target_path"))
@@ -319,6 +391,52 @@ func _check_sample_statuses(instance: Node) -> void:
 	_check("提供清单样本运行状态检查接口", instance.has_method("inspect_sample"))
 	if not instance.has_method("inspect_sample"):
 		return
+
+	var empty_path_invalid_approval: Dictionary = instance.call(
+		"inspect_sample", _make_sample("", Vector2i(48, 48), "forbidden_status")
+	) as Dictionary
+	_check("空 source_path + 非法 approval_status 命中 invalid_approval", empty_path_invalid_approval.get("status_code") == "invalid_approval", str(empty_path_invalid_approval))
+
+	var empty_path_invalid_provenance: Dictionary = instance.call(
+		"inspect_sample", _make_sample("", Vector2i(48, 48), "approved", "unknown")
+	) as Dictionary
+	_check("空 source_path + 非法 provenance_status 命中 invalid_provenance", empty_path_invalid_provenance.get("status_code") == "invalid_provenance", str(empty_path_invalid_provenance))
+
+	var empty_path_invalid_rights: Dictionary = instance.call(
+		"inspect_sample", _make_sample("", Vector2i(48, 48), "approved", "unverified", "unknown")
+	) as Dictionary
+	_check("空 source_path + 非法 rights_status 命中 invalid_rights", empty_path_invalid_rights.get("status_code") == "invalid_rights", str(empty_path_invalid_rights))
+
+	var pending_then_invalid: Dictionary = instance.call(
+		"inspect_sample", _make_sample(TEXTURE_FIXTURE_PATH, Vector2i(1024, 1024), "pending_user_approval", "verified", "mystery")
+	) as Dictionary
+	_check("一个门 pending 与后续非法不会遮蔽非法枚举", pending_then_invalid.get("status_code") == "invalid_rights", str(pending_then_invalid))
+
+	var invalid_approval_issued: Dictionary = _make_sample(TEXTURE_FIXTURE_PATH, Vector2i(1024, 1024), "forbidden_status", "verified", "verified")
+	invalid_approval_issued["provenance"] = "reviewed"
+	var invalid_approval: Dictionary = instance.call("inspect_sample", invalid_approval_issued) as Dictionary
+	_check("非法 approval_status 会进入 invalid_approval", invalid_approval.get("status_code") == "invalid_approval", str(invalid_approval))
+
+	var invalid_provenance_issued: Dictionary = _make_sample(TEXTURE_FIXTURE_PATH, Vector2i(1024, 1024), "approved", "unknown", "verified")
+	invalid_provenance_issued["provenance"] = "reviewed"
+	var invalid_provenance: Dictionary = instance.call("inspect_sample", invalid_provenance_issued) as Dictionary
+	_check("非法 provenance_status 会进入 invalid_provenance", invalid_provenance.get("status_code") == "invalid_provenance", str(invalid_provenance))
+
+	var invalid_rights_issued: Dictionary = _make_sample(TEXTURE_FIXTURE_PATH, Vector2i(1024, 1024), "approved", "verified", "unknown")
+	invalid_rights_issued["provenance"] = "reviewed"
+	invalid_rights_issued["rights_basis"] = "self_created"
+	var invalid_rights: Dictionary = instance.call("inspect_sample", invalid_rights_issued) as Dictionary
+	_check("非法 rights_status 会进入 invalid_rights", invalid_rights.get("status_code") == "invalid_rights", str(invalid_rights))
+
+	var invalid_provenance_basis_verified: Dictionary = _make_sample(TEXTURE_FIXTURE_PATH, Vector2i(1024, 1024), "approved", "verified", "verified")
+	invalid_provenance_basis_verified["provenance"] = ""
+	var invalid_basis: Dictionary = instance.call("inspect_sample", invalid_provenance_basis_verified) as Dictionary
+	_check("provenance_status=verified 且 provenance 空将失败", invalid_basis.get("status_code") == "invalid_provenance_basis", str(invalid_basis))
+
+	var invalid_rights_basis_verified: Dictionary = _make_sample(TEXTURE_FIXTURE_PATH, Vector2i(1024, 1024), "approved", "verified", "verified")
+	invalid_rights_basis_verified["rights_basis"] = ""
+	var invalid_rights_basis: Dictionary = instance.call("inspect_sample", invalid_rights_basis_verified) as Dictionary
+	_check("rights_status=verified 且 rights_basis 空将失败", invalid_rights_basis.get("status_code") == "invalid_rights_basis", str(invalid_rights_basis))
 
 	var invalid_path: Dictionary = instance.call(
 		"inspect_sample", _make_sample("C:/outside.png", Vector2i(48, 48))
@@ -346,57 +464,36 @@ func _check_sample_statuses(instance: Node) -> void:
 	_check("声明尺寸与实际纹理不符时明确报错", mismatch.get("status_code") == "size_mismatch", str(mismatch))
 	_check("尺寸错误仍返回实际纹理尺寸", mismatch.get("actual_texture_size") == actual_size, str(mismatch))
 
-	var approved: Dictionary = _make_sample(TEXTURE_FIXTURE_PATH, actual_size)
-	var usable: Dictionary = instance.call("inspect_sample", approved) as Dictionary
-	_check("三道门全部通过时状态为可用", usable.get("status_code") == "usable", str(usable))
+	var approved: Dictionary = instance.call(
+		"inspect_sample", _make_sample(TEXTURE_FIXTURE_PATH, actual_size, "approved", "verified", "verified", "reviewed", "approved")
+	) as Dictionary
+	_check("三道门全部通过时状态为可用", approved.get("status_code") == "usable", str(approved))
 
-	var approval_pending_sample: Dictionary = _make_sample(TEXTURE_FIXTURE_PATH, actual_size)
-	approval_pending_sample["approval_status"] = "pending_user_approval"
-	var approval_pending: Dictionary = instance.call("inspect_sample", approval_pending_sample) as Dictionary
+	var approval_pending: Dictionary = instance.call(
+		"inspect_sample", _make_sample(TEXTURE_FIXTURE_PATH, actual_size, "pending_user_approval", "verified", "verified")
+	) as Dictionary
 	_check("未获用户确认时状态码应为 approval_pending", approval_pending.get("status_code") == "approval_pending", str(approval_pending))
 
-	var provenance_pending: Dictionary = _make_sample(TEXTURE_FIXTURE_PATH, actual_size)
-	provenance_pending["provenance_status"] = "unverified"
-	_check(
-		"来源未核验时状态码应为 provenance_unverified",
-		instance.call("inspect_sample", provenance_pending).get("status_code") == "provenance_unverified",
-		str(instance.call("inspect_sample", provenance_pending))
-	)
+	var provenance_pending: Dictionary = instance.call(
+		"inspect_sample", _make_sample(TEXTURE_FIXTURE_PATH, actual_size, "approved", "unverified", "unverified")
+	) as Dictionary
+	_check("来源未核验时状态码应为 provenance_unverified", provenance_pending.get("status_code") == "provenance_unverified", str(provenance_pending))
 
-	var rights_review: Dictionary = _make_sample(TEXTURE_FIXTURE_PATH, actual_size)
-	rights_review["rights_status"] = "review_required"
-	_check(
-		"使用权未核验时状态码应为 rights_review_required",
-		instance.call("inspect_sample", rights_review).get("status_code") == "rights_review_required",
-		str(instance.call("inspect_sample", rights_review))
-	)
-
-	var invalid_approval: Dictionary = _make_sample(TEXTURE_FIXTURE_PATH, actual_size)
-	invalid_approval["approval_status"] = "forbidden_status"
-	_check(
-		"非法 approval_status 会进入 invalid_approval",
-		instance.call("inspect_sample", invalid_approval).get("status_code") == "invalid_approval",
-		str(instance.call("inspect_sample", invalid_approval))
-	)
-
-	var invalid_provenance: Dictionary = _make_sample(TEXTURE_FIXTURE_PATH, actual_size)
-	invalid_provenance["provenance_status"] = "unknown"
-	_check(
-		"非法 provenance_status 会进入 invalid_provenance",
-		instance.call("inspect_sample", invalid_provenance).get("status_code") == "invalid_provenance",
-		str(instance.call("inspect_sample", invalid_provenance))
-	)
-
-	var invalid_rights: Dictionary = _make_sample(TEXTURE_FIXTURE_PATH, actual_size)
-	invalid_rights["rights_status"] = "unknown"
-	_check(
-		"非法 rights_status 会进入 invalid_rights",
-		instance.call("inspect_sample", invalid_rights).get("status_code") == "invalid_rights",
-		str(instance.call("inspect_sample", invalid_rights))
-	)
+	var rights_review_required: Dictionary = instance.call(
+		"inspect_sample", _make_sample(TEXTURE_FIXTURE_PATH, actual_size, "approved", "verified", "review_required")
+	) as Dictionary
+	_check("使用权待核验时状态码应为 rights_review_required", rights_review_required.get("status_code") == "rights_review_required", str(rights_review_required))
 
 
-func _make_sample(source_path: String, source_size: Vector2i) -> Dictionary:
+func _make_sample(
+	source_path: String,
+	source_size: Vector2i,
+	approval_status: String = "approved",
+	provenance_status: String = "verified",
+	rights_status: String = "verified",
+	provenance: String = "provenance_basis",
+	rights_basis: String = "rights_basis"
+) -> Dictionary:
 	return {
 		"id": "test_sample",
 		"label": "测试样本",
@@ -406,13 +503,13 @@ func _make_sample(source_path: String, source_size: Vector2i) -> Dictionary:
 		"display_size": [48, 48],
 		"texture_filter": "nearest",
 		"alpha_required": true,
-		"required_variants": [],
+		"required_variants": ["single_weapon", "dual_weapon"],
 		"required_directions": [],
-		"approval_status": "approved",
-		"provenance": "test_fixture",
-		"provenance_status": "verified",
-		"rights_basis": "self_created",
-		"rights_status": "verified",
+		"approval_status": approval_status,
+		"provenance": provenance,
+		"provenance_status": provenance_status,
+		"rights_basis": rights_basis,
+		"rights_status": rights_status,
 	}
 
 
@@ -432,6 +529,19 @@ func _array_contains_all(values: Variant, required: Array[String]) -> bool:
 	var array_values: Array = values as Array
 	for item: String in required:
 		if not array_values.has(item):
+			return false
+	return true
+
+
+func _array_equal_required_order(values: Variant, required: Variant) -> bool:
+	if typeof(values) != TYPE_ARRAY or typeof(required) != TYPE_ARRAY:
+		return false
+	var expected: Array = required as Array
+	var actual: Array = values as Array
+	if actual.size() != expected.size():
+		return false
+	for i: int in range(expected.size()):
+		if str(actual[i]) != str(expected[i]):
 			return false
 	return true
 

@@ -3,69 +3,110 @@
   "purpose": "Godot visual cohesion playground inspection contract for prototype loading.",
   "default_filter": "nearest",
   "check_sizes": [
-    [1280, 720],
-    [1920, 1080],
-    [2560, 1440]
+    [
+      1280,
+      720
+    ],
+    [
+      1920,
+      1080
+    ],
+    [
+      2560,
+      1440
+    ]
   ],
   "asset_types": {
     "ui": {
       "texture_filter": "nearest",
       "alpha_required": true,
-      "source_size": [210, 118],
-      "display_size": [210, 118],
-      "required_variants": ["bottom_action_bar", "tooltip", "panel", "button_idle", "button_hover", "button_pressed"],
+      "required_variants": [
+        "bottom_action_bar",
+        "tooltip",
+        "panel",
+        "button_idle",
+        "button_hover",
+        "button_pressed"
+      ],
       "required_directions": [],
       "nineslice_compatible": true,
       "baked_text_forbidden": true,
-      "requires_gothic_pixel_style": true,
+      "gothic_pixel_style": "subtle",
       "description": "略微精细深色哥特像素 UI，边界清晰可拼接。"
     },
     "portrait": {
       "texture_filter": "nearest",
       "alpha_required": true,
-      "source_size": [384, 512],
-      "display_size": [384, 512],
-      "required_variants": ["single_weapon", "dual_weapon"],
+      "required_variants": [
+        "single_weapon",
+        "dual_weapon"
+      ],
       "required_directions": [],
-      "sword_shape_allowed": true,
       "style": "third_pass_consistent_look",
-      "description": "第三版统一质感角色立绘，需真实握持、允许剑形。"
+      "grip_required": true,
+      "allowed_weapon_shapes": [
+        "traditional_chinese_sword",
+        "western_sword",
+        "long_tachi"
+      ],
+      "description": "第三版统一质感角色立绘，强调真实握持语义。"
     },
     "map_token": {
       "texture_filter": "nearest",
       "alpha_required": true,
-      "source_size": [48, 48],
-      "display_size": [48, 48],
-      "required_variants": ["single_weapon", "dual_weapon"],
-      "required_directions": ["NW", "NE", "SW", "SE"],
+      "required_variants": [
+        "single_weapon",
+        "dual_weapon"
+      ],
+      "required_directions": [
+        "NW",
+        "NE",
+        "SW",
+        "SE"
+      ],
+      "frame_size": [
+        48,
+        48
+      ],
       "static_idle_only": true,
-      "animation_type": "static",
-      "source_frame_size": [48, 48],
-      "description": "战棋人物占位，48×48 框内真实体积呈现，不含战斗动画。"
+      "combat_animation_required": false,
+      "description": "战棋人物占位贴图，48×48 帧大小，静态待机，不含战斗动画。"
     },
     "terrain": {
       "texture_filter": "nearest",
       "alpha_required": true,
-      "source_size": [140, 140],
-      "display_size": [140, 140],
-      "required_variants": ["base_ground", "transparent_overlay", "edge_blend"],
+      "required_variants": [
+        "base_ground",
+        "transparent_overlay",
+        "edge_blend"
+      ],
       "required_directions": [],
-      "tile_size": [64, 32],
-      "tile_ratio_2_to_1": true,
-      "layering": "base_and_overlay",
-      "description": "地形支持 64×32 瓦片，基底与覆盖物分离，支持透明覆盖。"
+      "tile_size": [
+        64,
+        32
+      ],
+      "ratio_2_to_1": true,
+      "seamless_connections_required": true,
+      "separate_base_and_overlay": true,
+      "description": "地形支持 64×32 瓦片，支持分层基底与覆盖物。"
     },
     "vfx": {
       "texture_filter": "nearest",
       "alpha_required": true,
-      "source_size": [256, 256],
-      "display_size": [256, 256],
-      "required_variants": ["slash", "movement", "range", "status"],
+      "required_variants": [
+        "slash",
+        "movement",
+        "range",
+        "status"
+      ],
       "required_directions": [],
       "animation_type": "static_keyframe",
+      "pixel_core_filter": "nearest",
+      "optional_glow_layer_separate": true,
       "allow_loop": false,
-      "supports_optional_glow_layer": true,
-      "description": "静态关键帧参考板，柔和光晕若出现需与核心分离，不含循环与粒子系统。"
+      "particle_system_required": false,
+      "combat_animation_required": false,
+      "description": "静态关键帧参考板，柔和光晕若出现需与核心分离，不含循环和粒子系统。"
     }
   },
   "samples": [
@@ -74,16 +115,29 @@
       "asset_type": "ui",
       "label": "UI",
       "source_path": "",
-      "source_size": [210, 118],
-      "display_size": [210, 118],
+      "source_size": [
+        0,
+        0
+      ],
+      "display_size": [
+        210,
+        118
+      ],
       "texture_filter": "nearest",
       "alpha_required": true,
-      "required_variants": ["bottom_action_bar", "tooltip", "panel", "button_idle", "button_hover", "button_pressed"],
+      "required_variants": [
+        "bottom_action_bar",
+        "tooltip",
+        "panel",
+        "button_idle",
+        "button_hover",
+        "button_pressed"
+      ],
       "required_directions": [],
       "approval_status": "pending_user_approval",
-      "provenance": "pending",
+      "provenance": "",
       "provenance_status": "unverified",
-      "rights_basis": "pending_review",
+      "rights_basis": "",
       "rights_status": "unverified"
     },
     {
@@ -91,16 +145,25 @@
       "asset_type": "portrait",
       "label": "人物原画",
       "source_path": "",
-      "source_size": [384, 512],
-      "display_size": [384, 512],
+      "source_size": [
+        0,
+        0
+      ],
+      "display_size": [
+        128,
+        170
+      ],
       "texture_filter": "nearest",
       "alpha_required": true,
-      "required_variants": ["single_weapon", "dual_weapon"],
+      "required_variants": [
+        "single_weapon",
+        "dual_weapon"
+      ],
       "required_directions": [],
       "approval_status": "pending_user_approval",
-      "provenance": "pending",
+      "provenance": "",
       "provenance_status": "unverified",
-      "rights_basis": "pending_review",
+      "rights_basis": "",
       "rights_status": "unverified"
     },
     {
@@ -108,16 +171,30 @@
       "asset_type": "map_token",
       "label": "战棋人物",
       "source_path": "",
-      "source_size": [48, 48],
-      "display_size": [48, 48],
+      "source_size": [
+        0,
+        0
+      ],
+      "display_size": [
+        48,
+        48
+      ],
       "texture_filter": "nearest",
       "alpha_required": true,
-      "required_variants": ["single_weapon", "dual_weapon"],
-      "required_directions": ["NW", "NE", "SW", "SE"],
+      "required_variants": [
+        "single_weapon",
+        "dual_weapon"
+      ],
+      "required_directions": [
+        "NW",
+        "NE",
+        "SW",
+        "SE"
+      ],
       "approval_status": "pending_user_approval",
-      "provenance": "pending",
+      "provenance": "",
       "provenance_status": "unverified",
-      "rights_basis": "pending_review",
+      "rights_basis": "",
       "rights_status": "unverified"
     },
     {
@@ -125,16 +202,26 @@
       "asset_type": "terrain",
       "label": "场景与地形",
       "source_path": "",
-      "source_size": [140, 140],
-      "display_size": [140, 140],
+      "source_size": [
+        0,
+        0
+      ],
+      "display_size": [
+        140,
+        140
+      ],
       "texture_filter": "nearest",
       "alpha_required": true,
-      "required_variants": ["base_ground", "transparent_overlay", "edge_blend"],
+      "required_variants": [
+        "base_ground",
+        "transparent_overlay",
+        "edge_blend"
+      ],
       "required_directions": [],
       "approval_status": "pending_user_approval",
-      "provenance": "pending",
+      "provenance": "",
       "provenance_status": "unverified",
-      "rights_basis": "pending_review",
+      "rights_basis": "",
       "rights_status": "unverified"
     },
     {
@@ -142,16 +229,27 @@
       "asset_type": "vfx",
       "label": "特效",
       "source_path": "",
-      "source_size": [256, 256],
-      "display_size": [256, 256],
+      "source_size": [
+        0,
+        0
+      ],
+      "display_size": [
+        140,
+        140
+      ],
       "texture_filter": "nearest",
       "alpha_required": true,
-      "required_variants": ["slash", "movement", "range", "status"],
+      "required_variants": [
+        "slash",
+        "movement",
+        "range",
+        "status"
+      ],
       "required_directions": [],
       "approval_status": "pending_user_approval",
-      "provenance": "pending",
+      "provenance": "",
       "provenance_status": "unverified",
-      "rights_basis": "pending_review",
+      "rights_basis": "",
       "rights_status": "unverified"
     }
   ]

@@ -379,7 +379,7 @@ func _build_sample_card(sample: Dictionary) -> PanelContainer:
 	_sample_states[sample_id] = cached_state
 
 	var card: PanelContainer = PanelContainer.new()
-	card.custom_minimum_size = Vector2(210.0, 320.0)
+	card.custom_minimum_size = Vector2(238.0, 330.0)
 	var panel_style: StyleBoxFlat = StyleBoxFlat.new()
 	panel_style.bg_color = COLOR_PANEL
 	panel_style.border_color = COLOR_ERROR if state.get("placeholder_kind") == "error" else COLOR_PANEL_BORDER
@@ -409,7 +409,7 @@ func _build_sample_card(sample: Dictionary) -> PanelContainer:
 	content.add_child(status)
 
 	var preview_area: CenterContainer = CenterContainer.new()
-	preview_area.custom_minimum_size = Vector2(170.0, 130.0)
+	preview_area.custom_minimum_size = Vector2(220.0, 170.0)
 	preview_area.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	content.add_child(preview_area)
 
@@ -467,6 +467,8 @@ func _inspect_sample_internal(sample: Dictionary) -> Dictionary:
 	var approval_status: String = str(sample.get("approval_status", ""))
 	var provenance_status: String = str(sample.get("provenance_status", ""))
 	var rights_status: String = str(sample.get("rights_status", ""))
+	var provenance: String = str(sample.get("provenance", ""))
+	var rights_basis: String = str(sample.get("rights_basis", ""))
 	var result: Dictionary = {
 		"status_code": "unknown",
 		"status_text": "状态未知",
@@ -481,16 +483,6 @@ func _inspect_sample_internal(sample: Dictionary) -> Dictionary:
 		"rights_status": rights_status,
 	}
 
-	if source_path.is_empty():
-		var pending_parts: Array[String] = ["待提供"]
-		if approval_status != "approved":
-			pending_parts.append("待用户确认")
-		if provenance_status != "verified":
-			pending_parts.append("来源未核验")
-		if rights_status != "verified":
-			pending_parts.append("使用权依据未核验")
-		return _set_sample_status(result, "pending_asset", " · ".join(pending_parts), "pending")
-
 	if approval_status != "pending_user_approval" and approval_status != "approved":
 		return _set_sample_status(
 			result,
@@ -498,12 +490,24 @@ func _inspect_sample_internal(sample: Dictionary) -> Dictionary:
 			"用户确认状态无效",
 			"error"
 		)
+
+	if provenance_status != "unverified" and provenance_status != "verified":
+		return _set_sample_status(result, "invalid_provenance", "来源状态无效", "error")
+
+	if rights_status != "unverified" and rights_status != "review_required" and rights_status != "verified":
+		return _set_sample_status(result, "invalid_rights", "使用权状态无效", "error")
+
+	if source_path.is_empty():
+		var pending_parts: Array[String] = ["待提供"]
+		pending_parts.append("待用户确认")
+		pending_parts.append("来源未核验")
+		pending_parts.append("使用权依据未核验")
+		return _set_sample_status(result, "pending_asset", " · ".join(pending_parts), "pending")
+
 	if approval_status != "approved":
 		var approval_text: String = "待用户确认" if approval_status == "pending_user_approval" else "用户确认状态无效"
 		return _set_sample_status(result, "approval_pending", approval_text, "pending")
 
-	if provenance_status != "unverified" and provenance_status != "verified":
-		return _set_sample_status(result, "invalid_provenance", "来源状态无效", "error")
 	if provenance_status != "verified":
 		return _set_sample_status(
 			result,
@@ -512,8 +516,13 @@ func _inspect_sample_internal(sample: Dictionary) -> Dictionary:
 			"pending"
 		)
 
-	if rights_status != "unverified" and rights_status != "review_required" and rights_status != "verified":
-		return _set_sample_status(result, "invalid_rights", "使用权状态无效", "error")
+	if provenance_status == "verified" and provenance.strip_edges().is_empty():
+		return _set_sample_status(
+			result,
+			"invalid_provenance_basis",
+		"来源核验通过但来源说明为空",
+			"error"
+		)
 	if rights_status == "unverified":
 		return _set_sample_status(
 			result,
@@ -527,6 +536,13 @@ func _inspect_sample_internal(sample: Dictionary) -> Dictionary:
 			"rights_review_required",
 			"使用权需要复核",
 			"pending"
+		)
+	if rights_status == "verified" and rights_basis.strip_edges().is_empty():
+		return _set_sample_status(
+			result,
+			"invalid_rights_basis",
+		"使用权核验通过但依据为空",
+			"error"
 		)
 
 	if not _is_valid_resource_path(source_path):

@@ -1,6 +1,8 @@
 # 视觉素材统一质感 Playground
 
-该目录用于原型阶段的素材一致性检查，不作为正式生产入库。清单驱动五类样本槽：`ui`、`portrait`、`map_token`、`terrain`、`vfx`，顺序固定不变。素材文件不在此目录内导入；`source_path` 暂时留空表示待提供。
+该目录用于原型阶段的素材一致性检查，不作为正式生产入库。清单驱动五类样本槽：`ui`、`portrait`、`map_token`、`terrain`、`vfx`，顺序固定不变。`source_path` 为空表示待提供，`display_size` 仅用于检查窗口，不等同生产规格。素材文件不在此目录内导入，不能以此路径写入清单的正式文件。
+
+运行方向：`F` 切换纹理过滤方式、`R` 切换检查画布尺寸、`P` 截图。内部承载检查 UI 的是 `SubViewport`，截图仅写入 `user://visual_style_playground/`，不会写回仓库。
 
 ## 样本规则（五类）
 
@@ -25,6 +27,7 @@
   - `tile_size` 为 `64×32`，比例 `2:1`。
   - 变体至少有 `base_ground`、`transparent_overlay`，支持地表与覆盖物分离。
   - 透明；`nearest` 采样。
+  - 支持无缝衔接。
 
 - `vfx`
   - 变体必须恰含 `slash`、`movement`、`range`、`status`。
@@ -37,9 +40,9 @@
 
 1. `approval_status`：`approved`，表示文件本身已通过用户确认；否则是待确认状态。
 2. `provenance_status`：`verified`，表示来源可追溯与可核验；否则是来源未核验。
-3. `rights_status`：`verified`，表示使用权依据可核验；`review_required` 和 `unverified` 都不允许加载。
+3. `rights_status`：`verified`，表示使用权依据可核验；`review_required` 与 `unverified` 都不允许加载。
 
-此外还要求 `source_path` 为仓库内 `res://` 合法路径、资源类型为 `Texture2D` 且与清单尺寸匹配。清单里仍允许保留空槽显示为待提供，但会显示“待提供、待用户确认、来源未核验、使用权依据未核验”。
+此外还要求 `source_path` 为仓库内 `res://` 合法路径、资源类型为 `Texture2D` 且与清单尺寸匹配。`source_path` 为空时，`approval_status`、`provenance_status`、`rights_status`、来源说明与使用权说明会显示“待提供、待用户确认、来源未核验、使用权依据未核验”。`provenance_status` 为 `verified` 时 `provenance` 必须有非空说明；`rights_status` 为 `verified` 时 `rights_basis` 必须有非空说明。空槽请使用空字符串，不要用 `pending` 充当依据。
 
 ## 说明边界
 
