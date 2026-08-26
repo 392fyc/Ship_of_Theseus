@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "purpose": "Godot visual cohesion playground inspection contract; not a production asset specification.",
+  "default_filter": "nearest",
+  "check_sizes": [
+    [1280, 720],
+    [1920, 1080],
+    [2560, 1440]
+  ],
+  "samples": [
+    {
+      "id": "ui",
+      "label": "UI",
+      "source_path": "",
+      "source_size": [0, 0],
+      "display_size": [210, 118],
+      "approval_status": "pending_user_approval",
+      "provenance": "unassigned",
+      "license_status": "unverified"
+    },
+    {
+      "id": "portrait",
+      "label": "人物原画",
+      "source_path": "",
+      "source_size": [0, 0],
+      "display_size": [128, 170],
+      "approval_status": "pending_user_approval",
+      "provenance": "unassigned",
+      "license_status": "unverified"
+    },
+    {
+      "id": "map_token",
+      "label": "战棋人物",
+      "source_path": "",
+      "source_size": [48, 48],
+      "display_size": [48, 48],
+      "approval_status": "pending_user_approval",
+      "provenance": "unassigned",
+      "license_status": "unverified"
+    },
+    {
+      "id": "terrain",
+      "label": "场景与地形",
+      "source_path": "",
+      "source_size": [0, 0],
+      "display_size": [140, 140],
+      "approval_status": "pending_user_approval",
+      "provenance": "unassigned",
+      "license_status": "unverified"
+    },
+    {
+      "id": "vfx",
+      "label": "特效",
+      "source_path": "",
+      "source_size": [0, 0],
+      "display_size": [140, 140],
+      "approval_status": "pending_user_approval",
+      "provenance": "unassigned",
+      "license_status": "unverified"
+    }
+  ]
+}
