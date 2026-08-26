@@ -379,7 +379,7 @@ func _build_sample_card(sample: Dictionary) -> PanelContainer:
 	_sample_states[sample_id] = cached_state
 
 	var card: PanelContainer = PanelContainer.new()
-	card.custom_minimum_size = Vector2(238.0, 330.0)
+	card.custom_minimum_size = Vector2(210.0, 320.0)
 	var panel_style: StyleBoxFlat = StyleBoxFlat.new()
 	panel_style.bg_color = COLOR_PANEL
 	panel_style.border_color = COLOR_ERROR if state.get("placeholder_kind") == "error" else COLOR_PANEL_BORDER
@@ -409,7 +409,7 @@ func _build_sample_card(sample: Dictionary) -> PanelContainer:
 	content.add_child(status)
 
 	var preview_area: CenterContainer = CenterContainer.new()
-	preview_area.custom_minimum_size = Vector2(220.0, 170.0)
+	preview_area.custom_minimum_size = Vector2(170.0, 130.0)
 	preview_area.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	content.add_child(preview_area)
 
@@ -447,9 +447,11 @@ func _build_sample_card(sample: Dictionary) -> PanelContainer:
 	content.add_child(display_label)
 
 	var provenance_label: Label = Label.new()
-	provenance_label.text = "来源：%s\n许可：%s" % [
-		str(sample.get("provenance", "unassigned")),
-		str(sample.get("license_status", "unverified")),
+	provenance_label.text = "来源：%s\n来源核验：%s\n使用权依据：%s\n许可：%s" % [
+		str(sample.get("provenance", "")),
+		str(sample.get("provenance_status", "unverified")),
+		str(sample.get("rights_basis", "")),
+		str(sample.get("rights_status", "unverified")),
 	]
 	provenance_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	provenance_label.custom_minimum_size.y = 32.0
@@ -463,7 +465,8 @@ func _inspect_sample_internal(sample: Dictionary) -> Dictionary:
 	var declared_size: Vector2i = _array_to_size(sample.get("source_size", [0, 0]))
 	var display_size: Vector2i = _array_to_size(sample.get("display_size", [0, 0]))
 	var approval_status: String = str(sample.get("approval_status", ""))
-	var license_status: String = str(sample.get("license_status", ""))
+	var provenance_status: String = str(sample.get("provenance_status", ""))
+	var rights_status: String = str(sample.get("rights_status", ""))
 	var result: Dictionary = {
 		"status_code": "unknown",
 		"status_text": "状态未知",
@@ -474,23 +477,58 @@ func _inspect_sample_internal(sample: Dictionary) -> Dictionary:
 		"actual_texture_size": Vector2i.ZERO,
 		"display_size": display_size,
 		"approval_status": approval_status,
-		"license_status": license_status,
+		"provenance_status": provenance_status,
+		"rights_status": rights_status,
 	}
 
 	if source_path.is_empty():
 		var pending_parts: Array[String] = ["待提供"]
 		if approval_status != "approved":
 			pending_parts.append("待用户确认")
-		if license_status != "verified":
-			pending_parts.append("许可未核验")
+		if provenance_status != "verified":
+			pending_parts.append("来源未核验")
+		if rights_status != "verified":
+			pending_parts.append("使用权依据未核验")
 		return _set_sample_status(result, "pending_asset", " · ".join(pending_parts), "pending")
 
+	if approval_status != "pending_user_approval" and approval_status != "approved":
+		return _set_sample_status(
+			result,
+			"invalid_approval",
+			"用户确认状态无效",
+			"error"
+		)
 	if approval_status != "approved":
 		var approval_text: String = "待用户确认" if approval_status == "pending_user_approval" else "用户确认状态无效"
 		return _set_sample_status(result, "approval_pending", approval_text, "pending")
-	if license_status != "verified":
-		var license_text: String = "许可未核验" if license_status == "unverified" else "许可状态无效"
-		return _set_sample_status(result, "license_unverified", license_text, "pending")
+
+	if provenance_status != "unverified" and provenance_status != "verified":
+		return _set_sample_status(result, "invalid_provenance", "来源状态无效", "error")
+	if provenance_status != "verified":
+		return _set_sample_status(
+			result,
+			"provenance_unverified",
+			"来源未核验",
+			"pending"
+		)
+
+	if rights_status != "unverified" and rights_status != "review_required" and rights_status != "verified":
+		return _set_sample_status(result, "invalid_rights", "使用权状态无效", "error")
+	if rights_status == "unverified":
+		return _set_sample_status(
+			result,
+			"rights_unverified",
+			"使用权依据未核验",
+			"pending"
+		)
+	if rights_status == "review_required":
+		return _set_sample_status(
+			result,
+			"rights_review_required",
+			"使用权需要复核",
+			"pending"
+		)
+
 	if not _is_valid_resource_path(source_path):
 		return _set_sample_status(result, "invalid_path", "路径格式错误：必须使用仓库内 res:// 路径", "error")
 	if not ResourceLoader.exists(source_path):

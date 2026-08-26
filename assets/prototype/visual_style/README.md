@@ -1,41 +1,49 @@
 # 视觉素材统一质感 Playground
 
-该目录保存视觉检查场的样本清单，不保存未经用户确认的候选图片。检查场与正式玩法隔离，用于同时观察 UI、人物原画、战棋人物、场景地形和特效的质感一致性、缩放清晰度与准入状态。
+该目录用于原型阶段的素材一致性检查，不作为正式生产入库。清单驱动五类样本槽：`ui`、`portrait`、`map_token`、`terrain`、`vfx`，顺序固定不变。素材文件不在此目录内导入；`source_path` 暂时留空表示待提供。
 
-## 当前方向
+## 样本规则（五类）
 
-- 优先验证略微精细的像素或像素化插画质感，并让 UI、人物、场景地形与特效使用同一种视觉语言。
-- 战棋人物先在真实 48×48 显示区域实测。只有该尺寸下无法稳定辨识人物身份、朝向或关键装备时，才允许降低战棋人物的细节；人物原画仍保持较高完成度。
-- 初版不要求战棋战斗动画。
+- `ui`
+  - 风格：略微精细、深色哥特像素化插画。
+  - 必须支持 `bottom_action_bar`、`tooltip`，并预留 `NinePatch` 兼容。
+  - 禁止烘焙文字，透明层保留，`nearest` 采样。
+  - 与其他类型共用三档检查尺寸 `1280×720 / 1920×1080 / 2560×1440`。
 
-`sample_manifest.json` 中的 `display_size` 是 Playground 当前检查窗口，不是正式素材规格。`map_token` 的 48×48 用于验证现阶段的真实显示辨识度，也不代表已经冻结生产规格。
+- `portrait`
+  - 第三版统一质感参考。
+  - 变体必须恰含 `single_weapon`、`dual_weapon`。
+  - 真实握持语义，允许剑形；透明；`nearest` 采样。
 
-## 素材进入条件
+- `map_token`
+  - 变体必须恰含 `single_weapon`、`dual_weapon`。
+  - 方向必须声明 `NW`、`NE`、`SW`、`SE`。
+  - `source_size` 与 `frame` 为 `48×48`，透明；`nearest` 采样。
+  - 静态待机，不含战斗动画。
 
-素材路径写入清单并进入仓库前，必须同时满足以下条件：
+- `terrain`
+  - `tile_size` 为 `64×32`，比例 `2:1`。
+  - 变体至少有 `base_ground`、`transparent_overlay`，支持地表与覆盖物分离。
+  - 透明；`nearest` 采样。
 
-1. 用户已经确认该素材或生成结果；购买素材也必须在购买前由用户确认。
-2. `source_path` 使用仓库内 `res://` 相对路径，不引用本机目录或仓库外文件。
-3. `provenance` 记录来源或生成方式，`license_status` 记录已核实的许可状态，`approval_status` 记录用户确认状态。
-4. 购买素材一旦确认，本地生成链后续产出应向已购素材的质感靠拢。
-5. 本地生成默认只使用 Codex 内置 GPT-Image-2，不使用外部 API key、SDK、命令行或 HTTP 调用。
+- `vfx`
+  - 变体必须恰含 `slash`、`movement`、`range`、`status`。
+  - 采用静态关键帧或参考板，像素核心用 `nearest`，柔和光晕若出现需独立。
+  - 不含完整循环、粒子系统或战斗动画。
 
-在用户确认前，五个样本槽必须保持空 `source_path`、`pending_user_approval` 和 `unverified` 许可状态。运行时棋盘格仅是内存占位，不会生成或保存图片文件。
+## 清单准入与三道门
 
-清单中的批准状态只允许以下值：
+`sample_manifest.json` 中，每个样本都必须同时满足三道门后才可被标记为可用：
 
-- `pending_user_approval`：等待用户确认，素材不能作为可用样本加载。
-- `approved`：用户已确认。
+1. `approval_status`：`approved`，表示文件本身已通过用户确认；否则是待确认状态。
+2. `provenance_status`：`verified`，表示来源可追溯与可核验；否则是来源未核验。
+3. `rights_status`：`verified`，表示使用权依据可核验；`review_required` 和 `unverified` 都不允许加载。
 
-许可状态只允许以下值：
+此外还要求 `source_path` 为仓库内 `res://` 合法路径、资源类型为 `Texture2D` 且与清单尺寸匹配。清单里仍允许保留空槽显示为待提供，但会显示“待提供、待用户确认、来源未核验、使用权依据未核验”。
 
-- `unverified`：许可尚未核验，素材不能作为可用样本加载。
-- `verified`：许可已经核验。
+## 说明边界
 
-只有 `approval_status` 为 `approved`、`license_status` 为 `verified`、`source_path` 是有效的仓库内 `res://` 路径，并且目标资源确实是尺寸与清单一致的 `Texture2D` 时，检查场才显示真实素材。运行时会区分待提供、待用户确认、许可未核验、路径格式错误、资源不存在、资源类型错误、尺寸不符和可用状态；错误状态使用红色交叉占位，避免被普通待确认占位掩盖。
-
-## 检查方式
-
-- `F`：切换 Nearest 与 Linear 纹理过滤。
-- `R`：循环切换 `sample_manifest.json` 定义的三档检查画布尺寸。画布由固定 `SubViewport` 实际渲染，不只是界面标签。
-- `P`：由检查者主动截图。截图直接来自当前检查画布，只写入 `user://visual_style_playground/`，不会自动写进仓库；文件名含毫秒计时与递增序号，避免连续截图互相覆盖。
+- `sample_manifest.json` 的字段与运行时状态用于原型审查，并不等于生产交付标准。
+- `review_required` 不可直接加载，必须完成复核后改为 `verified`。
+- 原型出现 `Codex` 生成结果并不代表已通过使用权核验；使用前仍需完成来源与许可依据确认。
+- 生成的临时图像仅写入运行态临时目录，不进入仓库。
