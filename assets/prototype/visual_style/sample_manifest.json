@@ -278,15 +278,43 @@
           "SW",
           "SE"
         ],
-        "foot_anchor_y": [
-          405,
-          406,
-          424,
-          423,
-          358,
-          357,
-          381,
-          380
+        "pivot_basis": {
+          "horizontal": "anatomical_body_axis_excluding_weapons_scabbards_and_cape_extension",
+          "vertical": "midpoint_between_both_foot_contacts"
+        },
+        "frame_pivot": [
+          [
+            205.9,
+            397.0
+          ],
+          [
+            194.0,
+            398.5
+          ],
+          [
+            178.5,
+            408.5
+          ],
+          [
+            178.0,
+            407.5
+          ],
+          [
+            203.4,
+            350.0
+          ],
+          [
+            198.8,
+            347.5
+          ],
+          [
+            173.5,
+            365.5
+          ],
+          [
+            182.2,
+            364.0
+          ]
         ],
         "display_scale": 0.15625,
         "tile_size": [
