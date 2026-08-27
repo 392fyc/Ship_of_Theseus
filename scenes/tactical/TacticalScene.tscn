@@ -17,6 +17,9 @@ script = ExtResource("2_turn_mgr")
 
 [node name="HighlightLayer" type="Node2D" parent="TacticalManager" unique_id=1683005674]
 
+[node name="UnitLayer" type="Node2D" parent="TacticalManager"]
+y_sort_enabled = true
+
 [node name="PopupLayer" type="Node2D" parent="TacticalManager"]
 z_index = 50
 

@@ -57,29 +57,52 @@ static func spawn(parent: Node, world_pos: Vector2,
 		amount: int, damage_type: String, is_crit: bool,
 		segment_index: int = 0) -> void:
 	var parts := compose(amount, damage_type, is_crit)
-	_create(parent, world_pos, parts.text, parts.shape, parts.color, parts.size, segment_index)
+	_create(parent, world_pos, parts.text, parts.shape, parts.color, parts.size,
+		segment_index, true)
+
+
+static func spawn_at_anchor(parent: Node, anchor_world: Vector2, amount: int,
+		damage_type: String, is_crit: bool, segment_index: int = 0) -> void:
+	var parts := compose(amount, damage_type, is_crit)
+	_create(parent, anchor_world, parts.text, parts.shape, parts.color, parts.size,
+		segment_index, false)
 
 
 static func spawn_miss(parent: Node, world_pos: Vector2,
 		segment_index: int = 0) -> void:
-	_create(parent, world_pos, "MISS", "none", COLOR_MISS, MISS_SIZE, segment_index)
+	_create(parent, world_pos, "MISS", "none", COLOR_MISS, MISS_SIZE,
+		segment_index, true)
+
+
+static func spawn_miss_at_anchor(parent: Node, anchor_world: Vector2,
+		segment_index: int = 0) -> void:
+	_create(parent, anchor_world, "MISS", "none", COLOR_MISS, MISS_SIZE,
+		segment_index, false)
 
 
 static func spawn_heal(parent: Node, world_pos: Vector2, amount: int,
 		segment_index: int = 0) -> void:
-	_create(parent, world_pos, "+%d" % amount, "heal", COLOR_HEAL, NORMAL_SIZE, segment_index)
+	_create(parent, world_pos, "+%d" % amount, "heal", COLOR_HEAL, NORMAL_SIZE,
+		segment_index, true)
+
+
+static func _compute_origin(world_pos: Vector2, text: String, shape: String,
+		font_size: int, segment_index: int, apply_legacy_offset: bool) -> Vector2:
+	var glyph_width := (GLYPH_SIZE + GLYPH_GAP) if shape != "none" else 0.0
+	var total_width := glyph_width + float(text.length()) * float(font_size) * 0.62
+	var segment_offset := Vector2(SEGMENT_DX, -SEGMENT_DY) * float(segment_index)
+	var legacy_y := -50.0 if apply_legacy_offset else 0.0
+	return Vector2(world_pos.x - total_width * 0.5, world_pos.y + legacy_y) \
+		+ segment_offset
 
 
 static func _create(parent: Node, world_pos: Vector2,
 		text: String, shape: String, color: Color, font_size: int,
-		segment_index: int) -> void:
+		segment_index: int, apply_legacy_offset: bool = true) -> void:
 	var has_glyph := shape != "none"
-	# 估算宽度，让 [字形 间距 数字] 整组横向居中于单位头顶。
-	var num_w := float(text.length()) * float(font_size) * 0.62
 	var glyph_w := (GLYPH_SIZE + GLYPH_GAP) if has_glyph else 0.0
-	var total_w := glyph_w + num_w
-	var seg := Vector2(SEGMENT_DX, -SEGMENT_DY) * float(segment_index)
-	var origin := Vector2(world_pos.x - total_w * 0.5, world_pos.y - 50.0) + seg
+	var origin := _compute_origin(
+		world_pos, text, shape, font_size, segment_index, apply_legacy_offset)
 
 	var nodes: Array[Control] = []
 

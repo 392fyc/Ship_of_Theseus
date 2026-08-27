@@ -4,6 +4,7 @@ extends Node
 @onready var turn_manager: TurnManager = $TurnManager
 @onready var terrain_layer: Node2D = $TerrainLayer
 @onready var highlight_layer: Node2D = $HighlightLayer
+@onready var unit_layer: Node2D = $UnitLayer
 @onready var popup_layer: Node2D = $PopupLayer
 
 var grid: Grid = Grid.new()
@@ -350,7 +351,7 @@ func handle_pointer_click(screen_pos: Vector2) -> void:
 
 
 func spawn_unit(class_id: String, spawn_pos: Vector2i,
-				faction: String) -> Unit:
+				faction: String, initial_facing: StringName = &"SE") -> Unit:
 	var class_data: Dictionary = DataLoader.classes.get(class_id, {})
 	if class_data.is_empty():
 		class_data = DataLoader.enemies.get(class_id, {})
@@ -360,8 +361,8 @@ func spawn_unit(class_id: String, spawn_pos: Vector2i,
 	var unit_scene := preload("res://scenes/tactical/Unit.tscn")
 	var unit: Unit = unit_scene.instantiate()
 	unit.faction = faction
-	add_child(unit)
-	unit.setup(class_data)
+	unit_layer.add_child(unit)
+	unit.setup(class_data, initial_facing)
 	unit.position = grid.grid_to_world(spawn_pos)
 	grid.place_unit(unit, spawn_pos)
 	units.append(unit)
@@ -1371,7 +1372,7 @@ func _build_attack_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 		"terrain_res_bonus": int(preview.get("terrain_res_bonus", 0)),
 		# 新增：头顶数字 + FE 浮窗所需字段
 		"targets": [{
-			"world": grid.grid_to_world(target.grid_position),
+			"world": target.get_combat_text_anchor_world(-30.0),
 			"damage": dmg,
 			"damage_type": dtype,
 			"hit_percent": hit_pct,
@@ -1449,7 +1450,7 @@ func _build_skill_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 		var t_hit: int = int(preview.get("hit_percent", 0))
 		var t_crit: int = int(preview.get("crit_percent", 0))
 		targets_list.append({
-			"world": grid.grid_to_world(target_unit.grid_position),
+			"world": target_unit.get_combat_text_anchor_world(-30.0),
 			"damage": dmg,
 			"damage_type": str(preview_data.get("damage_type", "physical")),
 			"hit_percent": t_hit,
@@ -1756,12 +1757,13 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 		attacker, defender, action_data)
 	_record_parry_prevented(attacker, defender, action_data, result, defense)
 	_log_attack(attacker, defender, result, "")
+	var combat_text_anchor := defender.get_combat_text_anchor_world(-50.0)
 	if result.hit:
-		DamagePopup.spawn(popup_layer, defender.position,
+		DamagePopup.spawn_at_anchor(popup_layer, combat_text_anchor,
 			result.damage, damage_type, result.crit)
 		defender.take_damage(result.damage, damage_type)
 	else:
-		DamagePopup.spawn_miss(popup_layer, defender.position)
+		DamagePopup.spawn_miss_at_anchor(popup_layer, combat_text_anchor)
 
 	if result.hit and defender.stats.is_alive():
 		_apply_hostile_skill_effects(attacker, defender, data)
@@ -3090,13 +3092,14 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 		attacker, defender, data)
 	_record_parry_prevented(attacker, defender, data, result, offhand_defense)
 	_log_attack(attacker, defender, result, "副手")
+	var combat_text_anchor := defender.get_combat_text_anchor_world(-50.0)
 	if result.hit:
 		# segment_index=1：与主手的飘字错开，否则同坐标同帧两个数字会叠在一起。
-		DamagePopup.spawn(popup_layer, defender.position,
+		DamagePopup.spawn_at_anchor(popup_layer, combat_text_anchor,
 			result.damage, damage_type, result.crit, 1)
 		defender.take_damage(result.damage, damage_type)
 	else:
-		DamagePopup.spawn_miss(popup_layer, defender.position, 1)
+		DamagePopup.spawn_miss_at_anchor(popup_layer, combat_text_anchor, 1)
 
 	# 被强化的副手追加只在实际命中后返气：必定暴击不保证命中，
 	# 副手仍按自己的命中结果结算。

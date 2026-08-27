@@ -19,8 +19,6 @@ var _damage_forecaster: Control = null
 var _forecast_head_nodes: Array[Node] = []
 # 浮窗锚到目标格上方的纵向间距（格中心上方留出 ~半格 + 浮窗高 + 三角）。
 const FORECASTER_ANCHOR_OFFSET_Y: float = 36.0
-# 头顶数字节点到格中心的纵向偏移（负值=上方）。
-const HEAD_NUMBER_OFFSET_Y: float = 30.0
 # 浮窗在头顶数字上方的额外净空（浮窗底边不压头顶数字）。
 const FORECASTER_HEAD_CLEARANCE: float = 28.0
 var _camera: Camera2D = null
@@ -49,7 +47,7 @@ var injected_enemy_units: Array = []
 
 const PLAYER_UNITS: Array[Dictionary] = [
 	# 测试场景：仅剑圣，便于专注验证剑气/印记/技能手感
-	{"class_id": "kensei", "pos": Vector2i(1, 2)},
+	{"class_id": "kensei", "pos": Vector2i(1, 2), "facing": &"SE"},
 ]
 
 # ── 敌人列表（木桩场景 B=不动 与 受击场景 B=自动攻击 共用，可增删）──
@@ -106,11 +104,15 @@ func _ready() -> void:
 
 		for cfg: Dictionary in PLAYER_UNITS:
 			var pos: Vector2i = cfg["pos"]
-			tactical_manager.spawn_unit(cfg["class_id"], pos, "player")
+			var facing := StringName(str(cfg.get("facing", "SE")))
+			tactical_manager.spawn_unit(
+				str(cfg.get("class_id", "")), pos, "player", facing)
 
 		for cfg: Dictionary in ENEMY_UNITS:
 			var pos: Vector2i = cfg["pos"]
-			tactical_manager.spawn_unit(cfg["class_id"], pos, "enemy")
+			var facing := StringName(str(cfg.get("facing", "SE")))
+			tactical_manager.spawn_unit(
+				str(cfg.get("class_id", "")), pos, "enemy", facing)
 
 	print("[TacticalScene] Units spawned: %d" % tactical_manager.units.size())
 
@@ -154,8 +156,9 @@ func _spawn_injected_units() -> void:
 			continue
 		var cfg: Dictionary = cfg_v
 		var pos: Vector2i = cfg.get("pos", Vector2i.ZERO)
+		var facing := StringName(str(cfg.get("facing", "SE")))
 		var player_unit: Unit = tactical_manager.spawn_unit(
-			str(cfg.get("class_id", "")), pos, "player")
+			str(cfg.get("class_id", "")), pos, "player", facing)
 		# HP 跨关继承（磨损模型 #8）：注入项带 hp 时按磨损/战死规则落地不满血入场。
 		# 无 hp 字段（首关或满血）→ 缺省满血，不改动。玩家不涉词条注入。
 		if player_unit != null and cfg.has("hp"):
@@ -165,8 +168,9 @@ func _spawn_injected_units() -> void:
 			continue
 		var cfg: Dictionary = cfg_v
 		var pos: Vector2i = cfg.get("pos", Vector2i.ZERO)
+		var facing := StringName(str(cfg.get("facing", "SE")))
 		var enemy_unit: Unit = tactical_manager.spawn_unit(
-			str(cfg.get("class_id", "")), pos, "enemy")
+			str(cfg.get("class_id", "")), pos, "enemy", facing)
 		if enemy_unit == null:
 			continue
 		var affixes_v: Variant = cfg.get("affixes", [])
@@ -318,8 +322,8 @@ func _spawn_forecast_head_nodes(targets: Array) -> void:
 		var dtype: String = str(target_dict.get("damage_type", "physical"))
 		var parts: Dictionary = DamagePopup.compose(dmg, dtype, false)
 		var screen: Vector2 = _world_to_screen(world)
-		# 锚到格中心正上方
-		var base_pos: Vector2 = Vector2(screen.x, screen.y - HEAD_NUMBER_OFFSET_Y)
+		# world 已是 Unit 提供的最终锚点，不再叠加旧版纵向偏移。
+		var base_pos: Vector2 = screen
 
 		# 字形节点
 		var shape: String = str(parts.get("shape", "sword"))
@@ -761,7 +765,9 @@ func _process_test_dummies() -> void:
 		if alive:
 			continue
 		var spawn_pos: Vector2i = cfg.get("pos", Vector2i.ZERO)
-		var new_unit: Unit = tactical_manager.spawn_unit(class_id, spawn_pos, "enemy")
+		var facing := StringName(str(cfg.get("facing", "SE")))
+		var new_unit: Unit = tactical_manager.spawn_unit(
+			class_id, spawn_pos, "enemy", facing)
 		if new_unit == null:
 			continue
 		var typed_units: Array[Unit] = [new_unit]

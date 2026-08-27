@@ -72,6 +72,18 @@ func _run() -> void:
 	_check("miss → none（无字形）", DamagePopup._type_shape("miss") == "none")
 	_check("治疗配色=绿", DamagePopup._type_color("heal") == DamagePopup.COLOR_HEAL)
 
+	# 已经由 Unit 计算完成的最终锚点不得再次叠加旧版 -50 像素偏移。
+	var parent := Node2D.new()
+	root.add_child(parent)
+	var anchor := Vector2(120, 80)
+	var legacy_origin := DamagePopup._compute_origin(
+		anchor, "12", "sword", 16, 0, true)
+	var final_origin := DamagePopup._compute_origin(
+		anchor, "12", "sword", 16, 0, false)
+	_check("旧 API 保留向上 50 像素", is_equal_approx(legacy_origin.y, anchor.y - 50.0))
+	_check("最终锚点 API 不再减 50", is_equal_approx(final_origin.y, anchor.y))
+	parent.free()
+
 	_finish()
 
 
