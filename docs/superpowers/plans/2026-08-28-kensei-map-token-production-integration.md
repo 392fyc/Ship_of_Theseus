@@ -812,11 +812,15 @@ if (-not (Test-Path -LiteralPath $env:GODOT_EXE)) { throw 'GODOT_EXE 未指向 G
 $godotVersion = (& $env:GODOT_EXE --version).Trim()
 if ($godotVersion -notmatch '^4\.6(\.|$)') { throw "VA-4 requires Godot 4.6.x, current: $godotVersion" }
 $projectRoot = (git rev-parse --show-toplevel).Trim()
+# headless 是快速验证“不支持捕获”的路径，必须立即以 1 退出，不能等待绘制信号。
 & $env:GODOT_EXE --headless --path $projectRoot --script res://tests/capture_kensei_map_token_tactical.gd -- --capture-all
-if ($LASTEXITCODE -ne 0) { throw 'TacticalScene capture failed' }
+if ($LASTEXITCODE -ne 1) { throw 'Headless TacticalScene capture must fail fast with exit 1' }
+# Windows 真实视觉证据使用同一 Godot console 的窗口渲染模式。
+& $env:GODOT_EXE --path $projectRoot --script res://tests/capture_kensei_map_token_tactical.gd -- --capture-all
+if ($LASTEXITCODE -ne 0) { throw 'Windowed TacticalScene capture failed' }
 ```
 
-Expected: 三张 PNG 均生成，控制台打印绝对目录。
+Expected: headless 打印“不支持捕获”标记并立即以退出码 1 结束；窗口模式生成三张 PNG，并打印绝对目录。
 
 - [ ] **Step 3: 在会话中检查并提交视觉证据给用户**
 

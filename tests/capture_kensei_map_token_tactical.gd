@@ -1,7 +1,7 @@
 extends SceneTree
 ## 真实 TacticalScene 中剑圣地图棋子的视觉证据捕获。
 ##
-## 运行：Godot_console.exe --headless --path <project-root> \
+## 运行：Godot_console.exe --path <project-root> \
 ##   --script res://tests/capture_kensei_map_token_tactical.gd -- --capture-all
 
 const CAPTURE_ROOT := "user://visual_style_playground/kensei_map_token_tactical/"
@@ -18,6 +18,14 @@ var _capture_directory := ""
 
 
 func _initialize() -> void:
+	if not OS.get_cmdline_user_args().has("--capture-all"):
+		print("KENSEI_TACTICAL_CAPTURE_ARGUMENT_ERROR=missing --capture-all")
+		quit(1)
+		return
+	if DisplayServer.get_name().to_lower() == "headless":
+		print("KENSEI_TACTICAL_CAPTURE_UNSUPPORTED_HEADLESS=use windowed Godot console")
+		quit(1)
+		return
 	call_deferred("_capture_all")
 
 
@@ -102,9 +110,19 @@ func _capture_occlusion_hud_popup() -> bool:
 		return false
 	var rear_unit: Unit = units[0]
 	var front_unit: Unit = units[1]
-	rear_unit.set_facing(&"NW")
+	if not rear_unit.set_facing(&"NW"):
+		push_error("Unable to set rear kensei facing for occlusion capture")
+		scene.queue_free()
+		return false
 	front_unit.equip_offhand(OFFHAND_WEAPON_ID)
-	front_unit.set_facing(&"SE")
+	if not front_unit.is_dual_wielding():
+		push_error("Occlusion capture front kensei did not equip an offhand weapon")
+		scene.queue_free()
+		return false
+	if not front_unit.set_facing(&"SE"):
+		push_error("Unable to set front kensei facing for occlusion capture")
+		scene.queue_free()
+		return false
 	front_unit.consume_movement_resource()
 	front_unit.consume_standard_resource()
 	front_unit.refresh_status_icons()
