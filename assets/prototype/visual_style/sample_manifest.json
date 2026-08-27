@@ -251,6 +251,61 @@
           1024
         ],
         "identity_scope": "external_review_artifact"
+      },
+      "runtime_candidate": {
+        "file_name": "map_token_source_transparent_clean_v2.png",
+        "source_path": "res://assets/prototype/visual_style/samples/map_token_source_transparent_clean_v2.png",
+        "sha256": "e6f33324c52929769d4698ed75e969470ec45748788503f4637fcb3223dc5415",
+        "pixel_size": [
+          1536,
+          1024
+        ],
+        "frame_grid": [
+          4,
+          2
+        ],
+        "source_frame_size": [
+          384,
+          512
+        ],
+        "variant_order": [
+          "single_weapon",
+          "dual_weapon"
+        ],
+        "direction_order": [
+          "NW",
+          "NE",
+          "SW",
+          "SE"
+        ],
+        "foot_anchor_y": [
+          405,
+          406,
+          424,
+          423,
+          358,
+          357,
+          381,
+          380
+        ],
+        "display_scale": 0.15625,
+        "tile_size": [
+          64,
+          32
+        ],
+        "filter_modes": [
+          "nearest",
+          "linear"
+        ],
+        "default_filter": "linear",
+        "approval": "approved",
+        "approval_basis": "2026-08-27 用户已按 SHA256 精确确认 clean_v2，可进入 Task 4.2 隔离原型。",
+        "provenance": "verified",
+        "provenance_basis": "由已授权的五个原文件经 Codex 内置图像能力定向修正，并经本地机械透明清理；SHA256 绑定。",
+        "rights": "verified",
+        "rights_basis": "由五个原文件的用户授权允许修改；clean_v2 已经用户按精确文件视觉确认后获准进入 Task 4.2 隔离原型。原型准入不等于正式生产准入。",
+        "admission_scope": "isolated_task_4_2_prototype",
+        "production_admission": "not_granted"
       }
     },
     {

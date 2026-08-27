@@ -31,6 +31,14 @@
   - 类型级 `frame_size` 仍冻结为 `48×48`，作为 Task 4 的独立产出与验收目标；透明；`nearest` 采样。
   - 静态待机，不含战斗动画。
 
+## clean_v2 隔离运行时预览
+
+`map_token` 的旧 `approved_preview` 继续绑定五类统一质感代表板，不被运行时候选替换。`runtime_candidate` 另行绑定用户按精确 SHA256 确认的 `map_token_source_transparent_clean_v2.png`：它是 `1536×1024` RGBA 透明高精度母版，按 `4×2` 切成八个 `384×512` 区域；顶排为单武器、底排为双武器，每排依次为 `NW / NE / SW / SE`。运行时直接切取母版，不生成 `64×64` 或其他倍数派生图。
+
+隔离场景 `res://scenes/playground/map_token_runtime_playground.tscn` 将八帧按统一 `0.15625` 缩放显示在 `64×32` 菱形格上，并使用逐帧脚锚把人物落点对齐格心。场景默认使用 `Linear`，可以在运行时切换到 `Nearest`；`--capture-all` 仅向 `user://visual_style_playground/map_token_runtime/<batch>/` 输出三档检查尺寸与两种过滤方式的六张截图。
+
+该候选只获准进入 Task 4.2 的隔离原型检查。它尚未进入正式 `Unit`、`TacticalScene` 或生产资源管线；原型准入不等于正式生产准入。
+
 - `terrain`
   - `tile_size` 为 `64×32`，比例 `2:1`。
   - 变体至少有 `base_ground`、`transparent_overlay`，支持地表与覆盖物分离。
