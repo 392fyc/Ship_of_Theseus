@@ -59,8 +59,8 @@ func _run() -> void:
 	_check("配置 ID 精确", profile.get("id") == "kensei_map_token")
 	_check("正式路径不引用 prototype", profile.get("texture_path") == PRODUCTION_PATH and not PRODUCTION_PATH.contains("/prototype/"))
 	_check("配置 SHA 精确", profile.get("sha256") == EXPECTED_SHA256)
-	_check("图集为 4×2", _integer_array(profile.get("frame_grid")) == [4, 2])
-	_check("单帧为 384×512", _integer_array(profile.get("source_frame_size")) == [384, 512])
+	_check("图集为 4×2", profile.get("frame_grid") == [4, 2])
+	_check("单帧为 384×512", profile.get("source_frame_size") == [384, 512])
 	_check("变体顺序精确", profile.get("variant_order") == ["single_weapon", "dual_weapon"])
 	_check("方向顺序精确", profile.get("direction_order") == ["NW", "NE", "SW", "SE"])
 	_check("八组中心点精确", _pivots_match(profile.get("frame_pivot", []), EXPECTED_PIVOTS))
@@ -100,14 +100,6 @@ func _pivots_match(raw: Variant, expected: Array[Vector2]) -> bool:
 		if not actual.is_equal_approx(expected[index]):
 			return false
 	return true
-
-func _integer_array(raw: Variant) -> Array:
-	if typeof(raw) != TYPE_ARRAY:
-		return []
-	var result: Array = []
-	for value: Variant in raw as Array:
-		result.append(int(value))
-	return result
 
 func _finish() -> void:
 	print("--- %d pass / %d fail ---" % [_pass, _fail])
