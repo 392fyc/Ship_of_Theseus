@@ -141,10 +141,15 @@ const ACTION_BADGE_Y: float = 20.0
 
 # ── 节点引用 ─────────────────────────────────────────
 @onready var sprite: AnimatedSprite2D = $Sprite
+@onready var map_token_view: Sprite2D = $MapTokenView
 @onready var health_bar: ProgressBar = $HealthBar
 @onready var status_icons: Node2D = $StatusIcons
 var _unit_label: Label = null
 var _hp_label: Label = null
+var _facing: StringName = &"SE"
+var _map_token_active := false
+var _map_token_layout: Dictionary = {}
+var _status_badge_y: float = STATUS_BADGE_Y
 
 
 func _ready() -> void:
@@ -152,10 +157,15 @@ func _ready() -> void:
 	_rebuild_status_icons()
 
 
-func setup(class_data: Dictionary) -> void:
+func setup(class_data: Dictionary, initial_facing: StringName = &"SE") -> void:
 	unit_id = str(class_data.get("id", ""))
 	unit_name = str(class_data.get("name", "Unit"))
 	priority = 0
+	var valid_directions: Array[StringName] = [&"NW", &"NE", &"SW", &"SE"]
+	_facing = initial_facing if valid_directions.has(initial_facing) else &"SE"
+	_map_token_active = false
+	_map_token_layout = {}
+	map_token_view.visible = false
 	stats = UnitStats.new()
 	buffs.clear()
 	# 主手武器随职业/敌人档案带入；副手槽默认空（要由天赋或装备层显式装上）。
@@ -183,9 +193,55 @@ func setup(class_data: Dictionary) -> void:
 		attack_min_range = maxi(1, int(basic_attack_range.get("min", 1)))
 		attack_range = maxi(attack_min_range, int(basic_attack_range.get("max", attack_min_range)))
 	_update_health_bar()
+	_map_token_active = _try_apply_map_token_visual(class_data)
 	_apply_visuals()
 	_rebuild_status_icons()
 	_emit_buffs_changed()
+
+
+func _try_apply_map_token_visual(class_data: Dictionary) -> bool:
+	var profile_id := str(class_data.get("map_token_profile_id", ""))
+	if profile_id == "":
+		return false
+	var data_loader := get_node_or_null("/root/DataLoader")
+	if data_loader == null:
+		push_error("[Unit] Map token data loader unavailable for %s" % unit_id)
+		return false
+	var visual_profiles: Dictionary = data_loader.get("visual_profiles") as Dictionary
+	var profile: Dictionary = visual_profiles.get(profile_id, {})
+	if profile.is_empty() or not bool(map_token_view.call("configure", profile)):
+		push_error("[Unit] Map token profile unavailable for %s: %s" % [unit_id, profile_id])
+		return false
+	_map_token_layout = map_token_view.call("get_overhead_layout") as Dictionary
+	_map_token_active = true
+	refresh_map_token_visual()
+	return true
+
+
+func set_facing(direction: StringName) -> bool:
+	if not [&"NW", &"NE", &"SW", &"SE"].has(direction):
+		return false
+	_facing = direction
+	refresh_map_token_visual()
+	return true
+
+
+func get_facing() -> StringName:
+	return _facing
+
+
+func refresh_map_token_visual() -> void:
+	if _map_token_active:
+		map_token_view.call("set_visual_state", _facing, is_dual_wielding())
+
+
+func has_runtime_map_token() -> bool:
+	return _map_token_active
+
+
+func get_combat_text_anchor_world(fallback_offset_y: float) -> Vector2:
+	var offset_y := float(_map_token_layout.get("popup_anchor_y", fallback_offset_y)) if _map_token_active else fallback_offset_y
+	return global_position + Vector2(0.0, offset_y)
 
 
 # ── 战斗接口 ─────────────────────────────────────────
@@ -254,11 +310,13 @@ func get_buff(buff_id: String) -> BuffEffect:
 ## 传空串等于卸下。装备层与测试都走这里，不要直接赋值字段。
 func equip_offhand(new_weapon_id: String) -> void:
 	offhand_weapon_id = new_weapon_id
+	refresh_map_token_visual()
 
 
 ## 卸下副手武器。
 func unequip_offhand() -> void:
 	offhand_weapon_id = ""
+	refresh_map_token_visual()
 
 
 ## 是否处于双持——**判据照设计库〔双持〕定义逐字**：
@@ -405,7 +463,8 @@ func move_to(target_pos: Vector2i, grid: Grid) -> void:
 	var tween: Tween = create_tween()
 	tween.tween_property(self, "position", world_target, 0.25)
 	await tween.finished
-	sprite.play("idle")
+	if not _map_token_active:
+		sprite.play("idle")
 	moved.emit(grid_position, target_pos)
 
 
@@ -595,8 +654,20 @@ func spend_marks(count: int) -> int:
 # ── 私有方法 ─────────────────────────────────────────
 
 func _apply_visuals() -> void:
-	sprite.self_modulate = FACTION_COLORS.get(faction, Color.WHITE)
-	sprite.scale = UNIT_ICON_SCALE
+	if _map_token_active:
+		sprite.visible = false
+		map_token_view.visible = true
+		map_token_view.self_modulate = Color.WHITE
+		var health_bottom := float(_map_token_layout["health_bar_bottom_y"])
+		health_bar.position.y = health_bottom - health_bar.size.y
+		_status_badge_y = float(_map_token_layout["status_badge_y"])
+	else:
+		sprite.visible = true
+		map_token_view.visible = false
+		sprite.self_modulate = FACTION_COLORS.get(faction, Color.WHITE)
+		sprite.scale = UNIT_ICON_SCALE
+		health_bar.position.y = -44.0
+		_status_badge_y = STATUS_BADGE_Y
 
 	var bg_style: StyleBoxFlat = StyleBoxFlat.new()
 	bg_style.bg_color = HP_BAR_BG
@@ -622,19 +693,20 @@ func _apply_visuals() -> void:
 	_hp_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_hp_label)
 
-	_unit_label = Label.new()
-	_unit_label.name = "UnitLabel"
-	_unit_label.text = str(UNIT_LABELS.get(unit_id, unit_name.left(2)))
-	_unit_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_unit_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_unit_label.position = Vector2(-32, -14)
-	_unit_label.size = Vector2(64, 28)
-	_unit_label.add_theme_font_size_override("font_size", 18)
-	_unit_label.add_theme_color_override("font_color", Color.WHITE)
-	_unit_label.add_theme_color_override("font_outline_color", Color.BLACK)
-	_unit_label.add_theme_constant_override("outline_size", 3)
-	_unit_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_unit_label)
+	if not _map_token_active:
+		_unit_label = Label.new()
+		_unit_label.name = "UnitLabel"
+		_unit_label.text = str(UNIT_LABELS.get(unit_id, unit_name.left(2)))
+		_unit_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_unit_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		_unit_label.position = Vector2(-32, -14)
+		_unit_label.size = Vector2(64, 28)
+		_unit_label.add_theme_font_size_override("font_size", 18)
+		_unit_label.add_theme_color_override("font_color", Color.WHITE)
+		_unit_label.add_theme_color_override("font_outline_color", Color.BLACK)
+		_unit_label.add_theme_constant_override("outline_size", 3)
+		_unit_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(_unit_label)
 
 	_rebuild_status_icons()
 
@@ -665,16 +737,30 @@ func _set_walk_direction(dir: Vector2i) -> void:
 	if dir == Vector2i.ZERO:
 		return
 	if dir.y < 0:
-		sprite.play("walk_north")
+		set_facing(&"NE")
 	elif dir.y > 0:
-		sprite.play("walk_south")
+		set_facing(&"SW")
 	elif dir.x < 0:
-		sprite.play("walk_west")
+		set_facing(&"NW")
 	else:
+		set_facing(&"SE")
+	if not _map_token_active and dir.y < 0:
+		sprite.play("walk_north")
+	elif not _map_token_active and dir.y > 0:
+		sprite.play("walk_south")
+	elif not _map_token_active and dir.x < 0:
+		sprite.play("walk_west")
+	elif not _map_token_active:
 		sprite.play("walk_east")
 
 
 func _on_death() -> void:
+	if _map_token_active:
+		queue_free()
+		return
+	if sprite.sprite_frames == null or not sprite.sprite_frames.has_animation(&"death") or sprite.sprite_frames.get_animation_loop(&"death"):
+		queue_free()
+		return
 	sprite.play("death")
 	await sprite.animation_finished
 	queue_free()
@@ -722,7 +808,7 @@ func _rebuild_status_icons() -> void:
 			duration_text = str(buff.duration)
 		var effect_label: Label = _make_badge(
 			icon_text + duration_text,
-			Vector2(start_x + float(index) * STATUS_BADGE_STEP, STATUS_BADGE_Y),
+			Vector2(start_x + float(index) * STATUS_BADGE_STEP, _status_badge_y),
 			Color(0.95, 0.30, 0.30) if buff.is_debuff() else Color(0.30, 0.85, 0.45),
 			false)
 		status_icons.add_child(effect_label)
