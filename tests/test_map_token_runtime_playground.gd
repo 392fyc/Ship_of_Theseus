@@ -22,7 +22,20 @@ const EXPECTED_CHECK_SIZES: Array[Vector2i] = [
 ]
 const EXPECTED_VARIANTS: Array[String] = ["single_weapon", "dual_weapon"]
 const EXPECTED_DIRECTIONS: Array[String] = ["NW", "NE", "SW", "SE"]
-const EXPECTED_FOOT_ANCHORS: Array[int] = [405, 406, 424, 423, 358, 357, 381, 380]
+const EXPECTED_FRAME_PIVOTS: Array[Vector2] = [
+	Vector2(205.9, 397.0),
+	Vector2(194.0, 398.5),
+	Vector2(178.5, 408.5),
+	Vector2(178.0, 407.5),
+	Vector2(203.4, 350.0),
+	Vector2(198.8, 347.5),
+	Vector2(173.5, 365.5),
+	Vector2(182.2, 364.0),
+]
+const EXPECTED_COMPARISON_CENTERS: Array[Vector2] = [
+	Vector2(875, 565),
+	Vector2(1065, 565),
+]
 const EXPECTED_REGIONS: Array[Rect2] = [
 	Rect2(0, 0, 384, 512),
 	Rect2(384, 0, 384, 512),
@@ -106,6 +119,22 @@ func _check_manifest_and_asset_contract() -> void:
 	_check("运行时候选单帧为 384×512", _as_size(runtime.get("source_frame_size", [])) == EXPECTED_SOURCE_FRAME_SIZE)
 	_check("运行时候选变体顺序精确", runtime.get("variant_order", []) == EXPECTED_VARIANTS)
 	_check("运行时候选方向顺序精确", runtime.get("direction_order", []) == EXPECTED_DIRECTIONS)
+	_check(
+		"运行时候选逐帧人体中轴精确且在帧内",
+		_frame_pivot_array_matches(runtime.get("frame_pivot", [])),
+		str(runtime.get("frame_pivot", []))
+	)
+	_check(
+		"人体中轴横向依据排除武器、刀鞘与披风外飘",
+		str((runtime.get("pivot_basis", {}) as Dictionary).get("horizontal", ""))
+		== "anatomical_body_axis_excluding_weapons_scabbards_and_cape_extension"
+	)
+	_check(
+		"人体中轴纵向依据为双脚接触点中点",
+		str((runtime.get("pivot_basis", {}) as Dictionary).get("vertical", ""))
+		== "midpoint_between_both_foot_contacts"
+	)
+	_check("运行时候选不再保留旧脚锚字段", not runtime.has("foot_anchor") and not runtime.has("foot_anchor_y"))
 	_check("运行时候选显示缩放精确", is_equal_approx(float(runtime.get("display_scale", 0.0)), EXPECTED_DISPLAY_SCALE))
 	_check("运行时候选菱形格为 64×32", _as_size(runtime.get("tile_size", [])) == EXPECTED_TILE_SIZE)
 	_check("运行时候选允许 Nearest 与 Linear", runtime.get("filter_modes", []) == ["nearest", "linear"])
@@ -183,7 +212,7 @@ func _check_runtime_scene_contract() -> void:
 			_check("帧 %d 变体映射正确" % index, str(spec.get("variant", "")) == expected_variant, str(spec))
 			_check("帧 %d 方向映射正确" % index, str(spec.get("direction", "")) == expected_direction, str(spec))
 			_check("帧 %d region 映射正确" % index, spec.get("region") == EXPECTED_REGIONS[index], str(spec))
-			_check("帧 %d 脚锚基线正确" % index, int(spec.get("foot_anchor_y", -1)) == EXPECTED_FOOT_ANCHORS[index], str(spec))
+			_check("帧 %d 人体中轴正确" % index, spec.get("frame_pivot") == EXPECTED_FRAME_PIVOTS[index], str(spec))
 			_check("帧 %d 是 Sprite2D" % index, sprite != null)
 			if sprite == null:
 				continue
@@ -191,9 +220,21 @@ func _check_runtime_scene_contract() -> void:
 			_check("帧 %d 使用正确 region" % index, sprite.region_rect == EXPECTED_REGIONS[index], str(sprite.region_rect))
 			_check("帧 %d 统一缩放" % index, sprite.scale.is_equal_approx(Vector2(EXPECTED_DISPLAY_SCALE, EXPECTED_DISPLAY_SCALE)), str(sprite.scale))
 			_check("帧 %d 使用原始高精度母版" % index, sprite.texture != null and sprite.texture.resource_path == ASSET_PATH)
-			var tile_center: Vector2 = sprite.get_meta("tile_center", Vector2.ZERO) as Vector2
-			var actual_foot: Vector2 = sprite.position + Vector2(192.0, float(EXPECTED_FOOT_ANCHORS[index])) * EXPECTED_DISPLAY_SCALE
-			_check("帧 %d 脚锚落在格心" % index, actual_foot.is_equal_approx(tile_center), "%s != %s" % [actual_foot, tile_center])
+			var pivot_metadata: Variant = sprite.get_meta("frame_pivot") if sprite.has_meta("frame_pivot") else null
+			_check(
+				"帧 %d 暴露精确 frame_pivot metadata" % index,
+				pivot_metadata == EXPECTED_FRAME_PIVOTS[index],
+				str(pivot_metadata)
+			)
+			var tile: Polygon2D = instance.find_child("Tile_%d" % index, true, false) as Polygon2D
+			_check("帧 %d 对应真实菱形格存在" % index, tile != null)
+			var tile_center: Vector2 = tile.position if tile != null else Vector2.ZERO
+			var actual_pivot: Vector2 = sprite.position + EXPECTED_FRAME_PIVOTS[index] * sprite.scale
+			_check(
+				"帧 %d 人体中轴落在格心 0.5px 内" % index,
+				actual_pivot.distance_to(tile_center) <= 0.5,
+				"%s 距 %s = %.3fpx" % [actual_pivot, tile_center, actual_pivot.distance_to(tile_center)]
+			)
 
 	_check("运行场默认 Linear", str(instance.call("get_filter_mode")) == "linear")
 	instance.call("set_filter_mode", "nearest")
@@ -273,12 +314,31 @@ func _check_correction_contract(instance: Node) -> void:
 			var logical_position: Vector2i = sprite.get_meta("logical_position", Vector2i(-99, -99)) as Vector2i
 			var variant: String = str(sprite.get_meta("variant", ""))
 			var direction: String = str(sprite.get_meta("direction", ""))
+			var frame_index: int = EXPECTED_VARIANTS.find(variant) * 4 + EXPECTED_DIRECTIONS.find(direction)
 			logical_positions.append(logical_position)
 			has_single_se = has_single_se or (variant == "single_weapon" and direction == "SE")
 			has_dual_se = has_dual_se or (variant == "dual_weapon" and direction == "SE")
 			var depth: int = logical_position.x + logical_position.y
 			_check("压力区单位按 x+y 非降序排列", depth >= previous_depth, "%d < %d" % [depth, previous_depth])
 			previous_depth = depth
+			if frame_index >= 0 and frame_index < EXPECTED_FRAME_PIVOTS.size():
+				var expected_pivot: Vector2 = EXPECTED_FRAME_PIVOTS[frame_index]
+				var pivot_metadata: Variant = sprite.get_meta("frame_pivot") if sprite.has_meta("frame_pivot") else null
+				_check(
+					"压力区 %s/%s 暴露精确 frame_pivot metadata" % [variant, direction],
+					pivot_metadata == expected_pivot,
+					str(pivot_metadata)
+				)
+				var tile_name: String = "StressTile_%d_%d" % [logical_position.x, logical_position.y]
+				var stress_tile: Polygon2D = instance.find_child(tile_name, true, false) as Polygon2D
+				_check("压力区 %s 对应真实菱形格存在" % tile_name, stress_tile != null)
+				var tile_center: Vector2 = stress_tile.position if stress_tile != null else Vector2.ZERO
+				var actual_pivot: Vector2 = sprite.position + expected_pivot * sprite.scale
+				_check(
+					"压力区 %s/%s 复用人体中轴" % [variant, direction],
+					actual_pivot.distance_to(tile_center) <= 0.5,
+					"%s 距 %s = %.3fpx" % [actual_pivot, tile_center, actual_pivot.distance_to(tile_center)]
+				)
 		_check("压力区包含 single SE", has_single_se)
 		_check("压力区包含 dual SE", has_dual_se)
 		_check("压力区至少一对单位占据曼哈顿相邻格", _has_manhattan_neighbor(logical_positions), str(logical_positions))
@@ -296,6 +356,24 @@ func _check_correction_contract(instance: Node) -> void:
 				_check("对照两侧使用同一显示缩放", nearest_sprite.scale.is_equal_approx(linear_sprite.scale), "%s != %s" % [nearest_sprite.scale, linear_sprite.scale])
 				_check("对照左侧固定 Nearest", nearest_sprite.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST)
 				_check("对照右侧固定 Linear", linear_sprite.texture_filter == CanvasItem.TEXTURE_FILTER_LINEAR)
+				for index: int in range(2):
+					var sprite: Sprite2D = comparison_nodes[index] as Sprite2D
+					var pivot_metadata: Variant = sprite.get_meta("frame_pivot") if sprite.has_meta("frame_pivot") else null
+					_check(
+						"过滤对照 %d 暴露 dual SE frame_pivot metadata" % index,
+						pivot_metadata == EXPECTED_FRAME_PIVOTS[7],
+						str(pivot_metadata)
+					)
+					var actual_pivot: Vector2 = sprite.position + EXPECTED_FRAME_PIVOTS[7] * sprite.scale
+					_check(
+						"过滤对照 %d 复用 dual SE 人体中轴" % index,
+						actual_pivot.distance_to(EXPECTED_COMPARISON_CENTERS[index]) <= 0.5,
+						"%s 距 %s = %.3fpx" % [
+							actual_pivot,
+							EXPECTED_COMPARISON_CENTERS[index],
+							actual_pivot.distance_to(EXPECTED_COMPARISON_CENTERS[index]),
+						]
+					)
 		var nearest_label: Label = instance.find_child("ComparisonNearestLabel", true, false) as Label
 		var linear_label: Label = instance.find_child("ComparisonLinearLabel", true, false) as Label
 		_check("过滤对照使用运行时 Nearest 标签", nearest_label != null and nearest_label.text == "Nearest")
@@ -348,6 +426,36 @@ func _as_size(value: Variant) -> Vector2i:
 	if values.size() != 2:
 		return Vector2i.ZERO
 	return Vector2i(int(values[0]), int(values[1]))
+
+
+func _frame_pivot_array_matches(value: Variant) -> bool:
+	if typeof(value) != TYPE_ARRAY:
+		return false
+	var pivots: Array = value as Array
+	if pivots.size() != EXPECTED_FRAME_PIVOTS.size():
+		return false
+	for index: int in range(pivots.size()):
+		if typeof(pivots[index]) != TYPE_ARRAY:
+			return false
+		var components: Array = pivots[index] as Array
+		if components.size() != 2:
+			return false
+		if not (
+			typeof(components[0]) in [TYPE_INT, TYPE_FLOAT]
+			and typeof(components[1]) in [TYPE_INT, TYPE_FLOAT]
+		):
+			return false
+		var frame_pivot: Vector2 = Vector2(float(components[0]), float(components[1]))
+		if not frame_pivot.is_equal_approx(EXPECTED_FRAME_PIVOTS[index]):
+			return false
+		if (
+			frame_pivot.x < 0.0
+			or frame_pivot.x >= 384.0
+			or frame_pivot.y < 0.0
+			or frame_pivot.y >= 512.0
+		):
+			return false
+	return true
 
 
 func _approved_preview_matches(value: Variant) -> bool:

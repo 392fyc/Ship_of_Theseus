@@ -226,7 +226,7 @@ func _validate_runtime_candidate() -> bool:
 	var frame_size: Vector2i = _array_to_size(_runtime_candidate.get("source_frame_size", []))
 	var variants: Array = _runtime_candidate.get("variant_order", []) as Array
 	var directions: Array = _runtime_candidate.get("direction_order", []) as Array
-	var anchors: Array = _runtime_candidate.get("foot_anchor_y", []) as Array
+	var pivots: Array = _runtime_candidate.get("frame_pivot", []) as Array
 	if (
 		not source_path.begins_with("res://assets/prototype/visual_style/samples/")
 		or not source_path.ends_with(".png")
@@ -236,7 +236,7 @@ func _validate_runtime_candidate() -> bool:
 		or frame_size * frame_grid != source_size
 		or variants.size() != 2
 		or directions.size() != 4
-		or anchors.size() != 8
+		or not _frame_pivots_are_valid(pivots, frame_size)
 	):
 		push_error("map_token runtime_candidate 切帧合同无效")
 		return false
@@ -350,7 +350,7 @@ func _build_frames() -> void:
 	var frame_size: Vector2i = _array_to_size(_runtime_candidate.get("source_frame_size", []))
 	var variants: Array = _runtime_candidate.get("variant_order", []) as Array
 	var directions: Array = _runtime_candidate.get("direction_order", []) as Array
-	var anchors: Array = _runtime_candidate.get("foot_anchor_y", []) as Array
+	var pivots: Array = _runtime_candidate.get("frame_pivot", []) as Array
 	var display_scale: float = float(_runtime_candidate.get("display_scale", 0.15625))
 	for row: int in range(variants.size()):
 		for column: int in range(directions.size()):
@@ -363,7 +363,7 @@ func _build_frames() -> void:
 				"variant": str(variants[row]),
 				"direction": str(directions[column]),
 				"region": region,
-				"foot_anchor_y": int(anchors[index]),
+				"frame_pivot": _array_to_vector2(pivots[index]),
 			}
 			_frame_specs.append(spec)
 
@@ -402,6 +402,7 @@ func _build_frames() -> void:
 			sprite.scale = Vector2(display_scale, display_scale)
 			sprite.set_meta("variant", str(variants[row]))
 			sprite.set_meta("direction", str(directions[column]))
+			sprite.set_meta("frame_pivot", spec.get("frame_pivot", Vector2.ZERO) as Vector2)
 			_preview_root.add_child(sprite)
 			_sprites.append(sprite)
 
@@ -461,7 +462,6 @@ func _build_stress_grid() -> void:
 	]
 	placements.sort_custom(_stress_placement_before)
 	var display_scale: float = float(_runtime_candidate.get("display_scale", 0.15625))
-	var frame_size: Vector2i = _array_to_size(_runtime_candidate.get("source_frame_size", []))
 	var texture: Texture2D = load(str(_runtime_candidate.get("source_path", ""))) as Texture2D
 	for placement: Dictionary in placements:
 		var variant: String = str(placement.get("variant", ""))
@@ -474,10 +474,8 @@ func _build_stress_grid() -> void:
 		)
 		var sprite: Sprite2D = _make_frame_sprite(texture, spec, display_scale)
 		sprite.name = "Stress_%s_%s_%d_%d" % [variant, direction, logical_position.x, logical_position.y]
-		sprite.position = grid_origin + screen_center + Vector2(
-			-float(frame_size.x) * 0.5,
-			-float(spec.get("foot_anchor_y", 0))
-		) * display_scale
+		var frame_pivot: Vector2 = spec.get("frame_pivot", Vector2.ZERO) as Vector2
+		sprite.position = grid_origin + screen_center - frame_pivot * display_scale
 		sprite.z_index = (logical_position.x + logical_position.y) * 10 + logical_position.x
 		sprite.set_meta("logical_position", logical_position)
 		sprite.set_meta("tile_center", grid_origin + screen_center)
@@ -500,7 +498,6 @@ func _build_filter_comparison() -> void:
 
 	var texture: Texture2D = load(str(_runtime_candidate.get("source_path", ""))) as Texture2D
 	var spec: Dictionary = _find_frame_spec("dual_weapon", "SE")
-	var frame_size: Vector2i = _array_to_size(_runtime_candidate.get("source_frame_size", []))
 	var display_scale: float = float(_runtime_candidate.get("display_scale", 0.15625)) * 1.6
 	var tile_size: Vector2i = _array_to_size(_runtime_candidate.get("tile_size", []))
 	var centers: Array[Vector2] = [Vector2(875, 565), Vector2(1065, 565)]
@@ -511,10 +508,8 @@ func _build_filter_comparison() -> void:
 		_comparison_root.add_child(tile)
 		var sprite: Sprite2D = _make_frame_sprite(texture, spec, display_scale)
 		sprite.name = "Comparison%s" % modes[index].capitalize()
-		sprite.position = centers[index] + Vector2(
-			-float(frame_size.x) * 0.5,
-			-float(spec.get("foot_anchor_y", 0))
-		) * display_scale
+		var frame_pivot: Vector2 = spec.get("frame_pivot", Vector2.ZERO) as Vector2
+		sprite.position = centers[index] - frame_pivot * display_scale
 		sprite.texture_filter = (
 			CanvasItem.TEXTURE_FILTER_NEAREST
 			if modes[index] == "nearest"
@@ -540,7 +535,6 @@ func _update_layout() -> void:
 	var vertical_gap: float = 150.0
 	var center: Vector2 = Vector2(365, 285)
 	var display_scale: float = float(_runtime_candidate.get("display_scale", 0.15625))
-	var frame_size: Vector2i = _array_to_size(_runtime_candidate.get("source_frame_size", []))
 	for index: int in range(_frame_specs.size()):
 		var row: int = index / 4
 		var column: int = index % 4
@@ -550,9 +544,9 @@ func _update_layout() -> void:
 		)
 		_tiles[index].position = tile_center
 		var spec: Dictionary = _frame_specs[index]
-		var foot_anchor_y: float = float(spec.get("foot_anchor_y", 0))
+		var frame_pivot: Vector2 = spec.get("frame_pivot", Vector2.ZERO) as Vector2
 		var sprite: Sprite2D = _sprites[index]
-		sprite.position = tile_center + Vector2(-float(frame_size.x) * 0.5, -foot_anchor_y) * display_scale
+		sprite.position = tile_center - frame_pivot * display_scale
 		sprite.set_meta("tile_center", tile_center)
 		_frame_labels[index].position = tile_center + Vector2(-64, 27)
 
@@ -605,6 +599,7 @@ func _make_frame_sprite(texture: Texture2D, spec: Dictionary, display_scale: flo
 	sprite.scale = Vector2(display_scale, display_scale)
 	sprite.set_meta("variant", str(spec.get("variant", "")))
 	sprite.set_meta("direction", str(spec.get("direction", "")))
+	sprite.set_meta("frame_pivot", spec.get("frame_pivot", Vector2.ZERO) as Vector2)
 	return sprite
 
 
@@ -736,3 +731,37 @@ func _array_to_size(value: Variant) -> Vector2i:
 	if values.size() != 2:
 		return Vector2i.ZERO
 	return Vector2i(int(values[0]), int(values[1]))
+
+
+func _array_to_vector2(value: Variant) -> Vector2:
+	if typeof(value) != TYPE_ARRAY:
+		return Vector2.ZERO
+	var values: Array = value as Array
+	if values.size() != 2:
+		return Vector2.ZERO
+	return Vector2(float(values[0]), float(values[1]))
+
+
+func _frame_pivots_are_valid(pivots: Array, frame_size: Vector2i) -> bool:
+	if pivots.size() != 8:
+		return false
+	for pivot_value: Variant in pivots:
+		if typeof(pivot_value) != TYPE_ARRAY:
+			return false
+		var components: Array = pivot_value as Array
+		if components.size() != 2:
+			return false
+		if not (
+			typeof(components[0]) in [TYPE_INT, TYPE_FLOAT]
+			and typeof(components[1]) in [TYPE_INT, TYPE_FLOAT]
+		):
+			return false
+		var frame_pivot: Vector2 = Vector2(float(components[0]), float(components[1]))
+		if (
+			frame_pivot.x < 0.0
+			or frame_pivot.x >= float(frame_size.x)
+			or frame_pivot.y < 0.0
+			or frame_pivot.y >= float(frame_size.y)
+		):
+			return false
+	return true
