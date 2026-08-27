@@ -44,9 +44,12 @@ func _run() -> void:
 	_check("拒绝未知方向", not view.call("set_visual_state", &"N", false))
 	_check_invalid_profile("缺少纹理路径", profile, func(invalid: Dictionary): invalid.erase("texture_path"))
 	_check_invalid_profile("内容错误哈希", profile, func(invalid: Dictionary): invalid["sha256"] = "0".repeat(64))
+	_check_invalid_profile("不存在纹理路径", profile, func(invalid: Dictionary): invalid["texture_path"] = "res://assets/units/kensei/does_not_exist.png")
 	_check_invalid_profile("错误图集", profile, func(invalid: Dictionary): invalid["frame_grid"] = [2.0, 4.0])
 	_check_invalid_profile("缺少中心点", profile, func(invalid: Dictionary): invalid.erase("frame_pivot"))
 	_check_invalid_profile("缺少布局字段", profile, func(invalid: Dictionary): invalid["overhead_layout"].erase("popup_anchor_y"))
+	for layout_key: String in ["opaque_union_top_y", "health_bar_bottom_y", "status_badge_y", "popup_anchor_y"]:
+		_check_invalid_profile("非有限布局字段 %s" % layout_key, profile, func(invalid: Dictionary): invalid["overhead_layout"][layout_key] = NAN)
 	_check_invalid_profile("越界人物中心点", profile, func(invalid: Dictionary): invalid["frame_pivot"][0] = [500.0, 397.0])
 	_check_invalid_profile("非有限人物中心点", profile, func(invalid: Dictionary): invalid["frame_pivot"][0] = [NAN, 397.0])
 	view.queue_free()

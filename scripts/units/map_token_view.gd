@@ -7,6 +7,7 @@ const EXPECTED_FRAME_SIZE := Vector2i(384, 512)
 var _configured := false
 var _profile: Dictionary = {}
 var _facing: StringName = &"SE"
+static var _source_sha256_cache: Dictionary = {}
 
 
 func configure(profile: Dictionary) -> bool:
@@ -14,18 +15,13 @@ func configure(profile: Dictionary) -> bool:
 	if not _validate_profile(profile):
 		return false
 	var texture_path := str(profile["texture_path"])
-	if not FileAccess.file_exists(texture_path):
-		push_error("[MapTokenView] Texture missing: %s" % texture_path)
-		return false
-	if FileAccess.get_sha256(texture_path) != str(profile["sha256"]):
-		push_error("[MapTokenView] Texture SHA256 mismatch: %s" % texture_path)
-		return false
-	var image := Image.load_from_file(texture_path)
-	if image == null or image.is_empty():
+	var loaded_texture := load(texture_path) as Texture2D
+	if loaded_texture == null:
 		push_error("[MapTokenView] Texture load failed: %s" % texture_path)
 		return false
-	var loaded_texture := ImageTexture.create_from_image(image)
-	loaded_texture.take_over_path(texture_path)
+	if FileAccess.file_exists(texture_path) and _get_source_sha256(texture_path) != str(profile["sha256"]):
+		push_error("[MapTokenView] Texture SHA256 mismatch: %s" % texture_path)
+		return false
 	texture = loaded_texture
 	hframes = EXPECTED_GRID.x
 	vframes = EXPECTED_GRID.y
@@ -99,6 +95,8 @@ func _validate_profile(profile: Dictionary) -> bool:
 	for key: String in ["opaque_union_top_y", "health_bar_bottom_y", "status_badge_y", "popup_anchor_y"]:
 		if not [TYPE_INT, TYPE_FLOAT].has(typeof((layout as Dictionary).get(key, null))):
 			return false
+		if not is_finite(float((layout as Dictionary)[key])):
+			return false
 	return true
 
 
@@ -109,6 +107,12 @@ func _matches_size(value: Variant, expected: Vector2i) -> bool:
 	if not [TYPE_INT, TYPE_FLOAT].has(typeof(size[0])) or not [TYPE_INT, TYPE_FLOAT].has(typeof(size[1])):
 		return false
 	return is_equal_approx(float(size[0]), float(expected.x)) and is_equal_approx(float(size[1]), float(expected.y))
+
+
+func _get_source_sha256(texture_path: String) -> String:
+	if not _source_sha256_cache.has(texture_path):
+		_source_sha256_cache[texture_path] = FileAccess.get_sha256(texture_path)
+	return str(_source_sha256_cache[texture_path])
 
 
 func _reset() -> void:
