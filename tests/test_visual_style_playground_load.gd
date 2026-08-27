@@ -17,7 +17,7 @@ const EXPECTED_CHECK_SIZES: Array[Vector2i] = [
 const EXPECTED_DISPLAY_SIZES: Dictionary = {
 	"ui": Vector2i(210, 118),
 	"portrait": Vector2i(128, 170),
-	"map_token": Vector2i(48, 48),
+	"map_token": Vector2i(140, 93),
 	"terrain": Vector2i(140, 140),
 	"vfx": Vector2i(140, 140),
 }
@@ -49,7 +49,9 @@ const EXPECTED_APPROVED_PREVIEWS: Dictionary = {
 	},
 }
 const APPROVED_PREVIEW_IDENTITY_SCOPE: String = "external_review_artifact"
-const VERIFIED_PREVIEW_PROVENANCE: String = "Codex 内置 image_gen 子任务生成；最终预览经本地机械透明清理；最终字节由 approved_preview.sha256 绑定。"
+const VERIFIED_PREVIEW_PROVENANCE: String = "Codex image_gen 生成；本地机械透明清理；SHA256 绑定。"
+const VERIFIED_RIGHTS_BASIS: String = "KB 视觉裁决@f111e237:L45；2026-08-27 用户授权；仅限五个 approved_preview.sha256 原文件。"
+const SAMPLE_DIRECTORY: String = "res://assets/prototype/visual_style/samples/"
 const TEXTURE_FIXTURE_PATH: String = "res://dev_doc/ui-art-research/mood/01-cold-stone.png"
 const REQUIRED_FIELDS: Array[String] = [
 	"asset_type",
@@ -163,6 +165,7 @@ func _check_manifest_contract() -> void:
 		actual_ids.append(sample_id)
 		var asset_type: String = str(sample.get("asset_type", ""))
 		var type_rules: Dictionary = asset_types.get(asset_type, {}) as Dictionary
+		var expected_preview: Dictionary = EXPECTED_APPROVED_PREVIEWS.get(sample_id, {}) as Dictionary
 
 		_check("样本槽 %s 包含字段 asset_type" % sample_id, sample.has("asset_type"))
 		for field_name: String in REQUIRED_FIELDS:
@@ -172,14 +175,17 @@ func _check_manifest_contract() -> void:
 		if type_rules.size() == 0:
 			continue
 
-		_check("样本槽 %s source_path 为空" % sample_id, str(sample.get("source_path", "missing")) == "")
+		var source_path: String = str(sample.get("source_path", ""))
+		var expected_source_path: String = SAMPLE_DIRECTORY + str(expected_preview.get("file_name", ""))
+		_check("样本槽 %s source_path 指向获批仓内 PNG" % sample_id, source_path == expected_source_path, source_path)
+		_check("样本槽 %s source_path 是合法 res:// 路径" % sample_id, _is_valid_resource_path(source_path), source_path)
 		for required_type_field: String in REQUIRED_TYPE_FIELDS:
 			_check("类型规则 %s 包含字段 %s" % [sample_id, required_type_field], type_rules.has(required_type_field))
 
 		var sample_source_size: Vector2i = _array_to_size(sample.get("source_size"))
 		_check(
-			"样本槽 %s 空槽 source_size 允许 0,0" % sample_id,
-			sample_source_size == Vector2i.ZERO,
+			"样本槽 %s source_size 与获批原文件一致" % sample_id,
+			sample_source_size == expected_preview.get("pixel_size", Vector2i.ZERO),
 			str(sample_source_size)
 		)
 		_check(
@@ -203,19 +209,32 @@ func _check_manifest_contract() -> void:
 		_check("样本槽 %s 已经用户逐文件批准" % sample_id, str(sample.get("approval_status", "")) == "approved")
 		_check("样本槽 %s 预览来源已核验" % sample_id, str(sample.get("provenance_status", "")) == "verified")
 		_check("样本槽 %s 预览来源说明与统一合同一致" % sample_id, str(sample.get("provenance", "")) == VERIFIED_PREVIEW_PROVENANCE)
-		_check("样本槽 %s 使用权依据仍为空" % sample_id, str(sample.get("rights_basis", "missing")) == "")
-		_check("样本槽 %s 使用权仍需要复核" % sample_id, str(sample.get("rights_status", "")) == "review_required")
+		_check("样本槽 %s 使用权依据与 KB 授权一致" % sample_id, str(sample.get("rights_basis", "")) == VERIFIED_RIGHTS_BASIS)
+		_check("样本槽 %s 使用权已经核验" % sample_id, str(sample.get("rights_status", "")) == "verified")
 
 		var approved_preview_value: Variant = sample.get("approved_preview", {})
 		_check("样本槽 %s approved_preview 是对象" % sample_id, typeof(approved_preview_value) == TYPE_DICTIONARY)
 		var approved_preview: Dictionary = approved_preview_value as Dictionary
-		var expected_preview: Dictionary = EXPECTED_APPROVED_PREVIEWS.get(sample_id, {}) as Dictionary
 		_check("样本槽 %s 批准预览文件名精确" % sample_id, str(approved_preview.get("file_name", "")) == str(expected_preview.get("file_name", "")))
 		var approved_sha256: String = str(approved_preview.get("sha256", ""))
 		_check("样本槽 %s 批准预览 SHA256 精确" % sample_id, approved_sha256 == str(expected_preview.get("sha256", "")))
 		_check("样本槽 %s 批准预览 SHA256 为 64 位小写十六进制" % sample_id, sha256_pattern.search(approved_sha256) != null, approved_sha256)
 		_check("样本槽 %s 批准预览像素尺寸精确" % sample_id, _array_to_size(approved_preview.get("pixel_size", [])) == expected_preview.get("pixel_size", Vector2i.ZERO), str(approved_preview.get("pixel_size", [])))
 		_check("样本槽 %s 批准预览仅是仓外审查工件" % sample_id, str(approved_preview.get("identity_scope", "")) == APPROVED_PREVIEW_IDENTITY_SCOPE)
+
+		var source_exists: bool = FileAccess.file_exists(source_path)
+		_check("样本槽 %s 仓内 PNG 存在" % sample_id, source_exists, source_path)
+		if source_exists:
+			var actual_sha256: String = FileAccess.get_sha256(source_path)
+			_check("样本槽 %s 仓内字节与批准 SHA256 一致" % sample_id, actual_sha256 == approved_sha256, actual_sha256)
+			var source_image: Image = Image.load_from_file(source_path)
+			var image_loaded: bool = source_image != null and not source_image.is_empty()
+			_check("样本槽 %s PNG 可由 Image 加载" % sample_id, image_loaded, source_path)
+			if image_loaded:
+				var image_size: Vector2i = Vector2i(source_image.get_width(), source_image.get_height())
+				_check("样本槽 %s PNG 实际尺寸与清单一致" % sample_id, image_size == sample_source_size, str(image_size))
+				_check("样本槽 %s PNG 为 RGBA8" % sample_id, source_image.get_format() == Image.FORMAT_RGBA8, str(source_image.get_format()))
+				_check("样本槽 %s PNG 存在透明像素" % sample_id, source_image.detect_alpha() != Image.ALPHA_NONE, str(source_image.detect_alpha()))
 
 		_check(
 			"样本槽 %s texture_filter 在允许枚举" % sample_id,
@@ -299,6 +318,8 @@ func _check_manifest_contract() -> void:
 					str(required_directions)
 				)
 				_check("map_token 规则 frame_size 为 48×48", _array_to_size(type_rules.get("frame_size", [0, 0])) == Vector2i(48, 48))
+				_check("map_token 代表板源尺寸不是类型级 48×48 帧", sample_source_size != _array_to_size(type_rules.get("frame_size", [0, 0])), str(sample_source_size))
+				_check("map_token 代表板按 140×93 等比例显示", _array_to_size(sample.get("display_size", [])) == Vector2i(140, 93), str(sample.get("display_size", [])))
 				_check("map_token 规则静态待机", bool(type_rules.get("static_idle_only", false)) and not bool(type_rules.get("combat_animation_required", true)))
 			"terrain":
 				_check("terrain 规则 tile_size 为 64×32", _array_to_size(type_rules.get("tile_size", [0, 0])) == Vector2i(64, 32))
@@ -366,24 +387,18 @@ func _check_scene_contract() -> void:
 
 	for sample_id: String in EXPECTED_IDS:
 		var current_state: Dictionary = instance.call("get_sample_state", sample_id) as Dictionary
-		_check("当前样本槽 %s 运行状态为 pending_asset" % sample_id, current_state.get("status_code") == "pending_asset", str(current_state))
+		_check("当前样本槽 %s 运行状态为 usable" % sample_id, current_state.get("status_code") == "usable", str(current_state))
 		var status_text: String = str(current_state.get("status_text", ""))
-		_check("当前样本槽 %s 精确显示待提供与使用权复核" % sample_id, status_text == "待提供 · 使用权需要复核", status_text)
-		_check("当前样本槽 %s 不再显示待用户确认" % sample_id, not status_text.contains("待用户确认"), status_text)
-		_check("当前样本槽 %s 不再显示来源未核验" % sample_id, not status_text.contains("来源未核验"), status_text)
-		_check("当前样本槽 %s 不再显示使用权依据未核验" % sample_id, not status_text.contains("使用权依据未核验"), status_text)
-		_check("当前样本槽 %s 的 approved_preview 不会绕过准入门" % sample_id, not bool(current_state.get("is_usable", true)), str(current_state))
-		_check("当前样本槽 %s 不伪造实际纹理尺寸" % sample_id, current_state.get("actual_texture_size") == Vector2i.ZERO, str(current_state))
+		_check("当前样本槽 %s 精确显示可用" % sample_id, status_text == "可用", status_text)
+		_check("当前样本槽 %s 三道门全部通过" % sample_id, bool(current_state.get("is_usable", false)), str(current_state))
+		var expected_source_size: Vector2i = (EXPECTED_APPROVED_PREVIEWS.get(sample_id, {}) as Dictionary).get("pixel_size", Vector2i.ZERO) as Vector2i
+		_check("当前样本槽 %s 实际纹理尺寸与源尺寸一致" % sample_id, current_state.get("actual_texture_size") == expected_source_size, str(current_state))
+		_check("当前样本槽 %s 清单源尺寸与批准文件一致" % sample_id, current_state.get("source_size") == expected_source_size, str(current_state))
 		var state_display_size: Vector2i = current_state.get("display_size", Vector2i.ZERO) as Vector2i
 		_check(
 			"当前样本槽 %s 显示尺寸与约定一致" % sample_id,
 			state_display_size == EXPECTED_DISPLAY_SIZES.get(sample_id, Vector2i.ZERO),
 			str(current_state)
-		)
-		_check(
-			"当前样本槽 %s status_text 不应误报可用" % sample_id,
-			not status_text.contains("可用"),
-			status_text
 		)
 
 	_check_sample_statuses(instance)
@@ -448,8 +463,9 @@ func _check_scene_contract() -> void:
 	_check("720p 检查五张卡同时可见", layout_metrics.get("all_cards_visible") == true, str(layout_metrics))
 
 	var map_state: Dictionary = instance.call("get_sample_state", "map_token") as Dictionary
-	_check("战棋人物标注源尺寸 0×0", map_state.get("source_size") == Vector2i(0, 0), str(map_state))
-	_check("战棋人物显示尺寸 48×48", map_state.get("display_size") == Vector2i(48, 48), str(map_state))
+	_check("战棋人物代表板源尺寸为 1536×1024", map_state.get("source_size") == Vector2i(1536, 1024), str(map_state))
+	_check("战棋人物代表板显示尺寸为 140×93", map_state.get("display_size") == Vector2i(140, 93), str(map_state))
+	_check("战棋人物代表板不是 48×48 单帧", map_state.get("source_size") != Vector2i(48, 48), str(map_state))
 
 	var screenshot_target: String = str(instance.call("get_screenshot_target_path"))
 	var second_screenshot_target: String = str(instance.call("get_screenshot_target_path"))
@@ -667,6 +683,15 @@ func _array_to_size(value: Variant) -> Vector2i:
 	if values.size() != 2:
 		return Vector2i.ZERO
 	return Vector2i(int(values[0]), int(values[1]))
+
+
+func _is_valid_resource_path(source_path: String) -> bool:
+	return (
+		source_path.begins_with(SAMPLE_DIRECTORY)
+		and source_path.ends_with(".png")
+		and not source_path.contains("\\")
+		and not source_path.contains("..")
+	)
 
 
 func _check(name: String, condition: bool, detail: String = "") -> void:

@@ -144,10 +144,10 @@
       "id": "ui",
       "asset_type": "ui",
       "label": "UI",
-      "source_path": "",
+      "source_path": "res://assets/prototype/visual_style/samples/ui_preview_final_v3.png",
       "source_size": [
-        0,
-        0
+        1774,
+        887
       ],
       "display_size": [
         210,
@@ -164,10 +164,10 @@
       ],
       "required_directions": [],
       "approval_status": "approved",
-      "provenance": "Codex 内置 image_gen 子任务生成；最终预览经本地机械透明清理；最终字节由 approved_preview.sha256 绑定。",
+      "provenance": "Codex image_gen 生成；本地机械透明清理；SHA256 绑定。",
       "provenance_status": "verified",
-      "rights_basis": "",
-      "rights_status": "review_required",
+      "rights_basis": "KB 视觉裁决@f111e237:L45；2026-08-27 用户授权；仅限五个 approved_preview.sha256 原文件。",
+      "rights_status": "verified",
       "approved_preview": {
         "file_name": "ui_preview_final_v3.png",
         "sha256": "0c6f5a7bbc78b889f09e9dccc0423caaef3323bf6e5170314d333ad2c5bc64b6",
@@ -182,10 +182,10 @@
       "id": "portrait",
       "asset_type": "portrait",
       "label": "人物原画",
-      "source_path": "",
+      "source_path": "res://assets/prototype/visual_style/samples/portrait_preview_final.png",
       "source_size": [
-        0,
-        0
+        1254,
+        1254
       ],
       "display_size": [
         128,
@@ -199,10 +199,10 @@
       ],
       "required_directions": [],
       "approval_status": "approved",
-      "provenance": "Codex 内置 image_gen 子任务生成；最终预览经本地机械透明清理；最终字节由 approved_preview.sha256 绑定。",
+      "provenance": "Codex image_gen 生成；本地机械透明清理；SHA256 绑定。",
       "provenance_status": "verified",
-      "rights_basis": "",
-      "rights_status": "review_required",
+      "rights_basis": "KB 视觉裁决@f111e237:L45；2026-08-27 用户授权；仅限五个 approved_preview.sha256 原文件。",
+      "rights_status": "verified",
       "approved_preview": {
         "file_name": "portrait_preview_final.png",
         "sha256": "9f123a2022abe62472530ebd13ba43587802623c0db7ff7af711f5cec5be0cf3",
@@ -217,14 +217,14 @@
       "id": "map_token",
       "asset_type": "map_token",
       "label": "战棋人物",
-      "source_path": "",
+      "source_path": "res://assets/prototype/visual_style/samples/map_token_preview_final_v2.png",
       "source_size": [
-        0,
-        0
+        1536,
+        1024
       ],
       "display_size": [
-        48,
-        48
+        140,
+        93
       ],
       "texture_filter": "nearest",
       "alpha_required": true,
@@ -239,10 +239,10 @@
         "SE"
       ],
       "approval_status": "approved",
-      "provenance": "Codex 内置 image_gen 子任务生成；最终预览经本地机械透明清理；最终字节由 approved_preview.sha256 绑定。",
+      "provenance": "Codex image_gen 生成；本地机械透明清理；SHA256 绑定。",
       "provenance_status": "verified",
-      "rights_basis": "",
-      "rights_status": "review_required",
+      "rights_basis": "KB 视觉裁决@f111e237:L45；2026-08-27 用户授权；仅限五个 approved_preview.sha256 原文件。",
+      "rights_status": "verified",
       "approved_preview": {
         "file_name": "map_token_preview_final_v2.png",
         "sha256": "9c828acb5caa501a351c6628311f8d29692c9ca4454e1614dab891444b61637f",
@@ -257,10 +257,10 @@
       "id": "terrain",
       "asset_type": "terrain",
       "label": "场景与地形",
-      "source_path": "",
+      "source_path": "res://assets/prototype/visual_style/samples/terrain_preview_final.png",
       "source_size": [
-        0,
-        0
+        1536,
+        1024
       ],
       "display_size": [
         140,
@@ -275,10 +275,10 @@
       ],
       "required_directions": [],
       "approval_status": "approved",
-      "provenance": "Codex 内置 image_gen 子任务生成；最终预览经本地机械透明清理；最终字节由 approved_preview.sha256 绑定。",
+      "provenance": "Codex image_gen 生成；本地机械透明清理；SHA256 绑定。",
       "provenance_status": "verified",
-      "rights_basis": "",
-      "rights_status": "review_required",
+      "rights_basis": "KB 视觉裁决@f111e237:L45；2026-08-27 用户授权；仅限五个 approved_preview.sha256 原文件。",
+      "rights_status": "verified",
       "approved_preview": {
         "file_name": "terrain_preview_final.png",
         "sha256": "e40f2d6685d4543c91770768a8f837b0b238f73bd8e436d7438961a15c446b53",
@@ -293,10 +293,10 @@
       "id": "vfx",
       "asset_type": "vfx",
       "label": "特效",
-      "source_path": "",
+      "source_path": "res://assets/prototype/visual_style/samples/vfx_preview_clean.png",
       "source_size": [
-        0,
-        0
+        1254,
+        1254
       ],
       "display_size": [
         140,
@@ -312,10 +312,10 @@
       ],
       "required_directions": [],
       "approval_status": "approved",
-      "provenance": "Codex 内置 image_gen 子任务生成；最终预览经本地机械透明清理；最终字节由 approved_preview.sha256 绑定。",
+      "provenance": "Codex image_gen 生成；本地机械透明清理；SHA256 绑定。",
       "provenance_status": "verified",
-      "rights_basis": "",
-      "rights_status": "review_required",
+      "rights_basis": "KB 视觉裁决@f111e237:L45；2026-08-27 用户授权；仅限五个 approved_preview.sha256 原文件。",
+      "rights_status": "verified",
       "approved_preview": {
         "file_name": "vfx_preview_clean.png",
         "sha256": "e4542cc0d29cc7421d801d05177e653aa85012c1bd67b303c07c966ba04ed844",
