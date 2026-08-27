@@ -21,6 +21,35 @@ const EXPECTED_DISPLAY_SIZES: Dictionary = {
 	"terrain": Vector2i(140, 140),
 	"vfx": Vector2i(140, 140),
 }
+const EXPECTED_APPROVED_PREVIEWS: Dictionary = {
+	"ui": {
+		"file_name": "ui_preview_final_v3.png",
+		"sha256": "0c6f5a7bbc78b889f09e9dccc0423caaef3323bf6e5170314d333ad2c5bc64b6",
+		"pixel_size": Vector2i(1774, 887),
+	},
+	"portrait": {
+		"file_name": "portrait_preview_final.png",
+		"sha256": "9f123a2022abe62472530ebd13ba43587802623c0db7ff7af711f5cec5be0cf3",
+		"pixel_size": Vector2i(1254, 1254),
+	},
+	"map_token": {
+		"file_name": "map_token_preview_final_v2.png",
+		"sha256": "9c828acb5caa501a351c6628311f8d29692c9ca4454e1614dab891444b61637f",
+		"pixel_size": Vector2i(1536, 1024),
+	},
+	"terrain": {
+		"file_name": "terrain_preview_final.png",
+		"sha256": "e40f2d6685d4543c91770768a8f837b0b238f73bd8e436d7438961a15c446b53",
+		"pixel_size": Vector2i(1536, 1024),
+	},
+	"vfx": {
+		"file_name": "vfx_preview_clean.png",
+		"sha256": "e4542cc0d29cc7421d801d05177e653aa85012c1bd67b303c07c966ba04ed844",
+		"pixel_size": Vector2i(1254, 1254),
+	},
+}
+const APPROVED_PREVIEW_IDENTITY_SCOPE: String = "external_review_artifact"
+const VERIFIED_PREVIEW_PROVENANCE: String = "Codex 内置 image_gen 子任务生成；最终预览经本地机械透明清理；最终字节由 approved_preview.sha256 绑定。"
 const TEXTURE_FIXTURE_PATH: String = "res://dev_doc/ui-art-research/mood/01-cold-stone.png"
 const REQUIRED_FIELDS: Array[String] = [
 	"asset_type",
@@ -36,6 +65,7 @@ const REQUIRED_FIELDS: Array[String] = [
 	"provenance_status",
 	"rights_basis",
 	"rights_status",
+	"approved_preview",
 ]
 const REQUIRED_TYPE_FIELDS: Array[String] = [
 	"texture_filter",
@@ -48,7 +78,7 @@ const PROVENANCE_STATUSES: Array[String] = ["unverified", "verified"]
 const RIGHTS_STATUSES: Array[String] = ["unverified", "review_required", "verified"]
 const TEXTURE_FILTERS: Array[String] = ["nearest", "linear"]
 const DIRECTIONS_NWSE: Array[String] = ["NW", "NE", "SW", "SE"]
-const UI_VARIANTS_REQUIRED: Array[String] = ["bottom_action_bar", "tooltip"]
+const UI_VARIANTS_REQUIRED: Array[String] = ["bottom_action_bar"]
 const PORTRAIT_VARIANTS_REQUIRED: Array[String] = ["single_weapon", "dual_weapon"]
 const MAP_TOKEN_VARIANTS_REQUIRED: Array[String] = ["single_weapon", "dual_weapon"]
 const TERRAIN_VARIANTS_REQUIRED: Array[String] = ["base_ground", "transparent_overlay"]
@@ -100,7 +130,7 @@ func _check_manifest_contract() -> void:
 		return
 
 	var manifest: Dictionary = parsed as Dictionary
-	_check("样本清单版本为 2", manifest.get("version", 0) == 2)
+	_check("样本清单版本为 3", manifest.get("version", 0) == 3)
 	_check("样本清单声明 check_sizes", manifest.has("check_sizes"))
 	var manifest_sizes_value: Variant = manifest.get("check_sizes", [])
 	_check("清单包含且只包含三档检查尺寸", typeof(manifest_sizes_value) == TYPE_ARRAY)
@@ -122,6 +152,8 @@ func _check_manifest_contract() -> void:
 
 	var samples: Array = samples_value as Array
 	var actual_ids: Array[String] = []
+	var sha256_pattern: RegEx = RegEx.new()
+	_check("SHA256 格式检查器能编译", sha256_pattern.compile("^[0-9a-f]{64}$") == OK)
 	for sample_value: Variant in samples:
 		if typeof(sample_value) != TYPE_DICTIONARY:
 			_check("每个样本槽都是 JSON 对象", false, str(sample_value))
@@ -168,6 +200,22 @@ func _check_manifest_contract() -> void:
 			"样本槽 %s rights_status 在允许枚举" % sample_id,
 			RIGHTS_STATUSES.has(str(sample.get("rights_status", "")))
 		)
+		_check("样本槽 %s 已经用户逐文件批准" % sample_id, str(sample.get("approval_status", "")) == "approved")
+		_check("样本槽 %s 预览来源已核验" % sample_id, str(sample.get("provenance_status", "")) == "verified")
+		_check("样本槽 %s 预览来源说明与统一合同一致" % sample_id, str(sample.get("provenance", "")) == VERIFIED_PREVIEW_PROVENANCE)
+		_check("样本槽 %s 使用权依据仍为空" % sample_id, str(sample.get("rights_basis", "missing")) == "")
+		_check("样本槽 %s 使用权仍需要复核" % sample_id, str(sample.get("rights_status", "")) == "review_required")
+
+		var approved_preview_value: Variant = sample.get("approved_preview", {})
+		_check("样本槽 %s approved_preview 是对象" % sample_id, typeof(approved_preview_value) == TYPE_DICTIONARY)
+		var approved_preview: Dictionary = approved_preview_value as Dictionary
+		var expected_preview: Dictionary = EXPECTED_APPROVED_PREVIEWS.get(sample_id, {}) as Dictionary
+		_check("样本槽 %s 批准预览文件名精确" % sample_id, str(approved_preview.get("file_name", "")) == str(expected_preview.get("file_name", "")))
+		var approved_sha256: String = str(approved_preview.get("sha256", ""))
+		_check("样本槽 %s 批准预览 SHA256 精确" % sample_id, approved_sha256 == str(expected_preview.get("sha256", "")))
+		_check("样本槽 %s 批准预览 SHA256 为 64 位小写十六进制" % sample_id, sha256_pattern.search(approved_sha256) != null, approved_sha256)
+		_check("样本槽 %s 批准预览像素尺寸精确" % sample_id, _array_to_size(approved_preview.get("pixel_size", [])) == expected_preview.get("pixel_size", Vector2i.ZERO), str(approved_preview.get("pixel_size", [])))
+		_check("样本槽 %s 批准预览仅是仓外审查工件" % sample_id, str(approved_preview.get("identity_scope", "")) == APPROVED_PREVIEW_IDENTITY_SCOPE)
 
 		_check(
 			"样本槽 %s texture_filter 在允许枚举" % sample_id,
@@ -198,10 +246,38 @@ func _check_manifest_contract() -> void:
 
 		match sample_id:
 			"ui":
-				_check("ui 变体至少包含 bottom_action_bar 与 tooltip", _array_contains_all(required_variants, UI_VARIANTS_REQUIRED), str(required_variants))
+				_check("ui 变体包含 bottom_action_bar", _array_contains_all(required_variants, UI_VARIANTS_REQUIRED), str(required_variants))
+				_check("ui 变体不包含 tooltip", not required_variants.has("tooltip"), str(required_variants))
 				_check("ui 规则要求 nineslice_compatible", bool(type_rules.get("nineslice_compatible", false)))
 				_check("ui 规则禁止烘焙文字", bool(type_rules.get("baked_text_forbidden", false)))
 				_check("ui 规则说明深色哥特像素", str(type_rules.get("gothic_pixel_style", "")) == "subtle" or bool(type_rules.get("requires_gothic_pixel_style", false)))
+				var bottom_bar_layout: Dictionary = type_rules.get("bottom_bar_layout", {}) as Dictionary
+				_check("ui 底部栏固定在底部", str(bottom_bar_layout.get("placement", "")) == "fixed_bottom", str(bottom_bar_layout))
+				_check(
+					"ui 底部栏分区顺序固定",
+					_array_equal_required_order(
+						bottom_bar_layout.get("section_order", []),
+						["character", "class_resource", "skills", "relics", "end_turn"]
+					),
+					str(bottom_bar_layout.get("section_order", []))
+				)
+				var character_layout: Dictionary = bottom_bar_layout.get("character", {}) as Dictionary
+				_check("ui 角色区是占位容器", str(character_layout.get("content", "")) == "placeholder", str(character_layout))
+				var class_resource_layout: Dictionary = bottom_bar_layout.get("class_resource", {}) as Dictionary
+				_check("ui 职业资源区内容默认为空", str(class_resource_layout.get("content", "")) == "empty", str(class_resource_layout))
+				_check("ui 职业资源区按职业定制", str(class_resource_layout.get("styling", "")) == "class_specific", str(class_resource_layout))
+				var skills_layout: Dictionary = bottom_bar_layout.get("skills", {}) as Dictionary
+				_check("ui 技能栏水平平铺", str(skills_layout.get("layout", "")) == "horizontal", str(skills_layout))
+				_check("ui 技能栏包含 4 个主动技能", int(skills_layout.get("active_count", -1)) == 4, str(skills_layout))
+				_check("ui 技能栏包含 1 个被动技能", int(skills_layout.get("passive_count", -1)) == 1, str(skills_layout))
+				_check("ui 被动技能图标相对更小", str(skills_layout.get("passive_relative_size", "")) == "smaller", str(skills_layout))
+				var relics_layout: Dictionary = bottom_bar_layout.get("relics", {}) as Dictionary
+				_check("ui 遗物栏共 8 格", int(relics_layout.get("slot_count", -1)) == 8, str(relics_layout))
+				_check("ui 遗物栏是 2 行", int(relics_layout.get("rows", -1)) == 2, str(relics_layout))
+				_check("ui 遗物栏是 4 列", int(relics_layout.get("columns", -1)) == 4, str(relics_layout))
+				_check("ui 不设常驻顶部提示面板", bool(bottom_bar_layout.get("persistent_top_tooltip", true)) == false, str(bottom_bar_layout))
+				_check("ui 不设独立普通攻击按钮", bool(bottom_bar_layout.get("standalone_attack_button", true)) == false, str(bottom_bar_layout))
+				_check("ui 不设独立移动按钮", bool(bottom_bar_layout.get("standalone_move_button", true)) == false, str(bottom_bar_layout))
 			"portrait":
 				_check(
 					"portrait 变体恰含 single_weapon 与 dual_weapon",
@@ -292,10 +368,11 @@ func _check_scene_contract() -> void:
 		var current_state: Dictionary = instance.call("get_sample_state", sample_id) as Dictionary
 		_check("当前样本槽 %s 运行状态为 pending_asset" % sample_id, current_state.get("status_code") == "pending_asset", str(current_state))
 		var status_text: String = str(current_state.get("status_text", ""))
-		_check("当前样本槽 %s 显示待提供" % sample_id, status_text.contains("待提供"), status_text)
-		_check("当前样本槽 %s 显示待用户确认" % sample_id, status_text.contains("待用户确认"), status_text)
-		_check("当前样本槽 %s 显示来源未核验" % sample_id, status_text.contains("来源未核验"), status_text)
-		_check("当前样本槽 %s 显示使用权依据未核验" % sample_id, status_text.contains("使用权依据未核验"), status_text)
+		_check("当前样本槽 %s 精确显示待提供与使用权复核" % sample_id, status_text == "待提供 · 使用权需要复核", status_text)
+		_check("当前样本槽 %s 不再显示待用户确认" % sample_id, not status_text.contains("待用户确认"), status_text)
+		_check("当前样本槽 %s 不再显示来源未核验" % sample_id, not status_text.contains("来源未核验"), status_text)
+		_check("当前样本槽 %s 不再显示使用权依据未核验" % sample_id, not status_text.contains("使用权依据未核验"), status_text)
+		_check("当前样本槽 %s 的 approved_preview 不会绕过准入门" % sample_id, not bool(current_state.get("is_usable", true)), str(current_state))
 		_check("当前样本槽 %s 不伪造实际纹理尺寸" % sample_id, current_state.get("actual_texture_size") == Vector2i.ZERO, str(current_state))
 		var state_display_size: Vector2i = current_state.get("display_size", Vector2i.ZERO) as Vector2i
 		_check(

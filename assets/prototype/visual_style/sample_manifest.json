@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "purpose": "Godot visual cohesion playground inspection contract for prototype loading.",
   "default_filter": "nearest",
   "check_sizes": [
@@ -22,13 +22,43 @@
       "alpha_required": true,
       "required_variants": [
         "bottom_action_bar",
-        "tooltip",
         "panel",
         "button_idle",
         "button_hover",
         "button_pressed"
       ],
       "required_directions": [],
+      "bottom_bar_layout": {
+        "placement": "fixed_bottom",
+        "section_order": [
+          "character",
+          "class_resource",
+          "skills",
+          "relics",
+          "end_turn"
+        ],
+        "character": {
+          "content": "placeholder"
+        },
+        "class_resource": {
+          "content": "empty",
+          "styling": "class_specific"
+        },
+        "skills": {
+          "layout": "horizontal",
+          "active_count": 4,
+          "passive_count": 1,
+          "passive_relative_size": "smaller"
+        },
+        "relics": {
+          "slot_count": 8,
+          "rows": 2,
+          "columns": 4
+        },
+        "persistent_top_tooltip": false,
+        "standalone_attack_button": false,
+        "standalone_move_button": false
+      },
       "nineslice_compatible": true,
       "baked_text_forbidden": true,
       "gothic_pixel_style": "subtle",
@@ -127,18 +157,26 @@
       "alpha_required": true,
       "required_variants": [
         "bottom_action_bar",
-        "tooltip",
         "panel",
         "button_idle",
         "button_hover",
         "button_pressed"
       ],
       "required_directions": [],
-      "approval_status": "pending_user_approval",
-      "provenance": "",
-      "provenance_status": "unverified",
+      "approval_status": "approved",
+      "provenance": "Codex 内置 image_gen 子任务生成；最终预览经本地机械透明清理；最终字节由 approved_preview.sha256 绑定。",
+      "provenance_status": "verified",
       "rights_basis": "",
-      "rights_status": "unverified"
+      "rights_status": "review_required",
+      "approved_preview": {
+        "file_name": "ui_preview_final_v3.png",
+        "sha256": "0c6f5a7bbc78b889f09e9dccc0423caaef3323bf6e5170314d333ad2c5bc64b6",
+        "pixel_size": [
+          1774,
+          887
+        ],
+        "identity_scope": "external_review_artifact"
+      }
     },
     {
       "id": "portrait",
@@ -160,11 +198,20 @@
         "dual_weapon"
       ],
       "required_directions": [],
-      "approval_status": "pending_user_approval",
-      "provenance": "",
-      "provenance_status": "unverified",
+      "approval_status": "approved",
+      "provenance": "Codex 内置 image_gen 子任务生成；最终预览经本地机械透明清理；最终字节由 approved_preview.sha256 绑定。",
+      "provenance_status": "verified",
       "rights_basis": "",
-      "rights_status": "unverified"
+      "rights_status": "review_required",
+      "approved_preview": {
+        "file_name": "portrait_preview_final.png",
+        "sha256": "9f123a2022abe62472530ebd13ba43587802623c0db7ff7af711f5cec5be0cf3",
+        "pixel_size": [
+          1254,
+          1254
+        ],
+        "identity_scope": "external_review_artifact"
+      }
     },
     {
       "id": "map_token",
@@ -191,11 +238,20 @@
         "SW",
         "SE"
       ],
-      "approval_status": "pending_user_approval",
-      "provenance": "",
-      "provenance_status": "unverified",
+      "approval_status": "approved",
+      "provenance": "Codex 内置 image_gen 子任务生成；最终预览经本地机械透明清理；最终字节由 approved_preview.sha256 绑定。",
+      "provenance_status": "verified",
       "rights_basis": "",
-      "rights_status": "unverified"
+      "rights_status": "review_required",
+      "approved_preview": {
+        "file_name": "map_token_preview_final_v2.png",
+        "sha256": "9c828acb5caa501a351c6628311f8d29692c9ca4454e1614dab891444b61637f",
+        "pixel_size": [
+          1536,
+          1024
+        ],
+        "identity_scope": "external_review_artifact"
+      }
     },
     {
       "id": "terrain",
@@ -218,11 +274,20 @@
         "edge_blend"
       ],
       "required_directions": [],
-      "approval_status": "pending_user_approval",
-      "provenance": "",
-      "provenance_status": "unverified",
+      "approval_status": "approved",
+      "provenance": "Codex 内置 image_gen 子任务生成；最终预览经本地机械透明清理；最终字节由 approved_preview.sha256 绑定。",
+      "provenance_status": "verified",
       "rights_basis": "",
-      "rights_status": "unverified"
+      "rights_status": "review_required",
+      "approved_preview": {
+        "file_name": "terrain_preview_final.png",
+        "sha256": "e40f2d6685d4543c91770768a8f837b0b238f73bd8e436d7438961a15c446b53",
+        "pixel_size": [
+          1536,
+          1024
+        ],
+        "identity_scope": "external_review_artifact"
+      }
     },
     {
       "id": "vfx",
@@ -246,11 +311,20 @@
         "status"
       ],
       "required_directions": [],
-      "approval_status": "pending_user_approval",
-      "provenance": "",
-      "provenance_status": "unverified",
+      "approval_status": "approved",
+      "provenance": "Codex 内置 image_gen 子任务生成；最终预览经本地机械透明清理；最终字节由 approved_preview.sha256 绑定。",
+      "provenance_status": "verified",
       "rights_basis": "",
-      "rights_status": "unverified"
+      "rights_status": "review_required",
+      "approved_preview": {
+        "file_name": "vfx_preview_clean.png",
+        "sha256": "e4542cc0d29cc7421d801d05177e653aa85012c1bd67b303c07c966ba04ed844",
+        "pixel_size": [
+          1254,
+          1254
+        ],
+        "identity_scope": "external_review_artifact"
+      }
     }
   ]
 }
