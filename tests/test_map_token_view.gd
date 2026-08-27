@@ -50,6 +50,7 @@ func _run() -> void:
 	_check_invalid_profile("缺少布局字段", profile, func(invalid: Dictionary): invalid["overhead_layout"].erase("popup_anchor_y"))
 	for layout_key: String in ["opaque_union_top_y", "health_bar_bottom_y", "status_badge_y", "popup_anchor_y"]:
 		_check_invalid_profile("非有限布局字段 %s" % layout_key, profile, func(invalid: Dictionary): invalid["overhead_layout"][layout_key] = NAN)
+		_check_invalid_profile("无穷布局字段 %s" % layout_key, profile, func(invalid: Dictionary): invalid["overhead_layout"][layout_key] = INF)
 	_check_invalid_profile("越界人物中心点", profile, func(invalid: Dictionary): invalid["frame_pivot"][0] = [500.0, 397.0])
 	_check_invalid_profile("非有限人物中心点", profile, func(invalid: Dictionary): invalid["frame_pivot"][0] = [NAN, 397.0])
 	view.queue_free()
