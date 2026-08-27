@@ -1,0 +1,385 @@
+{
+  "version": 3,
+  "purpose": "Godot visual cohesion playground inspection contract for prototype loading.",
+  "default_filter": "nearest",
+  "check_sizes": [
+    [
+      1280,
+      720
+    ],
+    [
+      1920,
+      1080
+    ],
+    [
+      2560,
+      1440
+    ]
+  ],
+  "asset_types": {
+    "ui": {
+      "texture_filter": "nearest",
+      "alpha_required": true,
+      "required_variants": [
+        "bottom_action_bar",
+        "panel",
+        "button_idle",
+        "button_hover",
+        "button_pressed"
+      ],
+      "required_directions": [],
+      "bottom_bar_layout": {
+        "placement": "fixed_bottom",
+        "section_order": [
+          "character",
+          "class_resource",
+          "skills",
+          "relics",
+          "end_turn"
+        ],
+        "character": {
+          "content": "placeholder"
+        },
+        "class_resource": {
+          "content": "empty",
+          "styling": "class_specific"
+        },
+        "skills": {
+          "layout": "horizontal",
+          "active_count": 4,
+          "passive_count": 1,
+          "passive_relative_size": "smaller"
+        },
+        "relics": {
+          "slot_count": 8,
+          "rows": 2,
+          "columns": 4
+        },
+        "persistent_top_tooltip": false,
+        "standalone_attack_button": false,
+        "standalone_move_button": false
+      },
+      "nineslice_compatible": true,
+      "baked_text_forbidden": true,
+      "gothic_pixel_style": "subtle",
+      "description": "略微精细深色哥特像素 UI，边界清晰可拼接。"
+    },
+    "portrait": {
+      "texture_filter": "nearest",
+      "alpha_required": true,
+      "required_variants": [
+        "single_weapon",
+        "dual_weapon"
+      ],
+      "required_directions": [],
+      "style": "third_pass_consistent_look",
+      "grip_required": true,
+      "allowed_weapon_shapes": [
+        "traditional_chinese_sword",
+        "western_sword",
+        "long_tachi"
+      ],
+      "description": "第三版统一质感角色立绘，强调真实握持语义。"
+    },
+    "map_token": {
+      "texture_filter": "nearest",
+      "alpha_required": true,
+      "required_variants": [
+        "single_weapon",
+        "dual_weapon"
+      ],
+      "required_directions": [
+        "NW",
+        "NE",
+        "SW",
+        "SE"
+      ],
+      "frame_size": [
+        48,
+        48
+      ],
+      "static_idle_only": true,
+      "combat_animation_required": false,
+      "description": "战棋人物占位贴图，48×48 帧大小，静态待机，不含战斗动画。"
+    },
+    "terrain": {
+      "texture_filter": "nearest",
+      "alpha_required": true,
+      "required_variants": [
+        "base_ground",
+        "transparent_overlay",
+        "edge_blend"
+      ],
+      "required_directions": [],
+      "tile_size": [
+        64,
+        32
+      ],
+      "ratio_2_to_1": true,
+      "seamless_connections_required": true,
+      "separate_base_and_overlay": true,
+      "description": "地形支持 64×32 瓦片，支持分层基底与覆盖物。"
+    },
+    "vfx": {
+      "texture_filter": "nearest",
+      "alpha_required": true,
+      "required_variants": [
+        "slash",
+        "movement",
+        "range",
+        "status"
+      ],
+      "required_directions": [],
+      "animation_type": "static_keyframe",
+      "pixel_core_filter": "nearest",
+      "optional_glow_layer_separate": true,
+      "allow_loop": false,
+      "particle_system_required": false,
+      "combat_animation_required": false,
+      "description": "静态关键帧参考板，柔和光晕若出现需与核心分离，不含循环和粒子系统。"
+    }
+  },
+  "samples": [
+    {
+      "id": "ui",
+      "asset_type": "ui",
+      "label": "UI",
+      "source_path": "res://assets/prototype/visual_style/samples/ui_preview_final_v3.png",
+      "source_size": [
+        1774,
+        887
+      ],
+      "display_size": [
+        210,
+        118
+      ],
+      "texture_filter": "nearest",
+      "alpha_required": true,
+      "required_variants": [
+        "bottom_action_bar",
+        "panel",
+        "button_idle",
+        "button_hover",
+        "button_pressed"
+      ],
+      "required_directions": [],
+      "approval_status": "approved",
+      "provenance": "Codex image_gen 生成；本地机械透明清理；SHA256 绑定。",
+      "provenance_status": "verified",
+      "rights_basis": "KB 视觉裁决@f111e237:L45；2026-08-27 用户授权；仅限五个 approved_preview.sha256 原文件。",
+      "rights_status": "verified",
+      "approved_preview": {
+        "file_name": "ui_preview_final_v3.png",
+        "sha256": "0c6f5a7bbc78b889f09e9dccc0423caaef3323bf6e5170314d333ad2c5bc64b6",
+        "pixel_size": [
+          1774,
+          887
+        ],
+        "identity_scope": "external_review_artifact"
+      }
+    },
+    {
+      "id": "portrait",
+      "asset_type": "portrait",
+      "label": "人物原画",
+      "source_path": "res://assets/prototype/visual_style/samples/portrait_preview_final.png",
+      "source_size": [
+        1254,
+        1254
+      ],
+      "display_size": [
+        128,
+        170
+      ],
+      "texture_filter": "nearest",
+      "alpha_required": true,
+      "required_variants": [
+        "single_weapon",
+        "dual_weapon"
+      ],
+      "required_directions": [],
+      "approval_status": "approved",
+      "provenance": "Codex image_gen 生成；本地机械透明清理；SHA256 绑定。",
+      "provenance_status": "verified",
+      "rights_basis": "KB 视觉裁决@f111e237:L45；2026-08-27 用户授权；仅限五个 approved_preview.sha256 原文件。",
+      "rights_status": "verified",
+      "approved_preview": {
+        "file_name": "portrait_preview_final.png",
+        "sha256": "9f123a2022abe62472530ebd13ba43587802623c0db7ff7af711f5cec5be0cf3",
+        "pixel_size": [
+          1254,
+          1254
+        ],
+        "identity_scope": "external_review_artifact"
+      }
+    },
+    {
+      "id": "map_token",
+      "asset_type": "map_token",
+      "label": "战棋人物",
+      "source_path": "res://assets/prototype/visual_style/samples/map_token_preview_final_v2.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "display_size": [
+        140,
+        93
+      ],
+      "texture_filter": "nearest",
+      "alpha_required": true,
+      "required_variants": [
+        "single_weapon",
+        "dual_weapon"
+      ],
+      "required_directions": [
+        "NW",
+        "NE",
+        "SW",
+        "SE"
+      ],
+      "approval_status": "approved",
+      "provenance": "Codex image_gen 生成；本地机械透明清理；SHA256 绑定。",
+      "provenance_status": "verified",
+      "rights_basis": "KB 视觉裁决@f111e237:L45；2026-08-27 用户授权；仅限五个 approved_preview.sha256 原文件。",
+      "rights_status": "verified",
+      "approved_preview": {
+        "file_name": "map_token_preview_final_v2.png",
+        "sha256": "9c828acb5caa501a351c6628311f8d29692c9ca4454e1614dab891444b61637f",
+        "pixel_size": [
+          1536,
+          1024
+        ],
+        "identity_scope": "external_review_artifact"
+      },
+      "runtime_candidate": {
+        "file_name": "map_token_source_transparent_clean_v2.png",
+        "source_path": "res://assets/prototype/visual_style/samples/map_token_source_transparent_clean_v2.png",
+        "sha256": "e6f33324c52929769d4698ed75e969470ec45748788503f4637fcb3223dc5415",
+        "pixel_size": [
+          1536,
+          1024
+        ],
+        "frame_grid": [
+          4,
+          2
+        ],
+        "source_frame_size": [
+          384,
+          512
+        ],
+        "variant_order": [
+          "single_weapon",
+          "dual_weapon"
+        ],
+        "direction_order": [
+          "NW",
+          "NE",
+          "SW",
+          "SE"
+        ],
+        "foot_anchor_y": [
+          405,
+          406,
+          424,
+          423,
+          358,
+          357,
+          381,
+          380
+        ],
+        "display_scale": 0.15625,
+        "tile_size": [
+          64,
+          32
+        ],
+        "filter_modes": [
+          "nearest",
+          "linear"
+        ],
+        "default_filter": "linear",
+        "approval": "approved",
+        "approval_basis": "2026-08-27 用户已按 SHA256 精确确认 clean_v2，可进入 Task 4.2 隔离原型。",
+        "provenance": "verified",
+        "provenance_basis": "由已授权的五个原文件经 Codex 内置图像能力定向修正，并经本地机械透明清理；SHA256 绑定。",
+        "rights": "verified",
+        "rights_basis": "由五个原文件的用户授权允许修改；clean_v2 已经用户按精确文件视觉确认后获准进入 Task 4.2 隔离原型。原型准入不等于正式生产准入。",
+        "admission_scope": "isolated_task_4_2_prototype",
+        "production_admission": "not_granted"
+      }
+    },
+    {
+      "id": "terrain",
+      "asset_type": "terrain",
+      "label": "场景与地形",
+      "source_path": "res://assets/prototype/visual_style/samples/terrain_preview_final.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "display_size": [
+        140,
+        140
+      ],
+      "texture_filter": "nearest",
+      "alpha_required": true,
+      "required_variants": [
+        "base_ground",
+        "transparent_overlay",
+        "edge_blend"
+      ],
+      "required_directions": [],
+      "approval_status": "approved",
+      "provenance": "Codex image_gen 生成；本地机械透明清理；SHA256 绑定。",
+      "provenance_status": "verified",
+      "rights_basis": "KB 视觉裁决@f111e237:L45；2026-08-27 用户授权；仅限五个 approved_preview.sha256 原文件。",
+      "rights_status": "verified",
+      "approved_preview": {
+        "file_name": "terrain_preview_final.png",
+        "sha256": "e40f2d6685d4543c91770768a8f837b0b238f73bd8e436d7438961a15c446b53",
+        "pixel_size": [
+          1536,
+          1024
+        ],
+        "identity_scope": "external_review_artifact"
+      }
+    },
+    {
+      "id": "vfx",
+      "asset_type": "vfx",
+      "label": "特效",
+      "source_path": "res://assets/prototype/visual_style/samples/vfx_preview_clean.png",
+      "source_size": [
+        1254,
+        1254
+      ],
+      "display_size": [
+        140,
+        140
+      ],
+      "texture_filter": "nearest",
+      "alpha_required": true,
+      "required_variants": [
+        "slash",
+        "movement",
+        "range",
+        "status"
+      ],
+      "required_directions": [],
+      "approval_status": "approved",
+      "provenance": "Codex image_gen 生成；本地机械透明清理；SHA256 绑定。",
+      "provenance_status": "verified",
+      "rights_basis": "KB 视觉裁决@f111e237:L45；2026-08-27 用户授权；仅限五个 approved_preview.sha256 原文件。",
+      "rights_status": "verified",
+      "approved_preview": {
+        "file_name": "vfx_preview_clean.png",
+        "sha256": "e4542cc0d29cc7421d801d05177e653aa85012c1bd67b303c07c966ba04ed844",
+        "pixel_size": [
+          1254,
+          1254
+        ],
+        "identity_scope": "external_review_artifact"
+      }
+    }
+  ]
+}
