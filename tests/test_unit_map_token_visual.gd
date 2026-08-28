@@ -51,7 +51,14 @@ func _run() -> void:
 	_check("正式棋子不使用阵营染色", token_view.self_modulate == Color.WHITE)
 	_check("占位职业文字不存在", kensei.get_node_or_null("UnitLabel") == null)
 	_check("血条底边为 -58", is_equal_approx(health_bar.position.y + health_bar.size.y, -58.0))
-	_check("状态锚点为 -84", is_equal_approx(float(kensei.get("_status_badge_y")), -84.0))
+	var raw_buff: Variant = (data_loader.get("buffs") as Dictionary).get("swordsman_parry_stance", {})
+	var buff := BuffEffect.from_dict(raw_buff as Dictionary)
+	_check("既有状态效果可构造", buff != null)
+	if buff != null:
+		kensei.add_buff(buff)
+		kensei.refresh_status_icons()
+		var status_label := _find_status_label(kensei, buff)
+		_check("状态图标保留既有基线锚点", status_label != null and is_equal_approx(status_label.position.y, Unit.STATUS_BADGE_Y))
 	_check("实际文字锚点为 -82", (kensei.call("get_combat_text_anchor_world", -50.0) as Vector2).is_equal_approx(kensei.global_position + Vector2(0, -82)))
 	kensei.equip_offhand("wpn_swordsman_starter")
 	_check("装副手切到双武器行", token_view.frame_coords.y == 1)
@@ -95,6 +102,20 @@ func _has_all_methods(unit: Unit, methods: Array[String]) -> bool:
 		if not unit.has_method(method_name):
 			return false
 	return true
+
+
+func _find_status_label(unit: Unit, buff: BuffEffect) -> Label:
+	var status_icons := unit.get_node_or_null("StatusIcons") as Node2D
+	if status_icons == null:
+		return null
+	var icon_text := buff.icon.strip_edges()
+	if icon_text == "":
+		icon_text = buff.buff_id.left(2).to_upper()
+	for child: Node in status_icons.get_children():
+		var label := child as Label
+		if label != null and label.text.begins_with(icon_text):
+			return label
+	return null
 
 
 func _check(label: String, condition: bool) -> void:

@@ -48,7 +48,8 @@ func _run() -> void:
 	_check_invalid_profile("错误图集", profile, func(invalid: Dictionary): invalid["frame_grid"] = [2.0, 4.0])
 	_check_invalid_profile("缺少中心点", profile, func(invalid: Dictionary): invalid.erase("frame_pivot"))
 	_check_invalid_profile("缺少布局字段", profile, func(invalid: Dictionary): invalid["overhead_layout"].erase("popup_anchor_y"))
-	for layout_key: String in ["opaque_union_top_y", "health_bar_bottom_y", "status_badge_y", "popup_anchor_y"]:
+	_check_valid_profile("布局不要求状态图标坐标", profile, func(valid: Dictionary): valid["overhead_layout"].erase("status_badge_y"))
+	for layout_key: String in ["opaque_union_top_y", "health_bar_bottom_y", "popup_anchor_y"]:
 		_check_invalid_profile("非有限布局字段 %s" % layout_key, profile, func(invalid: Dictionary): invalid["overhead_layout"][layout_key] = NAN)
 		_check_invalid_profile("无穷布局字段 %s" % layout_key, profile, func(invalid: Dictionary): invalid["overhead_layout"][layout_key] = INF)
 	_check_invalid_profile("越界人物中心点", profile, func(invalid: Dictionary): invalid["frame_pivot"][0] = [500.0, 397.0])
@@ -64,6 +65,16 @@ func _check_invalid_profile(label: String, profile: Dictionary, mutate: Callable
 	mutate.call(invalid)
 	_check(label + " 被拒绝", not view.call("configure", invalid))
 	_check(label + " 时节点不可见", not view.visible)
+	view.queue_free()
+
+
+func _check_valid_profile(label: String, profile: Dictionary, mutate: Callable) -> void:
+	var view: Sprite2D = load("res://scripts/units/map_token_view.gd").new()
+	root.add_child(view)
+	var valid := profile.duplicate(true)
+	mutate.call(valid)
+	_check(label + " 被接受", view.call("configure", valid))
+	_check(label + " 时节点可见", view.visible)
 	view.queue_free()
 
 

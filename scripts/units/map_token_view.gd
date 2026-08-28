@@ -92,7 +92,7 @@ func _validate_profile(profile: Dictionary) -> bool:
 	var layout: Variant = profile.get("overhead_layout", null)
 	if typeof(layout) != TYPE_DICTIONARY:
 		return false
-	for key: String in ["opaque_union_top_y", "health_bar_bottom_y", "status_badge_y", "popup_anchor_y"]:
+	for key: String in ["opaque_union_top_y", "health_bar_bottom_y", "popup_anchor_y"]:
 		if not [TYPE_INT, TYPE_FLOAT].has(typeof((layout as Dictionary).get(key, null))):
 			return false
 		if not is_finite(float((layout as Dictionary)[key])):

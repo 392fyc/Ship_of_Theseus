@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 将已批准的剑圣 `clean_v2` 静态棋子原字节导入正式素材目录，并在真实 `TacticalScene` 中完成四方向、单双武器、脚底居中、纵向遮挡和头顶信息避让。
+**Goal:** 将已批准的剑圣 `clean_v2` 静态棋子原字节导入正式素材目录，并在真实 `TacticalScene` 中完成四方向、单双武器、脚底居中、纵向遮挡、血条和弹出信息避让。
 
 **Architecture:** 正式 PNG 与独立 JSON 显示配置由 `DataLoader` 注册，`kensei` 职业数据只引用配置 ID。`MapTokenView: Sprite2D` 负责图集帧、中心点和过滤，`Unit` 负责玩法状态、HUD 与弹出文字锚点，`TacticalManager` 负责生成层和战斗文字消费；未绑定或加载失败的单位继续使用现有占位图。
 
@@ -18,6 +18,7 @@
 - 只有 `kensei` 绑定正式棋子；其他职业和敌人继续使用现有占位显示。
 - 初始朝向缺省为 `SE`；多轴移动差值使用现有 Y 轴优先规则。
 - 双武器显示只能复用现有 `Unit.is_dual_wielding()`，不得新增第二套双持判据。
+- Buff/Debuff 与血条关联的样式及位置不在 VA-4 范围；后续专门的 UI/视觉设计裁决完成后才能生产化。既有通用状态显示保留其 `STATUS_BADGE_Y=-58` 基线，不作为本阶段视觉验收项。
 - 初版不增加移动、攻击、受击或死亡动画。
 - 不改变玩法数值、伤害公式、双持规则、技能位移朝向或 UI 总体设计。
 - 正式运行时不得读取 `assets/prototype/visual_style/sample_manifest.json`。
@@ -239,7 +240,6 @@ if ((Get-FileHash $sourceAsset -Algorithm SHA256).Hash -ne (Get-FileHash $produc
   "overhead_layout": {
     "opaque_union_top_y": -51.484375,
     "health_bar_bottom_y": -58.0,
-    "status_badge_y": -84.0,
     "popup_anchor_y": -82.0
   },
   "production_admission": {
@@ -307,7 +307,7 @@ git commit -m "feat: admit kensei map token asset"
 
 - [ ] **Step 1: 写组件失败测试**
 
-测试直接实例化脚本并加入测试根节点，断言：合法配置成功；纹理路径、哈希、`4×2`、八组中心点或布局缺失时返回 `false` 且节点不可见；八个状态的 `frame_coords`、`offset=-pivot`、`scale=(0.15625,0.15625)`、`centered=false` 和 `TEXTURE_FILTER_LINEAR` 精确。
+测试直接实例化脚本并加入测试根节点，断言：合法配置成功；纹理路径、哈希、`4×2`、八组中心点或必填布局缺失时返回 `false` 且节点不可见；省略 `status_badge_y` 仍可配置；八个状态的 `frame_coords`、`offset=-pivot`、`scale=(0.15625,0.15625)`、`centered=false` 和 `TEXTURE_FILTER_LINEAR` 精确。
 
 ```gdscript
 var view: Sprite2D = load("res://scripts/units/map_token_view.gd").new()
@@ -440,7 +440,7 @@ func _validate_profile(profile: Dictionary) -> bool:
 	var layout: Variant = profile.get("overhead_layout", null)
 	if typeof(layout) != TYPE_DICTIONARY:
 		return false
-	for key: String in ["opaque_union_top_y", "health_bar_bottom_y", "status_badge_y", "popup_anchor_y"]:
+	for key: String in ["opaque_union_top_y", "health_bar_bottom_y", "popup_anchor_y"]:
 		if not [TYPE_INT, TYPE_FLOAT].has(typeof((layout as Dictionary).get(key, null))):
 			return false
 	return true
@@ -498,7 +498,7 @@ _check("初始方向 SE", kensei.get_facing() == &"SE")
 _check("正式棋子不使用阵营染色", token_view.self_modulate == Color.WHITE)
 _check("占位职业文字不存在", kensei.get_node_or_null("UnitLabel") == null)
 _check("血条底边为 -58", is_equal_approx(health_bar.position.y + health_bar.size.y, -58.0))
-_check("状态锚点为 -84", is_equal_approx(float(kensei.get("_status_badge_y")), -84.0))
+_check("通用状态图标保留既有基线锚点", status_label != null and is_equal_approx(status_label.position.y, Unit.STATUS_BADGE_Y))
 _check("实际文字锚点为 -82", kensei.get_combat_text_anchor_world(-50.0).is_equal_approx(kensei.global_position + Vector2(0, -82)))
 kensei.equip_offhand("wpn_swordsman_starter")
 _check("装副手切到双武器行", token_view.frame_coords.y == 1)
@@ -592,18 +592,16 @@ if _map_token_active:
 	map_token_view.self_modulate = Color.WHITE
 	var health_bottom := float(_map_token_layout["health_bar_bottom_y"])
 	health_bar.position.y = health_bottom - health_bar.size.y
-	_status_badge_y = float(_map_token_layout["status_badge_y"])
 else:
 	sprite.visible = true
 	map_token_view.visible = false
 	sprite.self_modulate = FACTION_COLORS.get(faction, Color.WHITE)
 	sprite.scale = UNIT_ICON_SCALE
-	_status_badge_y = STATUS_BADGE_Y
 ```
 
 `_hp_label` 创建后始终复制 `health_bar.position` 与 `health_bar.size`。只有占位分支创建 `UnitLabel`。`equip_offhand()`、`unequip_offhand()` 写字段后调用 `refresh_map_token_visual()`。
 
-新增 `_status_badge_y: float = STATUS_BADGE_Y`。正式棋子把它设为配置的 `status_badge_y`，`_rebuild_status_icons()` 创建 buff 状态标签时使用 `_status_badge_y`；不要移动 `StatusIcons` 父节点，否则会与子标签的 Y 坐标重复叠加。行动资源徽记继续使用 `ACTION_BADGE_Y`。
+`_rebuild_status_icons()` 保留既有 Buff/Debuff 状态标签创建和 `STATUS_BADGE_Y=-58` 基线；不要移动 `StatusIcons` 父节点，否则会与子标签的 Y 坐标重复叠加。行动资源徽记继续使用 `ACTION_BADGE_Y`。
 
 - [ ] **Step 5: 固定移动朝向与安全死亡路径**
 
@@ -803,7 +801,7 @@ const CAPTURE_NAMES := [
 ]
 ```
 
-第一张布置四名单武器剑圣并分别调用 `set_facing(NW/NE/SW/SE)`；第二张给四名剑圣 `equip_offhand("wpn_swordsman_starter")`；第三张把两名单位放在相邻 Y 深度，保留血条和状态图标，并通过 `DamagePopup.spawn_at_anchor()` 显示一组伤害文字。每张截图前等待两个 `process_frame` 和一次 `RenderingServer.frame_post_draw`，从真实根 viewport 取图，验证为 `1280×720` 后保存。每次成功打印 `KENSEI_TACTICAL_CAPTURED=<absolute path>`，结束打印 `KENSEI_TACTICAL_CAPTURE_DIR=<absolute directory>`；任何失败以退出码 1 结束。
+第一张布置四名单武器剑圣并分别调用 `set_facing(NW/NE/SW/SE)`；第二张给四名剑圣 `equip_offhand("wpn_swordsman_starter")`；第三张把两名单位放在相邻 Y 深度，核验纵向遮挡、血条和通过 `DamagePopup.spawn_at_anchor()` 显示的一组伤害文字。既有行动反馈可存在，但不作为本次视觉验收项。每张截图前等待两个 `process_frame` 和一次 `RenderingServer.frame_post_draw`，从真实根 viewport 取图，验证为 `1280×720` 后保存。每次成功打印 `KENSEI_TACTICAL_CAPTURED=<absolute path>`，结束打印 `KENSEI_TACTICAL_CAPTURE_DIR=<absolute directory>`；任何失败以退出码 1 结束。
 
 - [ ] **Step 2: 验证 Godot 版本并运行捕获**
 
@@ -824,7 +822,7 @@ Expected: headless 打印“不支持捕获”标记并立即以退出码 1 结�
 
 - [ ] **Step 3: 在会话中检查并提交视觉证据给用户**
 
-用本地图片查看工具逐张检查原始 `1280×720` 文件，并在会话中直接显示三张图片；同时提供控制台打印的绝对目录。检查：八个状态、脚底格心、单双武器、相邻遮挡、血条、状态图标和伤害数字。用户只裁决视觉结果；实现细节不再次询问。
+用本地图片查看工具逐张检查原始 `1280×720` 文件，并在会话中直接显示三张图片；同时提供控制台打印的绝对目录。检查：八个状态、脚底格心、单双武器、相邻遮挡、血条和伤害数字。用户只裁决视觉结果；实现细节不再次询问。
 
 - [ ] **Step 4: 运行全部标准回归**
 

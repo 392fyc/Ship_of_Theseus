@@ -69,7 +69,9 @@ func _run() -> void:
 	var admission := profile.get("production_admission", {}) as Dictionary
 	_check("正式准入已批准", admission.get("status") == "approved")
 	_check("正式准入只绑定 kensei", admission.get("class_ids", []) == ["kensei"])
-	_check("头顶联合上沿精确", is_equal_approx(float(profile.get("overhead_layout", {}).get("opaque_union_top_y")), -51.484375))
+	var overhead_layout := profile.get("overhead_layout", {}) as Dictionary
+	_check("头顶联合上沿精确", is_equal_approx(float(overhead_layout.get("opaque_union_top_y")), -51.484375))
+	_check("正式棋子布局不定义状态图标坐标", not overhead_layout.has("status_badge_y"))
 	var loader: Node = load("res://scripts/data/data_loader.gd").new()
 	loader.call("load_all")
 	var loaded_profiles := loader.get("visual_profiles") as Dictionary

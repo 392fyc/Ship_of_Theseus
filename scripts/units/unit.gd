@@ -149,7 +149,6 @@ var _hp_label: Label = null
 var _facing: StringName = &"SE"
 var _map_token_active := false
 var _map_token_layout: Dictionary = {}
-var _status_badge_y: float = STATUS_BADGE_Y
 
 
 func _ready() -> void:
@@ -660,14 +659,12 @@ func _apply_visuals() -> void:
 		map_token_view.self_modulate = Color.WHITE
 		var health_bottom := float(_map_token_layout["health_bar_bottom_y"])
 		health_bar.position.y = health_bottom - health_bar.size.y
-		_status_badge_y = float(_map_token_layout["status_badge_y"])
 	else:
 		sprite.visible = true
 		map_token_view.visible = false
 		sprite.self_modulate = FACTION_COLORS.get(faction, Color.WHITE)
 		sprite.scale = UNIT_ICON_SCALE
 		health_bar.position.y = -44.0
-		_status_badge_y = STATUS_BADGE_Y
 
 	var bg_style: StyleBoxFlat = StyleBoxFlat.new()
 	bg_style.bg_color = HP_BAR_BG
@@ -808,7 +805,7 @@ func _rebuild_status_icons() -> void:
 			duration_text = str(buff.duration)
 		var effect_label: Label = _make_badge(
 			icon_text + duration_text,
-			Vector2(start_x + float(index) * STATUS_BADGE_STEP, _status_badge_y),
+			Vector2(start_x + float(index) * STATUS_BADGE_STEP, STATUS_BADGE_Y),
 			Color(0.95, 0.30, 0.30) if buff.is_debuff() else Color(0.30, 0.85, 0.45),
 			false)
 		status_icons.add_child(effect_label)

@@ -18,7 +18,6 @@
   "overhead_layout": {
     "opaque_union_top_y": -51.484375,
     "health_bar_bottom_y": -58.0,
-    "status_badge_y": -84.0,
     "popup_anchor_y": -82.0
   },
   "production_admission": {

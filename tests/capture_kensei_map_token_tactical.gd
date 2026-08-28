@@ -13,8 +13,6 @@ const CAPTURE_NAMES := [
 const KENSEI_CLASS_ID := "kensei"
 const OFFHAND_WEAPON_ID := "wpn_swordsman_starter"
 const MAP_ID := "forest_01"
-const STATUS_BADGE_Y := -84.0
-const STATUS_BUFF_ID := "swordsman_parry_stance"
 
 var _capture_directory := ""
 
@@ -127,14 +125,6 @@ func _capture_occlusion_hud_popup() -> bool:
 		return false
 	front_unit.consume_movement_resource()
 	front_unit.consume_standard_resource()
-	var status_icon_text := _add_capture_status_buff(front_unit)
-	if status_icon_text == "":
-		scene.queue_free()
-		return false
-	front_unit.refresh_status_icons()
-	if not _assert_real_status_badge(front_unit, status_icon_text):
-		scene.queue_free()
-		return false
 
 	var tactical_manager: Node = scene.get("tactical_manager") as Node
 	var popup_layer: Node = tactical_manager.get_node_or_null("PopupLayer")
@@ -147,50 +137,6 @@ func _capture_occlusion_hud_popup() -> bool:
 	var success := await _capture_scene(CAPTURE_NAMES[2])
 	scene.queue_free()
 	return success
-
-
-func _add_capture_status_buff(unit: Unit) -> String:
-	var data_loader := root.get_node_or_null("/root/DataLoader") as Node
-	if data_loader == null:
-		push_error("Occlusion capture DataLoader is unavailable")
-		return ""
-	var raw_buff: Variant = data_loader.buffs.get(STATUS_BUFF_ID, {})
-	if not raw_buff is Dictionary:
-		push_error("Occlusion capture Buff data is unavailable: %s" % STATUS_BUFF_ID)
-		return ""
-	var buff := BuffEffect.from_dict(raw_buff)
-	if buff == null or buff.buff_id != STATUS_BUFF_ID:
-		push_error("Occlusion capture failed to construct Buff: %s" % STATUS_BUFF_ID)
-		return ""
-	unit.add_buff(buff)
-	if not unit.has_buff(STATUS_BUFF_ID):
-		push_error("Occlusion capture failed to add Buff: %s" % STATUS_BUFF_ID)
-		return ""
-	var icon_text := buff.icon.strip_edges()
-	if icon_text == "":
-		icon_text = buff.buff_id.left(2).to_upper()
-	return icon_text
-
-
-func _assert_real_status_badge(unit: Unit, status_icon_text: String) -> bool:
-	var status_icons := unit.get_node_or_null("StatusIcons") as Node2D
-	if status_icons == null:
-		push_error("Occlusion capture StatusIcons is unavailable")
-		return false
-	var real_status_labels: Array[Label] = []
-	for child: Node in status_icons.get_children():
-		var label := child as Label
-		if label != null and label.text.begins_with(status_icon_text):
-			real_status_labels.append(label)
-	if real_status_labels.is_empty():
-		push_error("Occlusion capture requires at least one real Buff status label")
-		return false
-	if real_status_labels[0].position.y != STATUS_BADGE_Y:
-		push_error("First real Buff status label Y must be %.1f relative to Unit, got %.1f" % [
-			STATUS_BADGE_Y, real_status_labels[0].position.y])
-		return false
-	return true
-
 
 func _make_tactical_scene(positions: Array[Vector2i]) -> Node:
 	# 在 SceneTree 初始化后才 load：--script 入口的脚本预加载会早于 autoload 注册，
