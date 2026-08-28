@@ -11,9 +11,11 @@
 
 - 测试先行：更新后的资产、组件和 Unit 状态基线断言在实现前分别以预期失败退出。
 - 聚焦 Godot 测试：`test_kensei_map_token_asset` 33/0、`test_map_token_view` 71/0、`test_unit_map_token_visual` 27/0、`test_tactical_map_token_integration` 14/0。
-- 全量 Godot 回归：`tests/test_*.gd`，40/40 退出码 0。
+- 全量 Godot 回归：Godot `4.6.3.stable.official.7d41c59c4` 运行 `tests/test_*.gd`，40/40 退出码 0；完整输出见 `task-5-buff-scope-correction-full-regression.log`，SHA256 `15ccbbf0be034a2ffa6728f9b90dc8b2de61b6343b7e56d86137f08e6bb0b3c1`。
 - 截图：headless 快速失败退出码 1；窗口模式退出码 0，批次 `user://visual_style_playground/kensei_map_token_tactical/batch_1787927940/`，三张 PNG 均为 `1280×720`。
 - 静态检查：提交前运行 `git diff --check`。
+
+本次修正后的规格与计划仅把血条、生命值文字与战斗文字弹出信息列为 VA-4 正向完成条件。通用 Buff/Debuff 状态系统保留，但其样式和位置不属于本阶段交付。
 
 ## 提交与剩余事项
 

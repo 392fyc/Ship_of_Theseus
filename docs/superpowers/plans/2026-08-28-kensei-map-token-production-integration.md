@@ -18,7 +18,7 @@
 - 只有 `kensei` 绑定正式棋子；其他职业和敌人继续使用现有占位显示。
 - 初始朝向缺省为 `SE`；多轴移动差值使用现有 Y 轴优先规则。
 - 双武器显示只能复用现有 `Unit.is_dual_wielding()`，不得新增第二套双持判据。
-- Buff/Debuff 与血条关联的样式及位置不在 VA-4 范围；后续专门的 UI/视觉设计裁决完成后才能生产化。既有通用状态显示保留其 `STATUS_BADGE_Y=-58` 基线，不作为本阶段视觉验收项。
+- Buff/Debuff 与血条关联的样式及位置不在 VA-4 范围；后续专门的 UI/视觉设计裁决完成后才能生产化。既有通用状态显示保留，不作为本阶段视觉验收项。
 - 初版不增加移动、攻击、受击或死亡动画。
 - 不改变玩法数值、伤害公式、双持规则、技能位移朝向或 UI 总体设计。
 - 正式运行时不得读取 `assets/prototype/visual_style/sample_manifest.json`。
@@ -468,7 +468,7 @@ git commit -m "feat: add static map token view"
 
 ---
 
-### Task 3B: `Unit` 显示状态、HUD 与死亡接入
+### Task 3B: `Unit` 棋子显示、HUD 与死亡接入
 
 **Files:**
 - Modify: `scenes/tactical/Unit.tscn`
@@ -498,7 +498,6 @@ _check("初始方向 SE", kensei.get_facing() == &"SE")
 _check("正式棋子不使用阵营染色", token_view.self_modulate == Color.WHITE)
 _check("占位职业文字不存在", kensei.get_node_or_null("UnitLabel") == null)
 _check("血条底边为 -58", is_equal_approx(health_bar.position.y + health_bar.size.y, -58.0))
-_check("通用状态图标保留既有基线锚点", status_label != null and is_equal_approx(status_label.position.y, Unit.STATUS_BADGE_Y))
 _check("实际文字锚点为 -82", kensei.get_combat_text_anchor_world(-50.0).is_equal_approx(kensei.global_position + Vector2(0, -82)))
 kensei.equip_offhand("wpn_swordsman_starter")
 _check("装副手切到双武器行", token_view.frame_coords.y == 1)
@@ -601,7 +600,7 @@ else:
 
 `_hp_label` 创建后始终复制 `health_bar.position` 与 `health_bar.size`。只有占位分支创建 `UnitLabel`。`equip_offhand()`、`unequip_offhand()` 写字段后调用 `refresh_map_token_visual()`。
 
-`_rebuild_status_icons()` 保留既有 Buff/Debuff 状态标签创建和 `STATUS_BADGE_Y=-58` 基线；不要移动 `StatusIcons` 父节点，否则会与子标签的 Y 坐标重复叠加。行动资源徽记继续使用 `ACTION_BADGE_Y`。
+保留既有 Buff/Debuff 状态系统及其节点，不在 VA-4 调整样式或位置；不要移动 `StatusIcons` 父节点。行动资源徽记继续使用既有实现。
 
 - [ ] **Step 5: 固定移动朝向与安全死亡路径**
 
