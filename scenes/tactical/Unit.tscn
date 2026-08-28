@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/units/unit.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/units/map_token_view.gd" id="map_token_view_script"]
 
 [sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_1"]
 size = Vector2i(64, 64)
@@ -82,6 +83,10 @@ script = ExtResource("1_script")
 sprite_frames = SubResource("SpriteFrames_1")
 animation = &"idle"
 autoplay = "idle"
+
+[node name="MapTokenView" type="Sprite2D" parent="."]
+visible = false
+script = ExtResource("map_token_view_script")
 
 [node name="HealthBar" type="ProgressBar" parent="."]
 offset_left = -32.0

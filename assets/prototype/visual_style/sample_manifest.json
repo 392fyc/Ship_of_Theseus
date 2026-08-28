@@ -333,7 +333,9 @@
         "rights": "verified",
         "rights_basis": "由五个原文件的用户授权允许修改；clean_v2 已经用户按精确文件视觉确认后获准进入 Task 4.2 隔离原型。原型准入不等于正式生产准入。",
         "admission_scope": "isolated_task_4_2_prototype",
-        "production_admission": "not_granted"
+        "production_admission": "approved_exact_sha",
+        "production_bindings": ["kensei"],
+        "production_admission_basis": "2026-08-28 用户批准该精确 SHA256 文件原字节进入正式素材目录并仅绑定 kensei。"
       }
     },
     {

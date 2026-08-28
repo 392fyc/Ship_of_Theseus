@@ -1,5 +1,6 @@
 {
   "id": "kensei",
+  "map_token_profile_id": "kensei_map_token",
   "name": "剑圣",
   "base_stats": {
     "HP": 28,

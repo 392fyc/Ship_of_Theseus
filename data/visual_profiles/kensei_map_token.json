@@ -1,0 +1,29 @@
+{
+  "id": "kensei_map_token",
+  "asset_type": "map_token",
+  "texture_path": "res://assets/units/kensei/map_token_clean_v2.png",
+  "sha256": "e6f33324c52929769d4698ed75e969470ec45748788503f4637fcb3223dc5415",
+  "source_size": [1536, 1024],
+  "frame_grid": [4, 2],
+  "source_frame_size": [384, 512],
+  "variant_order": ["single_weapon", "dual_weapon"],
+  "direction_order": ["NW", "NE", "SW", "SE"],
+  "frame_pivot": [
+    [205.9, 397.0], [194.0, 398.5], [178.5, 408.5], [178.0, 407.5],
+    [203.4, 350.0], [198.8, 347.5], [173.5, 365.5], [182.2, 364.0]
+  ],
+  "display_scale": 0.15625,
+  "tile_size": [64, 32],
+  "default_filter": "linear",
+  "overhead_layout": {
+    "opaque_union_top_y": -51.484375,
+    "health_bar_bottom_y": -58.0,
+    "popup_anchor_y": -82.0
+  },
+  "production_admission": {
+    "status": "approved",
+    "class_ids": ["kensei"],
+    "sha256": "e6f33324c52929769d4698ed75e969470ec45748788503f4637fcb3223dc5415",
+    "basis": "2026-08-28 user approval for exact SHA256 and kensei binding"
+  }
+}
