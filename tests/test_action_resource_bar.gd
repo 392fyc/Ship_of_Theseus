@@ -65,6 +65,17 @@ func _test_visual_contract_and_missing_data_visibility() -> void:
 	_check("有完整数据时显示", bar.visible)
 	_eq("外壳底色", (bar.get_theme_stylebox("panel") as StyleBoxFlat).bg_color, Color("#0A0B12F5"))
 	_eq("外壳边框", (bar.get_theme_stylebox("panel") as StyleBoxFlat).border_color, Color("#8F743D"))
+	var outer_margin: MarginContainer = bar.get_child(0) as MarginContainer
+	_check("外壳包含边距容器", outer_margin != null)
+	if outer_margin != null:
+		_eq("外壳左边距", outer_margin.get_theme_constant("margin_left"), 6)
+		_eq("外壳右边距", outer_margin.get_theme_constant("margin_right"), 6)
+		_eq("外壳上边距", outer_margin.get_theme_constant("margin_top"), 4)
+		_eq("外壳下边距", outer_margin.get_theme_constant("margin_bottom"), 4)
+		var row: HBoxContainer = outer_margin.get_child(0) as HBoxContainer
+		_check("边距容器包含资源行", row != null)
+		if row != null:
+			_eq("资源段间距", row.get_theme_constant("separation"), 4)
 	for resource_id: String in ["movement", "standard", "swift"]:
 		var segment: Control = bar._segments[resource_id]
 		_eq("%s 段尺寸" % resource_id, segment.custom_minimum_size, Vector2(76.0, 30.0))
@@ -72,6 +83,21 @@ func _test_visual_contract_and_missing_data_visibility() -> void:
 	_eq("A 强调色", bar._segments["standard"].glyph.accent_color, Color("#D17A50"))
 	_eq("S 强调色", bar._segments["swift"].glyph.accent_color, Color("#D5BC59"))
 	_eq("可用文字", bar._segments["movement"].state_label.text, "可用")
+	for resource_id: String in ["movement", "standard", "swift"]:
+		var available_segment: PanelContainer = bar._segments[resource_id]
+		var available_style: StyleBoxFlat = available_segment.get_theme_stylebox("panel") as StyleBoxFlat
+		_eq("%s 可用背景" % resource_id, available_style.bg_color, Color("#121722"))
+		_eq("%s 可用边框" % resource_id, available_style.border_color, available_segment.glyph.accent_color)
+		_eq("%s 可用标题颜色" % resource_id, available_segment.title_label.get_theme_color("font_color"), Color("#E5DBCB"))
+		_eq("%s 可用状态颜色" % resource_id, available_segment.state_label.get_theme_color("font_color"), available_segment.glyph.accent_color)
+	bar.update_resources({"movement_used": true, "standard_used": true, "swift_used": true})
+	for resource_id: String in ["movement", "standard", "swift"]:
+		var spent_segment: PanelContainer = bar._segments[resource_id]
+		var spent_style: StyleBoxFlat = spent_segment.get_theme_stylebox("panel") as StyleBoxFlat
+		_eq("%s 已用背景" % resource_id, spent_style.bg_color, Color("#23232A"))
+		_eq("%s 已用边框" % resource_id, spent_style.border_color, Color("#6C6872"))
+		_eq("%s 已用标题颜色" % resource_id, spent_segment.title_label.get_theme_color("font_color"), Color("#6C6872"))
+		_eq("%s 已用状态颜色" % resource_id, spent_segment.state_label.get_theme_color("font_color"), Color("#6C6872"))
 	bar.clear_resources()
 	_check("清除数据后隐藏", not bar.visible)
 	var incomplete_entries: Array[Dictionary] = [{"id": "movement", "spent": false}]
