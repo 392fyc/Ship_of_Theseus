@@ -95,4 +95,3 @@ func update_resources(resources: Dictionary) -> void
 - 不接入遗物运行数据，不调整遗物槽数量。
 - 不替换整套底栏美术，不导入新的 UI 图片或字体。
 - 不改变行动经济、技能消耗、回合阶段或 AI。
-
