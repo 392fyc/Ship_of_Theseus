@@ -137,7 +137,6 @@ const HP_BAR_BORDER := Color(0.06, 0.06, 0.08)
 const UNIT_ICON_SCALE: Vector2 = Vector2(0.45, 0.45)
 const STATUS_BADGE_STEP: float = 18.0
 const STATUS_BADGE_Y: float = -58.0
-const ACTION_BADGE_Y: float = 20.0
 
 # ── 节点引用 ─────────────────────────────────────────
 @onready var sprite: AnimatedSprite2D = $Sprite
@@ -778,20 +777,6 @@ func _rebuild_status_icons() -> void:
 		return
 	for child: Node in status_icons.get_children():
 		child.queue_free()
-
-	var action_badges: Array[Dictionary] = [
-		{"text": "M", "spent": movement_used, "color": Color(0.40, 0.70, 1.00)},
-		{"text": "A", "spent": standard_used, "color": Color(1.00, 0.50, 0.30)},
-		{"text": "S", "spent": swift_used, "color": Color(1.00, 0.90, 0.35)},
-	]
-	for index: int in range(action_badges.size()):
-		var action_badge: Dictionary = action_badges[index]
-		var action_label: Label = _make_badge(
-			str(action_badge["text"]),
-			Vector2(-18.0 + float(index) * STATUS_BADGE_STEP, ACTION_BADGE_Y),
-			action_badge["color"],
-			bool(action_badge["spent"]))
-		status_icons.add_child(action_label)
 
 	var total_statuses: int = buffs.size()
 	var start_x: float = -0.5 * STATUS_BADGE_STEP * float(maxi(total_statuses - 1, 0))

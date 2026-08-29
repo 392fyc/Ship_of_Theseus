@@ -1,0 +1,1121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>战斗底部 UI 整批 Playground v1</title>
+  <style>
+    :root {
+      --abyss: #07090d;
+      --hull: #0d1118;
+      --stone: #151821;
+      --stone-low: #090c12;
+      --old-gold: #a18445;
+      --old-gold-hi: #d0ad62;
+      --old-gold-low: #3c301c;
+      --bone: #e8dec7;
+      --bone-dim: #928b7d;
+      --m-blue: #557b96;
+      --a-copper: #9b623b;
+      --s-yellow: #b49b48;
+      --hp: #a6443f;
+      --shield: #4f718c;
+      --xp: #735c86;
+      --danger: #a8453c;
+      --focus: #f1d58b;
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #030507;
+    }
+
+    body {
+      color: var(--bone);
+      font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+    }
+
+    button:focus-visible,
+    input:focus-visible + label {
+      outline: 2px solid var(--focus);
+      outline-offset: 3px;
+    }
+
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
+    /* 固定设计画布由脚本等比缩放；本页仅验证结构和交互，不代表正式游戏资产。 */
+    #design-stage {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      width: 1280px;
+      height: 720px;
+      overflow: hidden;
+      transform-origin: center;
+      background: var(--abyss);
+      image-rendering: pixelated;
+    }
+
+    .battlefield {
+      position: absolute;
+      inset: 0;
+      background: #111821;
+    }
+
+    .battlefield::before {
+      content: "";
+      position: absolute;
+      inset: 54px -90px 166px;
+      opacity: .34;
+      transform: perspective(720px) rotateX(58deg) rotateZ(-1deg);
+      background-color: #18202a;
+      background-image:
+        linear-gradient(30deg, transparent 48.5%, #37414b 49%, #37414b 50%, transparent 50.5%),
+        linear-gradient(150deg, transparent 48.5%, #37414b 49%, #37414b 50%, transparent 50.5%);
+      background-size: 82px 48px;
+      box-shadow: inset 0 -80px 100px #07090d;
+    }
+
+    .battlefield::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(180deg, rgba(5, 8, 12, .12) 0 45%, rgba(4, 6, 9, .88) 82% 100%),
+        radial-gradient(circle at 38% 38%, rgba(83, 103, 112, .12), transparent 30%);
+    }
+
+    .map-object {
+      position: absolute;
+      z-index: 1;
+      opacity: .35;
+      filter: saturate(.45);
+    }
+
+    .ruin-a {
+      left: 130px;
+      top: 222px;
+      width: 170px;
+      height: 98px;
+      border: 8px solid #53606a;
+      border-top-width: 18px;
+      transform: skewY(-8deg);
+      box-shadow: inset 24px 0 #29333d;
+    }
+
+    .ruin-b {
+      right: 96px;
+      top: 180px;
+      width: 126px;
+      height: 160px;
+      border-left: 24px solid #4b565d;
+      border-bottom: 16px solid #303940;
+      transform: skewY(9deg);
+    }
+
+    .route-mark {
+      left: 564px;
+      top: 280px;
+      width: 230px;
+      height: 4px;
+      border-top: 3px dashed rgba(149, 140, 105, .42);
+      transform: rotate(-11deg);
+    }
+
+    .unit-token {
+      position: absolute;
+      z-index: 2;
+      width: 34px;
+      height: 34px;
+      border: 2px solid #756744;
+      transform: rotate(45deg);
+      background: #26313a;
+      box-shadow: 0 8px 14px rgba(0, 0, 0, .4);
+      opacity: .55;
+    }
+
+    .unit-token::after {
+      content: "";
+      position: absolute;
+      inset: 9px;
+      border-radius: 50%;
+      background: #99a39d;
+    }
+
+    .ally-token { left: 472px; top: 340px; border-color: #607e8d; }
+    .enemy-token { left: 815px; top: 245px; border-color: #8d5a4d; }
+
+    .turn-plaque {
+      position: absolute;
+      z-index: 4;
+      left: 22px;
+      top: 20px;
+      min-width: 176px;
+      padding: 10px 14px;
+      border-left: 3px solid var(--old-gold);
+      background: rgba(8, 11, 16, .74);
+      color: var(--bone-dim);
+      font-size: 11px;
+      letter-spacing: .08em;
+    }
+
+    .turn-plaque strong {
+      display: block;
+      color: var(--bone);
+      font: 600 15px/1.3 "SimSun", "Microsoft YaHei", serif;
+      letter-spacing: .16em;
+    }
+
+    .playground-controls {
+      position: absolute;
+      z-index: 30;
+      right: 18px;
+      top: 16px;
+      width: 284px;
+      padding: 9px 10px 10px;
+      border: 1px solid #594a2d;
+      background: rgba(7, 9, 13, .93);
+      box-shadow: inset 0 1px #8a703d, 0 6px 18px rgba(0, 0, 0, .35);
+    }
+
+    .controls-title {
+      margin: 0 0 7px;
+      color: var(--old-gold-hi);
+      font: 600 11px/1.2 Consolas, monospace;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .controls-row {
+      display: grid;
+      grid-template-columns: 52px 94px auto;
+      gap: 6px;
+      align-items: center;
+      color: var(--bone-dim);
+      font-size: 10px;
+    }
+
+    .control-label {
+      white-space: nowrap;
+    }
+
+    .segmented {
+      display: inline-flex;
+      padding: 2px;
+      border: 1px solid #373226;
+      background: #080a0f;
+    }
+
+    .segmented button {
+      min-width: 40px;
+      padding: 4px 7px;
+      border: 0;
+      background: transparent;
+      color: #8f8b82;
+      cursor: pointer;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .segmented button[aria-pressed="true"] {
+      color: var(--bone);
+      background: #332a1a;
+      box-shadow: inset 0 0 0 1px #725e35;
+    }
+
+    .annotation-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .annotation-toggle input {
+      width: 13px;
+      height: 13px;
+      accent-color: var(--old-gold);
+    }
+
+    .dashboard {
+      position: absolute;
+      z-index: 10;
+      left: 50%;
+      bottom: 16px;
+      width: max-content;
+      height: 142px;
+      display: grid;
+      grid-template-columns: 226px 202px 390px 230px 106px;
+      gap: 8px;
+      align-items: stretch;
+      transform: translateX(-50%);
+    }
+
+    .panel {
+      position: relative;
+      min-width: 0;
+      border: 1px solid #574729;
+      background-color: var(--hull);
+      background-image: radial-gradient(circle at 1px 1px, rgba(126, 120, 100, .08) 1px, transparent 1px);
+      background-size: 7px 7px;
+      box-shadow:
+        inset 1px 1px 0 rgba(204, 168, 91, .52),
+        inset -2px -2px 0 #211a10,
+        0 7px 16px rgba(0, 0, 0, .62);
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 5px;
+      pointer-events: none;
+      border: 1px solid #2d2b29;
+      box-shadow: inset 0 1px rgba(160, 132, 72, .22);
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      left: 3px;
+      top: 3px;
+      width: 5px;
+      height: 5px;
+      pointer-events: none;
+      background: var(--old-gold-hi);
+      box-shadow:
+        calc(100% + var(--panel-inner-width, 210px)) 0 #62502d,
+        0 126px #62502d;
+      opacity: .72;
+    }
+
+    .zone-title {
+      position: relative;
+      z-index: 3;
+      margin: 0;
+      color: #b8a36e;
+      font: 600 10px/1.1 "SimSun", "Microsoft YaHei", serif;
+      letter-spacing: .16em;
+    }
+
+    .character-panel {
+      --panel-inner-width: 210px;
+      display: grid;
+      grid-template-columns: 74px 1fr;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .portrait-wrap {
+      position: relative;
+      z-index: 12;
+      align-self: center;
+    }
+
+    .portrait-button {
+      position: relative;
+      width: 74px;
+      height: 102px;
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid #8b6f38;
+      background: #080b10;
+      cursor: help;
+      box-shadow: inset 0 0 0 3px #18130c;
+    }
+
+    .portrait-button::before,
+    .portrait-button::after {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      width: 10px;
+      height: 10px;
+      border: 2px solid var(--old-gold-hi);
+      transform: rotate(45deg);
+      background: #15121a;
+    }
+
+    .portrait-button::before { left: -6px; top: -6px; }
+    .portrait-button::after { right: -6px; bottom: -6px; }
+
+    .portrait-button svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .attribute-card {
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 10px);
+      width: 224px;
+      padding: 11px 12px 12px;
+      visibility: hidden;
+      opacity: 0;
+      transform: translateY(6px);
+      border: 1px solid #715b32;
+      background: #0b0e14;
+      box-shadow: inset 0 1px #a18445, 0 10px 24px rgba(0, 0, 0, .7);
+      transition: opacity 120ms ease, transform 120ms ease;
+      pointer-events: none;
+    }
+
+    .portrait-wrap:hover .attribute-card,
+    .portrait-wrap:focus-within .attribute-card {
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .attribute-card h2 {
+      margin: 0 0 8px;
+      color: var(--old-gold-hi);
+      font: 600 12px/1.2 "SimSun", "Microsoft YaHei", serif;
+      letter-spacing: .12em;
+    }
+
+    .attribute-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto;
+      gap: 5px 8px;
+      font-size: 10px;
+    }
+
+    .attribute-grid span:nth-child(4n + 1),
+    .attribute-grid span:nth-child(4n + 3) { color: var(--bone-dim); }
+    .attribute-grid strong { color: var(--bone); font-family: Consolas, monospace; }
+
+    .character-data {
+      position: relative;
+      z-index: 3;
+      min-width: 0;
+      padding-top: 1px;
+    }
+
+    .character-name {
+      margin: 5px 0 5px;
+      overflow: hidden;
+      color: var(--bone);
+      font: 600 13px/1.2 "SimSun", "Microsoft YaHei", serif;
+      letter-spacing: .08em;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .compact-group {
+      margin-top: 4px;
+      padding: 5px 6px;
+      border-left: 2px solid #655333;
+      background: rgba(4, 6, 9, .55);
+    }
+
+    .level-row,
+    .bar-row {
+      display: grid;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+    }
+
+    .level-row { grid-template-columns: 37px 1fr; }
+    .bar-row { grid-template-columns: 30px 1fr; }
+    .bar-row + .bar-row { margin-top: 4px; }
+
+    .level-badge {
+      color: var(--old-gold-hi);
+      font-family: Consolas, monospace;
+    }
+
+    .meter {
+      position: relative;
+      height: 10px;
+      overflow: hidden;
+      border: 1px solid #302c28;
+      background: #06080c;
+    }
+
+    .meter > i {
+      display: block;
+      width: var(--fill);
+      height: 100%;
+      background: var(--meter-color);
+    }
+
+    .meter > b {
+      position: absolute;
+      inset: 0;
+      color: #eee7d8;
+      font: 8px/8px Consolas, monospace;
+      text-align: center;
+      text-shadow: 1px 1px #000;
+    }
+
+    .xp-meter { --meter-color: var(--xp); }
+    .hp-meter { --meter-color: var(--hp); }
+    .shield-meter { --meter-color: var(--shield); }
+
+    .class-panel {
+      --panel-inner-width: 186px;
+      overflow: hidden;
+    }
+
+    .skills-panel {
+      --panel-inner-width: 374px;
+      padding: 11px 10px 8px;
+      overflow: visible;
+    }
+
+    .action-resources {
+      position: absolute;
+      z-index: 7;
+      left: 50%;
+      bottom: calc(100% + 7px);
+      width: 188px;
+      height: 34px;
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      padding: 5px 8px;
+      transform: translateX(-50%);
+      border: 1px solid #574729;
+      background: #090c11;
+      box-shadow: inset 0 1px rgba(204, 168, 91, .42), 0 5px 12px rgba(0, 0, 0, .55);
+    }
+
+    .action-resource {
+      position: relative;
+      display: flex;
+      gap: 2px;
+      align-items: center;
+      min-width: 0;
+      color: var(--token-color);
+      font: 700 11px/1 Consolas, monospace;
+    }
+
+    .action-resource + .action-resource::before {
+      content: "";
+      width: 1px;
+      height: 17px;
+      margin-right: 3px;
+      background: #3f3728;
+    }
+
+    .resource-code {
+      color: var(--token-color);
+      font-size: 11px;
+    }
+
+    .move-icon {
+      width: 13px;
+      height: 13px;
+      color: var(--m-blue);
+      filter: drop-shadow(0 1px #000);
+    }
+
+    .move-icon path {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: square;
+      stroke-linejoin: miter;
+    }
+
+    .movement-value {
+      min-width: 8px;
+      color: #91adbd;
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .resource-pips {
+      display: flex;
+      gap: 2px;
+      align-items: center;
+    }
+
+    .resource-pip {
+      position: relative;
+      display: block;
+      width: 8px;
+      height: 10px;
+      transition: background-color 120ms ease, opacity 120ms ease;
+    }
+
+    .resource-pip.is-remaining {
+      background: var(--token-color);
+      box-shadow: inset 0 2px var(--token-hi), 0 1px #000;
+    }
+
+    .resource-pip.is-missing {
+      clip-path: polygon(0 0, 62% 0, 62% 35%, 100% 35%, 100% 100%, 0 100%);
+      background: #474b4c;
+      opacity: .62;
+    }
+
+    .resource-pip.is-missing::after {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      clip-path: inherit;
+      background: #090c11;
+    }
+
+    .resource-count {
+      min-width: 17px;
+      color: #777972;
+      font-size: 9px;
+      letter-spacing: -.08em;
+    }
+
+    .resource-count b {
+      color: var(--token-color);
+      font: inherit;
+    }
+
+    .resource-m { --token-color: var(--m-blue); --token-hi: #88a7b8; }
+    .resource-a { --token-color: var(--a-copper); --token-hi: #c68a60; }
+    .resource-s { --token-color: var(--s-yellow); --token-hi: #d1bd71; }
+
+    .skills-content {
+      position: relative;
+      z-index: 4;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 4px;
+      margin-top: 9px;
+    }
+
+    .skill-button {
+      position: relative;
+      width: 66px;
+      height: 92px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .skill-button.passive {
+      width: 53px;
+      opacity: .82;
+    }
+
+    .skill-gem {
+      position: absolute;
+      left: 5px;
+      top: 3px;
+      width: 56px;
+      height: 56px;
+      border: 2px solid #8d7138;
+      transform: rotate(45deg);
+      background: var(--gem-bg);
+      box-shadow:
+        inset 0 0 0 3px #0a0b0f,
+        inset 0 0 0 5px var(--gem-edge),
+        3px 4px 7px rgba(0, 0, 0, .75);
+      transition: border-color 120ms ease, filter 120ms ease, transform 120ms ease;
+    }
+
+    .passive .skill-gem {
+      left: 6px;
+      top: 9px;
+      width: 43px;
+      height: 43px;
+      border-color: #6a5936;
+    }
+
+    .skill-button:hover .skill-gem,
+    .skill-button:focus-visible .skill-gem {
+      border-color: var(--old-gold-hi);
+      filter: brightness(1.18);
+      transform: rotate(45deg) translate(-2px, -2px);
+    }
+
+    .skill-icon {
+      position: absolute;
+      inset: 10px;
+      width: 36px;
+      height: 36px;
+      transform: rotate(-45deg);
+      color: #e5ddc9;
+      filter: drop-shadow(1px 2px #000);
+    }
+
+    .passive .skill-icon {
+      inset: 8px;
+      width: 27px;
+      height: 27px;
+      color: #c6a65a;
+    }
+
+    .skill-key {
+      position: absolute;
+      z-index: 3;
+      left: 0;
+      top: 0;
+      width: 17px;
+      height: 17px;
+      border: 1px solid #745d34;
+      background: #090b10;
+      color: var(--bone);
+      font: 10px/15px Consolas, monospace;
+      text-align: center;
+    }
+
+    .skill-name {
+      position: absolute;
+      left: -3px;
+      right: -3px;
+      bottom: 1px;
+      color: var(--bone-dim);
+      font: 10px/1.2 "Microsoft YaHei", sans-serif;
+      white-space: nowrap;
+    }
+
+    .skill-button:hover .skill-name,
+    .skill-button:focus-visible .skill-name { color: var(--bone); }
+
+    .skill-slash { --gem-bg: #3a1818; --gem-edge: #681e22; }
+    .skill-guard { --gem-bg: #173041; --gem-edge: #244d68; }
+    .skill-dash { --gem-bg: #123535; --gem-edge: #1c5955; }
+    .skill-stance { --gem-bg: #2a2931; --gem-edge: #55515d; }
+    .skill-insight { --gem-bg: #291c36; --gem-edge: #51376a; }
+
+    .passive-divider {
+      width: 1px;
+      height: 69px;
+      margin: 0 5px;
+      background: #574729;
+      box-shadow: 1px 0 #17130d;
+    }
+
+    .relic-panel {
+      --panel-inner-width: 214px;
+      padding: 11px 14px;
+    }
+
+    .relic-grid {
+      position: relative;
+      z-index: 4;
+      display: grid;
+      grid-template-columns: repeat(4, 42px);
+      grid-template-rows: repeat(2, 42px);
+      gap: 8px;
+      margin-top: 11px;
+      justify-content: center;
+    }
+
+    .relic-slot {
+      position: relative;
+      display: grid;
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      place-items: center;
+      border: 1px solid #705a31;
+      background-color: #090c11;
+      background-image:
+        linear-gradient(45deg, transparent 47%, rgba(103, 86, 47, .13) 48% 52%, transparent 53%),
+        linear-gradient(-45deg, transparent 47%, rgba(103, 86, 47, .13) 48% 52%, transparent 53%);
+      background-size: 10px 10px;
+      cursor: pointer;
+      box-shadow: inset 2px 2px #1d1911, inset -2px -2px #050608;
+      transition: border-color 120ms ease, transform 120ms ease, filter 120ms ease;
+    }
+
+    .relic-slot::before,
+    .relic-slot::after {
+      content: "";
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border: 1px solid #9c7f43;
+      background: #1b160c;
+    }
+
+    .relic-slot::before { left: -2px; top: -2px; }
+    .relic-slot::after { right: -2px; bottom: -2px; }
+
+    .relic-slot:hover,
+    .relic-slot:focus-visible {
+      z-index: 2;
+      border-color: var(--old-gold-hi);
+      filter: brightness(1.18);
+      transform: translateY(-2px);
+    }
+
+    .relic-slot svg {
+      width: 25px;
+      height: 25px;
+      color: #b99c59;
+      filter: drop-shadow(1px 2px #000);
+    }
+
+    .relic-slot:nth-child(2) svg,
+    .relic-slot:nth-child(5) svg { color: #778aa2; }
+    .relic-slot:nth-child(3) svg,
+    .relic-slot:nth-child(7) svg { color: #846a9b; }
+
+    .end-panel {
+      --panel-inner-width: 90px;
+      display: grid;
+      place-items: center;
+      border-color: #703b32;
+      background-color: #130d0f;
+      box-shadow:
+        inset 1px 1px 0 rgba(177, 77, 64, .48),
+        inset -2px -2px 0 #27100e,
+        0 7px 16px rgba(0, 0, 0, .62);
+    }
+
+    .end-turn-button {
+      position: relative;
+      z-index: 4;
+      display: grid;
+      width: 78px;
+      min-height: 102px;
+      padding: 10px 6px 7px;
+      place-items: center;
+      border: 1px solid #713d35;
+      background: #1b1012;
+      color: #d9cdb8;
+      cursor: pointer;
+      box-shadow: inset 0 0 0 3px #0d0b0e;
+      transition: border-color 120ms ease, background-color 120ms ease, transform 120ms ease;
+    }
+
+    .end-turn-button:hover,
+    .end-turn-button:focus-visible {
+      border-color: #d27463;
+      background: #291416;
+      transform: translateY(-2px);
+    }
+
+    .end-turn-button svg {
+      width: 46px;
+      height: 52px;
+      color: #b76b55;
+      filter: drop-shadow(1px 2px #000);
+    }
+
+    .end-turn-button span {
+      font: 600 11px/1.2 "SimSun", "Microsoft YaHei", serif;
+      letter-spacing: .08em;
+    }
+
+    .show-annotations .zone::before {
+      content: attr(data-zone-name);
+      position: absolute;
+      z-index: 18;
+      left: 50%;
+      bottom: calc(100% + 71px);
+      padding: 3px 6px;
+      transform: translateX(-50%);
+      border: 1px solid rgba(208, 173, 98, .6);
+      background: #080a0f;
+      color: var(--old-gold-hi);
+      font: 10px/1.2 Consolas, monospace;
+      white-space: nowrap;
+    }
+
+    .show-annotations .zone::after {
+      content: "";
+      position: absolute;
+      z-index: 17;
+      left: 50%;
+      bottom: calc(100% + 1px);
+      height: 70px;
+      border-left: 1px dashed rgba(208, 173, 98, .42);
+    }
+
+    .show-annotations .panel.zone::after {
+      background: transparent;
+      box-shadow: none;
+      width: 0;
+      top: auto;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.001ms !important;
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="design-stage" aria-label="战斗底部界面设计画布">
+    <div class="battlefield" aria-hidden="true">
+      <div class="map-object ruin-a"></div>
+      <div class="map-object ruin-b"></div>
+      <div class="map-object route-mark"></div>
+      <div class="unit-token ally-token"></div>
+      <div class="unit-token enemy-token"></div>
+    </div>
+
+    <div class="turn-plaque" aria-hidden="true">
+      <strong>我方阶段</strong>
+      第 06 回合 · 战棋场景占位
+    </div>
+
+    <section class="playground-controls" aria-labelledby="controls-title">
+      <h1 class="controls-title" id="controls-title">Playground / 原型控制</h1>
+      <div class="controls-row">
+        <span class="control-label">行动资源</span>
+        <div class="segmented" aria-label="行动资源状态">
+          <button type="button" data-action-mode="full" aria-pressed="true">满载</button>
+          <button type="button" data-action-mode="mixed" aria-pressed="false">消耗</button>
+        </div>
+        <label class="annotation-toggle">
+          <input type="checkbox" id="annotation-toggle">
+          布局标注
+        </label>
+      </div>
+    </section>
+
+    <section class="dashboard" id="dashboard" data-action-state="full" aria-label="战斗底部操作栏">
+      <section class="panel zone character-panel" data-zone="character" data-zone-name="character" aria-labelledby="character-title">
+        <div class="portrait-wrap">
+          <button class="portrait-button" type="button" aria-label="查看柳生十兵卫详细属性" aria-describedby="attribute-card">
+            <svg viewBox="0 0 74 102" aria-hidden="true">
+              <rect width="74" height="102" fill="#0b1118"/>
+              <path d="M7 92 Q14 64 25 60 L49 60 Q61 66 68 92Z" fill="#2e3841"/>
+              <path d="M25 31 Q28 17 39 17 Q52 20 52 34 L48 55 Q42 63 32 57 Q24 48 25 31Z" fill="#a98262"/>
+              <path d="M20 32 Q18 12 37 9 Q55 10 59 28 L51 38 L47 26 L27 27 L24 42Z" fill="#14171c"/>
+              <path d="M51 26 L64 44 L55 47 L48 35Z" fill="#232930"/>
+              <path d="M25 62 L37 75 L49 62 L59 94 L14 94Z" fill="#303943"/>
+              <path d="M37 75 L42 93 L32 93Z" fill="#6c5332"/>
+              <path d="M12 95 H63" stroke="#a18445" stroke-width="2"/>
+            </svg>
+          </button>
+          <aside class="attribute-card" id="attribute-card" role="tooltip">
+            <h2>详细属性</h2>
+            <div class="attribute-grid">
+              <span>力量</span><strong>14</strong><span>技巧</span><strong>16</strong>
+              <span>体魄</span><strong>12</strong><span>意志</span><strong>11</strong>
+              <span>速度</span><strong>15</strong><span>防御</span><strong>8</strong>
+              <span>移动</span><strong>5</strong><span>幸运</span><strong>9</strong>
+            </div>
+          </aside>
+        </div>
+
+        <div class="character-data">
+          <h2 class="zone-title" id="character-title">角色</h2>
+          <p class="character-name">柳生十兵卫</p>
+          <div class="compact-group" aria-label="等级与经验">
+            <div class="level-row">
+              <span class="level-badge">Lv.12</span>
+              <span class="meter xp-meter" style="--fill: 68%"><i></i><b>EXP 680 / 1000</b></span>
+            </div>
+          </div>
+          <div class="compact-group" aria-label="生命与护盾">
+            <div class="bar-row"><span>HP</span><span class="meter hp-meter" style="--fill: 71%"><i></i><b>30 / 42</b></span></div>
+            <div class="bar-row"><span>护盾</span><span class="meter shield-meter" style="--fill: 40%"><i></i><b>8 / 20</b></span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel zone class-panel" data-zone="class_resource" data-zone-name="class_resource" aria-labelledby="class-resource-reserved">
+        <span class="visually-hidden" id="class-resource-reserved">职业资源预留容器，暂无内容</span>
+      </section>
+
+      <section class="panel zone skills-panel" data-zone="skills" data-zone-name="skills" aria-labelledby="skills-title">
+        <div class="action-resources" aria-labelledby="action-resource-summary">
+          <span class="visually-hidden" id="action-resource-summary" aria-live="polite">行动资源：移动 6 格，标准行动剩余 3 点，迅捷行动剩余 3 点</span>
+          <div class="action-resource resource-m" data-token="M" data-current="6">
+            <span class="resource-code">M</span>
+            <svg class="move-icon" viewBox="0 0 14 14" aria-hidden="true">
+              <path d="M2 10H8M6 3L11 7L6 11M2 5H7"/>
+            </svg>
+            <b class="movement-value" data-resource-value="M">6</b>
+          </div>
+          <div class="action-resource resource-a" data-token="A" data-current="3" data-max="3">
+            <span class="resource-code">A</span>
+            <span class="resource-pips" aria-hidden="true">
+              <i class="resource-pip is-remaining" data-resource-pip="A"></i>
+              <i class="resource-pip is-remaining" data-resource-pip="A"></i>
+              <i class="resource-pip is-remaining" data-resource-pip="A"></i>
+            </span>
+            <span class="resource-count"><b data-resource-value="A">3</b>/3</span>
+          </div>
+          <div class="action-resource resource-s" data-token="S" data-current="3" data-max="3">
+            <span class="resource-code">S</span>
+            <span class="resource-pips" aria-hidden="true">
+              <i class="resource-pip is-remaining" data-resource-pip="S"></i>
+              <i class="resource-pip is-remaining" data-resource-pip="S"></i>
+              <i class="resource-pip is-remaining" data-resource-pip="S"></i>
+            </span>
+            <span class="resource-count"><b data-resource-value="S">3</b>/3</span>
+          </div>
+        </div>
+
+        <h2 class="zone-title" id="skills-title">战技</h2>
+        <div class="skills-content">
+          <button class="skill-button skill-slash" type="button" data-skill-kind="active" aria-label="技能一：斩击">
+            <span class="skill-key">1</span>
+            <span class="skill-gem">
+              <svg class="skill-icon" viewBox="0 0 36 36" aria-hidden="true"><path d="M7 28L27 8M23 7L29 13M5 25L11 31M9 27L4 32" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"/></svg>
+            </span>
+            <span class="skill-name">斩击</span>
+          </button>
+          <button class="skill-button skill-guard" type="button" data-skill-kind="active" aria-label="技能二：招架">
+            <span class="skill-key">2</span>
+            <span class="skill-gem">
+              <svg class="skill-icon" viewBox="0 0 36 36" aria-hidden="true"><path d="M18 4L30 9V18C30 25 25 30 18 33C11 30 6 25 6 18V9Z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M11 17H25" stroke="currentColor" stroke-width="2"/></svg>
+            </span>
+            <span class="skill-name">招架</span>
+          </button>
+          <button class="skill-button skill-dash" type="button" data-skill-kind="active" aria-label="技能三：一闪">
+            <span class="skill-key">3</span>
+            <span class="skill-gem">
+              <svg class="skill-icon" viewBox="0 0 36 36" aria-hidden="true"><path d="M5 25L28 8L20 21L31 17L10 30L16 18Z" fill="currentColor"/></svg>
+            </span>
+            <span class="skill-name">一闪</span>
+          </button>
+          <button class="skill-button skill-stance" type="button" data-skill-kind="active" aria-label="技能四：无明构">
+            <span class="skill-key">4</span>
+            <span class="skill-gem">
+              <svg class="skill-icon" viewBox="0 0 36 36" aria-hidden="true"><path d="M18 3L23 12L33 18L23 24L18 33L13 24L3 18L13 12Z" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="18" cy="18" r="4" fill="currentColor"/></svg>
+            </span>
+            <span class="skill-name">无明构</span>
+          </button>
+          <span class="passive-divider" aria-hidden="true"></span>
+          <button class="skill-button passive skill-insight" type="button" data-skill-kind="passive" aria-label="被动技能：心眼">
+            <span class="skill-gem">
+              <svg class="skill-icon" viewBox="0 0 36 36" aria-hidden="true"><path d="M3 18Q18 5 33 18Q18 31 3 18Z" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="18" cy="18" r="5" fill="currentColor"/></svg>
+            </span>
+            <span class="skill-name">心眼</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="panel zone relic-panel" data-zone="relics" data-zone-name="relics" aria-labelledby="relics-title">
+        <h2 class="zone-title" id="relics-title">遗物</h2>
+        <div class="relic-grid">
+          <button class="relic-slot" type="button" data-relic-slot="1" aria-label="遗物一：残月"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M23 4A12 12 0 1 0 27 24A10 10 0 1 1 23 4Z" fill="currentColor"/></svg></button>
+          <button class="relic-slot" type="button" data-relic-slot="2" aria-label="遗物二：霜轮"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3V29M3 16H29M7 7L25 25M25 7L7 25" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="16" r="5" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+          <button class="relic-slot" type="button" data-relic-slot="3" aria-label="遗物三：幽灯"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M10 11H22L20 27H12Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11Q16 2 20 11M9 14H23" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="19" r="3" fill="currentColor"/></svg></button>
+          <button class="relic-slot" type="button" data-relic-slot="4" aria-label="遗物四：断环"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M25 11A11 11 0 1 0 25 21" fill="none" stroke="currentColor" stroke-width="4"/><path d="M21 7L28 10L25 17" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+          <button class="relic-slot" type="button" data-relic-slot="5" aria-label="遗物五：山纹"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 26L11 12L16 20L21 7L29 26Z" fill="none" stroke="currentColor" stroke-width="2.3"/></svg></button>
+          <button class="relic-slot" type="button" data-relic-slot="6" aria-label="遗物六：骨骰"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="6" y="6" width="20" height="20" transform="rotate(45 16 16)" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="20" cy="20" r="2" fill="currentColor"/><circle cx="16" cy="16" r="2" fill="currentColor"/></svg></button>
+          <button class="relic-slot" type="button" data-relic-slot="7" aria-label="遗物七：星泪"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3L20 12L29 16L20 20L16 29L12 20L3 16L12 12Z" fill="currentColor"/></svg></button>
+          <button class="relic-slot" type="button" data-relic-slot="8" aria-label="遗物八：旧印"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4L26 10V22L16 28L6 22V10Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M11 17L15 21L22 12" fill="none" stroke="currentColor" stroke-width="2.4"/></svg></button>
+        </div>
+      </section>
+
+      <section class="panel zone end-panel" data-zone="end_turn" data-zone-name="end_turn" aria-label="结束回合区">
+        <button class="end-turn-button" type="button" aria-label="结束当前回合">
+          <svg viewBox="0 0 48 56" aria-hidden="true">
+            <path d="M12 4H36M12 52H36M15 6C15 18 22 20 24 28C26 20 33 18 33 6M15 50C15 39 22 36 24 28C26 36 33 39 33 50" fill="none" stroke="currentColor" stroke-width="3"/>
+            <path d="M18 10H30L24 23ZM18 46H30L24 33Z" fill="currentColor"/>
+          </svg>
+          <span>结束回合</span>
+        </button>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const DESIGN_WIDTH = 1280;
+      const DESIGN_HEIGHT = 720;
+      const stage = document.getElementById("design-stage");
+      const dashboard = document.getElementById("dashboard");
+      const annotationToggle = document.getElementById("annotation-toggle");
+      const actionResourceSummary = document.getElementById("action-resource-summary");
+
+      const fitStage = () => {
+        const scale = Math.min(window.innerWidth / DESIGN_WIDTH, window.innerHeight / DESIGN_HEIGHT);
+        stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+      };
+
+      const selectSegment = (selector, activeButton) => {
+        document.querySelectorAll(selector).forEach((button) => {
+          button.setAttribute("aria-pressed", String(button === activeButton));
+        });
+      };
+
+      const actionStates = {
+        full: {
+          movement: 6,
+          standard: 3,
+          swift: 3,
+          summary: "行动资源：移动 6 格，标准行动剩余 3 点，迅捷行动剩余 3 点"
+        },
+        mixed: {
+          movement: 2,
+          standard: 1,
+          swift: 2,
+          summary: "行动资源：移动 2 格，标准行动剩余 1 点，迅捷行动剩余 2 点"
+        }
+      };
+
+      const updatePips = (token, current) => {
+        const resource = dashboard.querySelector(`.resource-${token.toLowerCase()}`);
+        resource.dataset.current = String(current);
+        resource.querySelector(`[data-resource-value="${token}"]`).textContent = String(current);
+        resource.querySelectorAll(".resource-pip").forEach((pip, index) => {
+          const isRemaining = index < current;
+          pip.classList.toggle("is-remaining", isRemaining);
+          pip.classList.toggle("is-missing", !isRemaining);
+        });
+      };
+
+      const setActionState = (mode) => {
+        const state = actionStates[mode];
+        dashboard.dataset.actionState = mode;
+        const movement = dashboard.querySelector(".resource-m");
+        movement.dataset.current = String(state.movement);
+        movement.querySelector('[data-resource-value="M"]').textContent = String(state.movement);
+        updatePips("A", state.standard);
+        updatePips("S", state.swift);
+        actionResourceSummary.textContent = state.summary;
+      };
+
+      document.querySelectorAll("[data-action-mode]").forEach((button) => {
+        button.addEventListener("click", () => {
+          setActionState(button.dataset.actionMode);
+          selectSegment("[data-action-mode]", button);
+        });
+      });
+
+      annotationToggle.addEventListener("change", () => {
+        dashboard.classList.toggle("show-annotations", annotationToggle.checked);
+      });
+
+      window.addEventListener("resize", fitStage, { passive: true });
+      setActionState("full");
+      fitStage();
+    })();
+  </script>
+</body>
+</html>
