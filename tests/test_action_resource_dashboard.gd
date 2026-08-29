@@ -48,6 +48,9 @@ func _run() -> void:
 	_check("玩家操作态创建行动资源栏", resource_bar != null)
 	if resource_bar != null:
 		_check("玩家操作态显示行动资源栏", resource_bar.visible)
+		dashboard.update_state(data.merged({"visible": false}, true))
+		_check("仪表盘隐藏时立即隐藏行动资源栏", not resource_bar.visible)
+		dashboard.update_state(data.merged({"visible": true, "show_actions": true}, true))
 		_check("资源栏与技能栏精确间隔 6 像素", is_equal_approx(
 			dashboard._skill_bar.position.y - (resource_bar.position.y + resource_bar.size.y), 6.0))
 		_check("资源栏与技能栏水平中心一致", is_equal_approx(
@@ -65,16 +68,27 @@ func _run() -> void:
 		_check("只保留行动资源栏时仍参与避让", is_equal_approx(
 			dashboard.get_content_top_y(), resource_bar.position.y))
 
-		dashboard.update_state(data.merged({"visible": true, "mode": "enemy", "show_actions": false}, true))
+		dashboard.update_state(data.merged({"visible": true, "mode": "player", "show_actions": false}, true))
+		_check("玩家模式但 show_actions=false 时隐藏行动资源栏", not resource_bar.visible)
+
+		dashboard.update_state(data.merged({"visible": true, "mode": "enemy", "show_actions": true}, true))
 		_check("敌方信息态隐藏行动资源栏", not resource_bar.visible)
 
-		dashboard.update_state(data.merged({
-		"visible": true,
-		"mode": "player",
-		"show_actions": true,
-		"action_resources": {},
-	}, true))
-		_check("缺失资源数据时隐藏行动资源栏", not resource_bar.visible)
+		var missing_payload: Dictionary = data.duplicate(true)
+		missing_payload.erase("action_resources")
+		dashboard.update_state(missing_payload.merged({"visible": true, "mode": "player", "show_actions": true}, true))
+		_check("缺失 action_resources 字段时隐藏行动资源栏", not resource_bar.visible)
+
+		for missing_field: String in ["movement_used", "standard_used", "swift_used"]:
+			var partial_resources: Dictionary = resources.duplicate(true)
+			partial_resources.erase(missing_field)
+			dashboard.update_state(data.merged({
+				"visible": true,
+				"mode": "player",
+				"show_actions": true,
+				"action_resources": partial_resources,
+			}, true))
+			_check("缺少 %s 时隐藏行动资源栏" % missing_field, not resource_bar.visible)
 
 	_finish(scene)
 

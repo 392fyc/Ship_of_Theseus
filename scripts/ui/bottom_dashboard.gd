@@ -356,6 +356,7 @@ func update_state(state: Dictionary) -> void:
 	var should_show: bool = bool(state.get("visible", false))
 	_set_dashboard_visible(should_show)
 	if not should_show:
+		_update_action_resources(state, false)
 		_skill_bar.set_expanded(false)
 		_set_item_popup_visible(false)
 		return
