@@ -107,6 +107,7 @@ func _test_visual_contract_and_missing_data_visibility() -> void:
 		_eq("%s 可用边框" % resource_id, available_style.border_color, available_segment.glyph.accent_color)
 		_eq("%s 可用标题颜色" % resource_id, available_segment.title_label.get_theme_color("font_color"), Color("#E5DBCB"))
 		_eq("%s 可用状态颜色" % resource_id, available_segment.state_label.get_theme_color("font_color"), available_segment.glyph.accent_color)
+		_eq("%s 可用状态文字" % resource_id, available_segment.state_label.text, "可用")
 		_check("%s 菱形位于文字左侧" % resource_id, segment_row.get_child(0) == available_segment.glyph and segment_row.get_child(1) != available_segment.glyph)
 	bar.update_resources({"movement_used": true, "standard_used": true, "swift_used": true})
 	for resource_id: String in ["movement", "standard", "swift"]:
@@ -116,6 +117,7 @@ func _test_visual_contract_and_missing_data_visibility() -> void:
 		_eq("%s 已用边框" % resource_id, spent_style.border_color, Color("#6C6872"))
 		_eq("%s 已用标题颜色" % resource_id, spent_segment.title_label.get_theme_color("font_color"), Color("#6C6872"))
 		_eq("%s 已用状态颜色" % resource_id, spent_segment.state_label.get_theme_color("font_color"), Color("#6C6872"))
+		_eq("%s 已用状态文字" % resource_id, spent_segment.state_label.text, "已用")
 	bar.clear_resources()
 	_check("清除数据后隐藏", not bar.visible)
 	for missing_flag: String in ["movement_used", "standard_used", "swift_used"]:
