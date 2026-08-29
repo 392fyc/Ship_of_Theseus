@@ -34,27 +34,6 @@ func update_resources(resources: Dictionary) -> void:
 	visible = true
 
 
-func set_resources(resources: Array[Dictionary]) -> void:
-	var resource_state: Dictionary = {}
-	for definition: Dictionary in RESOURCE_DEFINITIONS:
-		var resource_id: String = str(definition["id"])
-		var flag: String = str(definition["flag"])
-		var found: bool = false
-		for resource: Dictionary in resources:
-			if str(resource.get("id", "")) != resource_id:
-				continue
-			if not resource.has("spent"):
-				clear_resources()
-				return
-			resource_state[flag] = bool(resource["spent"])
-			found = true
-			break
-		if not found:
-			clear_resources()
-			return
-	update_resources(resource_state)
-
-
 func clear_resources() -> void:
 	visible = false
 
