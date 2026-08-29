@@ -196,6 +196,11 @@ func get_dashboard_data() -> Dictionary:
 		"hp_max": info_unit.stats.max_hp,
 		"hp_ratio": float(info_unit.stats.hp) / maxf(1.0, float(info_unit.stats.max_hp)),
 		"status_text": info_unit.get_action_status_summary(),
+		"action_resources": {
+			"movement_used": info_unit.movement_used,
+			"standard_used": info_unit.standard_used,
+			"swift_used": info_unit.swift_used,
+		},
 		"phase_text": _get_phase_text(),
 		"show_actions": not is_enemy_info and _is_player_turn_active(),
 		"buttons": _build_primary_button_state(),
