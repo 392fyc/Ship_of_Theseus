@@ -194,7 +194,7 @@
       z-index: 30;
       right: 18px;
       top: 16px;
-      width: 410px;
+      width: 284px;
       padding: 9px 10px 10px;
       border: 1px solid #594a2d;
       background: rgba(7, 9, 13, .93);
@@ -211,7 +211,7 @@
 
     .controls-row {
       display: grid;
-      grid-template-columns: 52px 90px 52px 98px auto;
+      grid-template-columns: 52px 94px auto;
       gap: 6px;
       align-items: center;
       color: var(--bone-dim);
@@ -272,11 +272,6 @@
       gap: 8px;
       align-items: stretch;
       transform: translateX(-50%);
-      transition: grid-template-columns 180ms ease;
-    }
-
-    .dashboard.class-collapsed {
-      grid-template-columns: 226px 62px 390px 230px 106px;
     }
 
     .panel {
@@ -485,93 +480,7 @@
 
     .class-panel {
       --panel-inner-width: 186px;
-      padding: 12px 13px;
       overflow: hidden;
-    }
-
-    .class-resource-content {
-      position: relative;
-      z-index: 3;
-      opacity: 1;
-      transition: opacity 120ms ease;
-    }
-
-    .class-collapsed .class-resource-content {
-      visibility: hidden;
-      opacity: 0;
-    }
-
-    .class-resource-empty {
-      position: absolute;
-      z-index: 3;
-      inset: 12px 8px;
-      display: none;
-      place-items: center;
-      color: #746f66;
-      font: 10px/1.3 "SimSun", "Microsoft YaHei", serif;
-      text-align: center;
-      writing-mode: vertical-rl;
-      letter-spacing: .12em;
-    }
-
-    .class-collapsed .class-resource-empty { display: grid; }
-
-    .resource-heading {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin: 12px 0 6px;
-      color: var(--bone-dim);
-      font-size: 10px;
-    }
-
-    .resource-heading strong {
-      color: #8eb1c7;
-      font: 11px/1 Consolas, monospace;
-    }
-
-    .qi-track {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 2px;
-      height: 19px;
-      padding: 2px;
-      border: 1px solid #38444e;
-      background: #060a0e;
-      box-shadow: inset 0 0 0 1px #121c24;
-    }
-
-    .qi-segment {
-      border: 1px solid #334450;
-      background: #0b1218;
-    }
-
-    .qi-segment.is-filled {
-      border-color: #7295a8;
-      background: #557b96;
-      box-shadow: inset 0 2px #84a3b3;
-    }
-
-    .mark-row {
-      display: grid;
-      grid-template-columns: 1fr repeat(3, 29px);
-      gap: 6px;
-      align-items: center;
-      margin-top: 11px;
-      color: var(--bone-dim);
-      font-size: 10px;
-    }
-
-    .class-mark {
-      display: grid;
-      width: 29px;
-      height: 29px;
-      place-items: center;
-      border: 1px solid var(--old-gold);
-      background: #1d170d;
-      color: var(--old-gold-hi);
-      font: 600 13px/1 "SimSun", serif;
-      box-shadow: inset 0 0 0 2px #0a0c11;
     }
 
     .skills-panel {
@@ -584,13 +493,13 @@
       position: absolute;
       z-index: 7;
       left: 50%;
-      bottom: calc(100% + 8px);
-      width: 260px;
-      height: 52px;
+      bottom: calc(100% + 7px);
+      width: 188px;
+      height: 34px;
       display: flex;
       justify-content: center;
-      gap: 12px;
-      padding: 6px 10px;
+      gap: 5px;
+      padding: 5px 8px;
       transform: translateX(-50%);
       border: 1px solid #574729;
       background: #090c11;
@@ -598,53 +507,98 @@
     }
 
     .action-resource {
-      display: grid;
-      grid-template-columns: 17px 40px;
+      position: relative;
+      display: flex;
       gap: 2px;
       align-items: center;
-      width: 66px;
+      min-width: 0;
       color: var(--token-color);
-      font: 700 13px/1 Consolas, monospace;
+      font: 700 11px/1 Consolas, monospace;
     }
 
-    .action-resource svg {
-      width: 40px;
-      height: 34px;
-      overflow: visible;
-      filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .75));
+    .action-resource + .action-resource::before {
+      content: "";
+      width: 1px;
+      height: 17px;
+      margin-right: 3px;
+      background: #3f3728;
     }
 
-    .action-resource .piece {
-      fill: var(--token-color);
-      stroke: var(--token-hi);
-      stroke-width: 1;
-      transition: opacity 140ms ease, fill 140ms ease, transform 140ms ease;
+    .resource-code {
+      color: var(--token-color);
+      font-size: 11px;
     }
 
-    .action-resource .piece-seam {
+    .move-icon {
+      width: 13px;
+      height: 13px;
+      color: var(--m-blue);
+      filter: drop-shadow(0 1px #000);
+    }
+
+    .move-icon path {
       fill: none;
-      stroke: #11151a;
-      stroke-width: 1.4;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: square;
+      stroke-linejoin: miter;
+    }
+
+    .movement-value {
+      min-width: 8px;
+      color: #91adbd;
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .resource-pips {
+      display: flex;
+      gap: 2px;
+      align-items: center;
+    }
+
+    .resource-pip {
+      position: relative;
+      display: block;
+      width: 8px;
+      height: 10px;
+      transition: background-color 120ms ease, opacity 120ms ease;
+    }
+
+    .resource-pip.is-remaining {
+      background: var(--token-color);
+      box-shadow: inset 0 2px var(--token-hi), 0 1px #000;
+    }
+
+    .resource-pip.is-missing {
+      clip-path: polygon(0 0, 62% 0, 62% 35%, 100% 35%, 100% 100%, 0 100%);
+      background: #474b4c;
+      opacity: .62;
+    }
+
+    .resource-pip.is-missing::after {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      clip-path: inherit;
+      background: #090c11;
+    }
+
+    .resource-count {
+      min-width: 17px;
+      color: #777972;
+      font-size: 9px;
+      letter-spacing: -.08em;
+    }
+
+    .resource-count b {
+      color: var(--token-color);
+      font: inherit;
     }
 
     .resource-m { --token-color: var(--m-blue); --token-hi: #88a7b8; }
     .resource-a { --token-color: var(--a-copper); --token-hi: #c68a60; }
     .resource-s { --token-color: var(--s-yellow); --token-hi: #d1bd71; }
-
-    .dashboard[data-action-state="mixed"] .resource-a,
-    .dashboard[data-action-state="mixed"] .resource-s { color: #666a6c; }
-
-    .dashboard[data-action-state="mixed"] .resource-a .piece-core,
-    .dashboard[data-action-state="mixed"] .resource-s .piece-core {
-      fill: #3e4245;
-      stroke: #666a6c;
-    }
-
-    .dashboard[data-action-state="mixed"] .resource-a .piece-top,
-    .dashboard[data-action-state="mixed"] .resource-s .piece-bottom {
-      opacity: 0;
-      transform: translate(3px, -2px);
-    }
 
     .skills-content {
       position: relative;
@@ -938,13 +892,8 @@
       <div class="controls-row">
         <span class="control-label">行动资源</span>
         <div class="segmented" aria-label="行动资源状态">
-          <button type="button" data-action-mode="full" aria-pressed="true">全量</button>
-          <button type="button" data-action-mode="mixed" aria-pressed="false">混合</button>
-        </div>
-        <span class="control-label">职业资源</span>
-        <div class="segmented" aria-label="职业资源状态">
-          <button type="button" data-class-mode="kensei" aria-pressed="true">剑圣</button>
-          <button type="button" data-class-mode="none" aria-pressed="false">无资源</button>
+          <button type="button" data-action-mode="full" aria-pressed="true">满载</button>
+          <button type="button" data-action-mode="mixed" aria-pressed="false">消耗</button>
         </div>
         <label class="annotation-toggle">
           <input type="checkbox" id="annotation-toggle">
@@ -995,50 +944,37 @@
         </div>
       </section>
 
-      <section class="panel zone class-panel" data-zone="class_resource" data-zone-name="class_resource" aria-labelledby="class-title">
-        <div class="class-resource-content">
-          <h2 class="zone-title" id="class-title">剑圣资源</h2>
-          <div class="resource-heading"><span>剑气 · 十段</span><strong>7 / 10</strong></div>
-          <div class="qi-track" aria-label="剑气七格，共十格">
-            <i class="qi-segment is-filled"></i><i class="qi-segment is-filled"></i><i class="qi-segment is-filled"></i><i class="qi-segment is-filled"></i><i class="qi-segment is-filled"></i>
-            <i class="qi-segment is-filled"></i><i class="qi-segment is-filled"></i><i class="qi-segment"></i><i class="qi-segment"></i><i class="qi-segment"></i>
-          </div>
-          <div class="mark-row" aria-label="心道势三枚印记">
-            <span>三印</span><i class="class-mark">心</i><i class="class-mark">道</i><i class="class-mark">势</i>
-          </div>
-        </div>
-        <div class="class-resource-empty" aria-hidden="true">该职业无专属资源</div>
+      <section class="panel zone class-panel" data-zone="class_resource" data-zone-name="class_resource" aria-labelledby="class-resource-reserved">
+        <span class="visually-hidden" id="class-resource-reserved">职业资源预留容器，暂无内容</span>
       </section>
 
       <section class="panel zone skills-panel" data-zone="skills" data-zone-name="skills" aria-labelledby="skills-title">
         <div class="action-resources" aria-labelledby="action-resource-summary">
-          <span class="visually-hidden" id="action-resource-summary" aria-live="polite">行动资源：M 完整，A 完整，S 完整</span>
-          <div class="action-resource resource-m" data-token="M">
-            <span>M</span>
-            <svg viewBox="0 0 40 34" aria-hidden="true">
-              <path class="piece piece-core" d="M3 8H29V28H9L3 22Z"/>
-              <path class="piece piece-top" d="M30 8H37V16H30Z"/>
-              <path class="piece piece-bottom" d="M9 29H20V33H9Z"/>
-              <path class="piece-seam" d="M29 8V17M9 28V22"/>
+          <span class="visually-hidden" id="action-resource-summary" aria-live="polite">行动资源：移动 6 格，标准行动剩余 3 点，迅捷行动剩余 3 点</span>
+          <div class="action-resource resource-m" data-token="M" data-current="6">
+            <span class="resource-code">M</span>
+            <svg class="move-icon" viewBox="0 0 14 14" aria-hidden="true">
+              <path d="M2 10H8M6 3L11 7L6 11M2 5H7"/>
             </svg>
+            <b class="movement-value" data-resource-value="M">6</b>
           </div>
-          <div class="action-resource resource-a" data-token="A">
-            <span>A</span>
-            <svg viewBox="0 0 40 34" aria-hidden="true">
-              <path class="piece piece-core" d="M3 8H29V28H9L3 22Z"/>
-              <path class="piece piece-top" d="M30 8H37V16H30Z"/>
-              <path class="piece piece-bottom" d="M9 29H20V33H9Z"/>
-              <path class="piece-seam" d="M29 8V17M9 28V22"/>
-            </svg>
+          <div class="action-resource resource-a" data-token="A" data-current="3" data-max="3">
+            <span class="resource-code">A</span>
+            <span class="resource-pips" aria-hidden="true">
+              <i class="resource-pip is-remaining" data-resource-pip="A"></i>
+              <i class="resource-pip is-remaining" data-resource-pip="A"></i>
+              <i class="resource-pip is-remaining" data-resource-pip="A"></i>
+            </span>
+            <span class="resource-count"><b data-resource-value="A">3</b>/3</span>
           </div>
-          <div class="action-resource resource-s" data-token="S">
-            <span>S</span>
-            <svg viewBox="0 0 40 34" aria-hidden="true">
-              <path class="piece piece-core" d="M3 8H29V28H9L3 22Z"/>
-              <path class="piece piece-top" d="M30 8H37V16H30Z"/>
-              <path class="piece piece-bottom" d="M9 29H20V33H9Z"/>
-              <path class="piece-seam" d="M29 8V17M9 28V22"/>
-            </svg>
+          <div class="action-resource resource-s" data-token="S" data-current="3" data-max="3">
+            <span class="resource-code">S</span>
+            <span class="resource-pips" aria-hidden="true">
+              <i class="resource-pip is-remaining" data-resource-pip="S"></i>
+              <i class="resource-pip is-remaining" data-resource-pip="S"></i>
+              <i class="resource-pip is-remaining" data-resource-pip="S"></i>
+            </span>
+            <span class="resource-count"><b data-resource-value="S">3</b>/3</span>
           </div>
         </div>
 
@@ -1128,23 +1064,47 @@
         });
       };
 
+      const actionStates = {
+        full: {
+          movement: 6,
+          standard: 3,
+          swift: 3,
+          summary: "行动资源：移动 6 格，标准行动剩余 3 点，迅捷行动剩余 3 点"
+        },
+        mixed: {
+          movement: 2,
+          standard: 1,
+          swift: 2,
+          summary: "行动资源：移动 2 格，标准行动剩余 1 点，迅捷行动剩余 2 点"
+        }
+      };
+
+      const updatePips = (token, current) => {
+        const resource = dashboard.querySelector(`.resource-${token.toLowerCase()}`);
+        resource.dataset.current = String(current);
+        resource.querySelector(`[data-resource-value="${token}"]`).textContent = String(current);
+        resource.querySelectorAll(".resource-pip").forEach((pip, index) => {
+          const isRemaining = index < current;
+          pip.classList.toggle("is-remaining", isRemaining);
+          pip.classList.toggle("is-missing", !isRemaining);
+        });
+      };
+
+      const setActionState = (mode) => {
+        const state = actionStates[mode];
+        dashboard.dataset.actionState = mode;
+        const movement = dashboard.querySelector(".resource-m");
+        movement.dataset.current = String(state.movement);
+        movement.querySelector('[data-resource-value="M"]').textContent = String(state.movement);
+        updatePips("A", state.standard);
+        updatePips("S", state.swift);
+        actionResourceSummary.textContent = state.summary;
+      };
+
       document.querySelectorAll("[data-action-mode]").forEach((button) => {
         button.addEventListener("click", () => {
-          dashboard.dataset.actionState = button.dataset.actionMode;
-          actionResourceSummary.textContent = button.dataset.actionMode === "mixed"
-            ? "行动资源：M 完整，A 已消耗，S 已消耗"
-            : "行动资源：M 完整，A 完整，S 完整";
+          setActionState(button.dataset.actionMode);
           selectSegment("[data-action-mode]", button);
-        });
-      });
-
-      document.querySelectorAll("[data-class-mode]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const isCollapsed = button.dataset.classMode === "none";
-          dashboard.classList.toggle("class-collapsed", isCollapsed);
-          dashboard.querySelector(".class-resource-content").setAttribute("aria-hidden", String(isCollapsed));
-          dashboard.querySelector(".class-resource-empty").setAttribute("aria-hidden", String(!isCollapsed));
-          selectSegment("[data-class-mode]", button);
         });
       });
 
@@ -1153,6 +1113,7 @@
       });
 
       window.addEventListener("resize", fitStage, { passive: true });
+      setActionState("full");
       fitStage();
     })();
   </script>
