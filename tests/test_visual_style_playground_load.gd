@@ -132,7 +132,7 @@ func _check_manifest_contract() -> void:
 		return
 
 	var manifest: Dictionary = parsed as Dictionary
-	_check("样本清单版本为 3", manifest.get("version", 0) == 3)
+	_check("样本清单版本为 4", manifest.get("version", 0) == 4)
 	_check("样本清单声明 check_sizes", manifest.has("check_sizes"))
 	var manifest_sizes_value: Variant = manifest.get("check_sizes", [])
 	_check("清单包含且只包含三档检查尺寸", typeof(manifest_sizes_value) == TYPE_ARRAY)
@@ -276,24 +276,71 @@ func _check_manifest_contract() -> void:
 					"ui 底部栏分区顺序固定",
 					_array_equal_required_order(
 						bottom_bar_layout.get("section_order", []),
-						["character", "class_resource", "skills", "relics", "end_turn"]
+						["character", "equipment", "skills", "relics", "end_turn"]
 					),
 					str(bottom_bar_layout.get("section_order", []))
 				)
+				_check("ui 底部栏不包含职业资源区", not bottom_bar_layout.has("class_resource"), str(bottom_bar_layout))
 				var character_layout: Dictionary = bottom_bar_layout.get("character", {}) as Dictionary
-				_check("ui 角色区是占位容器", str(character_layout.get("content", "")) == "placeholder", str(character_layout))
-				var class_resource_layout: Dictionary = bottom_bar_layout.get("class_resource", {}) as Dictionary
-				_check("ui 职业资源区内容默认为空", str(class_resource_layout.get("content", "")) == "empty", str(class_resource_layout))
-				_check("ui 职业资源区按职业定制", str(class_resource_layout.get("styling", "")) == "class_specific", str(class_resource_layout))
+				var character_groups: Array = character_layout.get("field_groups", []) as Array
+				_check("ui 角色栏包含三个字段组", character_groups.size() == 3, str(character_groups))
+				var profession_name_group: Dictionary = _dictionary_at(character_groups, 0)
+				var level_experience_group: Dictionary = _dictionary_at(character_groups, 1)
+				var health_shield_group: Dictionary = _dictionary_at(character_groups, 2)
+				_check("ui 角色栏第一组是职业与名称", str(profession_name_group.get("id", "")) == "profession_and_name", str(profession_name_group))
+				_check("ui 角色栏第二组是等级与经验", str(level_experience_group.get("id", "")) == "level_and_experience", str(level_experience_group))
+				_check("ui 角色栏第三组是生命与护盾", str(health_shield_group.get("id", "")) == "health_and_shield", str(health_shield_group))
+				_check("ui 生命与护盾共享外框", bool(health_shield_group.get("shared_outer_frame", false)), str(health_shield_group))
+				var survival_bands: Array = health_shield_group.get("independent_bands", []) as Array
+				_check(
+					"ui 共享外框内保留生命与护盾两条独立状态带",
+					survival_bands.size() == 2
+						and str(_dictionary_at(survival_bands, 0).get("id", "")) == "health"
+						and str(_dictionary_at(survival_bands, 1).get("id", "")) == "shield",
+					str(survival_bands)
+				)
+				var equipment_layout: Dictionary = bottom_bar_layout.get("equipment", {}) as Dictionary
+				_check(
+					"ui 装备栏恰含武器与防具两槽",
+					_array_equal_required_order(equipment_layout.get("slot_ids", []), ["weapon", "armor"]),
+					str(equipment_layout)
+				)
+				_check("ui 武器与防具槽为 52×52 正方形", _array_to_size(equipment_layout.get("slot_size", [])) == Vector2i(52, 52), str(equipment_layout))
+				var potion_layout: Dictionary = equipment_layout.get("universal_potion", {}) as Dictionary
+				_check("ui 通用血瓶是装备栏内的独立按钮", str(potion_layout.get("role", "")) == "independent_button" and not bool(potion_layout.get("belongs_to_equipment_slot", true)), str(potion_layout))
+				_check("ui 通用血瓶为 32×32 正方形", _array_to_size(potion_layout.get("size", [])) == Vector2i(32, 32), str(potion_layout))
 				var skills_layout: Dictionary = bottom_bar_layout.get("skills", {}) as Dictionary
 				_check("ui 技能栏水平平铺", str(skills_layout.get("layout", "")) == "horizontal", str(skills_layout))
-				_check("ui 技能栏包含 4 个主动技能", int(skills_layout.get("active_count", -1)) == 4, str(skills_layout))
-				_check("ui 技能栏包含 1 个被动技能", int(skills_layout.get("passive_count", -1)) == 1, str(skills_layout))
-				_check("ui 被动技能图标相对更小", str(skills_layout.get("passive_relative_size", "")) == "smaller", str(skills_layout))
+				_check("ui 技能栏外框固定", bool(skills_layout.get("frame_size_fixed", false)), str(skills_layout))
+				_check("ui 技能栏默认 6 格", int(skills_layout.get("default_slot_count", -1)) == 6, str(skills_layout))
+				var supported_skill_range: Array = skills_layout.get("supported_slot_count_range", []) as Array
+				_check(
+					"ui 技能栏内部适配 5—7 格",
+					supported_skill_range.size() == 2
+						and int(supported_skill_range[0]) == 5
+						and int(supported_skill_range[1]) == 7,
+					str(skills_layout)
+				)
+				_check("ui 默认技能槽为 64×64 正方形", _array_to_size(skills_layout.get("default_slot_size", [])) == Vector2i(64, 64), str(skills_layout))
+				var action_resource_layout: Dictionary = bottom_bar_layout.get("action_resource_bar", {}) as Dictionary
+				_check(
+					"ui 行动资源条独立置于技能栏上方",
+					str(action_resource_layout.get("role", "")) == "independent_compact_bar"
+						and str(action_resource_layout.get("placement", "")) == "above_skills"
+						and not bool(action_resource_layout.get("belongs_to_bottom_sections", true)),
+					str(action_resource_layout)
+				)
+				_check("ui 行动资源条不预留职业资源槽", not bool(action_resource_layout.get("profession_resource_slot_reserved", true)), str(action_resource_layout))
+				var movement_resource_layout: Dictionary = action_resource_layout.get("movement_resource", {}) as Dictionary
+				_check("ui 移动资源失效态只灰化", str(movement_resource_layout.get("disabled_visual", "")) == "grayed", str(movement_resource_layout))
+				_check("ui 移动资源失效态没有斜杠", not bool(movement_resource_layout.get("slash_overlay", true)), str(movement_resource_layout))
 				var relics_layout: Dictionary = bottom_bar_layout.get("relics", {}) as Dictionary
 				_check("ui 遗物栏共 8 格", int(relics_layout.get("slot_count", -1)) == 8, str(relics_layout))
 				_check("ui 遗物栏是 2 行", int(relics_layout.get("rows", -1)) == 2, str(relics_layout))
 				_check("ui 遗物栏是 4 列", int(relics_layout.get("columns", -1)) == 4, str(relics_layout))
+				_check("ui 遗物槽为 44×44 正方形", _array_to_size(relics_layout.get("slot_size", [])) == Vector2i(44, 44), str(relics_layout))
+				var end_turn_layout: Dictionary = bottom_bar_layout.get("end_turn", {}) as Dictionary
+				_check("ui 结束回合按钮为 52×52 正方形", _array_to_size(end_turn_layout.get("button_size", [])) == Vector2i(52, 52), str(end_turn_layout))
 				_check("ui 不设常驻顶部提示面板", bool(bottom_bar_layout.get("persistent_top_tooltip", true)) == false, str(bottom_bar_layout))
 				_check("ui 不设独立普通攻击按钮", bool(bottom_bar_layout.get("standalone_attack_button", true)) == false, str(bottom_bar_layout))
 				_check("ui 不设独立移动按钮", bool(bottom_bar_layout.get("standalone_move_button", true)) == false, str(bottom_bar_layout))
@@ -683,6 +730,12 @@ func _array_to_size(value: Variant) -> Vector2i:
 	if values.size() != 2:
 		return Vector2i.ZERO
 	return Vector2i(int(values[0]), int(values[1]))
+
+
+func _dictionary_at(values: Array, index: int) -> Dictionary:
+	if index < 0 or index >= values.size() or typeof(values[index]) != TYPE_DICTIONARY:
+		return {}
+	return values[index] as Dictionary
 
 
 func _is_valid_resource_path(source_path: String) -> bool:
