@@ -1,0 +1,147 @@
+{
+  "task_id": "GHV-9-HUD-TYPOGRAPHY-SCALE",
+  "status": "completed",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/issue-18-action-resource-bar",
+  "target_head_before": "94e10f36757ad247dec0b779cd8859c5c02e61ea",
+  "candidate_head": null,
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "开发原型使用简体中文记录，不修改受保护分支或玩法权威；实现与独立审查分离。"
+    },
+    {
+      "contract": ".codex/project/mercury-task-contract.md",
+      "summary": "单一交付、最多三项可观察验收条件、聚焦验证及一次集中修正。"
+    },
+    {
+      "contract": "docs/superpowers/plans/2026-09-04-hud-typography-scale.md",
+      "summary": "只统一放大底部 HUD 动态文字与承载区域，保持既有外框、五区和棋盘安全布局。"
+    },
+    {
+      "contract": "dev_doc/ui-art-research/hud-ghv9-typography-scale/display-contract.md",
+      "summary": "规定 14／12／11／9／11／12／22／18px 字体层级及对应组件几何。"
+    }
+  ],
+  "changed_files": [
+    "assets/ui/themes/hud_structure_prototype.tres",
+    "scenes/tactical/hud/character_hud_panel.tscn",
+    "scenes/tactical/hud/value_meter.tscn",
+    "scenes/tactical/hud/skill_slot_button.tscn",
+    "scenes/tactical/hud/action_resource_strip.tscn",
+    "scripts/ui/hud/value_meter.gd",
+    "tests/test_hud_character_panel.gd",
+    "tests/test_hud_value_meter.gd",
+    "tests/test_hud_numeric_font_theme_integration.gd",
+    "tests/test_hud_numeric_font_candidate.gd",
+    "tests/test_hud_skill_slot_button.gd",
+    "tests/test_hud_action_resource_strip.gd",
+    "tests/test_hud_bottom_dynamic_states_gallery.gd",
+    "tests/capture_hud_bottom_numeric_font_preview.gd",
+    "docs/superpowers/plans/2026-09-04-hud-typography-scale.md",
+    "dev_doc/ui-art-research/hud-ghv9-typography-scale/display-contract.md",
+    "dev_doc/ui-art-research/hud-ghv9-typography-scale/evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv9-typography-scale/evidence/visual-verdict.json",
+    "dev_doc/ui-art-research/hud-ghv9-typography-scale/evidence/candidate-receipt.json",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/display-contract.md",
+    "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/README.md",
+    "dev_doc/ui-art-research/hud-gha5-numeric-font-theme-integration/display-contract.md",
+    "dev_doc/ui-art-research/hud-gha5-numeric-font-theme-integration/evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv8-numeric-readability/display-contract.md",
+    "dev_doc/ui-art-research/hud-ghv8-numeric-readability/evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/hud_character_slice_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/hud_character_slice_1920x1080.png",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/hud_character_slice_2560x1440.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_5skills_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_5skills_1920x1080.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_5skills_2560x1440.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_6skills_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_6skills_1920x1080.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_6skills_2560x1440.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_7skills_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_7skills_1920x1080.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_7skills_2560x1440.png",
+    "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_1_ready_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_2_early_lock_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_3_exhausted_1280x720.png"
+  ],
+  "verification": [
+    {
+      "command": "Godot 4.6.3 six-script RED suite",
+      "result": "pass",
+      "evidence": "Six scripts failed on 31 expected assertions before implementation."
+    },
+    {
+      "command": "Godot 4.6.3 affected HUD suite",
+      "result": "pass",
+      "evidence": "22 scripts; 1258 assertions passed, 0 failed, with no script-error output."
+    },
+    {
+      "command": "Godot 4.6.3 windowed capture matrix",
+      "result": "pass",
+      "evidence": "15 screenshots generated; all dimensions match their declared 1280x720, 1920x1080 or 2560x1440 size."
+    },
+    {
+      "command": "Independent read-only technical and visual review",
+      "result": "pass",
+      "evidence": "All acceptance items passed; visual score 93/100; no blocking findings."
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "All approved dynamic text sizes are active, including reversible 11px to 9px meter values.",
+      "result": "pass",
+      "evidence": [
+        "assets/ui/themes/hud_structure_prototype.tres",
+        "scripts/ui/hud/value_meter.gd",
+        "tests/test_hud_value_meter.gd"
+      ]
+    },
+    {
+      "criterion": "Text carriers were resized or reallocated without changing the fixed outer HUD geometry.",
+      "result": "pass",
+      "evidence": [
+        "tests/test_hud_character_panel.gd",
+        "tests/test_hud_skill_slot_button.gd",
+        "tests/test_hud_action_resource_strip.gd",
+        "tests/test_hud_bottom_composition.gd"
+      ]
+    },
+    {
+      "criterion": "Current screenshots and independent review show no clipping, crowding or overflow.",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/hud-ghv9-typography-scale/evidence/visual-verdict.json",
+        "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/hud_character_slice_1280x720.png",
+        "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_2_early_lock_1280x720.png"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "production combat scenes, gameplay resource logic and save state",
+      "result": "unchanged",
+      "evidence": "Protected tracked paths match target_head_before; independent runtime regressions passed."
+    },
+    {
+      "subject": "relic gameplay capacity",
+      "result": "unchanged",
+      "evidence": "RunState.RELIC_SLOT_MAX remains 6 and HUD regression passes."
+    },
+    {
+      "subject": "design library, fixed KB and Mercury repositories",
+      "result": "unchanged",
+      "evidence": "No cross-repository write was performed."
+    }
+  ],
+  "residual_risks": [
+    "Final visual acceptance remains a user decision; the recommended inspection targets are long-name ellipsis and the early-lock state counters at 1280x720."
+  ],
+  "escalation_reason": null,
+  "publication": {
+    "published": false,
+    "remote_ref": null
+  }
+}

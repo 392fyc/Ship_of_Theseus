@@ -1,0 +1,156 @@
+{
+  "milestone_id": "GHV-2-CHARACTER-HUD-VERTICAL-SLICE",
+  "status": "implementation_complete",
+  "approval_status": "independent_review_passed_pending_user_review",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/issue-18-action-resource-bar",
+  "target_head_before": "94e10f36757ad247dec0b779cd8859c5c02e61ea",
+  "candidate_head": null,
+  "scope": [
+    "226x108 CharacterHudPanel 声明式组件",
+    "可复用 HudValueMeter 与有类型显示数据",
+    "普通、长名称、零护盾、满值、超大数值五类状态画廊",
+    "1280x720、1920x1080、2560x1440 三档实机证据",
+    "角色栏 Gate 3 最小素材判定"
+  ],
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "使用简体中文；Milestone 与 Task 分层；生产脚本受保护；实现者不得自我批准；验证和独立审查属于完成条件。"
+    },
+    {
+      "contract": "dev_doc/ui-art-research/godot-hud-asset-layer-methodology-2026-09-02.md",
+      "summary": "先用声明式 Godot 场景和动态字段证明结构，再按 Gate 3 只保留有明确消费者且 Theme 不足的图片职责。"
+    },
+    {
+      "contract": "dev_doc/ui-art-research/hud-ghv2-character-slice/display-contract.md",
+      "summary": "职业名、HP 当前值与上限已有生产来源；玩家名、等级、经验、护盾与头像仅为 mock，组件不读取玩法对象。"
+    }
+  ],
+  "changed_files": [
+    "assets/ui/themes/hud_structure_prototype.tres",
+    "scripts/ui/hud/value_meter_view_data.gd",
+    "scripts/ui/hud/character_hud_view_data.gd",
+    "scripts/ui/hud/value_meter.gd",
+    "scripts/ui/hud/character_hud_panel.gd",
+    "scripts/ui/playground/hud_character_vertical_slice_gallery.gd",
+    "scenes/tactical/hud/value_meter.tscn",
+    "scenes/tactical/hud/character_hud_panel.tscn",
+    "scenes/dev/hud_character_vertical_slice_gallery.tscn",
+    "tests/test_hud_value_meter.gd",
+    "tests/test_hud_character_panel.gd",
+    "tests/test_hud_character_vertical_slice_gallery.gd",
+    "tests/capture_hud_character_vertical_slice_gallery.gd",
+    "docs/superpowers/plans/2026-09-03-hud-character-vertical-slice.md",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/display-contract.md",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/minimum-asset-needs.md",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/visual-verdict.json",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/hud_character_slice_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/hud_character_slice_1920x1080.png",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/hud_character_slice_2560x1440.png",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/candidate-receipt.json"
+  ],
+  "generation": {
+    "image_generation_used": false,
+    "external_api_key_used": false,
+    "purchased_asset_used": false,
+    "reason": "GHV-2 只完成 Gate 2 结构样机和 Gate 3 素材边界裁决。"
+  },
+  "cross_repository_changes": [
+    {
+      "repository": "ShipOfTheseus-KB",
+      "branch": "codex/issue-18-hud-layout-r1",
+      "head_before": "3b8fa3320a140af848035d84ee95d62112626807",
+      "path": "04-Assets/visual-style-decisions.md",
+      "sha256": "1d84287b74e78377531f18d3349a3df73dff641c5d9c1f8efc15710202273b58",
+      "summary": "固化角色栏固定结构、动态文字与填充、HP/护盾共同外框以及两个最小中性外壳职责。"
+    }
+  ],
+  "verification": [
+    {
+      "command": "Godot 4.6.3 focused and affected SceneTree tests",
+      "result": "pass",
+      "evidence": "test_hud_value_meter 31；test_hud_character_panel 48；test_hud_character_vertical_slice_gallery 31；test_hud_surface_skinning 28；test_hud_skill_slot_button 46；test_hud_action_resource_strip 28；test_hud_vertical_slice_gallery 73；test_skillbar_v3_ui 25；test_action_resource_bar 75；合计 385 assertions passed, 0 failed"
+    },
+    {
+      "command": "Godot 4.6.3 windowed character-slice capture",
+      "result": "pass",
+      "evidence": "三张 PNG 已重新生成；捕获脚本返回 HUD_CHARACTER_CAPTURE_OK。"
+    },
+    {
+      "command": "JSON、截图尺寸、路径卫生、差异与受保护脚本静态检查",
+      "result": "pass",
+      "evidence": "visual-verdict.json 可解析；三张 PNG 分别为精确 1280x720、1920x1080、2560x1440；GHV-2 文本无本机绝对路径；git diff --check 退出 0；三个受保护生产脚本相对目标 HEAD 无差异。"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "声明式组件与纯显示数据不持有玩法对象",
+      "result": "pass",
+      "evidence": [
+        "scenes/tactical/hud/value_meter.tscn",
+        "scenes/tactical/hud/character_hud_panel.tscn",
+        "tests/test_hud_value_meter.gd",
+        "tests/test_hud_character_panel.gd"
+      ]
+    },
+    {
+      "criterion": "固定几何、动态比例、长名称与极值无越界",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/README.md",
+        "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/visual-verdict.json",
+        "110 GHV-2 focused assertions passed"
+      ]
+    },
+    {
+      "criterion": "下一图片批次只保留明确且最小的中性表面职责",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/hud-ghv2-character-slice/minimum-asset-needs.md"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "scripts/ui/bottom_dashboard.gd; scripts/ui/skill_bar.gd; scripts/ui/action_resource_bar.gd",
+      "result": "unchanged",
+      "evidence": "git diff against 94e10f36757ad247dec0b779cd8859c5c02e61ea is empty for all three paths."
+    },
+    {
+      "subject": "玩法规则与结构化设计库",
+      "result": "unchanged",
+      "evidence": "GHV-2 未修改玩法脚本、玩法 JSON 或 SoT-fyc-space。"
+    },
+    {
+      "subject": "生产 HUD 刷新链",
+      "result": "unchanged",
+      "evidence": "新组件未接入 BottomDashboard；mock-only 字段未伪造生产来源。"
+    }
+  ],
+  "next_asset_batch": [
+    "226x108 CharacterHudPanel 中性外壳",
+    "72x82 HudPortraitFrame 中性外壳"
+  ],
+  "publication": {
+    "committed": false,
+    "published": false,
+    "remote_ref": null
+  },
+  "residual_risks": [
+    "用户尚未审核角色栏三档截图和两项最小图片需求。",
+    "正式角色栏与头像框材质尚未生成。",
+    "玩家名、等级、经验、护盾与头像的生产来源仍需在未来接线里程碑中明确。",
+    "整套 HUD 的项目级界面缩放策略不在 GHV-2 范围内。"
+  ],
+  "independent_review": {
+    "verdict": "pass",
+    "completeness": 1.0,
+    "blockers": [],
+    "evidence": "独立只读审查复跑 GHV-2 三个测试为 31/0、48/0、31/0，核对三档截图、385 项回归、Gate 3 判定、JSON、保护范围与未提交状态；证据 README 的 0/100 描述修正后复核通过。"
+  },
+  "gha5_revalidation": "independent_review_passed_pending_user_visual_review",
+  "ghv7_revalidation": "independent_review_passed_pending_user_visual_review",
+  "ghv8_revalidation": "independent_review_passed_pending_user_visual_review"
+}

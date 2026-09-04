@@ -1,0 +1,50 @@
+{
+  "milestone_id": "GHA-1-HUD-NEUTRAL-SURFACES",
+  "status": "integrated_candidate_independent_review_passed_pending_user_review",
+  "generation_mode": "Codex built-in imagegen",
+  "style_reference": "dev_doc/ui-art-research/hud-r1-material-sample-v1/hud-r1-material-direction-v1.png",
+  "assets": [
+    {
+      "asset_id": "skill_slot_surface",
+      "consumer": "assets/ui/themes/hud_structure_prototype.tres::SkillSlotButton/styles/{normal,hover,pressed,disabled}",
+      "raw_candidates": [
+        "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/skill-slot-surface-a.png",
+        "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/skill-slot-surface-b.png"
+      ],
+      "imagegen_run_ids": [
+        "exec-6ab1cbb4-f4c2-4220-b950-1389194f675b",
+        "exec-c26aedd7-cf5e-4fb9-95fe-71ec23254c87"
+      ],
+      "background_extraction_output": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/skill-slot-surface-b-alpha.png",
+      "mechanically_cleaned_candidate": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/skill-slot-surface-b-mechanical.png",
+      "selected_candidate": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/skill-slot-surface-b-mechanical.png",
+      "final_asset": "assets/ui/skins/hud/skill_slot_surface_v1.png",
+      "final_size": [64, 64],
+      "final_sha256": "3e175dd60dc4833861e35539acfc53a1b11b7f1b07ef070dffa31d50f87a3d49",
+      "prompt": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/prompt-contract.md#技能槽中性表面-a-b",
+      "alpha_verified": true,
+      "integration_verified": true
+    },
+    {
+      "asset_id": "action_resource_strip_surface",
+      "consumer": "assets/ui/themes/hud_structure_prototype.tres::ActionResourceStrip/styles/panel",
+      "raw_candidates": [
+        "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/action-resource-strip-surface-a.png",
+        "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/action-resource-strip-surface-b.png"
+      ],
+      "imagegen_run_ids": [
+        "exec-c046dd9e-f265-4d7e-947e-a5985283ff46",
+        "exec-b99f715a-8558-46c3-bf33-5fe44ba34717"
+      ],
+      "background_extraction_output": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/action-resource-strip-surface-b-alpha.png",
+      "mechanically_cleaned_candidate": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/action-resource-strip-surface-b-mechanical.png",
+      "selected_candidate": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/action-resource-strip-surface-b-mechanical.png",
+      "final_asset": "assets/ui/skins/hud/action_resource_strip_surface_v1.png",
+      "final_size": [274, 40],
+      "final_sha256": "b1f1e3df3dab11f689e8c02a32f74157e8420053771e705d3c44da5f565a4948",
+      "prompt": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/prompt-contract.md#行动资源条中性表面-a-b",
+      "alpha_verified": true,
+      "integration_verified": true
+    }
+  ]
+}

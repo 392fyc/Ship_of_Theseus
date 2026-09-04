@@ -1,0 +1,72 @@
+{
+  "milestone_id": "GHV-3-UTILITY-HUD-VERTICAL-SLICE",
+  "status": "ghv7_safe_insets_independent_review_passed_pending_user_review",
+  "capture_runtime": "Godot 4.6.3 windowed Vulkan",
+  "screenshots": [
+    {
+      "path": "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_1280x720.png",
+      "size": "1280x720",
+      "sha256": "db77135c1fb3fc08eee77e0c3f937f633bd2dfa72402a42350ec4d17946e74b8",
+      "verdict": "pass",
+      "observations": [
+        "三组 506x108 组件带均位于 24px 安全边距内，没有裁切或重叠。",
+        "128x108 装备栏、278x108 遗物栏和 76x108 结束区保持固定尺寸。",
+        "32x32 血瓶、52x52 装备槽、40x40 遗物槽与 52x52 结束按钮均保持正方形。",
+        "装备、血瓶与遗物内框均和外围框保持可见透明净距。",
+        "禁用装备、遗物和结束按钮可与可用状态区分。"
+      ]
+    },
+    {
+      "path": "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_1920x1080.png",
+      "size": "1920x1080",
+      "sha256": "63e7fce55dede1f766de9667a43c50c55314946783432d8e82fcc9d566b15c04",
+      "verdict": "pass",
+      "observations": [
+        "固定尺寸组件保持居中，没有随画布被拉伸。",
+        "复用的面板与槽壳边角在常用桌面分辨率下仍清楚。"
+      ]
+    },
+    {
+      "path": "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_2560x1440.png",
+      "size": "2560x1440",
+      "sha256": "2fc3822f91b57624005498c15d85aba2bb2432b88dcc9223296cefda19b96942",
+      "verdict": "pass",
+      "observations": [
+        "固定 HUD 尺寸和内部间距保持不变。",
+        "画廊组件全部留在安全画布内。"
+      ]
+    }
+  ],
+  "state_coverage": [
+    "empty_equipment",
+    "mock_occupied_equipment",
+    "disabled_equipment_and_potion",
+    "eight_empty_visual_relic_slots",
+    "partially_mock_occupied_visual_relic_slots",
+    "end_turn",
+    "end_move",
+    "disabled_end_control"
+  ],
+  "gate3": {
+    "reused": [
+      "CharacterHudPanel neutral surface for EquipmentHudPanel and HudRelicPanel",
+      "SkillSlotButton neutral surface for 52x52 equipment and 40x40 relic slots"
+    ],
+    "new_image_duties": [
+      "32x32 potion button shell",
+      "44x44 end-action diamond frame",
+      "18x24 hourglass emblem"
+    ],
+    "excluded": [
+      "weapon icon",
+      "armor icon",
+      "potion content icon",
+      "relic content icon"
+    ]
+  },
+  "known_non_blocking_limits": [
+    "装备、血瓶与遗物内容仍为 mock-only，尚未进入生产刷新链。",
+    "32x32 血瓶壳、44x44 菱形框与 18x24 沙漏已经由 GHA-3 接入，但尚待独立审查与用户最终视觉审核。",
+    "武器、防具、血瓶内容与遗物内容图标不属于本批次。"
+  ]
+}

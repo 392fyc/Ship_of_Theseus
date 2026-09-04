@@ -1,0 +1,51 @@
+{
+  "milestone_id": "GHA-4-HUD-NUMERIC-FONT-CANDIDATE",
+  "status": "technical_and_independent_visual_pass_pending_user_review",
+  "candidate": {
+    "family": "IBM Plex Mono",
+    "internal_family": "IBM Plex Mono SmBld",
+    "style": "SemiBold",
+    "weight": 600,
+    "font_sha256": "f04d7c488ddf7d1fa99f2574efc3406ea4cbe17bb1af3a1ab960f84d0c96a172",
+    "license_sha256": "91c25c350d3cac39da2736d74f7ba37ef648f5237a4e330a240615bc8d8c4360",
+    "msdf_enabled": false
+  },
+  "screenshots": [
+    {
+      "path": "dev_doc/ui-art-research/hud-gha4-numeric-font/evidence/hud_numeric_font_candidate_1280x720.png",
+      "size": "1280x720",
+      "sha256": "1a1b0f918d2b59609d2bf558d5d13d7c7e8e3a3899a24a29af62ab7b0e704a29",
+      "verdict": "pass",
+      "observation": "The candidate column uses the same geometry, sizes and right edges as the fallback column; all 7px long values and the 8px short value remain complete."
+    },
+    {
+      "path": "dev_doc/ui-art-research/hud-gha4-numeric-font/evidence/hud_bottom_numeric_font_preview_1280x720.png",
+      "size": "1280x720",
+      "sha256": "00898d605ee78f6e5e691e7fc90f279e6494540d7705557f27f8948c6cbb71f4",
+      "verdict": "pass",
+      "observation": "One existing GHV-5 long-value gallery is reused; only XP, HP and SH receive a local IBM Plex font override."
+    }
+  ],
+  "checks": [
+    {
+      "subject": "glyph_readability",
+      "verdict": "pass",
+      "observation": "The candidate keeps the counters and slash discernible at actual 7px and 8px sizes on the dark HUD background."
+    },
+    {
+      "subject": "value_boundary",
+      "verdict": "pass",
+      "observation": "Every actual meter sample fits its 58px label without relying on clipping; 13-character values use 7px because 8px measures 63px."
+    },
+    {
+      "subject": "protected_state",
+      "verdict": "pass",
+      "observation": "The shared Theme, GHV-5 files and all three prior GHV-5 screenshot hashes remain unchanged."
+    }
+  ],
+  "known_non_blocking_limits": [
+    "Independent review and user visual approval are still required.",
+    "The candidate is locally overridden in development galleries only and is not the formal HUD font.",
+    "Export-package license visibility remains a formal-admission task."
+  ]
+}

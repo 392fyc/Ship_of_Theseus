@@ -1,0 +1,62 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud/slot_button.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/themes/hud_structure_prototype.tres" id="2_theme"]
+
+[node name="HudSlotButton" type="Button"]
+custom_minimum_size = Vector2(44, 44)
+offset_right = 44.0
+offset_bottom = 44.0
+focus_mode = 2
+mouse_default_cursor_shape = 2
+theme = ExtResource("2_theme")
+theme_type_variation = &"HudSlotButton44"
+script = ExtResource("1_script")
+
+[node name="Content" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="IconRect" type="TextureRect" parent="Content"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = -5.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StateOverlay" type="Panel" parent="Content"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"HudSlotEmptyOverlay"
+
+[node name="FocusOverlay" type="Panel" parent="Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"HudUtilityFocusOverlay"

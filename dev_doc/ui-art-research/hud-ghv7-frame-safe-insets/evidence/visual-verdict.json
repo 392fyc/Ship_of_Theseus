@@ -1,0 +1,50 @@
+{
+  "milestone_id": "GHV-7-FRAME-SAFE-INSETS",
+  "status": "independent_visual_pass_pending_user_review",
+  "verdict": "pass",
+  "ghv8_revalidation": "representative_images_independent_review_passed_pending_user_visual_review",
+  "checks": [
+    {
+      "subject": "painted_edge_clearance",
+      "verdict": "pass",
+      "observation": "All target inner frames use at least 10px raw inset against an approximately 6px painted outer edge, leaving at least 4px visible transparent clearance."
+    },
+    {
+      "subject": "character_geometry",
+      "verdict": "pass",
+      "observation": "Portrait Rect2(12,13,72,82) and info Rect2(90,13,124,82) remain inside the 226x108 panel with a 6px internal gap."
+    },
+    {
+      "subject": "utility_geometry",
+      "verdict": "pass",
+      "observation": "Equipment, potion and relic frames are visibly separated from their outer frames; the 250px relic grid still uses the available width without renewed excessive side whitespace."
+    },
+    {
+      "subject": "scope_preservation",
+      "verdict": "pass",
+      "observation": "Five-region outer sizes, action-resource behavior, runtime values, 8 visual relic shells and 6 gameplay relic capacity remain unchanged."
+    }
+  ],
+  "representative_images": [
+    {
+      "path": "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/hud_character_slice_1280x720.png",
+      "sha256": "c627f03821bb3046ebe06a2c30412440a5bb1dfe84f437dd352522e0f69b70b7"
+    },
+    {
+      "path": "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_1280x720.png",
+      "sha256": "db77135c1fb3fc08eee77e0c3f937f633bd2dfa72402a42350ec4d17946e74b8"
+    },
+    {
+      "path": "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_5skills_1280x720.png",
+      "sha256": "fc33d4bf4c9c078a5cb8cdbe89f44691269019de444ea18af8ef0f21ad0e7971"
+    },
+    {
+      "path": "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_2_early_lock_1280x720.png",
+      "sha256": "8460746fb04b4a6908bc30370e110d255e9e82ff90ccc9d85864581e4180d3bb"
+    }
+  ],
+  "known_non_blocking_limits": [
+    "User visual approval is still required before production HUD wiring.",
+    "These scenes remain development-only."
+  ]
+}

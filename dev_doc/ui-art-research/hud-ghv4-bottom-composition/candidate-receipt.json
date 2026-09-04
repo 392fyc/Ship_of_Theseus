@@ -1,0 +1,94 @@
+{
+  "milestone_id": "GHV-4-BOTTOM-HUD-COMPOSITION",
+  "status": "technical_candidate_independent_review_passed_pending_user_review",
+  "approval_status": "independent_review_passed_pending_user_visual_review",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/issue-18-action-resource-bar",
+  "target_head_before": "94e10f36757ad247dec0b779cd8859c5c02e61ea",
+  "candidate_head": null,
+  "changed_scope": [
+    "fixed 476x108 SkillShelf with 5/6/7 runtime layout",
+    "1280x720 BottomHudComposition using six existing business components",
+    "development-only 20x20 diamond board stress painter and approved kensei scale anchor",
+    "5/6/7 by three-resolution gallery capture matrix",
+    "SPEC-AR-VERTICAL-001 correction from action-strip y=556 to y=550",
+    "component, gallery and capture tests plus evidence records"
+  ],
+  "generation": {
+    "new_visual_assets_generated": false,
+    "external_api_key_used": false,
+    "purchased_asset_used": false,
+    "reused_approved_or_candidate_assets": [
+      "assets/ui/skins/hud/skill_slot_surface_v1.png",
+      "assets/ui/skins/hud/action_resource_strip_surface_v1.png",
+      "assets/ui/skins/hud/character_panel_surface_v1.png",
+      "assets/ui/skins/hud/portrait_frame_surface_v1.png",
+      "assets/ui/skins/hud/potion_button_shell_v1.png",
+      "assets/ui/skins/hud/end_action_diamond_frame_v1.png",
+      "assets/ui/skins/hud/end_action_hourglass_emblem_v1.png",
+      "assets/units/kensei/map_token_clean_v2.png"
+    ]
+  },
+  "runtime_boundaries": {
+    "production_wiring_added": false,
+    "content_icons_generated": false,
+    "profession_resource_placeholder_added": false,
+    "board_stress_grid_is_gameplay_limit": false,
+    "visual_relic_shell_count": 8,
+    "protected_gameplay_relic_capacity": 6
+  },
+  "verification": [
+    {
+      "command": "Godot 4.6.3 GHV-4 focused tests",
+      "result": "pass",
+      "evidence": "test_hud_skill_shelf 61/0, test_hud_bottom_composition 54/0, test_hud_bottom_composition_gallery 71/0."
+    },
+    {
+      "command": "Godot 4.6.3 affected HUD, prep-flow and kensei tests",
+      "result": "pass",
+      "evidence": "19 test scripts; 835 assertions passed, 0 failed."
+    },
+    {
+      "command": "Godot 4.6.3 windowed capture",
+      "result": "pass",
+      "evidence": "Nine screenshots generated for 5/6/7 skills at 1280x720, 1920x1080 and 2560x1440 after two consecutive complete render frames."
+    },
+    {
+      "command": "manual visual inspection",
+      "result": "pass",
+      "evidence": "All three 1280x720 skill-count images contain the full five-region row, action strip, 400-tile grid and kensei anchor without clipping."
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "BottomDashboard, SkillBar, ActionResourceBar, RunState, RunManager, tactical flow and project settings",
+      "result": "unchanged",
+      "evidence": "git diff against 94e10f36757ad247dec0b779cd8859c5c02e61ea is empty for protected paths; RunState.RELIC_SLOT_MAX remains 6."
+    }
+  ],
+  "independent_review": {
+    "verdict": "pass",
+    "completeness": 1.0,
+    "blockers": [],
+    "evidence": "Independent read-only review regenerated all nine captures, inspected the three 1280x720 skill-count images, and reran 19 scripts for 835 passed assertions and zero failures. It verified exact five-region geometry, SPEC-AR-VERTICAL-001, the 400-tile board, approved kensei anchor, 1/1.5/2 scaling, runtime-only fields, 8 visual versus 6 gameplay relic boundary, JSON and hashes, protected paths, and unpublished state."
+  },
+  "gha5_revalidation": "independent_review_passed_pending_user_visual_review",
+  "gha6_revalidation": "revision_3_independent_review_passed_pending_user_visual_review",
+  "ghv7_revalidation": "independent_review_passed_pending_user_visual_review",
+  "ghv8_revalidation": "independent_review_passed_pending_user_visual_review",
+  "cross_repository": {
+    "design_library_changed": false,
+    "kb_changed_for_this_milestone": false,
+    "mercury_changed": false
+  },
+  "publication": {
+    "committed": false,
+    "published": false,
+    "remote_ref": null
+  },
+  "residual_risks": [
+    "User visual approval is still required.",
+    "The runtime fallback portrait glyph is not final portrait content.",
+    "The composition is a development proof and is not connected to tactical production state."
+  ]
+}

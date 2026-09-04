@@ -1,0 +1,72 @@
+{
+  "milestone_id": "GHV-6-ACTION-RESOURCE-SEGMENTS",
+  "status": "revision_3_technical_candidate_independent_review_passed_pending_user_review",
+  "approval_status": "independent_review_passed_pending_user_visual_review",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/issue-18-action-resource-bar",
+  "target_head_before": "94e10f36757ad247dec0b779cd8859c5c02e61ea",
+  "candidate_head": null,
+  "milestone_tasks": [
+    {"task": 1, "name": "approve overall frame plus three matching complete inner frames", "status": "complete"},
+    {"task": 2, "name": "TDD implementation and affected path updates", "status": "complete"},
+    {"task": 3, "name": "15 refreshed captures and primary visual inspection", "status": "complete"},
+    {"task": 4, "name": "independent read-only review", "status": "complete"}
+  ],
+  "changed_scope": [
+    "one preserved overall ActionResourceStrip outer frame",
+    "three transparent resource zones reusing one complete four-sided ActionResourceSegment frame",
+    "4px spacing between the three independent inner frames",
+    "40-assertion structural and runtime regression contract",
+    "15 refreshed screenshots and current hash manifests"
+  ],
+  "generation": {
+    "image_generation_used": false,
+    "external_api_key_used": false,
+    "purchased_asset_used": false
+  },
+  "verification": [
+    {
+      "command": "Godot 4.6.3 RED/GREEN action-resource test",
+      "result": "pass",
+      "evidence": "Revision-3 checks first failed 34/6 against the continuous-frame and plain-seam implementation, then passed 40/0 after adding three matching complete inner frames."
+    },
+    {
+      "command": "Godot 4.6.3 affected regression suite",
+      "result": "pass",
+      "evidence": "22 scripts; 1160 assertions passed, 0 failed, with no SCRIPT ERROR or missing-node output."
+    },
+    {
+      "command": "Godot 4.6.3 windowed captures",
+      "result": "pass",
+      "evidence": "3 GHV-1, 9 GHV-4 and 3 GHV-5 screenshots regenerated; four 1280x720 representative images inspected at original resolution."
+    }
+  ],
+  "protected_state": {
+    "production_wiring_changed": false,
+    "gameplay_rules_changed": false,
+    "visual_relic_shell_count": 8,
+    "gameplay_relic_capacity": 6
+  },
+  "cross_repository": {
+    "design_library_changed": false,
+    "kb_changed_for_this_milestone": false,
+    "mercury_changed": false
+  },
+  "publication": {
+    "committed": false,
+    "published": false,
+    "remote_ref": null
+  },
+  "independent_review": {
+    "verdict": "pass",
+    "completeness": 1.0,
+    "blockers": [],
+    "evidence": "Independent read-only review used Godot 4.6.3, reran the focused test for 40/0 and the 22-script suite for 1160/0 with no SCRIPT ERROR or missing-node output. It inspected the GHV-1, GHV-4 and all three GHV-5 representative images at original resolution, verified the preserved overall frame plus three matching complete transparent inner frames with 4px spacing, checked current hashes and JSON, and confirmed protected production paths and RELIC_SLOT_MAX=6 remain unchanged."
+  },
+  "ghv7_revalidation": "representative_images_independent_review_passed_pending_user_visual_review",
+  "ghv8_revalidation": "representative_images_independent_review_passed_pending_user_visual_review",
+  "residual_risks": [
+    "User visual approval is still required before production HUD wiring.",
+    "The overall frame plus three matching inner frames remain prototype Theme styling, not production admission."
+  ]
+}

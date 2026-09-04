@@ -1,0 +1,117 @@
+{
+  "milestone_id": "GHV-3-UTILITY-HUD-VERTICAL-SLICE",
+  "status": "integrated_candidate_independent_review_passed_pending_user_review",
+  "approval_status": "independent_review_passed_pending_user_visual_review",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/issue-18-action-resource-bar",
+  "target_head_before": "94e10f36757ad247dec0b779cd8859c5c02e61ea",
+  "candidate_head": null,
+  "scope": [
+    "128x108 equipment panel with 52x52 weapon and armor slots plus 32x32 potion button",
+    "278x108 relic panel with eight 40x40 visual shells in a 2x4 grid",
+    "76x108 end-action control with separate 44x44 diamond and 18x24 hourglass layers",
+    "end_turn and end_move dual signal semantics",
+    "three-resolution Godot gallery and Gate 3 minimum-asset decision"
+  ],
+  "truth_boundaries": {
+    "equipment_potion_relic_content": "mock-only",
+    "visual_relic_shell_count": 8,
+    "protected_gameplay_relic_capacity": 6,
+    "production_wiring_added": false,
+    "content_icons_generated": false
+  },
+  "gate3": {
+    "reused_existing_surfaces": [
+      "assets/ui/skins/hud/character_panel_surface_v1.png for equipment and relic panels",
+      "assets/ui/skins/hud/skill_slot_surface_v1.png for 52x52 equipment and 40x40 relic slots"
+    ],
+    "next_minimum_image_duties": [
+      "32x32 potion button shell",
+      "44x44 end-action diamond frame",
+      "18x24 hourglass emblem"
+    ]
+  },
+  "changed_files": [
+    "assets/ui/themes/hud_structure_prototype.tres",
+    "scripts/ui/hud/slot_view_data.gd",
+    "scripts/ui/hud/potion_view_data.gd",
+    "scripts/ui/hud/end_turn_view_data.gd",
+    "scripts/ui/hud/slot_button.gd",
+    "scripts/ui/hud/potion_button.gd",
+    "scripts/ui/hud/equipment_hud_panel.gd",
+    "scripts/ui/hud/relic_grid.gd",
+    "scripts/ui/hud/end_turn_frame.gd",
+    "scripts/ui/hud/end_turn_emblem.gd",
+    "scripts/ui/hud/end_turn_button.gd",
+    "scripts/ui/hud/end_turn_control.gd",
+    "scripts/ui/playground/hud_utility_vertical_slice_gallery.gd",
+    "scenes/tactical/hud/slot_button.tscn",
+    "scenes/tactical/hud/potion_button.tscn",
+    "scenes/tactical/hud/equipment_hud_panel.tscn",
+    "scenes/tactical/hud/relic_grid.tscn",
+    "scenes/tactical/hud/end_turn_button.tscn",
+    "scenes/tactical/hud/end_turn_control.tscn",
+    "scenes/dev/hud_utility_vertical_slice_gallery.tscn",
+    "tests/test_hud_slot_button.gd",
+    "tests/test_hud_equipment_panel.gd",
+    "tests/test_hud_relic_grid.gd",
+    "tests/test_hud_end_turn_control.gd",
+    "tests/test_hud_utility_vertical_slice_gallery.gd",
+    "tests/capture_hud_utility_vertical_slice_gallery.gd",
+    "dev_doc/ui-art-research/hud-ghv3-utility-slice/display-contract.md",
+    "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/visual-verdict.json",
+    "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_1920x1080.png",
+    "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_2560x1440.png",
+    "dev_doc/ui-art-research/hud-ghv3-utility-slice/minimum-asset-needs.md",
+    "dev_doc/ui-art-research/hud-ghv3-utility-slice/candidate-receipt.json",
+    "docs/superpowers/plans/2026-09-03-hud-utility-vertical-slice.md"
+  ],
+  "verification": [
+    {
+      "command": "Godot 4.6.3 focused and affected SceneTree tests",
+      "result": "pass",
+      "evidence": "16 test scripts; 679 assertions passed, 0 failed: character surface 45, value meter 31, character panel 48, character gallery 31, existing surface 28, skill slot 46, action strip 28, existing gallery 73, skillbar production 25, action-resource production 75, utility slot 44, equipment 16, relic 23, end control 33, utility gallery 85, prep flow 48."
+    },
+    {
+      "command": "Godot 4.6.3 windowed utility-slice capture",
+      "result": "pass",
+      "evidence": "1280x720, 1920x1080 and 2560x1440 PNG created; capture script returned HUD_UTILITY_CAPTURE_OK."
+    },
+    {
+      "command": "Gate 3 reuse assertions",
+      "result": "pass",
+      "evidence": "EquipmentHudPanel and HudRelicPanel share the accepted CharacterHudPanel StyleBoxTexture; 52x52 equipment and 40x40 relic slots share the accepted neutral slot StyleBoxTexture."
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "RunState.RELIC_SLOT_MAX",
+      "result": "unchanged",
+      "evidence": "test_hud_relic_grid and test_prep_flow confirm the gameplay limit remains 6."
+    },
+    {
+      "subject": "BottomDashboard, SkillBar, ActionResourceBar and tactical production flow",
+      "result": "unchanged",
+      "evidence": "git diff against 94e10f36757ad247dec0b779cd8859c5c02e61ea is empty for the protected production scripts; no production wiring was added."
+    }
+  ],
+  "publication": {
+    "committed": false,
+    "published": false,
+    "remote_ref": null
+  },
+  "independent_review": {
+    "verdict": "pass",
+    "completeness": 1.0,
+    "blockers": [],
+    "evidence": "Independent read-only review checked declarative layers, typed display data, fixed geometry, 8 visual versus 6 gameplay relic slots, dual end signals, Theme reuse, three screenshots, JSON, protected scripts and uncommitted state; independently reran 16 scripts for 679/0 and returned PASS."
+  },
+  "ghv7_revalidation": "independent_review_passed_pending_user_visual_review",
+  "residual_risks": [
+    "User visual approval is still required before these candidates can be treated as accepted.",
+    "Equipment, potion and relic content are not wired to production state.",
+    "The three dedicated image duties identified by Gate 3 are not yet generated or imported."
+  ]
+}

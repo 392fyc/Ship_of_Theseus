@@ -1,0 +1,28 @@
+{
+  "family": "IBM Plex Mono",
+  "style": "SemiBold",
+  "weight": 600,
+  "version": "@ibm/plex-mono@2.5.0",
+  "font_version": "IBM PLEX MONO V2.5",
+  "font_version_date": "2026-04-21",
+  "release_published_at": "2026-06-11T19:24:51Z",
+  "source_commit": "2f9ba1b",
+  "release_url": "https://github.com/IBM/plex/releases/tag/%40ibm%2Fplex-mono%402.5.0",
+  "archive_url": "https://github.com/IBM/plex/releases/download/%40ibm%2Fplex-mono%402.5.0/ibm-plex-mono.zip",
+  "archive_path": "ibm-plex-mono/fonts/complete/ttf/IBMPlexMono-SemiBold.ttf",
+  "license_archive_path": "ibm-plex-mono/fonts/complete/ttf/license.txt",
+  "license": "SIL Open Font License 1.1",
+  "reserved_font_name": "Plex",
+  "godot_candidate_import": {
+    "antialiasing": "grayscale",
+    "hinting": "light",
+    "subpixel_positioning": "auto",
+    "generate_mipmaps": false,
+    "multichannel_signed_distance_field": false,
+    "oversampling": 0.0
+  },
+  "retrieved_at": "2026-09-03",
+  "zip_sha256": "6d23f01257663d8cc49a0d64c22ced630b79e0e2a0ac08a0da86e9a38bbc481c",
+  "font_sha256": "f04d7c488ddf7d1fa99f2574efc3406ea4cbe17bb1af3a1ab960f84d0c96a172",
+  "license_sha256": "91c25c350d3cac39da2736d74f7ba37ef648f5237a4e330a240615bc8d8c4360"
+}

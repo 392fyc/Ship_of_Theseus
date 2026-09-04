@@ -1,0 +1,121 @@
+{
+  "task_id": "GHV-10-DEFAULT-FIVE-SKILLS",
+  "status": "completed",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/issue-18-action-resource-bar",
+  "target_head_before": "94e10f36757ad247dec0b779cd8859c5c02e61ea",
+  "candidate_head": null,
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "只在任务分支工作，保留既有改动；Task 与 Milestone 分开报告，交付前进行独立审查和验证。"
+    },
+    {
+      "contract": ".codex/project/mercury-task-contract.md",
+      "summary": "任务卡限定一个主交付物、最多三项可观察验收条件，并以新鲜验证和独立审查形成回执。"
+    },
+    {
+      "contract": "docs/superpowers/plans/2026-09-04-hud-default-five-skills.md",
+      "summary": "默认显示五技能，显式六技能与七技能仍可用；不修改正式技能数据、正式战斗 HUD 或玩法逻辑。"
+    },
+    {
+      "contract": "dev_doc/ui-art-research/hud-ghv10-default-five-skills/display-contract.md",
+      "summary": "五个 64×64 槽位在固定 476×108 技能栏内居中，动态状态使用快捷键 1、2、Q、E、R。"
+    }
+  ],
+  "changed_files": [
+    "scripts/ui/playground/hud_bottom_composition_gallery.gd",
+    "scripts/ui/playground/hud_bottom_dynamic_states_gallery.gd",
+    "tests/test_hud_bottom_composition_gallery.gd",
+    "tests/test_hud_bottom_dynamic_states_gallery.gd",
+    "tests/test_hud_bottom_composition.gd",
+    "tests/capture_hud_bottom_dynamic_states_gallery.gd",
+    "docs/superpowers/plans/2026-09-04-hud-default-five-skills.md",
+    "dev_doc/ui-art-research/hud-ghv10-default-five-skills/display-contract.md",
+    "dev_doc/ui-art-research/hud-ghv10-default-five-skills/evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv10-default-five-skills/evidence/visual-verdict.json",
+    "dev_doc/ui-art-research/hud-ghv10-default-five-skills/evidence/candidate-receipt.json",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/display-contract.md",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/display-contract.md",
+    "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_5skills_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_5skills_1920x1080.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_5skills_2560x1440.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_6skills_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_6skills_1920x1080.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_6skills_2560x1440.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_7skills_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_7skills_1920x1080.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_7skills_2560x1440.png",
+    "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_1_ready_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_2_early_lock_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_3_exhausted_1280x720.png"
+  ],
+  "verification": [
+    {
+      "command": "Godot --headless：test_hud_bottom_composition_gallery.gd、test_hud_bottom_dynamic_states_gallery.gd、test_hud_bottom_composition.gd",
+      "result": "pass",
+      "evidence": "重启后重新运行 3 个脚本，共 266 项断言通过，0 项失败，0 个脚本错误。"
+    },
+    {
+      "command": "GHV-10 截图存在性、尺寸和 SHA-256 检查",
+      "result": "pass",
+      "evidence": "12 张截图全部存在且尺寸符合文件名；两张首要审核文件哈希与证据记录一致。"
+    },
+    {
+      "command": "独立规格与视觉复审",
+      "result": "pass",
+      "evidence": "默认五技能、动态状态、显式六／七技能兼容和正式路径边界全部通过；视觉评分 95。"
+    },
+    {
+      "command": "git diff --check 与受保护路径基线比较",
+      "result": "pass",
+      "evidence": "补丁格式检查无输出；五个受保护生产路径相对起始提交均未改变。"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "未显式配置时，完整组合与动态状态默认显示五个技能",
+      "result": "pass",
+      "evidence": [
+        "默认数量和真实槽位数量均由自动测试锁定为 5。",
+        "用户于 2026-09-05 审核默认五技能 1280×720 实图并裁决通过。"
+      ]
+    },
+    {
+      "criterion": "显式六技能和七技能布局继续正常工作，固定技能栏尺寸不变",
+      "result": "pass",
+      "evidence": [
+        "5／6／7 技能矩阵测试全部通过，技能栏仍为 476×108。"
+      ]
+    },
+    {
+      "criterion": "截图、聚焦测试和保护范围符合合同",
+      "result": "pass",
+      "evidence": [
+        "12 张截图尺寸正确；266 项聚焦断言通过；正式战斗与玩法路径未修改。"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "正式战斗场景、BottomDashboard、ActionResourceBar、RunState 与 project.godot",
+      "result": "unchanged",
+      "evidence": "相对 94e10f36757ad247dec0b779cd8859c5c02e61ea 的限定路径比较为空。"
+    },
+    {
+      "subject": "设计库、KB 与 Mercury",
+      "result": "unchanged",
+      "evidence": "本 Task 没有跨仓写入。"
+    }
+  ],
+  "residual_risks": [
+    "当前候选尚未提交或发布；后续集成必须先建立新的任务卡，不能恢复已被取代的 VA-6R 计划。"
+  ],
+  "escalation_reason": null,
+  "publication": {
+    "published": false,
+    "remote_ref": null
+  }
+}

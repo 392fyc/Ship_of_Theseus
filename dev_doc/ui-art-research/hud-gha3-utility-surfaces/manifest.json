@@ -1,0 +1,68 @@
+{
+  "milestone_id": "GHA-3-UTILITY-HUD-SURFACES",
+  "status": "generated_selected_integrated_independent_review_passed_pending_user_review",
+  "generation_mode": "Codex built-in imagegen",
+  "external_api_key_used": false,
+  "purchased_asset_used": false,
+  "reference_images": [
+    "assets/ui/skins/hud/skill_slot_surface_v1.png",
+    "assets/ui/skins/hud/character_panel_surface_v1.png",
+    "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_1280x720.png"
+  ],
+  "assets": [
+    {
+      "asset_id": "potion_button_shell",
+      "consumer": "HudPotionButton32/styles/*",
+      "target_size": "32x32",
+      "raw_candidates": [
+        "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/potion-button-shell-a.png",
+        "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/potion-button-shell-b.png"
+      ],
+      "imagegen_run_ids": [
+        "exec-06c59612-ef29-4545-95a1-bf359738b7a7",
+        "exec-c5483397-9c36-42ab-8765-4ec0d93d0176"
+      ],
+      "selected_candidate": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/potion-button-shell-a-native.png",
+      "final_asset": "assets/ui/skins/hud/potion_button_shell_v1.png",
+      "sha256": "d4f9bca956e24e1edb268689dd064ac733a3fdbc2cb677f8c54702b6beef0962",
+      "alpha_verified": true,
+      "integration_verified": true
+    },
+    {
+      "asset_id": "end_action_diamond_frame",
+      "consumer": "EndTurnButton/DiamondFrame",
+      "target_size": "44x44",
+      "raw_candidates": [
+        "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/end-action-diamond-frame-a.png",
+        "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/end-action-diamond-frame-b.png"
+      ],
+      "imagegen_run_ids": [
+        "exec-e163e5da-105f-4e51-be97-4076eb70b6c5",
+        "exec-9d9e0888-dcc7-4e50-b9a4-eca12239f5b4"
+      ],
+      "selected_candidate": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/end-action-diamond-frame-a-native.png",
+      "final_asset": "assets/ui/skins/hud/end_action_diamond_frame_v1.png",
+      "sha256": "bebbf640076fc6e47509d29f0b6ecae1c56c375b77d2301d798fcdb2417e0a36",
+      "alpha_verified": true,
+      "integration_verified": true
+    },
+    {
+      "asset_id": "end_action_hourglass_emblem",
+      "consumer": "EndTurnButton/HourglassEmblem",
+      "target_size": "18x24",
+      "raw_candidates": [
+        "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/end-action-hourglass-emblem-a.png",
+        "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/end-action-hourglass-emblem-b.png"
+      ],
+      "imagegen_run_ids": [
+        "exec-244d3490-a005-4bbf-ae41-bf63139d079e",
+        "exec-2eca0728-ba7f-4ae6-98b6-1d469548aec7"
+      ],
+      "selected_candidate": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/end-action-hourglass-emblem-b-native.png",
+      "final_asset": "assets/ui/skins/hud/end_action_hourglass_emblem_v1.png",
+      "sha256": "942a532564832d2e8ba6e6257b5db775555990352b297760d0e204fd5c611b5e",
+      "alpha_verified": true,
+      "integration_verified": true
+    }
+  ]
+}

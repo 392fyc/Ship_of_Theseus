@@ -1,0 +1,46 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud/value_meter.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/themes/hud_structure_prototype.tres" id="2_theme"]
+
+[node name="HudValueMeter" type="Control"]
+custom_minimum_size = Vector2(98, 13)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 98.0
+offset_bottom = 13.0
+mouse_filter = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Track" type="ProgressBar" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -5.5
+offset_bottom = 5.5
+grow_horizontal = 2
+mouse_filter = 2
+max_value = 1.0
+step = 0.001
+show_percentage = false
+theme_type_variation = &"HudHpMeter"
+
+[node name="ValueLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_right = -3.0
+mouse_filter = 2
+theme_type_variation = &"HudMeterValueLabel"
+horizontal_alignment = 2
+vertical_alignment = 1
+text_overrun_behavior = 3
+clip_text = true

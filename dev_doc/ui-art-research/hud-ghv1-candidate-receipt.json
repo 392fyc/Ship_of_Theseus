@@ -1,0 +1,129 @@
+{
+  "task_id": "GHV-1-HUD-VERTICAL-SLICES",
+  "status": "completed",
+  "approval_status": "pending_independent_and_user_review",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/issue-18-action-resource-bar",
+  "target_head_before": "94e10f36757ad247dec0b779cd8859c5c02e61ea",
+  "candidate_head": null,
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "使用简体中文；Milestone 与 Task 分层；生产脚本受保护；实现者不得自我批准；用户 Gate 前不提交或发布。"
+    },
+    {
+      "contract": ".codex/project/mercury-task-contract.md",
+      "summary": "候选实现提供范围、验证、保护状态与剩余风险证据，独立审核另行完成。"
+    },
+    {
+      "contract": "dev_doc/ui-art-research/godot-hud-asset-layer-methodology-2026-09-02.md",
+      "summary": "先以真实 Godot 纵向切片验证职责拆层，再确定最小图片需求；禁止恢复旧批量素材计划。"
+    }
+  ],
+  "changed_files": [
+    "assets/ui/themes/hud_structure_prototype.tres",
+    "scripts/ui/hud/skill_slot_view_data.gd",
+    "scripts/ui/hud/skill_slot_button.gd",
+    "scripts/ui/hud/action_resource_view_data.gd",
+    "scripts/ui/hud/action_resource_glyph.gd",
+    "scripts/ui/hud/action_resource_strip.gd",
+    "scripts/ui/playground/hud_vertical_slice_gallery.gd",
+    "scenes/tactical/hud/skill_slot_button.tscn",
+    "scenes/tactical/hud/action_resource_strip.tscn",
+    "scenes/dev/hud_vertical_slice_gallery.tscn",
+    "tests/test_hud_skill_slot_button.gd",
+    "tests/test_hud_action_resource_strip.gd",
+    "tests/test_hud_vertical_slice_gallery.gd",
+    "tests/capture_hud_vertical_slice_gallery.gd",
+    "docs/superpowers/plans/2026-09-02-hud-godot-vertical-slices.md",
+    "dev_doc/ui-art-research/godot-hud-asset-layer-methodology-2026-09-02.md",
+    "dev_doc/ui-art-research/hud-ghv1-minimum-asset-needs.md",
+    "dev_doc/ui-art-research/hud-ghv1-vertical-slice-evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv1-vertical-slice-evidence/visual-verdict.json",
+    "dev_doc/ui-art-research/hud-ghv1-vertical-slice-evidence/hud_vertical_slice_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv1-vertical-slice-evidence/hud_vertical_slice_1920x1080.png",
+    "dev_doc/ui-art-research/hud-ghv1-vertical-slice-evidence/hud_vertical_slice_2560x1440.png",
+    "dev_doc/skillbar-design/hud-r1-atomic-asset-contract.json",
+    "docs/superpowers/specs/2026-08-31-bottom-dashboard-atomic-asset-architecture.md",
+    "docs/superpowers/plans/2026-08-31-bottom-dashboard-atomic-asset-system.md",
+    "dev_doc/ui-art-research/hud-ghv1-candidate-receipt.json"
+  ],
+  "cross_repository_changes": [
+    "ShipOfTheseus-KB:04-Assets/visual-style-decisions.md"
+  ],
+  "verification": [
+    {
+      "command": "Godot 4.6.1 focused and affected SceneTree tests",
+      "result": "pass",
+      "evidence": "46 + 28 + 73 + 25 + 75 = 247 assertions passed, 0 failed."
+    },
+    {
+      "command": "Godot 4.6.1 windowed vertical-slice capture",
+      "result": "pass",
+      "evidence": "1280x720, 1920x1080 and 2560x1440 PNG files generated at exact dimensions."
+    },
+    {
+      "command": "JSON, whitespace, diff and protected-production checks",
+      "result": "pass",
+      "evidence": "All three JSON files parsed; diff check passed; obsolete cooldown overlay names are absent from current implementation and documents; protected production HUD scripts unchanged."
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "两个组件拥有声明式静态节点树、有类型显示数据与独立状态层",
+      "result": "pass",
+      "evidence": [
+        "scenes/tactical/hud/skill_slot_button.tscn",
+        "scenes/tactical/hud/action_resource_strip.tscn",
+        "247 assertions passed"
+      ]
+    },
+    {
+      "criterion": "5、6、7 技能和行动容量边界在三档画布无裁切或越界",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/hud-ghv1-vertical-slice-evidence/README.md",
+        "dev_doc/ui-art-research/hud-ghv1-vertical-slice-evidence/visual-verdict.json"
+      ]
+    },
+    {
+      "criterion": "最小素材需求只保留已有唯一 Godot 消费者的图片职责",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/hud-ghv1-minimum-asset-needs.md"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "scripts/ui/bottom_dashboard.gd; scripts/ui/skill_bar.gd; scripts/ui/action_resource_bar.gd",
+      "result": "unchanged",
+      "evidence": "git diff against target HEAD is empty for all three paths."
+    },
+    {
+      "subject": "玩法规则与结构化设计库",
+      "result": "unchanged",
+      "evidence": "GHV-1 did not modify gameplay scripts, JSON gameplay values or SoT-fyc-space."
+    },
+    {
+      "subject": "固定 KB vault",
+      "result": "changed",
+      "evidence": "Only 04-Assets/visual-style-decisions.md is modified on codex/issue-18-hud-layout-r1."
+    }
+  ],
+  "residual_risks": [
+    "独立只读审核尚未执行；实现者不自我批准。",
+    "用户尚未审核三档截图和两项最小图片需求。",
+    "当前 Theme、冷却数字字体和暗层透明度是结构占位，不是正式材质。",
+    "现有 godot_mcp 编辑器实例占用 6550 端口时，第二个编辑器扫描会记录端口占用警告；本次组件和场景解析未受影响。"
+  ],
+  "escalation_reason": null,
+  "target_head": "3b8fa3320a140af848035d84ee95d62112626807",
+  "source_schema_version": "unversioned",
+  "source_snapshot_or_commit": "ShipOfTheseus-KB/04-Assets/visual-style-decisions.md@3b8fa3320a140af848035d84ee95d62112626807+working-tree",
+  "normalized_digest": "sha256:f4c61bbc95c16bc0355513ef3bee20bd903af549f746a7fe91d5cddbacaff0cf",
+  "publication": {
+    "published": false,
+    "remote_ref": null
+  }
+}

@@ -1,0 +1,172 @@
+{
+  "task_id": "GHV-7-FRAME-SAFE-INSETS",
+  "milestone_id": "GHV-7-FRAME-SAFE-INSETS",
+  "status": "completed",
+  "approval_status": "independent_review_passed_pending_user_visual_review",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/issue-18-action-resource-bar",
+  "target_head_before": "94e10f36757ad247dec0b779cd8859c5c02e61ea",
+  "candidate_head": null,
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "Use Milestone and Task completion semantics, preserve protected production and gameplay paths, verify before completion, and require independent review."
+    },
+    {
+      "contract": "dev_doc/ui-art-research/hud-ghv7-frame-safe-insets/display-contract.md",
+      "summary": "Measure safe insets against the approximately 6px painted outer edge; require at least 10px raw inset and 4px visible transparent clearance without changing five-region outer geometry."
+    },
+    {
+      "contract": "dev_doc/ui-art-research/godot-hud-asset-layer-methodology-2026-09-02.md",
+      "summary": "Keep layout, runtime fields and image duties separate; prove component geometry in Godot before production wiring."
+    }
+  ],
+  "milestone_tasks": [
+    {"task": 1, "name": "root-cause analysis and approved safe-inset geometry", "status": "complete"},
+    {"task": 2, "name": "TDD scene and geometry-test revision", "status": "complete"},
+    {"task": 3, "name": "18 refreshed captures and primary visual inspection", "status": "complete"},
+    {"task": 4, "name": "independent read-only review", "status": "complete"}
+  ],
+  "changed_scope": [
+    "character content margins 12/12/13/13 with portrait-to-info gap 6",
+    "equipment and potion controls inset at least 10px from component boundaries",
+    "250x88 relic grid with eight 40x40 slots, 30px horizontal and 8px vertical gaps",
+    "runtime rectangle assertions for every affected inner frame",
+    "18 refreshed current screenshots and hash manifests"
+  ],
+  "changed_files": [
+    "scenes/tactical/hud/character_hud_panel.tscn",
+    "scenes/tactical/hud/equipment_hud_panel.tscn",
+    "scenes/tactical/hud/relic_grid.tscn",
+    "tests/test_hud_character_panel.gd",
+    "tests/test_hud_equipment_panel.gd",
+    "tests/test_hud_relic_grid.gd",
+    "tests/test_hud_bottom_composition.gd",
+    "dev_doc/ui-art-research/hud-r1-material-sample-matrix.md",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/display-contract.md",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/candidate-receipt.json",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/visual-verdict.json",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/hud_character_slice_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/hud_character_slice_1920x1080.png",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/hud_character_slice_2560x1440.png",
+    "dev_doc/ui-art-research/hud-ghv3-utility-slice/display-contract.md",
+    "dev_doc/ui-art-research/hud-ghv3-utility-slice/minimum-asset-needs.md",
+    "dev_doc/ui-art-research/hud-ghv3-utility-slice/candidate-receipt.json",
+    "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/visual-verdict.json",
+    "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_1920x1080.png",
+    "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_2560x1440.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/candidate-receipt.json",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/visual-verdict.json",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_5skills_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_5skills_1920x1080.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_5skills_2560x1440.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_6skills_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_6skills_1920x1080.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_6skills_2560x1440.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_7skills_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_7skills_1920x1080.png",
+    "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_7skills_2560x1440.png",
+    "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/visual-verdict.json",
+    "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/candidate-receipt.json",
+    "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_1_ready_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_2_early_lock_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_3_exhausted_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv6-action-resource-segments/evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv6-action-resource-segments/evidence/visual-verdict.json",
+    "dev_doc/ui-art-research/hud-ghv6-action-resource-segments/evidence/candidate-receipt.json",
+    "dev_doc/ui-art-research/hud-gha5-numeric-font-theme-integration/evidence/README.md",
+    "dev_doc/ui-art-research/hud-gha5-numeric-font-theme-integration/evidence/visual-verdict.json",
+    "dev_doc/ui-art-research/hud-gha5-numeric-font-theme-integration/evidence/candidate-receipt.json",
+    "dev_doc/ui-art-research/hud-ghv7-frame-safe-insets/display-contract.md",
+    "dev_doc/ui-art-research/hud-ghv7-frame-safe-insets/evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv7-frame-safe-insets/evidence/visual-verdict.json",
+    "dev_doc/ui-art-research/hud-ghv7-frame-safe-insets/evidence/candidate-receipt.json"
+  ],
+  "generation": {
+    "image_generation_used": false,
+    "external_api_key_used": false,
+    "purchased_asset_used": false
+  },
+  "verification": [
+    {
+      "command": "Godot 4.6.3 GHV-7 RED/GREEN focused tests",
+      "result": "pass",
+      "evidence": "Old geometry failed only the new expected checks; revised character, equipment and relic tests passed 53/0, 24/0 and 60/0, totaling 137/0."
+    },
+    {
+      "command": "Godot 4.6.3 affected regression suite",
+      "result": "pass",
+      "evidence": "22 scripts; 1210 assertions passed, 0 failed, with no SCRIPT ERROR or missing-node output."
+    },
+    {
+      "command": "Godot 4.6.3 windowed captures",
+      "result": "pass",
+      "evidence": "3 character, 3 utility, 9 composition and 3 dynamic-state screenshots regenerated; representative 1280x720 images inspected at original resolution."
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "Affected inner frames keep at least 4px visible transparent clearance from their painted outer frame.",
+      "result": "pass",
+      "evidence": [
+        "tests/test_hud_character_panel.gd",
+        "tests/test_hud_equipment_panel.gd",
+        "tests/test_hud_relic_grid.gd",
+        "dev_doc/ui-art-research/hud-ghv7-frame-safe-insets/evidence/visual-verdict.json"
+      ]
+    },
+    {
+      "criterion": "The relic grid keeps eight square visual slots and still fills the useful panel width.",
+      "result": "pass",
+      "evidence": [
+        "scenes/tactical/hud/relic_grid.tscn",
+        "tests/test_hud_relic_grid.gd",
+        "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_1280x720.png"
+      ]
+    },
+    {
+      "criterion": "Five-region outer geometry, action behavior, production wiring and gameplay relic capacity are preserved.",
+      "result": "pass",
+      "evidence": [
+        "tests/test_hud_bottom_composition.gd",
+        "22-script regression: 1210 passed, 0 failed",
+        "protected paths unchanged against target_head_before",
+        "scripts/roguelite/run_state.gd: RELIC_SLOT_MAX remains 6"
+      ]
+    }
+  ],
+  "protected_state": {
+    "five_region_outer_geometry_changed": false,
+    "production_wiring_changed": false,
+    "gameplay_rules_changed": false,
+    "visual_relic_shell_count": 8,
+    "gameplay_relic_capacity": 6
+  },
+  "cross_repository": {
+    "design_library_changed": false,
+    "kb_changed_for_this_milestone": false,
+    "mercury_changed": false
+  },
+  "publication": {
+    "committed": false,
+    "published": false,
+    "remote_ref": null
+  },
+  "independent_review": {
+    "verdict": "pass",
+    "completeness": 1.0,
+    "blockers": [],
+    "evidence": "Independent read-only review used Godot 4.6.3, reran the three focused tests for 137/0 and the 22-script suite for 1210/0 with no SCRIPT ERROR or missing-node output. It inspected four representative images at original resolution, confirmed at least 4px visible transparent clearance and no renewed relic side whitespace, verified all current JSON and hashes, and confirmed protected paths, gameplay relic capacity 6, unpublished state and no cross-repository writes."
+  },
+  "ghv8_revalidation": "representative_images_independent_review_passed_pending_user_visual_review",
+  "residual_risks": [
+    "User visual approval is still required.",
+    "The corrected scenes remain development-only and are not wired to production tactical state."
+  ],
+  "escalation_reason": null
+}

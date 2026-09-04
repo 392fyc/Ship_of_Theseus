@@ -1,0 +1,51 @@
+{
+  "milestone_id": "GHV-4-BOTTOM-HUD-COMPOSITION",
+  "status": "technical_and_independent_visual_pass_pending_user_review",
+  "ghv7_revalidation": "independent_review_passed_pending_user_visual_review",
+  "ghv8_revalidation": "independent_review_passed_pending_user_visual_review",
+  "default_review_image": "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_5skills_1280x720.png",
+  "checks": [
+    {
+      "subject": "five_region_geometry",
+      "verdict": "pass",
+      "observation": "The 1216x108 row uses 226/128/476/278/76 widths, 8px gaps, x=32, y=596, and 32/16 safe margins."
+    },
+    {
+      "subject": "action_strip_vertical_correction",
+      "verdict": "pass",
+      "observation": "The 274x40 strip is at x=503, y=550; it shares center x=640 with the skill shelf and ends 6px above the row."
+    },
+    {
+      "subject": "skill_count_layouts",
+      "verdict": "pass",
+      "observation": "5 and 6 skills use 64px slots; 7 skills use 56px slots. The 476px shelf stays fixed and no missing skill is rendered as a false slot."
+    },
+    {
+      "subject": "board_stress_and_token_scale",
+      "verdict": "pass",
+      "observation": "A 20x20 grid of 64x32 diamonds extends behind the HUD, with the approved single-weapon SE kensei frame as a scale anchor."
+    },
+    {
+      "subject": "runtime_only_content",
+      "verdict": "pass",
+      "observation": "Identity, level, XP, HP, SH, hotkeys, cooldown and movement are runtime nodes; skill, equipment, potion and relic content icons remain empty."
+    }
+  ],
+  "capture_matrix": [
+    {"skills": 5, "size": "1280x720", "sha256": "fc33d4bf4c9c078a5cb8cdbe89f44691269019de444ea18af8ef0f21ad0e7971", "verdict": "pass"},
+    {"skills": 5, "size": "1920x1080", "sha256": "1b8e46b038a742cd1e8430956de113b7a40aae2f5378c65a35dd5e5b6ecbab8d", "verdict": "pass"},
+    {"skills": 5, "size": "2560x1440", "sha256": "3a9e4cf72dfe6d8dd1ef11b07e94edac053b4dff5888247e02991437c8a751e2", "verdict": "pass"},
+    {"skills": 6, "size": "1280x720", "sha256": "322c880fa65ed1d5f1cfb4a7ca9c178a6c1277d73df258924ef9f740a07a9e4d", "verdict": "pass"},
+    {"skills": 6, "size": "1920x1080", "sha256": "ec5509cc11df628efce40362464d4bde786212a30de3c95bf1844bc3c40bb5bf", "verdict": "pass"},
+    {"skills": 6, "size": "2560x1440", "sha256": "f19be2ac2e11e5132d2c11af0c5e9a7c350e885ad32bb660f2085594234921bd", "verdict": "pass"},
+    {"skills": 7, "size": "1280x720", "sha256": "727f33a2893b0d28149c3a9c5b84b7a739bfb93fef3cb8742ae93a2c39723a5f", "verdict": "pass"},
+    {"skills": 7, "size": "1920x1080", "sha256": "a8201f12e8cdacf41402b089fc91fd275d4995cc74b7ebc32b3cf960de4865ea", "verdict": "pass"},
+    {"skills": 7, "size": "2560x1440", "sha256": "9970df1cf16ad65f697fe0b440e13ace525355fb35a5fa1ae93c2e81bbd63a11", "verdict": "pass"}
+  ],
+  "font_integration": "GHA-5 refresh: runtime XP, HP and SH values inherit IBM Plex Mono SemiBold from HudMeterValueLabel only.",
+  "known_non_blocking_limits": [
+    "User visual approval is still required.",
+    "The character portrait uses a runtime fallback glyph because portrait-content production is outside this milestone.",
+    "The composition is not wired to production tactical state."
+  ]
+}

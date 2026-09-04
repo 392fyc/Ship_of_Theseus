@@ -1,0 +1,107 @@
+{
+  "milestone_id": "GHA-2-CHARACTER-HUD-SURFACES",
+  "status": "integrated_candidate_independent_review_passed_pending_user_review",
+  "approval_status": "independent_review_passed_pending_user_review",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/issue-18-action-resource-bar",
+  "target_head_before": "94e10f36757ad247dec0b779cd8859c5c02e61ea",
+  "candidate_head": null,
+  "scope": [
+    "226x108 CharacterHudPanel 中性外壳",
+    "72x82 HudPortraitFrame 中性外壳",
+    "StyleBoxTexture 接线",
+    "透明通道、目标尺寸、运行时分层与三档截图验证"
+  ],
+  "generation": {
+    "mode": "Codex built-in imagegen",
+    "external_api_key_used": false,
+    "purchased_asset_used": false,
+    "candidate_count": 4,
+    "selected_family": "A",
+    "source_record": "dev_doc/ui-art-research/hud-gha2-character-surfaces/manifest.json"
+  },
+  "final_assets": [
+    {
+      "path": "assets/ui/skins/hud/character_panel_surface_v1.png",
+      "size": "226x108",
+      "sha256": "d324af01265ced9e1edd5e25b97dd85812ad713b386a140c2b798e64d32a97b4",
+      "consumer": "CharacterHudPanel/styles/panel"
+    },
+    {
+      "path": "assets/ui/skins/hud/portrait_frame_surface_v1.png",
+      "size": "72x82",
+      "sha256": "af554dfa2c06d966e45ce0654b667cc0eb60ca27eff3075361415a59229cf4d8",
+      "consumer": "HudPortraitFrame/styles/panel"
+    }
+  ],
+  "changed_files": [
+    "assets/ui/skins/hud/character_panel_surface_v1.png",
+    "assets/ui/skins/hud/portrait_frame_surface_v1.png",
+    "assets/ui/themes/hud_structure_prototype.tres",
+    "tests/test_hud_character_surface_skinning.gd",
+    "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/clean_neutral_checkerboard.gd",
+    "dev_doc/ui-art-research/hud-gha2-character-surfaces/prompt-contract.md",
+    "dev_doc/ui-art-research/hud-gha2-character-surfaces/manifest.json",
+    "dev_doc/ui-art-research/hud-gha2-character-surfaces/visual-verdict.json",
+    "dev_doc/ui-art-research/hud-gha2-character-surfaces/candidate-receipt.json",
+    "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/character-panel-surface-a.png",
+    "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/character-panel-surface-b.png",
+    "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/portrait-frame-surface-a.png",
+    "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/portrait-frame-surface-b.png",
+    "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/character-panel-surface-a-alpha.png",
+    "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/character-panel-surface-a-mechanical.png",
+    "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/portrait-frame-surface-a-alpha.png",
+    "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/portrait-frame-surface-a-mechanical.png",
+    "docs/superpowers/plans/2026-09-03-hud-character-surface-candidates.md",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/README.md",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/visual-verdict.json",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/hud_character_slice_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/hud_character_slice_1920x1080.png",
+    "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/hud_character_slice_2560x1440.png"
+  ],
+  "verification": [
+    {
+      "command": "Godot 4.6.3 character surface consumption test",
+      "result": "pass",
+      "evidence": "45 assertions passed, 0 failed；包含目标尺寸、完整一像素透明外缘、中心透明、可见边框、九宫格边距和运行时字段保护。"
+    },
+    {
+      "command": "Godot 4.6.3 focused and affected SceneTree tests",
+      "result": "pass",
+      "evidence": "test_hud_character_surface_skinning 45；test_hud_value_meter 31；test_hud_character_panel 48；test_hud_character_vertical_slice_gallery 31；test_hud_surface_skinning 28；test_hud_skill_slot_button 46；test_hud_action_resource_strip 28；test_hud_vertical_slice_gallery 73；test_skillbar_v3_ui 25；test_action_resource_bar 75；合计 430 assertions passed, 0 failed。"
+    },
+    {
+      "command": "Godot 4.6.3 windowed character-slice capture",
+      "result": "pass",
+      "evidence": "1280x720、1920x1080、2560x1440 PNG 已叠加两项候选并重新生成；捕获脚本返回 HUD_CHARACTER_CAPTURE_OK。"
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "scripts/ui/bottom_dashboard.gd; scripts/ui/skill_bar.gd; scripts/ui/action_resource_bar.gd",
+      "result": "unchanged",
+      "evidence": "git diff against 94e10f36757ad247dec0b779cd8859c5c02e61ea is empty for all three paths."
+    },
+    {
+      "subject": "动态角色字段与生产刷新链",
+      "result": "unchanged",
+      "evidence": "文字、数值、ProgressBar、头像接口与 fallback 保持运行时职责；未接入 BottomDashboard。"
+    }
+  ],
+  "publication": {
+    "committed": false,
+    "published": false,
+    "remote_ref": null
+  },
+  "residual_risks": [
+    "用户尚未对两项正式候选作最终视觉批准。",
+    "真实角色头像和生产字段接线不在本里程碑范围内。",
+    "完整底部 HUD 的组合明暗与项目级界面缩放仍需后续验证。"
+  ],
+  "independent_review": {
+    "verdict": "pass",
+    "completeness": 0.98,
+    "blockers": [],
+    "evidence": "独立只读审查复跑 10 项测试共 430/0，核对四个原始候选与运行标识、A 组选择、两个最终 SHA256、1 像素透明外缘、6 像素九宫格边距、运行时字段、三档截图、JSON、保护脚本和未提交状态后返回 PASS。"
+  }
+}

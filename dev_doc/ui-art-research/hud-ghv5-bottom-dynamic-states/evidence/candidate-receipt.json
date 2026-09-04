@@ -1,0 +1,94 @@
+{
+  "milestone_id": "GHV-5-BOTTOM-HUD-DYNAMIC-STATES",
+  "status": "technical_candidate_independent_review_passed_pending_user_review",
+  "approval_status": "independent_review_passed_pending_user_visual_review",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/issue-18-action-resource-bar",
+  "target_head_before": "94e10f36757ad247dec0b779cd8859c5c02e61ea",
+  "candidate_head": null,
+  "changed_scope": [
+    "HudValueMeter reversible 8px/7px runtime font-size fallback",
+    "three-state development gallery reusing one GHV-4 composition gallery",
+    "three 1280x720 state screenshots with stable-complete capture guards",
+    "dynamic state tests, display contract, visual verdict and receipt"
+  ],
+  "generation": {
+    "new_visual_assets_generated": false,
+    "external_api_key_used": false,
+    "purchased_asset_used": false,
+    "runtime_mock_texture_count": 1,
+    "runtime_mock_texture_has_resource_path": false
+  },
+  "state_matrix": [
+    "capacity_1_ready_zero_shield",
+    "capacity_2_early_move_lock_long_values",
+    "capacity_3_move_exhausted"
+  ],
+  "runtime_boundaries": {
+    "production_wiring_added": false,
+    "new_production_view_fields_added": false,
+    "formal_content_icons_added": false,
+    "profession_resource_placeholder_added": false,
+    "visual_relic_shell_count": 8,
+    "protected_gameplay_relic_capacity": 6
+  },
+  "verification": [
+    {
+      "command": "Godot 4.6.3 value-meter test",
+      "result": "pass",
+      "evidence": "37 assertions passed, 0 failed; includes reversible 8px to 7px to 8px behavior."
+    },
+    {
+      "command": "Godot 4.6.3 dynamic-state gallery test",
+      "result": "pass",
+      "evidence": "147 assertions passed, 0 failed across all three states in the same instance."
+    },
+    {
+      "command": "Godot 4.6.3 affected regression suite",
+      "result": "pass",
+      "evidence": "20 test scripts; 988 assertions passed, 0 failed."
+    },
+    {
+      "command": "Godot 4.6.3 windowed state capture",
+      "result": "pass",
+      "evidence": "Three 1280x720 screenshots generated after two consecutive complete render frames; all three manually inspected."
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "GHV-4 geometry and nine captures",
+      "result": "geometry_unchanged_captures_refreshed_by_GHA5",
+      "evidence": "Dynamic gallery still reuses one existing GHV-4 scene. GHA-5 later refreshed the nine screenshots after the shared numeric-font Theme change without changing composition geometry."
+    },
+    {
+      "subject": "production HUD, action rules, RunState and tactical flow",
+      "result": "unchanged",
+      "evidence": "Protected production paths remain empty against baseline; RunState.RELIC_SLOT_MAX remains 6."
+    }
+  ],
+  "independent_review": {
+    "verdict": "pass",
+    "completeness": 1.0,
+    "blockers": [],
+    "evidence": "Independent reviewer regenerated all three captures, reran 20 scripts with 988/0 assertions, verified screenshot and GHV-4 hashes, inspected all three original PNGs, and confirmed protected production paths remain unchanged."
+  },
+  "gha5_revalidation": "independent_review_passed_pending_user_visual_review",
+  "gha6_revalidation": "revision_3_independent_review_passed_pending_user_visual_review",
+  "ghv7_revalidation": "independent_review_passed_pending_user_visual_review",
+  "ghv8_revalidation": "independent_review_passed_pending_user_visual_review",
+  "cross_repository": {
+    "design_library_changed": false,
+    "kb_changed_for_this_milestone": false,
+    "mercury_changed": false
+  },
+  "publication": {
+    "committed": false,
+    "published": false,
+    "remote_ref": null
+  },
+  "residual_risks": [
+    "User visual approval is still required.",
+    "IBM Plex Mono SemiBold 600 is now integrated through GHA-5; user visual approval is still required before production HUD wiring.",
+    "The gallery is development-only and not connected to tactical production state."
+  ]
+}

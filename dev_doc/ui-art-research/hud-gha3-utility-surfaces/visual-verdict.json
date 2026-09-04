@@ -1,0 +1,68 @@
+{
+  "milestone_id": "GHA-3-UTILITY-HUD-SURFACES",
+  "status": "technical_and_independent_visual_pass_pending_user_review",
+  "selected_family": {
+    "potion_button_shell": "A",
+    "end_action_diamond_frame": "A",
+    "end_action_hourglass_emblem": "B"
+  },
+  "native_size_checks": [
+    {
+      "asset": "potion_button_shell_v1.png",
+      "size": "32x32",
+      "verdict": "pass",
+      "observation": "闭合方框与中心透明区清楚；A 比 B 在暗背景下稳定。"
+    },
+    {
+      "asset": "end_action_diamond_frame_v1.png",
+      "size": "44x44",
+      "verdict": "pass",
+      "observation": "菱形四尖完整，中心透明，位于 52x52 点击区内且不接触边缘。"
+    },
+    {
+      "asset": "end_action_hourglass_emblem_v1.png",
+      "size": "18x24",
+      "verdict": "pass",
+      "observation": "B 的上下横梁、腰部和沙粒在组合后比 A 清楚；通过运行时 self_modulate 轻度提亮。"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_1280x720.png",
+      "size": "1280x720",
+      "verdict": "pass",
+      "observations": [
+        "血瓶外壳位于装备栏右上 32x32 点击区，没有挤压武器或防具槽。",
+        "菱形明显大于沙漏，二者边缘不相接。",
+        "结束按钮禁用态整体灰化，仍能辨认菱形与沙漏。"
+      ]
+    },
+    {
+      "path": "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_1920x1080.png",
+      "size": "1920x1080",
+      "verdict": "pass",
+      "observations": [
+        "三个原子素材保持原生 HUD 尺寸，没有随画布拉伸。"
+      ]
+    },
+    {
+      "path": "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_2560x1440.png",
+      "size": "2560x1440",
+      "verdict": "pass",
+      "observations": [
+        "固定尺寸、透明中心和层间空隙保持不变。"
+      ]
+    }
+  ],
+  "runtime_separation": {
+    "potion_content_icon": "independent TextureRect",
+    "button_states": "Theme or parent Button modulation",
+    "diamond_and_hourglass": "two independent TextureRect layers",
+    "end_action_semantics": "end_turn and end_move remain runtime data and separate signals"
+  },
+  "known_non_blocking_limits": [
+    "用户尚未进行本批次最终视觉审核。",
+    "血瓶内容图标不在本批次，画廊彩色交叉纹理仍为 mock-only。",
+    "装备、血瓶与遗物尚未进入生产刷新链。"
+  ]
+}

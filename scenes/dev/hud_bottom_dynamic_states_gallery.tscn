@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/playground/hud_bottom_dynamic_states_gallery.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/dev/hud_bottom_composition_gallery.tscn" id="2_base_gallery"]
+
+[node name="HudBottomDynamicStatesGallery" type="Control"]
+custom_minimum_size = Vector2(1280, 720)
+offset_right = 1280.0
+offset_bottom = 720.0
+clip_contents = true
+script = ExtResource("1_script")
+
+[node name="BaseGallery" parent="." instance=ExtResource("2_base_gallery")]
+unique_name_in_owner = true
+layout_mode = 0

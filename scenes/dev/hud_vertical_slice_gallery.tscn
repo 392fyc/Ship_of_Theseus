@@ -1,0 +1,201 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/playground/hud_vertical_slice_gallery.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/themes/hud_structure_prototype.tres" id="2_theme"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_skill_shelf"]
+bg_color = Color(0.026, 0.022, 0.036, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.28, 0.24, 0.2, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="HudVerticalSliceGallery" type="Control"]
+custom_minimum_size = Vector2(1280, 720)
+offset_right = 1280.0
+offset_bottom = 720.0
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.012, 0.011, 0.018, 1)
+
+[node name="SafeArea" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="Layout" type="VBoxContainer" parent="SafeArea"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="SafeArea/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.8, 0.65, 1)
+theme_override_font_sizes/font_size = 22
+text = "HUD 组件纵向切片 · 结构样机"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="SafeArea/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.57, 0.61, 1)
+theme_override_font_sizes/font_size = 12
+text = "固定结构、运行时状态与容量边界；当前材质仅用于验证职责拆层"
+horizontal_alignment = 1
+
+[node name="Content" type="HBoxContainer" parent="SafeArea/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 42
+alignment = 1
+
+[node name="SkillColumn" type="VBoxContainer" parent="SafeArea/Layout/Content"]
+custom_minimum_size = Vector2(476, 0)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SkillSectionTitle" type="Label" parent="SafeArea/Layout/Content/SkillColumn"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.71, 0.48, 1)
+theme_override_font_sizes/font_size = 15
+text = "技能槽固定容器"
+
+[node name="Skill5Label" type="Label" parent="SafeArea/Layout/Content/SkillColumn"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.58, 1)
+theme_override_font_sizes/font_size = 11
+text = "5 个技能"
+
+[node name="SkillCount5" type="CenterContainer" parent="SafeArea/Layout/Content/SkillColumn"]
+custom_minimum_size = Vector2(476, 108)
+layout_mode = 2
+clip_contents = true
+
+[node name="ShelfBackground" type="Panel" parent="SafeArea/Layout/Content/SkillColumn/SkillCount5"]
+custom_minimum_size = Vector2(476, 108)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_skill_shelf")
+
+[node name="Slots" type="HBoxContainer" parent="SafeArea/Layout/Content/SkillColumn/SkillCount5"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="Skill6Label" type="Label" parent="SafeArea/Layout/Content/SkillColumn"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.58, 1)
+theme_override_font_sizes/font_size = 11
+text = "6 个技能"
+
+[node name="SkillCount6" type="CenterContainer" parent="SafeArea/Layout/Content/SkillColumn"]
+custom_minimum_size = Vector2(476, 108)
+layout_mode = 2
+clip_contents = true
+
+[node name="ShelfBackground" type="Panel" parent="SafeArea/Layout/Content/SkillColumn/SkillCount6"]
+custom_minimum_size = Vector2(476, 108)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_skill_shelf")
+
+[node name="Slots" type="HBoxContainer" parent="SafeArea/Layout/Content/SkillColumn/SkillCount6"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="Skill7Label" type="Label" parent="SafeArea/Layout/Content/SkillColumn"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.58, 1)
+theme_override_font_sizes/font_size = 11
+text = "7 个技能"
+
+[node name="SkillCount7" type="CenterContainer" parent="SafeArea/Layout/Content/SkillColumn"]
+custom_minimum_size = Vector2(476, 108)
+layout_mode = 2
+clip_contents = true
+
+[node name="ShelfBackground" type="Panel" parent="SafeArea/Layout/Content/SkillColumn/SkillCount7"]
+custom_minimum_size = Vector2(476, 108)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_skill_shelf")
+
+[node name="Slots" type="HBoxContainer" parent="SafeArea/Layout/Content/SkillColumn/SkillCount7"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="ResourceColumn" type="VBoxContainer" parent="SafeArea/Layout/Content"]
+custom_minimum_size = Vector2(410, 0)
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ResourceSectionTitle" type="Label" parent="SafeArea/Layout/Content/ResourceColumn"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.71, 0.48, 1)
+theme_override_font_sizes/font_size = 15
+text = "行动资源边界状态"
+
+[node name="ActionCapacity1" type="VBoxContainer" parent="SafeArea/Layout/Content/ResourceColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Label" type="Label" parent="SafeArea/Layout/Content/ResourceColumn/ActionCapacity1"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.58, 1)
+theme_override_font_sizes/font_size = 11
+text = "容量 1 · 全部可用"
+
+[node name="ActionCapacity2" type="VBoxContainer" parent="SafeArea/Layout/Content/ResourceColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Label" type="Label" parent="SafeArea/Layout/Content/ResourceColumn/ActionCapacity2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.58, 1)
+theme_override_font_sizes/font_size = 11
+text = "容量 2 · 部分消耗"
+
+[node name="ActionCapacity3" type="VBoxContainer" parent="SafeArea/Layout/Content/ResourceColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Label" type="Label" parent="SafeArea/Layout/Content/ResourceColumn/ActionCapacity3"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.58, 1)
+theme_override_font_sizes/font_size = 11
+text = "容量 3 · 标准部分消耗 / 迅捷耗尽"
+
+[node name="ActionMovementDisabled" type="VBoxContainer" parent="SafeArea/Layout/Content/ResourceColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Label" type="Label" parent="SafeArea/Layout/Content/ResourceColumn/ActionMovementDisabled"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.58, 1)
+theme_override_font_sizes/font_size = 11
+text = "移动阶段结束 · 仅灰化"

@@ -1,0 +1,39 @@
+{
+  "milestone_id": "GHA-1-HUD-NEUTRAL-SURFACES",
+  "score": 91,
+  "verdict": "pass_as_candidate",
+  "approval_status": "independent_review_passed_pending_user_review",
+  "reviewed_screenshots": [
+    "dev_doc/ui-art-research/hud-ghv1-vertical-slice-evidence/hud_vertical_slice_1280x720.png",
+    "dev_doc/ui-art-research/hud-ghv1-vertical-slice-evidence/hud_vertical_slice_1920x1080.png",
+    "dev_doc/ui-art-research/hud-ghv1-vertical-slice-evidence/hud_vertical_slice_2560x1440.png"
+  ],
+  "criteria": [
+    {
+      "criterion": "技能槽在 64×64 与 58×58 下边角闭合且不挤占内容区",
+      "result": "pass"
+    },
+    {
+      "criterion": "行动资源条在 274×40 下端部完整、长边无可见接缝",
+      "result": "pass"
+    },
+    {
+      "criterion": "外部与中心内容区均为真实透明",
+      "result": "pass"
+    },
+    {
+      "criterion": "冷却、快捷键、次数、选择、足迹、数值和行动点未烘焙进图片",
+      "result": "pass"
+    },
+    {
+      "criterion": "黑紫锻铁与克制旧金在两类表面之间形成同族材质",
+      "result": "pass"
+    }
+  ],
+  "differences": [
+    "技能槽为方形四角铆接，行动资源条为更克制的端部铆接；两者材质同族但轮廓装饰密度不同",
+    "本轮只验证两类中性外壳，完整底部 HUD 的相邻容器材质尚未组合验收",
+    "较大分辨率截图刻意保持原生尺寸，不代表最终项目级界面缩放策略"
+  ],
+  "reasoning": "B 方案在目标尺寸下保留了清楚但不过粗的边缘，中心留白足够，运行时状态仍独立可读。候选满足进入独立审查的标准，但实现者不将该判定视为最终批准。"
+}

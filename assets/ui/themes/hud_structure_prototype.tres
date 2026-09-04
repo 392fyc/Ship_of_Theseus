@@ -1,0 +1,373 @@
+[gd_resource type="Theme" load_steps=36 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/ui/skins/hud/skill_slot_surface_v1.png" id="1_skill_slot_surface"]
+[ext_resource type="Texture2D" path="res://assets/ui/skins/hud/action_resource_strip_surface_v1.png" id="2_resource_strip_surface"]
+[ext_resource type="Texture2D" path="res://assets/ui/skins/hud/character_panel_surface_v1.png" id="3_character_panel_surface"]
+[ext_resource type="Texture2D" path="res://assets/ui/skins/hud/portrait_frame_surface_v1.png" id="4_portrait_frame_surface"]
+[ext_resource type="Texture2D" path="res://assets/ui/skins/hud/potion_button_shell_v1.png" id="5_potion_button_shell"]
+[ext_resource type="FontFile" path="res://assets/fonts/ibm_plex_mono/IBMPlexMono-SemiBold.ttf" id="6_numeric_font"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_slot_normal"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
+texture = ExtResource("1_skill_slot_surface")
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_slot_hover"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
+texture = ExtResource("1_skill_slot_surface")
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+modulate_color = Color(1, 0.92, 0.72, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_slot_pressed"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
+texture = ExtResource("1_skill_slot_surface")
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+modulate_color = Color(0.74, 0.7, 0.78, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_slot_disabled"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
+texture = ExtResource("1_skill_slot_surface")
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+modulate_color = Color(0.44, 0.44, 0.48, 0.72)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slot_focus"]
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.95, 0.79, 0.35, 1)
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_selected"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.92, 0.72, 0.25, 0.85)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hotkey"]
+bg_color = Color(0.025, 0.022, 0.035, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.56, 0.43, 0.2, 0.9)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cooldown_shade"]
+bg_color = Color(0.02, 0.02, 0.025, 0.5)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_resource_strip"]
+content_margin_left = 6.0
+content_margin_top = 5.0
+content_margin_right = 6.0
+content_margin_bottom = 5.0
+texture = ExtResource("2_resource_strip_surface")
+texture_margin_left = 6.0
+texture_margin_top = 5.0
+texture_margin_right = 6.0
+texture_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_action_resource_segment"]
+content_margin_left = 3.0
+content_margin_top = 2.0
+content_margin_right = 3.0
+content_margin_bottom = 2.0
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.34, 0.29, 0.22, 0.58)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_character_panel"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+texture = ExtResource("3_character_panel_surface")
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_portrait_frame"]
+texture = ExtResource("4_portrait_frame_surface")
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_survival_frame"]
+bg_color = Color(0.014, 0.013, 0.021, 0.82)
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.25, 0.32, 0.9)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_meter_background"]
+bg_color = Color(0.02, 0.018, 0.028, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.18, 0.23, 0.95)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_experience_fill"]
+bg_color = Color(0.55, 0.4, 0.16, 0.92)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_fill"]
+bg_color = Color(0.43, 0.12, 0.14, 0.96)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_shield_fill"]
+bg_color = Color(0.18, 0.33, 0.5, 0.94)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_utility_slot_normal"]
+bg_color = Color(0.025, 0.022, 0.036, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.48, 0.37, 0.19, 0.94)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_utility_slot_hover"]
+bg_color = Color(0.045, 0.037, 0.061, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.72, 0.56, 0.27, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_utility_slot_pressed"]
+bg_color = Color(0.018, 0.016, 0.027, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.38, 0.31, 0.2, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_utility_slot_disabled"]
+bg_color = Color(0.02, 0.019, 0.026, 0.72)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.24, 0.23, 0.25, 0.7)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_potion_normal"]
+content_margin_left = 5.0
+content_margin_top = 5.0
+content_margin_right = 5.0
+content_margin_bottom = 5.0
+texture = ExtResource("5_potion_button_shell")
+texture_margin_left = 5.0
+texture_margin_top = 5.0
+texture_margin_right = 5.0
+texture_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_potion_hover"]
+content_margin_left = 5.0
+content_margin_top = 5.0
+content_margin_right = 5.0
+content_margin_bottom = 5.0
+texture = ExtResource("5_potion_button_shell")
+texture_margin_left = 5.0
+texture_margin_top = 5.0
+texture_margin_right = 5.0
+texture_margin_bottom = 5.0
+modulate_color = Color(1, 0.92, 0.72, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_potion_pressed"]
+content_margin_left = 5.0
+content_margin_top = 5.0
+content_margin_right = 5.0
+content_margin_bottom = 5.0
+texture = ExtResource("5_potion_button_shell")
+texture_margin_left = 5.0
+texture_margin_top = 5.0
+texture_margin_right = 5.0
+texture_margin_bottom = 5.0
+modulate_color = Color(0.74, 0.7, 0.78, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_potion_disabled"]
+content_margin_left = 5.0
+content_margin_top = 5.0
+content_margin_right = 5.0
+content_margin_bottom = 5.0
+texture = ExtResource("5_potion_button_shell")
+texture_margin_left = 5.0
+texture_margin_top = 5.0
+texture_margin_right = 5.0
+texture_margin_bottom = 5.0
+modulate_color = Color(0.44, 0.44, 0.48, 0.72)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_utility_focus"]
+bg_color = Color(0, 0, 0, 0)
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.93, 0.76, 0.34, 0.92)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slot_empty"]
+bg_color = Color(0.015, 0.014, 0.021, 0.42)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_equipment_panel"]
+bg_color = Color(0.025, 0.021, 0.035, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.34, 0.27, 0.17, 0.82)
+
+[resource]
+SkillSlotButton/base_type = &"Button"
+SkillSlotButton/colors/icon_disabled_color = Color(0.42, 0.42, 0.45, 0.7)
+SkillSlotButton/styles/disabled = SubResource("StyleBoxTexture_slot_disabled")
+SkillSlotButton/styles/focus = SubResource("StyleBoxFlat_slot_focus")
+SkillSlotButton/styles/hover = SubResource("StyleBoxTexture_slot_hover")
+SkillSlotButton/styles/normal = SubResource("StyleBoxTexture_slot_normal")
+SkillSlotButton/styles/pressed = SubResource("StyleBoxTexture_slot_pressed")
+SkillSlotSelectedOverlay/base_type = &"Panel"
+SkillSlotSelectedOverlay/styles/panel = SubResource("StyleBoxFlat_selected")
+HudHotkeyBadge/base_type = &"PanelContainer"
+HudHotkeyBadge/styles/panel = SubResource("StyleBoxFlat_hotkey")
+HudCooldownShade/base_type = &"Panel"
+HudCooldownShade/styles/panel = SubResource("StyleBoxFlat_cooldown_shade")
+HudCooldownTurnsLabel/base_type = &"Label"
+HudCooldownTurnsLabel/colors/font_color = Color(0.96, 0.88, 0.68, 1)
+HudCooldownTurnsLabel/colors/font_outline_color = Color(0.02, 0.018, 0.028, 1)
+HudCooldownTurnsLabel/constants/outline_size = 3
+HudCooldownTurnsLabel/font_sizes/font_size = 22
+HudHotkeyLabel/base_type = &"Label"
+HudHotkeyLabel/colors/font_color = Color(0.94, 0.88, 0.76, 1)
+HudHotkeyLabel/font_sizes/font_size = 11
+HudChargeLabel/base_type = &"Label"
+HudChargeLabel/colors/font_color = Color(0.94, 0.79, 0.35, 1)
+HudChargeLabel/font_sizes/font_size = 12
+ActionResourceStrip/base_type = &"PanelContainer"
+ActionResourceStrip/styles/panel = SubResource("StyleBoxTexture_resource_strip")
+ActionResourceSegment/base_type = &"PanelContainer"
+ActionResourceSegment/styles/panel = SubResource("StyleBoxFlat_action_resource_segment")
+ActionResourceMovementValue/base_type = &"Label"
+ActionResourceMovementValue/colors/font_color = Color(0.78, 0.82, 0.78, 1)
+ActionResourceMovementValue/font_sizes/font_size = 18
+CharacterHudPanel/base_type = &"PanelContainer"
+CharacterHudPanel/styles/panel = SubResource("StyleBoxTexture_character_panel")
+HudPortraitFrame/base_type = &"PanelContainer"
+HudPortraitFrame/styles/panel = SubResource("StyleBoxTexture_portrait_frame")
+HudPortraitFallback/base_type = &"Label"
+HudPortraitFallback/colors/font_color = Color(0.56, 0.48, 0.35, 0.82)
+HudPortraitFallback/colors/font_outline_color = Color(0.015, 0.012, 0.022, 1)
+HudPortraitFallback/constants/outline_size = 2
+HudPortraitFallback/font_sizes/font_size = 26
+HudIdentityLabel/base_type = &"Label"
+HudIdentityLabel/colors/font_color = Color(0.94, 0.86, 0.68, 1)
+HudIdentityLabel/colors/font_outline_color = Color(0.015, 0.012, 0.022, 1)
+HudIdentityLabel/constants/outline_size = 2
+HudIdentityLabel/font_sizes/font_size = 14
+HudLevelLabel/base_type = &"Label"
+HudLevelLabel/colors/font_color = Color(0.82, 0.78, 0.7, 1)
+HudLevelLabel/colors/font_outline_color = Color(0.015, 0.012, 0.022, 1)
+HudLevelLabel/constants/outline_size = 2
+HudLevelLabel/font_sizes/font_size = 12
+HudMeterValueLabel/base_type = &"Label"
+HudMeterValueLabel/colors/font_color = Color(0.96, 0.93, 0.86, 1)
+HudMeterValueLabel/colors/font_outline_color = Color(0.01, 0.008, 0.014, 1)
+HudMeterValueLabel/constants/outline_size = 1
+HudMeterValueLabel/fonts/font = ExtResource("6_numeric_font")
+HudMeterValueLabel/font_sizes/font_size = 11
+HudSurvivalFrame/base_type = &"PanelContainer"
+HudSurvivalFrame/styles/panel = SubResource("StyleBoxFlat_survival_frame")
+HudExperienceMeter/base_type = &"ProgressBar"
+HudExperienceMeter/styles/background = SubResource("StyleBoxFlat_meter_background")
+HudExperienceMeter/styles/fill = SubResource("StyleBoxFlat_experience_fill")
+HudHpMeter/base_type = &"ProgressBar"
+HudHpMeter/styles/background = SubResource("StyleBoxFlat_meter_background")
+HudHpMeter/styles/fill = SubResource("StyleBoxFlat_hp_fill")
+HudShieldMeter/base_type = &"ProgressBar"
+HudShieldMeter/styles/background = SubResource("StyleBoxFlat_meter_background")
+HudShieldMeter/styles/fill = SubResource("StyleBoxFlat_shield_fill")
+HudSlotButton52/base_type = &"Button"
+HudSlotButton52/styles/normal = SubResource("StyleBoxTexture_slot_normal")
+HudSlotButton52/styles/hover = SubResource("StyleBoxTexture_slot_hover")
+HudSlotButton52/styles/pressed = SubResource("StyleBoxTexture_slot_pressed")
+HudSlotButton52/styles/disabled = SubResource("StyleBoxTexture_slot_disabled")
+HudSlotButton44/base_type = &"Button"
+HudSlotButton44/styles/normal = SubResource("StyleBoxTexture_slot_normal")
+HudSlotButton44/styles/hover = SubResource("StyleBoxTexture_slot_hover")
+HudSlotButton44/styles/pressed = SubResource("StyleBoxTexture_slot_pressed")
+HudSlotButton44/styles/disabled = SubResource("StyleBoxTexture_slot_disabled")
+HudPotionButton32/base_type = &"Button"
+HudPotionButton32/styles/normal = SubResource("StyleBoxTexture_potion_normal")
+HudPotionButton32/styles/hover = SubResource("StyleBoxTexture_potion_hover")
+HudPotionButton32/styles/pressed = SubResource("StyleBoxTexture_potion_pressed")
+HudPotionButton32/styles/disabled = SubResource("StyleBoxTexture_potion_disabled")
+HudUtilityFocusOverlay/base_type = &"Panel"
+HudUtilityFocusOverlay/styles/panel = SubResource("StyleBoxFlat_utility_focus")
+HudSlotEmptyOverlay/base_type = &"Panel"
+HudSlotEmptyOverlay/styles/panel = SubResource("StyleBoxFlat_slot_empty")
+HudEquipmentPanel/base_type = &"Panel"
+HudEquipmentPanel/styles/panel = SubResource("StyleBoxTexture_character_panel")
+HudRelicPanel/base_type = &"Panel"
+HudRelicPanel/styles/panel = SubResource("StyleBoxTexture_character_panel")
+HudSkillShelf/base_type = &"Panel"
+HudSkillShelf/styles/panel = SubResource("StyleBoxTexture_character_panel")

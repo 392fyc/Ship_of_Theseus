@@ -1,0 +1,72 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/playground/hud_numeric_font_candidate_gallery.gd" id="1_script"]
+
+[node name="HudNumericFontCandidateGallery" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+color = Color(0.035, 0.027, 0.047, 1)
+
+[node name="Header" type="Label" parent="."]
+layout_mode = 0
+offset_left = 188.0
+offset_top = 84.0
+offset_right = 992.0
+offset_bottom = 112.0
+theme_override_colors/font_color = Color(0.91, 0.82, 0.64, 1)
+theme_override_font_sizes/font_size = 18
+text = "HUD 数值字体候选 · 1:1 实际字号"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScopeNote" type="Label" parent="."]
+layout_mode = 0
+offset_left = 188.0
+offset_top = 116.0
+offset_right = 992.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(0.49, 0.46, 0.43, 1)
+theme_override_font_sizes/font_size = 10
+text = "相同 58px 值框、相同字号、相同描边与右边界；仅右列覆盖候选字体"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ReferenceHost" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 188.0
+offset_top = 154.0
+offset_right = 548.0
+offset_bottom = 570.0
+mouse_filter = 2
+
+[node name="CandidateHost" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 612.0
+offset_top = 154.0
+offset_right = 972.0
+offset_bottom = 570.0
+mouse_filter = 2
+
+[node name="Footer" type="Label" parent="."]
+layout_mode = 0
+offset_left = 188.0
+offset_top = 590.0
+offset_right = 992.0
+offset_bottom = 626.0
+theme_override_colors/font_color = Color(0.56, 0.52, 0.47, 1)
+theme_override_font_sizes/font_size = 10
+text = "检查 0/6/8/9 内部空间、1/7 区分、斜杠连续性与 999999/999999 是否完整。\n本页为开发候选，不修改正式 HUD Theme。"
+horizontal_alignment = 1
+vertical_alignment = 1

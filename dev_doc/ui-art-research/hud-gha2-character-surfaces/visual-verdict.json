@@ -1,0 +1,46 @@
+{
+  "score": 96,
+  "verdict": "pass",
+  "category_match": true,
+  "approval_scope": "technical and candidate visual review only",
+  "selected_family": "A",
+  "checks": [
+    {
+      "subject": "character_panel_surface",
+      "result": "pass",
+      "evidence": "226x108 目标资产使用薄黑紫框与克制旧金角件；中心透明，长边无可见接缝，五种字段状态均未受挤压。"
+    },
+    {
+      "subject": "portrait_frame_surface",
+      "result": "pass",
+      "evidence": "72x82 目标资产与角色栏 A 同族；透明头像窗口面积充足，fallback 字符和未来头像内容均保持独立。"
+    },
+    {
+      "subject": "alpha_and_safe_edge",
+      "result": "pass",
+      "evidence": "两张 PNG 的完整一像素外缘无不透明像素，中心采样 alpha 为零，并仍含可见边框材质。"
+    },
+    {
+      "subject": "runtime_separation",
+      "result": "pass",
+      "evidence": "职业名、玩家名、等级、三个 current/max Label、三个 ProgressBar、头像 TextureRect 与 fallback Label 均由消费测试确认仍为运行时层。"
+    },
+    {
+      "subject": "resolution_evidence",
+      "result": "pass",
+      "evidence": "1280x720、1920x1080、2560x1440 三档 Godot 窗口截图均无边框裁切、重叠或内容区污染。"
+    }
+  ],
+  "differences": [
+    "画廊使用 fallback 字符，不包含未来角色头像内容",
+    "较大分辨率保持 226x108 原生组件尺寸，整套 HUD 的缩放策略仍在后续组合验证范围",
+    "当前画廊为隔离黑色背景，角色栏与相邻底部 HUD 组件的最终明暗关系尚未进行整批组合验收"
+  ],
+  "suggestions": [
+    "用户审核时优先查看 1280x720 原生尺寸下的边框密度、头像窗口和动态数值可读性",
+    "未来真实头像作为独立内容素材注入，不修改头像框中性表面",
+    "经验、HP、护盾轨道、填充与数值继续由 Theme 和运行时控件表达"
+  ],
+  "reasoning": "A 组在两个目标尺寸下都保留了比 B 组更大的透明内容区，并与既有技能槽、行动资源条维持同一黑紫与旧金薄框语言；运行时字段没有被图片替代。"
+}
+

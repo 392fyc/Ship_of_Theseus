@@ -1,0 +1,73 @@
+{
+  "milestone_id": "GHA-5-HUD-NUMERIC-FONT-THEME-INTEGRATION",
+  "status": "technical_candidate_independent_review_passed_pending_user_review",
+  "approval_status": "independent_review_passed_pending_user_visual_review",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/issue-18-action-resource-bar",
+  "target_head_before": "94e10f36757ad247dec0b779cd8859c5c02e61ea",
+  "candidate_head": null,
+  "changed_scope": [
+    "HudMeterValueLabel-only IBM Plex Mono SemiBold Theme assignment",
+    "numeric-font Theme integration regression test",
+    "three refreshed GHV-2 captures, nine refreshed GHV-4 captures and three refreshed GHV-5 captures",
+    "updated current evidence hashes and GHA-5 display contract"
+  ],
+  "generation": {
+    "image_generation_used": false,
+    "external_api_key_used": false,
+    "purchased_asset_used": false,
+    "font_license": "SIL Open Font License 1.1"
+  },
+  "verification": [
+    {
+      "command": "Primary run: Godot 4.6.3 RED/GREEN integration test",
+      "result": "pass",
+      "evidence": "Before Theme assignment the new test failed only the three expected font declaration/inheritance checks; after assignment it passed 14/0."
+    },
+    {
+      "command": "Primary run: Godot 4.6.3 affected regression suite",
+      "result": "pass",
+      "evidence": "22 test scripts; 1148 assertions passed, 0 failed."
+    },
+    {
+      "command": "Primary run: Godot 4.6.3 windowed captures",
+      "result": "pass",
+      "evidence": "3 GHV-2, 9 GHV-4 and 3 GHV-5 screenshots regenerated successfully; three representative 1280x720 images inspected at original resolution."
+    },
+    {
+      "command": "Independent rerun: Godot 4.6.1 affected regression suite",
+      "result": "pass",
+      "evidence": "The independent reviewer reran the same 22 scripts; 1148 assertions passed, 0 failed. This is additional cross-patch evidence and does not replace the primary 4.6.3 run."
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "production HUD, action rules, RunState and tactical flow",
+      "result": "unchanged",
+      "evidence": "Protected production paths remain empty against baseline; RunState.RELIC_SLOT_MAX remains 6."
+    }
+  ],
+  "cross_repository": {
+    "design_library_changed": false,
+    "kb_changed_for_this_milestone": false,
+    "mercury_changed": false
+  },
+  "publication": {
+    "committed": false,
+    "published": false,
+    "remote_ref": null
+  },
+  "independent_review": {
+    "verdict": "pass",
+    "completeness": 1.0,
+    "blockers": [],
+    "evidence": "Independent read-only review verified the single Theme binding, 8px/7px/8px recovery, all current screenshot hashes, three original-resolution representative images, protected paths and relic capacity. It independently reran 22 scripts under Godot 4.6.1 for 1148/0; the primary author run and captures used Godot 4.6.3."
+  },
+  "gha6_revalidation": "revision_3_independent_review_passed_pending_user_visual_review",
+  "ghv7_revalidation": "independent_review_passed_pending_user_visual_review",
+  "ghv8_revalidation": "independent_review_passed_pending_user_visual_review",
+  "residual_risks": [
+    "User visual approval is still required before production HUD wiring.",
+    "The integrated Theme remains development-only and is not connected to tactical production state."
+  ]
+}

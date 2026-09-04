@@ -1,0 +1,120 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/playground/hud_character_vertical_slice_gallery.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/themes/hud_structure_prototype.tres" id="2_theme"]
+
+[node name="HudCharacterVerticalSliceGallery" type="Control"]
+custom_minimum_size = Vector2(1280, 720)
+offset_right = 1280.0
+offset_bottom = 720.0
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.012, 0.011, 0.018, 1)
+
+[node name="SafeArea" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="Layout" type="VBoxContainer" parent="SafeArea"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="SafeArea/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.8, 0.65, 1)
+theme_override_font_sizes/font_size = 22
+text = "角色栏纵向切片 · 动态字段样机"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="SafeArea/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.57, 0.61, 1)
+theme_override_font_sizes/font_size = 12
+text = "职业名与 HP 来自现有生产字段；玩家名、等级、经验、护盾与头像为显示合同 mock"
+horizontal_alignment = 1
+
+[node name="Content" type="CenterContainer" parent="SafeArea/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CharacterColumn" type="HBoxContainer" parent="SafeArea/Layout/Content"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="NormalState" type="VBoxContainer" parent="SafeArea/Layout/Content/CharacterColumn"]
+custom_minimum_size = Vector2(226, 0)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="SafeArea/Layout/Content/CharacterColumn/NormalState"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.61, 0.65, 1)
+theme_override_font_sizes/font_size = 11
+text = "普通值"
+horizontal_alignment = 1
+
+[node name="LongNameState" type="VBoxContainer" parent="SafeArea/Layout/Content/CharacterColumn"]
+custom_minimum_size = Vector2(226, 0)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="SafeArea/Layout/Content/CharacterColumn/LongNameState"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.61, 0.65, 1)
+theme_override_font_sizes/font_size = 11
+text = "长职业名与玩家名"
+horizontal_alignment = 1
+
+[node name="ZeroShieldState" type="VBoxContainer" parent="SafeArea/Layout/Content/CharacterColumn"]
+custom_minimum_size = Vector2(226, 0)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="SafeArea/Layout/Content/CharacterColumn/ZeroShieldState"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.61, 0.65, 1)
+theme_override_font_sizes/font_size = 11
+text = "护盾为零"
+horizontal_alignment = 1
+
+[node name="FullValuesState" type="VBoxContainer" parent="SafeArea/Layout/Content/CharacterColumn"]
+custom_minimum_size = Vector2(226, 0)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="SafeArea/Layout/Content/CharacterColumn/FullValuesState"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.61, 0.65, 1)
+theme_override_font_sizes/font_size = 11
+text = "满值"
+horizontal_alignment = 1
+
+[node name="LargeValuesState" type="VBoxContainer" parent="SafeArea/Layout/Content/CharacterColumn"]
+custom_minimum_size = Vector2(226, 0)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="SafeArea/Layout/Content/CharacterColumn/LargeValuesState"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.61, 0.65, 1)
+theme_override_font_sizes/font_size = 11
+text = "超大数值"
+horizontal_alignment = 1

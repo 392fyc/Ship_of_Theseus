@@ -1,0 +1,84 @@
+{
+  "milestone_id": "GHA-4-HUD-NUMERIC-FONT-CANDIDATE",
+  "status": "technical_candidate_independent_review_passed_pending_user_review",
+  "approval_status": "independent_review_passed_pending_user_visual_review",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/issue-18-action-resource-bar",
+  "target_head_before": "94e10f36757ad247dec0b779cd8859c5c02e61ea",
+  "candidate_head": null,
+  "source": {
+    "version": "@ibm/plex-mono@2.5.0",
+    "release_url": "https://github.com/IBM/plex/releases/tag/%40ibm%2Fplex-mono%402.5.0",
+    "retrieved_at": "2026-09-03",
+    "zip_sha256_verified": true,
+    "purchased_asset_used": false,
+    "external_api_key_used": false,
+    "generative_image_used": false
+  },
+  "changed_scope": [
+    "one static IBM Plex Mono SemiBold TTF, original OFL text and source manifest",
+    "one isolated fallback-versus-candidate font gallery",
+    "one GHV-5 long-value preview using only local XP, HP and SH font overrides",
+    "two 1280x720 captures, tests, research record, display contract and evidence"
+  ],
+  "verification": [
+    {
+      "command": "official release archive SHA-256 check",
+      "result": "pass",
+      "evidence": "Downloaded ZIP SHA-256 equals the official 6d23f012...bbc481c value."
+    },
+    {
+      "command": "Godot 4.6.3 numeric font candidate test",
+      "result": "pass",
+      "evidence": "146 assertions passed, 0 failed; includes hashes, license, source dates, metadata, raster settings, glyph coverage, font width, local override and GHV-5 reuse boundaries."
+    },
+    {
+      "command": "Godot 4.6.3 affected regression suite",
+      "result": "pass",
+      "evidence": "21 existing test scripts; 1134 assertions passed, 0 failed."
+    },
+    {
+      "command": "Godot 4.6.3 windowed captures",
+      "result": "pass",
+      "evidence": "Two 1280x720 screenshots generated after two consecutive structurally complete render frames and manually inspected."
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "shared HUD Theme and HudValueMeter behavior",
+      "result": "unchanged",
+      "evidence": "Candidate font is applied only through local development-gallery overrides; 8px/7px behavior remains unchanged."
+    },
+    {
+      "subject": "GHV-5 implementation and three existing screenshots",
+      "result": "unchanged",
+      "evidence": "The preview instances one GHV-5 gallery; all three prior screenshot SHA-256 values still match the GHV-5 verdict."
+    },
+    {
+      "subject": "production HUD and gameplay capacity",
+      "result": "unchanged",
+      "evidence": "Protected production paths remain unchanged against baseline; gameplay relic capacity remains 6."
+    }
+  ],
+  "independent_review": {
+    "verdict": "pass",
+    "completeness": 1.0,
+    "blockers": [],
+    "evidence": "Independent review verified official source semantics and hashes, inspected both original PNGs, reran the Godot 4.6.3 focused test with 146/0 assertions, and confirmed the source-date correction removed its only finding."
+  },
+  "cross_repository": {
+    "design_library_changed": false,
+    "kb_changed_for_this_milestone": false,
+    "mercury_changed": false
+  },
+  "publication": {
+    "committed": false,
+    "published": false,
+    "remote_ref": null
+  },
+  "residual_risks": [
+    "User visual approval is still required before the candidate can become the formal HudMeterValueLabel font.",
+    "The formal integration task must keep the OFL text user-readable in exported builds.",
+    "CJK and other HUD font roles are outside this candidate scope."
+  ]
+}

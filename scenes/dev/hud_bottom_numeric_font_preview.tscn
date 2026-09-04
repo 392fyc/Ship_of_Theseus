@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/dev/hud_bottom_dynamic_states_gallery.tscn" id="1_gallery"]
+[ext_resource type="Script" path="res://scripts/ui/playground/hud_bottom_numeric_font_preview.gd" id="2_script"]
+
+[node name="HudBottomNumericFontPreview" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+script = ExtResource("2_script")
+
+[node name="BaseGallery" parent="." instance=ExtResource("1_gallery")]
+layout_mode = 0

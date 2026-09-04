@@ -1,0 +1,111 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/playground/hud_utility_vertical_slice_gallery.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/themes/hud_structure_prototype.tres" id="2_theme"]
+
+[node name="HudUtilityVerticalSliceGallery" type="Control"]
+custom_minimum_size = Vector2(1280, 720)
+offset_right = 1280.0
+offset_bottom = 720.0
+theme = ExtResource("2_theme")
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.012, 0.011, 0.018, 1)
+
+[node name="SafeArea" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="Layout" type="VBoxContainer" parent="SafeArea"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="SafeArea/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.8, 0.65, 1)
+theme_override_font_sizes/font_size = 22
+text = "装备、遗物与结束操作 · Godot 结构切片"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="SafeArea/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.58, 0.57, 0.61, 1)
+theme_override_font_sizes/font_size = 12
+text = "装备、血瓶与遗物内容均为 mock；8 格仅表示视觉槽壳，当前玩法容量仍为 6"
+horizontal_alignment = 1
+
+[node name="Content" type="CenterContainer" parent="SafeArea/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="States" type="VBoxContainer" parent="SafeArea/Layout/Content"]
+custom_minimum_size = Vector2(506, 0)
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="EmptyState" type="VBoxContainer" parent="SafeArea/Layout/Content/States"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Label" type="Label" parent="SafeArea/Layout/Content/States/EmptyState"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.61, 0.65, 1)
+theme_override_font_sizes/font_size = 11
+text = "空装备 · 8 格空遗物 · 结束回合"
+horizontal_alignment = 1
+
+[node name="Components" type="HBoxContainer" parent="SafeArea/Layout/Content/States/EmptyState"]
+custom_minimum_size = Vector2(506, 108)
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="OccupiedState" type="VBoxContainer" parent="SafeArea/Layout/Content/States"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Label" type="Label" parent="SafeArea/Layout/Content/States/OccupiedState"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.61, 0.65, 1)
+theme_override_font_sizes/font_size = 11
+text = "mock 占用 · 局部 mock 遗物 · 结束移动"
+horizontal_alignment = 1
+
+[node name="Components" type="HBoxContainer" parent="SafeArea/Layout/Content/States/OccupiedState"]
+custom_minimum_size = Vector2(506, 108)
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="DisabledState" type="VBoxContainer" parent="SafeArea/Layout/Content/States"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Label" type="Label" parent="SafeArea/Layout/Content/States/DisabledState"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.62, 0.61, 0.65, 1)
+theme_override_font_sizes/font_size = 11
+text = "不可用状态"
+horizontal_alignment = 1
+
+[node name="Components" type="HBoxContainer" parent="SafeArea/Layout/Content/States/DisabledState"]
+custom_minimum_size = Vector2(506, 108)
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1

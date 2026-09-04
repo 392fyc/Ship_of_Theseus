@@ -1,0 +1,39 @@
+{
+  "milestone_id": "GHV-6-ACTION-RESOURCE-SEGMENTS",
+  "status": "revision_3_technical_and_independent_visual_pass_pending_user_review",
+  "verdict": "pass",
+  "ghv7_revalidation": "representative_images_independent_review_passed_pending_user_visual_review",
+  "ghv8_revalidation": "representative_images_independent_review_passed_pending_user_visual_review",
+  "checks": [
+    {
+      "subject": "three_visible_groups",
+      "verdict": "pass",
+      "observation": "Movement, standard and swift resources occupy three equal 76px transparent cells, each enclosed by the same complete four-sided frame inside the overall strip frame."
+    },
+    {
+      "subject": "overall_and_matching_inner_frames",
+      "verdict": "pass",
+      "observation": "The overall strip frame remains, while three matching complete inner frames are separated by 4px gaps; there are no filled region blocks, plain divider lines, decorative posts or category labels."
+    },
+    {
+      "subject": "geometry_preservation",
+      "verdict": "pass",
+      "observation": "The action strip remains 274x40 at x=503, y=550, centered over the skill shelf with a 6px vertical gap."
+    },
+    {
+      "subject": "runtime_state_preservation",
+      "verdict": "pass",
+      "observation": "Capacity 1-3, partial consumption, movement greying and absent-capacity behavior remain runtime-driven."
+    }
+  ],
+  "representative_images": [
+    {"path": "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_5skills_1280x720.png", "sha256": "fc33d4bf4c9c078a5cb8cdbe89f44691269019de444ea18af8ef0f21ad0e7971"},
+    {"path": "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_1_ready_1280x720.png", "sha256": "798ae4acfd5d95617e0b82cdd3475c86c4ec9048a089e3154cf7ad9cf1ff2817"},
+    {"path": "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_2_early_lock_1280x720.png", "sha256": "8460746fb04b4a6908bc30370e110d255e9e82ff90ccc9d85864581e4180d3bb"},
+    {"path": "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_3_exhausted_1280x720.png", "sha256": "a351af0330d54c7c972e0c0e80b62a295aac82ae7d59f072b7c3d1d70b7f8997"}
+  ],
+  "known_non_blocking_limits": [
+    "User visual approval is still required before production HUD wiring.",
+    "The grouping is implemented in the development prototype Theme and scene only."
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "milestone_id": "GHV-5-BOTTOM-HUD-DYNAMIC-STATES",
+  "status": "technical_and_independent_visual_pass_pending_user_review",
+  "ghv7_revalidation": "independent_review_passed_pending_user_visual_review",
+  "ghv8_revalidation": "independent_review_passed_pending_user_visual_review",
+  "screenshots": [
+    {
+      "state_id": "capacity_1_ready_zero_shield",
+      "path": "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_1_ready_1280x720.png",
+      "size": "1280x720",
+      "sha256": "798ae4acfd5d95617e0b82cdd3475c86c4ec9048a089e3154cf7ad9cf1ff2817",
+      "verdict": "pass",
+      "observation": "Capacity-one pips, movement 6, zero shield and five runtime hotkeys are visible without content icons."
+    },
+    {
+      "state_id": "capacity_2_early_move_lock_long_values",
+      "path": "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_2_early_lock_1280x720.png",
+      "size": "1280x720",
+      "sha256": "8460746fb04b4a6908bc30370e110d255e9e82ff90ccc9d85864581e4180d3bb",
+      "verdict": "pass",
+      "observation": "Movement 7 is retained but greyed, capacity-two consumption is visible, long identity is ellipsized, long values use the revised 9px size, and the alpha-0.5 cooldown shade leaves the mock swatch visible behind digit 2."
+    },
+    {
+      "state_id": "capacity_3_move_exhausted",
+      "path": "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_3_exhausted_1280x720.png",
+      "size": "1280x720",
+      "sha256": "a351af0330d54c7c972e0c0e80b62a295aac82ae7d59f072b7c3d1d70b7f8997",
+      "verdict": "pass",
+      "observation": "Movement is greyed at zero, capacity-three consumption is visible, short values recover 11px, and the same mock swatch is brighter after cooldown removal."
+    }
+  ],
+  "runtime_checks": [
+    {"subject": "font_size_recovery", "verdict": "pass", "observation": "The same value label changes 11px to 9px and back to 11px without retaining a local override."},
+    {"subject": "cooldown_transparency", "verdict": "pass", "observation": "Cooldown shade alpha is 0.5 and the runtime-only swatch remains visible."},
+    {"subject": "content_boundary", "verdict": "pass", "observation": "Only one runtime texture with an empty resource path is used for shade comparison; all formal content icon slots remain empty."},
+    {"subject": "ghv4_reuse", "verdict": "pass", "observation": "The dynamic gallery contains exactly one existing GHV-4 gallery instance and does not duplicate its geometry or board."}
+  ],
+  "known_non_blocking_limits": [
+    "User visual approval is still required.",
+    "IBM Plex Mono SemiBold 600 is integrated only through HudMeterValueLabel; user visual approval is still required before production HUD wiring.",
+    "The gallery is not wired to production tactical state."
+  ]
+}

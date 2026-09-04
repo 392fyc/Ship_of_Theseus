@@ -1,0 +1,46 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/playground/hud_bottom_composition_gallery.gd" id="1_gallery"]
+[ext_resource type="Script" path="res://scripts/ui/playground/diamond_board_stress.gd" id="2_board"]
+[ext_resource type="Script" path="res://scripts/units/map_token_view.gd" id="3_token"]
+[ext_resource type="PackedScene" path="res://scenes/tactical/hud/bottom_hud_composition.tscn" id="4_composition"]
+
+[node name="HudBottomCompositionGallery" type="Control"]
+custom_minimum_size = Vector2(1280, 720)
+offset_right = 1280.0
+offset_bottom = 720.0
+clip_contents = true
+script = ExtResource("1_gallery")
+
+[node name="DesignRoot" type="Control" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(1280, 720)
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+
+[node name="Background" type="ColorRect" parent="DesignRoot"]
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+color = Color(0.012, 0.014, 0.02, 1)
+
+[node name="DiamondBoardStress" type="Control" parent="DesignRoot"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+script = ExtResource("2_board")
+
+[node name="KenseiScaleAnchor" type="Sprite2D" parent="DesignRoot"]
+unique_name_in_owner = true
+position = Vector2(640, 416)
+z_index = 1
+script = ExtResource("3_token")
+
+[node name="BottomHudComposition" parent="DesignRoot" instance=ExtResource("4_composition")]
+unique_name_in_owner = true
+layout_mode = 0
+z_index = 10

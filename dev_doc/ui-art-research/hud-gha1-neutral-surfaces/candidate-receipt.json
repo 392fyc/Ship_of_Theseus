@@ -1,0 +1,94 @@
+{
+  "milestone_id": "GHA-1-HUD-NEUTRAL-SURFACES",
+  "status": "implementation_complete",
+  "approval_status": "independent_review_passed_pending_user_review",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/issue-18-action-resource-bar",
+  "target_head_before": "94e10f36757ad247dec0b779cd8859c5c02e61ea",
+  "candidate_head": null,
+  "scope": [
+    "SkillSlotButton 中性表面",
+    "ActionResourceStrip 中性表面",
+    "StyleBoxTexture 接线",
+    "透明通道、目标尺寸、运行时分层与三档截图验证"
+  ],
+  "cross_repository_changes": [
+    {
+      "repository": "ShipOfTheseus-KB",
+      "branch": "codex/issue-18-hud-layout-r1",
+      "head_before": "3b8fa3320a140af848035d84ee95d62112626807",
+      "path": "04-Assets/visual-style-decisions.md",
+      "sha256": "3bf2f2aa7caf96bbf5658037975d97c942c43ff1c085699ee8868af5fdadf2d9",
+      "summary": "固化中性表面与运行时状态分层、透明棋盘机械清理、目标尺寸和透明安全边规则"
+    }
+  ],
+  "generation": {
+    "mode": "Codex built-in imagegen",
+    "external_api_key_used": false,
+    "purchased_asset_used": false,
+    "candidate_count": 4,
+    "selected_family": "B",
+    "source_record": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/manifest.json"
+  },
+  "final_assets": [
+    {
+      "path": "assets/ui/skins/hud/skill_slot_surface_v1.png",
+      "size": "64x64",
+      "sha256": "3e175dd60dc4833861e35539acfc53a1b11b7f1b07ef070dffa31d50f87a3d49",
+      "consumer": "SkillSlotButton styles normal/hover/pressed/disabled"
+    },
+    {
+      "path": "assets/ui/skins/hud/action_resource_strip_surface_v1.png",
+      "size": "274x40",
+      "sha256": "b1f1e3df3dab11f689e8c02a32f74157e8420053771e705d3c44da5f565a4948",
+      "consumer": "ActionResourceStrip styles/panel"
+    }
+  ],
+  "verification": [
+    {
+      "command": "Godot surface-consumption test",
+      "result": "pass",
+      "evidence": "28 assertions passed, 0 failed；包含目标尺寸、外部与中心真实透明、九宫格边距、共用纹理及运行时节点断言"
+    },
+    {
+      "command": "Godot 4.6.3 focused and affected SceneTree tests",
+      "result": "pass",
+      "evidence": "test_hud_surface_skinning 28；test_hud_skill_slot_button 46；test_hud_action_resource_strip 28；test_hud_vertical_slice_gallery 73；test_skillbar_v3_ui 25；test_action_resource_bar 75；合计 275 assertions passed, 0 failed"
+    },
+    {
+      "command": "Godot windowed vertical-slice capture",
+      "result": "pass",
+      "evidence": "1280x720、1920x1080、2560x1440 PNG 已按精确尺寸重新生成"
+    },
+    {
+      "command": "JSON、差异与受保护脚本静态检查",
+      "result": "pass",
+      "evidence": "四个 JSON 文件可解析；git diff --check 退出 0；三个受保护生产脚本相对目标 HEAD 无差异"
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "scripts/ui/bottom_dashboard.gd; scripts/ui/skill_bar.gd; scripts/ui/action_resource_bar.gd",
+      "result": "unchanged",
+      "evidence": "git diff against 94e10f36757ad247dec0b779cd8859c5c02e61ea is empty for all three paths"
+    },
+    {
+      "subject": "玩法规则与结构化设计库",
+      "result": "unchanged"
+    }
+  ],
+  "publication": {
+    "committed": false,
+    "published": false,
+    "remote_ref": null
+  },
+  "residual_risks": [
+    "用户尚未对两项正式候选作最终视觉批准",
+    "完整底部 HUD 的相邻容器材质与项目级界面缩放仍不在本里程碑范围内"
+  ],
+  "independent_review": {
+    "verdict": "pass",
+    "blockers": [],
+    "evidence": "独立只读审查复跑 test_action_resource_bar 为 75/0，复核回执 JSON、路径卫生及前序八项验收结论后返回 PASS"
+  }
+}

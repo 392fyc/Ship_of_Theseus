@@ -1,0 +1,86 @@
+{
+  "milestone_id": "GHA-2-CHARACTER-HUD-SURFACES",
+  "status": "integrated_candidates_independent_review_passed_pending_user_review",
+  "generation_mode": "Codex built-in imagegen",
+  "external_api_key_used": false,
+  "purchased_asset_used": false,
+  "style_references": [
+    "assets/ui/skins/hud/skill_slot_surface_v1.png",
+    "assets/ui/skins/hud/action_resource_strip_surface_v1.png",
+    "dev_doc/ui-art-research/hud-r1-material-sample-v1/hud-r1-material-direction-v1.png"
+  ],
+  "prompt_contract": "dev_doc/ui-art-research/hud-gha2-character-surfaces/prompt-contract.md",
+  "assets": [
+    {
+      "asset_id": "character_panel_surface",
+      "consumer": "assets/ui/themes/hud_structure_prototype.tres::CharacterHudPanel/styles/panel",
+      "target_size": [226, 108],
+      "raw_candidates": [
+        "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/character-panel-surface-a.png",
+        "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/character-panel-surface-b.png"
+      ],
+      "imagegen_run_ids": [
+        "exec-ce2e7342-09fe-4ce9-b8e2-351f05702446",
+        "exec-00a12ac3-9940-4552-bad4-dcb9af04d272"
+      ],
+      "background_extraction_output": "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/character-panel-surface-a-alpha.png",
+      "selected_candidate": "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/character-panel-surface-a-mechanical.png",
+      "mechanically_cleaned_candidate": "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/character-panel-surface-a-mechanical.png",
+      "final_asset": "assets/ui/skins/hud/character_panel_surface_v1.png",
+      "final_sha256": "d324af01265ced9e1edd5e25b97dd85812ad713b386a140c2b798e64d32a97b4",
+      "prompt_sections": [
+        "角色栏中性外壳 A",
+        "角色栏中性外壳 B"
+      ],
+      "required_alpha": {
+        "external_background": true,
+        "center_content_window": true,
+        "one_pixel_safe_edge": true
+      },
+      "selection_reason": "A 的边框更薄、透明内容区更大；B 的强化角部在 226x108 下会争夺动态字段空间。",
+      "alpha_verified": true,
+      "integration_verified": true
+    },
+    {
+      "asset_id": "portrait_frame_surface",
+      "consumer": "assets/ui/themes/hud_structure_prototype.tres::HudPortraitFrame/styles/panel",
+      "target_size": [72, 82],
+      "raw_candidates": [
+        "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/portrait-frame-surface-a.png",
+        "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/portrait-frame-surface-b.png"
+      ],
+      "imagegen_run_ids": [
+        "exec-d087f21b-7a97-4615-9d3e-e63162b5518f",
+        "exec-f9b49033-d7d4-42c2-9425-bc6ce04d0cea"
+      ],
+      "background_extraction_output": "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/portrait-frame-surface-a-alpha.png",
+      "selected_candidate": "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/portrait-frame-surface-a-mechanical.png",
+      "mechanically_cleaned_candidate": "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/portrait-frame-surface-a-mechanical.png",
+      "final_asset": "assets/ui/skins/hud/portrait_frame_surface_v1.png",
+      "final_sha256": "af554dfa2c06d966e45ce0654b667cc0eb60ca27eff3075361415a59229cf4d8",
+      "prompt_sections": [
+        "头像框中性外壳 A",
+        "头像框中性外壳 B"
+      ],
+      "required_alpha": {
+        "external_background": true,
+        "center_content_window": true,
+        "one_pixel_safe_edge": true
+      },
+      "selection_reason": "A 与角色栏 A 的薄框语言一致且保留更大的头像窗口；B 的中段铆接和角部层级在 72x82 下过重。",
+      "alpha_verified": true,
+      "integration_verified": true
+    }
+  ],
+  "dynamic_layers_excluded_from_images": [
+    "profession_name",
+    "player_name",
+    "level",
+    "experience_value_and_fill",
+    "hp_value_and_fill",
+    "shield_value_and_fill",
+    "portrait_texture",
+    "portrait_fallback"
+  ],
+  "user_visual_approval": "pending"
+}

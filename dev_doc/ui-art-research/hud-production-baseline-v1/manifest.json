@@ -1,0 +1,1536 @@
+{
+	"admission_kind": "development_candidate_baseline",
+	"baseline_id": "hud-godot-candidate-v1",
+	"files": [
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "binary",
+			"path": "assets/fonts/ibm_plex_mono/IBMPlexMono-SemiBold.ttf",
+			"role": "HUD 运行候选",
+			"sha256": "f04d7c488ddf7d1fa99f2574efc3406ea4cbe17bb1af3a1ab960f84d0c96a172"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "assets/fonts/ibm_plex_mono/LICENSE.txt",
+			"role": "HUD 运行候选",
+			"sha256": "91c25c350d3cac39da2736d74f7ba37ef648f5237a4e330a240615bc8d8c4360"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "assets/fonts/ibm_plex_mono/source.json",
+			"role": "HUD 运行候选",
+			"sha256": "cbe9a891daa868e037a70a3e8cd1c5e4ec7445c8f86d1edf642f9a47f37f53e4"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "binary",
+			"path": "assets/ui/skins/hud/action_resource_strip_surface_v1.png",
+			"role": "HUD 运行候选",
+			"sha256": "b1f1e3df3dab11f689e8c02a32f74157e8420053771e705d3c44da5f565a4948"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "binary",
+			"path": "assets/ui/skins/hud/character_panel_surface_v1.png",
+			"role": "HUD 运行候选",
+			"sha256": "d324af01265ced9e1edd5e25b97dd85812ad713b386a140c2b798e64d32a97b4"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "binary",
+			"path": "assets/ui/skins/hud/end_action_diamond_frame_v1.png",
+			"role": "HUD 运行候选",
+			"sha256": "bebbf640076fc6e47509d29f0b6ecae1c56c375b77d2301d798fcdb2417e0a36"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "binary",
+			"path": "assets/ui/skins/hud/end_action_hourglass_emblem_v1.png",
+			"role": "HUD 运行候选",
+			"sha256": "942a532564832d2e8ba6e6257b5db775555990352b297760d0e204fd5c611b5e"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "binary",
+			"path": "assets/ui/skins/hud/portrait_frame_surface_v1.png",
+			"role": "HUD 运行候选",
+			"sha256": "af554dfa2c06d966e45ce0654b667cc0eb60ca27eff3075361415a59229cf4d8"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "binary",
+			"path": "assets/ui/skins/hud/potion_button_shell_v1.png",
+			"role": "HUD 运行候选",
+			"sha256": "d4f9bca956e24e1edb268689dd064ac733a3fdbc2cb677f8c54702b6beef0962"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "binary",
+			"path": "assets/ui/skins/hud/skill_slot_surface_v1.png",
+			"role": "HUD 运行候选",
+			"sha256": "3e175dd60dc4833861e35539acfc53a1b11b7f1b07ef070dffa31d50f87a3d49"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "assets/ui/themes/hud_structure_prototype.tres",
+			"role": "HUD 运行候选",
+			"sha256": "cd0a23e291f760cd46e7f6e3618ab5c84698f788988f6ec24a1da94f81489ac2"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/godot-hud-asset-layer-methodology-2026-09-02.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "54cb03c8a5380f9cd3619bb1c174bf30ced657f518473aab3cfb2779813ba36f"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/candidate-receipt.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "ef12fc21dc82f925bb0f102f2766b4e96f7617fbb7182740efcc4bddaef801e1"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/clean_neutral_checkerboard.gd",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "04a3c31592b4db843585a7ac56bc206523f8581cd1e2b0bce31a93d93d29ff13"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/manifest.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "940fc657418e4d18787a49f0cc5b7819701916c2e0ba5c26a8a37738b6a79726"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/prompt-contract.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "855f19f139cfb5b0a2efce2121343b2935149c689f9c4b9e312afbf71a88c9db"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/.gdignore",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/action-resource-strip-surface-a.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "22c0facae8249392eac56ad0ac8a2c6cb36b2900ada98a7d432443861c6999de"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/action-resource-strip-surface-b-alpha.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "ac6ec7360d986a598a563a15a1971694b66ec93c890bd258bb6f753b2274247b"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/action-resource-strip-surface-b-mechanical.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "545e2cfc932a6d7b2b6ede39d484c660e0950bf7273319941a6e6034993a9e5f"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/action-resource-strip-surface-b.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "40312ad5663cf0c2778d960c74491433920d429d8a431debaff2562bf99dfc4d"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/skill-slot-surface-a-alpha.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "27ce00f1ede7acf0cbd9b51e5ff02829f43b52718bc172970906362d5608f40d"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/skill-slot-surface-a.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "8db96f9a6ee9bac800ed161eea1f9cb80a7e88162d9fe10622e2de66bb0c471f"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/skill-slot-surface-b-alpha.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "3c8dad2ef43cc16dd4b643750c18a99afc3f8ea5fa6ddd27172acff956e35955"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/skill-slot-surface-b-mechanical.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "d51337217b4929212c2a4a6e348b43aafdcd2c7b69592843ae7342e4047a32c5"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/raw/skill-slot-surface-b.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "43a1755c5336878f3c0a0b51dc7077ee9c433ed14b561e3981d05da433eea468"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha1-neutral-surfaces/visual-verdict.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "0f836b8e6b98cf52e38efd6435845a83c1154c3e20667b301991334d27e59c99"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha2-character-surfaces/candidate-receipt.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "9ae7b5124118f099d847428fd088a1a23990aefe405fb0484b08311423783c03"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha2-character-surfaces/manifest.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "d8b57ef5c656f46763f017b74178531072b2446361e07555834cab2d30932dbe"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha2-character-surfaces/prompt-contract.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "78a6785d9c425fd2ad7d1ca53a0552b0ef7cee7db84b3ac51df0c752bbbc531e"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/.gdignore",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "86f1ce0297d673aa5ce53af43fbe939a0a28aafb0fb95edb12c03a4f302e46ca"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/character-panel-surface-a-alpha.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "f493a352e21d10b5cfa42da91f8e40c5afd7b8a967eefa9201a0b59f00a5d84b"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/character-panel-surface-a-mechanical.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "d324af01265ced9e1edd5e25b97dd85812ad713b386a140c2b798e64d32a97b4"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/character-panel-surface-a.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "626e896cc359043d9dce8d630b1d82981ffb8d5bdb361d3fd8732804c27a30a8"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/character-panel-surface-b.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "666f004a58811f7e2668020e85ff0e6870d918297a61e501cbb692d567cd5f28"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/portrait-frame-surface-a-alpha.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "8514652be95f8e38bbe8886264ca214ce2537ff6edaf624b7e65cd0efdc00ef9"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/portrait-frame-surface-a-mechanical.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "af554dfa2c06d966e45ce0654b667cc0eb60ca27eff3075361415a59229cf4d8"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/portrait-frame-surface-a.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "88a4d81b20a464fe47ab1eeb7dc9a350b57fc592193f072158178125e8ec5b0a"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha2-character-surfaces/raw/portrait-frame-surface-b.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "b80d13dcdcb164d6effc0ad1898664371516064dd0fa75dc875dcf652d994006"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha2-character-surfaces/visual-verdict.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "edb77b1f140384d102d5c459fea5267499fa6d963c97ec44ec1ebdcb192da496"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/candidate-receipt.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "f06ab88adc83852919cecc33a217ccc90c02fffcfaf38787639d66ad0e83fb22"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/manifest.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "d27eec0b0118f61a2b7c6fa31680867cf20bd031243a642f43289b1accdddd48"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/prompt-contract.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "af6fbdc90363e4d0e51ca5da01da696a8edaa60cb9eb5d925eb5f69ca880d4e8"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/end-action-diamond-frame-a-native.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "bebbf640076fc6e47509d29f0b6ecae1c56c375b77d2301d798fcdb2417e0a36"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/end-action-diamond-frame-a.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "7a7b96e834930e898dc230371f1bb5c116514672053395b156649f1637390b26"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/end-action-diamond-frame-b-native.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "0d6236557af3c578574a9be2adeaf38af47735315c6975087d0c7aae3d0791c3"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/end-action-diamond-frame-b.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "7f622af4ea00bf97f5ab9d5290c9f05f951d99623a4fb380841a90a1cef57ce9"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/end-action-hourglass-emblem-a-native.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "82adc4b981fae69824dff20121100dbf7222494f9b69f15d890d3fa6c8d58d63"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/end-action-hourglass-emblem-a.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "65331c77a5511413ef41002070f8ea21e0f9d68174ae823ef5fd434fe0972286"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/end-action-hourglass-emblem-b-native.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "942a532564832d2e8ba6e6257b5db775555990352b297760d0e204fd5c611b5e"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/end-action-hourglass-emblem-b.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "83d9fc1d0ee9ad440a07b3639b231762046429d92a9caaae5e50d6e9890fb56c"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/potion-button-shell-a-native.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "d4f9bca956e24e1edb268689dd064ac733a3fdbc2cb677f8c54702b6beef0962"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/potion-button-shell-a.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "57ed5eb6740ea2c28b89fe3a12b767c2c7463826ef30401c29662558fdcd9e47"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/potion-button-shell-b-native.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "8d50681182012b4b7d7edfbee6f45f20ceba0bbc80a0d2b8603f89a45a6da777"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/raw/potion-button-shell-b.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "cabbee14aefcd06d6b1904818fa8fedde7fcb49ea16a6b882b70f22fd817ac8b"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha3-utility-surfaces/visual-verdict.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "12d788a0b030eddebae25d60a8a43d98ad6dcb930e4e6cb9aead228fa6b83eb0"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha4-numeric-font/display-contract.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "e54ceb75cfc612b05e956d8718837d65ce9ec9e07eeb38810e5b00c07b324b4c"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha4-numeric-font/evidence/README.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "a9e61b5a8e51a07790d5dd80ea9381c67714ebb79942fab16c64ef21c5811249"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha4-numeric-font/evidence/candidate-receipt.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "68c6e05a7556f5da61155daded9c01965e085a17fecb4a2ebaaa7d6d64ba6ccf"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha4-numeric-font/evidence/hud_bottom_numeric_font_preview_1280x720.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "00898d605ee78f6e5e691e7fc90f279e6494540d7705557f27f8948c6cbb71f4"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-gha4-numeric-font/evidence/hud_numeric_font_candidate_1280x720.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "1a1b0f918d2b59609d2bf558d5d13d7c7e8e3a3899a24a29af62ab7b0e704a29"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha4-numeric-font/evidence/visual-verdict.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "0d4ddcb691c9db031b07f0ba9863e25f94166b15089d3010918f3a6344a8cf7b"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha5-numeric-font-theme-integration/display-contract.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "8f9ea1c29a1c9925e8bdf226d33197fe02f32f1225c5fa392707dd4cb2980f66"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha5-numeric-font-theme-integration/evidence/README.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "4426af6f001a9f7bf27707c1e7ff39e7f13cf7cde6794718f0723f69910c7209"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha5-numeric-font-theme-integration/evidence/candidate-receipt.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "d25f4aab9bf899e0a813f171dd3cc405a3c390a06bdcf93b642e362d28824404"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-gha5-numeric-font-theme-integration/evidence/visual-verdict.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "46c51384c5adc2aca457ac2eb348b4e1c0dc682a42309060d644f53481e43823"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv1-candidate-receipt.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "e63780b094a774cfdb11db4fc64f67362e944ef4aaa1013629921f1a1b340443"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv1-minimum-asset-needs.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "1020881c2ec622c2039268e60b253e2b77d31df961271d7099809cf9da87c924"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv1-vertical-slice-evidence/README.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "19891bbf5aca5009696411fa6aa89dcaa14e816e4466ccb2fd608775dadba977"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv1-vertical-slice-evidence/hud_vertical_slice_1280x720.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "f0a14508488c11534bed1f9022c75d1b64cc0a3d0686ffa87fd5bdee1bfc7657"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv1-vertical-slice-evidence/hud_vertical_slice_1920x1080.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "7e00921dc9c4b397b4cc77fb05467f3e7c1e5f15fdfdacffbeb5c4a3b0a01944"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv1-vertical-slice-evidence/hud_vertical_slice_2560x1440.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "394c85c47ea740f8ea23d243d191ff20ffd9895c584ed30d34d7eca256d60f49"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv1-vertical-slice-evidence/visual-verdict.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "88cd5c9d1340ffbc798b5f3fbac76b6cfcbd28435fe61a3c6a4ec6300dbb3238"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv10-default-five-skills/display-contract.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "d037e29a8f19769c370ec9d953875a3e73c923716c8f24b9b89798ee5358ccc2"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv10-default-five-skills/evidence/README.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "023574a11cf24cd376214f87dc8f9ea00cb3408e36ff1a9b33f32a166a29e2a3"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv10-default-five-skills/evidence/candidate-receipt.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "51e449811ed5acd823a8d293908d1ab68e2b54a6b7076909b1f13eb93d427326"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv10-default-five-skills/evidence/visual-verdict.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "ac097e7f35105478375d5cba2d148acf601bfac06c3336fd467bc7011806e7e3"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv2-character-slice/candidate-receipt.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "7e8d016e3bc6017ae092c683db5b6fd56734c502ac9f931f8ce0f7aed5bff73e"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv2-character-slice/display-contract.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "c603fd565603e164795cf0faf471b311f369aacaf5da19dc6971cd319fcbbd4d"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/README.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "3f347bb0c698bf49ccd00fa7d6b6a31913e1ad71079b6d1f4641b33b6e88a390"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/hud_character_slice_1280x720.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "c627f03821bb3046ebe06a2c30412440a5bb1dfe84f437dd352522e0f69b70b7"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/hud_character_slice_1920x1080.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "e8ac10aa500e71143daffbfc39a7a31d28480035dad808e64a0d59a7896fecef"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/hud_character_slice_2560x1440.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "63c035bb23463adff36692cd1726739225437eb057329d495ad36c1cce349858"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv2-character-slice/evidence/visual-verdict.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "a7ecda77351b1faa89b71d535fa7936a5107cb5bf98c18d2afed47bd3166e654"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv2-character-slice/minimum-asset-needs.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "43fbc25d4da1cb7247b3d53031251642ea56146bb5c287b0f470c7fdc410d09c"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv3-utility-slice/candidate-receipt.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "15ddd1443a7b3d29092dd53e01eefdf238d618d9b08bf19d782d50949326f766"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv3-utility-slice/display-contract.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "f4793c13da904ff02fc1ae42de9dbea5289391d9f10c8f096d91672218898cc5"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/README.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "ec880144c9344fe84927b87f7c1cb624933ea048b050b01366dc7e7f7c1744ad"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_1280x720.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "db77135c1fb3fc08eee77e0c3f937f633bd2dfa72402a42350ec4d17946e74b8"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_1920x1080.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "63e7fce55dede1f766de9667a43c50c55314946783432d8e82fcc9d566b15c04"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/hud_utility_slice_2560x1440.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "2fc3822f91b57624005498c15d85aba2bb2432b88dcc9223296cefda19b96942"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv3-utility-slice/evidence/visual-verdict.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "6cb2c83432888bbadcc3069bc886ad5f05d287af8b236caad993a1f9cd9dd957"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv3-utility-slice/minimum-asset-needs.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "1be9d39ca9a11fe6e60e1634ff808d656b0f159c5ad54f42d6aa41cda3c5de70"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv4-bottom-composition/candidate-receipt.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "b363370d3f54ccdd85d55973d7f89952018749165936b191a415426dece17ed4"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv4-bottom-composition/display-contract.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "2298654e7755898f7823a7b1993e3e97c4d59126ffcbd4e3105b50f3c6835336"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/README.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "27a52c7368472112c86b4518a8f4a2a3da4d3d064d210850b645e1cb6a171965"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_5skills_1280x720.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "fc33d4bf4c9c078a5cb8cdbe89f44691269019de444ea18af8ef0f21ad0e7971"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_5skills_1920x1080.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "1b8e46b038a742cd1e8430956de113b7a40aae2f5378c65a35dd5e5b6ecbab8d"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_5skills_2560x1440.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "3a9e4cf72dfe6d8dd1ef11b07e94edac053b4dff5888247e02991437c8a751e2"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_6skills_1280x720.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "322c880fa65ed1d5f1cfb4a7ca9c178a6c1277d73df258924ef9f740a07a9e4d"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_6skills_1920x1080.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "ec5509cc11df628efce40362464d4bde786212a30de3c95bf1844bc3c40bb5bf"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_6skills_2560x1440.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "f19be2ac2e11e5132d2c11af0c5e9a7c350e885ad32bb660f2085594234921bd"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_7skills_1280x720.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "727f33a2893b0d28149c3a9c5b84b7a739bfb93fef3cb8742ae93a2c39723a5f"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_7skills_1920x1080.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "a8201f12e8cdacf41402b089fc91fd275d4995cc74b7ebc32b3cf960de4865ea"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv4-bottom-composition/evidence/hud_bottom_composition_7skills_2560x1440.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "9970df1cf16ad65f697fe0b440e13ace525355fb35a5fa1ae93c2e81bbd63a11"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv4-bottom-composition/visual-verdict.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "dcb5a5bf528b56fe787fba81d0b00c5a62293b3c07fb0fedac946474df3d6d06"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/display-contract.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "dfd295cc7ed99b438686dbfedb8fb76099c5eadc2be80e05c4e7c22a2833691e"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/README.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "8db5e1e5f5a3f12a70eda3dca1f0201338cd39354d8eedbd54809e5822ccee2f"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/candidate-receipt.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "446436d4eea53b39dea0ddfdbd5e6ecbbe27d93f161df3c37c2664ea365653aa"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_1_ready_1280x720.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "798ae4acfd5d95617e0b82cdd3475c86c4ec9048a089e3154cf7ad9cf1ff2817"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_2_early_lock_1280x720.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "8460746fb04b4a6908bc30370e110d255e9e82ff90ccc9d85864581e4180d3bb"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/hud_bottom_dynamic_capacity_3_exhausted_1280x720.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "a351af0330d54c7c972e0c0e80b62a295aac82ae7d59f072b7c3d1d70b7f8997"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv5-bottom-dynamic-states/evidence/visual-verdict.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "8cc12aebc4496ecd6cb3479ecc754efed7886e319e32624b46905c11d1eb4a46"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv6-action-resource-segments/display-contract.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "26102aa8474905d424ead78fe3433752a02fd2b92fbd82fbde1ed75c423988f3"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv6-action-resource-segments/evidence/README.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "aa10ca896e03a5c0728ab2d81cf1abe3b320dc3b84e93abdd04124895aa739eb"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv6-action-resource-segments/evidence/candidate-receipt.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "a60cd6f1ad0dd6c40dac2cc89686059ed47707e432b5c919c460057adde3844d"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv6-action-resource-segments/evidence/visual-verdict.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "e2911231becd337dd415005a7d8332ed624bfbe3961ea78d6d1a3b42240ae312"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv7-frame-safe-insets/display-contract.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "d9ae1491ba99d1118355cc042e021d3e4a7ca7692dc10e8654cbe41039f47bf4"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv7-frame-safe-insets/evidence/README.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "dd1e303feaee7e92843aa092a97b99ada198d2436a8a673b147be66cb823d489"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv7-frame-safe-insets/evidence/candidate-receipt.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "6265badfb3910478b9b3727f64c25f1f53669437e955f83d5278a96d169fcf41"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv7-frame-safe-insets/evidence/visual-verdict.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "5db3b7c0fd8a302cae669b8fb79486137b9d8ef65fc1454d414d82bdc0872d86"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv9-typography-scale/display-contract.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "31d25f254a77e0e8c270114d447be96b5adbcf9d876752d265ee1e0d5794fcb8"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv9-typography-scale/evidence/README.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "690ff22c97f115d8337f0322cbff7234ffc5e5e6ad1f1caa26b8effcc837e1f9"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv9-typography-scale/evidence/candidate-receipt.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "41b3dbe6a45b893e523ce8d6c2bc5ecf319e20ec2ff9b4e7d2e4375a5ce09a20"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/hud-ghv9-typography-scale/evidence/visual-verdict.json",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "0f5b9925effd2ff86f00d4a2d350236315e8e713d7e2eb38add8415827860782"
+		},
+		{
+			"category": "provenance_archive",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/hud-r1-material-sample-v1/hud-r1-material-direction-v1.png",
+			"role": "GHA-1／GHA-2 生成来源存档",
+			"sha256": "927996d7bcce94abf51644c75f53daeab63fbf3b281022fbe18d1e02126a474f"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "dev_doc/ui-art-research/ibm-plex-mono-godot-4-6-2026-09-03.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "f3fa8060c92c231016c662746228a2b0e26587e3f6fc16a3e1caae81e916a730"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/penpot-hud-r1-method-reset/01_skill_count_5_cleaned.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "1782407eafc5aa2d2c7847ce8076c05841c3e46326995a58ba512cd2323ea009"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "binary",
+			"path": "dev_doc/ui-art-research/penpot-hud-r1-method-reset/02_resource_states_cleaned.png",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "e0199c56fb05c09b8865fdc51ff6a8cb07aff525653bc32986734f3a639b2b34"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "docs/superpowers/plans/2026-09-02-hud-godot-vertical-slices.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "b1eb62c21fbef30e826eb5d9d956a367d10a8cadd5393ebacc1b29db25a051a1"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "docs/superpowers/plans/2026-09-03-hud-bottom-composition-vertical-slice.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "46652eec9c1f4f634bc51ebe3512b016dae1eb8181b0a1da9408bba63fed1060"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "docs/superpowers/plans/2026-09-03-hud-bottom-dynamic-states.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "c66943306ee70fe175dc1d2b24a96ce76adf50430d4cd5b73a97474df684ae9a"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "docs/superpowers/plans/2026-09-03-hud-character-surface-candidates.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "31891f94b1ff076eac8d38f4c5d1ae226b59680245a0ca67995e8639f6afd0cf"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "docs/superpowers/plans/2026-09-03-hud-character-vertical-slice.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "1818f4864252332327928269574f26b93eefde3874dc71a14976632c72762e68"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "docs/superpowers/plans/2026-09-03-hud-neutral-surface-candidates.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "a5cc0c99b177d0cc07fddbd33d9572d82a96e5c024aad7123135cbb1c8fe2f3c"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "docs/superpowers/plans/2026-09-03-hud-numeric-font-candidate.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "8206ac27e8d8e90c6e950cf5abea2637d31b24c246f22e0c3c2607aebe4f8e26"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "docs/superpowers/plans/2026-09-03-hud-numeric-font-theme-integration.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "682a45b64fdc57a3e7d0a2a83d496f6061481f3d0ec037086080c22063e87b04"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "docs/superpowers/plans/2026-09-03-hud-utility-surface-candidates.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "b279d0ff266587dab8f6856ad22c25cf2cad9e50f7bc033a787d3a4b2408e5ce"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "docs/superpowers/plans/2026-09-03-hud-utility-vertical-slice.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "740b3d38cc3863b58b568aef6ee782b31f9f7c937dc834da9365b69393dc815f"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "docs/superpowers/plans/2026-09-04-hud-default-five-skills.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "ee31a8ca4abd3417175c6a996290ca606ec6f91287907fbf5dc23e95f00330c4"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "docs/superpowers/plans/2026-09-04-hud-typography-scale.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "fc429e46cbfb6a31e3612164839435e4ad9a6cdcd4f5fdcb5f3a66f29d940860"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "docs/superpowers/plans/2026-09-05-hud-candidate-baseline-freeze.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "88f1b405c7c0ceb29200001b5083a4e7f616408559ba5d05985d08789562d421"
+		},
+		{
+			"category": "contract_evidence",
+			"hash_mode": "text_lf",
+			"path": "docs/superpowers/specs/2026-09-05-hud-candidate-baseline-freeze-design.md",
+			"role": "HUD 候选现行合同与证据",
+			"sha256": "0e12b539b1c1880053a6a1b41811396bf9f59768bfe8c76943f332dafacac722"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "scenes/dev/hud_bottom_composition_gallery.tscn",
+			"role": "HUD 候选验证支架",
+			"sha256": "9a16107b5e93f670bf127d70a690cf9f467395a8d633765c3b339c22295ec73b"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "scenes/dev/hud_bottom_dynamic_states_gallery.tscn",
+			"role": "HUD 候选验证支架",
+			"sha256": "c7c81bc4620292e3c4aceff3ce02fe56b96987a097f3511719ab1981b17153ea"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "scenes/dev/hud_bottom_numeric_font_preview.tscn",
+			"role": "HUD 候选验证支架",
+			"sha256": "61b13bf2f26b0761b867817b9672850ab244e927c31dc824adff65372af1b86e"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "scenes/dev/hud_character_vertical_slice_gallery.tscn",
+			"role": "HUD 候选验证支架",
+			"sha256": "901956472402ed758a07a7c3af9aac29d73c64124792f73932ffb66b82bbd534"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "scenes/dev/hud_numeric_font_candidate_gallery.tscn",
+			"role": "HUD 候选验证支架",
+			"sha256": "41152c8f90423a3de17dc9b9349aa8ba5c43f041340f3914290c8fd7b6279af7"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "scenes/dev/hud_utility_vertical_slice_gallery.tscn",
+			"role": "HUD 候选验证支架",
+			"sha256": "a73d2073231ff3ad9c33f81449f27c207998f11e27d1f98148a2a2ff2d4b92de"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "scenes/dev/hud_vertical_slice_gallery.tscn",
+			"role": "HUD 候选验证支架",
+			"sha256": "5f7db277760bea36efb1e8a2b2311cd30a02eaeaed86e1ce0211e9f99f4a8642"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scenes/tactical/hud/action_resource_strip.tscn",
+			"role": "HUD 运行候选",
+			"sha256": "4e441050bd68bb20bebca8997e7c6f1e4e3ce57f4245f37c347f93630721dfd2"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scenes/tactical/hud/bottom_hud_composition.tscn",
+			"role": "HUD 运行候选",
+			"sha256": "cfeb997fc8edc215b6ef112dc450eff3ce800f920bbf220a0f0dcc6e10e87b8c"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scenes/tactical/hud/character_hud_panel.tscn",
+			"role": "HUD 运行候选",
+			"sha256": "4ed4b28190441b31110320ddd1ee26cd4cd1ea32575841f4af6ccc2db95daf4c"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scenes/tactical/hud/end_turn_button.tscn",
+			"role": "HUD 运行候选",
+			"sha256": "70fd81ab31e8c12a27577568a11462babdfcf0721db5c66030892ec3b7da2341"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scenes/tactical/hud/end_turn_control.tscn",
+			"role": "HUD 运行候选",
+			"sha256": "40de96bbb66c60fc5aa4ba1e9c38ef189b4e192f698da64187154e225b205424"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scenes/tactical/hud/equipment_hud_panel.tscn",
+			"role": "HUD 运行候选",
+			"sha256": "66bc16655c3b7c6c140d831a7e390b5bfb9563f54b58fc663be97338f59aaee9"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scenes/tactical/hud/potion_button.tscn",
+			"role": "HUD 运行候选",
+			"sha256": "9b0b53bbad84d40061dd1df993cdb488ab0cdeeaba6991b930faf59fd49f24da"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scenes/tactical/hud/relic_grid.tscn",
+			"role": "HUD 运行候选",
+			"sha256": "d368a55cac722d0c037d3f8182d9e153583082b12a4fac1b6ce6d842658ba49b"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scenes/tactical/hud/skill_shelf.tscn",
+			"role": "HUD 运行候选",
+			"sha256": "fe060b6dbb1ee3c027664754d7c39fdd34fd640f58e26271c7e3c50444fdd13f"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scenes/tactical/hud/skill_slot_button.tscn",
+			"role": "HUD 运行候选",
+			"sha256": "3d179495e7a0b88270b22e3050ebea26d2e2eb4f6dd4bc9eb6a444e0303be515"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scenes/tactical/hud/slot_button.tscn",
+			"role": "HUD 运行候选",
+			"sha256": "572afa83e1a9313a74247c04e5cf79ccb5e8e5b5dfb945de47acd51628dc1c05"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scenes/tactical/hud/value_meter.tscn",
+			"role": "HUD 运行候选",
+			"sha256": "ccc00f17186ab543bbc3415f3b589f2d2c92c058726c1d345a0c07ea2007187a"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/action_resource_glyph.gd",
+			"role": "HUD 运行候选",
+			"sha256": "08e6268ff0241c27ea569072015392195d0db8d9afa3f9f7d3d3986b17e24abe"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/action_resource_strip.gd",
+			"role": "HUD 运行候选",
+			"sha256": "b5ebe26cd26d2fb57aea8b007854f335236f6539b07afb59af932329b0b395fc"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/action_resource_view_data.gd",
+			"role": "HUD 运行候选",
+			"sha256": "7ac2fadbf39ef95161d5f935b3472965dd996e027b149a73bff6301f042bb359"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/bottom_hud_composition.gd",
+			"role": "HUD 运行候选",
+			"sha256": "43d7912391c77e3c0c9df76698e7857e6c124c28616c9d2135a70f1b4a6bed30"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/character_hud_panel.gd",
+			"role": "HUD 运行候选",
+			"sha256": "e858fc99adc27e2f76c53922b5a0051023f624594a1236902580fa5b8e1893e2"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/character_hud_view_data.gd",
+			"role": "HUD 运行候选",
+			"sha256": "3faabe4a8b9248107fe58fec7e45fd743b2c536d92860c98f932fc779c00de73"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/end_turn_button.gd",
+			"role": "HUD 运行候选",
+			"sha256": "6b4612aba333abbabfe7bbc9c8f6d670b1d874c9c1cfaa44987ed28673a76974"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/end_turn_control.gd",
+			"role": "HUD 运行候选",
+			"sha256": "98a1c7f2ff2e3da0a079c58f0acf009f0bd6a2ad8bf2173a0887785f1fa8c337"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/end_turn_view_data.gd",
+			"role": "HUD 运行候选",
+			"sha256": "3d590127ec05b9c94f35a8fd5d501cbf3fa0a245305a58f45e32ac835ae79a3b"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/equipment_hud_panel.gd",
+			"role": "HUD 运行候选",
+			"sha256": "b48b255f99f19a6c585841f48316df3e730c952ec0a0bf1eede7550e44ddb6dd"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/potion_button.gd",
+			"role": "HUD 运行候选",
+			"sha256": "331cde297f5b8614cb087184ea307313d027b8d1998cf24cc3f7daa9583a2ab4"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/potion_view_data.gd",
+			"role": "HUD 运行候选",
+			"sha256": "14344dca1ce96e7ce9bba03c6b9d05d2a70c2a7e99f62b128e1e4f02b04d489d"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/relic_grid.gd",
+			"role": "HUD 运行候选",
+			"sha256": "61de2897f516fb7976e21ccf8f77f3cd18cc991edec6d54af4539cb8ba1ec032"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/skill_shelf.gd",
+			"role": "HUD 运行候选",
+			"sha256": "32d2fb5c6883c07953ef66a1f2275dd87d3cd6d8289bdd1c912316ae75db58b2"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/skill_slot_button.gd",
+			"role": "HUD 运行候选",
+			"sha256": "b0745680b0feb8fb17c5e3fba86e6d9d683f5972c56814cca6703a548d7cc8b2"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/skill_slot_view_data.gd",
+			"role": "HUD 运行候选",
+			"sha256": "8908c1e74ca9032d89f049559ff8a3b9420945f7830f89ccc5cb712dd2661c1a"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/slot_button.gd",
+			"role": "HUD 运行候选",
+			"sha256": "e577732e8eab3887b4100fd152ba8eff38c25b5588b8d67de16eaa09e4a6b4ff"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/slot_view_data.gd",
+			"role": "HUD 运行候选",
+			"sha256": "c76525d004695f9d1ef64f494049562c3350b9d5523acb39b08a566ab77a0e16"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/value_meter.gd",
+			"role": "HUD 运行候选",
+			"sha256": "07309849821fa4e7c8487f2f03326b5801090789a484e38974dfc5da43b58c2a"
+		},
+		{
+			"category": "runtime_candidate",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/hud/value_meter_view_data.gd",
+			"role": "HUD 运行候选",
+			"sha256": "0b2ba017a9e9c65d1b57c127607684c6a7031c3db8b55e184094815f53e56e08"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/playground/diamond_board_stress.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "8fbf97cf7536e627a36f1dceec937479d5c3b875181ff1404c12dd703f18b8c1"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/playground/hud_bottom_composition_gallery.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "ff31b914bcbc555db13d6b526e5f50e109c2e092f82cb61ff62433aa169cf16f"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/playground/hud_bottom_dynamic_states_gallery.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "a59de558a6ae8cfc7cf7f4a4fe1e1857906ce284c95645b4f1c68f324301f9c3"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/playground/hud_bottom_numeric_font_preview.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "30fd79e3d7b8104e7781c0e3ea336e1c9a63b24e6bc826e03c6a64feda6f6de4"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/playground/hud_character_vertical_slice_gallery.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "3581c783b06ccf665c1f69377b2d494f1456bb516da090c039ff6bc866d5871f"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/playground/hud_numeric_font_candidate_gallery.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "d89dc01680411c37279d1081117fbb0f65baac5995fbb75f56def8f3b187cf15"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/playground/hud_utility_vertical_slice_gallery.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "4c7be8f4e574096db3431890f14821687d908a3222b93270b129614787e243d3"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "scripts/ui/playground/hud_vertical_slice_gallery.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "71a904571880aece8f2c2d6b51d57e953322e4525a60e488f7f8c6a589f55755"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/capture_hud_bottom_composition_gallery.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "f9eeb9d2c44238d750436b3e85bbb0b3162caa85861c9e9c19d0b31518f1ba1e"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/capture_hud_bottom_dynamic_states_gallery.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "e35fa0c15c5e1f064bd61f550d39ccfc4587e98d5684f04d85bcff6e5a1d243d"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/capture_hud_bottom_numeric_font_preview.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "2b0b15897ecccaf31ea4569ca99f5d3d610a7df8ac438543201d415d24fc120b"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/capture_hud_character_vertical_slice_gallery.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "75b71d4dedead70e099b19dd344699ce3a9b53a6d8022bf6ba156911065ba7fd"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/capture_hud_numeric_font_candidate_gallery.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "cfa80e4b21374b92dc356738ecda8fb5fb741e1df6d03a635d2eedffe92a1bcf"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/capture_hud_utility_vertical_slice_gallery.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "a7ea8ff7c9ca9b2e0a05a9bb8cf267504ace1fcc123038052f89111f708045f7"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/capture_hud_vertical_slice_gallery.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "a9db699821d515efba7563a8c5e00266767e41974ca0456799a747935a66ec32"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_action_resource_strip.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "7e9d9334caba1a0003b5f3ca508bf97e7f845ea7e30a5a591987626c2bf63371"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_bottom_composition.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "12d86e82bd2ecf1977d6aa4f422ade7d56a99ca254ba041ba7b82321d905e110"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_bottom_composition_gallery.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "1b57b1d301e61053c44fda07c1f8aa380637ce79290e385d5283183575b7198a"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_bottom_dynamic_states_gallery.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "63a8fbbae93816e91cb405eecc7f6c31dff6b4b33c1c8810ca3ec2684abc45be"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_character_panel.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "b7988e9314d283bb88be8675b4795cd5df75fb50ab19833575e84330d75038b0"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_character_surface_skinning.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "3fed4783fe7ef8323debaa96d159ef3d3886395d4f85be797ad97903f21ed5d3"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_character_vertical_slice_gallery.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "20cf894faac1fcc2289c7b05d6f7ab34480c13eb5e4eefce2ba5c3aaa04b45a5"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_end_turn_control.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "860525d94867fa7439987e50afac201d16e9712a3f6eb3d74217f1448592c1ae"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_equipment_panel.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "e6ac135bb38231f11ac2d99078de3227d319d6bb837fc3af622fa781b00eed0a"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_numeric_font_candidate.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "c7ebc85d166e1579bc510692957a0ca3d16967271ae9151b555e94a15ff7c6cd"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_numeric_font_theme_integration.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "147e59a183a730931eceeccd710eeec22b405666ae1cd37e9172803e55d39121"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_production_baseline_manifest.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "31e9f499d722ede1b8cb0d1fc8927b20e97206f6111b5149a7ddd6ea58b2b2a2"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_relic_grid.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "779f530f9ec94c57ed11d77b694729efecc0835764ab55e04911f09f250cf3fb"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_skill_shelf.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "aaeb4111bf428469e6386a71ab3fcee1e6a9f7faeb8bb6e22a1181f91cefa38f"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_skill_slot_button.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "d3902fab5bd0a3bf422acc688743db845c4dba3aa5a783a2c78ed01f56bf8b84"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_slot_button.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "f16a8d81256b58b433024cff6b0002d59c839cc248a568dae562a757213b3e6d"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_surface_skinning.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "bb295419bf531549d2c160dd9ba08d456197cc4cfbc0078d608f0d4cf47074af"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_utility_surface_skinning.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "7d77d8df39021fdcea92fd7364ca5250963ba90dc8be19c8920a3822d20b696d"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_utility_vertical_slice_gallery.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "3c390c75d76c54706b9defb91061ce83db28fed40ef15bd1a51f26d5c71eb4de"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_value_meter.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "e2852dc553e03ccba498db9af3414942d19f47557554067617501812a52dce57"
+		},
+		{
+			"category": "verification_support",
+			"hash_mode": "text_lf",
+			"path": "tests/test_hud_vertical_slice_gallery.gd",
+			"role": "HUD 候选验证支架",
+			"sha256": "2cc2ea2a966ce8b50452e863ec7e4df5a4137e818f8b7c2c6d5ac8d6542dcf58"
+		}
+	],
+	"production_admission": false,
+	"publication": false,
+	"schema_version": 1,
+	"target_head_before": "94e10f36757ad247dec0b779cd8859c5c02e61ea"
+}
