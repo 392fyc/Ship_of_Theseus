@@ -197,9 +197,15 @@ func get_dashboard_data() -> Dictionary:
 		"hp_ratio": float(info_unit.stats.hp) / maxf(1.0, float(info_unit.stats.max_hp)),
 		"status_text": info_unit.get_action_status_summary(),
 		"action_resources": {
+			"movement_remaining": maxi(0, info_unit.stats.mov),
+			"movement_available": not info_unit.movement_used,
+			"standard_capacity": info_unit.standard_capacity,
+			"standard_remaining": info_unit.standard_remaining,
+			"swift_capacity": info_unit.swift_capacity,
+			"swift_remaining": info_unit.swift_remaining,
 			"movement_used": info_unit.movement_used,
-			"standard_used": info_unit.standard_used,
-			"swift_used": info_unit.swift_used,
+			"standard_used": info_unit.standard_remaining == 0,
+			"swift_used": info_unit.swift_remaining == 0,
 		},
 		"phase_text": _get_phase_text(),
 		"show_actions": not is_enemy_info and _is_player_turn_active(),
@@ -885,7 +891,6 @@ func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 		"name": str(skill_data.get("name", skill_id)),
 		"action_cost": str(skill_data.get("action_cost", "standard")),
 		"timing_constraint": str(skill_data.get("timing_constraint", "any")),
-		"swift_limit": int(skill_data.get("swift_limit", 1)),
 		"cooldown": cooldown_turns,
 		"cooldown_max": int(skill_data.get("cooldown", 0)),
 		"description": str(skill_data.get("description", "")),
@@ -1228,7 +1233,7 @@ func _get_attack_button_reason() -> String:
 func _resolve_post_action_phase() -> void:
 	if not _is_player_turn_active():
 		return
-	if current_unit.standard_used:
+	if current_unit.standard_remaining == 0:
 		if _has_available_swift_skill(current_unit):
 			input_state = InputState.SWIFT_PHASE
 			_clear_targeting_buffers()
@@ -1624,8 +1629,7 @@ func _execute_skill_action(action: GameAction) -> bool:
 		return false
 
 	var action_cost: String = str(skill_data.get("action_cost", "standard"))
-	var swift_limit: int = int(skill_data.get("swift_limit", 1))
-	GameAction.consume_action_cost(user, action_cost, swift_limit)
+	GameAction.consume_action_cost(user, action_cost)
 	if action_cost in ["move", "standard", "swift"]:
 		_move_committed = true
 
@@ -2209,7 +2213,6 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		"skill_name": str(skill_data.get("name", _selected_skill_id)),
 		"action_cost": str(skill_data.get("action_cost", "standard")),
 		"timing_constraint": str(skill_data.get("timing_constraint", "any")),
-		"swift_limit": int(skill_data.get("swift_limit", 1)),
 		"cooldown": int(skill_data.get("cooldown", 0)),
 		"damage_type": str(skill_data.get("damage_type", "physical")),
 		"pure_atk_source": str(skill_data.get("pure_atk_source", "phys")),

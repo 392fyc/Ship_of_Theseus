@@ -10,7 +10,6 @@
   "attack_type": "melee",
   "cooldown": 3,
   "action_cost": "swift",
-  "swift_limit": 1,
   "timing_constraint": "before_move",
   "effects": [
     { "type": "physical_defense_up", "chance": 100, "duration": 2, "value": 5 }

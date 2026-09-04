@@ -87,9 +87,7 @@ func _test_zhanji_qi_runtime(tm: Object, sword: Unit) -> void:
 
 	# 进入行动阶段，复位行动经济/资源
 	tm.input_state = 2  # ACTION_PHASE
-	sword.standard_used = false
-	sword.movement_used = false
-	sword.swift_used = false
+	sword.reset_action_resources()
 	sword.skill_cooldowns.clear()
 	sword.set_sword_qi(0)
 	sword.clear_marks()
@@ -118,9 +116,7 @@ func _test_zhanji_qi_runtime(tm: Object, sword: Unit) -> void:
 func _test_yishan_cooldown_runtime(tm: Object, sword: Unit) -> void:
 	print("\n[b] 一闪施放 → cd=3；reset_turn_state() 逐回合递减")
 	tm.input_state = 2  # ACTION_PHASE（move 技能也须非 IDLE）
-	sword.standard_used = false
-	sword.movement_used = false
-	sword.swift_used = false
+	sword.reset_action_resources()
 	sword.skill_cooldowns.clear()
 	sword.set_sword_qi(50)  # 一闪 qi_cost=10
 	sword.clear_marks()
@@ -175,9 +171,7 @@ func _test_juhe_kill_optional(tm: Object, sword: Unit) -> void:
 
 	_place_adjacent(tm, sword, enemy)
 	tm.input_state = 2
-	sword.standard_used = false
-	sword.movement_used = false
-	sword.swift_used = false
+	sword.reset_action_resources()
 	sword.skill_cooldowns.clear()  # 不可预置 cd：execute 会先验证 is_skill_available 而拒绝
 	sword.set_sword_qi(60)  # 居合 qi_cost=60
 	sword.clear_marks()

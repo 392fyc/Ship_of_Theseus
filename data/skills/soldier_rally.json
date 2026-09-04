@@ -10,7 +10,6 @@
   "attack_type": "area",
   "cooldown": 3,
   "action_cost": "swift",
-  "swift_limit": 1,
   "timing_constraint": "any",
   "effects": [
     { "effect_id": "haste", "chance": 100, "duration": 2, "value": 2 }

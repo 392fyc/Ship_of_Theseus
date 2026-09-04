@@ -157,9 +157,7 @@ func _test_resource_gate(tm: Object, sword: Unit) -> void:
 	# 故直接赋 InputState.ACTION_PHASE 的序号（enum: IDLE=0, MOVE_PHASE=1, ACTION_PHASE=2）。
 	tm.input_state = 2
 	# 复位行动经济 + 冷却 + 资源，隔离资源门槛
-	sword.standard_used = false
-	sword.movement_used = false
-	sword.swift_used = false
+	sword.reset_action_resources()
 	sword.skill_cooldowns.clear()
 
 	# B1 居合剑气门槛：0 气不可用且原因为剑气不足
@@ -172,7 +170,7 @@ func _test_resource_gate(tm: Object, sword: Unit) -> void:
 
 	# B2 居合剑气满足：60 气可用（居合单体，上游检查应通过）
 	sword.set_sword_qi(60)
-	sword.standard_used = false
+	sword.reset_action_resources()
 	var e_qi6: Dictionary = tm._build_skill_entry(sword, "swordsman_juhe")
 	_check("居合 60气 → 可用",
 		bool(e_qi6.get("available", false)),
@@ -181,7 +179,7 @@ func _test_resource_gate(tm: Object, sword: Unit) -> void:
 	# B3 拔刀印记门槛：0 印记原因含印记不足
 	sword.clear_marks()
 	sword.set_sword_qi(20)
-	sword.standard_used = false
+	sword.reset_action_resources()
 	var e_m0: Dictionary = tm._build_skill_entry(sword, "swordsman_badao")
 	_check("拔刀 0印记 → 原因含「印记」",
 		"印记" in str(e_m0.get("reason", "")),
@@ -192,7 +190,7 @@ func _test_resource_gate(tm: Object, sword: Unit) -> void:
 	sword.marks["心"] = true
 	sword.marks["道"] = true
 	sword.marks["势"] = true
-	sword.standard_used = false
+	sword.reset_action_resources()
 	var e_m3: Dictionary = tm._build_skill_entry(sword, "swordsman_badao")
 	_check("拔刀 3印记 → 印记门槛通过(原因不含「印记」)",
 		not ("印记" in str(e_m3.get("reason", ""))),

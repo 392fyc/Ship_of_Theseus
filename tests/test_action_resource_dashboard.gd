@@ -34,12 +34,26 @@ func _run() -> void:
 	if current_unit == null or dashboard == null:
 		_finish(scene)
 		return
+	_check("当前单位支持容量配置", current_unit.has_method("configure_action_resource_capacities"))
+	if not current_unit.has_method("configure_action_resource_capacities"):
+		_finish(scene)
+		return
 
+	current_unit.configure_action_resource_capacities(2, 3)
+	current_unit.consume_standard_resource()
+	current_unit.consume_swift_resource()
 	var data: Dictionary = tactical_manager.get_dashboard_data()
 	var resources: Dictionary = data.get("action_resources", {})
-	_eq("movement_used 透传", resources.get("movement_used"), current_unit.movement_used)
-	_eq("standard_used 透传", resources.get("standard_used"), current_unit.standard_used)
-	_eq("swift_used 透传", resources.get("swift_used"), current_unit.swift_used)
+	_eq("移动力数值来自当前单位", resources.get("movement_remaining"), maxi(0, current_unit.stats.mov))
+	_eq("移动仍可用", resources.get("movement_available"), true)
+	_eq("标准容量真实透传", resources.get("standard_capacity"), 2)
+	_eq("标准剩余真实透传", resources.get("standard_remaining"), 1)
+	_eq("迅捷容量真实透传", resources.get("swift_capacity"), 3)
+	_eq("迅捷剩余真实透传", resources.get("swift_remaining"), 2)
+	_eq("旧标准键由耗尽状态派生", resources.get("standard_used"), false)
+	_eq("旧迅捷键由耗尽状态派生", resources.get("swift_used"), false)
+
+	current_unit.reset_action_resources()
 
 	dashboard.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
 	dashboard.size = Vector2(1280.0, 720.0)

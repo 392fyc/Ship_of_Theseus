@@ -128,8 +128,8 @@ func _validate_capture_state(tactical_manager: Object, resource_bar: Control, sk
 			or not _has_expected_spent_state(segments, "swift", swift_spent):
 		push_error("Action resource bar segment state did not match capture state")
 		return false
-	if unit.movement_used != movement_spent or unit.standard_used != standard_spent \
-			or unit.swift_used != swift_spent:
+	if unit.movement_used != movement_spent or (unit.standard_remaining == 0) != standard_spent \
+			or (unit.swift_remaining == 0) != swift_spent:
 		push_error("Current unit resource state did not match capture state")
 		return false
 	if _map_has_action_badges(tactical_manager):

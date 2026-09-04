@@ -81,7 +81,7 @@ static func can_use_normal_move(unit: Unit) -> Dictionary:
 static func can_use_normal_attack(unit: Unit) -> Dictionary:
 	if unit == null:
 		return {"ok": false, "reason": "No acting unit"}
-	if unit.standard_used:
+	if not unit.can_take_normal_attack():
 		return {"ok": false, "reason": "Standard Action already used"}
 	return {"ok": true, "reason": ""}
 
@@ -114,9 +114,8 @@ static func validate_skill_usage(unit: Unit, skill_data: Dictionary,
 			"reason": "印记不足：需 %d / 现 %d" % [marks_needed, unit.get_mark_count()]}
 
 	var action_cost: String = str(skill_data.get("action_cost", "standard"))
-	var swift_limit: int = int(skill_data.get("swift_limit", 1))
 	var action_cost_result: Dictionary = validate_action_cost(
-		unit, action_cost, reaction_trigger_met, swift_limit)
+		unit, action_cost, reaction_trigger_met)
 	if not bool(action_cost_result.get("ok", false)):
 		return action_cost_result
 
@@ -126,8 +125,7 @@ static func validate_skill_usage(unit: Unit, skill_data: Dictionary,
 
 
 static func validate_action_cost(unit: Unit, action_cost: String,
-		reaction_trigger_met: bool = false,
-		swift_limit: int = 1) -> Dictionary:
+		reaction_trigger_met: bool = false) -> Dictionary:
 	if unit == null:
 		return {"ok": false, "reason": "No acting unit"}
 
@@ -136,10 +134,10 @@ static func validate_action_cost(unit: Unit, action_cost: String,
 			if unit.movement_used:
 				return {"ok": false, "reason": "Movement already used"}
 		"standard":
-			if unit.standard_used:
+			if not unit.can_take_normal_attack():
 				return {"ok": false, "reason": "Standard Action already used"}
 		"swift":
-			if not unit.can_use_swift_skill(swift_limit):
+			if not unit.can_use_swift_skill():
 				return {"ok": false, "reason": "Swift Action already used"}
 		"reaction":
 			if not unit.reaction_available:
@@ -171,10 +169,10 @@ static func validate_timing_constraint(unit: Unit,
 			if not unit.movement_used:
 				return {"ok": false, "reason": "Must use after moving"}
 		"before_attack":
-			if unit.standard_used:
+			if unit.has_spent_standard_resource():
 				return {"ok": false, "reason": "Must use before attacking"}
 		"after_attack":
-			if not unit.standard_used:
+			if not unit.has_spent_standard_resource():
 				return {"ok": false, "reason": "Must use after attacking"}
 		_:
 			return {
@@ -185,8 +183,7 @@ static func validate_timing_constraint(unit: Unit,
 	return {"ok": true, "reason": ""}
 
 
-static func consume_action_cost(unit: Unit, action_cost: String,
-		swift_limit: int = 1) -> void:
+static func consume_action_cost(unit: Unit, action_cost: String) -> void:
 	if unit == null:
 		return
 
@@ -197,8 +194,7 @@ static func consume_action_cost(unit: Unit, action_cost: String,
 			unit.consume_standard_resource()
 			unit.consume_movement_resource()
 		"swift":
-			if swift_limit != -1:
-				unit.consume_swift_resource()
+			unit.consume_swift_resource()
 		"reaction":
 			unit.consume_reaction_resource()
 		"free":

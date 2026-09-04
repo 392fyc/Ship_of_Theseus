@@ -111,9 +111,7 @@ func _test_yishan_path_aoe(tm: Object, sword: Unit) -> void:
 	tm.input_state = INPUT_ACTION_PHASE
 	tm._targeting_direction = Vector2i(1, 0)
 	tm._selected_skill_id = "swordsman_yishan"
-	sword.standard_used = false
-	sword.movement_used = false
-	sword.swift_used = false
+	sword.reset_action_resources()
 	sword.skill_cooldowns.clear()
 	sword.set_sword_qi(10)
 	sword.clear_marks()
@@ -165,14 +163,12 @@ func _test_yishan_landing_reject(tm: Object, sword: Unit) -> void:
 	_check("落点被占 → _can_confirm_skill_target==false", not can_confirm)
 
 	# 强行 _execute：备资源，记录前值，断言零消耗。
-	sword.standard_used = false
-	sword.movement_used = false
-	sword.swift_used = false
+	sword.reset_action_resources()
 	sword.skill_cooldowns.clear()
 	sword.set_sword_qi(5)
 	sword.clear_marks()
 	var qi_before: int = sword.sword_qi
-	var standard_before: bool = sword.standard_used
+	var standard_before: int = sword.standard_remaining
 	var move_before: bool = sword.movement_used
 
 	var action: Object = tm._build_skill_action(sword, occupied, blocker)
@@ -182,7 +178,7 @@ func _test_yishan_landing_reject(tm: Object, sword: Unit) -> void:
 	var ok: bool = tm._execute_skill_action(action)
 	_check("无效落点 _execute_skill_action 返回 false", not ok)
 	_eq("拒绝后 剑气未扣（仍为5）", sword.sword_qi, qi_before)
-	_eq("拒绝后 standard_used 未变", sword.standard_used, standard_before)
+	_eq("拒绝后 standard_remaining 未变", sword.standard_remaining, standard_before)
 	_eq("拒绝后 movement_used 未变", sword.movement_used, move_before)
 	_check("拒绝后 一闪无冷却写入", not sword.skill_cooldowns.has("swordsman_yishan"))
 
@@ -221,9 +217,7 @@ func _test_badao_splash(tm: Object, sword: Unit) -> void:
 	tm.input_state = INPUT_ACTION_PHASE
 	tm._selected_skill_id = "swordsman_badao"
 	tm._targeting_direction = Vector2i.ZERO
-	sword.standard_used = false
-	sword.movement_used = false
-	sword.swift_used = false
+	sword.reset_action_resources()
 	sword.skill_cooldowns.clear()
 	sword.set_sword_qi(20)
 	# 拔刀 requires_marks=3 + mark_cost=3：给满 3 印记

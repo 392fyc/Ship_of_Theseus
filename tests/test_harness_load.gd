@@ -100,7 +100,7 @@ func _run() -> void:
 		sword.set_sword_qi(5)
 		sword.marks["心"] = true
 		sword.skill_cooldowns["swordsman_juhe"] = 3
-		sword.standard_used = true
+		sword.consume_standard_resource()
 
 	tm.debug_soft_reset()
 	_check("软重置后不崩（场景仍有效）", is_instance_valid(scene))
@@ -110,7 +110,7 @@ func _run() -> void:
 		_eq("软重置 → 剑气回初始0", sword.sword_qi, 0)
 		_eq("软重置 → 印记清空", sword.get_mark_count(), 0)
 		_eq("软重置 → 冷却清空", sword.skill_cooldowns.size(), 0)
-		_check("软重置 → standard_used 复位", not sword.standard_used)
+		_eq("软重置 → standard_remaining 回满", sword.standard_remaining, sword.standard_capacity)
 
 	# 确定性开关：toggle 翻转
 	var det1: bool = tm.debug_toggle_deterministic()

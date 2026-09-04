@@ -146,9 +146,7 @@ func _test_badao_mark_timing(tm: Object, sword: Unit, dummy: Unit) -> void:
 # ── 工具 ─────────────────────────────────────────────
 
 func _reset(sword: Unit) -> void:
-	sword.standard_used = false
-	sword.movement_used = false
-	sword.swift_used = false
+	sword.reset_action_resources()
 	sword.skill_cooldowns.clear()
 	sword.set_sword_qi(0)
 	sword.clear_marks()

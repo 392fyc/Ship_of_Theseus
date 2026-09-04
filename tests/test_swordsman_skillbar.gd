@@ -126,9 +126,7 @@ func _test_forecast_data_contract(tm: Object, sword: Unit) -> void:
 	enemy_a.stats.def_attr = 0
 	_force_place(tm, sword, origin)
 	_force_place(tm, enemy_a, atk_pos)
-	sword.standard_used = false
-	sword.movement_used = false
-	sword.swift_used = false
+	sword.reset_action_resources()
 
 	tm.current_unit = sword
 	tm.input_state = 4  # InputState.ATTACK_TARGETING
@@ -179,9 +177,7 @@ func _test_forecast_data_contract(tm: Object, sword: Unit) -> void:
 	tm.input_state = 3  # InputState.SKILL_TARGETING
 	tm._selected_skill_id = "swordsman_badao"
 	tm._targeting_direction = Vector2i.ZERO
-	sword.standard_used = false
-	sword.movement_used = false
-	sword.swift_used = false
+	sword.reset_action_resources()
 	sword.skill_cooldowns.clear()
 	sword.set_sword_qi(9)
 	sword.clear_marks()
@@ -228,7 +224,7 @@ func _test_swift_availability_respects_slot_swap(tm: Object, sword: Unit) -> voi
 
 	sword.set_sword_qi(50)      # 招架 qi_cost=10，够用
 	sword.skill_cooldowns.clear()
-	sword.swift_used = false
+	sword.reset_action_resources()
 	sword.clear_marks()
 	_check("前提：剑圣 skill_ids 含拔刀（替换目标确实在表内）",
 		sword.skill_ids.has("swordsman_badao"))
@@ -255,7 +251,7 @@ func _test_swift_availability_respects_slot_swap(tm: Object, sword: Unit) -> voi
 		mm.setup(mm_class)
 		mm.set_sword_qi(50)
 		mm.skill_cooldowns.clear()
-		mm.swift_used = false
+		mm.reset_action_resources()
 		mm.marks["心"] = true
 		mm.marks["道"] = true
 		mm.marks["势"] = true

@@ -5,6 +5,7 @@ extends SceneTree
 ## 真实迅捷技能。测试只监听 dashboard_state_changed，不主动发射或调用其内部包装方法。
 
 const INVALID_CELL: Vector2i = Vector2i(-1, -1)
+const INPUT_ACTION_PHASE: int = 2
 
 var _pass: int = 0
 var _fail: int = 0
@@ -40,7 +41,12 @@ func _run() -> void:
 	if unit == null or enemy == null or resource_bar == null:
 		_finish(scene)
 		return
+	_check("当前单位支持容量配置", unit.has_method("configure_action_resource_capacities"))
+	if not unit.has_method("configure_action_resource_capacities"):
+		_finish(scene)
+		return
 
+	unit.configure_action_resource_capacities(2, 1)
 	tactical_manager.dashboard_state_changed.connect(_on_dashboard_state_changed)
 	tactical_manager.debug_deterministic = true
 	_check_runtime_state("场景初始化", unit, resource_bar, false, false, false)
@@ -92,7 +98,29 @@ func _run() -> void:
 	await process_frame
 	_check("标准行动自动发出仪表盘刷新", _dashboard_signal_count > before_attack)
 	_check("标准攻击后高血木桩仍存活", enemy.stats.is_alive())
-	_check_runtime_state("标准行动后", unit, resource_bar, true, true, false)
+	_eq("首次攻击后标准剩余一点", unit.standard_remaining, 1)
+	_eq("首次攻击后累计消费一次", unit.standard_spent_this_turn, 1)
+	_eq("首次攻击后移动失效", unit.movement_used, true)
+	_eq("首次攻击后仍在行动阶段", tactical_manager.input_state, INPUT_ACTION_PHASE)
+	_check("首次攻击后第二次普通攻击仍可用",
+		bool(GameAction.can_use_normal_attack(unit).get("ok", false)))
+	_check_runtime_state("首次标准行动后", unit, resource_bar, true, false, false)
+
+	var second_attack: GameAction = GameAction.make_attack(unit, enemy)
+	_check("第二次真实标准攻击动作可构造", second_attack != null)
+	if second_attack == null:
+		_finish(scene)
+		return
+	second_attack.data.merge(tactical_manager._build_basic_attack_action_data(unit, enemy), true)
+	var before_second_attack: int = _dashboard_signal_count
+	tactical_manager._execute_attack_from_input(second_attack)
+	await process_frame
+	_check("第二次标准行动自动发出仪表盘刷新", _dashboard_signal_count > before_second_attack)
+	_check("第二次标准攻击后高血木桩仍存活", enemy.stats.is_alive())
+	_eq("第二次攻击后标准点耗尽", unit.standard_remaining, 0)
+	_check("标准点耗尽后普通攻击被拒绝",
+		not bool(GameAction.can_use_normal_attack(unit).get("ok", false)))
+	_check_runtime_state("第二次标准行动后", unit, resource_bar, true, true, false)
 
 	var before_swift_turn: int = _dashboard_signal_count
 	tactical_manager.turn_manager.current_unit = unit
@@ -134,8 +162,8 @@ func _on_dashboard_state_changed() -> void:
 func _check_runtime_state(stage: String, unit: Unit, resource_bar: Control,
 		expected_movement: bool, expected_standard: bool, expected_swift: bool) -> void:
 	_eq("%s Unit.movement_used" % stage, unit.movement_used, expected_movement)
-	_eq("%s Unit.standard_used" % stage, unit.standard_used, expected_standard)
-	_eq("%s Unit.swift_used" % stage, unit.swift_used, expected_swift)
+	_eq("%s Unit.standard_remaining 耗尽状态" % stage, unit.standard_remaining == 0, expected_standard)
+	_eq("%s Unit.swift_remaining 耗尽状态" % stage, unit.swift_remaining == 0, expected_swift)
 	_check("%s 行动资源栏可见" % stage, resource_bar.visible)
 	var segments: Dictionary = resource_bar.get("_segments") as Dictionary
 	_eq("%s 资源栏 M 状态" % stage, bool((segments["movement"] as Object).get("spent")), expected_movement)

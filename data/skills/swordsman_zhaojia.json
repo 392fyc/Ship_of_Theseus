@@ -10,7 +10,6 @@
   "attack_type": "melee",
   "cooldown": 1,
   "action_cost": "swift",
-  "swift_limit": 1,
   "timing_constraint": "any",
   "effects": [
     { "effect_id": "swordsman_parry_stance", "chance": 100, "duration": 1 }

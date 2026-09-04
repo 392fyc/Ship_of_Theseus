@@ -42,10 +42,18 @@ func _run() -> void:
 		bool(GameAction.validate_action_cost(u, "free").get("ok", false)))
 
 	# 2. 零消耗
+	var before_free: Array[int] = [
+		u.standard_remaining,
+		u.swift_remaining,
+		u.standard_spent_this_turn,
+	]
 	GameAction.consume_action_cost(u, "free")
 	_eq("free 消耗后 movement_used 仍 false", u.movement_used, false)
-	_eq("free 消耗后 standard_used 仍 false", u.standard_used, false)
-	_eq("free 消耗后 swift_used 仍 false", u.swift_used, false)
+	_eq("free 消耗后三项计数不变", [
+		u.standard_remaining,
+		u.swift_remaining,
+		u.standard_spent_this_turn,
+	], before_free)
 	_eq("free 消耗后 reaction_available 仍 true", u.reaction_available, true)
 
 	# 3. 资源全耗尽后 free 仍可用（不吃任何资源门槛）
