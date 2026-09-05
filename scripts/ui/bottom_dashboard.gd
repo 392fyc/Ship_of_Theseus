@@ -236,6 +236,7 @@ const SHOW_ANIM_TIME: float = 0.25
 const HIDE_ANIM_TIME: float = 0.20
 const DASH_OFFSET_Y: float = 24.0
 const ACTION_RESOURCE_GAP_Y: float = 6.0
+const ACTION_RESOURCE_SIZE: Vector2 = Vector2(274.0, 40.0)
 
 const COLOR_PANEL_BG: Color = Color(0.04, 0.05, 0.10, 0.95)
 const COLOR_PANEL_BG_ALT: Color = Color(0.06, 0.06, 0.12, 0.96)
@@ -319,7 +320,7 @@ var _end_divider: ColorRect = null
 var _button_nodes: Dictionary = {}
 
 var _skill_bar: SkillBar = null
-var _action_resource_bar: Control = null
+var _action_resource_strip: Control = null
 var _item_popup: Control = null
 var _item_popup_panel: PanelContainer = null
 var _item_popup_list: VBoxContainer = null
@@ -328,7 +329,8 @@ var _item_popup_list: VBoxContainer = null
 # v3：剑气纯文本 → SwordQiBar 分段条；印记 Label → MarkBlock 方块（24/28px）。
 # 用 preload 引用 SwordQiBar（headless --script 不刷新全局 class_name 缓存）。
 const SwordQiBarScript: GDScript = preload("res://scripts/ui/sword_qi_bar.gd")
-const ActionResourceBarScript: GDScript = preload("res://scripts/ui/action_resource_bar.gd")
+const ActionResourceStripScene: PackedScene = preload("res://scenes/tactical/hud/action_resource_strip.tscn")
+const ActionResourceViewDataScript: GDScript = preload("res://scripts/ui/hud/action_resource_view_data.gd")
 const SWORD_QI_DEFAULT_THRESHOLD: int = 70  # state 缺省时回退（逻辑值优先从 state 读；剑气 0-100 标度）
 var _sword_qi_row: HBoxContainer = null
 var _sword_qi_label: Label = null         # 数值标签 "0/100"（保留：条上方右对齐）
@@ -356,7 +358,7 @@ func update_state(state: Dictionary) -> void:
 	var should_show: bool = bool(state.get("visible", false))
 	_set_dashboard_visible(should_show)
 	if not should_show:
-		_update_action_resources(state, false)
+		_update_action_resources(state)
 		_skill_bar.set_expanded(false)
 		_set_item_popup_visible(false)
 		return
@@ -394,7 +396,7 @@ func update_state(state: Dictionary) -> void:
 	if not show_actions:
 		_skill_bar.set_expanded(false)
 		_set_item_popup_visible(false)
-	_update_action_resources(state, show_actions)
+	_update_action_resources(state)
 
 	_update_buttons(_extract_button_state(state.get("buttons", {})), show_skills)
 	_skill_bar.update_entries(_extract_skill_entries(state.get("skills", [])), str(state.get("selected_skill_id", "")))
@@ -420,8 +422,16 @@ func _build_ui() -> void:
 	_skill_bar.skill_selected.connect(_on_skill_selected)
 	add_child(_skill_bar)
 
-	_action_resource_bar = ActionResourceBarScript.new()
-	add_child(_action_resource_bar)
+	_action_resource_strip = ActionResourceStripScene.instantiate() as Control
+	add_child(_action_resource_strip)
+	var strip_style: StyleBoxTexture = _action_resource_strip.get_theme_stylebox(&"panel") as StyleBoxTexture
+	if strip_style != null:
+		var compact_strip_style: StyleBoxTexture = strip_style.duplicate() as StyleBoxTexture
+		compact_strip_style.content_margin_top = 2.0
+		compact_strip_style.content_margin_bottom = 2.0
+		_action_resource_strip.add_theme_stylebox_override(&"panel", compact_strip_style)
+	_action_resource_strip.visible = false
+	_action_resource_strip.mouse_filter = Control.MOUSE_FILTER_STOP
 
 	_item_popup = _build_item_popup()
 	add_child(_item_popup)
@@ -1058,7 +1068,7 @@ func _get_end_button_tooltip(buttons: Dictionary) -> String:
 func _layout_dashboard() -> void:
 	if not is_node_ready():
 		return
-	if _info_panel == null or _relic_panel == null or _action_shell == null or _skill_bar == null or _action_resource_bar == null or _item_popup == null:
+	if _info_panel == null or _relic_panel == null or _action_shell == null or _skill_bar == null or _action_resource_strip == null or _item_popup == null:
 		return
 
 	var vp_h: float = size.y
@@ -1090,11 +1100,11 @@ func _layout_dashboard() -> void:
 	var skill_x: float = clampf(vp_w * 0.5 - skill_sz.x * 0.5, PANEL_MARGIN, vp_w - skill_sz.x - PANEL_MARGIN)
 	var skill_y: float = vp_h - skill_sz.y - PANEL_MARGIN + offset_y
 	_skill_bar.position = Vector2(skill_x, skill_y)
-	var resource_sz: Vector2 = _action_resource_bar.get_combined_minimum_size()
-	_action_resource_bar.size = resource_sz
+	var resource_sz: Vector2 = ACTION_RESOURCE_SIZE
+	_action_resource_strip.size = resource_sz
 	var resource_x: float = skill_x + skill_sz.x * 0.5 - resource_sz.x * 0.5
 	var resource_y: float = skill_y - resource_sz.y - ACTION_RESOURCE_GAP_Y
-	_action_resource_bar.position = Vector2(resource_x, resource_y)
+	_action_resource_strip.position = Vector2(resource_x, resource_y)
 
 	# Item popup: above action shell
 	_item_popup.position = Vector2(
@@ -1106,21 +1116,58 @@ func _layout_dashboard() -> void:
 ## tactical_scene 的伤害预测浮窗据此上移，避免压住人物属性栏（反馈 2026-06-29）。
 func get_content_top_y() -> float:
 	var result: float = size.y
-	for p: Control in [_info_panel, _relic_panel, _action_shell, _skill_bar, _action_resource_bar]:
+	for p: Control in [_info_panel, _relic_panel, _action_shell, _skill_bar, _action_resource_strip]:
 		if p != null and p.visible:
 			result = minf(result, p.position.y)
 	return result
 
 
-func _update_action_resources(state: Dictionary, show_actions: bool) -> void:
-	if _action_resource_bar == null:
+func _update_action_resources(state: Dictionary) -> void:
+	if _action_resource_strip == null:
 		return
-	var resources_variant: Variant = state.get("action_resources", {})
-	var resources: Dictionary = resources_variant if resources_variant is Dictionary else {}
-	var complete_resources: bool = resources.has("movement_used") \
-		and resources.has("standard_used") \
-		and resources.has("swift_used")
-	_action_resource_bar.update_resources(resources if show_actions and complete_resources else {})
+	_action_resource_strip.visible = false
+	if not bool(state.get("visible", false)):
+		return
+	if str(state.get("mode", "")) != "player":
+		return
+	if typeof(state.get("show_actions", null)) != TYPE_BOOL or not state.get("show_actions", false):
+		return
+	var resources_variant: Variant = state.get("action_resources", null)
+	if not (resources_variant is Dictionary):
+		return
+	var resources: Dictionary = resources_variant as Dictionary
+	if not _has_valid_action_resources(resources):
+		return
+	var view: RefCounted = ActionResourceViewDataScript.new() as RefCounted
+	view.set("movement_remaining", resources["movement_remaining"])
+	view.set("movement_available", resources["movement_available"])
+	view.set("standard_capacity", resources["standard_capacity"])
+	view.set("standard_remaining", resources["standard_remaining"])
+	view.set("swift_capacity", resources["swift_capacity"])
+	view.set("swift_remaining", resources["swift_remaining"])
+	_action_resource_strip.call("apply_view", view)
+	_action_resource_strip.visible = true
+
+
+func _has_valid_action_resources(resources: Dictionary) -> bool:
+	if not resources.has("movement_remaining") or typeof(resources["movement_remaining"]) != TYPE_INT \
+			or resources["movement_remaining"] < 0:
+		return false
+	if not resources.has("movement_available") or typeof(resources["movement_available"]) != TYPE_BOOL:
+		return false
+	if not resources.has("standard_capacity") or typeof(resources["standard_capacity"]) != TYPE_INT \
+			or resources["standard_capacity"] < 1 or resources["standard_capacity"] > 3:
+		return false
+	if not resources.has("standard_remaining") or typeof(resources["standard_remaining"]) != TYPE_INT \
+			or resources["standard_remaining"] < 0 or resources["standard_remaining"] > resources["standard_capacity"]:
+		return false
+	if not resources.has("swift_capacity") or typeof(resources["swift_capacity"]) != TYPE_INT \
+			or resources["swift_capacity"] < 1 or resources["swift_capacity"] > 3:
+		return false
+	if not resources.has("swift_remaining") or typeof(resources["swift_remaining"]) != TYPE_INT \
+			or resources["swift_remaining"] < 0 or resources["swift_remaining"] > resources["swift_capacity"]:
+		return false
+	return true
 
 
 func _set_dashboard_visible(should_show: bool) -> void:

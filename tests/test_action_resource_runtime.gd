@@ -1,5 +1,5 @@
 extends SceneTree
-## VA-5 Task 3：真实 TacticalScene 行动资源刷新链回归。
+## HUD-PROD-1C：真实 TacticalScene 行动资源刷新链回归。
 ##
 ## 每个状态变化均从生产入口触发：TurnManager.turn_started、真实移动、真实普攻与
 ## 真实迅捷技能。测试只监听 dashboard_state_changed，不主动发射或调用其内部包装方法。
@@ -33,12 +33,12 @@ func _run() -> void:
 	var dashboard: BottomDashboard = scene._bottom_dashboard
 	var unit: Unit = tactical_manager._get_dashboard_unit()
 	var enemy: Unit = _find_alive_dummy(tactical_manager)
-	var resource_bar: Control = dashboard.get("_action_resource_bar") as Control if dashboard != null else null
+	var strip: Control = dashboard.get("_action_resource_strip") as Control if dashboard != null and _has_property(dashboard, "_action_resource_strip") else null
 
 	_check("真实 TacticalScene 提供当前玩家单位", unit != null and unit.faction == "player")
 	_check("真实 TacticalScene 提供木桩单位", enemy != null and enemy.unit_id.begins_with("test_dummy"))
-	_check("真实 TacticalScene 创建行动资源栏", resource_bar != null)
-	if unit == null or enemy == null or resource_bar == null:
+	_check("真实 TacticalScene 创建行动资源栏", strip != null)
+	if unit == null or enemy == null or strip == null:
 		_finish(scene)
 		return
 	_check("当前单位支持容量配置", unit.has_method("configure_action_resource_capacities"))
@@ -46,20 +46,17 @@ func _run() -> void:
 		_finish(scene)
 		return
 
-	unit.configure_action_resource_capacities(2, 1)
 	tactical_manager.dashboard_state_changed.connect(_on_dashboard_state_changed)
 	tactical_manager.debug_deterministic = true
-	_check_runtime_state("场景初始化", unit, resource_bar, false, false, false)
+	_check_runtime_state("场景初始化", tactical_manager, unit, strip, true, 1, 1, 1, 1)
 
-	unit.consume_movement_resource()
-	unit.consume_standard_resource()
-	unit.consume_swift_resource()
+	unit.configure_action_resource_capacities(2, 1)
 	var before_turn_start: int = _dashboard_signal_count
 	tactical_manager.turn_manager.current_unit = unit
 	tactical_manager.turn_manager.turn_started.emit(unit)
 	await process_frame
 	_check("回合开始自动发出仪表盘刷新", _dashboard_signal_count > before_turn_start)
-	_check_runtime_state("回合开始", unit, resource_bar, false, false, false)
+	_check_runtime_state("回合开始", tactical_manager, unit, strip, true, 2, 2, 1, 1)
 
 	var move_target: Vector2i = _find_empty_neighbor(tactical_manager, unit.grid_position)
 	_check("移动目标显式非空且有效", move_target != INVALID_CELL and tactical_manager.grid.is_valid(move_target))
@@ -70,7 +67,7 @@ func _run() -> void:
 	await tactical_manager._execute_move(unit, move_target)
 	await process_frame
 	_check("移动完成自动发出仪表盘刷新", _dashboard_signal_count > before_move)
-	_check_runtime_state("移动后", unit, resource_bar, true, false, false)
+	_check_runtime_state("移动后", tactical_manager, unit, strip, false, 2, 2, 1, 1)
 
 	enemy.stats.max_hp = 9999
 	enemy.stats.hp = 9999
@@ -104,7 +101,7 @@ func _run() -> void:
 	_eq("首次攻击后仍在行动阶段", tactical_manager.input_state, INPUT_ACTION_PHASE)
 	_check("首次攻击后第二次普通攻击仍可用",
 		bool(GameAction.can_use_normal_attack(unit).get("ok", false)))
-	_check_runtime_state("首次标准行动后", unit, resource_bar, true, false, false)
+	_check_runtime_state("首次标准行动后", tactical_manager, unit, strip, false, 2, 1, 1, 1)
 
 	var second_attack: GameAction = GameAction.make_attack(unit, enemy)
 	_check("第二次真实标准攻击动作可构造", second_attack != null)
@@ -120,14 +117,14 @@ func _run() -> void:
 	_eq("第二次攻击后标准点耗尽", unit.standard_remaining, 0)
 	_check("标准点耗尽后普通攻击被拒绝",
 		not bool(GameAction.can_use_normal_attack(unit).get("ok", false)))
-	_check_runtime_state("第二次标准行动后", unit, resource_bar, true, true, false)
+	_check_runtime_state("第二次标准行动后", tactical_manager, unit, strip, false, 2, 0, 1, 1)
 
 	var before_swift_turn: int = _dashboard_signal_count
 	tactical_manager.turn_manager.current_unit = unit
 	tactical_manager.turn_manager.turn_started.emit(unit)
 	await process_frame
 	_check("迅捷技能前的新回合自动刷新", _dashboard_signal_count > before_swift_turn)
-	_check_runtime_state("迅捷技能前的新回合", unit, resource_bar, false, false, false)
+	_check_runtime_state("迅捷技能前的新回合", tactical_manager, unit, strip, true, 2, 2, 1, 1)
 
 	tactical_manager._selected_skill_id = "swordsman_zhaojia"
 	var swift_action: GameAction = tactical_manager._build_skill_action(
@@ -143,14 +140,14 @@ func _run() -> void:
 	tactical_manager._execute_skill_from_input(swift_action)
 	await process_frame
 	_check("迅捷技能自动发出仪表盘刷新", _dashboard_signal_count > before_swift)
-	_check_runtime_state("迅捷技能后", unit, resource_bar, false, false, true)
+	_check_runtime_state("迅捷技能后", tactical_manager, unit, strip, true, 2, 2, 1, 0)
 
 	var before_final_turn: int = _dashboard_signal_count
 	tactical_manager.turn_manager.current_unit = unit
 	tactical_manager.turn_manager.turn_started.emit(unit)
 	await process_frame
 	_check("最后回合开始自动发出仪表盘刷新", _dashboard_signal_count > before_final_turn)
-	_check_runtime_state("最后回合开始", unit, resource_bar, false, false, false)
+	_check_runtime_state("最后回合开始", tactical_manager, unit, strip, true, 2, 2, 1, 1)
 
 	_finish(scene)
 
@@ -159,26 +156,71 @@ func _on_dashboard_state_changed() -> void:
 	_dashboard_signal_count += 1
 
 
-func _check_runtime_state(stage: String, unit: Unit, resource_bar: Control,
-		expected_movement: bool, expected_standard: bool, expected_swift: bool) -> void:
-	_eq("%s Unit.movement_used" % stage, unit.movement_used, expected_movement)
-	_eq("%s Unit.standard_remaining 耗尽状态" % stage, unit.standard_remaining == 0, expected_standard)
-	_eq("%s Unit.swift_remaining 耗尽状态" % stage, unit.swift_remaining == 0, expected_swift)
-	_check("%s 行动资源栏可见" % stage, resource_bar.visible)
-	var segments: Dictionary = resource_bar.get("_segments") as Dictionary
-	_eq("%s 资源栏 M 状态" % stage, bool((segments["movement"] as Object).get("spent")), expected_movement)
-	_eq("%s 资源栏 A 状态" % stage, bool((segments["standard"] as Object).get("spent")), expected_standard)
-	_eq("%s 资源栏 S 状态" % stage, bool((segments["swift"] as Object).get("spent")), expected_swift)
-	_check("%s 地图 StatusIcons 不含 M/A/S" % stage, not _has_action_badges(unit))
+func _check_runtime_state(stage: String, manager: Object, unit: Unit, strip: Control,
+		movement_available: bool, standard_capacity: int, standard_remaining: int,
+		swift_capacity: int, swift_remaining: int) -> void:
+	_eq("%s Unit.movement_used" % stage, unit.movement_used, not movement_available)
+	_eq("%s Unit.standard_capacity" % stage, unit.standard_capacity, standard_capacity)
+	_eq("%s Unit.standard_remaining" % stage, unit.standard_remaining, standard_remaining)
+	_eq("%s Unit.swift_capacity" % stage, unit.swift_capacity, swift_capacity)
+	_eq("%s Unit.swift_remaining" % stage, unit.swift_remaining, swift_remaining)
+	_assert_view(stage, strip, maxi(0, unit.stats.mov), movement_available,
+		standard_capacity, standard_remaining, swift_capacity, swift_remaining)
+	_check("%s 地图 StatusIcons 不含 M/A/S" % stage, not _has_action_badges(manager))
 
 
-func _has_action_badges(unit: Unit) -> bool:
-	var status_icons := unit.get_node_or_null("StatusIcons") as Node2D
-	if status_icons == null:
-		return false
-	for child: Node in status_icons.get_children():
-		var label := child as Label
-		if label != null and label.text in ["M", "A", "S"]:
+func _assert_view(label: String, strip: Control, movement: int, available: bool,
+		standard_capacity: int, standard_remaining: int, swift_capacity: int, swift_remaining: int) -> void:
+	_check("%s 正式资源条可见" % label, strip.visible)
+	var view: RefCounted = strip.get("_view") as RefCounted
+	_check("%s 有私有 ViewData" % label, view != null)
+	if view != null:
+		_eq("%s 移动力" % label, view.get("movement_remaining"), movement)
+		_eq("%s 移动可用" % label, view.get("movement_available"), available)
+		_eq("%s 标准容量" % label, view.get("standard_capacity"), standard_capacity)
+		_eq("%s 标准剩余" % label, view.get("standard_remaining"), standard_remaining)
+		_eq("%s 迅捷容量" % label, view.get("swift_capacity"), swift_capacity)
+		_eq("%s 迅捷剩余" % label, view.get("swift_remaining"), swift_remaining)
+	_eq("%s 标准点阵" % label, _spent_states(strip.call("get_standard_pips") as Array),
+		_expected_spent(standard_capacity, standard_remaining))
+	_eq("%s 迅捷点阵" % label, _spent_states(strip.call("get_swift_pips") as Array),
+		_expected_spent(swift_capacity, swift_remaining))
+	var movement_value: Label = strip.get_node("Margin/MainRow/MovementZone/MovementCluster/MovementValue") as Label
+	_eq("%s 移动数值保持" % label, movement_value.text, str(movement))
+	var footprint: Control = strip.get_node("Margin/MainRow/MovementZone/MovementCluster/FootprintGlyph") as Control
+	_eq("%s 足迹灰化" % label, bool(footprint.get("spent")), not available)
+
+
+func _expected_spent(capacity: int, remaining: int) -> Array[bool]:
+	var result: Array[bool] = []
+	for index: int in capacity:
+		result.append(index >= remaining)
+	return result
+
+
+func _spent_states(nodes: Array) -> Array[bool]:
+	var result: Array[bool] = []
+	for node: Variant in nodes:
+		result.append(bool((node as Object).get("spent")))
+	return result
+
+
+func _has_action_badges(manager: Object) -> bool:
+	for candidate: Variant in manager.units as Array:
+		var unit: Unit = candidate as Unit
+		var icons: Node2D = unit.get_node_or_null("StatusIcons") as Node2D if unit != null else null
+		if icons == null:
+			continue
+		for child: Node in icons.get_children():
+			var label: Label = child as Label
+			if label != null and label.text in ["M", "A", "S"]:
+				return true
+	return false
+
+
+func _has_property(value: Object, property_name: String) -> bool:
+	for property: Dictionary in value.get_property_list():
+		if str(property.get("name", "")) == property_name:
 			return true
 	return false
 

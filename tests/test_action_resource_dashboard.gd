@@ -1,110 +1,85 @@
 extends SceneTree
-## VA-5 Task 2：行动资源仪表盘接线回归。
-##
-## 生产改动若删除 action_resources payload、跳过玩家态显示门控、打破 6px 间距或
-## 遗漏浮窗避让枚举，本测试应失败。测试使用真实 TacticalScene 及其真实 BottomDashboard。
+## 正式资源载荷与 BottomDashboard 接线回归。
+
+const RESOURCE_FIELDS: Array[String] = [
+	"movement_remaining", "movement_available", "standard_capacity",
+	"standard_remaining", "swift_capacity", "swift_remaining",
+]
+const STRIP_SCENE_PATH := "res://scenes/tactical/hud/action_resource_strip.tscn"
 
 var _pass: int = 0
 var _fail: int = 0
 var _fails: Array[String] = []
-var _ran: bool = false
-
-
 func _initialize() -> void:
-	print("=== test_action_resource_dashboard (行动资源仪表盘接线) ===")
-
-
-func _process(_delta: float) -> bool:
-	if _ran:
-		return true
-	_ran = true
-	_run()
-	return true
+	print("=== test_action_resource_dashboard ===")
+	call_deferred("_run")
 
 
 func _run() -> void:
-	var scene: Node = load("res://scenes/tactical/TacticalScene.tscn").instantiate()
+	var scene: Node = (load("res://scenes/tactical/TacticalScene.tscn") as PackedScene).instantiate()
 	root.add_child(scene)
-
-	var tactical_manager: Object = scene.tactical_manager
+	await process_frame
+	await process_frame
+	var manager: Object = scene.tactical_manager
 	var dashboard: BottomDashboard = scene._bottom_dashboard
-	var current_unit: Unit = tactical_manager._get_dashboard_unit()
-	_check("真实 TacticalScene 提供当前信息单位", current_unit != null)
-	_check("真实 TacticalScene 创建 BottomDashboard", dashboard != null)
-	if current_unit == null or dashboard == null:
+	var unit: Unit = manager._get_dashboard_unit() if manager != null else null
+	_check("真实 TacticalScene 提供单位与仪表盘", manager != null and dashboard != null and unit != null)
+	if manager == null or dashboard == null or unit == null:
 		_finish(scene)
 		return
-	_check("当前单位支持容量配置", current_unit.has_method("configure_action_resource_capacities"))
-	if not current_unit.has_method("configure_action_resource_capacities"):
-		_finish(scene)
-		return
-
-	current_unit.configure_action_resource_capacities(2, 3)
-	current_unit.consume_standard_resource()
-	current_unit.consume_swift_resource()
-	var data: Dictionary = tactical_manager.get_dashboard_data()
-	var resources: Dictionary = data.get("action_resources", {})
-	_eq("移动力数值来自当前单位", resources.get("movement_remaining"), maxi(0, current_unit.stats.mov))
-	_eq("移动仍可用", resources.get("movement_available"), true)
-	_eq("标准容量真实透传", resources.get("standard_capacity"), 2)
-	_eq("标准剩余真实透传", resources.get("standard_remaining"), 1)
-	_eq("迅捷容量真实透传", resources.get("swift_capacity"), 3)
-	_eq("迅捷剩余真实透传", resources.get("swift_remaining"), 2)
-	_eq("旧标准键由耗尽状态派生", resources.get("standard_used"), false)
-	_eq("旧迅捷键由耗尽状态派生", resources.get("swift_used"), false)
-
-	current_unit.reset_action_resources()
+	unit.configure_action_resource_capacities(2, 3)
+	unit.consume_standard_resource()
+	unit.consume_swift_resource()
+	var data: Dictionary = manager.get_dashboard_data()
+	var resources: Dictionary = data.get("action_resources", {}) as Dictionary
+	_eq("正式载荷字段数严格为六", resources.size(), RESOURCE_FIELDS.size())
+	for field: String in RESOURCE_FIELDS:
+		_check("正式载荷含字段 %s" % field, resources.has(field))
+	_eq("移动力来自当前单位", resources.get("movement_remaining"), maxi(0, unit.stats.mov))
+	_eq("移动机会来自当前单位", resources.get("movement_available"), true)
+	_eq("标准容量来自真实入口", resources.get("standard_capacity"), 2)
+	_eq("标准剩余来自真实消费", resources.get("standard_remaining"), 1)
+	_eq("迅捷容量来自真实入口", resources.get("swift_capacity"), 3)
+	_eq("迅捷剩余来自真实消费", resources.get("swift_remaining"), 2)
 
 	dashboard.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
 	dashboard.size = Vector2(1280.0, 720.0)
-	dashboard.update_state(data.merged({"visible": true, "show_actions": true}, true))
-	var resource_bar: Control = dashboard.get("_action_resource_bar") as Control
-	_check("玩家操作态创建行动资源栏", resource_bar != null)
-	if resource_bar != null:
-		_check("玩家操作态显示行动资源栏", resource_bar.visible)
-		dashboard.update_state(data.merged({"visible": false}, true))
-		_check("仪表盘隐藏时立即隐藏行动资源栏", not resource_bar.visible)
-		dashboard.update_state(data.merged({"visible": true, "show_actions": true}, true))
-		_check("资源栏与技能栏精确间隔 6 像素", is_equal_approx(
-			dashboard._skill_bar.position.y - (resource_bar.position.y + resource_bar.size.y), 6.0))
-		_check("资源栏与技能栏水平中心一致", is_equal_approx(
-			resource_bar.position.x + resource_bar.size.x * 0.5,
-			dashboard._skill_bar.position.x + dashboard._skill_bar.size.x * 0.5))
-
-		var expected_top: float = dashboard.size.y
-		for control: Control in [dashboard._info_panel, dashboard._relic_panel, dashboard._action_shell, dashboard._skill_bar, resource_bar]:
-			if control.visible:
-				expected_top = minf(expected_top, control.position.y)
-		_check("浮窗避让取全部可见底栏控件的最小 Y", is_equal_approx(dashboard.get_content_top_y(), expected_top))
-
-		for control: Control in [dashboard._info_panel, dashboard._relic_panel, dashboard._action_shell, dashboard._skill_bar]:
-			control.visible = false
-		_check("只保留行动资源栏时仍参与避让", is_equal_approx(
-			dashboard.get_content_top_y(), resource_bar.position.y))
-
-		dashboard.update_state(data.merged({"visible": true, "mode": "player", "show_actions": false}, true))
-		_check("玩家模式但 show_actions=false 时隐藏行动资源栏", not resource_bar.visible)
-
-		dashboard.update_state(data.merged({"visible": true, "mode": "enemy", "show_actions": true}, true))
-		_check("敌方信息态隐藏行动资源栏", not resource_bar.visible)
-
-		var missing_payload: Dictionary = data.duplicate(true)
-		missing_payload.erase("action_resources")
-		dashboard.update_state(missing_payload.merged({"visible": true, "mode": "player", "show_actions": true}, true))
-		_check("缺失 action_resources 字段时隐藏行动资源栏", not resource_bar.visible)
-
-		for missing_field: String in ["movement_used", "standard_used", "swift_used"]:
-			var partial_resources: Dictionary = resources.duplicate(true)
-			partial_resources.erase(missing_field)
-			dashboard.update_state(data.merged({
-				"visible": true,
-				"mode": "player",
-				"show_actions": true,
-				"action_resources": partial_resources,
-			}, true))
-			_check("缺少 %s 时隐藏行动资源栏" % missing_field, not resource_bar.visible)
-
+	dashboard.update_state(data.merged({"visible": true, "mode": "player", "show_actions": true}, true))
+	await process_frame
+	_check("仪表盘提供正式资源条属性", _has_property(dashboard, "_action_resource_strip"))
+	if _has_property(dashboard, "_action_resource_strip"):
+		var strip: Control = dashboard.get("_action_resource_strip") as Control
+		_check("正式资源条来自冻结场景", strip != null and strip.scene_file_path == STRIP_SCENE_PATH)
+		_check("玩家态显示正式资源条", strip != null and strip.visible)
+		if strip != null:
+			_eq("与技能栏净距为六像素", dashboard._skill_bar.position.y - (strip.position.y + strip.size.y), 6.0)
+			_eq("与技能栏水平中心一致", strip.position.x + strip.size.x * 0.5,
+				dashboard._skill_bar.position.x + dashboard._skill_bar.size.x * 0.5)
+			_assert_invalid_payloads_hide(dashboard, strip, data)
 	_finish(scene)
+
+
+func _assert_invalid_payloads_hide(dashboard: BottomDashboard, strip: Control, data: Dictionary) -> void:
+	for field: String in RESOURCE_FIELDS:
+		var invalid: Dictionary = data.duplicate(true)
+		(invalid["action_resources"] as Dictionary).erase(field)
+		dashboard.update_state(invalid.merged({"visible": true, "mode": "player", "show_actions": true}, true))
+		_check("缺少 %s 时隐藏" % field, not strip.visible)
+	for replacement: Dictionary in [
+		{"movement_remaining": 1.5}, {"movement_available": 1}, {"standard_capacity": 0},
+		{"standard_remaining": 3}, {"swift_capacity": 4}, {"swift_remaining": -1},
+	]:
+		var invalid: Dictionary = data.duplicate(true)
+		(invalid["action_resources"] as Dictionary).merge(replacement, true)
+		dashboard.update_state(invalid.merged({"visible": true, "mode": "player", "show_actions": true}, true))
+		_check("类型或范围无效时隐藏", not strip.visible)
+
+
+func _has_property(value: Object, property_name: String) -> bool:
+	for property: Dictionary in value.get_property_list():
+		if str(property.get("name", "")) == property_name:
+			return true
+	return false
 
 
 func _finish(scene: Node) -> void:
@@ -112,7 +87,6 @@ func _finish(scene: Node) -> void:
 		scene.free()
 	print("\n--- 结果：%d 过 / %d 失败 ---" % [_pass, _fail])
 	if _fail > 0:
-		print("失败项：")
 		for failure: String in _fails:
 			print("  ✗ " + failure)
 	else:

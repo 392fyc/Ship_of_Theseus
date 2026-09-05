@@ -1,0 +1,111 @@
+{
+  "task_id": "HUD-PROD-1C-ACTION-RESOURCE-STRIP-CUTOVER",
+  "status": "independent_visual_pass_pending_user_confirmation",
+  "independent_visual_review": {
+    "status": "performed",
+    "reviewer": "/root/review_hud_1c_visual",
+    "source": {
+      "source_thread": "01a06802-2920-7832-9808-dc0e35ec7e3c",
+      "message_id": "amsg_01a07099-4858-74f3-8e1a-9432bd2d95d0",
+      "timestamp": "2026-09-05T08:04:48.857Z"
+    },
+    "capture_reviews": [
+      {
+        "capture": "default",
+        "capture_path": "dev_doc/ui-art-research/hud-prod-1c-action-resource-cutover/evidence/action_resources_default_1280x720.png",
+        "review": {
+          "score": 97,
+          "verdict": "pass",
+          "category_match": true,
+          "differences": [],
+          "suggestions": [],
+          "reasoning": "default：资源条居中且与技能栏保持约 6 像素净距；朝上足迹、三个同款完整分区边框、整体边框和透明内部均清楚，棋盘主体未被遮挡。"
+        }
+      },
+      {
+        "capture": "multi",
+        "capture_path": "dev_doc/ui-art-research/hud-prod-1c-action-resource-cutover/evidence/action_resources_multi_point_1280x720.png",
+        "review": {
+          "score": 94,
+          "verdict": "pass",
+          "category_match": true,
+          "differences": [
+            "已用态图形在中灰背景上的对比度低于参考图，但原始尺寸下仍能准确读出标准行动 1 个可用加 2 个已用、迅捷行动 2 个可用加 1 个已用。"
+          ],
+          "suggestions": [
+            "后续若允许调整冻结候选，可略微提高已用态灰色的明度，继续保持灰化语义并增强复杂背景下的辨识度。"
+          ],
+          "reasoning": "multi：多点数量与消费状态可读，移动区整体灰化；居中、朝上足迹、统一完整分区边框、整体边框、透明分区以及与技能栏和棋盘的关系均合格。"
+        }
+      }
+    ]
+  },
+  "visual_evidence_audit": {
+    "status": "original_images_checked",
+    "reviewer": "/root/hud_1c_visual_evidence",
+    "source": "本会话独立核对者使用 view_image 查看两张原图后的核对结果，由主控传递。"
+  },
+  "checks": [
+    {
+      "id": "default_resource_glyphs",
+      "result": "pass",
+      "scope": "default capture action resource strip",
+      "reviewer": "/root/hud_1c_visual_evidence",
+      "source": "original_image_audit",
+      "evidence": "默认图显示朝上足迹和移动力4、一个绿色圆点、一个橘黄色三角。"
+    },
+    {
+      "id": "multi_resource_glyphs",
+      "result": "pass",
+      "scope": "multi capture action resource strip",
+      "reviewer": "/root/hud_1c_visual_evidence",
+      "source": "original_image_audit",
+      "evidence": "复杂图中足迹和移动力4灰化；标准行动为一个绿色加两个灰色圆点，迅捷行动为两个橘黄色加一个灰色三角。"
+    },
+    {
+      "id": "borders_and_placement",
+      "result": "pass",
+      "scope": "both captures action resource strip",
+      "reviewer": "/root/hud_1c_visual_evidence",
+      "source": "original_image_audit",
+      "evidence": "三个同款完整分区边框、整体边框和透明内部可见；资源条位于技能栏上方且水平居中，没有遮挡棋盘主体。"
+    },
+    {
+      "id": "retired_labels_and_unit_badges",
+      "result": "pass",
+      "scope": "action resource strip and map unit badges",
+      "reviewer": "/root/hud_1c_visual_evidence",
+      "source": "original_image_audit",
+      "evidence": "正式资源条没有旧可用/已用文字、斜杠或M/A/S；地图人物徽标没有M/A/S。右上既有回合栏的M/A/S处于本检查范围之外。"
+    },
+    {
+      "id": "runtime_dimensions_and_gap",
+      "result": "pass",
+      "scope": "production action resource strip layout",
+      "reviewer": "/root/hud_1c_layout_review",
+      "source": {
+        "command": "$godot --headless --path $projectRoot --script res://tests/test_action_resource_strip_production_cutover.gd",
+        "result": "245 passed, 0 failed, exit 0",
+        "reviewed_tree": "67a4c89997c48de5070183fef74545b34d5cda82"
+      },
+      "evidence": "正式资源条组合最小尺寸和实际尺寸均为274×40，与技能栏净距为6像素；精确值来自生产测试，原图只用于视觉一致性核对。"
+    }
+  ],
+  "captures": [
+    {
+      "path": "dev_doc/ui-art-research/hud-prod-1c-action-resource-cutover/evidence/action_resources_default_1280x720.png",
+      "size": "1280x720",
+      "sha256": "58387AF9F53BA737F2FC5693BA51A0B354DFC6DD7CAFA648F2A3F9710401A466"
+    },
+    {
+      "path": "dev_doc/ui-art-research/hud-prod-1c-action-resource-cutover/evidence/action_resources_multi_point_1280x720.png",
+      "size": "1280x720",
+      "sha256": "CCDE6A85C41BDB71BF8161BD211136E4C9E6C1F64A7643A8603FFBA5B1F0D07E"
+    }
+  ],
+  "known_non_blocking_limits": [
+    "仍待用户视觉确认，HUD-PROD-1C Task和HUD-PROD-1 Milestone均未完成。",
+    "多点消费态的灰色对比度略低，但原始尺寸下仍可读；本次不改冻结候选。",
+    "两张原图只代表默认态与复杂部分消费态；规格要求的五种状态由自动测试证明。"
+  ]
+}
