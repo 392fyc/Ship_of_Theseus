@@ -58,10 +58,6 @@ func _test_facade() -> void:
 				_assert_badges(slot, "A", "20")
 				_assert_badge_layout(slot)
 			_eq("方槽中心不受名称影响", slot.get_global_rect().get_center().y, bar.get_global_rect().get_center().y)
-			var name_label: Label = slot.get_node("NameLabel") as Label
-			_eq("完整技能名", name_label.text, entries[index].name)
-			var bottom_margin: float = (bar._panel.get_theme_stylebox(&"panel") as StyleBoxTexture).texture_margin_bottom
-			_check("名称位于外框内部预留高度内", name_label.get_global_rect().end.y <= bar.get_global_rect().end.y - bottom_margin)
 			var expected_key: String = str(index) if index > 0 and index <= 4 else ""
 			_eq("仅前四非被动显示真实快捷键", (slot.get_node("Content/HotkeyBadge/HotkeyText") as Label).text, expected_key)
 		_eq("行动资源条尺寸保持", dashboard._action_resource_strip.size, Vector2(274.0, 40.0))

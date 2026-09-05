@@ -11,7 +11,7 @@
         1280.0,
         720.0
       ],
-      "sha256": "02d62547b9ef7cf2d528830db46be53361419f0d4fde17d087abd8430fbb6eb6",
+      "sha256": "ac5e0ff2c7e903564cb9bd7eeb0fca6fc97d255a334126d698e0577e8242fcb9",
       "skill_entries": [
         {
           "action_type_rect": [
@@ -205,7 +205,7 @@
         1280.0,
         720.0
       ],
-      "sha256": "ef05e5182c692207dd3c4bbca6cf5420990e0b20d5b9a838bbc654439a601d65",
+      "sha256": "4378a787a83bcd97226e549f738ab2ccf717b2bf6b9e0625278e68f6a6cfe9b4",
       "skill_entries": [
         {
           "action_type_rect": [
@@ -399,7 +399,7 @@
         1280.0,
         720.0
       ],
-      "sha256": "58159cceefbe423e00c2d1d66152c5b090e256d1c796805d9088a77e5a5035ee",
+      "sha256": "d9d754ca96d267a4fa07a6f8b2a37f184f49d9089fcea0356ce4c1fda86a473e",
       "skill_entries": [
         {
           "action_type_rect": [
@@ -593,7 +593,7 @@
         1280.0,
         720.0
       ],
-      "sha256": "0402d5b970bf0dd8391abbf78dd2d49d9a59ae4d03e4cc4fda135a58b281c575",
+      "sha256": "20a67fbfe9def9df8b85b88fb6abc4c43be99d61cb0545c6043d0d20f46a07e0",
       "skill_entries": [
         {
           "action_type_rect": [
@@ -790,7 +790,7 @@
         1920.0,
         1080.0
       ],
-      "sha256": "2a57d208ac36947a4037d31add7bfdfc2ff79ed4a0bd599cd3ed8392abba7fea",
+      "sha256": "98beebcd5d0052d2c626e2ea97f2dec38d481fafafce0bc9c52854e88dba135f",
       "skill_entries": [
         {
           "action_type_rect": [
@@ -984,7 +984,7 @@
         2560,
         1440
       ],
-      "sha256": "897256cc7d15072c7291040d5ba3613927c3adad66a4c670d0169926a3e996c3",
+      "sha256": "8fab6cb03a9532f40415e42ca433747ad766b85831b0141230f83358d779410a",
       "skill_entries": [
         {
           "action_type_rect": [
@@ -1171,6 +1171,6 @@
   "character_configuration": "真实TacticalScene剑圣配置，未注入合成技能数量。",
   "godot_version": "4.6.3-stable (official)",
   "source_scene": "scenes/tactical/TacticalScene.tscn",
-  "starting_head": "ce6ba1943cb6961cc8fa8a8cad40c226f6761a63",
-  "task_id": "HUD-PROD-1D-GENERIC-RESOURCE-COST"
+  "starting_head": "80452bf696dcc7c086f4263298e5793ada5bf3e4",
+  "task_id": "HUD-PROD-1D-ICON-LABELS"
 }

@@ -18,18 +18,15 @@ func configure_entry(entry: Dictionary, view: SkillSlotViewData, action_type_tex
 func _apply_view_to_nodes() -> void:
 	super._apply_view_to_nodes()
 	var placeholder: Label = get_node("Content/IconPlaceholder") as Label
-	var title_label: Label = get_node("NameLabel") as Label
 	var action_label: Label = get_node("Content/ActionTypeLabel") as Label
 	var cost_label: Label = get_node("Content/CostLabel") as Label
 	placeholder.text = _title.left(1) if _title != "" else "技"
-	title_label.text = _title
 	action_label.text = "" if _view.passive else _action_type_text
 	action_label.visible = action_label.text != ""
 	cost_label.text = "" if _view.passive else _resource_cost_text
 	cost_label.visible = cost_label.text != "" and _view.cooldown_turns <= 0
 	var unavailable: bool = not _view.enabled and not _view.passive
 	placeholder.add_theme_color_override(&"font_color", Color(0.78, 0.80, 0.84) if unavailable else _accent)
-	title_label.add_theme_color_override(&"font_color", Color(0.78, 0.80, 0.84) if unavailable else Color(0.90, 0.86, 0.78))
 	action_label.add_theme_color_override(&"font_color", Color(0.78, 0.80, 0.84) if unavailable else _accent)
 	cost_label.add_theme_color_override(&"font_color", Color(1.0, 0.55, 0.46) if unavailable else Color(0.373, 0.659, 0.847))
 	# 纯被动仍由父组件禁止激活，禁用按钮皮肤不会掩盖其正常说明内容。

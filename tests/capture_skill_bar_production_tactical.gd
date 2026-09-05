@@ -67,9 +67,9 @@ func _run() -> void:
 		if not await _save("tooltip", actual_tooltip):
 			return
 	var metadata: Dictionary = {
-		"task_id": "HUD-PROD-1D-GENERIC-RESOURCE-COST",
+		"task_id": "HUD-PROD-1D-ICON-LABELS",
 		"source_scene": "scenes/tactical/TacticalScene.tscn",
-		"starting_head": "ce6ba1943cb6961cc8fa8a8cad40c226f6761a63",
+		"starting_head": "80452bf696dcc7c086f4263298e5793ada5bf3e4",
 		"godot_version": Engine.get_version_info().string,
 		"captures": _captures,
 		"character_configuration": "真实TacticalScene剑圣配置，未注入合成技能数量。",
@@ -105,7 +105,7 @@ func _save(state: String, tooltip: Label = null) -> bool:
 		var resource_label: Label = slot.get_node("Content/CostLabel") as Label
 		var action_rect: Rect2 = action_label.get_rect()
 		var resource_rect: Rect2 = resource_label.get_rect()
-		visible_skills.append({"skill_id": view.skill_id, "name": slot.get_node("NameLabel").text,
+		visible_skills.append({"skill_id": view.skill_id, "name": slot.get("_title"),
 			"hotkey": view.hotkey_text, "enabled": view.enabled, "disabled": slot.disabled,
 			"selected": view.selected, "cooldown": view.cooldown_turns, "passive": view.passive,
 			"action_type_text": action_label.text, "resource_cost_text": resource_label.text,
