@@ -1,0 +1,588 @@
+{
+  "captures": [
+    {
+      "action_resource_size": [
+        274.0,
+        40.0
+      ],
+      "gap": 6.0,
+      "path": "dev_doc/ui-art-research/hud-prod-1d-skill-bar-cutover/evidence/skill_bar_default_1280x720.png",
+      "resolution": [
+        1280.0,
+        720.0
+      ],
+      "sha256": "27060b978c5c6388a86e43e4a70cfa92e5d0fcb8b1595cf40bb914cebfc58ef3",
+      "skill_entries": [
+        {
+          "cooldown": 0.0,
+          "cost_text": "",
+          "disabled": true,
+          "enabled": true,
+          "hotkey": "",
+          "name": "心眼",
+          "passive": true,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_xinyan"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "A",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "1",
+          "name": "斩击",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_zhanji"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "10气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "2",
+          "name": "一闪",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_yishan"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "10气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "3",
+          "name": "招架",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_zhaojia"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "60气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "4",
+          "name": "居合",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_juhe"
+        }
+      ],
+      "skill_shelf_size": [
+        476.0,
+        108.0
+      ],
+      "state": "default",
+      "tooltip_visible": false
+    },
+    {
+      "action_resource_size": [
+        274.0,
+        40.0
+      ],
+      "gap": 6.0,
+      "path": "dev_doc/ui-art-research/hud-prod-1d-skill-bar-cutover/evidence/skill_bar_selected_1280x720.png",
+      "resolution": [
+        1280.0,
+        720.0
+      ],
+      "sha256": "dd95d294aba3eebf11b13cbfa348a3571de27c10ab4e07094632641c0b66b47a",
+      "skill_entries": [
+        {
+          "cooldown": 0.0,
+          "cost_text": "",
+          "disabled": true,
+          "enabled": true,
+          "hotkey": "",
+          "name": "心眼",
+          "passive": true,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_xinyan"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "A",
+          "disabled": false,
+          "enabled": true,
+          "hotkey": "1",
+          "name": "斩击",
+          "passive": false,
+          "selected": true,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_zhanji"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "10气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "2",
+          "name": "一闪",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_yishan"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "10气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "3",
+          "name": "招架",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_zhaojia"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "60气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "4",
+          "name": "居合",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_juhe"
+        }
+      ],
+      "skill_shelf_size": [
+        476.0,
+        108.0
+      ],
+      "state": "selected",
+      "tooltip_visible": false
+    },
+    {
+      "action_resource_size": [
+        274.0,
+        40.0
+      ],
+      "gap": 6.0,
+      "path": "dev_doc/ui-art-research/hud-prod-1d-skill-bar-cutover/evidence/skill_bar_unavailable_1280x720.png",
+      "resolution": [
+        1280.0,
+        720.0
+      ],
+      "sha256": "cdb48ffebbf1dd24daf673648d4500436ccf387b70c79ea14f5066214bccb347",
+      "skill_entries": [
+        {
+          "cooldown": 0.0,
+          "cost_text": "",
+          "disabled": true,
+          "enabled": true,
+          "hotkey": "",
+          "name": "心眼",
+          "passive": true,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_xinyan"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "A",
+          "disabled": false,
+          "enabled": true,
+          "hotkey": "1",
+          "name": "斩击",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_zhanji"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "10气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "2",
+          "name": "一闪",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_yishan"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "10气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "3",
+          "name": "招架",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_zhaojia"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "60气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "4",
+          "name": "居合",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_juhe"
+        }
+      ],
+      "skill_shelf_size": [
+        476.0,
+        108.0
+      ],
+      "state": "unavailable",
+      "tooltip_visible": false
+    },
+    {
+      "action_resource_size": [
+        274.0,
+        40.0
+      ],
+      "gap": 6.0,
+      "path": "dev_doc/ui-art-research/hud-prod-1d-skill-bar-cutover/evidence/skill_bar_tooltip_1280x720.png",
+      "resolution": [
+        1280.0,
+        720.0
+      ],
+      "sha256": "82e205c185231593c3030591a720e6d07f1b9c42d69675ef373a9542544fb2a6",
+      "skill_entries": [
+        {
+          "cooldown": 0.0,
+          "cost_text": "",
+          "disabled": true,
+          "enabled": true,
+          "hotkey": "",
+          "name": "心眼",
+          "passive": true,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_xinyan"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "A",
+          "disabled": false,
+          "enabled": true,
+          "hotkey": "1",
+          "name": "斩击",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_zhanji"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "10气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "2",
+          "name": "一闪",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_yishan"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "10气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "3",
+          "name": "招架",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_zhaojia"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "60气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "4",
+          "name": "居合",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_juhe"
+        }
+      ],
+      "skill_shelf_size": [
+        476.0,
+        108.0
+      ],
+      "state": "tooltip",
+      "tooltip_content_width": 248.0,
+      "tooltip_text": "【居合】\n奥义·距离 1，造成 300% 物理伤害，必定命中且必定暴击。消耗 60 点剑气；击杀目标可返还 30 点剑气并使本技能冷却减 1；施放后获得 1 枚印记。\n✗ 剑气不足：需 60 / 现 0",
+      "tooltip_trigger": "root.push_input鼠标悬停后，原生tooltip自动出现。",
+      "tooltip_visible": true
+    },
+    {
+      "action_resource_size": [
+        274.0,
+        40.0
+      ],
+      "gap": 6.0,
+      "path": "dev_doc/ui-art-research/hud-prod-1d-skill-bar-cutover/evidence/skill_bar_default_1920x1080.png",
+      "resolution": [
+        1920.0,
+        1080.0
+      ],
+      "sha256": "6d41c610453ec51f1a6395067c5e0ff926be1a60957416769e917c0603c2ba99",
+      "skill_entries": [
+        {
+          "cooldown": 0.0,
+          "cost_text": "",
+          "disabled": true,
+          "enabled": true,
+          "hotkey": "",
+          "name": "心眼",
+          "passive": true,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_xinyan"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "A",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "1",
+          "name": "斩击",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_zhanji"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "10气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "2",
+          "name": "一闪",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_yishan"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "10气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "3",
+          "name": "招架",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_zhaojia"
+        },
+        {
+          "cooldown": 0.0,
+          "cost_text": "60气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "4",
+          "name": "居合",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_juhe"
+        }
+      ],
+      "skill_shelf_size": [
+        476.0,
+        108.0
+      ],
+      "state": "default",
+      "tooltip_visible": false
+    },
+    {
+      "action_resource_size": [
+        274.0,
+        40.0
+      ],
+      "gap": 6.0,
+      "path": "dev_doc/ui-art-research/hud-prod-1d-skill-bar-cutover/evidence/skill_bar_default_2560x1440.png",
+      "resolution": [
+        2560,
+        1440
+      ],
+      "sha256": "4603d2734748fd6d6a3d19c3b906c70568c253eeb2f156e072f87e1d024b5736",
+      "skill_entries": [
+        {
+          "cooldown": 0,
+          "cost_text": "",
+          "disabled": true,
+          "enabled": true,
+          "hotkey": "",
+          "name": "心眼",
+          "passive": true,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_xinyan"
+        },
+        {
+          "cooldown": 0,
+          "cost_text": "A",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "1",
+          "name": "斩击",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_zhanji"
+        },
+        {
+          "cooldown": 0,
+          "cost_text": "10气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "2",
+          "name": "一闪",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_yishan"
+        },
+        {
+          "cooldown": 0,
+          "cost_text": "10气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "3",
+          "name": "招架",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_zhaojia"
+        },
+        {
+          "cooldown": 0,
+          "cost_text": "60气",
+          "disabled": true,
+          "enabled": false,
+          "hotkey": "4",
+          "name": "居合",
+          "passive": false,
+          "selected": false,
+          "size": [
+            64.0,
+            64.0
+          ],
+          "skill_id": "swordsman_juhe"
+        }
+      ],
+      "skill_shelf_size": [
+        476.0,
+        108.0
+      ],
+      "state": "default",
+      "tooltip_visible": false
+    }
+  ],
+  "character_configuration": "真实TacticalScene剑圣配置，未注入合成技能数量。",
+  "godot_version": "4.6.3-stable (official)",
+  "source_scene": "scenes/tactical/TacticalScene.tscn",
+  "starting_head": "762e9cb9e7d6166d7134a42d6e72c0656dc6da7b",
+  "task_id": "HUD-PROD-1D-SKILL-BAR-PRODUCTION-CUTOVER"
+}
