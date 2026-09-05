@@ -109,9 +109,9 @@ func _build_cost_text(entry: Dictionary, action_cost: String) -> String:
 	var mark_cost: int = int(entry.get("mark_cost", 0))
 	var parts: PackedStringArray = []
 	if mark_cost > 0:
-		parts.append("%d印" % mark_cost)
+		parts.append(str(mark_cost))
 	if qi_cost > 0:
-		parts.append("%d气" % qi_cost)
+		parts.append(str(qi_cost))
 	if not parts.is_empty():
 		return "+".join(parts)
 	return str(COST_SYMBOLS.get(action_cost, ""))

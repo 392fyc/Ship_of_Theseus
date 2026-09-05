@@ -11,7 +11,7 @@
         1280.0,
         720.0
       ],
-      "sha256": "27060b978c5c6388a86e43e4a70cfa92e5d0fcb8b1595cf40bb914cebfc58ef3",
+      "sha256": "8ce67e6404ab06776e6bdf277b903c9be763dda0f87a4df1c6fcb8ddcc253aef",
       "skill_entries": [
         {
           "cooldown": 0.0,
@@ -45,7 +45,7 @@
         },
         {
           "cooldown": 0.0,
-          "cost_text": "10气",
+          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "2",
@@ -60,7 +60,7 @@
         },
         {
           "cooldown": 0.0,
-          "cost_text": "10气",
+          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "3",
@@ -75,7 +75,7 @@
         },
         {
           "cooldown": 0.0,
-          "cost_text": "60气",
+          "cost_text": "60",
           "disabled": true,
           "enabled": false,
           "hotkey": "4",
@@ -107,7 +107,7 @@
         1280.0,
         720.0
       ],
-      "sha256": "dd95d294aba3eebf11b13cbfa348a3571de27c10ab4e07094632641c0b66b47a",
+      "sha256": "b3db7bc7f3532f8ba1c5ae55a74e109ad33494a17052dbb502beb375f86567d8",
       "skill_entries": [
         {
           "cooldown": 0.0,
@@ -141,7 +141,7 @@
         },
         {
           "cooldown": 0.0,
-          "cost_text": "10气",
+          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "2",
@@ -156,7 +156,7 @@
         },
         {
           "cooldown": 0.0,
-          "cost_text": "10气",
+          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "3",
@@ -171,7 +171,7 @@
         },
         {
           "cooldown": 0.0,
-          "cost_text": "60气",
+          "cost_text": "60",
           "disabled": true,
           "enabled": false,
           "hotkey": "4",
@@ -203,7 +203,7 @@
         1280.0,
         720.0
       ],
-      "sha256": "cdb48ffebbf1dd24daf673648d4500436ccf387b70c79ea14f5066214bccb347",
+      "sha256": "7828fb63cff6fd46355303495042e0ee6fd4db37723d617e1650f2d38c7b95da",
       "skill_entries": [
         {
           "cooldown": 0.0,
@@ -237,7 +237,7 @@
         },
         {
           "cooldown": 0.0,
-          "cost_text": "10气",
+          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "2",
@@ -252,7 +252,7 @@
         },
         {
           "cooldown": 0.0,
-          "cost_text": "10气",
+          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "3",
@@ -267,7 +267,7 @@
         },
         {
           "cooldown": 0.0,
-          "cost_text": "60气",
+          "cost_text": "60",
           "disabled": true,
           "enabled": false,
           "hotkey": "4",
@@ -299,7 +299,7 @@
         1280.0,
         720.0
       ],
-      "sha256": "82e205c185231593c3030591a720e6d07f1b9c42d69675ef373a9542544fb2a6",
+      "sha256": "4124c6ed7a0b88179d828c26a4a3a48e566b1cafb4b8de3aeed36d317faf0890",
       "skill_entries": [
         {
           "cooldown": 0.0,
@@ -333,7 +333,7 @@
         },
         {
           "cooldown": 0.0,
-          "cost_text": "10气",
+          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "2",
@@ -348,7 +348,7 @@
         },
         {
           "cooldown": 0.0,
-          "cost_text": "10气",
+          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "3",
@@ -363,7 +363,7 @@
         },
         {
           "cooldown": 0.0,
-          "cost_text": "60气",
+          "cost_text": "60",
           "disabled": true,
           "enabled": false,
           "hotkey": "4",
@@ -398,7 +398,7 @@
         1920.0,
         1080.0
       ],
-      "sha256": "6d41c610453ec51f1a6395067c5e0ff926be1a60957416769e917c0603c2ba99",
+      "sha256": "7f7c0179c4ec2ceb04d451d5cf56d4b33369bb0871e183106c156d39c75e8065",
       "skill_entries": [
         {
           "cooldown": 0.0,
@@ -432,7 +432,7 @@
         },
         {
           "cooldown": 0.0,
-          "cost_text": "10气",
+          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "2",
@@ -447,7 +447,7 @@
         },
         {
           "cooldown": 0.0,
-          "cost_text": "10气",
+          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "3",
@@ -462,7 +462,7 @@
         },
         {
           "cooldown": 0.0,
-          "cost_text": "60气",
+          "cost_text": "60",
           "disabled": true,
           "enabled": false,
           "hotkey": "4",
@@ -494,7 +494,7 @@
         2560,
         1440
       ],
-      "sha256": "4603d2734748fd6d6a3d19c3b906c70568c253eeb2f156e072f87e1d024b5736",
+      "sha256": "d97c660fe3138e80392ac2982419f060120721671e6913e905b992091f565d95",
       "skill_entries": [
         {
           "cooldown": 0,
@@ -528,7 +528,7 @@
         },
         {
           "cooldown": 0,
-          "cost_text": "10气",
+          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "2",
@@ -543,7 +543,7 @@
         },
         {
           "cooldown": 0,
-          "cost_text": "10气",
+          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "3",
@@ -558,7 +558,7 @@
         },
         {
           "cooldown": 0,
-          "cost_text": "60气",
+          "cost_text": "60",
           "disabled": true,
           "enabled": false,
           "hotkey": "4",
@@ -583,6 +583,6 @@
   "character_configuration": "真实TacticalScene剑圣配置，未注入合成技能数量。",
   "godot_version": "4.6.3-stable (official)",
   "source_scene": "scenes/tactical/TacticalScene.tscn",
-  "starting_head": "762e9cb9e7d6166d7134a42d6e72c0656dc6da7b",
+  "starting_head": "2508eed21bb6995e6470bfb79a91d6edbe978d3b",
   "task_id": "HUD-PROD-1D-SKILL-BAR-PRODUCTION-CUTOVER"
 }

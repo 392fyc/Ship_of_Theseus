@@ -85,7 +85,7 @@ func _test_facade() -> void:
 	var unavailable: Button = bar._list.get_child(3)
 	_check("选中层直接绑定", selected.get_node("Content/SelectedOverlay").visible)
 	_eq("cost_text优先", selected.get_node("Content/CostLabel").text, "自定费")
-	_eq("费用按印记再剑气组合", bar._build_cost_text(states[2], "standard"), "1印+20气")
+	_eq("费用按印记再剑气组合且不加单位", bar._build_cost_text(states[2], "standard"), "1+20")
 	_eq("无职业费用时回退行动符号", bar._list.get_child(4).get_node("Content/CostLabel").text, "S")
 	_eq("首字占位", selected.get_node("Content/IconPlaceholder").text, states[1].name.left(1))
 	_eq("冷却剩余回合", cooling.get_node("Content/CooldownTurnsLabel").text, "2")
