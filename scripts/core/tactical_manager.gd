@@ -880,6 +880,25 @@ func _restore_action_phase_state() -> void:
 	_resolve_post_action_phase()
 
 
+## 仅归一 HUD 显示元数据；不参与技能可用性或实际资源结算。
+func _build_resource_cost_display(skill_data: Dictionary) -> Dictionary:
+	var display: Variant = skill_data.get("resource_cost_display", {
+		"amount": skill_data.get("qi_cost", 0), "resource_name": "剑气",
+	})
+	if not display is Dictionary:
+		return {}
+	var amount: Variant = display.get("amount")
+	var resource_name: Variant = display.get("resource_name")
+	if typeof(amount) not in [TYPE_INT, TYPE_FLOAT] or typeof(resource_name) != TYPE_STRING:
+		return {}
+	if typeof(amount) == TYPE_FLOAT:
+		# JSON 数字来自浮点解析；只接受可安全归一到 int 的整数值。
+		if not is_finite(amount) or amount != floorf(amount) or amount >= 9223372036854775808.0:
+			return {}
+	if amount <= 0 or resource_name.strip_edges().is_empty():
+		return {}
+	return {"amount": int(amount), "resource_name": resource_name.strip_edges()}
+
 func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 	var skill_data: Dictionary = _get_skill_data(skill_id)
 	var cooldown_turns: int = unit.get_skill_cooldown(skill_id)
@@ -897,6 +916,7 @@ func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 		"qi_cost": int(skill_data.get("qi_cost", 0)),
 		"mark_cost": int(skill_data.get("mark_cost", 0)),
 		"requires_marks": int(skill_data.get("requires_marks", 0)),
+		"resource_cost_display": _build_resource_cost_display(skill_data),
 	}
 	var phase_reason: String = _get_phase_mismatch_reason(skill_data)
 	if phase_reason != "":
@@ -982,6 +1002,7 @@ func _build_passive_entry(unit: Unit) -> Dictionary:
 		"skill_id": "swordsman_xinyan",
 		"name": "心眼",
 		"is_passive": true,
+		"resource_cost_display": {},
 		"available": true,
 		"description": desc,
 		"reason": "",

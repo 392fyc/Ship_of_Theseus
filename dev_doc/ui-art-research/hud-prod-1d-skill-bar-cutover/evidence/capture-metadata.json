@@ -11,16 +11,35 @@
         1280.0,
         720.0
       ],
-      "sha256": "8ce67e6404ab06776e6bdf277b903c9be763dda0f87a4df1c6fcb8ddcc253aef",
+      "sha256": "02d62547b9ef7cf2d528830db46be53361419f0d4fde17d087abd8430fbb6eb6",
       "skill_entries": [
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "",
+          "action_type_visible": false,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "",
           "disabled": true,
           "enabled": true,
           "hotkey": "",
           "name": "心眼",
           "passive": true,
+          "resource_cost_display": {
+
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "",
+          "resource_cost_visible": false,
           "selected": false,
           "size": [
             64.0,
@@ -29,13 +48,32 @@
           "skill_id": "swordsman_xinyan"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "A",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "A",
           "disabled": true,
           "enabled": false,
           "hotkey": "1",
           "name": "斩击",
           "passive": false,
+          "resource_cost_display": {
+
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "",
+          "resource_cost_visible": false,
           "selected": false,
           "size": [
             64.0,
@@ -44,13 +82,33 @@
           "skill_id": "swordsman_zhanji"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "M",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "2",
           "name": "一闪",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 10.0,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "10",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -59,13 +117,33 @@
           "skill_id": "swordsman_yishan"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "S",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "3",
           "name": "招架",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 10.0,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "10",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -74,13 +152,33 @@
           "skill_id": "swordsman_zhaojia"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "A",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "60",
           "disabled": true,
           "enabled": false,
           "hotkey": "4",
           "name": "居合",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 60.0,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "60",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -107,16 +205,35 @@
         1280.0,
         720.0
       ],
-      "sha256": "b3db7bc7f3532f8ba1c5ae55a74e109ad33494a17052dbb502beb375f86567d8",
+      "sha256": "ef05e5182c692207dd3c4bbca6cf5420990e0b20d5b9a838bbc654439a601d65",
       "skill_entries": [
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "",
+          "action_type_visible": false,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "",
           "disabled": true,
           "enabled": true,
           "hotkey": "",
           "name": "心眼",
           "passive": true,
+          "resource_cost_display": {
+
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "",
+          "resource_cost_visible": false,
           "selected": false,
           "size": [
             64.0,
@@ -125,13 +242,32 @@
           "skill_id": "swordsman_xinyan"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "A",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "A",
           "disabled": false,
           "enabled": true,
           "hotkey": "1",
           "name": "斩击",
           "passive": false,
+          "resource_cost_display": {
+
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "",
+          "resource_cost_visible": false,
           "selected": true,
           "size": [
             64.0,
@@ -140,13 +276,33 @@
           "skill_id": "swordsman_zhanji"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "M",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "2",
           "name": "一闪",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 10.0,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "10",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -155,13 +311,33 @@
           "skill_id": "swordsman_yishan"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "S",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "3",
           "name": "招架",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 10.0,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "10",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -170,13 +346,33 @@
           "skill_id": "swordsman_zhaojia"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "A",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "60",
           "disabled": true,
           "enabled": false,
           "hotkey": "4",
           "name": "居合",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 60.0,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "60",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -203,16 +399,35 @@
         1280.0,
         720.0
       ],
-      "sha256": "7828fb63cff6fd46355303495042e0ee6fd4db37723d617e1650f2d38c7b95da",
+      "sha256": "58159cceefbe423e00c2d1d66152c5b090e256d1c796805d9088a77e5a5035ee",
       "skill_entries": [
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "",
+          "action_type_visible": false,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "",
           "disabled": true,
           "enabled": true,
           "hotkey": "",
           "name": "心眼",
           "passive": true,
+          "resource_cost_display": {
+
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "",
+          "resource_cost_visible": false,
           "selected": false,
           "size": [
             64.0,
@@ -221,13 +436,32 @@
           "skill_id": "swordsman_xinyan"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "A",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "A",
           "disabled": false,
           "enabled": true,
           "hotkey": "1",
           "name": "斩击",
           "passive": false,
+          "resource_cost_display": {
+
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "",
+          "resource_cost_visible": false,
           "selected": false,
           "size": [
             64.0,
@@ -236,13 +470,33 @@
           "skill_id": "swordsman_zhanji"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "M",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "2",
           "name": "一闪",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 10.0,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "10",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -251,13 +505,33 @@
           "skill_id": "swordsman_yishan"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "S",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "3",
           "name": "招架",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 10.0,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "10",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -266,13 +540,33 @@
           "skill_id": "swordsman_zhaojia"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "A",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "60",
           "disabled": true,
           "enabled": false,
           "hotkey": "4",
           "name": "居合",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 60.0,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "60",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -299,16 +593,35 @@
         1280.0,
         720.0
       ],
-      "sha256": "4124c6ed7a0b88179d828c26a4a3a48e566b1cafb4b8de3aeed36d317faf0890",
+      "sha256": "0402d5b970bf0dd8391abbf78dd2d49d9a59ae4d03e4cc4fda135a58b281c575",
       "skill_entries": [
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "",
+          "action_type_visible": false,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "",
           "disabled": true,
           "enabled": true,
           "hotkey": "",
           "name": "心眼",
           "passive": true,
+          "resource_cost_display": {
+
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "",
+          "resource_cost_visible": false,
           "selected": false,
           "size": [
             64.0,
@@ -317,13 +630,32 @@
           "skill_id": "swordsman_xinyan"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "A",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "A",
           "disabled": false,
           "enabled": true,
           "hotkey": "1",
           "name": "斩击",
           "passive": false,
+          "resource_cost_display": {
+
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "",
+          "resource_cost_visible": false,
           "selected": false,
           "size": [
             64.0,
@@ -332,13 +664,33 @@
           "skill_id": "swordsman_zhanji"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "M",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "2",
           "name": "一闪",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 10.0,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "10",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -347,13 +699,33 @@
           "skill_id": "swordsman_yishan"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "S",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "3",
           "name": "招架",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 10.0,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "10",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -362,13 +734,33 @@
           "skill_id": "swordsman_zhaojia"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "A",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "60",
           "disabled": true,
           "enabled": false,
           "hotkey": "4",
           "name": "居合",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 60.0,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "60",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -383,7 +775,7 @@
       ],
       "state": "tooltip",
       "tooltip_content_width": 248.0,
-      "tooltip_text": "【居合】\n奥义·距离 1，造成 300% 物理伤害，必定命中且必定暴击。消耗 60 点剑气；击杀目标可返还 30 点剑气并使本技能冷却减 1；施放后获得 1 枚印记。\n✗ 剑气不足：需 60 / 现 0",
+      "tooltip_text": "【居合】\n奥义·距离 1，造成 300% 物理伤害，必定命中且必定暴击。消耗 60 点剑气；击杀目标可返还 30 点剑气并使本技能冷却减 1；施放后获得 1 枚印记。\n消耗：60 剑气\n✗ 剑气不足：需 60 / 现 0",
       "tooltip_trigger": "root.push_input鼠标悬停后，原生tooltip自动出现。",
       "tooltip_visible": true
     },
@@ -398,16 +790,35 @@
         1920.0,
         1080.0
       ],
-      "sha256": "7f7c0179c4ec2ceb04d451d5cf56d4b33369bb0871e183106c156d39c75e8065",
+      "sha256": "2a57d208ac36947a4037d31add7bfdfc2ff79ed4a0bd599cd3ed8392abba7fea",
       "skill_entries": [
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "",
+          "action_type_visible": false,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "",
           "disabled": true,
           "enabled": true,
           "hotkey": "",
           "name": "心眼",
           "passive": true,
+          "resource_cost_display": {
+
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "",
+          "resource_cost_visible": false,
           "selected": false,
           "size": [
             64.0,
@@ -416,13 +827,32 @@
           "skill_id": "swordsman_xinyan"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "A",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "A",
           "disabled": true,
           "enabled": false,
           "hotkey": "1",
           "name": "斩击",
           "passive": false,
+          "resource_cost_display": {
+
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "",
+          "resource_cost_visible": false,
           "selected": false,
           "size": [
             64.0,
@@ -431,13 +861,33 @@
           "skill_id": "swordsman_zhanji"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "M",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "2",
           "name": "一闪",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 10.0,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "10",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -446,13 +896,33 @@
           "skill_id": "swordsman_yishan"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "S",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "3",
           "name": "招架",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 10.0,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "10",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -461,13 +931,33 @@
           "skill_id": "swordsman_zhaojia"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "A",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0.0,
-          "cost_text": "60",
           "disabled": true,
           "enabled": false,
           "hotkey": "4",
           "name": "居合",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 60.0,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "60",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -494,16 +984,35 @@
         2560,
         1440
       ],
-      "sha256": "d97c660fe3138e80392ac2982419f060120721671e6913e905b992091f565d95",
+      "sha256": "897256cc7d15072c7291040d5ba3613927c3adad66a4c670d0169926a3e996c3",
       "skill_entries": [
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "",
+          "action_type_visible": false,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0,
-          "cost_text": "",
           "disabled": true,
           "enabled": true,
           "hotkey": "",
           "name": "心眼",
           "passive": true,
+          "resource_cost_display": {
+
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "",
+          "resource_cost_visible": false,
           "selected": false,
           "size": [
             64.0,
@@ -512,13 +1021,32 @@
           "skill_id": "swordsman_xinyan"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "A",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0,
-          "cost_text": "A",
           "disabled": true,
           "enabled": false,
           "hotkey": "1",
           "name": "斩击",
           "passive": false,
+          "resource_cost_display": {
+
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "",
+          "resource_cost_visible": false,
           "selected": false,
           "size": [
             64.0,
@@ -527,13 +1055,33 @@
           "skill_id": "swordsman_zhanji"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "M",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0,
-          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "2",
           "name": "一闪",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 10,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "10",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -542,13 +1090,33 @@
           "skill_id": "swordsman_yishan"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "S",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0,
-          "cost_text": "10",
           "disabled": true,
           "enabled": false,
           "hotkey": "3",
           "name": "招架",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 10,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "10",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -557,13 +1125,33 @@
           "skill_id": "swordsman_zhaojia"
         },
         {
+          "action_type_rect": [
+            4.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "action_type_text": "A",
+          "action_type_visible": true,
+          "badge_rect_coordinate_space": "slot_content_local",
           "cooldown": 0,
-          "cost_text": "60",
           "disabled": true,
           "enabled": false,
           "hotkey": "4",
           "name": "居合",
           "passive": false,
+          "resource_cost_display": {
+            "amount": 60,
+            "resource_name": "剑气"
+          },
+          "resource_cost_rect": [
+            34.0,
+            48.0,
+            26.0,
+            14.0
+          ],
+          "resource_cost_text": "60",
+          "resource_cost_visible": true,
           "selected": false,
           "size": [
             64.0,
@@ -583,6 +1171,6 @@
   "character_configuration": "真实TacticalScene剑圣配置，未注入合成技能数量。",
   "godot_version": "4.6.3-stable (official)",
   "source_scene": "scenes/tactical/TacticalScene.tscn",
-  "starting_head": "2508eed21bb6995e6470bfb79a91d6edbe978d3b",
-  "task_id": "HUD-PROD-1D-SKILL-BAR-PRODUCTION-CUTOVER"
+  "starting_head": "ce6ba1943cb6961cc8fa8a8cad40c226f6761a63",
+  "task_id": "HUD-PROD-1D-GENERIC-RESOURCE-COST"
 }

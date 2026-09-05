@@ -2,13 +2,15 @@ extends "res://scripts/ui/hud/skill_slot_button.gd"
 ## 正式技能信息附加到冻结按钮；激活、冷却和选中继续由父组件负责。
 
 var _title: String = ""
-var _cost_text: String = ""
+var _action_type_text: String = ""
+var _resource_cost_text: String = ""
 var _accent: Color = Color.WHITE
 
 
-func configure_entry(entry: Dictionary, view: SkillSlotViewData, cost_text: String, accent: Color) -> void:
+func configure_entry(entry: Dictionary, view: SkillSlotViewData, action_type_text: String, resource_cost_text: String, accent: Color) -> void:
 	_title = str(entry.get("name", entry.get("skill_id", "")))
-	_cost_text = cost_text
+	_action_type_text = action_type_text
+	_resource_cost_text = resource_cost_text
 	_accent = accent
 	apply_view(view)
 
@@ -17,14 +19,18 @@ func _apply_view_to_nodes() -> void:
 	super._apply_view_to_nodes()
 	var placeholder: Label = get_node("Content/IconPlaceholder") as Label
 	var title_label: Label = get_node("NameLabel") as Label
+	var action_label: Label = get_node("Content/ActionTypeLabel") as Label
 	var cost_label: Label = get_node("Content/CostLabel") as Label
 	placeholder.text = _title.left(1) if _title != "" else "技"
 	title_label.text = _title
-	cost_label.text = _cost_text
-	cost_label.visible = _cost_text != "" and _view.cooldown_turns <= 0
+	action_label.text = "" if _view.passive else _action_type_text
+	action_label.visible = action_label.text != ""
+	cost_label.text = "" if _view.passive else _resource_cost_text
+	cost_label.visible = cost_label.text != "" and _view.cooldown_turns <= 0
 	var unavailable: bool = not _view.enabled and not _view.passive
 	placeholder.add_theme_color_override(&"font_color", Color(0.78, 0.80, 0.84) if unavailable else _accent)
 	title_label.add_theme_color_override(&"font_color", Color(0.78, 0.80, 0.84) if unavailable else Color(0.90, 0.86, 0.78))
+	action_label.add_theme_color_override(&"font_color", Color(0.78, 0.80, 0.84) if unavailable else _accent)
 	cost_label.add_theme_color_override(&"font_color", Color(1.0, 0.55, 0.46) if unavailable else Color(0.373, 0.659, 0.847))
 	# 纯被动仍由父组件禁止激活，禁用按钮皮肤不会掩盖其正常说明内容。
 	if _view.passive and not _view.active_capable:

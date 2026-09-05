@@ -1,34 +1,146 @@
 {
-  "task_id": "HUD-PROD-1D-COST-NUMBERS",
-  "status": "completed",
-  "reviewer": "hud_next_task_scope",
+  "task_id": "HUD-PROD-1D-GENERIC-RESOURCE-COST",
   "verdict": "pass",
   "approved_for_commit": true,
-  "starting_head": "2508eed21bb6995e6470bfb79a91d6edbe978d3b",
+  "review_stage": "独立代码、运行与视觉验收完成；可由 Main 精确本地提交。",
+  "starting_head": "ce6ba1943cb6961cc8fa8a8cad40c226f6761a63",
+  "scope": "职业中性费用显示接口；费用按用户确认的最多三位数范围验收。",
   "blockers": [],
-  "evidence": [
-    "产品仅将印记、剑气数值费用去单位，组合顺序、显式cost_text和行动符号回退保持。",
-    "定向测试原始日志389/0，受影响断言验证1+20。",
-    "六图费用元数据为被动空、A、10、10、60；1280原图一致。",
-    "tooltip保留完整技能描述、单位和不可用原因。",
-    "六张PNG尺寸与SHA全部匹配；元数据起点为本次Git起点。",
-    "生产槽样式、尺寸、冻结候选与捕获脚本无差异。"
+  "acceptance": [
+    {
+      "criterion": 1,
+      "status": "pass",
+      "evidence": [
+        "scripts/core/tactical_manager.gd:884 归一显式 resource_cost_display；字段缺省才适配剑气，显式空与无效输入隐藏。",
+        "scripts/ui/skill_bar.gd:98、109 只消费中性显示字段，资源名称进入 tooltip；生产槽无职业字段依赖。",
+        "tests/test_skill_bar_production_cutover.gd:153、215、226 验证非剑气来源经真实 TacticalManager entry → BottomDashboard → SkillBar；覆盖 JSON 整数、输入保留、印记排除及可用性和资源结算不变。"
+      ]
+    },
+    {
+      "criterion": 2,
+      "status": "pass",
+      "evidence": [
+        "scripts/ui/production/skill_slot.gd:26 保持左下 M/A/S、被动两角隐藏及冷却费用隐藏；scenes/tactical/production/skill_slot.tscn:23、39 保持左右半区布局。",
+        "tests/test_skill_bar_production_cutover.gd:177、178、230 验证 999 的 64/56 槽尺寸、角标几何与原缩放。",
+        "最终核心脚本独立运行 780/0，包括真实斩击 A/空、一闪 M/10、招架 S/10、居合 A/60、心眼空/空及鼠标和 1—4 输入。",
+        "独立 999 夹具经真实 entry → HUD 测得 64 槽左框 [4,48,26,14]、右框 [34,48,26,14]；56 槽左框 [4,40,22,14]、右框 [30,40,22,14]，均不相交并完整位于槽内。"
+      ]
+    },
+    {
+      "criterion": 3,
+      "status": "pass",
+      "evidence": [
+        "六张原图已在本任务首轮逐张查看；当前字节与该轮一致，实际分辨率和 SHA 均匹配当前 metadata。",
+        "1280/1920/2560 默认图及选中、资源不足、原生 tooltip 图的信息、皮肤和几何通过视觉复核。",
+        "175 项受保护输入、220 项冻结文件全部匹配；git diff --check 通过。",
+        "本结论批准精确本地提交；实际提交与向用户展示由 Main 执行。"
+      ]
+    }
   ],
-  "changed_files_sha256": {
-    "scripts/ui/skill_bar.gd": "7C8754CC72B852E3D857C3C94B9D312CF0C552BE654A96EC70CC9CDC29E34B6F",
-    "tests/test_skill_bar_production_cutover.gd": "4856297806E0AEC92E5891349493FB8A1AE2DA50A67399290DAFC863685B4742",
-    "docs/superpowers/plans/2026-09-05-skill-bar-production-cutover.md": "1EA3417FCD180A2F9664E941767801FC8134FB18DEDC621A9E2847887F279F09",
-    "dev_doc/ui-art-research/hud-prod-1d-skill-bar-cutover/evidence/capture-metadata.json": "CA97E6F0FB0CCB20DAE8CD4C2B7CF914F22A1F848C1A0BEE9DF82733DAC31645"
+  "verification": {
+    "independent_core": {
+      "script": "tests/test_skill_bar_production_cutover.gd",
+      "passed": 780,
+      "failed": 0,
+      "exit_code": 0,
+      "log": ".superpowers/sdd/2026-09-05-hud-generic-resource-cost/reviewer-test-three-digits-final.log"
+    },
+    "independent_geometry": {
+      "passed": 24,
+      "failed": 0,
+      "exit_code": 0,
+      "log": ".superpowers/sdd/2026-09-05-hud-generic-resource-cost/reviewer-three-digits-geometry.log",
+      "fixture": ".superpowers/sdd/2026-09-05-hud-generic-resource-cost/reviewer-three-digits-fixture.gd",
+      "amount": 999,
+      "glyph_width": 18,
+      "font_size": 10,
+      "outline_size": 2,
+      "scale": [
+        1,
+        1
+      ],
+      "font_same_as_existing_theme": true,
+      "full_tooltip_amount": true
+    },
+    "other_logs_checked": {
+      "test_hud_skill_slot_button": "50/0",
+      "test_swordsman_skillbar": "71/0",
+      "test_skillbar_v3_ui": "25/0",
+      "test_tactical_inject_smoke": "20/0"
+    },
+    "five_required_scripts_total": {
+      "passed": 946,
+      "failed": 0
+    },
+    "godot_errors_or_warnings": 0,
+    "protected": {
+      "checked": 175,
+      "mismatches": []
+    },
+    "frozen": {
+      "checked": 220,
+      "mismatches": []
+    },
+    "diff_check": "pass"
   },
-  "png_directory": "dev_doc/ui-art-research/hud-prod-1d-skill-bar-cutover/evidence",
-  "png_sha256": {
-    "skill_bar_default_1280x720.png": "8ce67e6404ab06776e6bdf277b903c9be763dda0f87a4df1c6fcb8ddcc253aef",
-    "skill_bar_default_1920x1080.png": "7f7c0179c4ec2ceb04d451d5cf56d4b33369bb0871e183106c156d39c75e8065",
-    "skill_bar_default_2560x1440.png": "d97c660fe3138e80392ac2982419f060120721671e6913e905b992091f565d95",
-    "skill_bar_selected_1280x720.png": "b3db7bc7f3532f8ba1c5ae55a74e109ad33494a17052dbb502beb375f86567d8",
-    "skill_bar_tooltip_1280x720.png": "4124c6ed7a0b88179d828c26a4a3a48e566b1cafb4b8de3aeed36d317faf0890",
-    "skill_bar_unavailable_1280x720.png": "7828fb63cff6fd46355303495042e0ee6fd4db37723d617e1650f2d38c7b95da"
+  "visual_verdict": {
+    "score": 93,
+    "verdict": "pass",
+    "category_match": true,
+    "differences": [],
+    "suggestions": [],
+    "reasoning": "六张真实截图中的行动类型与职业数字左右分明，完整名称和禁用信息可读，被动与选中状态可辨。原生 tooltip 正常换行并保留说明、资源名称、金额及不可用原因。当前原图 SHA 与已实际查看的字节相同。"
   },
-  "residual_risks": [],
-  "reviewer_changed_files": []
+  "png_metadata_check": {
+    "count": 6,
+    "all_sha256_match": true,
+    "all_dimensions_match": true,
+    "dimensions": [
+      [
+        1280,
+        720
+      ],
+      [
+        1280,
+        720
+      ],
+      [
+        1280,
+        720
+      ],
+      [
+        1280,
+        720
+      ],
+      [
+        1920,
+        1080
+      ],
+      [
+        2560,
+        1440
+      ]
+    ],
+    "starting_head_matches": true,
+    "real_payload_matches": true
+  },
+  "reviewer_product_changes": [],
+  "current_residuals": [],
+  "files_sha256": {
+    "scripts/core/tactical_manager.gd": "4BC77382A5C6A99D5550310AF4991D545C1A0A6CB8C4889B39517788A19D5501",
+    "scripts/ui/skill_bar.gd": "023D7F6200E52D02481A4EF35CC4D46DB765B2110A681CF1F91EFE27F03E2293",
+    "scripts/ui/production/skill_slot.gd": "1E631025325965DA8483B3BCC9BC359C922978FCEBBE0059381F5B3CDF3A8A16",
+    "scenes/tactical/production/skill_slot.tscn": "6BA07A13F8EAF6F8C33C13089E28B605DF15BA011D65BC7CD3A7886437676B30",
+    "tests/test_skill_bar_production_cutover.gd": "D1B42F69F99C9E453CE3366A0205064EB8DE86B9DA33246A868C807A488C142A",
+    "tests/capture_skill_bar_production_tactical.gd": "55A08383416C1EE9B4E0A9CE6BEBFAE2F816314A6151FFBD1C87013988CDB377",
+    "docs/superpowers/plans/2026-09-05-skill-bar-production-cutover.md": "D203868149512C4B3B0360B5977EF1ADD3EE6D3BAFDC2F438DD96A55F1052DF3",
+    "dev_doc/ui-art-research/hud-prod-1d-skill-bar-cutover/evidence/capture-metadata.json": "64C035A87552CED489BA81921B1531A85CA5BF02AB2530E5496E965492AB7D7C",
+    "dev_doc/ui-art-research/hud-prod-1d-skill-bar-cutover/evidence/skill_bar_default_1280x720.png": "02D62547B9EF7CF2D528830DB46BE53361419F0D4FDE17D087ABD8430FBB6EB6",
+    "dev_doc/ui-art-research/hud-prod-1d-skill-bar-cutover/evidence/skill_bar_default_1920x1080.png": "2A57D208AC36947A4037D31ADD7BFDFC2FF79ED4A0BD599CD3ED8392ABBA7FEA",
+    "dev_doc/ui-art-research/hud-prod-1d-skill-bar-cutover/evidence/skill_bar_default_2560x1440.png": "897256CC7D15072C7291040D5BA3613927C3ADAD66A4C670D0169926A3E996C3",
+    "dev_doc/ui-art-research/hud-prod-1d-skill-bar-cutover/evidence/skill_bar_selected_1280x720.png": "EF05E5182C692207DD3C4BBCA6CF5420990E0B20D5B9A838BBC654439A601D65",
+    "dev_doc/ui-art-research/hud-prod-1d-skill-bar-cutover/evidence/skill_bar_unavailable_1280x720.png": "58159CCEEFBE423E00C2D1D66152C5B090E256D1C796805D9088A77E5A5035EE",
+    "dev_doc/ui-art-research/hud-prod-1d-skill-bar-cutover/evidence/skill_bar_tooltip_1280x720.png": "0402D5B970BF0DD8391ABBF78DD2D49D9A59AE4D03E4CC4FDA135A58B281C575"
+  },
+  "reviewed_at": "2026-09-06T00:07:26.3136346+08:00"
 }

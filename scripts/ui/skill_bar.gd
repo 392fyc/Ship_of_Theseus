@@ -62,10 +62,10 @@ func update_entries(entries: Array[Dictionary], selected_skill_id: String) -> vo
 			if active_index < 4:
 				view.hotkey_text = str(active_index + 1)
 			active_index += 1
-		var action_cost: String = str(entry.get("action_cost", "standard"))
+		var action_cost: String = str(entry.get("action_cost", ""))
 		var slot: Button = ProductionSlotScene.instantiate() as Button
 		slot.custom_minimum_size = Vector2(extent, extent)
-		slot.call("configure_entry", entry, view, _build_cost_text(entry, action_cost), _get_cost_color(action_cost))
+		slot.call("configure_entry", entry, view, str(COST_SYMBOLS.get(action_cost, "")), _build_resource_cost_text(entry), _get_cost_color(action_cost))
 		slot.skill_activated.connect(_on_slot_pressed)
 		_list.add_child(slot)
 	_refresh_size()
@@ -95,6 +95,10 @@ func _compose_tooltip(entry: Dictionary, available: bool, is_passive: bool) -> S
 	var desc: String = str(entry.get("description", ""))
 	if desc != "":
 		parts.append(desc)
+	var resource_cost_text: String = _build_resource_cost_text(entry)
+	if not is_passive and resource_cost_text != "":
+		var display: Dictionary = entry.get("resource_cost_display", {})
+		parts.append("消耗：%s %s" % [resource_cost_text, display.get("resource_name", "")])
 	if not is_passive and not available:
 		var reason: String = str(entry.get("reason", ""))
 		if reason != "":
@@ -102,19 +106,10 @@ func _compose_tooltip(entry: Dictionary, available: bool, is_passive: bool) -> S
 	return "\n".join(parts)
 
 
-func _build_cost_text(entry: Dictionary, action_cost: String) -> String:
-	if entry.has("cost_text"):
-		return str(entry["cost_text"])
-	var qi_cost: int = int(entry.get("qi_cost", 0))
-	var mark_cost: int = int(entry.get("mark_cost", 0))
-	var parts: PackedStringArray = []
-	if mark_cost > 0:
-		parts.append(str(mark_cost))
-	if qi_cost > 0:
-		parts.append(str(qi_cost))
-	if not parts.is_empty():
-		return "+".join(parts)
-	return str(COST_SYMBOLS.get(action_cost, ""))
+func _build_resource_cost_text(entry: Dictionary) -> String:
+	var display: Dictionary = entry.get("resource_cost_display", {})
+	var amount: int = int(display.get("amount", 0))
+	return str(amount) if amount > 0 else ""
 
 
 func _get_cost_color(action_cost: String) -> Color:

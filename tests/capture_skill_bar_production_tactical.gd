@@ -67,9 +67,9 @@ func _run() -> void:
 		if not await _save("tooltip", actual_tooltip):
 			return
 	var metadata: Dictionary = {
-		"task_id": "HUD-PROD-1D-SKILL-BAR-PRODUCTION-CUTOVER",
+		"task_id": "HUD-PROD-1D-GENERIC-RESOURCE-COST",
 		"source_scene": "scenes/tactical/TacticalScene.tscn",
-		"starting_head": "762e9cb9e7d6166d7134a42d6e72c0656dc6da7b",
+		"starting_head": "ce6ba1943cb6961cc8fa8a8cad40c226f6761a63",
 		"godot_version": Engine.get_version_info().string,
 		"captures": _captures,
 		"character_configuration": "真实TacticalScene剑圣配置，未注入合成技能数量。",
@@ -95,13 +95,25 @@ func _save(state: String, tooltip: Label = null) -> bool:
 	if bar.get_global_rect().get_center().x != strip.get_global_rect().get_center().x:
 		_fail("技能架与资源条未对齐")
 		return false
+	var source_costs: Dictionary = {}
+	for entry: Dictionary in _manager.get_dashboard_data().skills:
+		source_costs[entry.skill_id] = entry.get("resource_cost_display", {})
 	var visible_skills: Array[Dictionary] = []
 	for slot: Button in bar._list.get_children():
 		var view: RefCounted = slot.get("_view")
+		var action_label: Label = slot.get_node("Content/ActionTypeLabel") as Label
+		var resource_label: Label = slot.get_node("Content/CostLabel") as Label
+		var action_rect: Rect2 = action_label.get_rect()
+		var resource_rect: Rect2 = resource_label.get_rect()
 		visible_skills.append({"skill_id": view.skill_id, "name": slot.get_node("NameLabel").text,
 			"hotkey": view.hotkey_text, "enabled": view.enabled, "disabled": slot.disabled,
 			"selected": view.selected, "cooldown": view.cooldown_turns, "passive": view.passive,
-			"cost_text": slot.get_node("Content/CostLabel").text, "size": [slot.size.x, slot.size.y]})
+			"action_type_text": action_label.text, "resource_cost_text": resource_label.text,
+			"resource_cost_display": source_costs.get(view.skill_id, {}),
+			"action_type_visible": action_label.is_visible_in_tree(), "resource_cost_visible": resource_label.is_visible_in_tree(),
+			"action_type_rect": [action_rect.position.x, action_rect.position.y, action_rect.size.x, action_rect.size.y],
+			"resource_cost_rect": [resource_rect.position.x, resource_rect.position.y, resource_rect.size.x, resource_rect.size.y],
+			"badge_rect_coordinate_space": "slot_content_local", "size": [slot.size.x, slot.size.y]})
 	await RenderingServer.frame_post_draw
 	var capture: Image = root.get_texture().get_image()
 	if capture == null or capture.get_size() != _resolution:
