@@ -32,6 +32,7 @@ func _run() -> void:
 
 	_test_normalization(view_script)
 	await _test_declared_structure_and_states(view_script, packed)
+	await _test_movement_color_ignores_theme_tint(view_script, packed)
 	_finish()
 
 
@@ -180,6 +181,31 @@ func _test_declared_structure_and_states(view_script: GDScript,
 	_check("图形组件没有斜杠状态属性",
 		glyph_properties.all(func(name: String) -> bool: return not "slash" in name))
 
+	strip.queue_free()
+	await process_frame
+
+
+func _test_movement_color_ignores_theme_tint(view_script: GDScript,
+		packed: PackedScene) -> void:
+	var strip: Control = packed.instantiate() as Control
+	strip.theme = strip.theme.duplicate(true) as Theme
+	strip.theme.set_color(&"font_color", &"ActionResourceMovementValue", Color("#24384A"))
+	root.add_child(strip)
+	await process_frame
+	var movement_value: Label = strip.get_node(
+		"Margin/MainRow/MovementZone/MovementCluster/MovementValue") as Label
+	var view: RefCounted = view_script.new()
+	view.set("movement_remaining", 4)
+	var states: Array[bool] = [true, false, true]
+	var labels: Array[String] = ["可用", "耗尽", "恢复可用"]
+	for index: int in states.size():
+		view.set("movement_available", states[index])
+		strip.call("apply_view", view)
+		var expected_color: Color = Color("#D1AB57") if states[index] else Color("#CDD2DA")
+		_eq("%s时数值保持白色调制" % labels[index], movement_value.modulate, Color.WHITE)
+		_eq("%s时实际字体色不受主题底色叠乘" % labels[index],
+			movement_value.get_theme_color(&"font_color") * movement_value.modulate, expected_color)
+		_eq("%s时移动数值保持" % labels[index], movement_value.text, "4")
 	strip.queue_free()
 	await process_frame
 

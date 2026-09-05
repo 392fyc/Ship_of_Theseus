@@ -39,7 +39,10 @@ func _apply_view_to_nodes() -> void:
 	_footprint_glyph.configure(ActionResourceGlyph.Kind.FOOTPRINT,
 		not _view.movement_available)
 	_movement_value.text = str(_view.movement_remaining)
-	_movement_value.modulate = _footprint_glyph.get_display_color()
+	var movement_color: Color = ActionResourceGlyph.FOOTPRINT_COLOR if _view.movement_available \
+		else ActionResourceGlyph.SPENT_OUTLINE_COLOR
+	_movement_value.add_theme_color_override(&"font_color", movement_color)
+	_movement_value.modulate = Color.WHITE
 	_rebuild_pips(_standard_pips, ActionResourceGlyph.Kind.STANDARD,
 		_view.standard_capacity, _view.standard_remaining)
 	_rebuild_pips(_swift_pips, ActionResourceGlyph.Kind.SWIFT,
