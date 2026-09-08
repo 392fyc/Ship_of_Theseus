@@ -1,0 +1,347 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud/m2/skill_slot_button.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/themes/hud_m2.tres" id="2_theme"]
+[ext_resource type="Script" path="res://scripts/ui/hud/m2/action_resource_glyph.gd" id="3_glyph"]
+
+[node name="SkillSlotButton" type="Button"]
+custom_minimum_size = Vector2(64, 64)
+offset_right = 64.0
+offset_bottom = 64.0
+focus_mode = 2
+theme = ExtResource("2_theme")
+theme_type_variation = &"HudM2SkillButton"
+script = ExtResource("1_script")
+
+[node name="Content" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ActiveFrame" type="Panel" parent="Content"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"HudM2SlotFrame"
+
+[node name="IconRect" type="TextureRect" parent="Content"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
+expand_mode = 1
+stretch_mode = 0
+
+[node name="PassiveFrame" type="Control" parent="Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Contour" type="Panel" parent="Content/PassiveFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+theme_type_variation = &"HudM2PassiveContour"
+
+[node name="TopShadow" type="Panel" parent="Content/PassiveFrame"]
+layout_mode = 1
+anchor_right = 1.0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = 5.0
+mouse_filter = 2
+theme_type_variation = &"HudM2PassiveShadow"
+
+[node name="LeftShadow" type="Panel" parent="Content/PassiveFrame"]
+layout_mode = 1
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = 5.0
+offset_right = 5.0
+offset_bottom = -5.0
+mouse_filter = 2
+theme_type_variation = &"HudM2PassiveShadow"
+
+[node name="BottomReflection" type="Panel" parent="Content/PassiveFrame"]
+layout_mode = 1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = -4.0
+offset_right = -3.0
+offset_bottom = -3.0
+mouse_filter = 2
+theme_type_variation = &"HudM2PassiveBottom"
+
+[node name="RightReflection" type="Panel" parent="Content/PassiveFrame"]
+layout_mode = 1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -4.0
+offset_top = 5.0
+offset_right = -3.0
+offset_bottom = -4.0
+mouse_filter = 2
+theme_type_variation = &"HudM2PassiveRight"
+
+[node name="InnerEdge" type="Panel" parent="Content/PassiveFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+offset_left = 5.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = -5.0
+theme_type_variation = &"HudM2PassiveInner"
+
+[node name="CooldownShade" type="Panel" parent="Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+offset_left = 5.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = -5.0
+theme_type_variation = &"HudM2Cooldown"
+
+[node name="UnavailableShade" type="Panel" parent="Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+offset_left = 5.0
+offset_top = 5.0
+offset_right = -5.0
+offset_bottom = -5.0
+theme_type_variation = &"HudM2Unavailable"
+
+[node name="CooldownTurnsLabel" type="Label" parent="Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -12.0
+offset_top = -15.0
+offset_right = 12.0
+offset_bottom = 13.0
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_type_variation = &"HudM2CooldownLabel"
+
+[node name="SelectedOverlay" type="Panel" parent="Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+offset_left = 2.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+theme_type_variation = &"HudM2Selection"
+
+[node name="InspectionPanel" type="Panel" parent="."]
+unique_name_in_owner = true
+visible = false
+z_index = 20
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -130.0
+offset_top = -112.0
+offset_right = 130.0
+offset_bottom = -8.0
+mouse_filter = 0
+theme_type_variation = &"HudM2Base"
+
+[node name="Frame" type="Panel" parent="InspectionPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"HudM2Panel"
+
+[node name="InspectionLabel" type="Label" parent="InspectionPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = 12.0
+offset_right = -14.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"HudM2Text"
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 2
+
+[node name="HotkeyBadge" type="Panel" parent="Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -22.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = 22.0
+mouse_filter = 2
+theme_type_variation = &"HudM2Hotkey"
+
+[node name="HotkeyText" type="Label" parent="Content/HotkeyBadge"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+theme_type_variation = &"HudM2NumericLabel"
+
+[node name="ActionBadge" type="Panel" parent="Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = -21.0
+offset_right = 23.0
+offset_bottom = -4.0
+mouse_filter = 2
+theme_type_variation = &"HudM2ActionBadge"
+
+[node name="ActionGlyph" type="Control" parent="Content/ActionBadge"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 4.0
+offset_top = 3.0
+offset_right = 15.0
+offset_bottom = 14.0
+mouse_filter = 2
+script = ExtResource("3_glyph")
+
+[node name="ResourceCostBadge" type="Panel" parent="Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -30.0
+offset_top = -21.0
+offset_right = -4.0
+offset_bottom = -4.0
+mouse_filter = 2
+theme_type_variation = &"HudM2CostBadge"
+
+[node name="ResourceCostText" type="Label" parent="Content/ResourceCostBadge"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+offset_left = 1.0
+offset_right = -1.0
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+theme_type_variation = &"HudM2NumericLabel"
+
+[node name="ChargeText" type="Label" parent="Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+mouse_filter = 2
+theme_type_variation = &"HudM2NumericLabel"
+
+[node name="FocusOverlay" type="Panel" parent="Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+offset_left = 1.0
+offset_top = 1.0
+offset_right = -1.0
+offset_bottom = -1.0
+theme_type_variation = &"HudM2Selection"

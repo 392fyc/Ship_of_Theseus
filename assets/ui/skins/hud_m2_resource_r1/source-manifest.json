@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "task_id": "RESOURCE-INTEGRATION-R1-T1-MATERIAL",
+  "selected_option": "A",
+  "approval": {
+    "file_id": "c828d3cf-7d4e-8145-8008-8f0919f9073c",
+    "page_id": "8086b853-2801-807d-8008-985af17836c7",
+    "root_id": "8086b853-2801-807d-8008-9b0389eec6d2",
+    "source_read_revision": 199,
+    "approval_record": ".omc/plans/penpot-ui-m2/resource-integration-r1/approved-selection.json",
+    "approval_record_sha256": "d4355ae8431091de11504bf9f394279b52929a723a1e8ce1f1d1721d8a65f539",
+    "candidate_record": ".omc/plans/penpot-ui-m2/resource-canvas-r1/candidate-record.json",
+    "candidate_sha256": "58955abc3354a6650dc15e1f4ae06a4049da51074449aba24f188b1d1921fc1d",
+    "native_reference": ".omc/plans/penpot-ui-m2/resource-canvas-r1/A-native.png",
+    "native_reference_sha256": "8fcec07a0a99b1a5556472a643b6d1722a783238ca291b48e9335be79273c88a"
+  },
+  "source_repository": "Ship_of_Theseus",
+  "source_planning_branch": "codex/issue-18-action-resource-bar",
+  "source_head": "507485a18d31ea0e709172e0787b99cd6de8c9fb",
+  "resource_design_source": {
+    "path": ".omc/plans/penpot-ui-m2/resource-spec-r1/designlib-facts.json",
+    "sha256": "049b8bab1b4084ea69c75e475217845d62c75d72696350c43cbb3e27f46f9387",
+    "schema_version": "unversioned",
+    "source_snapshot_or_commit": "3a71ade3cac109dbdda8a90d0e47f04232f83b9f",
+    "normalized_sha256": {
+      "snapshots/resources.json@3a71ade3cac109dbdda8a90d0e47f04232f83b9f": "526d654f5b1d2490e2f9674a7486e7cc0547c5ca10d7d86c4128bab97813a0da",
+      "snapshots/classes.json@3a71ade3cac109dbdda8a90d0e47f04232f83b9f": "d0bce975fe9a2c705de70b782000e36d11e1307f7cfe7d6f0d26e8b7acadd470",
+      "snapshots/rules.json@3a71ade3cac109dbdda8a90d0e47f04232f83b9f": "62495259d704c3a04ecc3d3b1effb9149ddf198180cb0bd104c98ba575782191",
+      "snapshots/skills.json@3a71ade3cac109dbdda8a90d0e47f04232f83b9f": "4706a409ca233e82d8f434a4584dd9743104d1dfe8753b02c4b2899edf018b57",
+      "snapshots/talents.json@3a71ade3cac109dbdda8a90d0e47f04232f83b9f": "e47e50fa2f35a8438b7de692206422d9a07cbdbd3a17e10aeb8dc16fc839eec9",
+      "snapshots/manifest.json@3a71ade3cac109dbdda8a90d0e47f04232f83b9f": "abb10804f8e010592c3568695d224a842f8b7092307a2f0144cdcdee04422136",
+      "app/models.py@3a71ade3cac109dbdda8a90d0e47f04232f83b9f": "7a96ed5937a5afc76eb0a50fe1f1fbf3bf78c366bc74988ee5631bdccfafcd7b",
+      "docs/mercury-sot-lane-management.md@3a71ade3cac109dbdda8a90d0e47f04232f83b9f": "29f0ed1d8a4becf9a99f8b6fa59fd5c6ee574137a13dd758d20f1890f1034949"
+    }
+  },
+  "logical_canvas": [
+    1280,
+    720
+  ],
+  "resource_bounds": [
+    32,
+    540,
+    366,
+    56
+  ],
+  "shared_resource_separator": [
+    35,
+    597.8,
+    363,
+    1.2
+  ],
+  "texture": {
+    "media_id": "c828d3cf-7d4e-8145-8008-9a698a4b776a",
+    "name": "black-plum-bookcloth.png",
+    "opacity": 0.16,
+    "sampling": "Original full source clone hierarchy and image-fill bounds; no-action body uses native clipping at logical y=599 without resizing texture."
+  },
+  "native_export": {
+    "api": "node.export",
+    "type": "png",
+    "scale": 1,
+    "postprocessing": "Base64 decoding and byte-identical file copy only."
+  },
+  "presentation_tokens": ".omc/plans/penpot-ui-m2/resource-integration-r1/material-exports/presentation-tokens.json",
+  "assets": [
+    {
+      "key": "shared-with-resources",
+      "path": "shared-with-resources.png",
+      "node_id": "8086b853-2801-807d-8008-9b93fac5794d",
+      "source_clone_id": "8086b853-2801-807d-8008-9b93fbca4311",
+      "logical_bounds": [
+        32,
+        540,
+        1216,
+        164
+      ],
+      "pixel_size": [
+        1216,
+        164
+      ],
+      "sha256": "20197fa1c06265de0322b1fca9412b44cc99c0bc672e61803e09043c9c910b86",
+      "export_revision": 201,
+      "exported_at": "2026-09-08T13:44:13.570Z",
+      "contains_dynamic_content": false,
+      "native_evidence": ".omc/plans/penpot-ui-m2/resource-integration-r1/material-exports/export-shared-with-resources.json",
+      "outline": "M38,540 H380 Q386,540 386,546 V585 C386,591 391,596 398,596 H492 C498,596 503,591 503,585 V557 Q503,550 510,550 H770 Q777,550 777,557 V585 C777,591 782,596 788,596 H1242 Q1248,596 1248,602 V698 Q1248,704 1242,704 H38 Q32,704 32,698 V546 Q32,540 38,540 Z",
+      "derivation": "Approved A source clone; content and upper portrait accent paths hidden within export clone."
+    },
+    {
+      "key": "shared-resources-only",
+      "path": "shared-resources-only.png",
+      "node_id": "8086b853-2801-807d-8008-9b942c4f7135",
+      "source_clone_id": "8086b853-2801-807d-8008-9b942d1fc7db",
+      "logical_bounds": [
+        32,
+        540,
+        1216,
+        164
+      ],
+      "pixel_size": [
+        1216,
+        164
+      ],
+      "sha256": "97e6b222aea4ab9a99a151df8932c131f4e886b5b41ac3423353b963e80231a1",
+      "export_revision": 202,
+      "exported_at": "2026-09-08T13:47:34.856Z",
+      "contains_dynamic_content": false,
+      "native_evidence": ".omc/plans/penpot-ui-m2/resource-integration-r1/material-exports/export-shared-resources-only.json",
+      "outline": "M38,540 H380 Q386,540 386,546 V585 C386,591 391,596 398,596 H1242 Q1248,596 1248,602 V698 Q1248,704 1242,704 H38 Q32,704 32,698 V546 Q32,540 38,540 Z",
+      "derivation": "Same A resource curve and material stops; action protrusion closed along body top; original body texture clipped without resampling.",
+      "derived_layer_ids": [
+        "8086b853-2801-807d-8008-9b949cfe8bf5",
+        "8086b853-2801-807d-8008-9b949df481d0",
+        "8086b853-2801-807d-8008-9b949f110538",
+        "8086b853-2801-807d-8008-9b949ffb72ec",
+        "8086b853-2801-807d-8008-9b94a0ecd431",
+        "8086b853-2801-807d-8008-9b94a1d784a8"
+      ],
+      "texture_clip": {
+        "id": "8086b853-2801-807d-8008-9b94326876a6",
+        "rect": [
+          0,
+          599,
+          1280,
+          121
+        ],
+        "sourcePath": "8086b853-2801-807d-8008-9b0389eec6ec",
+        "samplingPreserved": true
+      }
+    },
+    {
+      "key": "mark-slot",
+      "path": "mark-slot.png",
+      "node_id": "8086b853-2801-807d-8008-9b94369f22c0",
+      "source_clone_id": "8086b853-2801-807d-8008-9b943850afbb",
+      "logical_bounds": [
+        282,
+        562,
+        24,
+        24
+      ],
+      "pixel_size": [
+        24,
+        24
+      ],
+      "sha256": "8dee0fa8eec086b20dff8309e2dc225f7dcde5b6c1fba9ce3126edd767f173f2",
+      "export_revision": 201,
+      "exported_at": "2026-09-08T13:44:28.707Z",
+      "contains_dynamic_content": false,
+      "native_evidence": ".omc/plans/penpot-ui-m2/resource-integration-r1/material-exports/export-mark-slot.json",
+      "derivation": "First A mark slot cropped natively with text hidden; empty border uses observed regular-state #63523D, interior #100C17.",
+      "empty_border_source_node_id": "8086b853-2801-807d-8008-9b049ba3e651",
+      "source_mark_border_node_id": "8086b853-2801-807d-8008-9b039d395fda"
+    }
+  ]
+}

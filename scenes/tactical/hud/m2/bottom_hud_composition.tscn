@@ -1,0 +1,66 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud/m2/bottom_hud_composition.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/tactical/hud/m2/character_hud_panel.tscn" id="2_character"]
+[ext_resource type="PackedScene" path="res://scenes/tactical/hud/m2/equipment_hud_panel.tscn" id="3_equipment"]
+[ext_resource type="PackedScene" path="res://scenes/tactical/hud/m2/skill_shelf.tscn" id="4_skills"]
+[ext_resource type="PackedScene" path="res://scenes/tactical/hud/m2/relic_grid.tscn" id="5_relics"]
+[ext_resource type="PackedScene" path="res://scenes/tactical/hud/m2/end_turn_control.tscn" id="6_end"]
+[ext_resource type="PackedScene" path="res://scenes/tactical/hud/m2/action_resource_strip.tscn" id="7_actions"]
+[ext_resource type="Theme" path="res://assets/ui/themes/hud_m2.tres" id="8_theme"]
+[ext_resource type="Script" path="res://scripts/ui/hud/m2/shared_frame.gd" id="9_frame"]
+[ext_resource type="PackedScene" path="res://scenes/tactical/hud/m2/class_resource_host.tscn" id="10_resource"]
+
+[node name="BottomHudComposition" type="Control"]
+custom_minimum_size = Vector2(1280, 720)
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+theme = ExtResource("8_theme")
+script = ExtResource("1_script")
+
+[node name="SharedFrame" type="Control" parent="."]
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 0
+theme_type_variation = &"HudM2SharedFrame"
+script = ExtResource("9_frame")
+
+[node name="ClassResourceHost" parent="." instance=ExtResource("10_resource")]
+
+[node name="BottomRow" type="HBoxContainer" parent="."]
+custom_minimum_size = Vector2(1216, 108)
+layout_mode = 0
+offset_left = 32.0
+offset_top = 596.0
+offset_right = 1248.0
+offset_bottom = 704.0
+theme_override_constants/separation = 8
+
+[node name="CharacterHudPanel" parent="BottomRow" instance=ExtResource("2_character")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="EquipmentHudPanel" parent="BottomRow" instance=ExtResource("3_equipment")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SkillShelf" parent="BottomRow" instance=ExtResource("4_skills")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="RelicGrid" parent="BottomRow" instance=ExtResource("5_relics")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="EndTurnControl" parent="BottomRow" instance=ExtResource("6_end")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ActionResourceStrip" parent="." instance=ExtResource("7_actions")]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 503.0
+offset_top = 550.0
+offset_right = 777.0
+offset_bottom = 590.0

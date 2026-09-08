@@ -184,9 +184,14 @@ func get_selected_skill_id() -> String:
 func get_dashboard_data() -> Dictionary:
 	var info_unit: Unit = _get_dashboard_unit()
 	if info_unit == null:
-		return {"visible": false}
+		return {"visible": false, "class_resource_display": {}}
 
 	var is_enemy_info: bool = _is_enemy_info_mode()
+	# 只投影现行分档边界；资源库存与单位规则保持原来源。
+	var qi_threshold_pct: int = info_unit._xinyan_qi_ratio_threshold_pct
+	var qi_band: StringName = &"none"
+	if info_unit._qi_max > 0 and qi_threshold_pct >= 0:
+		qi_band = &"low" if info_unit.sword_qi * 100 <= info_unit._qi_max * qi_threshold_pct else &"high"
 	return {
 		"visible": true,
 		"mode": "enemy" if is_enemy_info else "player",
@@ -213,6 +218,13 @@ func get_dashboard_data() -> Dictionary:
 		"selected_skill_id": _selected_skill_id,
 		"forecast": _combat_forecast.duplicate(true),
 		"hint_text": _get_dashboard_hint_text(),
+		"weapon_display": _get_weapon_display(info_unit),
+		"class_resource_display": {
+			"class_id": info_unit.unit_id,
+			"mark_capacity": info_unit._mark_max,
+			"qi_threshold_ratio": float(qi_threshold_pct) / 100.0 if qi_threshold_pct >= 0 else -1.0,
+			"qi_band": qi_band,
+		},
 		# ── 主属性面板：基础值 + 括号加成（stats_delta=生效−基础，含印记/心眼/buff）──
 		"stats": {
 			"str": info_unit.stats.str_attr, "mag": info_unit.stats.mag,
@@ -239,6 +251,25 @@ func get_dashboard_data() -> Dictionary:
 			"speed_threshold": info_unit._xinyan_speed_threshold,
 		} if info_unit._qi_max > 0 else {},
 	}
+
+
+func _get_weapon_display(info_unit: Unit) -> Dictionary:
+	if info_unit == null:
+		return {}
+	var content_id: String = info_unit.weapon_id.strip_edges()
+	if content_id.is_empty():
+		return {}
+	var source: Variant = DataLoader.weapons.get(content_id)
+	if not source is Dictionary:
+		return {}
+	var record: Dictionary = source
+	var display_name_value: Variant = record.get("name")
+	if not (display_name_value is String or display_name_value is StringName):
+		return {}
+	var display_name: String = str(display_name_value).strip_edges()
+	if display_name.is_empty():
+		return {}
+	return {"content_id": content_id, "display_name": display_name}
 
 
 ## 当前悬停格的世界坐标（供浮窗定位）。纯只读 helper、纯加法。

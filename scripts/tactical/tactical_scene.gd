@@ -9,14 +9,16 @@ extends Node2D
 # 伤害预测浮窗脚本用 preload 引用（headless --script 不刷新全局 class_name 缓存；
 # class_name DamageForecaster 仍在文件内声明，编辑器/真机可全局引用）。
 const DamageForecasterScript: GDScript = preload("res://scripts/ui/damage_forecaster.gd")
+const RuntimeDashboardScript: GDScript = preload("res://scripts/ui/hud/m2/runtime_dashboard.gd")
 
 var _turn_order_bar: TurnOrderBar = null
-var _bottom_dashboard: BottomDashboard = null
+var _bottom_dashboard: HudM2RuntimeDashboard = null
 # 伤害预测浮窗（v3）：浮于悬停目标格上方，独立 CanvasLayer 宿主（屏幕空间）。
 var _forecaster_layer: CanvasLayer = null
 var _damage_forecaster: Control = null
 # 头顶数字节点池（浮于各受影响目标头顶，持续显示至瞄准结束）。
 var _forecast_head_nodes: Array[Node] = []
+var _forecast_world_anchor: Vector2 = Vector2.ZERO
 # 浮窗锚到目标格上方的纵向间距（格中心上方留出 ~半格 + 浮窗高 + 三角）。
 const FORECASTER_ANCHOR_OFFSET_Y: float = 36.0
 # 浮窗在头顶数字上方的额外净空（浮窗底边不压头顶数字）。
@@ -63,7 +65,6 @@ const ENEMY_UNITS: Array[Dictionary] = [
 
 var _battle_over: bool = false
 var _turn_order_scene: PackedScene = preload("res://scenes/tactical/TurnOrderBar.tscn")
-var _bottom_dashboard_scene: PackedScene = preload("res://scenes/tactical/bottom_dashboard.tscn")
 
 # ── 调试 harness（默认开启于测试场景；纯加法、不影响正式战斗逻辑）──────
 ## 是否启用调试 harness（快捷键 + overlay）。本测试场景默认 true；
@@ -120,7 +121,7 @@ func _ready() -> void:
 
 	_turn_order_bar = _turn_order_scene.instantiate()
 	$UILayer.add_child(_turn_order_bar)
-	_bottom_dashboard = _bottom_dashboard_scene.instantiate()
+	_bottom_dashboard = RuntimeDashboardScript.new()
 	$UILayer.add_child(_bottom_dashboard)
 	_build_damage_forecaster()
 	tactical_manager.turn_manager.queue_changed.connect(_refresh_turn_order)
@@ -378,24 +379,30 @@ func _update_damage_forecaster() -> void:
 		_spawn_forecast_head_nodes(targets)
 
 	_damage_forecaster.set_forecast(forecast)
-	var world: Vector2 = hover.get("world", Vector2.ZERO)
-	var screen: Vector2 = _world_to_screen(world)
+	_forecast_world_anchor = hover.get("world", Vector2.ZERO)
+	_damage_forecaster.visible = true
+	_layout_damage_forecaster()
+
+
+func _layout_damage_forecaster() -> void:
+	if _damage_forecaster == null or not _damage_forecaster.visible:
+		return
+	var screen: Vector2 = _world_to_screen(_forecast_world_anchor)
 	# 锚到目标格上方：x 居中浮窗、底部三角尖对准格中心上方（额外加头顶数字净空）。
-	var panel_size: Vector2 = DamageForecasterScript.PANEL_SIZE
+	var visual_size: Vector2 = _damage_forecaster.get_visual_size()
 	var pos: Vector2 = Vector2(
-		screen.x - panel_size.x * 0.5,
-		screen.y - FORECASTER_ANCHOR_OFFSET_Y - FORECASTER_HEAD_CLEARANCE - panel_size.y - DamageForecasterScript.TRIANGLE_H)
+		screen.x - visual_size.x * 0.5,
+		screen.y - FORECASTER_ANCHOR_OFFSET_Y - FORECASTER_HEAD_CLEARANCE - visual_size.y)
 	# 夹在视口内，避免出界（顶端/左右）。
 	var vp: Vector2 = get_viewport().get_visible_rect().size
-	pos.x = clampf(pos.x, 4.0, maxf(4.0, vp.x - panel_size.x - 4.0))
+	pos.x = clampf(pos.x, 4.0, maxf(4.0, vp.x - visual_size.x - 4.0))
 	# 底部避让：浮窗底边不得压到底栏内容区（人物属性栏等）。目标在棋盘下方时上移。
-	if _bottom_dashboard != null and _bottom_dashboard.has_method("get_content_top_y"):
+	if _bottom_dashboard != null:
 		var dash_top: float = _bottom_dashboard.get_content_top_y()
 		if dash_top > 0.0:
-			pos.y = minf(pos.y, dash_top - panel_size.y - 6.0)
+			pos.y = minf(pos.y, dash_top - visual_size.y - 8.0)
 	pos.y = maxf(4.0, pos.y)
 	_damage_forecaster.position = pos
-	_damage_forecaster.visible = true
 
 
 ## 世界坐标 → 屏幕坐标（经视口 canvas 变换，含相机平移/缩放）。
@@ -493,7 +500,7 @@ func _try_trigger_skill_slot(slot_index: int) -> void:
 	# 键 1-4 仅对应「主动」技能（跳过心眼等被动条目），与技能栏键位角标 1-4 一致。
 	var active: Array = []
 	for e: Dictionary in entries:
-		if not bool(e.get("is_passive", false)):
+		if bool(e.get("active_capable", not bool(e.get("is_passive", false)))):
 			active.append(e)
 	var idx: int = slot_index - 1
 	if idx < 0 or idx >= active.size():
@@ -624,6 +631,8 @@ func _make_debug_button(label_text: String) -> Button:
 
 
 func _process(_delta: float) -> void:
+	if _damage_forecaster != null and _damage_forecaster.visible:
+		_layout_damage_forecaster()
 	if debug_harness_enabled and _debug_overlay != null and not _battle_over:
 		_refresh_debug_overlay()
 

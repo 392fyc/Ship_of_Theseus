@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/playground/hud_m2_p3_gallery.gd" id="1_gallery"]
+[ext_resource type="PackedScene" path="res://scenes/tactical/hud/m2/bottom_hud_composition.tscn" id="2_composition"]
+
+[node name="HudM2P3Gallery" type="Control"]
+custom_minimum_size = Vector2(1280, 720)
+offset_right = 1280.0
+offset_bottom = 720.0
+clip_contents = true
+script = ExtResource("1_gallery")
+
+[node name="DesignRoot" type="Control" parent="."]
+unique_name_in_owner = true
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+
+[node name="Background" type="ColorRect" parent="DesignRoot"]
+offset_right = 1280.0
+offset_bottom = 720.0
+mouse_filter = 2
+color = Color(0.06667, 0.07451, 0.10980, 1)
+
+[node name="Board" type="Control" parent="DesignRoot"]
+unique_name_in_owner = true
+offset_right = 1280.0
+offset_bottom = 640.0
+mouse_filter = 2
+
+[node name="BottomHudComposition" parent="DesignRoot" instance=ExtResource("2_composition")]
+unique_name_in_owner = true
+layout_mode = 0

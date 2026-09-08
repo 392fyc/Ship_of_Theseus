@@ -1,0 +1,351 @@
+{
+  "scope": "M2 P3 显示夹具；数值不定义玩法，图片不构成正式内容库准入。",
+  "character": {
+    "profession_name": "剑圣",
+    "player_name": "fyc",
+    "level": 12,
+    "experience": {
+      "current": 34,
+      "maximum": 100
+    },
+    "hp": {
+      "current": 160,
+      "maximum": 200
+    },
+    "shield": {
+      "current": 45,
+      "maximum": 60
+    },
+    "portrait_path": "res://assets/prototype/visual_style/samples/portrait_preview_final.png",
+    "portrait_crop": [
+      160,
+      200,
+      220,
+      235
+    ],
+    "attributes": {
+      "STR": {
+        "value": 18,
+        "delta": 2
+      },
+      "MAG": 7,
+      "DEX": {
+        "value": 16,
+        "delta": 1
+      },
+      "SPE": 12,
+      "DEF": {
+        "value": 14,
+        "delta": 3
+      },
+      "RES": 9,
+      "LCK": 11,
+      "MOV": 4
+    }
+  },
+  "character_overrides": {
+    "mixed": {
+      "hp": {
+        "current": 38,
+        "maximum": 200
+      },
+      "shield": {
+        "current": 0,
+        "maximum": 60
+      }
+    },
+    "compact": {
+      "player_name": "远行于群星与长夜之间的 fyc"
+    },
+    "focus": {
+      "player_name": "远行于群星与长夜之间的 fyc"
+    },
+    "missing": {
+      "profession_name": "",
+      "player_name": "",
+      "level": null,
+      "experience": null,
+      "shield": null,
+      "portrait_path": "",
+      "attributes": {
+        "STR": null,
+        "MAG": null,
+        "DEX": null,
+        "SPE": null,
+        "DEF": null,
+        "RES": null,
+        "LCK": null,
+        "MOV": null
+      }
+    }
+  },
+  "skills": [
+    {
+      "skill_id": "fixture_slash",
+      "name": "斩击",
+      "icon": "res://assets/prototype/hud_m2/skill-zhanji.png",
+      "action_type": "standard",
+      "resource_cost_display": {
+        "amount": 12,
+        "resource_name": "斗志"
+      }
+    },
+    {
+      "skill_id": "fixture_counter",
+      "name": "被动可触发示例",
+      "icon": "res://assets/prototype/hud_m2/skill-yishan.png",
+      "action_type": "move",
+      "passive": true,
+      "active_capable": true,
+      "resource_cost_display": {
+        "amount": 999,
+        "resource_name": "法力"
+      }
+    },
+    {
+      "skill_id": "fixture_parry",
+      "name": "冷却示例",
+      "icon": "res://assets/prototype/hud_m2/skill-zhaojia.png",
+      "action_type": "swift",
+      "cooldown_turns": 2,
+      "resource_cost_display": {}
+    },
+    {
+      "skill_id": "fixture_insight",
+      "name": "纯被动示例",
+      "icon": "res://assets/prototype/hud_m2/skill-xinyan.png",
+      "action_type": "swift",
+      "passive": true,
+      "active_capable": false,
+      "resource_cost_display": {
+        "amount": 128,
+        "resource_name": "斗志"
+      }
+    },
+    {
+      "skill_id": "fixture_draw",
+      "name": "居合",
+      "icon": "res://assets/prototype/hud_m2/skill-juhe.png",
+      "action_type": "standard",
+      "resource_cost_display": {
+        "amount": 24,
+        "resource_name": "斗志"
+      }
+    },
+    {
+      "skill_id": "fixture_slash_extra",
+      "name": "无费用示例",
+      "icon": "res://assets/prototype/hud_m2/skill-zhanji.png",
+      "action_type": "standard",
+      "resource_cost_display": {}
+    },
+    {
+      "skill_id": "fixture_dash_extra",
+      "name": "非法费用示例",
+      "icon": "res://assets/prototype/hud_m2/skill-yishan.png",
+      "action_type": "move",
+      "resource_cost_display": {
+        "amount": "16",
+        "resource_name": "法力"
+      }
+    }
+  ],
+  "skill_overrides": {
+    "mixed": {
+      "0": {
+        "selected": true
+      },
+      "4": {
+        "enabled": false,
+        "tooltip_text": "资源不足的显示示例"
+      }
+    },
+    "compact": {
+      "0": {
+        "selected": true
+      },
+      "4": {
+        "enabled": false
+      }
+    },
+    "focus": {
+      "0": {
+        "selected": true
+      },
+      "4": {
+        "enabled": false
+      }
+    },
+    "missing": {
+      "5": {
+        "resource_cost_display": {
+          "resource_name": "法力"
+        }
+      }
+    }
+  },
+  "action_resources": {
+    "movement_remaining": 4,
+    "movement_available": true,
+    "standard_capacity": 1,
+    "standard_remaining": 1,
+    "swift_capacity": 1,
+    "swift_remaining": 1
+  },
+  "action_overrides": {
+    "mixed": {
+      "standard_capacity": 3,
+      "standard_remaining": 1,
+      "swift_capacity": 2,
+      "swift_remaining": 0
+    },
+    "compact": {
+      "movement_available": false,
+      "standard_capacity": 3,
+      "standard_remaining": 0,
+      "swift_capacity": 3,
+      "swift_remaining": 0
+    }
+  },
+  "equipment": {
+    "weapon": {
+      "content_id": "",
+      "icon": "",
+      "occupied": false,
+      "locked": false,
+      "enabled": false,
+      "empty_kind": ""
+    },
+    "armor": {
+      "content_id": "",
+      "icon": "",
+      "occupied": false,
+      "locked": false,
+      "enabled": false,
+      "empty_kind": ""
+    },
+    "potion": {
+      "content_id": "fixture_blood_potion",
+      "icon": "res://assets/prototype/hud_m2/potion-blood.png"
+    }
+  },
+  "end_action": {
+    "action_kind": "end_turn",
+    "visible": true,
+    "enabled": true,
+    "tooltip_text": "结束回合"
+  },
+  "relics": [
+    {
+      "slot_id": "fixture_relic_slot_1",
+      "content_id": "",
+      "icon": "",
+      "occupied": false,
+      "locked": false,
+      "enabled": false,
+      "empty_kind": ""
+    },
+    {
+      "slot_id": "fixture_relic_slot_2",
+      "content_id": "",
+      "icon": "",
+      "occupied": false,
+      "locked": false,
+      "enabled": false,
+      "empty_kind": ""
+    },
+    {
+      "slot_id": "fixture_relic_slot_3",
+      "content_id": "",
+      "icon": "",
+      "occupied": false,
+      "locked": false,
+      "enabled": false,
+      "empty_kind": ""
+    },
+    {
+      "slot_id": "fixture_relic_slot_4",
+      "content_id": "",
+      "icon": "",
+      "occupied": false,
+      "locked": false,
+      "enabled": false,
+      "empty_kind": ""
+    },
+    {
+      "slot_id": "fixture_relic_slot_5",
+      "content_id": "",
+      "icon": "",
+      "occupied": false,
+      "locked": false,
+      "enabled": false,
+      "empty_kind": ""
+    },
+    {
+      "slot_id": "fixture_relic_slot_6",
+      "content_id": "",
+      "icon": "",
+      "occupied": false,
+      "locked": false,
+      "enabled": false,
+      "empty_kind": ""
+    },
+    {
+      "slot_id": "fixture_relic_slot_7",
+      "content_id": "",
+      "icon": "",
+      "occupied": false,
+      "locked": false,
+      "enabled": false,
+      "empty_kind": ""
+    },
+    {
+      "slot_id": "fixture_relic_slot_8",
+      "content_id": "",
+      "icon": "",
+      "occupied": false,
+      "locked": false,
+      "enabled": false,
+      "empty_kind": ""
+    }
+  ],
+  "utility_overrides": {
+    "mixed": {
+      "end_action": {
+        "action_kind": "end_move",
+        "tooltip_text": "结束移动"
+      }
+    },
+    "missing": {
+      "equipment": {
+        "potion": {
+          "enabled": false
+        }
+      },
+      "end_action": {
+        "enabled": false
+      }
+    },
+    "utility_disabled": {
+      "equipment": {
+        "potion": {
+          "enabled": false
+        }
+      },
+      "end_action": {
+        "enabled": false
+      }
+    },
+    "utility_hidden": {
+      "end_action": {
+        "visible": false
+      }
+    },
+    "utility_invalid": {
+      "end_action": {
+        "action_kind": "invalid_fixture_kind"
+      }
+    },
+    "utility_occupied": {}
+  }
+}

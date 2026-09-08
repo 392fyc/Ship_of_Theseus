@@ -1,0 +1,8 @@
+[gd_resource type="FontFile" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud/m2/hud_font_setup.gd" id="1_setup"]
+[ext_resource type="FontFile" path="res://assets/fonts/ibm_plex_mono/IBMPlexMono-SemiBold.ttf" id="2_source"]
+
+[resource]
+script = ExtResource("1_setup")
+source_font = ExtResource("2_source")

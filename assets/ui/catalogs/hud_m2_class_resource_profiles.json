@@ -1,0 +1,11 @@
+{
+  "source_repository": "SoT-fyc-space",
+  "source_commit": "3a71ade3cac109dbdda8a90d0e47f04232f83b9f",
+  "source_snapshot": "snapshots/resources.json",
+  "normalized_sha256": "526d654f5b1d2490e2f9674a7486e7cc0547c5ca10d7d86c4128bab97813a0da",
+  "profiles": {
+    "myrmidon": {"renderer_key": "sword", "show_marks": false},
+    "kensei": {"renderer_key": "sword", "show_marks": true},
+    "sword_immortal": {"renderer_key": "sword", "show_marks": false}
+  }
+}

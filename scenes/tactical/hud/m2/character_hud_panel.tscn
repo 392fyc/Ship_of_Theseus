@@ -1,0 +1,552 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud/m2/character_hud_panel.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/themes/hud_m2.tres" id="2_theme"]
+[sub_resource type="StyleBoxEmpty" id="Empty"]
+[node name="CharacterHudPanel" type="Panel"]
+custom_minimum_size = Vector2(226, 108)
+offset_right = 226.0
+offset_bottom = 108.0
+mouse_filter = 1
+theme = ExtResource("2_theme")
+theme_type_variation = &"HudM2Base"
+script = ExtResource("1_script")
+
+[node name="MetalFrame" type="Panel" parent="."]
+offset_right = 226.0
+offset_bottom = 108.0
+mouse_filter = 2
+theme_type_variation = &"HudM2Panel"
+
+[node name="PortraitBase" type="Panel" parent="."]
+unique_name_in_owner = true
+offset_left = 12.0
+offset_top = 13.0
+offset_right = 84.0
+offset_bottom = 95.0
+mouse_filter = 2
+theme_type_variation = &"HudM2Recess"
+
+[node name="PortraitBackground" type="Panel" parent="."]
+unique_name_in_owner = true
+offset_left = 18.0
+offset_top = 19.0
+offset_right = 78.0
+offset_bottom = 89.0
+mouse_filter = 2
+theme_type_variation = &"HudM2PortraitBackground"
+
+[node name="PortraitFrame" type="Panel" parent="."]
+unique_name_in_owner = true
+offset_left = 12.0
+offset_top = 13.0
+offset_right = 84.0
+offset_bottom = 95.0
+mouse_filter = 2
+theme_type_variation = &"HudPortraitFrame"
+
+[node name="PortraitContent" type="TextureRect" parent="."]
+unique_name_in_owner = true
+offset_left = 18.0
+offset_top = 19.0
+offset_right = 78.0
+offset_bottom = 89.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="PortraitFallback" type="Control" parent="."]
+unique_name_in_owner = true
+offset_left = 18.0
+offset_top = 19.0
+offset_right = 78.0
+offset_bottom = 89.0
+mouse_filter = 2
+
+
+[node name="PortraitInspectButton" type="Button" parent="."]
+unique_name_in_owner = true
+offset_right = 226.0
+offset_bottom = 108.0
+mouse_filter = 0
+mouse_default_cursor_shape = 2
+focus_mode = 2
+theme_override_styles/normal = SubResource("Empty")
+theme_override_styles/hover = SubResource("Empty")
+theme_override_styles/pressed = SubResource("Empty")
+theme_override_styles/focus = SubResource("Empty")
+
+[node name="PortraitFocus" type="Panel" parent="."]
+unique_name_in_owner = true
+offset_left = 11.0
+offset_top = 12.0
+offset_right = 85.0
+offset_bottom = 96.0
+mouse_filter = 2
+visible = false
+theme_type_variation = &"HudM2PortraitFocus"
+
+[node name="InfoColumn" type="Control" parent="."]
+unique_name_in_owner = true
+offset_left = 90.0
+offset_top = 13.0
+offset_right = 214.0
+offset_bottom = 95.0
+mouse_filter = 2
+
+
+[node name="IdentityFrame" type="Panel" parent="InfoColumn"]
+unique_name_in_owner = true
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 124.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"HudM2InfoBorder"
+
+[node name="IdentityLabel" type="Label" parent="InfoColumn/IdentityFrame"]
+unique_name_in_owner = true
+offset_left = 5.0
+offset_top = 1.0
+offset_right = 119.0
+offset_bottom = 19.0
+mouse_filter = 2
+theme_type_variation = &"HudM2IdentityLabel"
+text = ""
+vertical_alignment = 1
+horizontal_alignment = 0
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="LevelExperienceRow" type="Panel" parent="InfoColumn"]
+unique_name_in_owner = true
+offset_left = 0.0
+offset_top = 24.0
+offset_right = 124.0
+offset_bottom = 46.0
+mouse_filter = 2
+theme_type_variation = &"HudM2InfoBorder"
+
+[node name="LevelLabel" type="Label" parent="InfoColumn/LevelExperienceRow"]
+unique_name_in_owner = true
+offset_left = 5.0
+offset_top = 2.0
+offset_right = 47.0
+offset_bottom = 15.0
+mouse_filter = 2
+theme_type_variation = &"HudM2NumericLabel"
+text = ""
+vertical_alignment = 1
+horizontal_alignment = 0
+clip_text = true
+
+[node name="ExperienceValue" type="Label" parent="InfoColumn/LevelExperienceRow"]
+unique_name_in_owner = true
+offset_left = 48.0
+offset_top = 2.0
+offset_right = 119.0
+offset_bottom = 15.0
+mouse_filter = 2
+theme_type_variation = &"HudM2NumericLabel"
+text = ""
+vertical_alignment = 1
+horizontal_alignment = 2
+clip_text = true
+
+[node name="ExperienceTrack" type="Panel" parent="InfoColumn/LevelExperienceRow"]
+unique_name_in_owner = true
+offset_left = 5.0
+offset_top = 17.0
+offset_right = 119.0
+offset_bottom = 19.0
+mouse_filter = 2
+theme_type_variation = &"HudM2ExperienceTrack"
+
+[node name="ExperienceFill" type="Panel" parent="InfoColumn/LevelExperienceRow"]
+unique_name_in_owner = true
+offset_left = 5.0
+offset_top = 17.0
+offset_right = 5.0
+offset_bottom = 19.0
+mouse_filter = 2
+theme_type_variation = &"HudM2ExperienceFill"
+
+[node name="SurvivalFrame" type="Panel" parent="InfoColumn"]
+unique_name_in_owner = true
+offset_left = 0.0
+offset_top = 50.0
+offset_right = 124.0
+offset_bottom = 82.0
+mouse_filter = 2
+theme_type_variation = &"HudM2InfoBorder"
+
+[node name="HpTrack" type="Panel" parent="InfoColumn/SurvivalFrame"]
+unique_name_in_owner = true
+offset_left = 5.0
+offset_top = 3.0
+offset_right = 119.0
+offset_bottom = 15.0
+mouse_filter = 2
+theme_type_variation = &"HudM2SurvivalTrack"
+
+[node name="HpFill" type="Panel" parent="InfoColumn/SurvivalFrame"]
+unique_name_in_owner = true
+offset_left = 5.0
+offset_top = 3.0
+offset_right = 5.0
+offset_bottom = 15.0
+mouse_filter = 2
+theme_type_variation = &"HudM2HpFill"
+
+[node name="HpCaption" type="Label" parent="InfoColumn/SurvivalFrame"]
+unique_name_in_owner = true
+offset_left = 7.0
+offset_top = 1.0
+offset_right = 25.0
+offset_bottom = 16.0
+mouse_filter = 2
+theme_type_variation = &"HudM2LabelSmall"
+text = "HP"
+vertical_alignment = 1
+horizontal_alignment = 0
+clip_text = true
+
+[node name="HpValue" type="Label" parent="InfoColumn/SurvivalFrame"]
+unique_name_in_owner = true
+offset_left = 26.0
+offset_top = 1.0
+offset_right = 117.0
+offset_bottom = 16.0
+mouse_filter = 2
+theme_type_variation = &"HudM2NumericLabel"
+text = ""
+vertical_alignment = 1
+horizontal_alignment = 2
+clip_text = true
+
+[node name="ShieldTrack" type="Panel" parent="InfoColumn/SurvivalFrame"]
+unique_name_in_owner = true
+offset_left = 5.0
+offset_top = 18.0
+offset_right = 119.0
+offset_bottom = 30.0
+mouse_filter = 2
+theme_type_variation = &"HudM2SurvivalTrack"
+
+[node name="ShieldFill" type="Panel" parent="InfoColumn/SurvivalFrame"]
+unique_name_in_owner = true
+offset_left = 5.0
+offset_top = 18.0
+offset_right = 5.0
+offset_bottom = 30.0
+mouse_filter = 2
+theme_type_variation = &"HudM2ShieldFill"
+
+[node name="ShieldCaption" type="Label" parent="InfoColumn/SurvivalFrame"]
+unique_name_in_owner = true
+offset_left = 7.0
+offset_top = 16.0
+offset_right = 25.0
+offset_bottom = 31.0
+mouse_filter = 2
+theme_type_variation = &"HudM2LabelSmall"
+text = "SH"
+vertical_alignment = 1
+horizontal_alignment = 0
+clip_text = true
+
+[node name="ShieldValue" type="Label" parent="InfoColumn/SurvivalFrame"]
+unique_name_in_owner = true
+offset_left = 26.0
+offset_top = 16.0
+offset_right = 117.0
+offset_bottom = 31.0
+mouse_filter = 2
+theme_type_variation = &"HudM2NumericLabel"
+text = ""
+vertical_alignment = 1
+horizontal_alignment = 2
+clip_text = true
+
+[node name="InfoBorders" type="Control" parent="InfoColumn"]
+unique_name_in_owner = true
+offset_right = 124.0
+offset_bottom = 82.0
+mouse_filter = 2
+
+[node name="InspectionPanel" type="Panel" parent="."]
+unique_name_in_owner = true
+offset_top = -202.0
+offset_right = 304.0
+offset_bottom = -14.0
+mouse_filter = 0
+theme_type_variation = &"HudM2Base"
+visible = false
+z_index = 20
+
+[node name="InspectionFrame" type="Panel" parent="InspectionPanel"]
+unique_name_in_owner = true
+offset_right = 304.0
+offset_bottom = 188.0
+mouse_filter = 2
+theme_type_variation = &"HudM2Panel"
+
+[node name="InspectionLabel" type="Label" parent="InspectionPanel"]
+unique_name_in_owner = true
+offset_left = 16.0
+offset_top = 13.0
+offset_right = 288.0
+offset_bottom = 53.0
+mouse_filter = 2
+theme_type_variation = &"HudM2IdentityLabel"
+autowrap_mode = 3
+vertical_alignment = 1
+
+[node name="TitleDivider" type="Panel" parent="InspectionPanel"]
+unique_name_in_owner = true
+offset_left = 16.0
+offset_top = 59.0
+offset_right = 288.0
+offset_bottom = 60.0
+mouse_filter = 2
+theme_type_variation = &"HudM2TitleDivider"
+
+[node name="AttributeRows" type="Control" parent="InspectionPanel"]
+unique_name_in_owner = true
+offset_left = 16.0
+offset_top = 70.0
+offset_right = 288.0
+offset_bottom = 166.0
+mouse_filter = 2
+
+[node name="STR" type="Panel" parent="InspectionPanel/AttributeRows"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 130.0
+offset_bottom = 21.0
+mouse_filter = 2
+theme_type_variation = &"HudM2Recess"
+
+[node name="Key" type="Label" parent="InspectionPanel/AttributeRows/STR"]
+offset_left = 6.0
+offset_top = 1.0
+offset_right = 38.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"HudM2AttributeKey"
+text = "STR"
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="InspectionPanel/AttributeRows/STR"]
+offset_left = 38.0
+offset_top = 1.0
+offset_right = 123.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"HudM2NumericLabel"
+text = "—"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="MAG" type="Panel" parent="InspectionPanel/AttributeRows"]
+offset_left = 142.0
+offset_top = 0.0
+offset_right = 272.0
+offset_bottom = 21.0
+mouse_filter = 2
+theme_type_variation = &"HudM2Recess"
+
+[node name="Key" type="Label" parent="InspectionPanel/AttributeRows/MAG"]
+offset_left = 6.0
+offset_top = 1.0
+offset_right = 38.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"HudM2AttributeKey"
+text = "MAG"
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="InspectionPanel/AttributeRows/MAG"]
+offset_left = 38.0
+offset_top = 1.0
+offset_right = 123.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"HudM2NumericLabel"
+text = "—"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="DEX" type="Panel" parent="InspectionPanel/AttributeRows"]
+offset_left = 0.0
+offset_top = 25.0
+offset_right = 130.0
+offset_bottom = 46.0
+mouse_filter = 2
+theme_type_variation = &"HudM2Recess"
+
+[node name="Key" type="Label" parent="InspectionPanel/AttributeRows/DEX"]
+offset_left = 6.0
+offset_top = 1.0
+offset_right = 38.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"HudM2AttributeKey"
+text = "DEX"
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="InspectionPanel/AttributeRows/DEX"]
+offset_left = 38.0
+offset_top = 1.0
+offset_right = 123.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"HudM2NumericLabel"
+text = "—"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="SPE" type="Panel" parent="InspectionPanel/AttributeRows"]
+offset_left = 142.0
+offset_top = 25.0
+offset_right = 272.0
+offset_bottom = 46.0
+mouse_filter = 2
+theme_type_variation = &"HudM2Recess"
+
+[node name="Key" type="Label" parent="InspectionPanel/AttributeRows/SPE"]
+offset_left = 6.0
+offset_top = 1.0
+offset_right = 38.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"HudM2AttributeKey"
+text = "SPE"
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="InspectionPanel/AttributeRows/SPE"]
+offset_left = 38.0
+offset_top = 1.0
+offset_right = 123.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"HudM2NumericLabel"
+text = "—"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="DEF" type="Panel" parent="InspectionPanel/AttributeRows"]
+offset_left = 0.0
+offset_top = 50.0
+offset_right = 130.0
+offset_bottom = 71.0
+mouse_filter = 2
+theme_type_variation = &"HudM2Recess"
+
+[node name="Key" type="Label" parent="InspectionPanel/AttributeRows/DEF"]
+offset_left = 6.0
+offset_top = 1.0
+offset_right = 38.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"HudM2AttributeKey"
+text = "DEF"
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="InspectionPanel/AttributeRows/DEF"]
+offset_left = 38.0
+offset_top = 1.0
+offset_right = 123.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"HudM2NumericLabel"
+text = "—"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="RES" type="Panel" parent="InspectionPanel/AttributeRows"]
+offset_left = 142.0
+offset_top = 50.0
+offset_right = 272.0
+offset_bottom = 71.0
+mouse_filter = 2
+theme_type_variation = &"HudM2Recess"
+
+[node name="Key" type="Label" parent="InspectionPanel/AttributeRows/RES"]
+offset_left = 6.0
+offset_top = 1.0
+offset_right = 38.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"HudM2AttributeKey"
+text = "RES"
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="InspectionPanel/AttributeRows/RES"]
+offset_left = 38.0
+offset_top = 1.0
+offset_right = 123.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"HudM2NumericLabel"
+text = "—"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LCK" type="Panel" parent="InspectionPanel/AttributeRows"]
+offset_left = 0.0
+offset_top = 75.0
+offset_right = 130.0
+offset_bottom = 96.0
+mouse_filter = 2
+theme_type_variation = &"HudM2Recess"
+
+[node name="Key" type="Label" parent="InspectionPanel/AttributeRows/LCK"]
+offset_left = 6.0
+offset_top = 1.0
+offset_right = 38.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"HudM2AttributeKey"
+text = "LCK"
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="InspectionPanel/AttributeRows/LCK"]
+offset_left = 38.0
+offset_top = 1.0
+offset_right = 123.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"HudM2NumericLabel"
+text = "—"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="MOV" type="Panel" parent="InspectionPanel/AttributeRows"]
+offset_left = 142.0
+offset_top = 75.0
+offset_right = 272.0
+offset_bottom = 96.0
+mouse_filter = 2
+theme_type_variation = &"HudM2Recess"
+
+[node name="Key" type="Label" parent="InspectionPanel/AttributeRows/MOV"]
+offset_left = 6.0
+offset_top = 1.0
+offset_right = 38.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"HudM2AttributeKey"
+text = "MOV"
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="InspectionPanel/AttributeRows/MOV"]
+offset_left = 38.0
+offset_top = 1.0
+offset_right = 123.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_type_variation = &"HudM2NumericLabel"
+text = "—"
+horizontal_alignment = 2
+vertical_alignment = 1

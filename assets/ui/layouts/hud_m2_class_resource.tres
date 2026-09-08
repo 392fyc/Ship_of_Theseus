@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="HudM2ClassResourceLayout" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud/m2/class_resource_layout.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+selected_option = &"A"
+bounds = Rect2(32, 540, 366, 56)
+qi_label = Rect2(46, 549, 56, 16)
+qi_value = Rect2(164, 549, 94, 16)
+qi_track = Rect2(46, 573, 212, 12)
+qi_fill = Rect2(47, 574, 210, 10)
+divider = Rect2(270, 547, 0, 42)
+mark_label = Rect2(282, 546, 88, 12)
+mark_slots = Array[Rect2]([Rect2(282, 562, 24, 24), Rect2(311, 562, 24, 24), Rect2(340, 562, 24, 24)])
