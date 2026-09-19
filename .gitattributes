@@ -1,0 +1,7 @@
+# Keep the authenticated Mercury template byte-identical after Windows checkout.
+/.codex/agents/mercury-acceptance.toml text eol=lf
+/.codex/agents/mercury-dev.toml text eol=lf
+/.codex/agents/mercury-reviewer.toml text eol=lf
+/.codex/project/mercury-task-contract.md text eol=lf
+/.codex/rules/mercury-git-safety.rules text eol=lf
+/.codex/mercury-template.lock text eol=lf

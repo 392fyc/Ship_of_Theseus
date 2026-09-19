@@ -1,71 +1,87 @@
-# Portable task card and receipt
+# Portable task and evidence contract
 
-Use one task card for one primary deliverable. It is a portable boundary for a
-Main agent, an implementation worker, and one independent reviewer. Project
-contracts override this generic card where they are stricter.
+This contract supports bounded delegation and independent review when needed.
+The target repository chooses its execution and publication policy. A single
+executor may handle routine work; this template does not require a pipeline or
+two separate model reviews for every task. Invoke a complex workflow or
+multi-stage pipeline only when the user explicitly calls for it or an established
+task plan requires it.
 
-## Task card
+## Task input
 
-Before work starts, the Main agent records:
+State the objective, acceptance criteria, relevant contracts, allowed write
+paths, and required verification. For delegated repository work, identify the
+target repository, branch or worktree, and starting revision. Record forbidden
+paths, protected state, and dependencies when relevant. Use a task identifier
+when the project or coordinating agent requires one.
 
-- one bounded objective and one primary deliverable;
-- target repository, target branch or worktree, and exact starting HEAD;
-- allowed write paths and forbidden paths;
-- governing contracts, with a short summary of each;
-- adjacent problems explicitly not handled by this task;
-- size: `S`, `M`, or `L`; and a sub-agent budget level. Main agents never set a
-  token budget. The level is qualitative: `S` is local, `M` is one clear
-  multi-file deliverable, and `L` is an unsplittable complex core problem;
-- no more than three observable acceptance conditions;
-- focused verification commands, plus the conditions that require affected or
-  full verification; and
-- whether one consolidated correction is allowed after the reviewer reports
-  blocking work.
+Resolve routine details from repository context. Report an ambiguity or changed
+branch, HEAD, or governing contract when it can materially change the result;
+pause dependent writes while the mismatch is resolved. Preserve concurrent work.
+Commit and publication actions require explicit inclusion in the assignment and
+completion of the repository's review and guarded Git requirements.
 
-The card is a boundary, not a backlog. The worker stops and reports to the Main
-agent when the work exceeds its declared size, needs another deliverable,
-requires more write paths, or conflicts with a governing contract. A reviewer
-finding, test discovery, or adjacent concern does not automatically expand the
-task. The Main agent must split or issue a new card when scope changes.
+## Evidence
 
-## Verification and review
+Each criterion needs a reproducible observation: a command and observed result,
+file-and-line citation, or runtime observation. Identify the candidate revision
+or diff examined; include exit status for commands and collection time when the
+underlying state is mutable. Distinguish direct evidence from inference and keep
+failures, skipped checks, and limitations visible.
 
-Run focused verification by default. Run affected verification only when the
-task card says that the change reaches a named dependent surface, and run full
-verification only when the card's explicit full-test condition is met (for
-example, a shared framework, migration, public interface, or release change).
-Do not run broader tests merely for reassurance.
+Never copy credentials, secret-matching text, or private content into evidence.
+Use logical repository identities and repository-relative paths in portable
+records; exclude machine paths, tokens, ports, and transient process state.
 
-After implementation, one independent, read-only reviewer checks the exact
-candidate against this card and the governing contracts. The reviewer may
-report at most three current-scope blockers. If correction is allowed, the
-worker makes at most one consolidated correction, restricted to those blockers,
-then returns the result for the Main agent to close or split. There is no
-automatic second correction cycle. A high-risk small framework task may define
-its own blind acceptance check; it is not a global requirement.
+## Implementation receipt
 
-## Minimal implementation receipt
+For a routine bounded task, return changed files, criterion-specific evidence,
+commands and results, and limitations. Include branch and commit identifiers
+when relevant; an uncommitted candidate is valid.
 
-Return a concise machine-readable object containing:
+Use the following full receipt for cross-repository work, changes requiring
+independent review, or a task that explicitly requests structured exchange:
 
 ```json
 {
   "task_id": "stable identifier",
   "status": "completed|blocked|failed",
   "target_repository": "logical repository identity",
-  "target_branch": "assigned branch",
+  "target_branch": "assigned task branch",
   "target_head_before": "full commit identifier",
-  "candidate_head": "full commit identifier or null",
-  "contract_summary": [{"contract": "path or identifier", "summary": "governing points"}],
+  "candidate_head": "full commit identifier or null for an uncommitted candidate",
+  "contract_summary": [
+    {"contract": "path or identifier", "summary": "governing points"}
+  ],
   "changed_files": ["repository-relative path"],
-  "verification": [{"command": "command", "result": "pass|fail|skipped", "evidence": "observation"}],
-  "criteria_evidence": [{"criterion": "observable condition", "result": "pass|fail|partial", "evidence": ["citation or result"]}],
-  "protected_state": [{"subject": "protected scope", "result": "unchanged|changed|unverified", "evidence": "observation"}],
+  "verification": [
+    {"command": "reproducible command", "result": "pass|fail|skipped", "evidence": "concise observation"}
+  ],
+  "criteria_evidence": [
+    {"criterion": "criterion text", "result": "pass|fail|partial", "evidence": ["citation or command result"]}
+  ],
+  "protected_state": [
+    {"subject": "protected path or repository", "result": "unchanged|changed|unverified", "evidence": "concise observation"}
+  ],
   "residual_risks": [],
   "escalation_reason": null
 }
 ```
 
-Use repository-relative paths. Record fresh evidence, including failed or
-skipped checks, without secrets or local machine details. The worker supplies
-evidence but never approves its own delivery.
+## Review and completion
+
+Choose review depth from the task's risk and repository policy. Substantial
+behavior changes, cross-repository writes, security or permission changes, and
+agent instructions or rules require independent review. The task may choose
+change review, blind acceptance, or both according to the uncertainty involved.
+A workflow explicitly invoked by the user or required by an established task
+plan may specify additional reviewers.
+
+Independent reviewers inspect the exact candidate and gather fresh evidence;
+the implementer's self-assessment cannot substitute for their evaluation. Blind
+acceptance receives the objective, criteria, candidate, changed files, and
+verification evidence without implementation reasoning.
+
+Completion requires satisfied criteria, successful required verification,
+protected state preserved, and material review findings resolved. Disclose any
+remaining blocked or skipped check without converting it into a passing claim.

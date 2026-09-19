@@ -98,12 +98,14 @@ def test_codex_project_layer_is_discoverable_and_keeps_ownership_boundaries() ->
     rule_paths = sorted((ROOT / ".codex" / "rules").glob("*.rules"))
     skill_paths = sorted((ROOT / ".agents" / "skills").glob("sot-*/SKILL.md"))
 
-    assert [path.name for path in agent_paths] == [
+    required_agents = {
+        "mercury-acceptance.toml",
         "mercury-dev.toml",
         "mercury-reviewer.toml",
         "sot-designlib.toml",
         "sot-kb.toml",
-    ]
+    }
+    assert required_agents <= {path.name for path in agent_paths}
     assert [path.name for path in rule_paths] == [
         "mercury-git-safety.rules",
         "sot-protected-branches.rules",

@@ -8,6 +8,9 @@ export_presets.cfg
 *.uid
 .tmp_godot_mcp_*.txt
 
+# Python helper and test bytecode
+__pycache__/
+
 # OS
 .DS_Store
 Thumbs.db
