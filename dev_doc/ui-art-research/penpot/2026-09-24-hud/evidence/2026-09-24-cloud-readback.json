@@ -1,0 +1,221 @@
+{
+  "capturedAt": "2026-09-23T17:03:14.851Z",
+  "file": {
+    "id": "c828d3cf-7d4e-8145-8008-8f0919f9073c",
+    "name": "New File 1",
+    "revn": 215
+  },
+  "page": {
+    "id": "8086b853-2801-807d-8008-985af17836c7",
+    "name": "HUD R1 · 基础 UI 材质与布局修订"
+  },
+  "main": {
+    "id": "8086b853-2801-807d-8008-9cc915f221e9",
+    "name": "SPLIT-PIXEL-R1 · 左剑右素材印记 · 65 · 111",
+    "bounds": [
+      0,
+      38900,
+      1280,
+      720
+    ],
+    "record": {
+      "rootId": "8086b853-2801-807d-8008-9cc915f221e9",
+      "sourceId": "8086b853-2801-807d-8008-9cc057115091",
+      "name": "SPLIT-PIXEL-R1 · 左剑右素材印记 · 65 · 111",
+      "bounds": [
+        0,
+        38900,
+        1280,
+        720
+      ],
+      "swordId": "8086b853-2801-807d-8008-9cc915f22203",
+      "swordState": {
+        "holderId": "8086b853-2801-807d-8008-9cc915f22203",
+        "qi": 65,
+        "cap": 100,
+        "band": "high",
+        "marks": [
+          true,
+          true,
+          true
+        ],
+        "baseGroupId": "8086b853-2801-807d-8008-9cc915f3bcbb",
+        "baseImageId": "8086b853-2801-807d-8008-9cc915f3bcc3",
+        "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+        "textureId": "8086b853-2801-807d-8008-9cc915f3bcc6",
+        "textureMediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+        "bladeMaskId": "8086b853-2801-807d-8008-9cc915f3bcc5",
+        "amountBoardId": "8086b853-2801-807d-8008-9cc915f3bcbc",
+        "quantityWidth": 133.99165,
+        "tintId": "8086b853-2801-807d-8008-9cc915f3bcc7",
+        "tintOpacity": 1,
+        "blendMode": "color",
+        "energyId": "8086b853-2801-807d-8008-9cc915f3bcc4",
+        "energyOpacity": 0.92,
+        "flowGroupId": "8086b853-2801-807d-8008-9cc915f3bcbd",
+        "flowOpacity": 0.82,
+        "flowIds": [
+          "8086b853-2801-807d-8008-9cc915f3bcc8",
+          "8086b853-2801-807d-8008-9cc915f3bcc9",
+          "8086b853-2801-807d-8008-9cc915f3bcca"
+        ],
+        "flowLayerOpacity": [
+          0.42,
+          0.82,
+          0.96
+        ],
+        "palette": {
+          "tint": "#E22755",
+          "dim": "#7E193C",
+          "mid": "#E63865",
+          "highlight": "#FFD6E0"
+        },
+        "markIds": [],
+        "numberId": "8086b853-2801-807d-8008-9cc915f3bcbe",
+        "scale": 0.157,
+        "origin": [
+          32,
+          487
+        ],
+        "resourceBounds": [
+          32,
+          520,
+          366,
+          56
+        ],
+        "markCenters": [
+          160,
+          236,
+          312
+        ],
+        "markY": 557,
+        "maskActive": true,
+        "thresholdTick": false,
+        "currentValueOnly": true,
+        "basicXinyanEffective": true,
+        "layoutMode": "left_sword_right_material_marks",
+        "marksGroupId": "8086b853-2801-807d-8008-9cc91ea160dd"
+      },
+      "hiddenOriginalGlyphIds": [
+        "8086b853-2801-807d-8008-9cc915f3bcbf",
+        "8086b853-2801-807d-8008-9cc915f3bcc0",
+        "8086b853-2801-807d-8008-9cc915f3bcc1"
+      ],
+      "marks": {
+        "holderId": "8086b853-2801-807d-8008-9cc91ea160dd",
+        "bounds": [
+          886,
+          520,
+          278,
+          56
+        ],
+        "states": [
+          true,
+          true,
+          true
+        ],
+        "scale": 1,
+        "records": [
+          {
+            "char": "心",
+            "held": true,
+            "maskId": "8086b853-2801-807d-8008-9cc92145fb05",
+            "textureId": "8086b853-2801-807d-8008-9cc92460439a",
+            "tintId": "8086b853-2801-807d-8008-9cc92765aec0",
+            "energyId": "8086b853-2801-807d-8008-9cc928f888cf",
+            "materialId": "8086b853-2801-807d-8008-9cc92a84ccef",
+            "edgeId": "8086b853-2801-807d-8008-9cc92ba3f13f",
+            "center": 46,
+            "top": 18,
+            "width": 36.50645023163547,
+            "height": 34,
+            "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+            "color": "#E8C986",
+            "gray": "#AAA4B1",
+            "maskActive": true,
+            "textureSourceOrigin": [
+              1040,
+              318
+            ],
+            "textureScale": 0.75
+          },
+          {
+            "char": "道",
+            "held": true,
+            "maskId": "8086b853-2801-807d-8008-9cc92d6cefac",
+            "textureId": "8086b853-2801-807d-8008-9cc92f3c6e5c",
+            "tintId": "8086b853-2801-807d-8008-9cc930fb7af8",
+            "energyId": "8086b853-2801-807d-8008-9cc9329ea9a7",
+            "materialId": "8086b853-2801-807d-8008-9cc9344d0679",
+            "edgeId": "8086b853-2801-807d-8008-9cc9355afcdc",
+            "center": 139,
+            "top": 18,
+            "width": 34.61686442769671,
+            "height": 34,
+            "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+            "color": "#7AD2C8",
+            "gray": "#AAA4B1",
+            "maskActive": true,
+            "textureSourceOrigin": [
+              1040,
+              318
+            ],
+            "textureScale": 0.75
+          },
+          {
+            "char": "势",
+            "held": true,
+            "maskId": "8086b853-2801-807d-8008-9cc937591cb1",
+            "textureId": "8086b853-2801-807d-8008-9cc939069058",
+            "tintId": "8086b853-2801-807d-8008-9cc93acbd6e4",
+            "energyId": "8086b853-2801-807d-8008-9cc93c89d1bd",
+            "materialId": "8086b853-2801-807d-8008-9cc93e2775d2",
+            "edgeId": "8086b853-2801-807d-8008-9cc93f37d4e2",
+            "center": 232,
+            "top": 18,
+            "width": 33.52827975028684,
+            "height": 34,
+            "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+            "color": "#EA9383",
+            "gray": "#AAA4B1",
+            "maskActive": true,
+            "textureSourceOrigin": [
+              1040,
+              318
+            ],
+            "textureScale": 0.75
+          }
+        ],
+        "noNumericResource": true,
+        "materialMode": "native_glyph_mask_same_raster_color_and_screen"
+      },
+      "swordBounds": [
+        32,
+        520,
+        366,
+        56
+      ],
+      "markBounds": [
+        886,
+        520,
+        278,
+        56
+      ],
+      "moduleGap": 20,
+      "visibleGlyphBottomGap": 24,
+      "visualApproval": false
+    }
+  },
+  "qa": {
+    "id": "7537319b-8c1a-8048-8008-a08a60c059ca",
+    "name": "SPLIT-QA · 八组合 · 1x"
+  },
+  "versions": [
+    {
+      "label": "SoT HUD 定版 2026-09-24 · 左剑右印记",
+      "createdAt": "2026-09-23T17:02:21.075Z",
+      "isAutosave": false
+    }
+  ],
+  "penpotVersion": "2.18.0"
+}

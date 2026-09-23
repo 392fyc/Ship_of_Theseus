@@ -1,0 +1,3 @@
+# 统一文本换行，保证不同系统检出后的文件摘要一致。
+* text=auto eol=lf
+*.png binary

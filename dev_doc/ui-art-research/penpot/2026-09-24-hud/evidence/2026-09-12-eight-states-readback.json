@@ -1,0 +1,730 @@
+{
+  "result": {
+    "root": {
+      "id": "7537319b-8c1a-8048-8008-a08a60c059ca",
+      "x": 0,
+      "y": 41100,
+      "width": 680,
+      "height": 380
+    },
+    "data": {
+      "kind": "eight_states_1x",
+      "source": "8086b853-2801-807d-8008-9cc915f221e9",
+      "states": [
+        {
+          "holderId": "7537319b-8c1a-8048-8008-a08a6788c445",
+          "bounds": [
+            32,
+            36,
+            278,
+            56
+          ],
+          "states": [
+            false,
+            false,
+            false
+          ],
+          "scale": 1,
+          "records": [
+            {
+              "char": "心",
+              "held": false,
+              "maskId": "7537319b-8c1a-8048-8008-a08a6788c44c",
+              "textureId": "7537319b-8c1a-8048-8008-a08a6788c44d",
+              "tintId": "7537319b-8c1a-8048-8008-a08a6789021c",
+              "energyId": "7537319b-8c1a-8048-8008-a08a6789021d",
+              "materialId": "7537319b-8c1a-8048-8008-a08a6788c446",
+              "edgeId": "7537319b-8c1a-8048-8008-a08a6788c447",
+              "center": 46,
+              "top": 18,
+              "width": 36.50645023163547,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#E8C986",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            },
+            {
+              "char": "道",
+              "held": false,
+              "maskId": "7537319b-8c1a-8048-8008-a08a6789021e",
+              "textureId": "7537319b-8c1a-8048-8008-a08a6789021f",
+              "tintId": "7537319b-8c1a-8048-8008-a08a67890220",
+              "energyId": "7537319b-8c1a-8048-8008-a08a67890221",
+              "materialId": "7537319b-8c1a-8048-8008-a08a6788c448",
+              "edgeId": "7537319b-8c1a-8048-8008-a08a6788c449",
+              "center": 139,
+              "top": 18,
+              "width": 34.61686442769671,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#7AD2C8",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            },
+            {
+              "char": "势",
+              "held": false,
+              "maskId": "7537319b-8c1a-8048-8008-a08a67890222",
+              "textureId": "7537319b-8c1a-8048-8008-a08a67890223",
+              "tintId": "7537319b-8c1a-8048-8008-a08a67890224",
+              "energyId": "7537319b-8c1a-8048-8008-a08a67890225",
+              "materialId": "7537319b-8c1a-8048-8008-a08a6788c44a",
+              "edgeId": "7537319b-8c1a-8048-8008-a08a6788c44b",
+              "center": 232,
+              "top": 18,
+              "width": 33.52827975028684,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#EA9383",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            }
+          ],
+          "noNumericResource": true,
+          "materialMode": "native_glyph_mask_same_raster_color_and_screen",
+          "clonedFrom": "8086b853-2801-807d-8008-9cc91ea160dd"
+        },
+        {
+          "holderId": "7537319b-8c1a-8048-8008-a08a6c2d710d",
+          "bounds": [
+            368,
+            36,
+            278,
+            56
+          ],
+          "states": [
+            false,
+            false,
+            true
+          ],
+          "scale": 1,
+          "records": [
+            {
+              "char": "心",
+              "held": false,
+              "maskId": "7537319b-8c1a-8048-8008-a08a6c2d7114",
+              "textureId": "7537319b-8c1a-8048-8008-a08a6c2d7115",
+              "tintId": "7537319b-8c1a-8048-8008-a08a6c2d7116",
+              "energyId": "7537319b-8c1a-8048-8008-a08a6c2d7117",
+              "materialId": "7537319b-8c1a-8048-8008-a08a6c2d710e",
+              "edgeId": "7537319b-8c1a-8048-8008-a08a6c2d710f",
+              "center": 46,
+              "top": 18,
+              "width": 36.50645023163547,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#E8C986",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            },
+            {
+              "char": "道",
+              "held": false,
+              "maskId": "7537319b-8c1a-8048-8008-a08a6c2d7118",
+              "textureId": "7537319b-8c1a-8048-8008-a08a6c2d7119",
+              "tintId": "7537319b-8c1a-8048-8008-a08a6c2d711a",
+              "energyId": "7537319b-8c1a-8048-8008-a08a6c2d711b",
+              "materialId": "7537319b-8c1a-8048-8008-a08a6c2d7110",
+              "edgeId": "7537319b-8c1a-8048-8008-a08a6c2d7111",
+              "center": 139,
+              "top": 18,
+              "width": 34.61686442769671,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#7AD2C8",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            },
+            {
+              "char": "势",
+              "held": true,
+              "maskId": "7537319b-8c1a-8048-8008-a08a6c2d711c",
+              "textureId": "7537319b-8c1a-8048-8008-a08a6c2d711d",
+              "tintId": "7537319b-8c1a-8048-8008-a08a6c2d711e",
+              "energyId": "7537319b-8c1a-8048-8008-a08a6c2d711f",
+              "materialId": "7537319b-8c1a-8048-8008-a08a6c2d7112",
+              "edgeId": "7537319b-8c1a-8048-8008-a08a6c2d7113",
+              "center": 232,
+              "top": 18,
+              "width": 33.52827975028684,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#EA9383",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            }
+          ],
+          "noNumericResource": true,
+          "materialMode": "native_glyph_mask_same_raster_color_and_screen",
+          "clonedFrom": "8086b853-2801-807d-8008-9cc91ea160dd"
+        },
+        {
+          "holderId": "7537319b-8c1a-8048-8008-a08a7fcf2c28",
+          "bounds": [
+            32,
+            120,
+            278,
+            56
+          ],
+          "states": [
+            false,
+            true,
+            false
+          ],
+          "scale": 1,
+          "records": [
+            {
+              "char": "心",
+              "held": false,
+              "maskId": "7537319b-8c1a-8048-8008-a08a7fcf2c2f",
+              "textureId": "7537319b-8c1a-8048-8008-a08a7fcf2c30",
+              "tintId": "7537319b-8c1a-8048-8008-a08a7fcf2c31",
+              "energyId": "7537319b-8c1a-8048-8008-a08a7fcf437e",
+              "materialId": "7537319b-8c1a-8048-8008-a08a7fcf2c29",
+              "edgeId": "7537319b-8c1a-8048-8008-a08a7fcf2c2a",
+              "center": 46,
+              "top": 18,
+              "width": 36.50645023163547,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#E8C986",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            },
+            {
+              "char": "道",
+              "held": true,
+              "maskId": "7537319b-8c1a-8048-8008-a08a7fcf437f",
+              "textureId": "7537319b-8c1a-8048-8008-a08a7fcf4380",
+              "tintId": "7537319b-8c1a-8048-8008-a08a7fcf4381",
+              "energyId": "7537319b-8c1a-8048-8008-a08a7fcf4382",
+              "materialId": "7537319b-8c1a-8048-8008-a08a7fcf2c2b",
+              "edgeId": "7537319b-8c1a-8048-8008-a08a7fcf2c2c",
+              "center": 139,
+              "top": 18,
+              "width": 34.61686442769671,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#7AD2C8",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            },
+            {
+              "char": "势",
+              "held": false,
+              "maskId": "7537319b-8c1a-8048-8008-a08a7fcf4383",
+              "textureId": "7537319b-8c1a-8048-8008-a08a7fcf4384",
+              "tintId": "7537319b-8c1a-8048-8008-a08a7fcf4385",
+              "energyId": "7537319b-8c1a-8048-8008-a08a7fcf4386",
+              "materialId": "7537319b-8c1a-8048-8008-a08a7fcf2c2d",
+              "edgeId": "7537319b-8c1a-8048-8008-a08a7fcf2c2e",
+              "center": 232,
+              "top": 18,
+              "width": 33.52827975028684,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#EA9383",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            }
+          ],
+          "noNumericResource": true,
+          "materialMode": "native_glyph_mask_same_raster_color_and_screen",
+          "clonedFrom": "8086b853-2801-807d-8008-9cc91ea160dd"
+        },
+        {
+          "holderId": "7537319b-8c1a-8048-8008-a08a870b9d01",
+          "bounds": [
+            368,
+            120,
+            278,
+            56
+          ],
+          "states": [
+            false,
+            true,
+            true
+          ],
+          "scale": 1,
+          "records": [
+            {
+              "char": "心",
+              "held": false,
+              "maskId": "7537319b-8c1a-8048-8008-a08a870b9d08",
+              "textureId": "7537319b-8c1a-8048-8008-a08a870b9d09",
+              "tintId": "7537319b-8c1a-8048-8008-a08a870b9d0a",
+              "energyId": "7537319b-8c1a-8048-8008-a08a870b9d0b",
+              "materialId": "7537319b-8c1a-8048-8008-a08a870b9d02",
+              "edgeId": "7537319b-8c1a-8048-8008-a08a870b9d03",
+              "center": 46,
+              "top": 18,
+              "width": 36.50645023163547,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#E8C986",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            },
+            {
+              "char": "道",
+              "held": true,
+              "maskId": "7537319b-8c1a-8048-8008-a08a870b9d0c",
+              "textureId": "7537319b-8c1a-8048-8008-a08a870b9d0d",
+              "tintId": "7537319b-8c1a-8048-8008-a08a870b9d0e",
+              "energyId": "7537319b-8c1a-8048-8008-a08a870b9d0f",
+              "materialId": "7537319b-8c1a-8048-8008-a08a870b9d04",
+              "edgeId": "7537319b-8c1a-8048-8008-a08a870b9d05",
+              "center": 139,
+              "top": 18,
+              "width": 34.61686442769671,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#7AD2C8",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            },
+            {
+              "char": "势",
+              "held": true,
+              "maskId": "7537319b-8c1a-8048-8008-a08a870b9d10",
+              "textureId": "7537319b-8c1a-8048-8008-a08a870b9d11",
+              "tintId": "7537319b-8c1a-8048-8008-a08a870b9d12",
+              "energyId": "7537319b-8c1a-8048-8008-a08a870b9d13",
+              "materialId": "7537319b-8c1a-8048-8008-a08a870b9d06",
+              "edgeId": "7537319b-8c1a-8048-8008-a08a870b9d07",
+              "center": 232,
+              "top": 18,
+              "width": 33.52827975028684,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#EA9383",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            }
+          ],
+          "noNumericResource": true,
+          "materialMode": "native_glyph_mask_same_raster_color_and_screen",
+          "clonedFrom": "8086b853-2801-807d-8008-9cc91ea160dd"
+        },
+        {
+          "holderId": "7537319b-8c1a-8048-8008-a08aaced474e",
+          "bounds": [
+            32,
+            204,
+            278,
+            56
+          ],
+          "states": [
+            true,
+            false,
+            false
+          ],
+          "scale": 1,
+          "records": [
+            {
+              "char": "心",
+              "held": true,
+              "maskId": "7537319b-8c1a-8048-8008-a08aaced4755",
+              "textureId": "7537319b-8c1a-8048-8008-a08aaced4756",
+              "tintId": "7537319b-8c1a-8048-8008-a08aaced4757",
+              "energyId": "7537319b-8c1a-8048-8008-a08aaced4758",
+              "materialId": "7537319b-8c1a-8048-8008-a08aaced474f",
+              "edgeId": "7537319b-8c1a-8048-8008-a08aaced4750",
+              "center": 46,
+              "top": 18,
+              "width": 36.50645023163547,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#E8C986",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            },
+            {
+              "char": "道",
+              "held": false,
+              "maskId": "7537319b-8c1a-8048-8008-a08aaced4759",
+              "textureId": "7537319b-8c1a-8048-8008-a08aaced475a",
+              "tintId": "7537319b-8c1a-8048-8008-a08aaced475b",
+              "energyId": "7537319b-8c1a-8048-8008-a08aaced475c",
+              "materialId": "7537319b-8c1a-8048-8008-a08aaced4751",
+              "edgeId": "7537319b-8c1a-8048-8008-a08aaced4752",
+              "center": 139,
+              "top": 18,
+              "width": 34.61686442769671,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#7AD2C8",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            },
+            {
+              "char": "势",
+              "held": false,
+              "maskId": "7537319b-8c1a-8048-8008-a08aaced475d",
+              "textureId": "7537319b-8c1a-8048-8008-a08aaced475e",
+              "tintId": "7537319b-8c1a-8048-8008-a08aaced475f",
+              "energyId": "7537319b-8c1a-8048-8008-a08aaced4760",
+              "materialId": "7537319b-8c1a-8048-8008-a08aaced4753",
+              "edgeId": "7537319b-8c1a-8048-8008-a08aaced4754",
+              "center": 232,
+              "top": 18,
+              "width": 33.52827975028684,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#EA9383",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            }
+          ],
+          "noNumericResource": true,
+          "materialMode": "native_glyph_mask_same_raster_color_and_screen",
+          "clonedFrom": "8086b853-2801-807d-8008-9cc91ea160dd"
+        },
+        {
+          "holderId": "7537319b-8c1a-8048-8008-a08ab23c0815",
+          "bounds": [
+            368,
+            204,
+            278,
+            56
+          ],
+          "states": [
+            true,
+            false,
+            true
+          ],
+          "scale": 1,
+          "records": [
+            {
+              "char": "心",
+              "held": true,
+              "maskId": "7537319b-8c1a-8048-8008-a08ab23c081c",
+              "textureId": "7537319b-8c1a-8048-8008-a08ab23c081d",
+              "tintId": "7537319b-8c1a-8048-8008-a08ab23c081e",
+              "energyId": "7537319b-8c1a-8048-8008-a08ab23c081f",
+              "materialId": "7537319b-8c1a-8048-8008-a08ab23c0816",
+              "edgeId": "7537319b-8c1a-8048-8008-a08ab23c0817",
+              "center": 46,
+              "top": 18,
+              "width": 36.50645023163547,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#E8C986",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            },
+            {
+              "char": "道",
+              "held": false,
+              "maskId": "7537319b-8c1a-8048-8008-a08ab23c0820",
+              "textureId": "7537319b-8c1a-8048-8008-a08ab23c0821",
+              "tintId": "7537319b-8c1a-8048-8008-a08ab23c0822",
+              "energyId": "7537319b-8c1a-8048-8008-a08ab23c0823",
+              "materialId": "7537319b-8c1a-8048-8008-a08ab23c0818",
+              "edgeId": "7537319b-8c1a-8048-8008-a08ab23c0819",
+              "center": 139,
+              "top": 18,
+              "width": 34.61686442769671,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#7AD2C8",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            },
+            {
+              "char": "势",
+              "held": true,
+              "maskId": "7537319b-8c1a-8048-8008-a08ab23c0824",
+              "textureId": "7537319b-8c1a-8048-8008-a08ab23c0825",
+              "tintId": "7537319b-8c1a-8048-8008-a08ab23c0826",
+              "energyId": "7537319b-8c1a-8048-8008-a08ab23c0827",
+              "materialId": "7537319b-8c1a-8048-8008-a08ab23c081a",
+              "edgeId": "7537319b-8c1a-8048-8008-a08ab23c081b",
+              "center": 232,
+              "top": 18,
+              "width": 33.52827975028684,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#EA9383",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            }
+          ],
+          "noNumericResource": true,
+          "materialMode": "native_glyph_mask_same_raster_color_and_screen",
+          "clonedFrom": "8086b853-2801-807d-8008-9cc91ea160dd"
+        },
+        {
+          "holderId": "7537319b-8c1a-8048-8008-a08ab5c2c910",
+          "bounds": [
+            32,
+            288,
+            278,
+            56
+          ],
+          "states": [
+            true,
+            true,
+            false
+          ],
+          "scale": 1,
+          "records": [
+            {
+              "char": "心",
+              "held": true,
+              "maskId": "7537319b-8c1a-8048-8008-a08ab5c2c917",
+              "textureId": "7537319b-8c1a-8048-8008-a08ab5c2c918",
+              "tintId": "7537319b-8c1a-8048-8008-a08ab5c2c919",
+              "energyId": "7537319b-8c1a-8048-8008-a08ab5c2c91a",
+              "materialId": "7537319b-8c1a-8048-8008-a08ab5c2c911",
+              "edgeId": "7537319b-8c1a-8048-8008-a08ab5c2c912",
+              "center": 46,
+              "top": 18,
+              "width": 36.50645023163547,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#E8C986",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            },
+            {
+              "char": "道",
+              "held": true,
+              "maskId": "7537319b-8c1a-8048-8008-a08ab5c2c91b",
+              "textureId": "7537319b-8c1a-8048-8008-a08ab5c2c91c",
+              "tintId": "7537319b-8c1a-8048-8008-a08ab5c2c91d",
+              "energyId": "7537319b-8c1a-8048-8008-a08ab5c2c91e",
+              "materialId": "7537319b-8c1a-8048-8008-a08ab5c2c913",
+              "edgeId": "7537319b-8c1a-8048-8008-a08ab5c2c914",
+              "center": 139,
+              "top": 18,
+              "width": 34.61686442769671,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#7AD2C8",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            },
+            {
+              "char": "势",
+              "held": false,
+              "maskId": "7537319b-8c1a-8048-8008-a08ab5c2c91f",
+              "textureId": "7537319b-8c1a-8048-8008-a08ab5c2c920",
+              "tintId": "7537319b-8c1a-8048-8008-a08ab5c2c921",
+              "energyId": "7537319b-8c1a-8048-8008-a08ab5c2c922",
+              "materialId": "7537319b-8c1a-8048-8008-a08ab5c2c915",
+              "edgeId": "7537319b-8c1a-8048-8008-a08ab5c2c916",
+              "center": 232,
+              "top": 18,
+              "width": 33.52827975028684,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#EA9383",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            }
+          ],
+          "noNumericResource": true,
+          "materialMode": "native_glyph_mask_same_raster_color_and_screen",
+          "clonedFrom": "8086b853-2801-807d-8008-9cc91ea160dd"
+        },
+        {
+          "holderId": "7537319b-8c1a-8048-8008-a08abaea05a4",
+          "bounds": [
+            368,
+            288,
+            278,
+            56
+          ],
+          "states": [
+            true,
+            true,
+            true
+          ],
+          "scale": 1,
+          "records": [
+            {
+              "char": "心",
+              "held": true,
+              "maskId": "7537319b-8c1a-8048-8008-a08abaea5126",
+              "textureId": "7537319b-8c1a-8048-8008-a08abaea5127",
+              "tintId": "7537319b-8c1a-8048-8008-a08abaea5128",
+              "energyId": "7537319b-8c1a-8048-8008-a08abaea5129",
+              "materialId": "7537319b-8c1a-8048-8008-a08abaea05a5",
+              "edgeId": "7537319b-8c1a-8048-8008-a08abaea05a6",
+              "center": 46,
+              "top": 18,
+              "width": 36.50645023163547,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#E8C986",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            },
+            {
+              "char": "道",
+              "held": true,
+              "maskId": "7537319b-8c1a-8048-8008-a08abaea512a",
+              "textureId": "7537319b-8c1a-8048-8008-a08abaea512b",
+              "tintId": "7537319b-8c1a-8048-8008-a08abaea512c",
+              "energyId": "7537319b-8c1a-8048-8008-a08abaea512d",
+              "materialId": "7537319b-8c1a-8048-8008-a08abaea05a7",
+              "edgeId": "7537319b-8c1a-8048-8008-a08abaea05a8",
+              "center": 139,
+              "top": 18,
+              "width": 34.61686442769671,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#7AD2C8",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            },
+            {
+              "char": "势",
+              "held": true,
+              "maskId": "7537319b-8c1a-8048-8008-a08abaea512e",
+              "textureId": "7537319b-8c1a-8048-8008-a08abaea512f",
+              "tintId": "7537319b-8c1a-8048-8008-a08abaea5130",
+              "energyId": "7537319b-8c1a-8048-8008-a08abaea5131",
+              "materialId": "7537319b-8c1a-8048-8008-a08abaea05a9",
+              "edgeId": "7537319b-8c1a-8048-8008-a08abaea05aa",
+              "center": 232,
+              "top": 18,
+              "width": 33.52827975028684,
+              "height": 34,
+              "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+              "color": "#EA9383",
+              "gray": "#AAA4B1",
+              "maskActive": true,
+              "textureSourceOrigin": [
+                1040,
+                318
+              ],
+              "textureScale": 0.75
+            }
+          ],
+          "noNumericResource": true,
+          "materialMode": "native_glyph_mask_same_raster_color_and_screen",
+          "clonedFrom": "8086b853-2801-807d-8008-9cc91ea160dd"
+        }
+      ]
+    }
+  },
+  "log": ""
+}
