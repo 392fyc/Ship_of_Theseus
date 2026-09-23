@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "capturedAt": "2026-09-23T17:06:47.084Z",
+  "file": "c828d3cf-7d4e-8145-8008-8f0919f9073c",
+  "page": "8086b853-2801-807d-8008-985af17836c7",
+  "revision": 215,
+  "checks": {
+    "namedVersionPresent": true,
+    "revisionMatches": true,
+    "mainBoundsMatch": true,
+    "swordBoundsMatch": true,
+    "marksBoundsMatch": true
+  },
+  "scope": "节点、布局和命名版本核验；视觉请对照仓库预览。修订变化时先检查差异。"
+}

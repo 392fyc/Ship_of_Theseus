@@ -1,0 +1,135 @@
+{
+  "task_id": "HUD-PENPOT-FREEZE-20260924",
+  "status": "completed",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/hud-penpot-freeze-20260924",
+  "target_head_before": "c1f34ed331ab753b04610274292005cb975feca0",
+  "candidate_head": null,
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "当前视觉定版和同云接手；独立任务工作树；保护已有修改；提交前独立审查。"
+    },
+    {
+      "contract": ".codex/project/mercury-task-contract.md",
+      "summary": "范围、验收和证据明确；可交付未提交候选；路径与记录可跨机器使用。"
+    }
+  ],
+  "allowed_write_paths": [
+    "dev_doc/README.md",
+    "dev_doc/ui-art-research/penpot/"
+  ],
+  "changed_files": [
+    "dev_doc/README.md",
+    "dev_doc/ui-art-research/penpot/.gdignore",
+    "dev_doc/ui-art-research/penpot/.gitattributes",
+    "dev_doc/ui-art-research/penpot/README.md",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/independent-review.json",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/manifest.json",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/README.md",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/receipt.json",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/verify-cloud.js",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/verify.py",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/evidence/2026-09-12-eight-states-readback.json",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/evidence/2026-09-12-main-readback.json",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/evidence/2026-09-24-cloud-check.json",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/evidence/2026-09-24-cloud-readback.json",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/previews/main-native.png",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/previews/marks-000-1x.png",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/previews/marks-000-3x-native.png",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/previews/marks-001-1x.png",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/previews/marks-010-1x.png",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/previews/marks-011-1x.png",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/previews/marks-100-1x.png",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/previews/marks-101-1x.png",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/previews/marks-110-1x.png",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/previews/marks-111-1x.png",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/previews/marks-111-3x-native.png",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/source/mark-outlines.json",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/source/shared-sword-texture.png",
+    "dev_doc/ui-art-research/penpot/2026-09-24-hud/source/sword-silhouette.png"
+  ],
+  "verification": [
+    {
+      "command": "python dev_doc/ui-art-research/penpot/2026-09-24-hud/verify.py",
+      "result": "pass",
+      "evidence": "18项文件摘要与长度，11项预览完整；云端主图记录与原预览来源记录相等。"
+    },
+    {
+      "command": "Penpot execute_code: verify-cloud.js",
+      "result": "pass",
+      "evidence": "修订215；手动命名版本存在；主画板、剑与印记布局核验通过。"
+    },
+    {
+      "result": "pass",
+      "command": "git diff --cached --check",
+      "evidence": "暂存区所有新增及修改文件检查通过。"
+    },
+    {
+      "result": "pass",
+      "command": "git checkout-index 到新临时目录，再运行verify.py",
+      "evidence": "26项接手文件检出后，18项产物、11张预览的长度、摘要和尺寸通过。"
+    },
+    {
+      "result": "pass",
+      "command": "候选文本常见凭据与本机绝对路径模式扫描",
+      "evidence": "无匹配；包括主代理回执。"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "固定当前视觉版本",
+      "result": "pass",
+      "evidence": [
+        "manifest.json",
+        "evidence/2026-09-24-cloud-check.json"
+      ]
+    },
+    {
+      "criterion": "同云服务跨机器接手入口",
+      "result": "pass",
+      "evidence": [
+        "README.md提供同云登录、指定文件/页/画板、命名版本预览及只读核验步骤。"
+      ]
+    },
+    {
+      "criterion": "独立审查提交范围与可携带性",
+      "result": "pass",
+      "evidence": [
+        "independent-review.json；核心检查及跨平台追加检查通过，直达URL列为待补项。"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "主工作树develop",
+      "result": "unchanged",
+      "evidence": "本轮前后git status --porcelain=v1为空，HEAD c1f34ed。"
+    },
+    {
+      "subject": "既有UI工作树",
+      "result": "unchanged",
+      "evidence": "仍为523d97e，8项未跟踪路径与本轮开始一致；本轮仅读取候选。"
+    },
+    {
+      "subject": "Penpot画布内容",
+      "result": "unchanged",
+      "evidence": "修订215，主图记录相等；本轮仅增加手动命名版本。"
+    }
+  ],
+  "residual_risks": [
+    "尚未在第二台机器登录验证云端访问权限。",
+    "Godot接入与实机验收不在本次提交准备范围。"
+  ],
+  "escalation_reason": null,
+  "publication": {
+    "published": false,
+    "remote_ref": null
+  },
+  "commit_created": false,
+  "task_phase": "freeze_and_prepare_only",
+  "optional_followups": [
+    "收到当前文件地址栏链接后填写cloud.workspace_url并加入README。"
+  ],
+  "independent_review": "independent-review.json"
+}

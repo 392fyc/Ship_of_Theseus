@@ -1,0 +1,295 @@
+{
+  "result": {
+    "capturedAt": "2026-09-12T10:00:26.764Z",
+    "version": "2.18.0",
+    "fileId": "c828d3cf-7d4e-8145-8008-8f0919f9073c",
+    "pageId": "8086b853-2801-807d-8008-985af17836c7",
+    "record": {
+      "rootId": "8086b853-2801-807d-8008-9cc915f221e9",
+      "sourceId": "8086b853-2801-807d-8008-9cc057115091",
+      "name": "SPLIT-PIXEL-R1 · 左剑右素材印记 · 65 · 111",
+      "bounds": [
+        0,
+        38900,
+        1280,
+        720
+      ],
+      "swordId": "8086b853-2801-807d-8008-9cc915f22203",
+      "swordState": {
+        "holderId": "8086b853-2801-807d-8008-9cc915f22203",
+        "qi": 65,
+        "cap": 100,
+        "band": "high",
+        "marks": [
+          true,
+          true,
+          true
+        ],
+        "baseGroupId": "8086b853-2801-807d-8008-9cc915f3bcbb",
+        "baseImageId": "8086b853-2801-807d-8008-9cc915f3bcc3",
+        "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+        "textureId": "8086b853-2801-807d-8008-9cc915f3bcc6",
+        "textureMediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+        "bladeMaskId": "8086b853-2801-807d-8008-9cc915f3bcc5",
+        "amountBoardId": "8086b853-2801-807d-8008-9cc915f3bcbc",
+        "quantityWidth": 133.99165,
+        "tintId": "8086b853-2801-807d-8008-9cc915f3bcc7",
+        "tintOpacity": 1,
+        "blendMode": "color",
+        "energyId": "8086b853-2801-807d-8008-9cc915f3bcc4",
+        "energyOpacity": 0.92,
+        "flowGroupId": "8086b853-2801-807d-8008-9cc915f3bcbd",
+        "flowOpacity": 0.82,
+        "flowIds": [
+          "8086b853-2801-807d-8008-9cc915f3bcc8",
+          "8086b853-2801-807d-8008-9cc915f3bcc9",
+          "8086b853-2801-807d-8008-9cc915f3bcca"
+        ],
+        "flowLayerOpacity": [
+          0.42,
+          0.82,
+          0.96
+        ],
+        "palette": {
+          "tint": "#E22755",
+          "dim": "#7E193C",
+          "mid": "#E63865",
+          "highlight": "#FFD6E0"
+        },
+        "markIds": [],
+        "numberId": "8086b853-2801-807d-8008-9cc915f3bcbe",
+        "scale": 0.157,
+        "origin": [
+          32,
+          487
+        ],
+        "resourceBounds": [
+          32,
+          520,
+          366,
+          56
+        ],
+        "markCenters": [
+          160,
+          236,
+          312
+        ],
+        "markY": 557,
+        "maskActive": true,
+        "thresholdTick": false,
+        "currentValueOnly": true,
+        "basicXinyanEffective": true,
+        "layoutMode": "left_sword_right_material_marks",
+        "marksGroupId": "8086b853-2801-807d-8008-9cc91ea160dd"
+      },
+      "hiddenOriginalGlyphIds": [
+        "8086b853-2801-807d-8008-9cc915f3bcbf",
+        "8086b853-2801-807d-8008-9cc915f3bcc0",
+        "8086b853-2801-807d-8008-9cc915f3bcc1"
+      ],
+      "marks": {
+        "holderId": "8086b853-2801-807d-8008-9cc91ea160dd",
+        "bounds": [
+          886,
+          520,
+          278,
+          56
+        ],
+        "states": [
+          true,
+          true,
+          true
+        ],
+        "scale": 1,
+        "records": [
+          {
+            "char": "心",
+            "held": true,
+            "maskId": "8086b853-2801-807d-8008-9cc92145fb05",
+            "textureId": "8086b853-2801-807d-8008-9cc92460439a",
+            "tintId": "8086b853-2801-807d-8008-9cc92765aec0",
+            "energyId": "8086b853-2801-807d-8008-9cc928f888cf",
+            "materialId": "8086b853-2801-807d-8008-9cc92a84ccef",
+            "edgeId": "8086b853-2801-807d-8008-9cc92ba3f13f",
+            "center": 46,
+            "top": 18,
+            "width": 36.50645023163547,
+            "height": 34,
+            "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+            "color": "#E8C986",
+            "gray": "#AAA4B1",
+            "maskActive": true,
+            "textureSourceOrigin": [
+              1040,
+              318
+            ],
+            "textureScale": 0.75
+          },
+          {
+            "char": "道",
+            "held": true,
+            "maskId": "8086b853-2801-807d-8008-9cc92d6cefac",
+            "textureId": "8086b853-2801-807d-8008-9cc92f3c6e5c",
+            "tintId": "8086b853-2801-807d-8008-9cc930fb7af8",
+            "energyId": "8086b853-2801-807d-8008-9cc9329ea9a7",
+            "materialId": "8086b853-2801-807d-8008-9cc9344d0679",
+            "edgeId": "8086b853-2801-807d-8008-9cc9355afcdc",
+            "center": 139,
+            "top": 18,
+            "width": 34.61686442769671,
+            "height": 34,
+            "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+            "color": "#7AD2C8",
+            "gray": "#AAA4B1",
+            "maskActive": true,
+            "textureSourceOrigin": [
+              1040,
+              318
+            ],
+            "textureScale": 0.75
+          },
+          {
+            "char": "势",
+            "held": true,
+            "maskId": "8086b853-2801-807d-8008-9cc937591cb1",
+            "textureId": "8086b853-2801-807d-8008-9cc939069058",
+            "tintId": "8086b853-2801-807d-8008-9cc93acbd6e4",
+            "energyId": "8086b853-2801-807d-8008-9cc93c89d1bd",
+            "materialId": "8086b853-2801-807d-8008-9cc93e2775d2",
+            "edgeId": "8086b853-2801-807d-8008-9cc93f37d4e2",
+            "center": 232,
+            "top": 18,
+            "width": 33.52827975028684,
+            "height": 34,
+            "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+            "color": "#EA9383",
+            "gray": "#AAA4B1",
+            "maskActive": true,
+            "textureSourceOrigin": [
+              1040,
+              318
+            ],
+            "textureScale": 0.75
+          }
+        ],
+        "noNumericResource": true,
+        "materialMode": "native_glyph_mask_same_raster_color_and_screen"
+      },
+      "swordBounds": [
+        32,
+        520,
+        366,
+        56
+      ],
+      "markBounds": [
+        886,
+        520,
+        278,
+        56
+      ],
+      "moduleGap": 20,
+      "visibleGlyphBottomGap": 24,
+      "visualApproval": false
+    },
+    "marksActual": [
+      {
+        "char": "心",
+        "held": true,
+        "maskActive": true,
+        "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+        "textureBounds": [
+          133.7467748841823,
+          299.5,
+          1629,
+          543
+        ],
+        "tintBlend": "color",
+        "tintOpacity": 1,
+        "energyBlend": "screen",
+        "energyOpacity": 0.24,
+        "edgeStrokes": [
+          {
+            "strokeColor": "#e8c986",
+            "strokeColorRefFile": null,
+            "strokeColorRefId": null,
+            "strokeOpacity": 0.7,
+            "strokeStyle": "solid",
+            "strokeWidth": 0.35,
+            "strokeAlignment": "center",
+            "strokeCapStart": null,
+            "strokeCapEnd": null,
+            "strokeColorGradient": null,
+            "strokeImage": null
+          }
+        ]
+      },
+      {
+        "char": "道",
+        "held": true,
+        "maskActive": true,
+        "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+        "textureBounds": [
+          227.6915677861516,
+          299.5,
+          1629,
+          543
+        ],
+        "tintBlend": "color",
+        "tintOpacity": 1,
+        "energyBlend": "screen",
+        "energyOpacity": 0.24,
+        "edgeStrokes": [
+          {
+            "strokeColor": "#7ad2c8",
+            "strokeColorRefFile": null,
+            "strokeColorRefId": null,
+            "strokeOpacity": 0.7,
+            "strokeStyle": "solid",
+            "strokeWidth": 0.35,
+            "strokeAlignment": "center",
+            "strokeCapStart": null,
+            "strokeCapEnd": null,
+            "strokeColorGradient": null,
+            "strokeImage": null
+          }
+        ]
+      },
+      {
+        "char": "势",
+        "held": true,
+        "maskActive": true,
+        "mediaId": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+        "textureBounds": [
+          321.2358601248566,
+          299.5,
+          1629,
+          543
+        ],
+        "tintBlend": "color",
+        "tintOpacity": 1,
+        "energyBlend": "screen",
+        "energyOpacity": 0.24,
+        "edgeStrokes": [
+          {
+            "strokeColor": "#ea9383",
+            "strokeColorRefFile": null,
+            "strokeColorRefId": null,
+            "strokeOpacity": 0.7,
+            "strokeStyle": "solid",
+            "strokeWidth": 0.35,
+            "strokeAlignment": "center",
+            "strokeCapStart": null,
+            "strokeCapEnd": null,
+            "strokeColorGradient": null,
+            "strokeImage": null
+          }
+        ]
+      }
+    ],
+    "helperAvailable": false,
+    "savedSelection": [
+      "7537319b-8c1a-8048-8008-a080aea2f277"
+    ]
+  },
+  "log": ""
+}

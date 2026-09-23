@@ -29,3 +29,4 @@ KB 读写走 `obsidian_*` MCP 或 `/sot-kb-write`（禁 PowerShell 写入，BOM 
 ## 仍保留在 repo 的
 
 - `skillbar-design/` —— 剑圣技能栏 v3 UI 设计稿（`skillbar-spec.md` + `skillbar-mockup.html`），批4 锁定参考，KB 暂无对应。
+- [Penpot 云端设计接手入口](ui-art-research/penpot/README.md) —— 基础 HUD 的当前定版版本、画板定位、预览及素材清单。

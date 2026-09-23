@@ -1,0 +1,273 @@
+{
+  "schema_version": 1,
+  "candidate": "hud-2026-09-24",
+  "status": "visually_frozen",
+  "approval": {
+    "date": "2026-09-24",
+    "source": "用户当前会话",
+    "instruction": "以当前版本固定后准备提交",
+    "shared_cloud_instruction": "不需要导出，假设目标机器可以使用同一个penpot云服务",
+    "scope": "当前Penpot主图与印记状态",
+    "godot_runtime_approved": false
+  },
+  "cloud": {
+    "service_url": "https://design.penpot.app",
+    "workspace_url": null,
+    "file_id": "c828d3cf-7d4e-8145-8008-8f0919f9073c",
+    "file_name": "New File 1",
+    "page_id": "8086b853-2801-807d-8008-985af17836c7",
+    "page_name": "HUD R1 · 基础 UI 材质与布局修订",
+    "revision": 215,
+    "observed_penpot_version": "2.18.0",
+    "named_version": {
+      "label": "SoT HUD 定版 2026-09-24 · 左剑右印记",
+      "created_at_utc": "2026-09-23T17:02:21.075Z",
+      "is_autosave": false
+    },
+    "main_board": {
+      "id": "8086b853-2801-807d-8008-9cc915f221e9",
+      "name": "SPLIT-PIXEL-R1 · 左剑右素材印记 · 65 · 111",
+      "bounds": [
+        0,
+        38900,
+        1280,
+        720
+      ]
+    },
+    "marks_qa_board": {
+      "id": "7537319b-8c1a-8048-8008-a08a60c059ca",
+      "name": "SPLIT-QA · 八组合 · 1x"
+    },
+    "access_requirement": "同一云服务中有该文件编辑权限的账号",
+    "editable_source_location": "shared_penpot_cloud"
+  },
+  "layout": {
+    "canvas": [
+      1280,
+      720
+    ],
+    "character": [
+      32,
+      596,
+      226,
+      108
+    ],
+    "equipment": [
+      266,
+      596,
+      128,
+      108
+    ],
+    "skills": [
+      402,
+      596,
+      476,
+      108
+    ],
+    "relics": [
+      886,
+      596,
+      278,
+      108
+    ],
+    "end_turn": [
+      1172,
+      596,
+      76,
+      108
+    ],
+    "action_resources": [
+      503,
+      550,
+      274,
+      40
+    ],
+    "sword": [
+      32,
+      520,
+      366,
+      56
+    ],
+    "marks": [
+      886,
+      520,
+      278,
+      56
+    ],
+    "bottom_gap": 20
+  },
+  "source_materials": {
+    "shared_texture": {
+      "path": "source/shared-sword-texture.png",
+      "cloud_media_id": "c828d3cf-7d4e-8145-8008-9ca87822f93b",
+      "mode": "RGB",
+      "requires_canvas_mask": true
+    },
+    "sword_silhouette": {
+      "path": "source/sword-silhouette.png",
+      "mode": "RGBA",
+      "layered": false
+    },
+    "mark_outlines": {
+      "path": "source/mark-outlines.json",
+      "source_font": "Noto Serif SC Bold",
+      "current_glyphs_are_paths": true,
+      "original_source_sha256": "4a22c3d5e73921fcd2984b0bfb3c9612aef2b943597c31dca19fc4d987355b19",
+      "text_normalization": "UTF-8 LF；仅统一换行，轮廓数据不变"
+    },
+    "number_font": "Source Sans Pro Semibold"
+  },
+  "verification": {
+    "preview_export_date": "2026-09-12",
+    "cloud_readback_date": "2026-09-24",
+    "cloud_check": "evidence/2026-09-24-cloud-check.json",
+    "local_command": "python dev_doc/ui-art-research/penpot/2026-09-24-hud/verify.py",
+    "cloud_command": "在Penpot MCP execute_code中执行verify-cloud.js",
+    "second_machine_login_tested": false,
+    "original_pre_creation_full_tree_protection": "unverified"
+  },
+  "artifacts": [
+    {
+      "bytes": 194634,
+      "path": "previews/main-native.png",
+      "sha256": "9efff8fefa5d6c92fa29e70631c4feb2c06ee5951f150f484e8d3977e7dc2e38",
+      "png_size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "bytes": 8274,
+      "path": "previews/marks-000-1x.png",
+      "sha256": "a1866ae31535d3238e67718a5a67adc602d0870a82f8f0c00341a1354d00794c",
+      "png_size": [
+        278,
+        56
+      ]
+    },
+    {
+      "bytes": 29642,
+      "path": "previews/marks-000-3x-native.png",
+      "sha256": "e89c351a01c7cd7fb7a7a04c566378703fbc66dfcab5d8392af37ab6ce670a52",
+      "png_size": [
+        834,
+        168
+      ]
+    },
+    {
+      "bytes": 8295,
+      "path": "previews/marks-001-1x.png",
+      "sha256": "a010a06bff508d1516c5f1ebf21265793924084f6f77d4dae53ba0a4f530c66a",
+      "png_size": [
+        278,
+        56
+      ]
+    },
+    {
+      "bytes": 8345,
+      "path": "previews/marks-010-1x.png",
+      "sha256": "34ef145d70df9604c005b0e2379175e3f8c18f99f03d2fef1c1158caeba997d8",
+      "png_size": [
+        278,
+        56
+      ]
+    },
+    {
+      "bytes": 8273,
+      "path": "previews/marks-011-1x.png",
+      "sha256": "2049723a634679bfb6e62fbd5385233de8f5878db57b4e11d3850a0022482895",
+      "png_size": [
+        278,
+        56
+      ]
+    },
+    {
+      "bytes": 8587,
+      "path": "previews/marks-100-1x.png",
+      "sha256": "ef4cd133c7ea1f6127814a12b26e0f8dd6ed65253c99d8e51eb236a0dc6562a8",
+      "png_size": [
+        278,
+        56
+      ]
+    },
+    {
+      "bytes": 8521,
+      "path": "previews/marks-101-1x.png",
+      "sha256": "40cbf50c822c63a626caa31f3fa2bbb0fcf0ff0e5d712d0821a22d36b662f7d5",
+      "png_size": [
+        278,
+        56
+      ]
+    },
+    {
+      "bytes": 8571,
+      "path": "previews/marks-110-1x.png",
+      "sha256": "e18e9640e10524eb1254be63dffd4e4ddb74d6e0a3ed3cb9909a695edce62225",
+      "png_size": [
+        278,
+        56
+      ]
+    },
+    {
+      "bytes": 8473,
+      "path": "previews/marks-111-1x.png",
+      "sha256": "d381b78b7b5bb7e848e51355841ae50a77e5ccce8ae2401e77c8b2e646c58504",
+      "png_size": [
+        278,
+        56
+      ]
+    },
+    {
+      "bytes": 39340,
+      "path": "previews/marks-111-3x-native.png",
+      "sha256": "57e8da0f788bae9a737afb8caddcaeba56b3ba3e3211c9741c3d53fa30538ba9",
+      "png_size": [
+        834,
+        168
+      ]
+    },
+    {
+      "bytes": 27527,
+      "path": "source/mark-outlines.json",
+      "sha256": "7947fcb0b6dea09796f4f5a15b46ea9ce35c2df07f38842a0f96b78dafe19e94"
+    },
+    {
+      "bytes": 1599924,
+      "path": "source/shared-sword-texture.png",
+      "sha256": "57adf557bfe226d5d2af08fcd7f27f9e9c9abeb9ecdab4064fc2c2e4267662a7",
+      "png_size": [
+        2172,
+        724
+      ]
+    },
+    {
+      "bytes": 34314,
+      "path": "source/sword-silhouette.png",
+      "sha256": "748519826b1bb2e8af157fabf227d69c918cd4d6a69bddea37904d1b3d644837",
+      "png_size": [
+        619,
+        89
+      ]
+    },
+    {
+      "bytes": 26012,
+      "path": "evidence/2026-09-12-eight-states-readback.json",
+      "sha256": "bae2929eb933ff725a190d834aa6615aba0b18f96477599d1171791e2b127626"
+    },
+    {
+      "bytes": 8677,
+      "path": "evidence/2026-09-12-main-readback.json",
+      "sha256": "3e4dd2d2857e81821c71c60e6951c8377763cb6b7f6806671b3d910690e7acc8"
+    },
+    {
+      "bytes": 470,
+      "path": "evidence/2026-09-24-cloud-check.json",
+      "sha256": "e1695613be96bfffa03ee1b9a88a55d903617755199f0ca919c6dcb674112c55"
+    },
+    {
+      "bytes": 6581,
+      "path": "evidence/2026-09-24-cloud-readback.json",
+      "sha256": "400f6d31d47d94e877bd067ea1933812b2e29ebc0a1a336192786dba916e6106"
+    }
+  ]
+}
