@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "capturedAt": "2026-09-23T18:15:37.200Z",
+  "file": "c828d3cf-7d4e-8145-8008-8f0919f9073c",
+  "page": "8086b853-2801-807d-8008-985af17836c7",
+  "revision": 215,
+  "checks": {
+    "namedVersionPresent": true,
+    "revisionMatches": true,
+    "mainBoundsMatch": true,
+    "swordBoundsMatch": true,
+    "marksBoundsMatch": true
+  },
+  "scope": "已连接目标页面，原样运行定版目录的 verify-cloud.js；只核验节点、布局和命名版本，视觉以仓库预览和 Godot 实机图复核。"
+}

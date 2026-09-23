@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="HudM2ClassResourceLayout" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud/m2/class_resource_layout.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+bounds = Rect2(32, 520, 366, 56)
+marks_bounds = Rect2(886, 520, 278, 56)
+base_rect = Rect2(40.792, 521.227, 323.577, 46.156)
+energy_rect = Rect2(156.03, 529.703, 206.141, 14.914)
+flow_rect = Rect2(134.05, 521.602, 222.94, 14.57)
+number_rect = Rect2(363, 523, 24, 19)

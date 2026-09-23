@@ -1,0 +1,80 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud/action_resource_strip.gd" id="1_strip"]
+[ext_resource type="Theme" path="res://assets/ui/themes/hud_structure_prototype.tres" id="2_theme"]
+[ext_resource type="Script" path="res://scripts/ui/hud/action_resource_glyph.gd" id="3_glyph"]
+
+[node name="ActionResourceStrip" type="PanelContainer"]
+custom_minimum_size = Vector2(274, 40)
+mouse_filter = 2
+theme = ExtResource("2_theme")
+theme_type_variation = &"ActionResourceStrip"
+script = ExtResource("1_strip")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 3
+
+[node name="MainRow" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="MovementZone" type="PanelContainer" parent="Margin/MainRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(76, 24)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"ActionResourceSegment"
+
+[node name="MovementCluster" type="HBoxContainer" parent="Margin/MainRow/MovementZone"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="FootprintGlyph" type="Control" parent="Margin/MainRow/MovementZone/MovementCluster"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(18, 24)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("3_glyph")
+
+[node name="MovementValue" type="Label" parent="Margin/MainRow/MovementZone/MovementCluster"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 24)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"ActionResourceMovementValue"
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StandardZone" type="PanelContainer" parent="Margin/MainRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(76, 24)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"ActionResourceSegment"
+
+[node name="StandardPips" type="HBoxContainer" parent="Margin/MainRow/StandardZone"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="SwiftZone" type="PanelContainer" parent="Margin/MainRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(76, 24)
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"ActionResourceSegment"
+
+[node name="SwiftPips" type="HBoxContainer" parent="Margin/MainRow/SwiftZone"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1

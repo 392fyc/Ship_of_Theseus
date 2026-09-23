@@ -7,6 +7,18 @@
 [node name="TacticalScene" type="Node2D" unique_id=369746598]
 script = ExtResource("3_scene_script")
 
+[node name="BattlefieldBackdrop" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="Ground" type="ColorRect" parent="BattlefieldBackdrop"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.0666667, 0.0745098, 0.109804, 1)
+
 [node name="TacticalManager" type="Node" parent="." unique_id=1819233230]
 script = ExtResource("1_script")
 

@@ -1,0 +1,14 @@
+{
+  "status": "development_placeholder",
+  "source_commit": "523d97e1411fc53bcbc8a7ca8313fa976c7f1479",
+  "source_scope": "assets/prototype/hud_m2/skill-*.png",
+  "provenance": "Reference branch files; original creation source and distribution rights have not been verified.",
+  "release_gate": "Replace these placeholders with visually approved skill icons whose source, rights and SHA256 are recorded before game distribution.",
+  "assets": {
+    "skill-juhe.png": "13935a1c8377946fc0258171475833cde33ce87ea44902b30a4201b2ea492091",
+    "skill-xinyan.png": "c3aa9def6a9db9b308397fb2fb6f9483a59a21e2b1f7ad58e72eef4a7bddf047",
+    "skill-yishan.png": "e6dd8d6364685b544e399be3e532316d15b92e7712cab04571c439a294bd9ae2",
+    "skill-zhanji.png": "7ed2d2d7066f1826a63c6dee064f03138d47a344fbeaab8ddb071901e4d03e77",
+    "skill-zhaojia.png": "5395f67acaf9fdf413fd4357865211e764aa296fd90bc92fecbc837336919eb2"
+  }
+}

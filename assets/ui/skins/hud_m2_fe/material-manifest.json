@@ -1,0 +1,220 @@
+{
+  "version": "FE-IMPORT-R1",
+  "file_id": "c828d3cf-7d4e-8145-8008-8f0919f9073c",
+  "page_id": "8086b853-2801-807d-8008-985af17836c7",
+  "approved_visual_source_root": "8086b853-2801-807d-8008-9a7fb871b410",
+  "export_source_root": "8086b853-2801-807d-8008-9a883e6146ae",
+  "export_revision": 189,
+  "source": "Penpot native PNG export; source layers copied without raster editing",
+  "shared_frame_contains_slot_positions": false,
+  "assets": [
+    {
+      "key": "shared-frame",
+      "id": "8086b853-2801-807d-8008-9a8a46692ccd",
+      "crop": [
+        32,
+        550,
+        1216,
+        154
+      ],
+      "logicalSize": [
+        1216,
+        154
+      ],
+      "type": "material_only_native_export",
+      "containsContent": false,
+      "path": "shared-frame.png",
+      "sha256": "72822cbf24a89be7fd6a5be98d62fc1daac4c285a3b2430f1314e768836515db",
+      "sourceChildId": "8086b853-2801-807d-8008-9a8a47289148"
+    },
+    {
+      "key": "slot-active",
+      "id": "8086b853-2801-807d-8008-9a884a360345",
+      "crop": [
+        464,
+        618,
+        64,
+        64
+      ],
+      "logicalSize": [
+        64,
+        64
+      ],
+      "type": "material_only_native_export",
+      "containsContent": false,
+      "path": "slot-active.png",
+      "sha256": "b79ce10084eef7c0bbe2bd067fec230ffd8bc3887819cc940615708b020ee799"
+    },
+    {
+      "key": "slot-empty",
+      "id": "8086b853-2801-807d-8008-9a884bda3bdd",
+      "crop": [
+        332,
+        642,
+        52,
+        52
+      ],
+      "logicalSize": [
+        52,
+        52
+      ],
+      "type": "material_only_native_export",
+      "containsContent": false,
+      "path": "slot-empty.png",
+      "sha256": "c5c0d0cd26c3185085d5e96e7c85a4a89060cad76e2fc2f1522ae88cab497af4"
+    },
+    {
+      "key": "slot-relic",
+      "id": "8086b853-2801-807d-8008-9a884d851c30",
+      "crop": [
+        900,
+        606,
+        40,
+        40
+      ],
+      "logicalSize": [
+        40,
+        40
+      ],
+      "type": "material_only_native_export",
+      "containsContent": false,
+      "path": "slot-relic.png",
+      "sha256": "de6943b15461e0b1f68aa56ddbe5b94a2b1ba89a505d88baa70982fb1a75e13f"
+    },
+    {
+      "key": "slot-potion",
+      "id": "8086b853-2801-807d-8008-9a884f45ee77",
+      "crop": [
+        352,
+        606,
+        32,
+        32
+      ],
+      "logicalSize": [
+        32,
+        32
+      ],
+      "type": "material_only_native_export",
+      "containsContent": false,
+      "path": "slot-potion.png",
+      "sha256": "4e611fd2f36cd8b82efd3efd55ceb82599b8e45edb794f466b387324f6596d28"
+    },
+    {
+      "key": "slot-passive",
+      "id": "8086b853-2801-807d-8008-9a8850ffd08c",
+      "crop": [
+        680,
+        618,
+        64,
+        64
+      ],
+      "logicalSize": [
+        64,
+        64
+      ],
+      "type": "material_only_native_export",
+      "containsContent": false,
+      "path": "slot-passive.png",
+      "sha256": "7f0203c7a64d1f146b0b3792898d85fca42119fbb0fb6143e7fd3573591dd102"
+    },
+    {
+      "key": "portrait-frame",
+      "id": "8086b853-2801-807d-8008-9a8852a1406e",
+      "crop": [
+        44,
+        607,
+        72,
+        84
+      ],
+      "logicalSize": [
+        72,
+        84
+      ],
+      "type": "material_only_native_export",
+      "containsContent": false,
+      "path": "portrait-frame.png",
+      "sha256": "26d44372228183410ab00a7f8400e71a2a0e8782879cc172cddaa34d65fc02c3"
+    },
+    {
+      "key": "end-frame",
+      "id": "8086b853-2801-807d-8008-9a8854a6884d",
+      "crop": [
+        1188,
+        628,
+        44,
+        44
+      ],
+      "logicalSize": [
+        44,
+        44
+      ],
+      "type": "material_only_native_export",
+      "containsContent": false,
+      "path": "end-frame.png",
+      "sha256": "debed1d0688bc95b63959e70afe8ba3497e37524d5e1cc5621acc3b6bce7d10d"
+    },
+    {
+      "id": "8086b853-2801-807d-8008-9a88df37c1a5",
+      "key": "shared-collapsed",
+      "crop": [
+        32,
+        596,
+        1216,
+        108
+      ],
+      "logicalSize": [
+        1216,
+        108
+      ],
+      "containsContent": false,
+      "path": "shared-collapsed.png",
+      "sha256": "04b2f55cd950eccceb4f9660c851cad8c7ac4af1c27c2768b533a6c95cc3b315"
+    }
+  ],
+  "portrait_expansion": {
+    "top": 2
+  },
+  "action_geometry": {
+    "version": "FE-R1-ACTION-1",
+    "centerY": 575.5,
+    "centersX": [
+      550.2,
+      640,
+      729.8
+    ],
+    "viewport": [
+      24,
+      24
+    ],
+    "circleDiameter": 20,
+    "swiftSide": 24,
+    "swiftHeight": 20.784609690826528,
+    "footVisibleHeight": 20,
+    "numberFontSize": 14,
+    "numberSizing": "auto-width",
+    "numberGap": 7,
+    "capacity": 3,
+    "pipGap": 5,
+    "source": "latest_user_position_and_size_correction",
+    "contentWindows": [
+      [
+        506,
+        553,
+        88.4,
+        45
+      ],
+      [
+        595.6,
+        553,
+        88.8,
+        45
+      ],
+      [
+        685.6,
+        553,
+        88.4,
+        45
+      ]
+    ]
+  }
+}

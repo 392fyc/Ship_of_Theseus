@@ -1,0 +1,126 @@
+{
+  "engine": "Godot 4.6.3.stable",
+  "renderer": "Vulkan / NVIDIA GeForce RTX 3070 Ti",
+  "script": "tests/capture_hud_freeze.gd",
+  "images": [
+    {
+      "file": "evidence/action-spent.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "47ba16f9da16f745dcdac53ca73cfb1e9595fc1c044a4db2a55bc64bd88c8bb7",
+      "source": "display_fixture"
+    },
+    {
+      "file": "evidence/fixture-0-111.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "ed86b7a776bc1101e9e856f36e68d03a4f0095ce0761f9bab31a94b56bfeb02a",
+      "source": "display_fixture"
+    },
+    {
+      "file": "evidence/fixture-1-111.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "cb3d0e82402f216b9b864f5d1b5651b0502c406b726611de428296439d607c74",
+      "source": "display_fixture"
+    },
+    {
+      "file": "evidence/fixture-100-111.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "d1d8d2303cc34a040d51a659e2e434c52386e17b4dcc04d5c230333fa9fb7bb9",
+      "source": "display_fixture"
+    },
+    {
+      "file": "evidence/fixture-50-111.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "679def19947d5509044003b7d0ce3d2ffca30d31d628670af325c633cbac26ab",
+      "source": "display_fixture"
+    },
+    {
+      "file": "evidence/fixture-51-111.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "6c6a318de2e9783adcfb12a890a43c7eb9a9e74051723e7d8ed300869c2e271b",
+      "source": "display_fixture"
+    },
+    {
+      "file": "evidence/hover-character.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "e768c976fcbc68dee6cfe9bd8647c357714bff300439b68d1c812ce35fdfb8d0",
+      "source": "real_state"
+    },
+    {
+      "file": "evidence/marks-000.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "2521b5b57be317f84697c6a833e0d50b50ac3415f360c5bb8d6f09ce8cb91bcf",
+      "source": "display_fixture"
+    },
+    {
+      "file": "evidence/marks-001.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "d8f5fa6eabb889134862e5d9e538716339f19d00220e8fa29c29b3734fe459a5",
+      "source": "display_fixture"
+    },
+    {
+      "file": "evidence/marks-010.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "4bf5df4a85796a5d16fe89d8d7df01fa9862b613842da02c1aa2c9277e8f2928",
+      "source": "display_fixture"
+    },
+    {
+      "file": "evidence/marks-011.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "99bba321b1570ebf74a0cbe8f70842be050f2effab0e67b0d10675d591b8b273",
+      "source": "display_fixture"
+    },
+    {
+      "file": "evidence/marks-100.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "89619b492d9e5131e36394569c4b5ca6198cb98a9a7d260b6bd43c3cfed5db12",
+      "source": "display_fixture"
+    },
+    {
+      "file": "evidence/marks-101.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "251db0345e0cc39934969250b556c8ccd46bfa4f3c97ad0477d86f042547871e",
+      "source": "display_fixture"
+    },
+    {
+      "file": "evidence/marks-110.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "a34a0f71a27ebd365fb07de04b80cacec3cce75d32f456453ffc9ea895c8a51e",
+      "source": "display_fixture"
+    },
+    {
+      "file": "evidence/marks-111.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "9c1aa82b34381cf5124e9259a24ecdf3adef83f2eca9397db28711b30a748301",
+      "source": "display_fixture"
+    },
+    {
+      "file": "evidence/production-1920.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "ee8cec2220bf1af010537b62c21dfc65ec992dbe5b39bef3287a5265be60e7f0",
+      "source": "real_state"
+    },
+    {
+      "file": "evidence/production.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "5d1d5bfe8d58382b632c90faa6773d8fe9265f0c48e871fb6a6f5fff472264ca",
+      "source": "real_state"
+    }
+  ]
+}

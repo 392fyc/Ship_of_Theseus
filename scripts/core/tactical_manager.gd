@@ -187,6 +187,10 @@ func get_dashboard_data() -> Dictionary:
 		return {"visible": false}
 
 	var is_enemy_info: bool = _is_enemy_info_mode()
+	var qi_threshold_pct: int = info_unit._xinyan_qi_ratio_threshold_pct
+	var qi_band: StringName = &"none"
+	if info_unit._qi_max > 0 and qi_threshold_pct >= 0:
+		qi_band = &"low" if info_unit.sword_qi * 100 <= info_unit._qi_max * qi_threshold_pct else &"high"
 	return {
 		"visible": true,
 		"mode": "enemy" if is_enemy_info else "player",
@@ -200,6 +204,12 @@ func get_dashboard_data() -> Dictionary:
 			"movement_used": info_unit.movement_used,
 			"standard_used": info_unit.standard_used,
 			"swift_used": info_unit.swift_used,
+			"movement_remaining": maxi(0, info_unit.stats.mov),
+			"movement_available": not info_unit.movement_used,
+			"standard_capacity": 1,
+			"standard_remaining": 0 if info_unit.standard_used else 1,
+			"swift_capacity": 1,
+			"swift_remaining": 0 if info_unit.swift_used else 1,
 		},
 		"phase_text": _get_phase_text(),
 		"show_actions": not is_enemy_info and _is_player_turn_active(),
@@ -210,6 +220,12 @@ func get_dashboard_data() -> Dictionary:
 		"selected_skill_id": _selected_skill_id,
 		"forecast": _combat_forecast.duplicate(true),
 		"hint_text": _get_dashboard_hint_text(),
+		"class_resource_display": {
+			"class_id": info_unit.unit_id,
+			"mark_capacity": info_unit._mark_max,
+			"qi_threshold_ratio": float(qi_threshold_pct) / 100.0 if qi_threshold_pct >= 0 else -1.0,
+			"qi_band": qi_band,
+		},
 		# ── 主属性面板：基础值 + 括号加成（stats_delta=生效−基础，含印记/心眼/buff）──
 		"stats": {
 			"str": info_unit.stats.str_attr, "mag": info_unit.stats.mag,
@@ -877,6 +893,23 @@ func _restore_action_phase_state() -> void:
 	_resolve_post_action_phase()
 
 
+## 只归一 HUD 费用标签，不改变技能消耗和可用性。
+func _build_resource_cost_display(skill_data: Dictionary) -> Dictionary:
+	var display: Variant = skill_data.get("resource_cost_display", {
+		"amount": skill_data.get("qi_cost", 0), "resource_name": "剑气",
+	})
+	if not display is Dictionary:
+		return {}
+	var amount: Variant = display.get("amount")
+	var resource_name: Variant = display.get("resource_name")
+	if not (amount is int or amount is float) or not (resource_name is String or resource_name is StringName):
+		return {}
+	if not is_finite(float(amount)) or float(amount) != floorf(float(amount)) or int(amount) <= 0 or int(amount) > 999:
+		return {}
+	var name: String = str(resource_name).strip_edges()
+	return {"amount": int(amount), "resource_name": name} if not name.is_empty() else {}
+
+
 func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 	var skill_data: Dictionary = _get_skill_data(skill_id)
 	var cooldown_turns: int = unit.get_skill_cooldown(skill_id)
@@ -895,6 +928,7 @@ func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 		"qi_cost": int(skill_data.get("qi_cost", 0)),
 		"mark_cost": int(skill_data.get("mark_cost", 0)),
 		"requires_marks": int(skill_data.get("requires_marks", 0)),
+		"resource_cost_display": _build_resource_cost_display(skill_data),
 	}
 	var phase_reason: String = _get_phase_mismatch_reason(skill_data)
 	if phase_reason != "":
