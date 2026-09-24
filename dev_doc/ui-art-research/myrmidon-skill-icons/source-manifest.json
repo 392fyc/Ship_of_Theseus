@@ -1,6 +1,6 @@
 {
   "scope": "基础剑士（myrmidon）战斗界面技能图标",
-  "status": "visual_candidate_pending_user_review",
+  "status": "user_approved",
   "source": {
     "generator": "OpenAI image_gen",
     "reference_policy": "四枚新版图标以游戏仓现有角色原画和已采用的心眼图标为材质与配色参考；心眼图标沿用已生成素材。未使用第三方游戏素材。",
@@ -45,17 +45,17 @@
     {
       "skill_id": "swordsman_juhe",
       "source": "candidate-v3/juhe-source.png",
-      "source_sha256": "77adc3809e8ef3a3cbd4bb9d2067aca4bfd9b4743c778ac9e329bd4dbf463bd4",
+      "source_sha256": "2b2b27fcc39071bf47154f3212342120977aadff31397aa474f3d576578a0a45",
       "runtime": "assets/ui/skills/myrmidon/juhe.png",
-      "runtime_sha256": "794c7cd92419c42716088a3dc3888f697770c748658c39c5302385efb052b9bb",
-      "brief": "水平停住的出鞘剑与细直剑光，表现静止蓄势后的一线斩击"
+      "runtime_sha256": "f8fa54e668085b87073a7c252d19f09469668ac08ad7b4e8931a3385e1f3cd16",
+      "brief": "贯穿图标的水平长剑与细直剑光，表现静止蓄势后的一线斩击"
     }
   ],
   "verification_views": [
-    {"path": "candidate-v3/move-1280.png", "sha256": "f433cf0c1ae1c5fba162762d927e2585c1e1d72d2915fa6a776d8ad55b11d675"},
-    {"path": "candidate-v3/action-1280.png", "sha256": "d221f874abce1b4a721d7ca8a96176b7c9ffd835cde34ca4b76bbfbe9bc30d9c"},
-    {"path": "candidate-v3/action-1920.png", "sha256": "d37613a81cf0efd735434104175d9cc156590f01af2d9fddfe090786bdc9e83f"},
-    {"path": "candidate-v3/skills-detail-4x.png", "sha256": "d8b582893d03c7e2a4549fea0a958d7cffd03f80adf3b6d470245f2035938244"}
+    {"path": "candidate-v3/move-1280.png", "sha256": "4d10620155a1d4d2552f66325bde7572e1faaf6a491521ba01a4fc30e6da4757"},
+    {"path": "candidate-v3/action-1280.png", "sha256": "094d282a932acf3e6ca3ff4f9dd5d04c9f9a8b611bfdf5adcf06b7476ba03bb7"},
+    {"path": "candidate-v3/action-1920.png", "sha256": "e0ce7ec912eff6d08554f7fc0fe8b5a869e40d566a757aa3171154c589693f88"},
+    {"path": "candidate-v3/skills-detail-4x.png", "sha256": "e633c58fbdb4ddd72d7f87a427c2ae0743c3316f5d2e05488f645a2a12b35e05"}
   ],
   "release_check": "仓库当前没有正式 export_presets.cfg；发布时需验证五张运行图及目录 JSON 纳入发行包，并排除开发源图与评审截图。"
 }
