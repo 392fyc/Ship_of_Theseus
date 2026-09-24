@@ -1,6 +1,6 @@
 extends SceneTree
 
-const SOURCE := "res://dev_doc/ui-art-research/myrmidon-skill-icons/candidate-v2"
+const SOURCE := "res://dev_doc/ui-art-research/myrmidon-skill-icons/candidate-v3"
 const TARGET := "res://assets/ui/skills/myrmidon"
 const ICONS := ["xinyan", "zhanji", "yishan", "zhaojia", "juhe"]
 

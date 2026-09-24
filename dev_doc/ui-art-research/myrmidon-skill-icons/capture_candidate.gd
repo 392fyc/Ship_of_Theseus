@@ -1,6 +1,6 @@
 extends SceneTree
 
-const OUTPUT := "res://dev_doc/ui-art-research/myrmidon-skill-icons/candidate-v2"
+const OUTPUT := "res://dev_doc/ui-art-research/myrmidon-skill-icons/candidate-v3"
 
 
 func _initialize() -> void:
