@@ -60,10 +60,18 @@ func _input(event: InputEvent) -> void:
 
 
 func _pointer_in_inspection_bridge() -> bool:
+	if not _inspection.visible:
+		return false
 	var card: Rect2 = _inspection.get_rect()
-	var left: float = maxf(0.0, card.position.x)
-	var right: float = minf(size.x, card.end.x)
-	return _inspection.visible and Rect2(left, card.end.y, right - left, -card.end.y).has_point(_pointer_local)
+	var portrait: Rect2 = _portrait_button.get_rect()
+	var bridge_height: float = portrait.end.y - card.end.y
+	if bridge_height <= 0.0 or _pointer_local.y < card.end.y or _pointer_local.y > portrait.end.y:
+		return false
+	# 由头像宽度逐渐展开到属性卡宽度，允许鼠标斜向移动到右列。
+	var progress: float = (portrait.end.y - _pointer_local.y) / bridge_height
+	var left: float = lerpf(portrait.position.x, card.position.x, progress)
+	var right: float = lerpf(portrait.end.x, card.end.x, progress)
+	return _pointer_local.x >= left and _pointer_local.x <= right
 
 
 func get_content_top_y() -> float:
@@ -93,7 +101,8 @@ func _apply_view_to_nodes() -> void:
 	%PortraitFallback.visible = _view.portrait_texture == null
 	%PortraitFallback.queue_redraw()
 	_portrait_button.tooltip_text = ""
-	_inspection_label.text = _view.identity_text()
+	_portrait_button.accessibility_name = _view.identity_text() + "，查看属性"
+	_inspection_label.text = _view.identity_text() + "  ·  属性"
 	for key: String in CharacterViewData.ATTRIBUTE_KEYS:
 		(%AttributeRows.get_node(key + "/Value") as Label).text = _view.attribute_value_text(key)
 	_layout_inspection.call_deferred()

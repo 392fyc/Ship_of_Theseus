@@ -1,0 +1,19 @@
+{
+  "version": "hud-character-portrait-1",
+  "class_id": "kensei",
+  "source_path": "res://assets/ui/portraits/kensei_hud_portrait_generated.png",
+  "source_sha256": "1b8fc2322dae3f141a0a342a2d11e2604351bad8d36912f8538b908905267105",
+  "source_size": [1173, 1341],
+  "source_provenance": "Built-in imagegen candidate regenerated from the approved original artwork and selected by the user for this HUD on 2026-09-24",
+  "reference_source_path": "res://assets/prototype/visual_style/samples/portrait_preview_final.png",
+  "reference_source_sha256": "9f123a2022abe62472530ebd13ba43587802623c0db7ff7af711f5cec5be0cf3",
+  "generation_prompt_path": "res://dev_doc/ui-art-research/hud-character-panel-portrait/generation-prompt.md",
+  "portrait_resource": "res://assets/ui/portraits/kensei_hud_portrait.tres",
+  "portrait_resource_sha256": "6d8ef615fc9dacd3fa32feb2dae2a6867b5e4c71a0670125f44696cf076a8b9a",
+  "crop_region": [320, 100, 660, 735],
+  "display_size": [70, 78],
+  "sampling": "linear",
+  "raster_derivative_created": true,
+  "visual_status": "user_approved",
+  "rights_boundary": "The original reference has recorded user authorization; the generated HUD candidate was selected by the user after a visual comparison."
+}

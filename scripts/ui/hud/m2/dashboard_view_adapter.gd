@@ -14,6 +14,7 @@ const MeterView := preload("res://scripts/ui/hud/value_meter_view_data.gd")
 const ClassResourceView := preload("res://scripts/ui/hud/m2/class_resource_view_data.gd")
 const SwordResourceView := preload("res://scripts/ui/hud/m2/sword_resource_view_data.gd")
 const ProfileCatalog := preload("res://scripts/ui/hud/m2/class_resource_profile_catalog.gd")
+const KenseiPortrait: Texture2D = preload("res://assets/ui/portraits/kensei_hud_portrait.tres")
 
 var _resource_profiles := ProfileCatalog.new()
 
@@ -82,6 +83,9 @@ func _build_character(state: Dictionary) -> RefCounted:
 	view.profession_name = str(state.get("unit_name", "")).strip_edges()
 	view.player_name = ""
 	view.portrait_fallback_text = str(state.get("unit_label", "")).strip_edges()
+	var class_display: Dictionary = state.get("class_resource_display", {}) if state.get("class_resource_display") is Dictionary else {}
+	if str(class_display.get("class_id", "")) == "kensei":
+		view.portrait_texture = KenseiPortrait
 	var hp: Variant = state.get("hp")
 	var hp_max: Variant = state.get("hp_max")
 	if _is_integer(hp) and _is_integer(hp_max):

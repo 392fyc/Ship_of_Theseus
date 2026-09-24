@@ -69,9 +69,47 @@ func _test_player_state(dashboard: Control, manager: Object) -> void:
 	_check("真实载荷显示五区和行动条", composition.visible and composition.get_node("ActionResourceStrip").visible)
 	var character: Control = composition.get_node("BottomRow/CharacterHudPanel") as Control
 	var character_card: Control = character.get_inspection_panel()
+	var portrait_image: TextureRect = character.get_node("PortraitContent") as TextureRect
+	var portrait_frame: Control = character.get_node("PortraitFrame") as Control
+	_check("真实剑圣显示头像而非轮廓占位", portrait_image.texture is AtlasTexture and not character.get_node("PortraitFallback").visible)
+	_check("头像图像铺到画框内缘", portrait_image.position.x <= portrait_frame.position.x + 1.0 and portrait_image.position.y <= portrait_frame.position.y + 3.0 and portrait_image.get_rect().end.x >= portrait_frame.get_rect().end.x - 1.0 and portrait_image.get_rect().end.y >= portrait_frame.get_rect().end.y - 1.0)
+	var portrait_button: Button = character.get_inspection_control()
+	_check("只有头像区域承担属性查看入口", portrait_button.get_rect() == Rect2(12, 13, 72, 82))
 	_move_pointer(character.get_inspection_control().get_global_rect().get_center())
 	await process_frame
 	_check("人物栏真实鼠标移入展开信息卡", character_card.visible and dashboard.get_input_blocking_rects().has(character_card.get_global_rect()))
+	var sword: Control = composition.get_class_resource_host()
+	_check("属性卡位于人物栏上方且避开剑气槽", character_card.get_global_rect().end.y < character.get_global_rect().position.y and not character_card.get_global_rect().intersects(sword.get_global_rect()))
+	_check("属性卡显示中文标签与实时数值", (character_card.get_node("AttributeRows/STR/Key") as Label).text == "力量" and (character_card.get_node("AttributeRows/STR/Value") as Label).text == str(manager.get_dashboard_data()["stats"]["str"]))
+	var travel_x: float = portrait_button.get_global_rect().get_center().x
+	var bridge_stayed_open: bool = true
+	for y: int in range(int(portrait_button.get_global_rect().get_center().y), int(character_card.get_global_rect().get_center().y), -8):
+		_move_pointer(Vector2(travel_x, float(y)))
+		await process_frame
+		bridge_stayed_open = bridge_stayed_open and character_card.visible
+	_check("从头像逐步经过空隙和剑气区域到属性卡时不闪退", bridge_stayed_open)
+	_move_pointer(portrait_button.get_global_rect().get_center())
+	await process_frame
+	var diagonal_start: Vector2 = portrait_button.get_global_rect().get_center()
+	var diagonal_end: Vector2 = character_card.get_global_rect().position + Vector2(character_card.size.x * 0.75, character_card.size.y * 0.8)
+	var diagonal_stayed_open: bool = true
+	for step: int in range(1, 31):
+		_move_pointer(diagonal_start.lerp(diagonal_end, float(step) / 30.0))
+		await process_frame
+		diagonal_stayed_open = diagonal_stayed_open and character_card.visible
+	_check("从头像斜向移到属性卡右列时不闪退", diagonal_stayed_open)
+	_move_pointer(character_card.get_global_rect().get_center())
+	await process_frame
+	_check("鼠标进入属性卡后保持展开", character_card.visible)
+	_move_pointer(character.get_global_rect().position + Vector2(150, 55))
+	await process_frame
+	_check("鼠标仅经过人物栏文字不会展开属性卡", not character_card.visible)
+	portrait_button.grab_focus()
+	await process_frame
+	_check("键盘聚焦头像可查看属性", character_card.visible)
+	portrait_button.release_focus()
+	await process_frame
+	_check("键盘离开头像收起属性卡", not character_card.visible)
 	_move_pointer(Vector2(640.0, 320.0))
 	await process_frame
 	_check("人物栏真实鼠标移出收起信息卡", not character_card.visible)

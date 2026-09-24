@@ -47,11 +47,12 @@ theme_type_variation = &"HudPortraitFrame"
 
 [node name="PortraitContent" type="TextureRect" parent="."]
 unique_name_in_owner = true
-offset_left = 18.0
-offset_top = 19.0
-offset_right = 78.0
-offset_bottom = 89.0
+offset_left = 13.0
+offset_top = 16.0
+offset_right = 83.0
+offset_bottom = 94.0
 mouse_filter = 2
+texture_filter = 2
 expand_mode = 1
 stretch_mode = 6
 
@@ -66,8 +67,10 @@ mouse_filter = 2
 
 [node name="PortraitInspectButton" type="Button" parent="."]
 unique_name_in_owner = true
-offset_right = 226.0
-offset_bottom = 108.0
+offset_left = 12.0
+offset_top = 13.0
+offset_right = 84.0
+offset_bottom = 95.0
 mouse_filter = 0
 mouse_default_cursor_shape = 2
 focus_mode = 2
@@ -84,6 +87,7 @@ offset_right = 85.0
 offset_bottom = 96.0
 mouse_filter = 2
 visible = false
+z_index = 2
 theme_type_variation = &"HudM2PortraitFocus"
 
 [node name="InfoColumn" type="Control" parent="."]
@@ -334,7 +338,8 @@ offset_right = 38.0
 offset_bottom = 20.0
 mouse_filter = 2
 theme_type_variation = &"HudM2AttributeKey"
-text = "STR"
+text = "力量"
+theme_override_font_sizes/font_size = 13
 vertical_alignment = 1
 
 [node name="Value" type="Label" parent="InspectionPanel/AttributeRows/STR"]
@@ -345,6 +350,7 @@ offset_bottom = 20.0
 mouse_filter = 2
 theme_type_variation = &"HudM2NumericLabel"
 text = "—"
+theme_override_font_sizes/font_size = 13
 horizontal_alignment = 2
 vertical_alignment = 1
 
@@ -363,7 +369,8 @@ offset_right = 38.0
 offset_bottom = 20.0
 mouse_filter = 2
 theme_type_variation = &"HudM2AttributeKey"
-text = "MAG"
+text = "魔力"
+theme_override_font_sizes/font_size = 13
 vertical_alignment = 1
 
 [node name="Value" type="Label" parent="InspectionPanel/AttributeRows/MAG"]
@@ -374,6 +381,7 @@ offset_bottom = 20.0
 mouse_filter = 2
 theme_type_variation = &"HudM2NumericLabel"
 text = "—"
+theme_override_font_sizes/font_size = 13
 horizontal_alignment = 2
 vertical_alignment = 1
 
@@ -392,7 +400,8 @@ offset_right = 38.0
 offset_bottom = 20.0
 mouse_filter = 2
 theme_type_variation = &"HudM2AttributeKey"
-text = "DEX"
+text = "技巧"
+theme_override_font_sizes/font_size = 13
 vertical_alignment = 1
 
 [node name="Value" type="Label" parent="InspectionPanel/AttributeRows/DEX"]
@@ -403,6 +412,7 @@ offset_bottom = 20.0
 mouse_filter = 2
 theme_type_variation = &"HudM2NumericLabel"
 text = "—"
+theme_override_font_sizes/font_size = 13
 horizontal_alignment = 2
 vertical_alignment = 1
 
@@ -421,7 +431,8 @@ offset_right = 38.0
 offset_bottom = 20.0
 mouse_filter = 2
 theme_type_variation = &"HudM2AttributeKey"
-text = "SPE"
+text = "速度"
+theme_override_font_sizes/font_size = 13
 vertical_alignment = 1
 
 [node name="Value" type="Label" parent="InspectionPanel/AttributeRows/SPE"]
@@ -432,6 +443,7 @@ offset_bottom = 20.0
 mouse_filter = 2
 theme_type_variation = &"HudM2NumericLabel"
 text = "—"
+theme_override_font_sizes/font_size = 13
 horizontal_alignment = 2
 vertical_alignment = 1
 
@@ -450,7 +462,8 @@ offset_right = 38.0
 offset_bottom = 20.0
 mouse_filter = 2
 theme_type_variation = &"HudM2AttributeKey"
-text = "DEF"
+text = "防御"
+theme_override_font_sizes/font_size = 13
 vertical_alignment = 1
 
 [node name="Value" type="Label" parent="InspectionPanel/AttributeRows/DEF"]
@@ -461,6 +474,7 @@ offset_bottom = 20.0
 mouse_filter = 2
 theme_type_variation = &"HudM2NumericLabel"
 text = "—"
+theme_override_font_sizes/font_size = 13
 horizontal_alignment = 2
 vertical_alignment = 1
 
@@ -479,7 +493,8 @@ offset_right = 38.0
 offset_bottom = 20.0
 mouse_filter = 2
 theme_type_variation = &"HudM2AttributeKey"
-text = "RES"
+text = "抗性"
+theme_override_font_sizes/font_size = 13
 vertical_alignment = 1
 
 [node name="Value" type="Label" parent="InspectionPanel/AttributeRows/RES"]
@@ -490,6 +505,7 @@ offset_bottom = 20.0
 mouse_filter = 2
 theme_type_variation = &"HudM2NumericLabel"
 text = "—"
+theme_override_font_sizes/font_size = 13
 horizontal_alignment = 2
 vertical_alignment = 1
 
@@ -508,7 +524,8 @@ offset_right = 38.0
 offset_bottom = 20.0
 mouse_filter = 2
 theme_type_variation = &"HudM2AttributeKey"
-text = "LCK"
+text = "幸运"
+theme_override_font_sizes/font_size = 13
 vertical_alignment = 1
 
 [node name="Value" type="Label" parent="InspectionPanel/AttributeRows/LCK"]
@@ -519,6 +536,7 @@ offset_bottom = 20.0
 mouse_filter = 2
 theme_type_variation = &"HudM2NumericLabel"
 text = "—"
+theme_override_font_sizes/font_size = 13
 horizontal_alignment = 2
 vertical_alignment = 1
 
@@ -537,7 +555,8 @@ offset_right = 38.0
 offset_bottom = 20.0
 mouse_filter = 2
 theme_type_variation = &"HudM2AttributeKey"
-text = "MOV"
+text = "移动"
+theme_override_font_sizes/font_size = 13
 vertical_alignment = 1
 
 [node name="Value" type="Label" parent="InspectionPanel/AttributeRows/MOV"]
@@ -548,5 +567,17 @@ offset_bottom = 20.0
 mouse_filter = 2
 theme_type_variation = &"HudM2NumericLabel"
 text = "—"
+theme_override_font_sizes/font_size = 13
 horizontal_alignment = 2
 vertical_alignment = 1
+
+[node name="AttributeNote" type="Label" parent="InspectionPanel"]
+offset_left = 16.0
+offset_top = 169.0
+offset_right = 288.0
+offset_bottom = 183.0
+mouse_filter = 2
+theme_type_variation = &"HudM2AttributeKey"
+text = "括号内为当前修正"
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 2
