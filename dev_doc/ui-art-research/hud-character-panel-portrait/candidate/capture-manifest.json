@@ -1,0 +1,19 @@
+{
+  "scene": "res://scenes/tactical/TacticalScene.tscn",
+  "capture_script": "res://tests/capture_hud_character_panel.gd",
+  "godot_version": "4.6.3.stable.official.7d41c59c4",
+  "renderer": "Vulkan Forward+",
+  "selected_variant": "generated",
+  "captures": [
+    {"file": "idle-1280.png", "size": [1280, 720], "sha256": "94df4ed181b9e2f0e3fc1b0237905c2dc39b239e798dcb3f0eeb7835148188b2"},
+    {"file": "hover-1280.png", "size": [1280, 720], "sha256": "bc2b97fefd73ac225c25c5c3bfad08fe2a27966c9170c30d2cb740b1db6c9077"},
+    {"file": "idle-1920.png", "size": [1920, 1080], "sha256": "721e17141ab1775dba51c9aa63e0f31c220607eb59fcc4293df4a16c0f0fa425"},
+    {"file": "hover-1920.png", "size": [1920, 1080], "sha256": "f49849c5260019d17cb9f0a52f70528ef9cd0f520d6a65254e0f2e1449cac9bd"},
+    {"file": "portrait-detail-4x.png", "size": [400, 400], "source_file": "hover-1280.png", "source_region": [32, 596, 100, 100], "resize": "nearest 4x", "sha256": "acd2024b333da0d94226516228ad8dfecac364a69aabf5267620319078258d3b"},
+    {"file": "idle-1280-generated.png", "size": [1280, 720], "sha256": "af76387c0c2c90f8d945e4c6a89b4104889f8e4a353e05554cf7ec0218b4a1fa"},
+    {"file": "hover-1280-generated.png", "size": [1280, 720], "sha256": "f3160c732245d532672c4da800bfe1607cd0a6edff0d464606f573055e10d6ed"},
+    {"file": "idle-1920-generated.png", "size": [1920, 1080], "sha256": "63938d49a2ce47c27a8c5ad2a38e04bdd0f6a8d1ec435a4f33552c85deb35086"},
+    {"file": "hover-1920-generated.png", "size": [1920, 1080], "sha256": "e5d418d9023ea3e1b3a5b6e1eb33a1c1d6c91786b726bdd108dbb285c02593d6"},
+    {"file": "portrait-detail-4x-generated.png", "size": [400, 400], "source_file": "hover-1280-generated.png", "source_region": [32, 596, 100, 100], "resize": "nearest 4x", "sha256": "34c5dad3ace103a0c20b838592e75c53f86b50a716802ccbaf8712f058a57a13"}
+  ]
+}
