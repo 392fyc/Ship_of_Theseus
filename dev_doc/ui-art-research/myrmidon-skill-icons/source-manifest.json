@@ -1,79 +1,61 @@
 {
   "scope": "基础剑士（myrmidon）战斗界面技能图标",
-  "status": "visual_candidate",
+  "status": "visual_candidate_pending_user_review",
   "source": {
     "generator": "OpenAI image_gen",
-    "reference_policy": "生成时只参考本任务生成的图像；未使用现有开发占位图作为生成参考。",
-    "zhanji_lineage": "candidate/zhanji-source-v2.png 由本任务生成的 candidate/zhanji-source.png 改进而成，前序图 SHA256 为 f025a76299e54415a44e40676fe6b37da1d49565870ba7d5191651b3d5286550。其余源图仅参考第二版的画风。",
+    "reference_policy": "生成时以游戏仓现有角色原画和已采用的人物头像为风格参考，并以本任务新生成的斩击图为同组风格参考；未使用第三方游戏素材或旧版技能图标作为生成参考。",
     "design_authority": "SoT-fyc-space snapshots/skills.json@3a71ade3cac109dbdda8a90d0e47f04232f83b9",
     "source_schema_version": "unversioned",
     "normalized_snapshot_sha256": "4706a409ca233e82d8f434a4584dd9743104d1dfe8753b02c4b2899edf018b57"
   },
-  "runtime_transform": "通过 build_icons.gd 调用 Godot Image.resize(104, 104, Image.INTERPOLATE_LANCZOS)，在界面中显示为 52×52 像素。",
-  "godot_4_6_references": [
-    "https://docs.godotengine.org/en/4.6/classes/class_image.html",
-    "https://docs.godotengine.org/en/4.6/tutorials/editor/command_line_tutorial.html",
-    "https://docs.godotengine.org/en/4.6/classes/class_resourceloader.html"
-  ],
+  "runtime_transform": "通过 build_icons.gd 调用 Godot Image.resize(104, 104, Image.INTERPOLATE_LANCZOS)，在界面中显示为 52×52 像素；截图前先在 Godot 编辑器刷新资源导入。",
   "assets": [
     {
       "skill_id": "swordsman_xinyan",
-      "source": "candidate/xinyan-source.png",
-      "source_sha256": "953b7dcb8a54470771dcef345043480d030c1ad5ba0f21516856aafbab42ca56",
+      "source": "candidate-v2/xinyan-source.png",
+      "source_sha256": "b62595b1b9264e9b2b7294e84b152480789a7333054b5fcbde3579d46f9a6bff",
       "runtime": "assets/ui/skills/myrmidon/xinyan.png",
-      "runtime_sha256": "6b82d7701cd6a4c42b17b37bf477803e082cea8dba003cfc44b29852c099a234",
-      "brief": "聚焦的眼形，表现被动感知"
+      "runtime_sha256": "9a486c4598f343ed3a351ed95659198cdb64342227889ab415bf59404d427fa1",
+      "brief": "暗红眼部特写，表现剑气感知被动"
     },
     {
       "skill_id": "swordsman_zhanji",
-      "source": "candidate/zhanji-source-v2.png",
-      "source_sha256": "9ea707d210447d9a7b18fa1824c847aadf084f16706c79900b5193fba0e8bc20",
+      "source": "candidate-v2/zhanji-source.png",
+      "source_sha256": "f39617457eae381f521f503afe9e10521a9a7d71f8d96fa4cba27b69f2c34c55",
       "runtime": "assets/ui/skills/myrmidon/zhanji.png",
-      "runtime_sha256": "7f9a9bbdd6b3900e14f0f6788e2e54732fade4fd4d0633d2916c1ea69599d377",
-      "brief": "朴素而清晰的斜向钢剑斩击"
+      "runtime_sha256": "0cee097e795cf26e976326ceb6e478e83e2d1bd78b8f5458ac76c238ff7ddee2",
+      "brief": "钢剑斜斩与宽幅暗红挥砍笔触"
     },
     {
       "skill_id": "swordsman_yishan",
-      "source": "candidate/yishan-source.png",
-      "source_sha256": "8672d146475b6c4deed2d90915853a267994816ee57ad7bddce056b44b05dea9",
+      "source": "candidate-v2/yishan-source.png",
+      "source_sha256": "b3fa83dbc2e51c8683792b931e6a9ecfc95a3e2aa101ea6fdbba28785b5b87b9",
       "runtime": "assets/ui/skills/myrmidon/yishan.png",
-      "runtime_sha256": "eb7514434069784adc2fd583bcbdffc9d9832d1fd95bb39997566a04d705a1cf",
-      "brief": "向前突进的刀锋与速度线"
+      "runtime_sha256": "d3670bea0a30c39c6f1fe397e8e1942093f62d9c1b516f119d5d38db4ff1ebbb",
+      "brief": "剑尖向前穿刺，表现沿途位移与斩击"
     },
     {
       "skill_id": "swordsman_zhaojia",
-      "source": "candidate/zhaojia-source.png",
-      "source_sha256": "00863b1687d86f792b71aea336dd3145c5b8dd44fe632101b46cdca525a5946a",
+      "source": "candidate-v2/zhaojia-source.png",
+      "source_sha256": "0f8add37dacfec5cae42d2fe4ba0b147594d7ba7cbd7d607c0fd3d51f3d79598",
       "runtime": "assets/ui/skills/myrmidon/zhaojia.png",
-      "runtime_sha256": "8ee9479897055aea4a95d9374c01d37bf1fb1ea3d69d0f6e15dbccb771ff2d63",
-      "brief": "直立剑身截住来袭攻击"
+      "runtime_sha256": "61f4c1ebdeb85dfdc6d0c15a69a0488b8b0a14b4039533ac0dd48325da7f8677",
+      "brief": "竖剑挡住来袭剑刃，表现防御反应"
     },
     {
       "skill_id": "swordsman_juhe",
-      "source": "candidate/juhe-source.png",
-      "source_sha256": "0c7e7a103bb8a95259d0b3d05031aa56d9c9c9022250030640a59e07ff6af535",
+      "source": "candidate-v2/juhe-source.png",
+      "source_sha256": "2a628aa93c603c1de7195b259d6b25b7cbac35594cb78ebb78503236ee26207b",
       "runtime": "assets/ui/skills/myrmidon/juhe.png",
-      "runtime_sha256": "63a13eb476842003b799187ce55ab68ce884eaba33d268b39dcfa6e3a7898164",
-      "brief": "剑身从剑鞘中瞬间出鞘"
+      "runtime_sha256": "c5bcc18310906f0ca18212324b8d45d5cfedde8fadec3419a27ddccc61212c79",
+      "brief": "握柄出鞘一瞬，表现高消耗决胜一击"
     }
   ],
   "verification_views": [
-    "candidate/move-1280.png",
-    "candidate/action-1280.png",
-    "candidate/action-1920.png",
-    "candidate/skills-detail-4x.png"
-  ],
-  "intermediate_review_views": [
-    {
-      "path": "candidate/zhanji-sample-1280.png",
-      "sha256": "3dacf5a255cc006a37ad28bcdf0eb7cf7faf00cbafd1b15851fdc23c7fc334c1",
-      "purpose": "斩击第二版在正式技能栏的中间评审图"
-    },
-    {
-      "path": "candidate/zhanji-sample-4x.png",
-      "sha256": "c6202f5ff5e1ee810a85a08055f78547ba0e828011c14e27913251a70a4e829d",
-      "purpose": "斩击第二版技能格的四倍细节"
-    }
+    {"path": "candidate-v2/move-1280.png", "sha256": "11e3307d1458e6fcda49c24d816ce656973994c591a165d4311a6a1a9175cb21"},
+    {"path": "candidate-v2/action-1280.png", "sha256": "6580c1a71cc9602b608f490b5f0cc74f199a881b4830f063a7056702cc11953f"},
+    {"path": "candidate-v2/action-1920.png", "sha256": "cc5b6da87cb8c78cd93e95db5bd8aab152f19628418a697758ae567c10e064aa"},
+    {"path": "candidate-v2/skills-detail-4x.png", "sha256": "f8cfad36440b1cfe494df4cde5dd6a1474149891a0d0f040872de236e009c2b7"}
   ],
   "release_check": "仓库当前没有正式 export_presets.cfg；发布时需验证五张运行图及目录 JSON 纳入发行包，并排除开发源图与评审截图。"
 }

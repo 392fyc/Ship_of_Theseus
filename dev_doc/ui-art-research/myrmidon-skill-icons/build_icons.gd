@@ -1,6 +1,6 @@
 extends SceneTree
 
-const SOURCE := "res://dev_doc/ui-art-research/myrmidon-skill-icons/candidate"
+const SOURCE := "res://dev_doc/ui-art-research/myrmidon-skill-icons/candidate-v2"
 const TARGET := "res://assets/ui/skills/myrmidon"
 const ICONS := ["xinyan", "zhanji", "yishan", "zhaojia", "juhe"]
 
@@ -9,7 +9,7 @@ func _initialize() -> void:
 	var directory: String = ProjectSettings.globalize_path(TARGET)
 	DirAccess.make_dir_recursive_absolute(directory)
 	for skill_id: String in ICONS:
-		var filename: String = "zhanji-source-v2.png" if skill_id == "zhanji" else "%s-source.png" % skill_id
+		var filename: String = "%s-source.png" % skill_id
 		var source_path: String = ProjectSettings.globalize_path(SOURCE.path_join(filename))
 		var image: Image = Image.load_from_file(source_path)
 		if image == null:

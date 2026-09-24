@@ -1,0 +1,24 @@
+{
+  "scope": "HUD R1 · 基础 UI 材质与布局修订页的简体中文字体修复",
+  "file_id": "c828d3cf-7d4e-8145-8008-8f0919f9073c",
+  "page_id": "8086b853-2801-807d-8008-985af17836c7",
+  "main_board_id": "8086b853-2801-807d-8008-9cc915f221e9",
+  "before_revision": 215,
+  "after_revision": 217,
+  "affected_text_nodes": 445,
+  "original_font_id": "sourcesanspro",
+  "corrected_font_id": "gfont-noto-sans-sc",
+  "preserved": ["characters", "fontSize", "fontWeight", "x", "y", "width", "height"],
+  "readback": {
+    "all_text_nodes": 1657,
+    "chinese_text_nodes": 445,
+    "chinese_nodes_with_corrected_font": 445,
+    "remaining_chinese_nodes_with_original_font": 0,
+    "replacement_characters": 0
+  },
+  "visual_check": "在 Penpot 主画板约 94% 缩放下检查了人物栏与操作区；剑圣、装备、结束回合等中文标签正常显示。",
+  "saved_versions": [
+    "SoT HUD 字体修复前 · 2026-09-25",
+    "SoT HUD 中文字体修复 · 2026-09-25"
+  ]
+}
