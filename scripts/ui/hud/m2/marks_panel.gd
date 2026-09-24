@@ -10,9 +10,9 @@ const CREST_REGIONS := [
 	Rect2(1500, 15, 566, 662),
 ]
 const CREST_DESTINATIONS := [
-	Rect2(22, 7, 48, 44),
-	Rect2(118, 7, 42, 44),
-	Rect2(213, 7, 38, 44),
+	Rect2(17, 0, 58, 52),
+	Rect2(114, 0, 50, 52),
+	Rect2(209, 0, 46, 52),
 ]
 
 var _state: StringName = &"000"

@@ -14,7 +14,7 @@
   },
   "runtime": {
     "source_regions": [[92, 56, 626, 586], [783, 18, 616, 654], [1500, 15, 566, 662]],
-    "destination_regions": [[22, 7, 48, 44], [118, 7, 42, 44], [213, 7, 38, 44]],
+    "destination_regions": [[17, 0, 58, 52], [114, 0, 50, 52], [209, 0, 46, 52]],
     "inactive_state": "Godot shader renders hollow grey outlines from each glyph alpha; active state uses the original colored atlas."
   }
 }

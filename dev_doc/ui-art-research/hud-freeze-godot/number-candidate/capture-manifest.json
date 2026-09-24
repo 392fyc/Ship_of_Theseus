@@ -6,25 +6,25 @@
       "file": "qi-0.png",
       "width": 1280,
       "height": 720,
-      "sha256": "23c9f334b7b2a6e412d682268961bf813e07f7f92fd44743bc1599a7ae68de88"
+      "sha256": "466af35cbcbb5be5c4cafac901aff327665c8dbb16b3e6f9ac6edca3d6853925"
     },
     {
       "file": "qi-100-1920.png",
       "width": 1920,
       "height": 1080,
-      "sha256": "2ed3d6b7af122303941a18dabfe9d6488739afc55a92b4a2ff3b6e1971a0cba5"
+      "sha256": "1a39602e84deef9d37845acac27ae97bda2bb06c94ecbd2188735eba80c95dbd"
     },
     {
       "file": "qi-100.png",
       "width": 1280,
       "height": 720,
-      "sha256": "48db3d8ad66d07a3c30763f35e5139894a5498f731b27aad4734fc409137eb9d"
+      "sha256": "f0d10685ecd8d8d7498ee35b6936107ee2117df779ab7bd6cc555536b7a844f2"
     },
     {
       "file": "qi-65.png",
       "width": 1280,
       "height": 720,
-      "sha256": "b54794bb658e1234be957195a1cbd9aeb3543c4972185f2de21aa55e5f25fc07"
+      "sha256": "277c0a086172e8513c6c1190abc516883d75ed5ae8cf9d645491acf531eae1ef"
     }
   ]
 }
