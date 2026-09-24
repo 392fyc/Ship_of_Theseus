@@ -381,3 +381,86 @@ def test_publish_dry_run_allows_configured_designlib_linked_worktree() -> None:
         assert "codex/designlib-publish" in result.stdout
         assert str(designlib) not in result.stdout + result.stderr
         assert str(origin) not in result.stdout + result.stderr
+
+
+def test_publish_scopes_local_roots_to_repository_section() -> None:
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp = Path(temp_dir)
+        origin = temp / "origin.git"
+        repo = temp / "repo"
+        designlib = temp / "designlib"
+        worktree_group = temp / "worktrees" / "designlib"
+        linked_worktree = worktree_group / "task"
+        for path in (origin, repo, designlib, worktree_group):
+            path.mkdir(parents=True)
+        run(["git", "init", "--bare"], origin)
+        init_repository(repo, "codex/fixture-roots")
+        init_repository(designlib, "codex/fixture-designlib")
+        run(["git", "remote", "add", "origin", str(origin)], repo)
+        run(["git", "remote", "add", "origin", str(origin)], designlib)
+        run(
+            ["git", "worktree", "add", "-b", "codex/fixture-designlib-task", str(linked_worktree)],
+            designlib,
+        )
+        fixture_script = install_publish_script(repo)
+        no_authorized_env = {"SOT_DESIGNLIB_ROOT": "", "SOT_KB_ROOT": ""}
+
+        local_roots = repo / ".codex" / "project" / "sot-roots.local.toml"
+        local_roots.parent.mkdir(parents=True)
+        local_roots.write_text(
+            "[roots]\n"
+            f"designlib_root = '{designlib.as_posix()}'\n"
+            "[worktrees]\n"
+            f"designlib_root = '{worktree_group.as_posix()}'\n",
+            encoding="utf-8",
+        )
+        run(["git", "add", str(local_roots.relative_to(repo))], repo)
+        run(
+            [
+                "git", "-c", "user.name=SoT Test",
+                "-c", "user.email=sot-test@example.invalid",
+                "commit", "-m", "install local roots fixture",
+            ],
+            repo,
+        )
+
+        result = run(
+            ["pwsh", "-NoProfile", "-File", str(fixture_script), "-DryRun"],
+            repo,
+            env=no_authorized_env,
+        )
+        assert "codex/fixture-roots" in result.stdout
+
+        authorized = run(
+            ["pwsh", "-NoProfile", "-File", str(fixture_script), "-DryRun"],
+            linked_worktree,
+            env=no_authorized_env,
+        )
+        assert "codex/fixture-designlib-task" in authorized.stdout
+
+        local_roots.write_text(
+            "[roots]\n"
+            f"ship_root = '{repo.as_posix()}'\n"
+            "[worktrees.extra]\n"
+            f"designlib_root = '{designlib.as_posix()}'\n"
+            "[[other_worktrees]]\n"
+            f"kb_root = '{designlib.as_posix()}'\n",
+            encoding="utf-8",
+        )
+        run(["git", "add", str(local_roots.relative_to(repo))], repo)
+        run(
+            [
+                "git", "-c", "user.name=SoT Test",
+                "-c", "user.email=sot-test@example.invalid",
+                "commit", "-m", "install non-root sections fixture",
+            ],
+            repo,
+        )
+        rejected = run(
+            ["pwsh", "-NoProfile", "-File", str(fixture_script), "-DryRun"],
+            linked_worktree,
+            check=False,
+            env=no_authorized_env,
+        )
+        assert rejected.returncode != 0
+        assert "controlled entrypoint" in (rejected.stdout + rejected.stderr).lower()
