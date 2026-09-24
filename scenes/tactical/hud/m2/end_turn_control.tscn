@@ -1,0 +1,44 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud/m2/end_turn_control.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/themes/hud_m2.tres" id="2_theme"]
+[ext_resource type="PackedScene" path="res://scenes/tactical/hud/m2/end_turn_button.tscn" id="3_button"]
+
+[node name="EndTurnControl" type="Panel"]
+custom_minimum_size = Vector2(76, 108)
+offset_right = 76.0
+offset_bottom = 108.0
+mouse_filter = 2
+theme = ExtResource("2_theme")
+theme_type_variation = &"HudM2Base"
+script = ExtResource("1_script")
+
+[node name="Frame" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"HudM2Panel"
+
+[node name="EndTurnButton" parent="." instance=ExtResource("3_button")]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 28.0
+offset_right = 64.0
+offset_bottom = 80.0
+
+[node name="EndLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 6.0
+offset_top = 86.0
+offset_right = 70.0
+offset_bottom = 101.0
+mouse_filter = 2
+theme_type_variation = &"HudM2EndLabel"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true

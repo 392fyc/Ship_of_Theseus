@@ -29,10 +29,10 @@ func _run() -> void:
 	var scene: Node = load("res://scenes/tactical/TacticalScene.tscn").instantiate()
 	root.add_child(scene)
 	var tactical_manager: Object = scene.tactical_manager
-	var dashboard: BottomDashboard = scene._bottom_dashboard
+	var dashboard: HudM2RuntimeDashboard = scene._bottom_dashboard
 	var unit: Unit = tactical_manager._get_dashboard_unit()
 	var enemy: Unit = _find_alive_dummy(tactical_manager)
-	var resource_bar: Control = dashboard.get("_action_resource_bar") as Control if dashboard != null else null
+	var resource_bar: Control = dashboard.get_composition().get_node("ActionResourceStrip") as Control if dashboard != null else null
 
 	_check("真实 TacticalScene 提供当前玩家单位", unit != null and unit.faction == "player")
 	_check("真实 TacticalScene 提供木桩单位", enemy != null and enemy.unit_id.begins_with("test_dummy"))
@@ -137,10 +137,18 @@ func _check_runtime_state(stage: String, unit: Unit, resource_bar: Control,
 	_eq("%s Unit.standard_used" % stage, unit.standard_used, expected_standard)
 	_eq("%s Unit.swift_used" % stage, unit.swift_used, expected_swift)
 	_check("%s 行动资源栏可见" % stage, resource_bar.visible)
-	var segments: Dictionary = resource_bar.get("_segments") as Dictionary
-	_eq("%s 资源栏 M 状态" % stage, bool((segments["movement"] as Object).get("spent")), expected_movement)
-	_eq("%s 资源栏 A 状态" % stage, bool((segments["standard"] as Object).get("spent")), expected_standard)
-	_eq("%s 资源栏 S 状态" % stage, bool((segments["swift"] as Object).get("spent")), expected_swift)
+	var view: Object = resource_bar.get("_view") as Object
+	_check("%s 资源栏拥有显示数据" % stage, view != null)
+	if view != null:
+		_eq("%s 资源栏 M 状态" % stage, not bool(view.get("movement_available")), expected_movement)
+		_eq("%s 资源栏 A 状态" % stage, int(view.get("standard_remaining")) == 0, expected_standard)
+		_eq("%s 资源栏 S 状态" % stage, int(view.get("swift_remaining")) == 0, expected_swift)
+		var standard_pips: Array = resource_bar.call("get_standard_pips")
+		var swift_pips: Array = resource_bar.call("get_swift_pips")
+		_check("%s 标准与迅捷字形存在" % stage, standard_pips.size() == 1 and swift_pips.size() == 1)
+		if standard_pips.size() == 1 and swift_pips.size() == 1:
+			_eq("%s 标准灰态字形" % stage, bool(standard_pips[0].get("spent")), expected_standard)
+			_eq("%s 迅捷灰态字形" % stage, bool(swift_pips[0].get("spent")), expected_swift)
 	_check("%s 地图 StatusIcons 不含 M/A/S" % stage, not _has_action_badges(unit))
 
 

@@ -1,0 +1,78 @@
+{
+  "status": "user_approved_for_godot_runtime",
+  "engine": "Godot 4.6.3 native window, Vulkan, NVIDIA GeForce RTX 3070 Ti",
+  "captures": [
+    {
+      "file": "filled-111-qi-100.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "ca05549c73365ff68bfa19ac20d9344ba6377ed9b6ea9ec2fecf9808509dc283"
+    },
+    {
+      "file": "filled-111-qi-65.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "baa136e2e2e572ef88f44b016fe9321be9a3449d3dcb4225ebccebf4aef97d1c"
+    },
+    {
+      "file": "marks-000.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "c485b9119734e8bed5d8507ca6f7f406d0752cc4b30d9e71efd3dc947a36fb8c"
+    },
+    {
+      "file": "marks-001.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "a02c9250d5245cf8a0750364895d9b3a4b891f69bef3341d13e589bba3fcc9a9"
+    },
+    {
+      "file": "marks-010.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "6a9c9176778ff53b3967d57f427cca0439e0f16850a37e3c1ceb7f3c6d0acc2e"
+    },
+    {
+      "file": "marks-011.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "17cb30933b8695a5c2ed892b180a1b9c9ff834e895e6a4bee192d6df13267add"
+    },
+    {
+      "file": "marks-100.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "3342502547804426bbc80a561af3d21a2a1895717f08e8fb164b1111158779e5"
+    },
+    {
+      "file": "marks-101.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "5199d92228958a5146c5f514e9d7c9008c472d55c88df036fa43f6df9501289f"
+    },
+    {
+      "file": "marks-110.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "5c15c83b8b9b5bcf4c44e0233eea4a3fbc5f3aebb383c360a52ea6aa500440da"
+    },
+    {
+      "file": "marks-111.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "baa136e2e2e572ef88f44b016fe9321be9a3449d3dcb4225ebccebf4aef97d1c"
+    },
+    {
+      "file": "production-000.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "23c9f334b7b2a6e412d682268961bf813e07f7f92fd44743bc1599a7ae68de88"
+    },
+    {
+      "file": "production-1920-000.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "1ecdb3e97b4e0f1a19d7441fb69c27e69a1c2d98c8104b9a61f47ef890a724e7"
+    }
+  ]
+}

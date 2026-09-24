@@ -1,0 +1,30 @@
+{
+  "status": "user_approved_for_godot_runtime",
+  "engine": "Godot 4.6.3 native window, Vulkan, NVIDIA GeForce RTX 3070 Ti",
+  "captures": [
+    {
+      "file": "qi-0.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "23c9f334b7b2a6e412d682268961bf813e07f7f92fd44743bc1599a7ae68de88"
+    },
+    {
+      "file": "qi-100-1920.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "2ed3d6b7af122303941a18dabfe9d6488739afc55a92b4a2ff3b6e1971a0cba5"
+    },
+    {
+      "file": "qi-100.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "48db3d8ad66d07a3c30763f35e5139894a5498f731b27aad4734fc409137eb9d"
+    },
+    {
+      "file": "qi-65.png",
+      "width": 1280,
+      "height": 720,
+      "sha256": "b54794bb658e1234be957195a1cbd9aeb3543c4972185f2de21aa55e5f25fc07"
+    }
+  ]
+}

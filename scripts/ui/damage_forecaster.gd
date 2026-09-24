@@ -53,6 +53,10 @@ func _ready() -> void:
 	size = PANEL_SIZE
 
 
+func get_visual_size() -> Vector2:
+	return Vector2(PANEL_SIZE.x, PANEL_SIZE.y + TRIANGLE_H - 1.0)
+
+
 ## 从 forecast 字典刷新展示内容。空字典 / visible=false 由调用方控可见性，
 ## 这里仅解析数值字段并 queue_redraw。
 func set_forecast(forecast: Dictionary) -> void:

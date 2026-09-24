@@ -53,7 +53,18 @@ function Get-ConfiguredRepositoryRoots {
 
     $localRootsPath = Join-Path $ScriptRepository ".codex/project/sot-roots.local.toml"
     if (Test-Path -LiteralPath $localRootsPath -PathType Leaf) {
+        $section = ""
         foreach ($line in Get-Content -LiteralPath $localRootsPath) {
+            if ($line -match '^\s*\[') {
+                $section = ""
+                if ($line -cmatch '^\s*\[\s*roots\s*\]\s*(?:#.*)?$') {
+                    $section = "roots"
+                }
+                continue
+            }
+            if ($section -ne "roots") {
+                continue
+            }
             if ($line -match "^\s*(?:designlib_root|kb_root)\s*=\s*'([^']*)'\s*(?:#.*)?$") {
                 if (-not [string]::IsNullOrWhiteSpace($Matches[1])) {
                     $configuredRoots.Add($Matches[1])

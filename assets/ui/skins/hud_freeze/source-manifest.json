@@ -1,0 +1,28 @@
+{
+  "source": {
+    "service": "https://design.penpot.app",
+    "file_id": "c828d3cf-7d4e-8145-8008-8f0919f9073c",
+    "page_id": "8086b853-2801-807d-8008-985af17836c7",
+    "named_version": "SoT HUD 定版 2026-09-24 · 左剑右印记",
+    "revision": 215,
+    "main_board_id": "8086b853-2801-807d-8008-9cc915f221e9",
+    "sword_id": "8086b853-2801-807d-8008-9cc915f22203",
+    "marks_id": "8086b853-2801-807d-8008-9cc91ea160dd"
+  },
+  "assets": {
+    "sword-base.png": {"source_shape_id": "8086b853-2801-807d-8008-9cc915f3bcbb", "sha256": "2e07ae71db148b50640e1de5d9e3cbf181bb0f7d8edb87c3bc258254d1b82c5d"},
+    "sword-blade-mask.png": {"source_shape_id": "8086b853-2801-807d-8008-9cc915f3bcc5", "sha256": "88fd5910dfb776df188481d7b1bef56b73b155d4a56093b62a70cf7a74888540"},
+    "sword-energy-high.png": {"source_shape_id": "8086b853-2801-807d-8008-9cc915f3bcc4", "sha256": "6d99a0904d72e11fa758ef300453b4906a3942c98560d02ae9e673598ad357b0"},
+    "sword-flow-high.png": {"source_shape_id": "8086b853-2801-807d-8008-9cc915f3bcbd", "sha256": "32b7516cd042624713d6517d612543909a38d5bc9ec9bed426313e04777f028c"},
+    "sword-energy-low.png": {"source": "同一文件的剑气 50 状态画板", "sha256": "70242ba3a9838386237eef83cc3537fa650191056faeb74ac231cf64bb0a2edb"},
+    "sword-flow-low.png": {"source": "同一文件的剑气 50 状态画板", "sha256": "ebac9fb678dda4782c45c18d363a21d73ab7d311f3fa72e47dd02cd4dcc94c75"},
+    "marks-000.png": {"source": "previews/marks-000-1x.png", "sha256": "a1866ae31535d3238e67718a5a67adc602d0870a82f8f0c00341a1354d00794c"},
+    "marks-001.png": {"source": "previews/marks-001-1x.png", "sha256": "a010a06bff508d1516c5f1ebf21265793924084f6f77d4dae53ba0a4f530c66a"},
+    "marks-010.png": {"source": "previews/marks-010-1x.png", "sha256": "34ef145d70df9604c005b0e2379175e3f8c18f99f03d2fef1c1158caeba997d8"},
+    "marks-011.png": {"source": "previews/marks-011-1x.png", "sha256": "2049723a634679bfb6e62fbd5385233de8f5878db57b4e11d3850a0022482895"},
+    "marks-100.png": {"source": "previews/marks-100-1x.png", "sha256": "ef4cd133c7ea1f6127814a12b26e0f8dd6ed65253c99d8e51eb236a0dc6562a8"},
+    "marks-101.png": {"source": "previews/marks-101-1x.png", "sha256": "40cbf50c822c63a626caa31f3fa2bbb0fcf0ff0e5d712d0821a22d36b662f7d5"},
+    "marks-110.png": {"source": "previews/marks-110-1x.png", "sha256": "e18e9640e10524eb1254be63dffd4e4ddb74d6e0a3ed3cb9909a695edce62225"},
+    "marks-111.png": {"source": "previews/marks-111-1x.png", "sha256": "d381b78b7b5bb7e848e51355841ae50a77e5ccce8ae2401e77c8b2e646c58504"}
+  }
+}

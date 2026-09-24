@@ -1,0 +1,20 @@
+{
+  "status": "user_approved_for_godot_runtime",
+  "tool": "built-in image_gen.imagegen",
+  "model_identity": "unavailable_from_tool_result",
+  "input_image": null,
+  "style_research": "https://na.finalfantasyxiv.com/jobguide/samurai/",
+  "originality": "The official reference was viewed for the three independent emblem and active-state pattern. No official image was submitted as an image-generation input or copied into this asset.",
+  "prompt": "Create a clean, original transparent RGBA sprite atlas for a dark fantasy tactical RPG HUD: EXACTLY THREE distinct resource sigils in one horizontal row, evenly spaced, no text anywhere. These are original emblems for 心 (focused inner perception), 道 (flowing path), and 势 (rising combat momentum), not literal Chinese lettering. Use the polished visual grammar of high-quality fantasy game job gauges: compact readable silhouette, intricate but restrained inner negative space, delicate ornamental contour integrated into each icon, narrow warm-metal rim accents, luminous colored enamel core, dark recessed cuts. All three are one coherent family yet identifiable by shape at only 40 pixels tall. First emblem: warm gold focus-eye with a small central flame/heartbeat and two closing arcs. Second emblem: muted turquoise flowing path drawn as a graceful crescent and two crossing current lines. Third emblem: coral red upward sword-force spiral with three sharp rising strokes. Front view, symmetrical overall balance for each sigil, painterly 2D UI icon, elegant and finely crafted, crisp thin edges, strong high contrast. Roughly 1:1 square aspect for each icon. Large fully transparent gaps between icons and transparent interior cutouts. NO existing game logos, NO snowflake/moon/flower replicas, NO Chinese/Japanese characters, NO letters, NO numbers, NO badges or opaque circular discs behind them, NO background, NO frame, NO shadow plate, NO thick outlines, NO chubby brush calligraphy, NO watercolor, NO pixel noise, NO bevel/embossed 3D or chrome. Output only the three separate sigils on transparency.",
+  "asset": {
+    "path": "marks-filled-generated.png",
+    "size": [2172, 724],
+    "sha256": "a7d025a16a5b37b09e4d04342b5fe392aa89b080123e26bfac6e1ba09f1acccf",
+    "alpha": true
+  },
+  "runtime": {
+    "source_regions": [[92, 56, 626, 586], [783, 18, 616, 654], [1500, 15, 566, 662]],
+    "destination_regions": [[22, 7, 48, 44], [118, 7, 42, 44], [213, 7, 38, 44]],
+    "inactive_state": "Godot shader renders hollow grey outlines from each glyph alpha; active state uses the original colored atlas."
+  }
+}
