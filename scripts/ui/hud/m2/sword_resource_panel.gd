@@ -38,6 +38,8 @@ func _draw() -> void:
 	var font: Font = get_theme_font(&"number", &"HudM2FrozenResource")
 	var font_size: int = get_theme_font_size(&"number", &"HudM2FrozenResource")
 	var color: Color = get_theme_color(&"number", &"HudM2FrozenResource")
-	var width: float = font.get_string_size(number, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-	var baseline: Vector2 = Vector2(number_rect.position.x + (number_rect.size.x - width) * 0.5, number_rect.position.y + number_rect.size.y * 0.76)
+	var baseline: Vector2 = Vector2(number_rect.position.x, number_rect.position.y + number_rect.size.y * 0.76)
+	var edge_color: Color = Color(0.08, 0.05, 0.09, 0.96)
+	for offset: Vector2 in [Vector2(-2, 0), Vector2(2, 0), Vector2(0, -2), Vector2(0, 2), Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 1), Vector2(1, 1)]:
+		draw_string(font, baseline + offset, number, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, edge_color)
 	draw_string(font, baseline, number, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
