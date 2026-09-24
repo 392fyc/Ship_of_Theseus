@@ -1,0 +1,61 @@
+{
+  "scope": "基础剑士（myrmidon）战斗界面技能图标",
+  "status": "user_approved",
+  "source": {
+    "generator": "OpenAI image_gen",
+    "reference_policy": "四枚新版图标以游戏仓现有角色原画和已采用的心眼图标为材质与配色参考；心眼图标沿用已生成素材。未使用第三方游戏素材。",
+    "design_authority": "SoT-fyc-space snapshots/skills.json@3a71ade3cac109dbdda8a90d0e47f04232f83b9",
+    "source_schema_version": "unversioned",
+    "normalized_snapshot_sha256": "4706a409ca233e82d8f434a4584dd9743104d1dfe8753b02c4b2899edf018b57"
+  },
+  "runtime_transform": "通过 build_icons.gd 调用 Godot Image.resize(104, 104, Image.INTERPOLATE_LANCZOS)，在界面中显示为 52×52 像素；截图前先在 Godot 编辑器刷新资源导入。",
+  "assets": [
+    {
+      "skill_id": "swordsman_xinyan",
+      "source": "candidate-v3/xinyan-source.png",
+      "source_sha256": "b62595b1b9264e9b2b7294e84b152480789a7333054b5fcbde3579d46f9a6bff",
+      "runtime": "assets/ui/skills/myrmidon/xinyan.png",
+      "runtime_sha256": "9a486c4598f343ed3a351ed95659198cdb64342227889ab415bf59404d427fa1",
+      "brief": "暗红眼部特写，表现剑气感知被动"
+    },
+    {
+      "skill_id": "swordsman_zhanji",
+      "source": "candidate-v3/zhanji-source.png",
+      "source_sha256": "d5eb062fc18a7579424325c0644d1ca44eb1114badaa9ba24615c056c1e9ce8f",
+      "runtime": "assets/ui/skills/myrmidon/zhanji.png",
+      "runtime_sha256": "332ebac7d26e225e868d159b6f31b0a18e28a7f799d1e9ee1cc0c8ee98510e00",
+      "brief": "切开护甲的宽幅弧线，突出命中与挥砍方向"
+    },
+    {
+      "skill_id": "swordsman_yishan",
+      "source": "candidate-v3/yishan-source.png",
+      "source_sha256": "2da3792c87aa0b33908f7df2cbe51aa8366dda77d887df64bf9b0c5aa52390d9",
+      "runtime": "assets/ui/skills/myrmidon/yishan.png",
+      "runtime_sha256": "61188e1d26440b7bdda5ddf550dd273ed6a523941cdb0b2740be1f85b496283f",
+      "brief": "低身冲刺的人物与身后暗红残影，突出沿途位移"
+    },
+    {
+      "skill_id": "swordsman_zhaojia",
+      "source": "candidate-v3/zhaojia-source.png",
+      "source_sha256": "bdffe7d5362363cf1877c726b36f0fed4276f73b044b5556b58aa279224e84dd",
+      "runtime": "assets/ui/skills/myrmidon/zhaojia.png",
+      "runtime_sha256": "1aea57c9d6a7dbcabe0f210cc4db928f9ea1d700e43c63045d5454494103a809",
+      "brief": "护手与剑格承接来袭剑刃，聚焦受击时的格挡碰撞"
+    },
+    {
+      "skill_id": "swordsman_juhe",
+      "source": "candidate-v3/juhe-source.png",
+      "source_sha256": "2b2b27fcc39071bf47154f3212342120977aadff31397aa474f3d576578a0a45",
+      "runtime": "assets/ui/skills/myrmidon/juhe.png",
+      "runtime_sha256": "f8fa54e668085b87073a7c252d19f09469668ac08ad7b4e8931a3385e1f3cd16",
+      "brief": "贯穿图标的水平长剑与细直剑光，表现静止蓄势后的一线斩击"
+    }
+  ],
+  "verification_views": [
+    {"path": "candidate-v3/move-1280.png", "sha256": "4d10620155a1d4d2552f66325bde7572e1faaf6a491521ba01a4fc30e6da4757"},
+    {"path": "candidate-v3/action-1280.png", "sha256": "094d282a932acf3e6ca3ff4f9dd5d04c9f9a8b611bfdf5adcf06b7476ba03bb7"},
+    {"path": "candidate-v3/action-1920.png", "sha256": "e0ce7ec912eff6d08554f7fc0fe8b5a869e40d566a757aa3171154c589693f88"},
+    {"path": "candidate-v3/skills-detail-4x.png", "sha256": "e633c58fbdb4ddd72d7f87a427c2ae0743c3316f5d2e05488f645a2a12b35e05"}
+  ],
+  "release_check": "仓库当前没有正式 export_presets.cfg；发布时需验证五张运行图及目录 JSON 纳入发行包，并排除开发源图与评审截图。"
+}
