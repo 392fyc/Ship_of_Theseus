@@ -117,7 +117,11 @@ func _apply_state() -> void:
 	if _composition == null:
 		return
 	var entries: Array = _last_state.get("skills", []) if _last_state.get("skills", []) is Array else []
-	var resolved_icons: Dictionary = _skill_icon_catalog.resolve_entries(entries)
+	var class_id: StringName = &""
+	var class_display: Variant = _last_state.get("class_resource_display", {})
+	if class_display is Dictionary:
+		class_id = StringName(str(class_display.get("class_id", "")))
+	var resolved_icons: Dictionary = _skill_icon_catalog.resolve_entries(entries, class_id)
 	resolved_icons.merge(_icon_textures, true)
 	var views: Dictionary = DashboardViewAdapter.new().build(_last_state, resolved_icons)
 	_composition.visible = bool(views.get("visible", false))

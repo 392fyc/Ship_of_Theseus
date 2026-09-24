@@ -3,5 +3,14 @@
   "swordsman_zhanji": "res://assets/prototype/hud_m2/skill-zhanji.png",
   "swordsman_yishan": "res://assets/prototype/hud_m2/skill-yishan.png",
   "swordsman_zhaojia": "res://assets/prototype/hud_m2/skill-zhaojia.png",
-  "swordsman_juhe": "res://assets/prototype/hud_m2/skill-juhe.png"
+  "swordsman_juhe": "res://assets/prototype/hud_m2/skill-juhe.png",
+  "_class_overrides": {
+    "myrmidon": {
+      "swordsman_xinyan": "res://assets/ui/skills/myrmidon/xinyan.png",
+      "swordsman_zhanji": "res://assets/ui/skills/myrmidon/zhanji.png",
+      "swordsman_yishan": "res://assets/ui/skills/myrmidon/yishan.png",
+      "swordsman_zhaojia": "res://assets/ui/skills/myrmidon/zhaojia.png",
+      "swordsman_juhe": "res://assets/ui/skills/myrmidon/juhe.png"
+    }
+  }
 }
