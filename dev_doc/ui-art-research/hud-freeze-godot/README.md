@@ -13,7 +13,7 @@
 
 剑的透明图层与摘要在 [定版素材来源清单](../../../assets/ui/skins/hud_freeze/source-manifest.json)；原创纹章的生成来源、摘要和裁切范围在 [纹章来源清单](../../../assets/ui/skins/hud_mark_crest/source-manifest.json)；数字字体的来源在 [字体来源清单](../../../assets/fonts/source_sans_pro/source.json)。布局、皮肤、状态适配和运行行为分别位于 `assets/ui/layouts/`、`assets/ui/themes/`、`scripts/ui/hud/m2/`、`scripts/core/tactical_manager.gd`。行动资源的显示数据从现有单次行动状态映射，战斗结算规则没有改动。
 
-基础剑士的五张技能图标已使用用户定版的正式素材并接入战斗界面；生成来源、源图与运行图摘要见 [基础剑士图标清单](../myrmidon-skill-icons/source-manifest.json)，接入记录见 [合并请求 #27](https://github.com/392fyc/Ship_of_Theseus/pull/27)。发行包中运行图与开发源图的纳入范围仍需独立检查。
+基础剑士的五张技能图标已使用用户定版的正式素材并接入战斗界面；生成来源、源图与运行图摘要见 [基础剑士图标清单](../myrmidon-skill-icons/source-manifest.json)，接入记录见 [合并请求 #27](https://github.com/392fyc/Ship_of_Theseus/pull/27)。五张运行图与目录 JSON 已通过[资源包核验](../myrmidon-skill-icons/export-audit.md)，开发源图和评审截图未进入该包。
 
 ## 实机图
 
@@ -38,6 +38,6 @@
 
 ## 验收与分发边界
 
-用户已确认第一版原创纹章、其约 20% 的放大尺寸与 32 像素剑气数字可以定版，正式场景默认显示。基础剑士五张技能图标已定版并进入正式战斗界面；发行包资源纳入与排除检查另行完成。集成与合并状态以 Git 和 GitHub 的实际记录为准。
+用户已确认第一版原创纹章、其约 20% 的放大尺寸与 32 像素剑气数字可以定版，正式场景默认显示。基础剑士五张技能图标已定版并进入正式战斗界面，其资源包纳入与排除结果见[核验记录](../myrmidon-skill-icons/export-audit.md)。完整可玩发行包仍需单独验收。集成与合并状态以 Git 和 GitHub 的实际记录为准。
 
 生成素材工具的本机能力与适用范围记录在 [工具流核验](toolchain-assessment.md)。
