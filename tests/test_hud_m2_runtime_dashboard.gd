@@ -74,10 +74,12 @@ func _test_player_state(dashboard: Control, manager: Object) -> void:
 	_check("真实剑圣显示头像而非轮廓占位", portrait_image.texture is AtlasTexture and not character.get_node("PortraitFallback").visible)
 	_check("头像图像铺到画框内缘", portrait_image.position.x <= portrait_frame.position.x + 1.0 and portrait_image.position.y <= portrait_frame.position.y + 3.0 and portrait_image.get_rect().end.x >= portrait_frame.get_rect().end.x - 1.0 and portrait_image.get_rect().end.y >= portrait_frame.get_rect().end.y - 1.0)
 	var portrait_button: Button = character.get_inspection_control()
+	var portrait_focus: Control = character.get_node("PortraitFocus") as Control
 	_check("只有头像区域承担属性查看入口", portrait_button.get_rect() == Rect2(12, 13, 72, 82))
 	_move_pointer(character.get_inspection_control().get_global_rect().get_center())
 	await process_frame
 	_check("人物栏真实鼠标移入展开信息卡", character_card.visible and dashboard.get_input_blocking_rects().has(character_card.get_global_rect()))
+	_check("鼠标悬停展开属性卡时头像画框保持常态", not portrait_focus.visible)
 	var sword: Control = composition.get_class_resource_host()
 	_check("属性卡位于人物栏上方且避开剑气槽", character_card.get_global_rect().end.y < character.get_global_rect().position.y and not character_card.get_global_rect().intersects(sword.get_global_rect()))
 	_check("属性卡显示中文标签与实时数值", (character_card.get_node("AttributeRows/STR/Key") as Label).text == "力量" and (character_card.get_node("AttributeRows/STR/Value") as Label).text == str(manager.get_dashboard_data()["stats"]["str"]))
@@ -107,9 +109,11 @@ func _test_player_state(dashboard: Control, manager: Object) -> void:
 	portrait_button.grab_focus()
 	await process_frame
 	_check("键盘聚焦头像可查看属性", character_card.visible)
+	_check("键盘聚焦头像显示焦点提示", portrait_focus.visible)
 	portrait_button.release_focus()
 	await process_frame
 	_check("键盘离开头像收起属性卡", not character_card.visible)
+	_check("键盘失焦后头像恢复常态画框", not portrait_focus.visible)
 	_move_pointer(Vector2(640.0, 320.0))
 	await process_frame
 	_check("人物栏真实鼠标移出收起信息卡", not character_card.visible)

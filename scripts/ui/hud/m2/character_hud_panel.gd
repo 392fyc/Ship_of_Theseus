@@ -145,7 +145,7 @@ func _on_card_exited() -> void:
 
 func _update_inspection() -> void:
 	_inspection.visible = is_visible_in_tree() and (_hovered or _card_hovered or _portrait_button.has_focus() or _pointer_in_inspection_bridge())
-	%PortraitFocus.visible = _inspection.visible
+	%PortraitFocus.visible = is_visible_in_tree() and _portrait_button.has_focus()
 
 
 func _layout_inspection() -> void:
