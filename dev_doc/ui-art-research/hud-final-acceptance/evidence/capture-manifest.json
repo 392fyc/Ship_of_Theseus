@@ -1,0 +1,43 @@
+{
+  "batch": "batch_1790355944",
+  "captures": [
+    {
+      "file": "available-1280.png",
+      "height": 720,
+      "sha256": "af76387c0c2c90f8d945e4c6a89b4104889f8e4a353e05554cf7ec0218b4a1fa",
+      "width": 1280
+    },
+    {
+      "file": "mixed-1280.png",
+      "height": 720,
+      "sha256": "dd666750c487474328a810f4faa076416f90b1784f0a423ecb6d9da2955c8f30",
+      "width": 1280
+    },
+    {
+      "file": "spent-1280.png",
+      "height": 720,
+      "sha256": "22210f292ad9310753437af1afafe083db5ce4fa7007ec1ccc393389ba2d9fab",
+      "width": 1280
+    },
+    {
+      "file": "hover-1280.png",
+      "height": 720,
+      "sha256": "0244046b8b1156678e68a864c5b7b87f4410766ed43cde8113acea64ee6a81d0",
+      "width": 1280
+    },
+    {
+      "file": "available-1920.png",
+      "height": 1080,
+      "sha256": "63938d49a2ce47c27a8c5ad2a38e04bdd0f6a8d1ec435a4f33552c85deb35086",
+      "width": 1920
+    },
+    {
+      "file": "hover-1920.png",
+      "height": 1080,
+      "sha256": "f60330d9b3d6d3c9c535075da64ef2d621efabd72c9aa4ad1f122e6f7fb330ba",
+      "width": 1920
+    }
+  ],
+  "engine": "4.6.3-stable (official)",
+  "scene": "res://scenes/tactical/TacticalScene.tscn"
+}
