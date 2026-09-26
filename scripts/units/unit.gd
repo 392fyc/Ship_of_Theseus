@@ -593,7 +593,7 @@ func is_marks_full() -> bool:
 ##
 ## ★职业校验：替换目标必须真的在本单位的 skill_ids 内，否则不替换。
 ## 全仓只有「建技能栏」与「扫迅捷技能」两处读 skill_ids，施放路径上没有任何职业检查——
-## 技能栏本身就是访问控制。若此处不校验，共享剑气/印记资源的下位职业（剑士 myrmidon）
+## 技能栏本身就是访问控制。若此处不校验，只共享剑气的下位职业（剑士 myrmidon）
 ## 会在印记满 3 时把招架槽换成拔刀并真的放得出来，而拔刀按 R2.4 是剑圣（kensei）专属。
 func get_visible_skill_id(skill_id: String, slot_swap_trigger: String = "",
 		slot_swap_target: String = "") -> String:
@@ -618,6 +618,8 @@ func set_sword_qi(new_qi: int) -> void:
 
 ## 得到一个未持有的随机印记；返回印记名称，如果已满则返回 ""。
 func gain_random_mark() -> String:
+	if _mark_max <= 0 or get_mark_count() >= _mark_max:
+		return ""
 	var available_marks: Array[String] = []
 	for mark_key: String in ["心", "道", "势"]:
 		if not bool(marks.get(mark_key, false)):
@@ -866,8 +868,8 @@ func _get_base_stat_value(stat_key: String) -> int:
 	return 0
 
 
-## 剑圣资源初始化：从 class_data["sword_qi_config"] 读取参数。
-## 非剑圣单位调用此函数后字段保持零值，不影响其他职业。
+## 剑士线资源初始化：从 class_data["sword_qi_config"] 读取参数。
+## 未配置该资源的单位保持零值；只有印记容量大于零的职业可获得印记。
 func _init_sword_qi_resource(class_data: Dictionary) -> void:
 	var cfg: Dictionary = class_data.get("sword_qi_config", {})
 	if cfg.is_empty():

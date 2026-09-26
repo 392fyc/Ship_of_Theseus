@@ -246,7 +246,7 @@ func get_dashboard_data() -> Dictionary:
 		# ── 剑圣专属资源（非剑圣单位：sword_qi=-1 隐藏显示）──
 		"sword_qi": info_unit.sword_qi if info_unit._qi_max > 0 else -1,
 		"sword_qi_max": info_unit._qi_max,
-		"marks": info_unit.marks.duplicate() if info_unit._qi_max > 0 else {},
+		"marks": info_unit.marks.duplicate() if info_unit._mark_max > 0 else {},
 		# 剑气分段条阈值（速度+1）供 UI 读，纯加法（缺省由 UI 侧回退 7）。
 		"sword_qi_config": {
 			"speed_threshold": info_unit._xinyan_speed_threshold,
@@ -913,6 +913,10 @@ func _build_resource_cost_display(skill_data: Dictionary) -> Dictionary:
 func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 	var skill_data: Dictionary = _get_skill_data(skill_id)
 	var cooldown_turns: int = unit.get_skill_cooldown(skill_id)
+	var description: String = str(skill_data.get("description", ""))
+	var class_descriptions: Variant = skill_data.get("class_descriptions", {})
+	if class_descriptions is Dictionary:
+		description = str(class_descriptions.get(unit.unit_id, description))
 	var entry: Dictionary = {
 		"skill_id": skill_id,
 		"name": str(skill_data.get("name", skill_id)),
@@ -921,7 +925,7 @@ func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 		"swift_limit": int(skill_data.get("swift_limit", 1)),
 		"cooldown": cooldown_turns,
 		"cooldown_max": int(skill_data.get("cooldown", 0)),
-		"description": str(skill_data.get("description", "")),
+		"description": description,
 		"available": false,
 		"reason": "",
 		"selected": skill_id == _selected_skill_id,
