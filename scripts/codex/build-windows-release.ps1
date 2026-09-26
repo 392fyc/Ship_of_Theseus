@@ -3,7 +3,8 @@ param(
     [Parameter(Mandatory = $true)][string] $GodotPath,
     [Parameter(Mandatory = $true)][string] $TemplateArchivePath,
     [Parameter(Mandatory = $true)][string] $OutputDirectory,
-    [switch] $CaptureVisual
+    [switch] $CaptureVisual,
+    [ValidateSet('kensei', 'myrmidon')][string] $PreviewClass = 'kensei'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -82,6 +83,16 @@ $newline = if ($sceneText.Contains("`r`n")) { "`r`n" } else { "`n" }
 $sceneText = $sceneText.Replace($sceneScriptLine, $sceneScriptLine + $newline + 'debug_harness_enabled = false')
 [IO.File]::WriteAllText($scenePath, $sceneText, [Text.UTF8Encoding]::new($false))
 
+if ($PreviewClass -eq 'myrmidon') {
+    # 只在发行副本中切换测试战斗的展示职业；仓库里的剑圣测试场景不变。
+    $controllerPath = Join-Path $stage 'scripts/tactical/tactical_scene.gd'
+    $controllerText = [IO.File]::ReadAllText($controllerPath)
+    $kenseiSpawn = '{"class_id": "kensei", "pos": Vector2i(1, 2), "facing": &"SE"},'
+    Assert-Build ($controllerText.Split($kenseiSpawn).Count -eq 2) '无法唯一定位测试战斗的剑圣出生配置。'
+    $myrmidonSpawn = '{"class_id": "myrmidon", "pos": Vector2i(1, 2), "facing": &"SE"},'
+    [IO.File]::WriteAllText($controllerPath, $controllerText.Replace($kenseiSpawn, $myrmidonSpawn), [Text.UTF8Encoding]::new($false))
+}
+
 $presetTemplate = [IO.File]::ReadAllText((Join-Path $repoRoot 'release/windows-export-preset.cfg.in'))
 Assert-Build ($presetTemplate.Split('__RELEASE_TEMPLATE_PATH__').Count -eq 2) '导出预设模板缺少唯一模板路径占位符。'
 $templateForGodot = $templateExe.Replace('\', '/')
@@ -90,6 +101,16 @@ $preset = $presetTemplate.Replace('__RELEASE_TEMPLATE_PATH__', $templateForGodot
 [IO.File]::WriteAllText((Join-Path $stage 'export_presets.cfg'), $preset, [Text.UTF8Encoding]::new($false))
 
 Invoke-Godot @('--headless', '--editor', '--path', $stage, '--import', '--quit') (Join-Path $logs 'import.log')
+if ($PreviewClass -eq 'myrmidon') {
+    $previewCheck = Join-Path $stage 'myrmidon_preview_check.gd'
+    Copy-Item -LiteralPath (Join-Path $repoRoot 'tests/test_myrmidon_qi_only.gd') -Destination $previewCheck
+    try {
+        Invoke-Godot @('--headless', '--path', $stage, '--script', 'res://myrmidon_preview_check.gd', '--', '--expect-main-preview') (Join-Path $logs 'myrmidon-preview-check.log')
+        Assert-Build ((Get-Content -LiteralPath (Join-Path $logs 'myrmidon-preview-check.log') -Raw).Contains('MYRMIDON_QI_ONLY_RESULT failed=0')) '基础剑士正式场景检查没有通过。'
+    } finally {
+        Remove-Item -LiteralPath $previewCheck
+    }
+}
 $exe = Join-Path $dist 'ShipOfTheseus.exe'
 Invoke-Godot @('--headless', '--path', $stage, '--export-release', 'Windows Desktop Release', $exe) (Join-Path $logs 'export.log')
 $pck = Join-Path $dist 'ShipOfTheseus.pck'
@@ -119,11 +140,14 @@ $resourceArchive = [IO.Compression.ZipFile]::OpenRead($resourceZip)
 try {
     $excludedAddon = @($resourceArchive.Entries | Where-Object { $_.FullName -like 'addons/godot_mcp/*' })
     Assert-Build ($excludedAddon.Count -eq 0) '发行资源包仍包含 Godot MCP 插件。'
+    $previewCheckEntries = @($resourceArchive.Entries | Where-Object { $_.FullName -like '*myrmidon_preview_check*' })
+    Assert-Build ($previewCheckEntries.Count -eq 0) '发行资源包包含临时验收脚本。'
 } finally {
     $resourceArchive.Dispose()
 }
 
-$packageZip = Join-Path $outputRoot 'ShipOfTheseus-Windows-x86_64.zip'
+$packageName = if ($PreviewClass -eq 'myrmidon') { 'ShipOfTheseus-MyrmidonHUD-Windows-x86_64.zip' } else { 'ShipOfTheseus-Windows-x86_64.zip' }
+$packageZip = Join-Path $outputRoot $packageName
 [IO.Compression.ZipFile]::CreateFromDirectory($dist, $packageZip)
 $unpacked = Join-Path $outputRoot 'unpacked'
 $null = New-Item -ItemType Directory -Path $unpacked
@@ -143,6 +167,9 @@ Assert-Build ($process.ExitCode -eq 0) 'Windows 游戏包启动检查失败。'
 $smokeLines = @((Get-Content -LiteralPath $smokeOut) + (Get-Content -LiteralPath $smokeErr))
 $smokeErrors = @($smokeLines | Where-Object { $_ -match '^(SCRIPT )?ERROR:' })
 Assert-Build ($smokeErrors.Count -eq 0) 'Windows 游戏包启动日志包含错误。'
+if ($PreviewClass -eq 'myrmidon') {
+    Assert-Build (($smokeLines -join "`n").Contains('[TurnManager] Turn: 剑士 (player)')) '解压后的程序未进入基础剑士回合。'
+}
 
 $visualHash = $null
 if ($CaptureVisual) {
@@ -171,6 +198,8 @@ if ($CaptureVisual) {
 $report = [ordered]@{
     status = 'pass'
     source_commit = $sourceCommit
+    preview_class = $PreviewClass
+    preview_audit_status = if ($PreviewClass -eq 'myrmidon') { 'pass' } else { 'not_applicable' }
     engine_version = $engineVersion
     template_archive_sha256 = $actualTemplateHash
     executable_sha256 = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant()

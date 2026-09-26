@@ -278,7 +278,7 @@ func _test_slot_swap(dl: Object) -> void:
 # ── 5b. 槽位替换的职业校验（替换目标必须在本单位 skill_ids 内）──
 
 ## 全仓只有「建技能栏」与「扫迅捷技能」两处读 skill_ids，施放路径不另做职业检查，
-## 技能栏本身就是访问控制。剑士（myrmidon）共享剑气与剑意印记、也能靠斩击/居合把印记攒满，
+## 技能栏本身就是访问控制。剑士（myrmidon）只使用剑气，印记容量为零；
 ## 但拔刀按 R2.4 是剑圣专属、不在其 skill_ids 内 → 招架槽必须保持为招架。
 ## 两侧都要覆盖：拥有 target 则替换生效（剑圣），不拥有则不替换（剑士）。
 func _test_slot_swap_class_gate(dl: Object) -> void:
@@ -297,8 +297,8 @@ func _test_slot_swap_class_gate(dl: Object) -> void:
 	m.gain_random_mark()
 	m.gain_random_mark()
 	m.gain_random_mark()
-	_check("剑士印记同样能攒满（共享印记资源）", m.is_marks_full())
-	_eq("剑士印记满 → 招架槽仍是招架（不得替换为剑圣专属拔刀）",
+	_check("剑士没有印记系统", m._mark_max == 0 and not m.is_marks_full() and m.get_mark_count() == 0)
+	_eq("剑士无印记 → 招架槽仍是招架（不得替换为剑圣专属拔刀）",
 		m.get_visible_skill_id("swordsman_zhaojia", trig, tgt), "swordsman_zhaojia")
 	m.free()
 

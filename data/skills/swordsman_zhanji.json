@@ -21,5 +21,8 @@
   "requires_marks": 0,
   "guaranteed_crit": false,
   "guaranteed_hit": false,
-  "description": "距离 1，造成 100% 物理伤害。命中后获得 25 点剑气，并随机获得一枚尚未持有的剑意印记（已集满 3 枚时不再获得）。"
+  "description": "距离 1，造成 100% 物理伤害。命中后获得 25 点剑气，并随机获得一枚尚未持有的剑意印记（已集满 3 枚时不再获得）。",
+  "class_descriptions": {
+    "myrmidon": "距离 1，造成 100% 物理伤害。命中后获得 25 点剑气。"
+  }
 }

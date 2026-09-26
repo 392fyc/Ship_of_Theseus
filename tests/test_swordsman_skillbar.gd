@@ -244,7 +244,7 @@ func _test_swift_availability_respects_slot_swap(tm: Object, sword: Unit) -> voi
 	_check("印记满 → 判为无迅捷可用（招架槽已变拔刀，standard）",
 		not tm._has_available_swift_skill(sword))
 
-	# 剑士对照：拔刀不在其 skill_ids 内 → 满印也不替换 → 招架仍在槽上 → 仍有迅捷可用。
+	# 剑士对照：只有剑气、没有印记；招架始终留在槽上，仍有迅捷可用。
 	var dl: Object = load("res://scripts/data/data_loader.gd").new()
 	dl.load_all()
 	var mm_class: Dictionary = dl.classes.get("myrmidon", {})
@@ -256,12 +256,9 @@ func _test_swift_availability_respects_slot_swap(tm: Object, sword: Unit) -> voi
 		mm.set_sword_qi(50)
 		mm.skill_cooldowns.clear()
 		mm.swift_used = false
-		mm.marks["心"] = true
-		mm.marks["道"] = true
-		mm.marks["势"] = true
 		_check("前提：剑士 skill_ids 不含拔刀", not mm.skill_ids.has("swordsman_badao"))
-		_check("前提：剑士印记同样能满", mm.is_marks_full())
-		_check("剑士印记满 → 仍判为有迅捷可用（槽位不替换，招架还在）",
+		_check("前提：剑士印记容量为零", mm._mark_max == 0 and not mm.is_marks_full())
+		_check("剑士无印记 → 仍判为有迅捷可用（招架还在）",
 			tm._has_available_swift_skill(mm))
 		mm.free()
 	dl.free()
