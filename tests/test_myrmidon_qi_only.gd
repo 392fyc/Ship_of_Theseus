@@ -30,6 +30,9 @@ func _run() -> void:
 	_check("界面不发送印记状态", state.get("marks", {}) == {})
 	_check("印记面板隐藏", not dashboard.get_composition().get_marks_panel().visible)
 	_check("剑士无法获得印记", unit.gain_random_mark() == "" and unit.get_mark_count() == 0)
+	var character: Control = dashboard.get_composition().get_node("BottomRow/CharacterHudPanel") as Control
+	var portrait: TextureRect = character.get_node("PortraitContent") as TextureRect
+	_check("剑士显示正式头像", portrait.texture is AtlasTexture and not character.get_node("PortraitFallback").visible)
 
 	var shelf: Control = dashboard.get_composition().get_node("BottomRow/SkillShelf") as Control
 	var slots: Array = shelf.get_skill_slots()

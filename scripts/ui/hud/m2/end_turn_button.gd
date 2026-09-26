@@ -39,8 +39,11 @@ func _draw_hourglass() -> void:
 	if %HourglassEmblem.texture != null:
 		return
 	var color: Color = get_theme_color(&"end_emblem", &"HudM2")
-	var points := PackedVector2Array([Vector2(2, 2), Vector2(16, 2), Vector2(16, 5),
-		Vector2(5, 18), Vector2(5, 21), Vector2(13, 21), Vector2(13, 18),
-		Vector2(2, 5), Vector2(2, 2)])
+	# 上下两半围绕 (9, 12) 镜像，保持沙漏和三角形等宽等高。
+	var points := PackedVector2Array([
+		Vector2(2, 2), Vector2(16, 2), Vector2(16, 5),
+		Vector2(10, 11), Vector2(10, 13), Vector2(16, 19),
+		Vector2(16, 22), Vector2(2, 22), Vector2(2, 19),
+		Vector2(8, 13), Vector2(8, 11), Vector2(2, 5), Vector2(2, 2),
+	])
 	%HourglassEmblem.draw_polyline(points, color, 1.4, true)
-	%HourglassEmblem.draw_line(Vector2(2, 22), Vector2(16, 22), color, 1.4, true)

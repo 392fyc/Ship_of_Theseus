@@ -1,0 +1,7 @@
+# 基础剑士头像候选记录
+
+使用 Codex 内置图像生成工具编辑仓内已批准的剑圣头像，以已批准的基础剑士“一闪”技能图标作为材质参考。输出保存在 `assets/ui/portraits/myrmidon_hud_portrait_generated.png`，由 `myrmidon_hud_portrait.tres` 裁切后在人物栏显示。人物关系与外观尚待用户对本次候选作视觉确认。
+
+## 提示词
+
+> Use case: identity-preserve. Asset type: a single finished game HUD portrait for the base swordsman (Myrmidon), displayed at 70 × 78 pixels in an existing frame. Image 1 is the approved portrait of this same red-haired female protagonist at her later Sword Saint stage; preserve her recognizable face, crimson hair, red-brown eyes and painterly anatomy. Image 2 is a style and costume reference from the approved base-swordsman skill icons; use its dark crimson, charcoal black and restrained antique-gold material language. Create her earlier base-swordsman appearance as a tight head-and-shoulders portrait: simpler functional black leather and dark steel training armor, modest worn bronze trim, no elaborate Sword Saint crest or ornate high rank pauldrons. Calm, alert expression, natural warm skin highlights with no white geometric patches. Keep the face large and legible when reduced to 70 × 78 pixels. Vertical 7:8 composition, centered face, hair and shoulders filling the edges, very dark burgundy/charcoal background filling all corners. Original polished dark-fantasy hand-painted game art, consistent with the approved icon set. Output only the artwork, no interface frame, sword, extra characters, text, logo, watermark, transparent margin, checkerboard or border.

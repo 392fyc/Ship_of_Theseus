@@ -62,8 +62,10 @@ func _test_missing_and_action_states() -> void:
 	_check("零值不是缺值", character.hp != null and character.hp.current_value == 0 and character.hp.maximum_value == 0 and character.attribute_value_text("STR") == "0")
 	_check("缺失等级经验护盾和头像明确不可用", not character.has_level and character.experience == null and character.shield == null and character.portrait_texture == null)
 	_check("缺失属性显示横线", character.attribute_value_text("MAG") == "—")
+	var myrmidon: RefCounted = adapter.build({"visible": true, "unit_name": "剑士", "class_resource_display": {"class_id": "myrmidon"}})["character"]
+	_check("剑士头像读取独立生成素材", myrmidon.portrait_texture is AtlasTexture and (myrmidon.portrait_texture as AtlasTexture).region == Rect2(320, 100, 660, 735) and (myrmidon.portrait_texture as AtlasTexture).atlas.resource_path == "res://assets/ui/portraits/myrmidon_hud_portrait_generated.png")
 	var other_class: RefCounted = adapter.build({"visible": true, "unit_name": "法师", "class_resource_display": {"class_id": "mage"}})["character"]
-	_check("其他职业不会误用剑圣头像", other_class.portrait_texture == null)
+	_check("其他职业不会误用剑士或剑圣头像", other_class.portrait_texture == null)
 	_check("装备与遗物保持预留空槽", _is_reserved_slot(missing["weapon"]) and _is_reserved_slot(missing["armor"]) and missing["relics"].size() == 8 and missing["relics"].all(_is_reserved_slot))
 	_check("药剂缺来源状态保持", missing["potion"].content_id.is_empty() and not missing["potion"].enabled and missing["potion"].tooltip_text == "暂无药剂信息")
 	var valid: Dictionary = adapter.build(_state_with_actions({
