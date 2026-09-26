@@ -57,5 +57,5 @@
     {"path": "candidate-v3/action-1920.png", "sha256": "e0ce7ec912eff6d08554f7fc0fe8b5a869e40d566a757aa3171154c589693f88"},
     {"path": "candidate-v3/skills-detail-4x.png", "sha256": "e633c58fbdb4ddd72d7f87a427c2ae0743c3316f5d2e05488f645a2a12b35e05"}
   ],
-  "release_check": "已用 Godot 4.6.3 的临时资源审计预设导出 ZIP，确认五张运行图的导入映射及实际纹理、目录 JSON 均在包内，开发源图与评审截图均不在包内；详见 export-audit.md。正式可玩发行包仍需单独配置和验收。"
+  "release_check": "Godot 4.6.3 Windows 战斗 HUD 包已生成并从 ZIP 解压启动；五张运行图、目录 JSON 均入包，开发源图与评审截图未入包。见 ../hud-release-build/README.md。当前主场景是 TacticalScene 测试战斗。"
 }
