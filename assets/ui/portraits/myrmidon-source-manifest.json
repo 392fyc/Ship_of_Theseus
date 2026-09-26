@@ -1,0 +1,25 @@
+{
+  "version": "hud-myrmidon-portrait-1",
+  "class_id": "myrmidon",
+  "visual_status": "user_approved",
+  "source_path": "res://assets/ui/portraits/myrmidon_hud_portrait_generated.png",
+  "source_sha256": "6a887c2fd8ca3efc173180e4f39e0f594eec7c524d2578dac217b166bdf703c3",
+  "source_size": [1173, 1341],
+  "portrait_resource": "res://assets/ui/portraits/myrmidon_hud_portrait.tres",
+  "portrait_resource_sha256": "7dccc5e78683f97d5ae65080c541a0c4cefc86795670106449a8b80ca6abf4e3",
+  "crop_region": [320, 100, 660, 735],
+  "display_size": [70, 78],
+  "sampling": "linear",
+  "source_provenance": "Built-in imagegen edit of the approved Sword Saint HUD portrait, with the approved Myrmidon Yishan icon as a material reference.",
+  "reference_sources": [
+    {"path": "res://assets/ui/portraits/kensei_hud_portrait_generated.png", "sha256": "1b8fc2322dae3f141a0a342a2d11e2604351bad8d36912f8538b908905267105"},
+    {"path": "res://dev_doc/ui-art-research/myrmidon-skill-icons/candidate-v3/yishan-source.png", "sha256": "2da3792c87aa0b33908f7df2cbe51aa8366dda77d887df64bf9b0c5aa52390d9"}
+  ],
+  "generation_prompt_path": "res://dev_doc/ui-art-research/hud-myrmidon-portrait/generation-prompt.md",
+  "visual_decision": "2026-09-26 用户确认基础剑士头像的形象、裁切与贴边效果，以及结束回合沙漏的上下比例与三角形对称性。头像沿用已批准角色美术作视觉参考，不建立叙事身份规则。",
+  "review_views": [
+    {"path": "res://dev_doc/ui-art-research/hud-myrmidon-portrait/candidate/combat-1280.png", "sha256": "a24d28476305a04b65fe5a62d4fa1087f7e47d80f4e642139a1d7f863c772334"},
+    {"path": "res://dev_doc/ui-art-research/hud-myrmidon-portrait/candidate/portrait-detail-4x.png", "sha256": "ea99dc35a62fceba8e5ee2c7a06fbff18c0fedddb629be6efda096a05c5707d6"},
+    {"path": "res://dev_doc/ui-art-research/hud-myrmidon-portrait/candidate/end-turn-detail-4x.png", "sha256": "1f3ce27a53a946457c9595bd3d92dd1251cba0e00627a808d9fcc590505845e9"}
+  ]
+}
