@@ -1,0 +1,39 @@
+{
+  "result": "pass",
+  "archive_sha256": "756363d4a6937a3c80bd705b1a79222069e1c8f99000a54337226bb26663e690",
+  "archive_bytes": 9645039,
+  "archive_entries": 518,
+  "catalog_sha256": "368c3e90f0168aec75fe68c0c823f5292d128d076be6eb2c3e33310121f5872b",
+  "runtime_assets": [
+    {
+      "skill_id": "swordsman_xinyan",
+      "import": "assets/ui/skills/myrmidon/xinyan.png.import",
+      "texture": ".godot/imported/xinyan.png-23d5f09617fa4329449ac380cbaeeba0.ctex"
+    },
+    {
+      "skill_id": "swordsman_zhanji",
+      "import": "assets/ui/skills/myrmidon/zhanji.png.import",
+      "texture": ".godot/imported/zhanji.png-90bb16edc53e9c83b457ecd29cedd27f.ctex"
+    },
+    {
+      "skill_id": "swordsman_yishan",
+      "import": "assets/ui/skills/myrmidon/yishan.png.import",
+      "texture": ".godot/imported/yishan.png-0656ad0f7e6f74cef2e07feb143bb0c2.ctex"
+    },
+    {
+      "skill_id": "swordsman_zhaojia",
+      "import": "assets/ui/skills/myrmidon/zhaojia.png.import",
+      "texture": ".godot/imported/zhaojia.png-b24b453b70fdcc06e375ad2502d27c1e.ctex"
+    },
+    {
+      "skill_id": "swordsman_juhe",
+      "import": "assets/ui/skills/myrmidon/juhe.png.import",
+      "texture": ".godot/imported/juhe.png-1a60bbe6c3f61c8db5ed35cda7ded704.ctex"
+    }
+  ],
+  "excluded_roots": [
+    "dev_doc/",
+    "docs/",
+    "tests/"
+  ]
+}

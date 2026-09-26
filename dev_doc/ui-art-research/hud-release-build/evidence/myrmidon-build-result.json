@@ -1,0 +1,23 @@
+{
+  "status": "pass",
+  "source_commit": "23570b334d67f678ecaa6f69a6bf03c79f7e1948",
+  "preview_class": "myrmidon",
+  "preview_audit_status": "pass",
+  "engine_version": "4.6.3.stable.official.7d41c59c4",
+  "template_archive_sha256": "3fbe2c0e2dec9d537ab9ec97bcf8da91dcf23357fc51f67092dd068d839290a8",
+  "executable_sha256": "fda69ad440435bd93d7c0dfcc43f717badd5e051f1b3a19d60aa281e526b8cab",
+  "resource_pck_sha256": "3da38f81e49534ec45d0fc8adfb766b65b09110ee95d548d87871213b863f410",
+  "package_zip_sha256": "dd0af9d230748aa0ba608f3555ed015897dea81b6123f44d8a5279ae3d5d8c5a",
+  "package_zip_bytes": 46734068,
+  "icon_audit_sha256": "756363d4a6937a3c80bd705b1a79222069e1c8f99000a54337226bb26663e690",
+  "icon_count": 5,
+  "excluded_addon_entries": 0,
+  "license_files": [
+    "GODOT_LICENSE.txt",
+    "GODOT_COPYRIGHT.txt",
+    "IBM_PLEX_MONO_LICENSE.txt",
+    "SOURCE_SANS_PRO_LICENSE.txt"
+  ],
+  "smoke_exit_code": 0,
+  "visual_sha256": "5b2730a0fb256b933ee621c95d883728f58e7063c2f7dfc4902dbec1468038f5"
+}
