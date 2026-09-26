@@ -1,0 +1,21 @@
+{
+  "status": "pass",
+  "source_commit": "d05e58e9999fa3fece03ee51fbea290469b3145c",
+  "engine_version": "4.6.3.stable.official.7d41c59c4",
+  "template_archive_sha256": "3fbe2c0e2dec9d537ab9ec97bcf8da91dcf23357fc51f67092dd068d839290a8",
+  "executable_sha256": "fda69ad440435bd93d7c0dfcc43f717badd5e051f1b3a19d60aa281e526b8cab",
+  "resource_pck_sha256": "8547e54c27a2006f8fd29bf7a70f0c7d109fdc51e8ef2d3ab19581b2d14ca439",
+  "package_zip_sha256": "6c73783d9880221080935fcb657cfd1a93fa36340164565f575382dcf30fe324",
+  "package_zip_bytes": 46734133,
+  "icon_audit_sha256": "7c105665663e395349499ec6d5d356d4998931b62b83e8310bd72111663345a3",
+  "icon_count": 5,
+  "excluded_addon_entries": 0,
+  "license_files": [
+    "GODOT_LICENSE.txt",
+    "GODOT_COPYRIGHT.txt",
+    "IBM_PLEX_MONO_LICENSE.txt",
+    "SOURCE_SANS_PRO_LICENSE.txt"
+  ],
+  "smoke_exit_code": 0,
+  "visual_sha256": "2641d6f81e4b7cef9e05d3984fce9d8ed94902cd3deac4883a2c6fb724b3ac7d"
+}

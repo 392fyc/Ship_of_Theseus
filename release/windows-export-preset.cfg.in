@@ -1,0 +1,24 @@
+[preset.0]
+
+name="Windows Desktop Release"
+platform="Windows Desktop"
+runnable=true
+advanced_options=false
+dedicated_server=false
+custom_features=""
+export_filter="all_resources"
+include_filter="*.json"
+exclude_filter="dev_doc/*,docs/*,tests/*,addons/godot_mcp/*"
+export_path=""
+encryption_include_filters=""
+encryption_exclude_filters=""
+encrypt_pck=false
+encrypt_directory=false
+script_export_mode=2
+
+[preset.0.options]
+
+custom_template/debug=""
+custom_template/release="__RELEASE_TEMPLATE_PATH__"
+binary_format/architecture="x86_64"
+binary_format/embed_pck=false
