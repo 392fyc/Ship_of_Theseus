@@ -1,6 +1,6 @@
 # 基础剑士头像候选记录
 
-使用 Codex 内置图像生成工具编辑仓内已批准的剑圣头像，以已批准的基础剑士“一闪”技能图标作为材质参考。输出保存在 `assets/ui/portraits/myrmidon_hud_portrait_generated.png`，由 `myrmidon_hud_portrait.tres` 裁切后在人物栏显示。人物关系与外观尚待用户对本次候选作视觉确认。
+使用 Codex 内置图像生成工具编辑仓内已批准的剑圣头像，以已批准的基础剑士“一闪”技能图标作为材质参考。输出保存在 `assets/ui/portraits/myrmidon_hud_portrait_generated.png`，由 `myrmidon_hud_portrait.tres` 裁切后在人物栏显示。用户于 2026-09-26 确认本次头像的形象、裁切与贴边效果；这项视觉确认不建立叙事身份规则。
 
 ## 提示词
 
