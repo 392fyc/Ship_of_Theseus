@@ -1,8 +1,8 @@
 {
   "result": "pass",
-  "archive_sha256": "756363d4a6937a3c80bd705b1a79222069e1c8f99000a54337226bb26663e690",
-  "archive_bytes": 9645039,
-  "archive_entries": 518,
+  "archive_sha256": "e2be360e175486a63dc600e94bfaef8e8457448793d92f1e04f25ccc11900e57",
+  "archive_bytes": 11474415,
+  "archive_entries": 523,
   "catalog_sha256": "368c3e90f0168aec75fe68c0c823f5292d128d076be6eb2c3e33310121f5872b",
   "runtime_assets": [
     {
