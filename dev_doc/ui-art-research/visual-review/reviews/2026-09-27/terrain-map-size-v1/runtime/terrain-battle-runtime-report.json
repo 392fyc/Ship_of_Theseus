@@ -1,0 +1,15 @@
+{
+  "captures": {
+    "battle-courtyard-1280.png": "e787b89ce8b5ed9a2a5f5911a54aabf2c4bb7150c91583b77bf29c5ed88b7982",
+    "battle-courtyard-1920.png": "50a0731bffe483009dd99b2649552315151bcc56de85e994661e682d797ca2ef",
+    "battle-highland-1280.png": "0e34ffcd4169b77b0d4d750ab5addca3c9e2b1473c64545bd285719c71f685a9",
+    "battle-highland-1920.png": "ac591beaf68ca25762e3184dfa39fd70465c99505b3d038f38246a65311187fd",
+    "battle-wetland-1280.png": "e385731dd2838eede43eb513852e214e5bf9531a6e8b2433081a5044b740f874",
+    "battle-wetland-1920.png": "9ffe583e904e636e221ea3d3bf5664c68aee1aea62e800619341e41bdb845a81"
+  },
+  "checks": 89,
+  "engine": "4.6.3-stable (official)",
+  "failures": [],
+  "global_maps_unchanged": true,
+  "result": "pass"
+}

@@ -1,0 +1,132 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+[DataLoader] Loaded: 7 classes, 20 skills, 10 buffs, 8 enemies, 4 maps, 2 states, 7 talents
+[Grid] Initialized 8x8 map: courtyard_overgrown
+[TacticalScene] Units spawned: 4
+[TurnManager] Round 1 queue: [剑士(player), 弓箭手(enemy), 枪兵(enemy), 法师(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[PASS] 默认场景为荒草中庭
+[Grid] Initialized 8x8 map: courtyard_overgrown
+[TacticalScene] Units spawned: 4
+[TurnManager] Round 1 queue: [剑士(player), 弓箭手(enemy), 枪兵(enemy), 法师(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[PASS] overgrown 已选择且标题说明来自当前地图
+[PASS] overgrown 切图保留范围显示状态
+[PASS] overgrown 切换释放旧战斗且只保留一个战斗与棋盘
+[PASS] overgrown 数据表只临时注册当前地图
+[PASS] overgrown 为 8×8 棋盘，基础剑士无印记
+[PASS] overgrown 四名单位都位于可通行地块
+[Grid] Initialized 8x8 map: courtyard_overgrown
+[PASS] overgrown 所有可通行地块从玩家入口连通
+[PASS] overgrown 不可通行地块不进入路径与实际移动范围
+[PASS] overgrown 选格路径使用 Cell 移动消耗
+[PASS] overgrown 点击残垣不移动且不消费移动资源
+[PASS] overgrown 森林提示采用正式类型与定性闪避说明
+[PASS] overgrown 悬停森林格时树冠实际淡化
+[PASS] overgrown 平原提示读取正式地形与 Cell 移动消耗
+[PASS] overgrown 行动范围内的森林树冠不盖住选格标记
+[PASS] overgrown 残垣不通行但不阻挡攻击线
+[PASS] overgrown 1280 全部格子留在棋盘显示区并避开 HUD
+[PASS] overgrown 1280 屏幕选格往返一致
+[PASS] overgrown 1280 鼠标悬停产生正式寻路预览
+[PASS] overgrown 1280 保留原 HUD 且隐藏印记面板
+[PASS] overgrown 1920 全部格子留在棋盘显示区并避开 HUD
+[PASS] overgrown 1920 屏幕选格往返一致
+[PASS] overgrown 1920 鼠标悬停产生正式寻路预览
+[PASS] overgrown 1920 保留原 HUD 且隐藏印记面板
+[PASS] 居中棋盘时提示框使用左侧空白
+[PASS] 镜头缩放后拖动按屏幕像素跟手
+[PASS] 平移棋盘后提示框改放另一侧且不压棋盘
+[PASS] 棋盘放大后左右空间不足时隐藏提示框
+[PASS] 滚轮缩放以鼠标世界点为锚
+[PASS] 滚轮缩放位于 fit_zoom 的 0.75 至 1.45 倍
+[PASS] 滚轮放大受 fit_zoom 上限约束
+[PASS] 居中恢复 fit_zoom 和默认位置
+[PASS] 滚轮缩小受 fit_zoom 下限约束
+[PASS] 指针位于场景按钮时滚轮不缩放
+[PASS] 范围按钮只隐藏高亮且不改变移动范围
+[PASS] 提示按钮可隐藏地形卡而不切换地图
+[PASS] 关闭提示后持续悬停仍不显示地形卡
+[PASS] 重新开启提示后悬停可显示地形卡
+[PASS] overgrown 实际移动到选格并更新占格
+[PASS] overgrown 移动行动消费移动资源
+[Grid] Initialized 8x8 map: courtyard_overgrown
+[TacticalScene] Units spawned: 4
+[TurnManager] Round 1 queue: [剑士(player), 弓箭手(enemy), 枪兵(enemy), 法师(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[PASS] overgrown 重开保留场景并重置单位站位
+[PASS] overgrown 重开后地图注册仍无泄漏
+[Grid] Initialized 8x8 map: courtyard_flooded
+[TacticalScene] Units spawned: 4
+[TurnManager] Round 1 queue: [剑士(player), 弓箭手(enemy), 枪兵(enemy), 法师(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[PASS] flooded 已选择且标题说明来自当前地图
+[PASS] flooded 切图保留范围显示状态
+[PASS] flooded 切换释放旧战斗且只保留一个战斗与棋盘
+[PASS] flooded 数据表只临时注册当前地图
+[PASS] flooded 为 8×8 棋盘，基础剑士无印记
+[PASS] flooded 四名单位都位于可通行地块
+[Grid] Initialized 8x8 map: courtyard_flooded
+[PASS] flooded 所有可通行地块从玩家入口连通
+[PASS] flooded 不可通行地块不进入路径与实际移动范围
+[PASS] flooded 选格路径使用 Cell 移动消耗
+[PASS] flooded 点击残垣不移动且不消费移动资源
+[PASS] flooded 森林提示采用正式类型与定性闪避说明
+[PASS] flooded 悬停森林格时树冠实际淡化
+[PASS] flooded 平原提示读取正式地形与 Cell 移动消耗
+[PASS] flooded 残垣不通行但不阻挡攻击线
+[PASS] 积水花园区分可通行浅水和不可通行深水
+[PASS] flooded 1280 全部格子留在棋盘显示区并避开 HUD
+[PASS] flooded 1280 屏幕选格往返一致
+[PASS] flooded 1280 鼠标悬停产生正式寻路预览
+[PASS] flooded 1280 保留原 HUD 且隐藏印记面板
+[PASS] flooded 1920 全部格子留在棋盘显示区并避开 HUD
+[PASS] flooded 1920 屏幕选格往返一致
+[PASS] flooded 1920 鼠标悬停产生正式寻路预览
+[PASS] flooded 1920 保留原 HUD 且隐藏印记面板
+[PASS] flooded 实际移动到选格并更新占格
+[PASS] flooded 移动行动消费移动资源
+[Grid] Initialized 8x8 map: courtyard_flooded
+[TacticalScene] Units spawned: 4
+[TurnManager] Round 1 queue: [剑士(player), 弓箭手(enemy), 枪兵(enemy), 法师(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[PASS] flooded 重开保留场景并重置单位站位
+[PASS] flooded 重开后地图注册仍无泄漏
+[Grid] Initialized 8x8 map: courtyard_passage
+[TacticalScene] Units spawned: 4
+[TurnManager] Round 1 queue: [剑士(player), 弓箭手(enemy), 枪兵(enemy), 法师(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[PASS] passage 已选择且标题说明来自当前地图
+[PASS] passage 切图保留范围显示状态
+[PASS] passage 切换释放旧战斗且只保留一个战斗与棋盘
+[PASS] passage 数据表只临时注册当前地图
+[PASS] passage 为 8×8 棋盘，基础剑士无印记
+[PASS] passage 四名单位都位于可通行地块
+[Grid] Initialized 8x8 map: courtyard_passage
+[PASS] passage 所有可通行地块从玩家入口连通
+[PASS] passage 不可通行地块不进入路径与实际移动范围
+[PASS] passage 选格路径使用 Cell 移动消耗
+[PASS] passage 点击残垣不移动且不消费移动资源
+[PASS] passage 森林提示采用正式类型与定性闪避说明
+[PASS] passage 悬停森林格时树冠实际淡化
+[PASS] passage 平原提示读取正式地形与 Cell 移动消耗
+[PASS] passage 行动范围内的森林树冠不盖住选格标记
+[PASS] passage 残垣不通行但不阻挡攻击线
+[PASS] passage 1280 全部格子留在棋盘显示区并避开 HUD
+[PASS] passage 1280 屏幕选格往返一致
+[PASS] passage 1280 鼠标悬停产生正式寻路预览
+[PASS] passage 1280 保留原 HUD 且隐藏印记面板
+[PASS] passage 1920 全部格子留在棋盘显示区并避开 HUD
+[PASS] passage 1920 屏幕选格往返一致
+[PASS] passage 1920 鼠标悬停产生正式寻路预览
+[PASS] passage 1920 保留原 HUD 且隐藏印记面板
+[PASS] passage 实际移动到选格并更新占格
+[PASS] passage 移动行动消费移动资源
+[Grid] Initialized 8x8 map: courtyard_passage
+[TacticalScene] Units spawned: 4
+[TurnManager] Round 1 queue: [剑士(player), 弓箭手(enemy), 枪兵(enemy), 法师(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[PASS] passage 重开保留场景并重置单位站位
+[PASS] passage 重开后地图注册仍无泄漏
+[PASS] 退出候选恢复全部 DataLoader 地图注册
+BATTLEFIELD_COURTYARD_RESULT {"captures":[],"engine":"4.6.3-stable (official)","failed":0,"passed":97}

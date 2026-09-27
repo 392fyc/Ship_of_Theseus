@@ -1,0 +1,64 @@
+{
+  "contract_id": "water-visual-contract-v2",
+  "purpose": "用多格深水核心校准水深身份、深浅端点色调与连续等宽岸沿；核心色差不作为过渡合格依据。连续过渡与单格极端样例另由 water-depth-continuity-contract.json 检查。",
+  "fixture": {
+    "width": 5,
+    "height": 5,
+    "terrain_rows": [
+      [5, 5, 5, 5, 5],
+      [5, 6, 6, 6, 5],
+      [5, 6, 6, 6, 5],
+      [5, 6, 6, 6, 5],
+      [5, 5, 5, 5, 5]
+    ],
+    "shallow_terrain_id": 5,
+    "deep_terrain_id": 6,
+    "expected_center_terrain_id": 6,
+    "reason": "用连续的 3×3 深水区内部中心校准完整深色端点，外围为浅水。小孤格应形成缓和低洼，不能要求它达到大片深水核心的端点色。"
+  },
+  "capture": {
+    "engine": "Godot 4.6.3",
+    "viewport_px": [360, 280],
+    "board_scale": 1.5,
+    "depth_core_board_scale": 1.0,
+    "fixed_water_animation_time_seconds": 0.0,
+    "process_animation_after_freeze": false,
+    "post_processing": false,
+    "reason": "同组对照使用相同视口、棋盘变换和冻结动画时间，像素差只比较同位置。5×5 核心样例使用 1.0 倍以完整入画；3×3 石岸样例保持 1.5 倍。"
+  },
+  "depth_image_checker": {
+    "sample_local_offset_from_center_px": [0, 0],
+    "sample_patch_px": 7,
+    "metric": "浅水样本 RGB 通道均值减去深水样本 RGB 通道均值，通道归一化到 0..1。",
+    "minimum_shallow_minus_deep_mean": 0.1,
+    "reason": "深浅水色调的声明调色板通道均值差约 0.392；0.1 要求保留约四分之一的调色区分，并允许材质纹理造成波动。取格中心检查色调端点；原先偏移 18 像素的位置落入连续过渡区，不能再当完整深水端点。过渡本身以独立跨界曲线检查，色调门槛未降低。",
+    "negative_case": "地形数据仍声明中心为深水，但实际渲染中心使用浅水颜色。"
+  },
+  "stone_bank_checker": {
+    "reference": "同一铺石棋盘在实际渲染中禁用 stone_bank 过渡后的图像。",
+    "scanned_edges": [0, 1, 2, 3],
+    "edge_sample_fractions": [0.12, 0.25, 0.38, 0.5, 0.62, 0.75, 0.88],
+    "scan_from_water_edge_px": 0.5,
+    "scan_to_water_interior_px": 6.0,
+    "scan_step_px": 0.5,
+    "minimum_channel_delta": 0.12,
+    "minimum_positive_luminance_delta": 0.04,
+    "reject_positive_brightness_coverage": 0.8,
+	"uniform_band_min_width_px": 1.5,
+	"reject_uniform_color_band_coverage": 0.8,
+	"reason": "旧岸沿指定的 2.5 渲染单位临水多边形在 1.5 倍固定缩放下约为 3.75 屏幕像素；1.5 像素检测下限高于当前接触带约 1.3 像素的最宽预期。任意更宽连续带也会计入，不设置宽度上限。亮度指标统计扫描线上超过固定增亮阈值的比例，细线同样计入；强色带指标补充拦截对比明显但方向为变暗的旧式边线。",
+	"reported_metrics": [
+		"uniform_color_band_coverage",
+		"median_detected_band_width_px",
+		"maximum_positive_luminance_delta",
+		"positive_brightness_coverage",
+		"maximum_absolute_channel_delta"
+	],
+    "negative_case": "在无岸沿参照图上叠加旧式 2.5 单位实色临水带与 #a4a38f 石面 cap。",
+    "limitations": [
+      "只检查指定浅水格的四条内侧边和同位置像素变化。",
+      "可拦截扫描区中覆盖率高的连续增亮或强色带，不能自动判断所有石岸是否自然、材质是否协调或整条河岸是否合理。",
+      "视口、缩放、地形材质或渲染流程改变时，应按独立规格重新审视测量覆盖范围，不能据此直接放宽阈值。"
+    ]
+  }
+}

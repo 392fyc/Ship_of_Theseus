@@ -1,0 +1,22 @@
+{
+  "status": "user_approved",
+  "scope": "浅水与深水的连续渐变方案 v6",
+  "user_decision": "当前这个深水和浅水的渐变效果合理了很多，符合要求，可以作为一个固定方案。",
+  "approved_images": {
+    "water-depth-basin.png": "7cf84691ffade33a6adb5ff3f485365bcc757cd49fde6945b65a343e94b395a6",
+    "water-depth-single-cell.png": "f90ad45a94723a995376c5f4cf59b1dd504a7ab8c92ec2ed6c8ba7ca298de3d8"
+  },
+  "water_parameters": {
+    "shallow_tint": "89b9be",
+    "deep_tint": "234f62",
+    "subdivisions_per_cell": 8
+  },
+  "water_texture_sha256": "5a82396548d2ac161d9fa6d2af60caad2859f74f1254e978a1b54d5cadd9c520",
+  "function_sha256": {
+    "_water_depth_at": "a56a6f0a5806977cc5d9f2b3fa1b6cafec9ecf4e0dfcc38441fbb5ccb098bc7e",
+    "_depth_kernel": "d81c347fd6e866d4c5c8a2f381ce9095218d2cec504d9e3e0b592bb4d936bc76",
+    "_water_surface_mesh": "552191a73f27f12150e26b4ebc53485b775a7dfcc930fa2b6a8cb92c375ff08d",
+    "_draw_water_surface": "dd463512b7755d8a5d0daf0f4e278ab4c4be5a973d296082d421387e5b1b132d"
+  },
+  "limits": "仅锁定水深方案；其它新增地形、障碍物外观和完整场景仍为候选。"
+}

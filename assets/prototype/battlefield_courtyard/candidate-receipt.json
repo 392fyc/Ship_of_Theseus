@@ -1,0 +1,147 @@
+{
+  "task_id": "courtyard-water-depth-continuity-v6",
+  "status": "completed",
+  "revision": "water-depth-v6",
+  "deliverable_stage": "水深连续过渡、代表水域与对应验收修正；当前为未发布候选。",
+  "milestone_complete": false,
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/battlefield-courtyard-study",
+  "target_head_before": "75d9bf2c64e5504904feb8580339a08ebbb58a59",
+  "candidate_head": null,
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "按用户最新反馈修正水深视觉关系，使用任务工作树，保留已批准 HUD 与玩法规则，独立复核。"
+    },
+    {
+      "contract": ".codex/project/mercury-task-contract.md",
+      "summary": "以当前实际图片、原始运行结果和明确限制交付。"
+    },
+    {
+      "contract": "sot-task-receipt",
+      "summary": "任务完成与整体美术认可分开，未提交候选保留来源摘要。"
+    }
+  ],
+  "changed_files": [
+    "scripts/ui/playground/courtyard_board_view.gd",
+    "assets/prototype/battlefield_courtyard/visual_profile.json",
+    "assets/prototype/battlefield_courtyard/source-manifest.json",
+    "assets/prototype/battlefield_courtyard/README.md",
+    "assets/prototype/battlefield_courtyard/candidate-receipt.json",
+    "tests/test_courtyard_water_visual_contract.gd",
+    "tests/test_courtyard_water_depth_continuity.gd",
+    "tests/test_courtyard_terrain_adjacency.gd",
+    "tests/run_courtyard_visual_validation.ps1",
+    "dev_doc/ui-art-research/visual-review/water-visual-contract.json",
+    "dev_doc/ui-art-research/visual-review/water-depth-continuity-contract.json",
+    "dev_doc/ui-art-research/visual-review/README.md",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27-water-depth-continuity.md",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27-water-depth-independent-review.json"
+  ],
+  "evidence_archive": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/water-depth-v6/archive-manifest.json",
+  "verification": [
+    {
+      "command": "tests/run_courtyard_visual_validation.ps1 -GodotPath <Godot 4.6.3> -OutputDirectory <new-absolute-directory>",
+      "result": "pass",
+      "evidence": "final-v6：六步完成，退出 0；四条连续性曲线与单格弱峰检查通过，硬切/旧窄色带各三条错误对照被拒绝。"
+    },
+    {
+      "command": "同一完整批次中的水岸、邻接、素材、整屏与交互检查",
+      "result": "pass",
+      "evidence": "原三类水岸与色调反例仍被拒绝；14 项邻接、97 项交互通过；两幅素材预览和 12 张固定状态整屏采集完成。"
+    },
+    {
+      "command": "重算完整批次来源摘要与证据归档摘要",
+      "result": "pass",
+      "evidence": "295 项来源与当前文件相同；本轮 43 个原图、报告、日志及首轮取样失败报告已归档。"
+    },
+    {
+      "command": "git diff --check；核对 Ship 主工作树 HEAD 与 dirty 清单",
+      "result": "pass",
+      "evidence": "差异检查通过，仅既有换行提示；主仓 HEAD c1f34ed331ab753b04610274292005cb975feca0 与原有 dirty 路径保留。"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "代表样例使用多格相连的深水区，外围浅水向内部连续变深。",
+      "result": "pass",
+      "evidence": [
+        "7×7 water-depth-basin.png 与更新后的 terrain-adjacency.png。",
+        "实际积水花园使用同一规则，已重新采集并查看 flooded-1280-clear.png。"
+      ]
+    },
+    {
+      "criterion": "浅深边、转角和场外延伸存在足够可见的连续过渡。",
+      "result": "pass",
+      "evidence": [
+        "四条 17 点曲线中间色样本数为 13、10、13、13；跨度约 20.7–30.86 像素。",
+        "最大单步变化约 0.02536，固定上限 0.10；全部保持向深水方向变化。"
+      ]
+    },
+    {
+      "criterion": "单格极端情况平缓变深，弱于连片深区核心。",
+      "result": "pass",
+      "evidence": [
+        "单格中心比周围暗 0.12167，比多格核心亮 0.21699；双边连续，单步变化最大约 0.02144。",
+        "water-depth-single-cell.png 保留项目水纹和材质；该图只作极端验证，不替代主水域。"
+      ]
+    },
+    {
+      "criterion": "检查能够拒绝硬切和原窄色带，不以端点色差替代过渡。",
+      "result": "pass",
+      "evidence": [
+        "硬切与原五条各 1.6 单位的色带，在同一检查器三条对应路径上全部被拒绝。",
+        "色调端点改用连续 3×3 深区核心，原 0.10 门槛保留；过渡与单格有独立规格。",
+        "首轮含内部色调平台的两条长路径失败已保留；取样改为相邻浅深格中心，全部量化阈值保留，原因见本轮复核记录。"
+      ]
+    },
+    {
+      "criterion": "独立复核实际图像、取样职责与检查器有效性。",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/visual-review/reviews/2026-09-27-water-depth-independent-review.json",
+        "独立审查未发现本轮目标的阻断项，保留固定样例和整体美术未认可的边界。"
+      ]
+    }
+  ],
+  "independent_review": {
+    "verdict": "pass",
+    "record": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27-water-depth-independent-review.json",
+    "reviewer": "water_pipeline_review",
+    "scope": "水深连续性、代表水域、单格极端样例、跨界曲线与对应错误对照；不代表整体美术或用户认可。",
+    "visual_acceptance": "user_approved_for_water_depth_only",
+    "baseline_status": "water_depth_v6_approved"
+  },
+  "protected_state": [
+    {
+      "subject": "Ship 主工作树",
+      "result": "unchanged",
+      "evidence": "当前 HEAD 和既有 dirty 清单已核对；本轮工程写入仅在任务工作树。"
+    },
+    {
+      "subject": "设计库、KB、Mercury",
+      "result": "unchanged",
+      "evidence": "本轮没有跨仓写入，未改结构化玩法或活跃记忆。"
+    },
+    {
+      "subject": "已批准 HUD、技能、头像、地形通行与伤害规则",
+      "result": "unchanged",
+      "evidence": "只修改水面视觉、展示与检查；材质原图继续使用既有 water-surface-v5.png。"
+    },
+    {
+      "subject": "任务树其他既有改动",
+      "result": "preserved",
+      "evidence": "未提交或回退已有战场、相机与资源候选。"
+    }
+  ],
+  "residual_risks": [
+    "结论仅覆盖指定水深样例、同规则的当前场景和已列检查，不能证明任意地图形状或整体美术自然度均合格。",
+    "重复水纹、整体场景风格和正式关卡交付不在本次水深修正的完成声明内。"
+  ],
+  "escalation_reason": null,
+  "publication": {
+    "published": false,
+    "remote_ref": null
+  },
+  "user_acceptance_record": "assets/prototype/battlefield_courtyard/water-depth-approved.json"
+}

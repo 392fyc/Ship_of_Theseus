@@ -1,0 +1,61 @@
+{
+  "reviewer": "/root/water_pipeline_review",
+  "role": "独立只读审查者",
+  "result": "pass",
+  "completeness": 1.0,
+  "blockers": [],
+  "reviewed_batch": "terrain-runtime-final-v3",
+  "items": [
+    {
+      "criterion": "工作台进入正式战斗，地图与战斗网格一致且不污染全局地图表",
+      "result": "pass",
+      "evidence": "scripts/ui/playground/terrain_painter.gd:816-867；scripts/ui/terrain/terrain_battle_definition.gd:8-52；scripts/tactical/tactical_scene.gd:153-186；tests/test_terrain_painter_battle_flow.gd:76-97。"
+    },
+    {
+      "criterion": "合法出生点与错误地图拒绝后保留编辑状态",
+      "result": "pass",
+      "evidence": "scripts/ui/terrain/terrain_battle_definition.gd:33-52；tests/test_terrain_painter_battle_flow.gd:145-164；runtime/terrain-battle-runtime-report.json。"
+    },
+    {
+      "criterion": "重开、胜败结果与战中返回工作台",
+      "result": "pass",
+      "evidence": "scripts/tactical/terrain_battle_session.gd:37-48,78-93；tests/test_terrain_painter_battle_flow.gd:101-143。工作台返回、状态恢复及继续编辑有实际点击验证。"
+    },
+    {
+      "criterion": "敌方计时、敌我移动中断及战斗节点释放",
+      "result": "pass",
+      "evidence": "scripts/core/tactical_manager.gd:178-188,471-543,1586-1605；scripts/units/unit.gd:459-484。最终批次覆盖敌方启动等待、移动中、移动后等待及玩家移动中退出，日志未报ObjectDB泄漏或仍在使用的资源。"
+    },
+    {
+      "criterion": "两种分辨率布局及实际战斗画面",
+      "result": "pass",
+      "evidence": "已查看前批次的湿地1280/1920、高地1280、战斗中工作台与返回截图，棋盘未被底部HUD遮住；本批次六张战斗和两张工作台图与前批次逐字节相同，主代理归档时复算。"
+    },
+    {
+      "criterion": "原地图ID注入保持可用",
+      "result": "pass",
+      "evidence": "scripts/core/tactical_manager.gd:154-165；scripts/tactical/tactical_scene.gd:155-159；terrain-runtime-validation.json：旧注入20项通过。"
+    },
+    {
+      "criterion": "批准地形来源与原批次一致，验证期间来源稳定",
+      "result": "pass",
+      "evidence": "独立复算前批次全部42份摘要与当前来源相同；28份批准来源与当前文件及terrain-kit-v1两份联合来源清单全数一致。补测只改变两个测试文件，最终统一入口重新核验42份摘要。protected-state.json记录291项原来源不变、5项授权改动、0项意外改动。"
+    },
+    {
+      "criterion": "三场胜利及一场战败结果页实际点击返回按钮",
+      "result": "pass",
+      "evidence": "tests/test_terrain_battle_runtime.gd:109-115,168-174,237-248；scripts/tactical/terrain_battle_session.gd:90-93。点击按钮矩形中心并通过Input.parse_input_event发送按下/释放，同时断言editing_resumed发出与battle_active停止。"
+    },
+    {
+      "criterion": "最终结果与运行日志",
+      "result": "pass",
+      "evidence": "runtime/terrain-battle-runtime-report.json为89项、0失败；terrain-runtime-validation.json为pass。独立读取最终日志，未发现SCRIPT ERROR、ERROR、ObjectDB泄漏或仍占用资源错误。"
+    }
+  ],
+  "resolved_suggestions": [
+    "批准记录文件自身SHA256已经纳入统一验证入口。",
+    "胜利与战败结果页实际点击返回已补齐四条检查并重新通过统一验证。"
+  ],
+  "diagnostic_limit": "verbose诊断曾保留animation_finished的Orphan StringName；没有伴随ObjectDB或资源泄漏。本结论不表述为没有任何引擎诊断。",
+  "publication": "未提交、未发布"
+}

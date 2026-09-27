@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "generation_tool": "built_in_imagegen",
+  "assets": [
+    {
+      "path": "assets/prototype/battlefield_courtyard/natural-rock-v1.png",
+      "source_file": "exec-9c534b06-483e-4188-88d9-f4bfef2041e2.png",
+      "prompt": "Use case: stylized-concept. Asset type: reusable seamless natural rock albedo material for a 2D isometric dark fantasy tactical RPG. Create ONE square flat orthographic surface swatch that fills every edge. Weathered grey-brown limestone and slate bedrock, natural irregular broad strata and mineral veins, broken organic planar rock texture, muted cool grey and warm umber with very sparse olive lichen. Painterly crisp pixel-cluster finish for a detailed small-scale tactics map. Soft compressed contrast, medium dark stone values. Directionless diffuse illumination, no baked shadows, no white highlights. This is NATURAL UNQUARRIED bedrock, never bricks, paving slabs, masonry joints or a tiled floor. Seamlessly tileable left-right and top-bottom with no focal objects, no repetitive motifs. No perspective, no isometric diamond, no 3D boulder object, no silhouette, no ground rim, no border, no grass stems, no characters, no UI, no text, no watermark. Opaque background. The engine will map this one material to connected terrain geometry.",
+      "transparent_background": false,
+      "usage": "山地、山峰和熔岩冷却表面的共用岩材；使用运行时地形混合，不把整体场景烘焙进图片。",
+      "sha256": "aa7414ec6e3380e60a5b9e3b7d9383b21676a6a87015e2ebda2620b4dc73b5f6"
+    }
+  ],
+  "research": [
+    {
+      "url": "https://doc.mapeditor.org/en/stable/manual/terrain/",
+      "used": "手工和生成地图共享边与角的连接规则，变体与地形分开，支持等距地图。",
+      "access_date": "2026-09-27"
+    },
+    {
+      "url": "https://docs.godotengine.org/en/4.6/tutorials/2d/using_tilesets.html",
+      "used": "terrain peering bits 的边角匹配思路；本项目现有 Node2D 绘制采用共享坐标混合，无需将现有 Grid 迁移为 TileMap。",
+      "access_date": "2026-09-27"
+    },
+    {
+      "url": "https://docs.godotengine.org/en/4.6/tutorials/shaders/shader_reference/canvas_item_shader.html",
+      "used": "CanvasItem 材质混合与顶点颜色接口。",
+      "access_date": "2026-09-27"
+    },
+    {
+      "url": "https://www.nintendo.com/en-gb/Games/Nintendo-Switch-games/Fire-Emblem-Three-Houses-1175482.html",
+      "used": "官方战场与地形图的宽路、连续坡岸、地形分区可读性参考；没有据此声称掌握墙脚实现，也不复制素材。",
+      "access_date": "2026-09-27"
+    },
+    {
+      "url": "https://www.nintendo.com/au/games/nintendo-switch/fire-emblem-engage/",
+      "used": "官方战场编辑画面显示按格放置石柱与地板，可参考落地关系；没有足够墙体转角近景，墙体具体样式仍为本项目原创候选。",
+      "access_date": "2026-09-27"
+    }
+  ],
+  "design_authority": {
+    "repository": "SoT-fyc-space",
+    "head": "3a71ade3cac109dbdda8a90d0e47f04232f83b9f",
+    "source": "snapshots/rules.json",
+    "schema_version": "unversioned",
+    "normalized_sha256": "62495259d704c3a04ecc3d3b1effb9149ddf198180cb0bd104c98ba575782191",
+    "used_records": [
+      "R4.1",
+      "R4.2",
+      "R4.3"
+    ],
+    "limit": "提供移动、地形修正、攻击线通则；没有逐类型独立地形表。"
+  },
+  "design_context": {
+    "repository": "ShipOfTheseus-KB",
+    "head": "3b8fa3320a140af848035d84ee95d62112626807",
+    "source": "01-Game-Design/Core-Systems/grid-and-map.md",
+    "sha256": "d3ba0361b54b1cf2385e569e400c37da2f23e757248b003e955fbe9f2a349bc5",
+    "used": "九种基础地形、山地与山峰区分、无海拔玩法；本轮只读取。"
+  }
+}

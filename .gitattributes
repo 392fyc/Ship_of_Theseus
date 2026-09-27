@@ -5,3 +5,27 @@
 /.codex/project/mercury-task-contract.md text eol=lf
 /.codex/rules/mercury-git-safety.rules text eol=lf
 /.codex/mercury-template.lock text eol=lf
+
+
+# Keep the reviewed terrain sources byte-identical after Git checkout.
+/assets/prototype/battlefield_courtyard/** -text
+/data/battlefields/terrain_workshop_test.json text eol=lf
+/scenes/playground/terrain_painter.tscn text eol=lf
+/scripts/core/tactical_manager.gd -text
+/scripts/tactical/tactical_scene.gd -text
+/scripts/tactical/terrain_battle_session.gd text eol=lf
+/scripts/ui/playground/battlefield_courtyard.gd text eol=lf
+/scripts/ui/playground/courtyard_board_view.gd -text
+/scripts/ui/playground/terrain_painter.gd text eol=lf
+/scripts/ui/terrain/terrain_battle_definition.gd text eol=lf
+/scripts/ui/terrain/terrain_blend.gdshader text eol=lf
+/scripts/ui/terrain/terrain_catalog.gd text eol=lf
+/scripts/ui/terrain/terrain_surface.gd text eol=lf
+/scripts/units/unit.gd -text
+/tests/run_terrain_runtime_validation.ps1 text eol=lf
+/tests/test_tactical_inject_smoke.gd text eol=crlf
+/tests/test_terrain_battle_runtime.gd text eol=lf
+/tests/test_terrain_kit.gd text eol=lf
+/tests/test_terrain_map_size.gd text eol=lf
+/tests/test_terrain_painter.gd text eol=lf
+/tests/test_terrain_painter_battle_flow.gd text eol=lf

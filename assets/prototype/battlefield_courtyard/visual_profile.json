@@ -1,0 +1,90 @@
+{
+  "ground": "res://assets/prototype/battlefield_courtyard/stone-ground-v1.png",
+  "moss": "res://assets/prototype/battlefield_courtyard/moss-ground-v1.png",
+  "water": "res://assets/prototype/battlefield_courtyard/water-surface-v5.png",
+  "masonry": "res://assets/prototype/battlefield_courtyard/masonry-wall-v2.png",
+  "rubble": {
+    "texture": "res://assets/prototype/battlefield_courtyard/low-rubble-v1.png",
+    "region": [
+      426,
+      270,
+      690,
+      496
+    ],
+    "display_size": [
+      59,
+      37
+    ],
+    "foot_offset": [
+      29.5,
+      27
+    ]
+  },
+  "entry": {
+    "texture": "res://assets/prototype/battlefield_courtyard/courtyard-entry-v2.png",
+    "region": [
+      35,
+      180,
+      1485,
+      745
+    ],
+    "display_size": [
+      190,
+      95.32
+    ],
+    "foot_offset": [
+      103,
+      63
+    ]
+  },
+  "shrub": {
+    "texture": "res://assets/prototype/battlefield_courtyard/shrub-v1.png",
+    "region": [
+      245,
+      155,
+      1050,
+      700
+    ],
+    "display_size": [
+      51,
+      34
+    ],
+    "foot_offset": [
+      25.5,
+      27
+    ]
+  },
+  "water_surface": {
+    "shallow_tint": "89b9be",
+    "deep_tint": "234f62",
+    "subdivisions_per_cell": 8
+  },
+  "board_zoom": 1.36,
+  "board_screen_center": [
+    646,
+    302
+  ],
+  "grid_color": "c9c8b45c",
+  "boundary_color": "cabd976e",
+  "ground_tint": "e6e8edff",
+  "backdrop_color": "13171dff",
+  "meadow": "res://assets/prototype/battlefield_courtyard/meadow-ground-v2.png",
+  "tree": {
+    "texture": "res://assets/prototype/battlefield_courtyard/forest-tree-v2.png",
+    "region": [
+      286,
+      33,
+      964,
+      950
+    ],
+    "display_size": [
+      66,
+      65.04
+    ],
+    "foot_offset": [
+      37.5,
+      61.5
+    ]
+  },
+  "rock": "res://assets/prototype/battlefield_courtyard/natural-rock-v1.png"
+}

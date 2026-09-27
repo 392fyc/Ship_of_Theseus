@@ -1,0 +1,279 @@
+{
+  "schema_version": 1,
+  "status": "art_and_layout_candidate_rules_incomplete",
+  "generation_tool": "built_in_imagegen",
+  "model_reported": null,
+  "reference": {
+    "path": "assets/prototype/visual_style/samples/terrain_preview_final.png",
+    "role": "approved style reference, not an edit target",
+    "sha256": "e40f2d6685d4543c91770768a8f837b0b238f73bd8e436d7438961a15c446b53"
+  },
+  "assets": [
+    {
+      "path": "stone-ground-v1.png",
+      "source_file": "exec-9655bb3b-c1b7-4240-a5de-947737f088e3.png",
+      "prompt": "Use case: stylized-concept. Asset type: production ground material for a 2D isometric tactical RPG. Image 1 is STYLE REFERENCE ONLY: preserve the charcoal stone, weathered old-gold and painterly pixel-art atmosphere, do not copy its sheet layout or perspective. Create ONE square seamless top-down ground texture, orthographic looking straight down, filling every pixel edge to edge. Weathered dark grey limestone flagstone paving, large irregular rectangular slabs, soft cool slate-grey mids, subtle warm brown earth in recessed joints, sparse tiny straw-coloured dry grass tucked into joints. The ground must be quiet and readable beneath small characters and thin tactical overlays: compressed contrast, no black holes, no bright white chips, no dramatic lighting. Detailed hand-painted game texture with crisp brush/pixel clusters like the reference, not photorealistic. Directionless diffuse light, seamless left/right and top/bottom edges. No props, no walls, no trees, no runes, no characters, no UI, no text, no tactical grid, no vignette, no transparency. This is a flat reusable material to be projected by the engine, NOT an isometric diamond, not a scene, not an asset sheet.",
+      "transparent_background": false,
+      "usage": "院内道路、建筑地基和墙顶的石材；仅 PLAIN 的铺路位置使用。",
+      "sha256": "75e23e7471f98d7a8d233f21533b5fa847c0d5c9c3cc7bbd13efb954c7524826",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "active": true
+    },
+    {
+      "path": "low-rubble-v1.png",
+      "source_file": "exec-4a53aea1-d0cd-49e9-a034-e33f44992f61.png",
+      "prompt": "Use case: stylized-concept. Asset type: a single isolated low rubble obstacle sprite for a 2D isometric dark fantasy tactics game. Reference image is ONLY a style and material guide: charcoal grey hand-painted/pixel-cluster stone with tiny warm old-gold edge wear. Create one small collapsed square stone plinth: three to five large angular broken masonry blocks piled very LOW, knee-high, with a few chips and tiny sparse dry grass at the base. A readable compact silhouette, broad flat top planes. Exact orthographic 2:1 isometric ground plane (horizontal footprint width twice its ground depth), same camera as a classic isometric tactics board, not side view or top-down. All rubble fits a single rhombus footprint, centered in canvas, fully visible with generous transparent margins. Light softly from upper left, controlled mid-light edges to distinguish this obstacle from the darker floor. Detached prop, no floor tile or platform underneath, no long cast shadow beyond footprint. Authentic weathered ruin material like the reference, avoid photorealism, outlines, cartoony geometry, tall pillars, columns, arches, foliage canopy, characters, UI, text, logos. True RGBA transparent background. Produce ONE object only, not a sheet.",
+      "transparent_background": true,
+      "usage": "连贯墙体端头的低矮碎石，帮助墙端与地面衔接；不代表独立 Ruins 规则。",
+      "sha256": "f775d1a979425068bf437aee78e15b94a407d50e830e89c02cb0f4393c04883c",
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "transparent_fraction": 0.868254,
+      "active": true
+    },
+    {
+      "path": "courtyard-entry-v2.png",
+      "source_file": "exec-832d81dd-a172-4850-a88f-17da399969dc.png",
+      "prompt": "Use case: stylized-concept. Asset type: a modular ruined courtyard entrance, isolated 2D game sprite. Reference 1 is the ACTUAL floor material; match its weathered grey-brown stone colour, soft edges, chipped slab scale, sparse straw-coloured grass, restrained detail. Reference 2 only demonstrates the painterly pixel-cluster finish and 2:1 isometric camera. Create ONE LOW collapsed courtyard boundary wall with a WALK-THROUGH GAP in its middle. Two unequal knee-to-waist-high rubble piers flank a plain flat stone threshold, with a short broken wall extending a little on each side. It looks like part of an ordinary abandoned courtyard made of the SAME rough stone as reference 1. No complete overhead arch, no roof, no ornament, no metal, no banners, no cathedral architecture, no black polished bricks, no tall monument. Broad footprint spanning roughly two adjacent tactical tiles, wall direction runs down-right on a 2:1 isometric axis; parallel projection with no vanishing point. Modest soft directional light, readable medium grey top planes and dark earth joints. Little irregular broken silhouette, naturally worn and understated. The playable gap stays completely open. No separate raised platform underneath, no rectangular floor island, only a few threshold slabs immediately in the gap. Full prop fits inside image with transparent margin. True RGBA transparency everywhere outside stones; no fog or glow, no background, no people, no UI, no text. ONE coherent entrance module.",
+      "transparent_background": true,
+      "usage": "嵌入后场院墙缺口，并与贯穿庭院的道路对齐。",
+      "sha256": "f801ec6c25de19882f247729f591323700ad47d66270d5c7d448c078f82cc597",
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "transparent_fraction": 0.751795,
+      "active": true
+    },
+    {
+      "path": "moss-ground-v1.png",
+      "source_file": "exec-7cbb1d1e-630c-4034-bb03-9a579d069dc0.png",
+      "prompt": "Use case: stylized-concept. Asset type: ground material for an overgrown ruined courtyard in a 2D isometric tactical RPG. Image 1 is ONLY a style and surface-colour reference. Make one square, strictly TOP-DOWN orthographic seamless material texture filling all edges. Damp compact brown earth densely carpeted with muted olive and sage moss, small low creeping green leaves, dry straw roots, a few buried flat grey stones from the reference. Recognizable as overgrown soil, not stone pavement, never neon green. Soft grouped painterly pixel clusters, detailed but quiet, consistent with the reference's small hand-painted game material. Ground is FLAT with no tall objects, no shadows of trees, no walls, no tactical grid, no UI, no text, no glowing particles, no vignette. Diffuse neutral light. Natural non-repetitive texture, no large focal point. The engine projects this square texture onto isometric tiles; do NOT draw an isometric diamond. Opaque output.",
+      "transparent_background": false,
+      "usage": "森林树下的腐殖地表与水道湿岸。",
+      "sha256": "6c038fe09f0a9c117fe8d934c33815b820908571581dd3c0e5ea592190fd3b42",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "active": true
+    },
+    {
+      "path": "shallow-water-v1.png",
+      "source_file": "exec-19496309-b169-427b-b1c1-e32026a4386e.png",
+      "prompt": "Use case: stylized-concept. Asset type: a shallow-water ground material for a ruined stone courtyard, 2D tactical RPG. Reference 1 gives stone colours and painterly pixel-cluster texture, NOT layout. Create a square texture, strictly top-down orthographic view, no perspective. Still shallow rainwater over old cracked grey flagstones, muted teal and blue-grey translucent water, stones visibly submerged, soft restrained broken reflections and a few fine ripple rings. Most of the surface clearly reads as WATER rather than dry pavement, but not bright turquoise. Stylized hand-painted game art, crisp grouped brush/pixel clusters at the same refinement as reference. Controlled medium values so grid outlines and units remain readable. No shoreline in this texture (engine draws shore at exact grid boundary), no islands, no land patches, no objects, no plants, no fish, no grid, no text, no UI, no glowing magic, no big white highlights, no vignette. Opaque, edge-to-edge, tileable without obvious large repeating objects. The engine projects it onto exact tactical diamonds. Do NOT draw a diamond or scene.",
+      "transparent_background": false,
+      "usage": "保留的备选素材，当前场景不使用。",
+      "sha256": "8d35b4c3f1796f7ffb253f0059a2a15f659718988c9c7fedd2b5b2c3ab5c9fa9",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "active": false
+    },
+    {
+      "path": "shrub-v1.png",
+      "source_file": "exec-0ed5cae1-184a-4b3a-9063-0a8bae68a250.png",
+      "prompt": "Use case: stylized-concept. Asset type: ONE isolated low shrub cluster sprite for a 2D isometric ruined-courtyard tactical RPG. Reference 1 gives the dark grey weathered stone and subdued painterly pixel-cluster finish. Create a compact waist-low clump of wild shrubs and tangled roots growing through a few scattered old grey stones: muted sage and olive leaves, visible thin brown woody branches, a little dry straw grass. Clear grouped leafy masses with small gaps, not a round topiary ball, not a tall tree, not bright tropical foliage. The silhouette should read as vegetation at tiny tactical-grid size. Orthographic 2:1 isometric view with visible top and sides, soft upper-left light, restrained highlights, crisp hand-painted game texture matching reference. Compact footprint with horizontal width about twice ground depth, all content within a single tactical tile, no flat diamond platform beneath it. Full prop visible with generous transparent margin. True RGBA transparent background, no fog or glow, no grass field/background scene, no people, no flowers, no text, no UI. ONE coherent shrub object, not a sheet.",
+      "transparent_background": true,
+      "usage": "场外树林边缘的伴生灌木，不作为场内 FOREST 的主体。",
+      "sha256": "4a8ab22ce661e8285b901cc8d67dc589c6c3d950b0e28e7e948534c2740001c5",
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "transparent_fraction": 0.724503,
+      "active": true
+    },
+    {
+      "path": "meadow-ground-v2.png",
+      "source_file": "exec-87b6ad9c-9acb-46b5-93ac-7a9d47d3ddf6.png",
+      "prompt": "Asset type: one production top-down natural ground texture for the PLAIN terrain of an isometric dark-fantasy tactical RPG. Image 1 is STYLE REFERENCE ONLY for restrained earthy color and hand-painted pixel-cluster detail. Create a square flat orthographic top-down texture of open neglected meadow ground: broad patches of muted sage-grey short grass, faded olive moss, warm umber exposed soil, scattered very small dry blades. Organic broad shapes, low detail density and compressed contrast suitable beneath small units and grid overlays. Natural earth and grass must occupy almost the entire surface. No paving, no bricks, no slabs, no masonry, no large stones, no trees, no roots shaped as grid lines, no objects or characters. Directionless diffuse daylight, seamless edge-to-edge material, no shadows suggesting elevation, no perspective, no diamond tile, no border, no labels. Match the reference's painterly pixel-art finish but plainly read as soil and meadow, never as stone flooring. Opaque output.",
+      "sha256": "13ccf187b42d4483fe34b525987259ad27b543d6d336b8d38cdbdfa4d0fecd58",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "transparent_background": false,
+      "active": true,
+      "usage": "开阔平原、裸土和场外延续草地。"
+    },
+    {
+      "path": "forest-tree-v2.png",
+      "source_file": "exec-b81c0014-ca26-43b8-8a6f-bcde712505d1.png",
+      "prompt": "Asset type: ONE isolated forest tree sprite for a 2D orthographic 2:1 isometric tactical RPG, transparent RGBA. Image 1 is STYLE REFERENCE ONLY for restrained charcoal/earth/old-olive palette and detailed hand-painted pixel clusters. Create a mature gnarled deciduous tree with a clearly visible tall brown trunk, a few forked branches, exposed roots at the small footprint, and a broad but airy crown of muted sage and olive leaves. The tree must unmistakably read as a TREE, not a bush: lower third has open trunk and open air on both sides. Asymmetrical branching crown, openings between leaf masses, sparse ochre leaves, weathered ancient-courtyard atmosphere. Gentle upper-left illumination, controlled midtones. Orthographic isometric camera matching a 64x32 diamond plane, see upper surfaces but not overhead top-down. Full object centered and fully inside canvas, 6 percent transparent margin all around, clean silhouette with no strong painted outline. Small soft contact shadow only; no terrain tile, floor patch, background, pedestal, buildings, extra trees, UI, text, rune, border, or glowing effects. One prop only, original cohesive game art.",
+      "sha256": "0db7cb1e145af28443d6eed31ad38c84cdcf48cd6d8cff4b2ded224a44799203",
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "transparent_background": true,
+      "active": true,
+      "usage": "森林主体与场外林带；使用 AtlasTexture，保留树干、树冠和根部；与单位按前后排序并遮挡淡化。"
+    },
+    {
+      "path": "natural-water-v2.png",
+      "source_file": "exec-c88ee176-97c5-491e-8bf4-d8b0fc064413.png",
+      "prompt": "Asset type: one square top-down water material for a painterly pixel-art dark-fantasy tactical RPG. Image 1 is a STYLE REFERENCE ONLY for hand-painted clusters and controlled contrast. Create natural still-to-slow-moving teal water, filling the entire square edge to edge, orthographic viewed straight down. The substance must visibly read as WATER: broad translucent blue-green depths, a few curved soft ripples, restrained broken pale sky reflections, subtle irregular refracted patterns. In the shallower parts suggest fine brown sand and a few tiny rounded pebbles beneath water, greatly blurred by depth. Most of the water surface should be quiet mid-dark teal with broad low-frequency variation and softly wavy light, no crisp dark polygonal joints. No stone slabs, no masonry, no tiles, no bricks, no paving, no grid, no shoreline, no vegetation, no props, no foam border, no symbols, no text, no perspective or diamond frame. Diffuse ambient light, original hand-painted game texture, not photorealistic, not a blue recolor of flooring. Seamless repeatable material. Opaque square image.",
+      "sha256": "f9a55ac39286b53da0f007cf9ed59d4d5fb1945ba490c8c7af7992291789e848",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "transparent_background": false,
+      "active": false,
+      "usage": "保留的素材输入反例：含水底石子与局部浅色斑；不作为共用水面底材。"
+    },
+    {
+      "path": "masonry-wall-v2.png",
+      "source_file": "exec-11aebc7d-5d3c-458b-b570-7939affe40f6.png",
+      "prompt": "Asset type: one square FRONT VIEW vertical masonry wall-face material for the ruined walls of a 2D isometric dark fantasy tactical RPG. Image 1 is STYLE REFERENCE ONLY. Show the vertical outer face of an old standing wall built from large rough dark-grey limestone BLOCKS in staggered horizontal courses. Deep but restrained thin irregular mortar lines, chipped corners, some bulging worn block faces, sparse faint moss in crevices, subtle warm weathering. Fine hand-painted pixel clusters matching the reference, compressed contrast, directionless soft daylight. The brick courses must clearly read as a vertical ancient wall, not floor paving: block fronts have uneven chisel texture, horizontal bearing joints and staggered vertical joints, no top faces, no overhead view. Entire canvas filled edge-to-edge, seamless horizontal and vertical repeat, flat material with no perspective, no wall silhouette, no building or gate, no floor, no runes, no highlights framing a tile, no UI or text. Charcoal grey and subdued earthy taupe palette, avoid bright white mortar or shiny stone. Opaque output.",
+      "sha256": "dda2fb161f140090a4017f8f9b99fd72e6c7b69bf98e4355b73432c21644a23b",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "transparent_background": false,
+      "active": true,
+      "usage": "引擎构建的墙体垂直立面，连续砌石形成院墙与废弃房间。"
+    },
+    {
+      "path": "water-surface-v3.png",
+      "source_file": "exec-c9f5197a-1dea-4620-8aff-6a3b5bd5b4fc.png",
+      "prompt": "Use case: precise-object-edit. Asset type: repeatable 2D water-surface material for a painterly pixel-art tactical RPG. Edit the supplied water texture. Preserve its muted teal palette, grouped hand-painted brush/pixel-cluster style, square top-down orthographic material format, edge-to-edge opaque coverage and quiet slow-water identity. Change ONLY the semantic contamination and high contrast: remove ALL visible stones, sand, pebbles, riverbed, shallow patches, deep pockets, bright foamy chains and localized lighting pools. The output must be an evenly distributed low-contrast water SURFACE, with sparse soft broad curved flow marks and subtle broken sky reflections, no feature that asserts local depth. Keep the base value and saturation modest and uniform across the full canvas, no central highlight, no vignette, no spotlight, no light edging. Continuous seamless left/right and top/bottom boundaries, no grid or repetition drawn into the image, no shoreline or banks, no frame, no ground, no objects, no text, no UI. Do not turn it into smooth vector art or photorealistic water. The engine alone applies shallow/deep tint and creates the bank. One square reusable texture, not a scene or atlas.",
+      "sha256": "c5568f6162a9a637f64fd8a6a7be180978ce488e242fa5b67a86919f04038ae4",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "transparent_background": false,
+      "active": false,
+      "usage": "首轮水面输入反例：3x3重复与实用尺寸出现过密交叉亮纹，未通过本轮素材检查。",
+      "reference_edit_target": "natural-water-v2.png",
+      "intake_status": "rejected_dense_crossing_reflections",
+      "intake_evidence": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/materials-rejected/v3-material-water.png"
+    },
+    {
+      "path": "water-surface-v4.png",
+      "source_file": "exec-4f78c91c-cc0f-46d6-ac82-0e6729181f58.png",
+      "prompt": "Use case: precise-object-edit. Edit the supplied square top-down painterly teal water-surface texture for a small tactical RPG board. Critical single correction: REMOVE the entire bright criss-cross diamond net / cellular caustic pattern. It looks like a grid and shallow swimming-pool bottom. Replace those crossing lines with very sparse broad soft broken CURVED surface strokes that do not intersect, connect into loops, or form any network. Much quieter low-contrast texture: soft muted teal base, gentle irregular brush patches, only 5 to 10 percent brightness variation; subtle occasional grey-teal reflections slightly lighter than base, no pale cream highlights. Water surface must have no depth-specific contents. Preserve the image's hand-painted pixel-cluster medium, subdued teal hue, orthographic top-down view and square opaque edge-to-edge texture. No pebbles, riverbed, land, shoreline, vignette, centre highlight, depth pockets, foam, bubbles, white streaks, crossing lines, caustics, diamonds, grids, borders, objects or text. Seamless left/right and top/bottom repeat with no obvious periodic focal object. One calm reusable water-surface material, NOT a scene.",
+      "sha256": "484cc6ed34993044aa9ddaa46fe5d30456be88344bbf7965505c693073e7c962",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "transparent_background": false,
+      "active": false,
+      "usage": "第二轮输入反例：独立复核仍在重复图中发现交叉纹理，已退回生成环节。",
+      "reference_edit_target": "water-surface-v3.png",
+      "intake_status": "rejected_periodic_crossing_reflections",
+      "intake_evidence": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/materials-rejected/v4-material-water.png"
+    },
+    {
+      "path": "water-surface-v5.png",
+      "source_file": "exec-49ee1ba2-e315-4dfa-9f24-23d575e7c694.png",
+      "prompt": "Use case: stylized-concept. Asset: ONE square seamless top-down WATER SURFACE material for a small hand-painted pixel-cluster tactical RPG. Create a fresh extremely quiet surface, opaque edge to edge, no scene. Broad nearly horizontal soft irregular teal brush masses with just a FEW widely spaced gently curved broken water strokes, all flowing in ONE loose direction. Some long stretches should be almost featureless, but distribute variation evenly without a focal point. Restrained dark cyan/teal midtone palette around muted #155860 to #216872; any lighter strokes only subtly lighter, no white or cream. Painterly grouped brush clusters at low contrast, not photographic and not vector. Critical: absolutely NO intersecting strokes, crosshatching, criss-cross lattice, diamond cells, loops, caustics, net, grid, pebbles, floor, sand, depth patches, foam or circular ripples. This is water surface only; game engine determines depth and adds rare animated ripples. No shoreline, borders, vignette, lights, shadow gradient, bright center, props or text. No tiny high-frequency noise. Repeat seamlessly in both axes; three-by-three repetition should remain quiet without visible periodic lattice. No perspective. One square material only.",
+      "sha256": "5a82396548d2ac161d9fa6d2af60caad2859f74f1254e978a1b54d5cadd9c520",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "transparent_background": false,
+      "active": true,
+      "usage": "当前候选：低对比水面与稀疏单向笔触；深浅与岸沿由地形数据及绘制控制。",
+      "generation_mode": "new_material_with_text_style_constraints",
+      "intake_status": "candidate_material_reviewed_user_acceptance_pending",
+      "intake_evidence": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/water-depth-v6/material-water.png"
+    },
+    {
+      "path": "natural-rock-v1.png",
+      "source_file": "exec-9c534b06-483e-4188-88d9-f4bfef2041e2.png",
+      "prompt": "Use case: stylized-concept. Asset type: reusable seamless natural rock albedo material for a 2D isometric dark fantasy tactical RPG. Create ONE square flat orthographic surface swatch that fills every edge. Weathered grey-brown limestone and slate bedrock, natural irregular broad strata and mineral veins, broken organic planar rock texture, muted cool grey and warm umber with very sparse olive lichen. Painterly crisp pixel-cluster finish for a detailed small-scale tactics map. Soft compressed contrast, medium dark stone values. Directionless diffuse illumination, no baked shadows, no white highlights. This is NATURAL UNQUARRIED bedrock, never bricks, paving slabs, masonry joints or a tiled floor. Seamlessly tileable left-right and top-bottom with no focal objects, no repetitive motifs. No perspective, no isometric diamond, no 3D boulder object, no silhouette, no ground rim, no border, no grass stems, no characters, no UI, no text, no watermark. Opaque background. The engine will map this one material to connected terrain geometry.",
+      "transparent_background": false,
+      "usage": "山地、山峰和熔岩冷却表面的共用岩材；使用运行时地形混合，不把整体场景烘焙进图片。",
+      "sha256": "aa7414ec6e3380e60a5b9e3b7d9383b21676a6a87015e2ebda2620b4dc73b5f6",
+      "active": true
+    }
+  ],
+  "rules_source": {
+    "repository": "SoT-fyc-space",
+    "head": "3a71ade3cac109dbdda8a90d0e47f04232f83b9f",
+    "snapshot": "snapshots/rules.json",
+    "snapshot_commit": "b3950d3392a27fac6257535d56ae616e14c98aed",
+    "schema_version": "unversioned",
+    "records": [
+      "R4.1",
+      "R4.2",
+      "R4.3"
+    ],
+    "status": "锁定",
+    "normalized_digest": "8788d2c8288936960b9a7bcb9c4a8aff131e087f7ccdf5786fca8fae2f794a48",
+    "normalized_digest_scope": "Complete selected records R4.1, R4.2, R4.3",
+    "full_snapshot_normalized_sha256": "62495259d704c3a04ecc3d3b1effb9149ddf198180cb0bd104c98ba575782191"
+  },
+  "scope": "Only candidate map composition and visual presentation. No damage, line-of-sight, movement cost, cover, height or talent rules introduced.",
+  "design_book_reference": {
+    "repository": "ShipOfTheseus-KB",
+    "head": "3b8fa3320a140af848035d84ee95d62112626807",
+    "files": [
+      {
+        "path": "01-Game-Design/game-design-doc.md",
+        "sha256": "bf930846f2b49965fdb5b66e292b335c780932b347529eccbdf431f3f991ea7f"
+      },
+      {
+        "path": "01-Game-Design/Core-Systems/grid-and-map.md",
+        "sha256": "d3ba0361b54b1cf2385e569e400c37da2f23e757248b003e955fbe9f2a349bc5"
+      },
+      {
+        "path": "01-Game-Design/Core-Systems/battle-calculation.md",
+        "sha256": "731a231fa084d33c0af164fccd826073b8195d5d7f729b1ec0d93805194a8552"
+      }
+    ],
+    "usage": "Terrain inventory and recorded design intent; per-type normalized design-library records are absent from the inspected rules snapshot.",
+    "candidate_mapping": [
+      "PLAIN: open meadow and earth; selected cells carry a paved-path appearance",
+      "FOREST: rooted trees with trunks and canopies",
+      "WALL: upright connected masonry",
+      "SHALLOW_WATER: light shallow water and visible banks",
+      "DEEP_WATER: dark water without visible bed"
+    ],
+    "unresolved": [
+      "FOREST exact evasion value is unspecified in the design book; runtime +20 is not approved here.",
+      "Wet behavior and WALL/DEEP_WATER special-class traversal exceptions are not integrated.",
+      "WALL visuals do not implement destroyed-building Ruins."
+    ],
+    "detail": "terrain-design-reference.md"
+  },
+  "presentation": {
+    "revision": "water-depth-v6",
+    "structure": "地表、墙体、林木与逻辑格分层；场内外墙段共享邻接轮廓、墙脚和共用端点。",
+    "adjacency": "草土岸、石砌岸、深浅水过渡、墙端直连转角分叉、随邻地变化的墙脚；河道出口逐列继承边缘地形。",
+    "architecture": "断墙回廊由同一份房间铺地、门洞及墙段数据构建，中央通廊连接两侧遗迹。",
+    "motion": "保留树冠轻摆、水纹、鼠标缩放平移；单位整体覆盖区域和行动范围驱动遮挡淡化。",
+    "acceptance": "按本轮连续性规格检查深浅水过渡，并保留水岸与色调校准；当前结果见 candidate-receipt.json。候选待用户视觉验收，未发布。",
+    "coverage": "当前五种地形、三张候选及所用四邻接组合；未覆盖全部正式地形或任意对角组合。",
+    "banks": "铺石延续到水边，仅在接触位置叠加透明湿暗。是否产生亮带按固定四边像素检查与原生图核验；结论限于已验证样例。",
+    "water_depth": "在相邻水格中心之间连续采样外观深度，细分网格共享全局坐标和材质坐标，转角与场外水域遵循同一规则。代表样例为多格相连的深水盆地；单格仅用于极端校准，不用窄条叠色充当过渡。"
+  },
+  "presentation_revision": "terrain-kit-v1",
+  "water_depth_acceptance": "water-depth-approved.json",
+  "terrain_kit_sources": "terrain-kit-sources.json"
+}

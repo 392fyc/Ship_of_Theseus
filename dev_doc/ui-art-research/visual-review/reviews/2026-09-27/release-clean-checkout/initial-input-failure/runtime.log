@@ -1,0 +1,94 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 596.36 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 3070 Ti
+
+[DataLoader] Loaded: 7 classes, 20 skills, 10 buffs, 8 enemies, 4 maps, 2 states, 7 talents
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: ?
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[TacticalManager] 枪兵 (enemy) died at (9, 9) | HP=0
+[TacticalScene] Unit killed: 枪兵 (enemy) | remaining: 1
+[TacticalScene] === VICTORY ===
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[FAIL] wetland 实际鼠标完成移动
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[TacticalManager] 枪兵 (enemy) died at (9, 9) | HP=0
+[TacticalScene] Unit killed: 枪兵 (enemy) | remaining: 1
+[TacticalScene] === VICTORY ===
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[TacticalManager] 枪兵 (enemy) died at (9, 9) | HP=0
+[TacticalScene] Unit killed: 枪兵 (enemy) | remaining: 1
+[TacticalScene] === VICTORY ===
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[TurnManager] Turn: 枪兵 (enemy)
+[AI] 枪兵: move (2, 1) → (1, 0)
+[AI] 枪兵: attack 剑士
+[Attack] 枪兵→剑士 | hit=true | crit=false | dmg=9
+[TurnManager] === Round ended ===
+[TurnManager] Round 2 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[TacticalManager] 剑士 (player) died at (0, 0) | HP=0
+[TacticalScene] Unit killed: 剑士 (player) | remaining: 1
+[TacticalScene] === DEFEAT ===
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[TurnManager] Turn: 枪兵 (enemy)
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[TurnManager] Turn: 枪兵 (enemy)
+[AI] 枪兵: move (2, 1) → (1, 0)
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[TurnManager] Turn: 枪兵 (enemy)
+[AI] 枪兵: move (2, 1) → (1, 0)
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+TERRAIN_BATTLE_RUNTIME_RESULT {"captures":{"battle-courtyard-1280.png":"e787b89ce8b5ed9a2a5f5911a54aabf2c4bb7150c91583b77bf29c5ed88b7982","battle-courtyard-1920.png":"50a0731bffe483009dd99b2649552315151bcc56de85e994661e682d797ca2ef","battle-highland-1280.png":"0e34ffcd4169b77b0d4d750ab5addca3c9e2b1473c64545bd285719c71f685a9","battle-highland-1920.png":"ac591beaf68ca25762e3184dfa39fd70465c99505b3d038f38246a65311187fd","battle-wetland-1280.png":"db042fd8587c30659655581d7a50c73167cb8641c2385d50045f03087e15e87f","battle-wetland-1920.png":"9ffe583e904e636e221ea3d3bf5664c68aee1aea62e800619341e41bdb845a81"},"checks":89,"engine":"4.6.3-stable (official)","failures":["wetland 实际鼠标完成移动"],"global_maps_unchanged":true,"result":"fail"}

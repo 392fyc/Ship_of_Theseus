@@ -1,0 +1,10 @@
+{
+  "battle_capture": "terrain-painter-battle-1280x720.png",
+  "failed": 0,
+  "passed": 19,
+  "resolution": [
+    1280,
+    720
+  ],
+  "return_capture": "terrain-painter-return-1280x720.png"
+}

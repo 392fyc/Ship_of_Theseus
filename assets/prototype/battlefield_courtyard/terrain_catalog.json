@@ -1,0 +1,317 @@
+{
+  "schema_version": 1,
+  "scope": "基础地形创作外观；不改变玩法规则",
+  "transition_defaults": {
+    "shore_width": 0.5,
+    "wet_darkening": 0.22,
+    "scorch_darkening": 0.27
+  },
+  "transition_styles": {
+    "continuous": {},
+    "approved_depth_v6": {},
+    "root_litter": {},
+    "scree_slope": {},
+    "masonry_foot": {},
+    "wet_soil_bank": {"shore_width": 0.5},
+    "rock_bank": {"shore_width": 0.5},
+    "marsh_bank": {"shore_width": 0.5},
+    "cooled_rock_margin": {"scorch_darkening": 0.27},
+    "damp_earth": {},
+    "excluded": {}
+  },
+  "variant_styles": {
+    "paving_bank": {"shore_width": 0.14, "wet_darkening": 0.22}
+  },
+  "terrains": {
+    "0": {
+      "name": "平原",
+      "variants": [
+        "meadow",
+        "paving"
+      ]
+    },
+    "1": {
+      "name": "森林",
+      "variants": [
+        "forest"
+      ]
+    },
+    "2": {
+      "name": "山地",
+      "variants": [
+        "foothill"
+      ]
+    },
+    "3": {
+      "name": "山峰",
+      "variants": [
+        "rocky",
+        "mossy"
+      ]
+    },
+    "4": {
+      "name": "墙",
+      "variants": [
+        "dressed",
+        "ruined",
+        "pillar"
+      ]
+    },
+    "5": {
+      "name": "浅水",
+      "variants": [
+        "shallow"
+      ]
+    },
+    "6": {
+      "name": "深水",
+      "variants": [
+        "deep"
+      ]
+    },
+    "7": {
+      "name": "熔岩",
+      "variants": [
+        "lava"
+      ]
+    },
+    "8": {
+      "name": "沼泽",
+      "variants": [
+        "marsh"
+      ]
+    }
+  },
+  "pairs": {
+    "0:0": {
+      "allowed": true,
+      "kind": "continuous",
+      "reason": ""
+    },
+    "0:1": {
+      "allowed": true,
+      "kind": "root_litter",
+      "reason": ""
+    },
+    "0:2": {
+      "allowed": true,
+      "kind": "scree_slope",
+      "reason": ""
+    },
+    "0:3": {
+      "allowed": true,
+      "kind": "scree_slope",
+      "reason": ""
+    },
+    "0:4": {
+      "allowed": true,
+      "kind": "masonry_foot",
+      "reason": ""
+    },
+    "0:5": {
+      "allowed": true,
+      "kind": "wet_soil_bank",
+      "reason": ""
+    },
+    "0:6": {
+      "allowed": true,
+      "kind": "wet_soil_bank",
+      "reason": ""
+    },
+    "0:7": {
+      "allowed": true,
+      "kind": "cooled_rock_margin",
+      "reason": ""
+    },
+    "0:8": {
+      "allowed": true,
+      "kind": "damp_earth",
+      "reason": ""
+    },
+    "1:1": {
+      "allowed": true,
+      "kind": "continuous",
+      "reason": ""
+    },
+    "1:2": {
+      "allowed": true,
+      "kind": "scree_slope",
+      "reason": ""
+    },
+    "1:3": {
+      "allowed": true,
+      "kind": "scree_slope",
+      "reason": ""
+    },
+    "1:4": {
+      "allowed": true,
+      "kind": "masonry_foot",
+      "reason": ""
+    },
+    "1:5": {
+      "allowed": true,
+      "kind": "wet_soil_bank",
+      "reason": ""
+    },
+    "1:6": {
+      "allowed": true,
+      "kind": "wet_soil_bank",
+      "reason": ""
+    },
+    "1:7": {
+      "allowed": false,
+      "kind": "excluded",
+      "reason": "当前场景库不支持熔岩直接贴森林、水域或沼泽；请用至少一格裸地或岩地形成冷却隔离带。"
+    },
+    "1:8": {
+      "allowed": true,
+      "kind": "damp_earth",
+      "reason": ""
+    },
+    "2:2": {
+      "allowed": true,
+      "kind": "continuous",
+      "reason": ""
+    },
+    "2:3": {
+      "allowed": true,
+      "kind": "scree_slope",
+      "reason": ""
+    },
+    "2:4": {
+      "allowed": true,
+      "kind": "masonry_foot",
+      "reason": ""
+    },
+    "2:5": {
+      "allowed": true,
+      "kind": "rock_bank",
+      "reason": ""
+    },
+    "2:6": {
+      "allowed": true,
+      "kind": "rock_bank",
+      "reason": ""
+    },
+    "2:7": {
+      "allowed": true,
+      "kind": "cooled_rock_margin",
+      "reason": ""
+    },
+    "2:8": {
+      "allowed": true,
+      "kind": "scree_slope",
+      "reason": ""
+    },
+    "3:3": {
+      "allowed": true,
+      "kind": "continuous",
+      "reason": ""
+    },
+    "3:4": {
+      "allowed": true,
+      "kind": "masonry_foot",
+      "reason": ""
+    },
+    "3:5": {
+      "allowed": true,
+      "kind": "rock_bank",
+      "reason": ""
+    },
+    "3:6": {
+      "allowed": true,
+      "kind": "rock_bank",
+      "reason": ""
+    },
+    "3:7": {
+      "allowed": true,
+      "kind": "cooled_rock_margin",
+      "reason": ""
+    },
+    "3:8": {
+      "allowed": true,
+      "kind": "scree_slope",
+      "reason": ""
+    },
+    "4:4": {
+      "allowed": true,
+      "kind": "continuous",
+      "reason": ""
+    },
+    "4:5": {
+      "allowed": true,
+      "kind": "rock_bank",
+      "style": {"shore_width": 0.14},
+      "reason": ""
+    },
+    "4:6": {
+      "allowed": true,
+      "kind": "rock_bank",
+      "style": {"shore_width": 0.14},
+      "reason": ""
+    },
+    "4:7": {
+      "allowed": true,
+      "kind": "cooled_rock_margin",
+      "reason": ""
+    },
+    "4:8": {
+      "allowed": true,
+      "kind": "masonry_foot",
+      "reason": ""
+    },
+    "5:5": {
+      "allowed": true,
+      "kind": "continuous",
+      "reason": ""
+    },
+    "5:6": {
+      "allowed": true,
+      "kind": "approved_depth_v6",
+      "reason": ""
+    },
+    "5:7": {
+      "allowed": false,
+      "kind": "excluded",
+      "reason": "当前场景库不支持熔岩直接贴森林、水域或沼泽；请用至少一格裸地或岩地形成冷却隔离带。"
+    },
+    "5:8": {
+      "allowed": true,
+      "kind": "marsh_bank",
+      "reason": ""
+    },
+    "6:6": {
+      "allowed": true,
+      "kind": "continuous",
+      "reason": ""
+    },
+    "6:7": {
+      "allowed": false,
+      "kind": "excluded",
+      "reason": "当前场景库不支持熔岩直接贴森林、水域或沼泽；请用至少一格裸地或岩地形成冷却隔离带。"
+    },
+    "6:8": {
+      "allowed": true,
+      "kind": "marsh_bank",
+      "reason": ""
+    },
+    "7:7": {
+      "allowed": true,
+      "kind": "continuous",
+      "reason": ""
+    },
+    "7:8": {
+      "allowed": false,
+      "kind": "excluded",
+      "reason": "当前场景库不支持熔岩直接贴森林、水域或沼泽；请用至少一格裸地或岩地形成冷却隔离带。"
+    },
+    "8:8": {
+      "allowed": true,
+      "kind": "continuous",
+      "reason": ""
+    }
+  },
+  "corner_policy": "四个格心共同决定共享顶点处的地表权重；直边、内角、外角、T形及四格混合共用世界坐标，禁止独立叠边。",
+  "exclusions_scope": "当前可复用场景库的直接接壤限制；不宣称这些自然现象在任何世界中均不可能。",
+  "variants_scope": "石柱沿用 WALL；低山地 MOUNTAIN 可通行，高山峰 PEAK 不可进入；仅外观，不增加地形枚举或建筑状态。"
+}

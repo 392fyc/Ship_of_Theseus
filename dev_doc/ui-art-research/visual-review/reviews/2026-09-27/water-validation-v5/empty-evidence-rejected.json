@@ -1,0 +1,16 @@
+{
+  "started_at_utc": "2026-09-27T07:46:40.7579531Z",
+  "status": "failed",
+  "visual_acceptance": "pending_user",
+  "baseline_status": "candidate_unapproved",
+  "runner_sha256": "6ef82775dbfdc671b93f99ccda85fcffb9484633f565185b65b10193c3b3b4fd",
+  "steps": [
+    {
+      "name": "water-contract",
+      "exit_code": 0,
+      "valid_result_marker": true,
+      "passed": false,
+      "log": "water-contract.log"
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "board_scale": 1.5,
+  "captured_at_utc": "2026-09-27T11:08:58",
+  "checker_results": {
+    "depth_rendered_luminance": {
+      "correct_delta": 0.111511277224945,
+      "correct_sample_result": "PASS",
+      "deep_correct_mean": 0.100280114810686,
+      "deep_data_shallow_tint_mean": 0.21179139203563,
+      "metric": "shallow_reference_mean_channel_value - deep_center_mean_channel_value",
+      "minimum_delta": 0.1,
+      "negative_blocked": true,
+      "negative_shallow_tint_delta": 0.0,
+      "negative_shallow_tint_result": "FAIL",
+      "shallow_reference_mean": 0.21179139203563
+    },
+    "depth_semantics": {
+      "correct_fixture_matches_independent_contract": true,
+      "correct_sample_observed_center_terrain_id": 6,
+      "correct_sample_result": "PASS",
+      "expected_center_terrain_id": 6,
+      "negative_blocked": true,
+      "negative_shallow_center_observed_terrain_id": 5,
+      "negative_shallow_center_result": "FAIL"
+    },
+    "stone_bank_uniform_band": {
+      "current_bank_metrics": {
+        "detected_band_ray_count": 0,
+        "maximum_absolute_channel_delta": 0.0,
+        "maximum_positive_luminance_delta": 0.0,
+        "median_detected_band_width_px": 0.0,
+        "positive_brightness_coverage": 0.0,
+        "scanned_edge_samples": 28,
+        "uniform_color_band_coverage": 0.0
+      },
+      "current_bank_result": "PASS",
+      "negative_blocked": true,
+      "negative_legacy_metrics": {
+        "detected_band_ray_count": 27,
+        "maximum_absolute_channel_delta": 0.235614567995071,
+        "maximum_positive_luminance_delta": 0.202852933357159,
+        "median_detected_band_width_px": 3.0,
+        "positive_brightness_coverage": 0.964285714285714,
+        "scanned_edge_samples": 28,
+        "uniform_color_band_coverage": 0.964285714285714
+      },
+      "negative_legacy_result": "FAIL",
+      "reject_positive_brightness_coverage_at_or_above": 0.8,
+      "reject_uniform_color_band_coverage_at_or_above": 0.8
+    }
+  },
+  "contract_id": "water-visual-contract-v2",
+  "depth_core_board_scale": 1.0,
+  "engine": "4.6.3-stable (official)",
+  "fixed_animation_time_seconds": 0.0,
+  "image_files_saved": true,
+  "image_sha256": {
+    "stone-bank-current.png": "8545b0b3df390932a5dfd481d424fe9c30637c2967e8a617bf48c8f2bd3e7fb3",
+    "stone-bank-legacy-negative.png": "d43fd4199364ad2e6028766e74e16bc4ee77d14f9ea2e06a79eb109eed4baaac",
+    "stone-bank-reference.png": "8545b0b3df390932a5dfd481d424fe9c30637c2967e8a617bf48c8f2bd3e7fb3",
+    "water-depth-correct.png": "e058a66431213c1b5c47dfe8b12da0a07213e59f77da9d896325b69f72d5a737",
+    "water-depth-render-negative.png": "c755a01c5f01d294cc6be808146335767d8cad9dcdc02514673b501c4421e7ac",
+    "water-depth-semantic-negative.png": "9217e031c3626afc10dd2123e5c6d6282ce3654643ba7b68767d367a29125e2e",
+    "water-visual-diagnostic-comparison.png": "f0714ef1035b864b962ca52f27a46d8dd1b0236d0e1af1bd40cb5a836bcbc528"
+  },
+  "limits": [
+    "只检查指定浅水格的四条内侧边和同位置像素变化。",
+    "可拦截扫描区中覆盖率高的连续增亮或强色带，不能自动判断所有石岸是否自然、材质是否协调或整条河岸是否合理。",
+    "视口、缩放、地形材质或渲染流程改变时，应按独立规格重新审视测量覆盖范围，不能据此直接放宽阈值。"
+  ],
+  "negative_samples_blocked": true,
+  "overall": "PASS",
+  "positive_samples_passed": true,
+  "source_hashes_stable_after_capture": true,
+  "source_sha256": {
+    "res://assets/prototype/battlefield_courtyard/visual_profile.json": "8bbf74074fbca4ab6162e60e66d383c5b365eb4a6a85a8dad5f9dc1b4a5923aa",
+    "res://assets/prototype/battlefield_courtyard/water-surface-v5.png": "5a82396548d2ac161d9fa6d2af60caad2859f74f1254e978a1b54d5cadd9c520",
+    "res://dev_doc/ui-art-research/visual-review/water-visual-contract.json": "2284ceabdde2716db9f62b4b1461d738d19d7ecd5364a8af156e710b3c3c3651",
+    "res://scripts/ui/playground/courtyard_board_view.gd": "41a307633f513a9f47b15763396017121b146519186241fd95532aca5f78ddd7",
+    "res://tests/test_courtyard_terrain_adjacency.gd": "715f2d0dfffd83f075c9328e273939de59fa6301ac9ab6531d210134c25e1be0",
+    "res://tests/test_courtyard_water_visual_contract.gd": "372dbe824bf3a0827c5fef9283517d2fa1a91246d78097f784d94385adb4f491"
+  },
+  "viewport_px": [
+    360.0,
+    280.0
+  ]
+}

@@ -1,0 +1,35 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+
+=== test_tactical_inject_smoke (TacticalScene 注入模式) ===
+[DataLoader] Loaded: 7 classes, 20 skills, 10 buffs, 8 enemies, 4 maps, 2 states, 7 talents
+[Grid] Initialized 8x8 map: forest_01
+[TacticalScene] Units spawned: 3
+[TurnManager] Round 1 queue: [剑圣(player), 哥布林战士(enemy), 哥布林战士(enemy)]
+[TurnManager] Turn: 剑圣 (player)
+  OK  场景实例化成功
+  OK  tactical_manager 存在
+  OK  注入 spawn 单位总数 == 3
+  OK  玩家单位 spawn 1 个
+  OK  敌人单位 spawn 2 个
+  OK  玩家单位为 kensei
+  OK  玩家不注入词条（has_affix 为假）
+  OK  玩家单位 max_hp > 注入 hp（磨损前提）
+  OK  玩家注入 hp<max_hp → stats.hp==注入 hp（不满血入场）
+  OK  缩放敌（含 afs_bulwark）存在
+  OK  参照敌（无词条）存在
+  OK  缩放敌 has_affix(af_heal_resist) 为真（基础词条注入）
+  OK  缩放敌 has_affix(afs_bulwark) 为真（特殊词条注入）
+  OK  参照敌 has_affix(af_heal_resist) 为假（scale=1.0 未注入词条）
+  OK  缩放敌 max_hp == round(参照敌 max_hp × 1.35)
+  OK  缩放敌 max_hp > 参照敌 max_hp（数值增强生效）
+  OK  缩放敌 hp==max_hp（注入后回满）
+  OK  注入流程未崩（场景仍有效）
+[Grid] Initialized 8x8 map: forest_01
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑圣(player), 哥布林战士(enemy)]
+[TurnManager] Turn: 剑圣 (player)
+  OK  战死角色（注入 hp=0）单位存在
+  OK  注入 hp<=0 → 以 hp=1 入场（无永久死亡[占位]）
+
+--- 结果：20 过 / 0 失败 ---
+OK：全部断言通过

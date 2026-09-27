@@ -1,6 +1,8 @@
 # Godot engine cache
 .godot/
 *.import
+# 地形批准记录校验这些导入参数，需随素材交付。
+!/assets/prototype/battlefield_courtyard/*.png.import
 export_presets.cfg
 
 # Engine / dev-environment generated files

@@ -1,0 +1,3 @@
+# Preserve raw evidence bytes and their SHA-256 receipts on every checkout.
+* -text
+**/* -text

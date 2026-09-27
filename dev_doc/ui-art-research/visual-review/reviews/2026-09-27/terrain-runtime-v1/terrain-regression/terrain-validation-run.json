@@ -1,0 +1,58 @@
+{
+  "result": "pass",
+  "water_baseline_unchanged": true,
+  "sources_sha256": {
+    "scripts/ui/terrain/terrain_catalog.gd": "0c96396c227b1cf60665da841f1071d9f1cd8105513c4803b3b732ce7bd7ae0a",
+    "scripts/ui/terrain/terrain_blend.gdshader": "a1ff38cab28a3d80ef0e6268344c05f8d0caee0e93b996793d143869119b6836",
+    "assets/prototype/battlefield_courtyard/natural-rock-v1.png": "aa7414ec6e3380e60a5b9e3b7d9383b21676a6a87015e2ebda2620b4dc73b5f6",
+    "scenes/playground/terrain_painter.tscn": "84edf4e9d568cfe65a14e84a8cd0074ebf87ddad218a31078c2d77fa235267d4",
+    "assets/prototype/battlefield_courtyard/terrain_examples.json": "52832ee9c2fbd3eb119b605990eb8d18a584a42dd3a671af4b824348e8731b58",
+    "assets/prototype/battlefield_courtyard/visual_profile.json": "8bbf74074fbca4ab6162e60e66d383c5b365eb4a6a85a8dad5f9dc1b4a5923aa",
+    "assets/prototype/battlefield_courtyard/terrain_catalog.json": "9952635f32faf7d69bd32c0e883714b3273c9ce006732ad6c7b8ff4d1e7486b0",
+    "tests/run_terrain_kit_validation.ps1": "98123a4d2d8e3848479f662af392a9d616d8d3e4c67a49b428ad8535c87565e7",
+    "scripts/ui/playground/terrain_painter.gd": "a1bc59ede003983dabd2745cd7546bd7fafaf94aac085239bad1401339df9cff",
+    "assets/prototype/battlefield_courtyard/water-surface-v5.png": "5a82396548d2ac161d9fa6d2af60caad2859f74f1254e978a1b54d5cadd9c520",
+    "scripts/ui/terrain/terrain_surface.gd": "5526db8ee3bdb8d5bc264bae24cf5d05e9670e1507fcd3ee413ce5ed7593b13f",
+    "tests/test_terrain_painter.gd": "8bb7751ccd733592a5cf3c262058ab34bc8da322ae2d825402bccfeefa9e0f5c",
+    "scripts/ui/playground/courtyard_board_view.gd": "41a307633f513a9f47b15763396017121b146519186241fd95532aca5f78ddd7",
+    "tests/test_terrain_kit.gd": "5bf1f575f362e157674a6c3c75509aa746ec367d6389134a9d2cfd3653ee5aac",
+    "assets/prototype/battlefield_courtyard/water-depth-approved.json": "3f0d28405f871e3e67a2108b1e45f9824ee4a1d6b20e2f6bc7269b728764c60f"
+  },
+  "steps": [
+    {
+      "result": "pass",
+      "count": 6,
+      "name": "courtyard-regression"
+    },
+    {
+      "result": "pass",
+      "evidence": {
+        "allowed_distinct_pairs_rendered": 32,
+        "captures": {
+          "terrain-corners.png": "de1b11a2abf0c43fa9be038a6e68d58b3127549b77cf0764ed57b7a60fe8e915",
+          "terrain-example-courtyard.png": "d32206a4409b31705905a4e006f46f581b71863c6728238d964a7aee9d77ba78",
+          "terrain-example-highland.png": "286c1494aefec69f07e7961a9fb1b476f8cf3a8eb964fb482bf69b56f9b1cc68",
+          "terrain-example-wetland.png": "d8879db14b38d0fa58be638456c5e5c8e10ecf100c5f566bbf9c8227fe2c1ee8",
+          "terrain-obstacles.png": "3734af12ab1b2115dc828ba8adee7c5e5f6b0ad3eac483f9c2a086d6d3b97cf1",
+          "terrain-pairs-01.png": "6ea2ccddff817aba2790238cfc7313075c1c68eb1d3cf7480fb57c5e6da09730",
+          "terrain-pairs-02.png": "7f67622caedfd1688ade97fbc41865c820a613e786483d6500d6f0b0f9d8803c",
+          "terrain-pairs-03.png": "8c31c6351b368304c39e45fdf3a774f6d4c0aec2e16df6282cc685947e59f234",
+          "terrain-pairs-04.png": "09d71e6be299b578b903dd2ab9c3233741761670cabf05aa9241612b2fcc2779"
+        },
+        "checks": 166,
+        "excluded_pairs": 4,
+        "failures": [],
+        "result": "pass"
+      },
+      "name": "kit"
+    },
+    {
+      "result": "pass",
+      "evidence": {
+        "failed": 0,
+        "passed": 28
+      },
+      "name": "painter"
+    }
+  ]
+}

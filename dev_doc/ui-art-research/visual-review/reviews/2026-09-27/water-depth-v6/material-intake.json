@@ -1,0 +1,36 @@
+{
+  "board_sha256": "51d0e5b0cc187795a4465620eb0776379ac08a6f9f4b4892a74f26737295e1f2",
+  "engine": "4.6.3-stable (official)",
+  "post_processing": false,
+  "profile_sha256": "a6b60223ccc6658dc62da82d385c12e2d260ab0940b66a2b029810be5c7fdcc1",
+  "records": [
+    {
+      "engine_scale": 1.36,
+      "file": "material-water.png",
+      "identity_matches_manifest": true,
+      "image_sha256": "221f9f74f787715f3ed18a573093971a890a957173633d36f1ddfd1a2e5d3e4d",
+      "repeats": [
+        3,
+        3
+      ],
+      "source": "res://assets/prototype/battlefield_courtyard/water-surface-v5.png",
+      "source_sha256": "5a82396548d2ac161d9fa6d2af60caad2859f74f1254e978a1b54d5cadd9c520",
+      "visual_acceptance": "pending_review"
+    },
+    {
+      "engine_scale": 1.36,
+      "file": "material-ground.png",
+      "identity_matches_manifest": true,
+      "image_sha256": "0c6feadf0b69f5fb71db5397b460c2606e4bc5ccc9039bace5bf1a526cf318fd",
+      "repeats": [
+        3,
+        3
+      ],
+      "source": "res://assets/prototype/battlefield_courtyard/stone-ground-v1.png",
+      "source_sha256": "75e23e7471f98d7a8d233f21533b5fa847c0d5c9c3cc7bbd13efb954c7524826",
+      "visual_acceptance": "pending_review"
+    }
+  ],
+  "script_sha256": "438e7fc5c218b3bfb444284e0516aae0056b5c480890b698dc522c9bde2a2dd7",
+  "source_manifest_sha256": "5d4a332a6c367bf0e6474b50d70d5372f97ed8a6dee3d25aac5a3e51332527d8"
+}

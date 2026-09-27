@@ -6,6 +6,7 @@ extends Node2D
 @export var unit_name: String = "Unit"
 @export var faction: String = "player"  # "player" | "enemy"
 var priority: int = 0  # initiative tie-breaker (0/+1/+2)
+var _movement_tween: Tween
 
 # ── 数据 ────────────────────────────────────────────
 var stats: UnitStats = null
@@ -109,6 +110,7 @@ var _affix_vanguard_active: bool = false
 signal damage_taken(amount: int, damage_type: String)
 signal unit_died
 signal moved(from: Vector2i, to: Vector2i)
+signal movement_finished(completed: bool)
 signal buffs_changed(unit: Unit)
 
 # ── 阵营颜色 ─────────────────────────────────────────
@@ -459,11 +461,27 @@ func move_to(target_pos: Vector2i, grid: Grid) -> void:
 	var dir: Vector2i = target_pos - grid_position
 	_set_walk_direction(dir)
 	var tween: Tween = create_tween()
+	_movement_tween = tween
 	tween.tween_property(self, "position", world_target, 0.25)
-	await tween.finished
+	tween.finished.connect(_on_movement_tween_finished, CONNECT_ONE_SHOT)
+	var completed: bool = await movement_finished
+	_movement_tween = null
+	if not completed:
+		return
 	if not _map_token_active:
 		sprite.play("idle")
 	moved.emit(grid_position, target_pos)
+
+
+func _on_movement_tween_finished() -> void:
+	movement_finished.emit(true)
+
+
+func cancel_movement() -> void:
+	if _movement_tween == null or not _movement_tween.is_valid():
+		return
+	_movement_tween.kill()
+	movement_finished.emit(false)
 
 
 # ── 回合状态重置（TurnManager 调用）─────────────────

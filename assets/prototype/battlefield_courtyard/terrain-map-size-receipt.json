@@ -1,0 +1,189 @@
+{
+  "task_id": "square-map-size-10-25",
+  "status": "completed",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/battlefield-courtyard-study",
+  "target_head_before": "75d9bf2c64e5504904feb8580339a08ebbb58a59",
+  "candidate_head": null,
+  "user_requirement": "地图大小可调整；只支持正方形，只设置边长，最小10、最大25。",
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "任务树内实现；保留既有改动与已批准美术；独立审查后交付；本轮不提交或发布。"
+    },
+    {
+      "contract": ".codex/project/mercury-task-contract.md",
+      "summary": "明确范围与逐项证据；候选未提交；实现、独立审查和用户视觉批准分开记录。"
+    },
+    {
+      "contract": ".agents/skills/sot-task-receipt/SKILL.md",
+      "summary": "提供结构化回执；来源、验证和保护状态可追溯。"
+    }
+  ],
+  "changed_files": [
+    "scripts/ui/playground/terrain_painter.gd",
+    "scripts/ui/terrain/terrain_catalog.gd",
+    "tests/test_terrain_map_size.gd",
+    "tests/test_terrain_painter.gd",
+    "tests/test_terrain_kit.gd",
+    "tests/test_terrain_painter_battle_flow.gd",
+    "tests/test_terrain_battle_runtime.gd",
+    "tests/run_terrain_runtime_validation.ps1",
+    "assets/prototype/battlefield_courtyard/terrain-catalog-visual-scope.json",
+    "assets/prototype/battlefield_courtyard/README.md",
+    "assets/prototype/battlefield_courtyard/terrain-kit-receipt.json",
+    "assets/prototype/battlefield_courtyard/terrain-runtime-receipt.json",
+    "assets/prototype/battlefield_courtyard/terrain-map-size-receipt.json",
+    "dev_doc/ui-art-research/visual-review/terrain-kit.md",
+    "dev_doc/ui-art-research/visual-review/terrain-runtime-integration.md",
+    "dev_doc/ui-art-research/visual-review/terrain-map-size.md",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/archive-manifest.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/editor-flow/run.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/editor-flow/terrain-painter-battle-1280x720.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/editor-flow/terrain-painter-battle-flow.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/editor-flow/terrain-painter-return-1280x720.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/independent-review.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/legacy-injection/run.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/invalid-import.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/map-size-10-editor-1280x720.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/map-size-25-battle-1280x720.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/map-size-25-battle-1920x1080.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/map-size-25-editor-1280x720.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/map-size-25-editor-1920x1080.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/roundtrip-10.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/roundtrip-25.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/run.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/terrain-map-size-report.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/runtime/battle-wetland-1280.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/runtime/run.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/runtime/terrain-battle-runtime-report.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/source-protection-check.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/kit/run.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/kit/terrain-kit-report.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/painter/run.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/painter/terrain-painter-comparison.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/painter/terrain-painter-validation.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/painter/terrain-painter-workbench-1280x720.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/adjacency.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/capture-manifest.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/flooded-1280-play.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/flooded-1920-play.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/interaction.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/material-intake.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/material-intake.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/overgrown-1280-play.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/overgrown-1920-play.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/passage-1280-play.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/passage-1920-play.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/terrain-adjacency.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/validation-run.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/verification.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/water-contract.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/water-depth-continuity-report.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/water-depth-continuity.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/water-visual-contract-report.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/whole-scene.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/terrain-validation-run.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-runtime-validation.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/visual-review.json"
+  ],
+  "verification": [
+    {
+      "command": "tests/run_terrain_runtime_validation.ps1 -GodotPath <Godot-4.6.3-console> -OutputDirectory <new-external-output>",
+      "result": "pass",
+      "exit_code": 0,
+      "evidence": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-runtime-validation.json"
+    },
+    {
+      "command": "Godot 4.6.3 test_terrain_map_size.gd",
+      "result": "pass",
+      "evidence": "79项通过，0项失败；5张原生截图覆盖10×10、25×25与两种分辨率。"
+    },
+    {
+      "command": "正式战斗及原有地形回归",
+      "result": "pass",
+      "evidence": "正式试战89/0，编辑往返19/0，原注入20项，地形库166/0，原工作台28/0；水岸、水深、邻接与旧战场六阶段回归通过。"
+    },
+    {
+      "command": "直接查看最终5张尺寸截图",
+      "result": "pass",
+      "evidence": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/visual-review.json"
+    },
+    {
+      "command": "独立只读代码与图像审查",
+      "result": "pass",
+      "evidence": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/independent-review.json"
+    },
+    {
+      "command": "批准来源及最终证据摘要复核",
+      "result": "pass",
+      "evidence": "原批准记录与本轮开始副本相同；27个视觉文件和3个视觉函数不变；9张固定地形图与批准版逐字节相同；46个运行来源仍与最终批次相同。"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "单一边长输入，正方形10至25格，默认10",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/terrain-map-size-report.json"
+      ]
+    },
+    {
+      "criterion": "扩大保留原区域并补平原，缩小裁边；铺石与变体随尺寸调整，完整可撤销",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/run.log"
+      ]
+    },
+    {
+      "criterion": "导入、保存与试战共用尺寸限制，旧10×10样例可加载",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/terrain-map-size-report.json"
+      ]
+    },
+    {
+      "criterion": "25×25边角可操作；窗口放大后重新居中；正式移动和返回保持编辑状态",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/visual-review.json",
+        "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/run.log"
+      ]
+    },
+    {
+      "criterion": "已批准地形外观保持不变",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/source-protection-check.json"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "已批准地形素材、绘制与批准记录",
+      "result": "unchanged",
+      "evidence": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/source-protection-check.json"
+    },
+    {
+      "subject": "terrain_battle_session.gd与terrain_battle_definition.gd",
+      "result": "unchanged",
+      "evidence": "与本轮开始快照逐字节摘要相同。"
+    },
+    {
+      "subject": "游戏主仓、设计库、KB、Mercury",
+      "result": "unchanged",
+      "evidence": "本轮全部写入均位于既有游戏任务树及仓库外运行证据目录；未执行跨仓写入、Git提交或发布。"
+    }
+  ],
+  "residual_risks": [
+    "25×25全图视野会缩小格子和单位；正式试战沿用既有缩放与拖动。当前试战仍为基础剑士与枪兵各一名，未扩展关卡部署或遭遇平衡。"
+  ],
+  "escalation_reason": null,
+  "publication": {
+    "published": false,
+    "remote_ref": null
+  },
+  "evidence_archive": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/archive-manifest.json",
+  "independent_review": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/independent-review.json",
+  "usage": "运行terrain_painter场景，在右上设置边长10至25，点击调整大小。缩小后可用撤销恢复。"
+}

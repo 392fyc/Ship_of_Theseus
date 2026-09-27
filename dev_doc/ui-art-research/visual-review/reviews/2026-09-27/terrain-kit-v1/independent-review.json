@@ -1,0 +1,44 @@
+{
+  "reviewer": "/root/water_pipeline_review",
+  "role": "independent_read_only_review",
+  "evidence_batch_alias": "final-v1 refers to this archived directory",
+  "overallVerdict": "pass",
+  "completeness": 0.96,
+  "items": [
+    {
+      "item": "九类地形的组合校验、共享坐标混合与非法接触拒绝",
+      "verdict": "pass",
+      "evidence": "scripts/ui/terrain/terrain_catalog.gd:42-53,81-87；scripts/ui/terrain/terrain_blend.gdshader:72-77；tests/test_terrain_kit.gd:38-76；final-v1/kit/terrain-kit-report.json：166项检查、32种合法异类组合、4种排除组合、0失败。",
+      "detail": "渲染使用统一世界坐标；直边覆盖全部合法异类组合，转角和多地形交会另有代表样例。非法对角接触也被校验器检查。"
+    },
+    {
+      "item": "地图编辑与 JSON 加载使用同一渲染路径",
+      "verdict": "pass",
+      "evidence": "tests/test_terrain_painter.gd:109-127,205-212；final-v1/painter/terrain-painter-validation.json 与 terrain-painter-comparison.json：地图数据相同、像素相同、工作台截图已保存；两张预览 SHA256 相同。",
+      "detail": "我检查了工作台、手绘预览和 JSON 预览；当前冻结批次的两张预览逐像素一致。"
+    },
+    {
+      "item": "地形变体、移动类型区分与水深冻结",
+      "verdict": "pass",
+      "evidence": "tests/test_terrain_kit.gd:77-91；scripts/core/cell.gd:23-32；tests/run_terrain_kit_validation.ps1:28-40；final-v1/terrain-validation-run.json：water_baseline_unchanged=true。",
+      "detail": "五种墙/山峰外观可见地区分；MOUNTAIN 仍可通行，PEAK 仍不可通行。水深函数、参数和纹理通过冻结检查。"
+    },
+    {
+      "item": "配对外观参数确实进入渲染",
+      "verdict": "pass",
+      "evidence": "scripts/ui/terrain/terrain_catalog.gd:16-22；scripts/ui/terrain/terrain_surface.gd:20-30；scripts/ui/terrain/terrain_blend.gdshader:47-49,98-115；tests/test_terrain_kit.gd:118-152。",
+      "detail": "参数表由目录生成并被 shader 读取；测试确认调整水岸宽度和熔岩冷却边参数会改变固定地图像素。"
+    },
+    {
+      "item": "当前样图与运行来源可追踪",
+      "verdict": "pass",
+      "evidence": "final-v1/terrain-validation-run.json：六步旧回归、kit、painter 均通过；我复算旧回归报告中的302项来源摘要，缺失0、不同0；9张 kit 图像摘要均匹配。",
+      "detail": "已看四张组合图、转角图、障碍图、三张示例图及工作台和手绘/JSON预览。采样图中未见明显拼接裂缝或先前报告的坡脚吞没窄地形问题。"
+    }
+  ],
+  "blockers": [],
+  "suggestions": [
+    "覆盖范围是32种合法异类组合的直边样例加代表性角点/多地形样例；不要表述为穷举了每个组合的所有拓扑。",
+    "图像检查和自动验证不能替代用户对最终美术的验收。"
+  ]
+}

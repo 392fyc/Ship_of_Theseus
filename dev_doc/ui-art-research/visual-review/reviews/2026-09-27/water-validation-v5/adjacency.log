@@ -1,0 +1,29 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 596.36 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 3070 Ti
+
+[DataLoader] Loaded: 7 classes, 20 skills, 10 buffs, 8 enemies, 4 maps, 2 states, 7 talents
+[Grid] Initialized 3x3 map: adjacency_preview
+[Grid] Initialized 3x3 map: adjacency_preview
+[Grid] Initialized 3x3 map: adjacency_preview
+[Grid] Initialized 3x3 map: adjacency_preview
+[Grid] Initialized 3x3 map: adjacency_preview
+[Grid] Initialized 3x3 map: adjacency_preview
+[PASS] 浅水面对草地只生成湿土岸
+[PASS] 同一浅水面对铺石地生成石砌岸
+[PASS] 水深样例按独立规格使用浅水外圈与深水中心
+[PASS] 浅水外圈向深水中心形成四条水深过渡且不生成陆地岸沿
+[PASS] 直墙连接左右相邻墙格
+[PASS] 墙角连接右方与下方墙格
+[PASS] 更换邻地后刷新实际墙体物件，中心地形保持不变
+[PASS] 移除邻墙后端头恢复，旧物件被释放
+[Grid] Initialized 8x8 map: courtyard_flooded
+[PASS] 河道两个出口逐列保持宽度与深浅地形一致
+[Grid] Initialized 8x8 map: courtyard_passage
+[PASS] 回廊场内墙格连接建筑中的其他墙段
+[PASS] 相接墙段的共用端点高度一致，不因段高不同留出裂口
+[Grid] Initialized 8x8 map: courtyard_flooded
+[PASS] flooded 场外墙体使用同一邻接规则形成转角或分叉
+[Grid] Initialized 8x8 map: courtyard_overgrown
+[PASS] overgrown 场外墙体使用同一邻接规则形成转角或分叉
+[PASS] 保存真实邻接对照图
+COURTYARD_ADJACENCY_RESULT {"failed":0,"passed":14}

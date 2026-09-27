@@ -1,0 +1,24 @@
+{
+  "reviewer": "main",
+  "result": "pass",
+  "scope": "本轮功能布局；地形外观沿用用户已批准来源",
+  "viewed_images": [
+    "runtime/battle-courtyard-1280.png",
+    "runtime/battle-courtyard-1920.png",
+    "runtime/battle-wetland-1280.png",
+    "runtime/battle-wetland-1920.png",
+    "runtime/battle-highland-1280.png",
+    "runtime/battle-highland-1920.png",
+    "editor-flow/terrain-painter-battle-1280x720.png",
+    "editor-flow/terrain-painter-return-1280x720.png"
+  ],
+  "observation": [
+    "三张示例在两种分辨率下均避开顶部工具与底部人物栏、剑气槽；剑士技能及头像保留且无印记。",
+    "工作台九种地形按钮与开始试战按钮可见；返回后的工具栏及地图画布完整。",
+    "两张在runtime3已查看的图与final-v2相应文件SHA256逐字节相同。"
+  ],
+  "limits": [
+    "检查当前样例与固定视角，不代替任意新地图的可读性与遭遇平衡验证。"
+  ],
+  "independent_review": "单独记录在 independent-review.json"
+}
