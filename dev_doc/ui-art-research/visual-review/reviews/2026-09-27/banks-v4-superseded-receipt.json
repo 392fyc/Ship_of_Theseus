@@ -1,0 +1,201 @@
+{
+  "task_id": "battlefield-courtyard-visual-candidate",
+  "status": "completed",
+  "deliverable_stage": "水岸材质修正、实际采集及专项独立复核完成；当前为待用户视觉认可的候选，未发布。",
+  "milestone_complete": false,
+  "independent_review": {
+    "code_and_images": "PASS，仅限本轮水岸：无统一亮框，土岸／石岸／深浅水可区分，湿土边缘变化克制，河道两端连续，范围、单位和 HUD 可读。",
+    "reviewed_images": [
+      "terrain-adjacency.png",
+      "flooded-1280-clear.png",
+      "flooded-1920-clear.png",
+      "flooded-1280-play.png"
+    ],
+    "evidence_pack": "banks-v4-final",
+    "review_limit": "审查者只读指定图片和相关绘制代码，未重跑测试；静态图不证明动态表现。",
+    "visual_acceptance": "用户尚未验收当前候选，正式关卡接入未完成。"
+  },
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/battlefield-courtyard-study",
+  "target_head_before": "75d9bf2c64e5504904feb8580339a08ebbb58a59",
+  "candidate_head": null,
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "在独立任务工作树实现，保护已有改动，结构化设计以设计库为准，提交前独立审查。"
+    },
+    {
+      "contract": ".codex/project/mercury-task-contract.md",
+      "summary": "回执仅覆盖候选准备；允许未提交候选，明确证据与未决验收。"
+    },
+    {
+      "contract": "sot-designlib",
+      "summary": "只读规则快照并核对设计书来源；未写生产数据或快照。"
+    }
+  ],
+  "changed_files": [
+    "scripts/tactical/tactical_scene.gd",
+    "scripts/ui/playground/battlefield_courtyard.gd",
+    "scripts/ui/playground/courtyard_board_view.gd",
+    "scenes/playground/battlefield_courtyard.tscn",
+    "tests/test_battlefield_courtyard.gd",
+    "assets/prototype/battlefield_courtyard/README.md",
+    "assets/prototype/battlefield_courtyard/courtyard_layouts.json",
+    "assets/prototype/battlefield_courtyard/visual_profile.json",
+    "assets/prototype/battlefield_courtyard/source-manifest.json",
+    "assets/prototype/battlefield_courtyard/terrain-design-reference.md",
+    "assets/prototype/battlefield_courtyard/candidate-receipt.json",
+    "assets/prototype/battlefield_courtyard/stone-ground-v1.png",
+    "assets/prototype/battlefield_courtyard/low-rubble-v1.png",
+    "assets/prototype/battlefield_courtyard/courtyard-entry-v2.png",
+    "assets/prototype/battlefield_courtyard/moss-ground-v1.png",
+    "assets/prototype/battlefield_courtyard/shallow-water-v1.png",
+    "assets/prototype/battlefield_courtyard/shrub-v1.png",
+    "tests/capture_battlefield_environment_motion.gd",
+    "assets/prototype/battlefield_courtyard/meadow-ground-v2.png",
+    "assets/prototype/battlefield_courtyard/forest-tree-v2.png",
+    "assets/prototype/battlefield_courtyard/natural-water-v2.png",
+    "assets/prototype/battlefield_courtyard/masonry-wall-v2.png",
+    "tests/test_courtyard_terrain_adjacency.gd",
+    "tests/capture_courtyard_visual_review.gd",
+    "dev_doc/ui-art-research/visual-review/README.md",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27-self-audit.md",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/evidence/manifest.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/evidence/A.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/evidence/B.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/evidence/C.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/evidence/D.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/evidence/E-missing-portrait.png"
+  ],
+  "verification": [
+    {
+      "command": "godot --path . --rendering-method gl_compatibility --script res://tests/test_courtyard_terrain_adjacency.gd -- --output=<absolute-directory>",
+      "result": "pass",
+      "evidence": "banks-v4 当前绘制代码：13 项通过、0 失败、退出码 0，并生成六格实际截图。"
+    },
+    {
+      "command": "godot --path . --rendering-method gl_compatibility --script res://tests/capture_courtyard_visual_review.gd -- --output=<absolute-directory>",
+      "result": "pass",
+      "evidence": "banks-v4-final 共 12 张整屏 PNG；三场景、两分辨率、常态／范围，退出码 0。"
+    },
+    {
+      "command": "主代理查看局部对照、积水花园两种尺寸和范围图，并检查其余两张场景常态图",
+      "result": "pass",
+      "evidence": "第一轮局部检查发现土岸仍像直切贴片，继续修正后重录；当前湿土材质边缘不规则，石岸保留暗面，水陆边界无统一亮框。"
+    },
+    {
+      "command": "检查 capture-manifest.json 的图片与源文件摘要",
+      "result": "pass",
+      "evidence": "12 张图片与 6 个当前源文件摘要一致。"
+    },
+    {
+      "command": "独立只读水岸专项复核",
+      "result": "pass",
+      "evidence": "五项图像标准均通过；查看两种尺寸的积水花园、范围图、六格对照和相关代码。"
+    },
+    {
+      "command": "git diff --check；核对主工作树状态；解析候选 JSON",
+      "result": "pass",
+      "evidence": "检查通过；主工作树 HEAD 与既有 dirty 路径清单保留，本轮无跨仓写入。"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "同一地形根据相邻地形改变边缘、墙体连接和墙脚",
+      "result": "pass",
+      "evidence": [
+        "13 项邻接检查与 terrain-adjacency.png。",
+        "当前使用的四邻接组合与场内外延伸得到核验；未推广为全部组合验收。"
+      ]
+    },
+    {
+      "criterion": "积水花园两端水道、岸线与深浅水对齐",
+      "result": "pass",
+      "evidence": [
+        "逐列边缘检查。",
+        "flooded 1280／1920 常态与范围实图，独立复核 1280。"
+      ]
+    },
+    {
+      "criterion": "断墙回廊的墙段与完整房间、门洞和地面相连",
+      "result": "pass",
+      "evidence": [
+        "architecture 数据与共享墙体轮廓。",
+        "passage 1280／1920 实图，单位标签及门洞可读。"
+      ]
+    },
+    {
+      "criterion": "三场景整体审美与正式关卡交付",
+      "result": "partial",
+      "evidence": [
+        "用户视觉认可与正式关卡接入尚未完成。"
+      ]
+    },
+    {
+      "criterion": "已定版剑士 HUD 保留",
+      "result": "pass",
+      "evidence": [
+        "当前整屏图中头像、技能、剑气与行动资源保留。",
+        "本轮变更限于岸沿绘制与自检记录，HUD 及玩法数据无改动。"
+      ]
+    },
+    {
+      "criterion": "建立可以复用的视觉自检方法并实际检验其限制",
+      "result": "pass",
+      "evidence": [
+        "visual-review/README.md；历史自检报告及 5 张原始证据图。",
+        "统一采集记录状态、帧号、源码及图片摘要。"
+      ]
+    },
+    {
+      "criterion": "土岸、石岸与深浅水过渡无统一发光描边且保持可读",
+      "result": "pass",
+      "evidence": [
+        "当前实际局部与整屏图。",
+        "五项水岸专项独立复核通过，用户视觉认可尚未取得。"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "Ship 主工作树",
+      "result": "unchanged",
+      "evidence": "仅在任务工作树写入；既有 dirty 路径清单保留。"
+    },
+    {
+      "subject": "设计库主工作树与生产数据",
+      "result": "unchanged",
+      "evidence": "仅读快照；原有三项 dirty 保留。"
+    },
+    {
+      "subject": "固定 KB vault",
+      "result": "unchanged",
+      "evidence": "只读设计书，未写 KB。"
+    },
+    {
+      "subject": "已定版 HUD 资产、职业、技能和地形规则数据",
+      "result": "unchanged",
+      "evidence": "对应受跟踪文件未产生本任务改动。"
+    }
+  ],
+  "residual_risks": [
+    "三张邻接修正候选尚未得到用户视觉验收，未纳入正式关卡或发布。",
+    "本庭院采用平原、森林、墙、浅水、深水；山地、山峰、熔岩、沼泽不在这三张候选内。",
+    "森林闪避数值在设计书中待定；当前实现值 +20 不视为本任务批准。",
+    "Wet 与墙／深水的特殊职业通行例外尚未接入，完整地形规则仍未验收。",
+    "WALL 外观不提供建筑摧毁后的独立 Ruins 规则。",
+    "单位仍为既有文字棋子，正式遭遇平衡与地图角色动画未交付。",
+    "视觉复核仍可能漏检；无提示抽查未稳定命中已知错误，后续必须结合明确检查项和可量化证据。",
+    "邻接当前覆盖候选中使用的组合，完整九种地形与任意对角关系未交付。"
+  ],
+  "escalation_reason": null,
+  "target_head": "3a71ade3cac109dbdda8a90d0e47f04232f83b9f",
+  "source_schema_version": "unversioned",
+  "source_snapshot_or_commit": "SoT-fyc-space:snapshots/rules.json@b3950d3392a27fac6257535d56ae616e14c98aed",
+  "normalized_digest": "sha256:62495259d704c3a04ecc3d3b1effb9149ddf198180cb0bd104c98ba575782191",
+  "publication": {
+    "published": false,
+    "remote_ref": null
+  },
+  "revision": "banks-v4"
+}

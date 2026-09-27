@@ -1,0 +1,163 @@
+{
+  "contract_id": "water-depth-continuity-contract-v1",
+  "purpose": "检查浅水向连片深水区域的水面颜色是否跨越可见距离连续变化；本合同独立规定样例与阈值，不从渲染结果反推期望。",
+  "terrain_ids": {
+    "shallow_water": 5,
+    "deep_water": 6
+  },
+  "basin_fixture": {
+    "width": 7,
+    "height": 7,
+    "center": [3, 3],
+    "terrain_rows": [
+      [5, 5, 5, 5, 5, 5, 5],
+      [5, 5, 6, 6, 6, 5, 5],
+      [5, 6, 6, 6, 6, 6, 5],
+      [5, 6, 6, 6, 6, 5, 5],
+      [5, 6, 6, 6, 6, 6, 5],
+      [5, 5, 6, 6, 6, 5, 5],
+      [5, 5, 5, 5, 5, 5, 5]
+    ],
+    "expected_shape": "一个外围浅水环绕的不规则连片深水盆地；深水区含相连的 3×3 核心，不以单格孤立深水替代。"
+  },
+  "flooded_extension_fixture": {
+    "width": 5,
+    "height": 4,
+    "environment": "flooded",
+    "terrain_rows": [
+      [0, 5, 6, 6, 0],
+      [0, 5, 6, 6, 0],
+      [0, 5, 6, 6, 0],
+      [0, 5, 6, 6, 0]
+    ],
+    "expected_off_map_rows": [-1],
+    "excluded_bridge_rows": [-3, -2],
+    "reason": "y=-1 按 flooded 场景规则延续边缘水域；x=1 是浅水、x=2..3 是相连深水，曲线终点进入深水内部。"
+  },
+  "single_cell_fixture": {
+    "width": 3,
+    "height": 3,
+    "center": [1, 1],
+    "terrain_rows": [
+      [5, 5, 5],
+      [5, 6, 5],
+      [5, 5, 5]
+    ],
+    "expectation": "作为内部极端情况，单格深水应形成平滑、可辨但较弱的低洼；峰值需深于浅水背景，也应比连片盆地核心浅。不得要求孤格达到盆地核心深色平台。"
+  },
+  "neutral_curve_sampling": {
+    "texture": "固定纯白 GradientTexture2D，读取实际 BoardView 水面网格绘制后的 SubViewport 图像。",
+    "ripple": "关闭。",
+    "color_measure": "每个采样像素的 sRGB RGB 三通道算术平均，范围 0..1；沿路径按等距位置双线性读取。",
+    "samples_per_curve": 17,
+    "path_endpoints_are_grid_centers": true,
+    "required_curves": [
+      {
+        "name": "north_straight_into_basin",
+        "fixture": "basin_fixture",
+        "from": [3, 0],
+        "to": [3, 1],
+        "shape": "只跨越一段直边浅深交界"
+      },
+      {
+        "name": "northwest_corner_into_basin",
+        "fixture": "basin_fixture",
+        "from": [1, 1],
+        "to": [2, 2],
+        "shape": "只跨越浅深转角斜边"
+      },
+      {
+        "name": "west_multicell_into_basin",
+        "fixture": "basin_fixture",
+        "from": [0, 3],
+        "to": [1, 3],
+        "shape": "从浅水格中心跨过西侧交界，到相邻连片深水格中心；完整深水核心另行校准"
+      },
+      {
+        "name": "off_map_extension_into_basin",
+        "fixture": "flooded_extension_fixture",
+        "from": [1, -1],
+        "to": [2, -1],
+        "shape": "场外 y=-1 浅水格中心到相邻深水格中心，仅统计交界过渡，不把内部深色平台算入宽度"
+      }
+    ],
+    "common_checker": {
+      "minimum_endpoint_rgb_mean_difference": 0.2,
+      "minimum_samples_in_endpoint_contrast_10_to_90_percent": 9,
+      "minimum_distinct_midrange_bins": 5,
+      "midrange_bin_width": 0.04,
+      "minimum_monotonic_steps_out_of_16": 14,
+      "monotonic_slack": 0.015,
+      "maximum_adjacent_rgb_mean_step": 0.1,
+      "middle_tone_definition": "端点 RGB 均值之间的 10%..90% 区间；方向从浅水端到深水端。",
+      "reasons": {
+        "endpoint_difference": "两端至少 0.20 的平均通道差，保证样例既有可见浅深差，也留出可测的中间过渡。",
+        "middle_samples": "17 个等距点中至少 9 个落在端点差值的中央 80%，要求过渡覆盖明显路径长度，而非仅一条窄线。",
+        "middle_bins": "至少覆盖 5 个 0.04 宽的不同亮度档，避免重复采到近似同色而把少数台阶误判为渐变。",
+        "monotonicity": "16 个相邻变化中至少 14 个沿浅到深方向推进，允许轻微像素量化和三角网格插值波动。",
+        "step_limit": "任一相邻样点平均通道跳变不得超过 0.10，拦截硬切和明显突跳。"
+      }
+    },
+    "pixel_span_reporting": "每条曲线同时记录画布上的端点像素距离；像素跨度因等距投影斜向与横向不同，不把采样点数量直接当作屏幕宽度。"
+  },
+  "single_cell_checker": {
+    "samples_per_half": 9,
+    "path": {
+      "fixture": "single_cell_fixture",
+      "from": [0, 1],
+      "through": [1, 1],
+      "to": [2, 1]
+    },
+    "maximum_endpoint_rgb_mean_difference": 0.04,
+    "minimum_center_darkening_from_shallow_endpoint": 0.08,
+    "minimum_center_lift_over_multicell_basin_core": 0.02,
+    "maximum_adjacent_rgb_mean_step": 0.1,
+    "minimum_monotonic_steps_per_half": 7,
+    "monotonic_slack": 0.015,
+    "reason": "孤立深格代表场景内最不利的窄小极端。要求它能形成连续低洼且比周边深，但因邻域支撑不足而弱于多格深区；不要求达到连片核心端点差或覆盖宽度门槛。"
+  },
+  "negative_samples": [
+    {
+      "name": "hard_cut",
+      "description": "按浅水/深水格直接选取两端色，不产生中间深度。"
+    },
+    {
+      "name": "legacy_five_narrow_strips",
+      "description": "复现旧实现的 5 条各 1.6 世界单位的窄色带，带宽总计 8 世界单位；旧实现按邻接边重复绘制，不是渐变面。"
+    }
+  ],
+  "capture": {
+    "rendering_method": "gl_compatibility",
+    "fixed_water_animation_time_seconds": 0.0,
+    "ripple_enabled": false,
+    "project_material_preview": true,
+    "neutral_sampling_is_independent_of_project_water_texture": true,
+    "output_files": [
+      "water-depth-continuity-report.json",
+      "water-depth-basin.png",
+      "water-depth-continuity-comparison.png"
+    ]
+  },
+  "report_contract": {
+    "result_marker": "COURTYARD_WATER_DEPTH_CONTINUITY_RESULT",
+    "marker_fields": [
+      "overall",
+      "positive_samples_passed",
+      "negative_samples_blocked",
+      "images_saved",
+      "source_hashes_stable"
+    ],
+    "report_top_level_fields": [
+      "overall",
+      "positive_samples_passed",
+      "negative_samples_blocked",
+      "source_sha256",
+      "image_sha256"
+    ]
+  },
+  "limitations": [
+    "这是一项固定样例的渲染连续性回归检查，不能代替对所有地图形状的覆盖，也不能代替用户的美术验收。",
+    "白色中性纹理隔离材质纹理带来的明暗噪声；项目材质只在盆地预览图中保留，用于查看素材叠加后的视觉结果。",
+    "屏幕像素曲线检查仅测量颜色均值变化，无法单独判断水纹节奏、笔触自然度或整体审美。"
+  ]
+}

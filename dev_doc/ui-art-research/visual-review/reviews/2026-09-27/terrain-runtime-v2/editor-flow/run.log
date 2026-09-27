@@ -1,0 +1,49 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 596.36 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 3070 Ti
+
+[DataLoader] Loaded: 7 classes, 20 skills, 10 buffs, 8 enemies, 4 maps, 2 states, 7 talents
+[Grid] Initialized 10x10 map: ?
+[PASS] 1280×720 工作台显示试战按钮
+[Grid] Initialized 10x10 map: ?
+[Grid] Initialized 10x10 map: ?
+[PASS] 试战前手工地形已写入并可撤销
+[Grid] Initialized 10x10 map: ?
+[Grid] Initialized 10x10 map: ?
+[PASS] 保存后重新加载恢复同一地图
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[PASS] 开始试战真实点击创建同级战斗会话
+[PASS] 活动试战期间重复启动不会创建第二个会话
+[PASS] 试战显示正式 TacticalScene HUD 与战斗单位
+[PASS] 战斗地图不写入 DataLoader 全局地图表
+[PASS] 进入试战完整保留编辑地图、笔刷与撤销栈
+[PASS] 保存正式战斗 HUD 截图
+[PASS] 战斗画面提供真实可点的返回编辑按钮
+[PASS] 点击返回编辑释放会话并恢复工作台
+[PASS] 返回后地图、撤销栈、画布位置与镜头变换完整恢复
+[PASS] 保存返回后的工作台截图
+[Grid] Initialized 10x10 map: ?
+[PASS] 返回后可继续绘制且沿用已选森林画笔
+[Grid] Initialized 10x10 map: ?
+[PASS] 返回后撤销可恢复继续绘制前的地图
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[PASS] 第二次点击仍能进入正式试战
+[PASS] 重复进出后编辑状态仍保留且无全局地图污染
+[Grid] Initialized 1x1 map: ?
+[Grid] Initialized 1x1 map: terrain_workshop_session
+[PASS] 不可达地图被中文说明拒绝且编辑状态不变
+[Grid] Initialized 10x10 map: ?
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[PASS] 退出编辑器会清理仍活动的试战会话
+TERRAIN_PAINTER_BATTLE_FLOW_RESULT {"failed":0,"passed":19}

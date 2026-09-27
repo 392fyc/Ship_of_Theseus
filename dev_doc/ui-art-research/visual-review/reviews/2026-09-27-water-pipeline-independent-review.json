@@ -1,0 +1,57 @@
+{
+  "date": "2026-09-27",
+  "reviewer": "water_pipeline_review",
+  "mode": "read_only",
+  "batch": "water-validation-v5-release-candidate",
+  "overall_verdict": "pass",
+  "scope": "本轮明确规格、反例校准、采集和来源一致性；不代表整体美术认可。",
+  "items": [
+    {
+      "criterion": "样例预期独立于绘制实现",
+      "result": "pass",
+      "evidence": "water-visual-contract.json:4-18；test_courtyard_water_visual_contract.gd:259-276。独立规定外浅内深，并核对矩阵。"
+    },
+    {
+      "criterion": "数据类型错误和深水误画浅色分别被拒绝",
+      "result": "pass",
+      "evidence": "test_courtyard_water_visual_contract.gd:259-324；本批报告。正确差值 0.105616，错误浅色差值 0.001814，固定阈值 0.1；中央 ID 5 被语义检查拒绝。"
+    },
+    {
+      "criterion": "忠实旧石岸亮带由同一检查器拒绝",
+      "result": "pass",
+      "evidence": "test_courtyard_water_visual_contract.gd:279-324,433-439。当前增亮覆盖与显著色带覆盖均为 0；旧样本分别为 0.928571 和 1.0。不是根据负样本标签判失败。"
+    },
+    {
+      "criterion": "素材有单张、重复和实际尺寸预览",
+      "result": "pass",
+      "evidence": "capture_courtyard_material_intake.gd:101-123；material-intake.json、material-water.png。实际查看单张、3×3 重复和 1.36 倍引擎尺寸；v5 不见交叉网格，仍可见水平波纹重复。素材仍为候选。"
+    },
+    {
+      "criterion": "冻结画面及来源可追踪，候选不自动成为批准基线",
+      "result": "pass",
+      "evidence": "run_courtyard_visual_validation.ps1:28-30,140-145,181-184；capture_courtyard_visual_review.gd:99-133。独立重算 293 项来源，0 缺失、0 不符；整屏清单 289 项均在聚合中；runner 摘要匹配。"
+    },
+    {
+      "criterion": "空结果或缺少必要证据时立即失败",
+      "result": "pass",
+      "evidence": "run_courtyard_visual_validation.ps1:158-179；empty-evidence-rejected.json。反例探针以 0 退出并返回空对象，入口仍在首步失败，没有运行后续步骤。"
+    },
+    {
+      "criterion": "有限测试不替代未知美术语义与用户认可",
+      "result": "pass",
+      "evidence": "流程 README 与本批 validation-run.json 保留 candidate_unapproved 和 pending_user，限定具体样例的证明范围。"
+    }
+  ],
+  "independently_viewed_images": [
+    "material-water.png",
+    "water-depth-correct.png",
+    "stone-bank-current.png"
+  ],
+  "blockers": [],
+  "limits": [
+    "未重做全部运行，独立读取实现和实际产物，并重算来源摘要。",
+    "正确深浅差仅高于阈值约 0.0056；继续保留正确和错误样本并行校准，不放宽阈值求通过。",
+    "水平波纹仍有重复；本次观察不构成无限重复地形包或全部场景自然度认可。",
+    "整体用户视觉认可、任意地图组合和正式关卡接入未完成。"
+  ]
+}

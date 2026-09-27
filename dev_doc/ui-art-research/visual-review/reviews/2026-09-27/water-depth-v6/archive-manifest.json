@@ -1,0 +1,178 @@
+{
+  "batch": "water-depth-v6",
+  "scope": "最终批次完整PNG、报告和日志；另存首轮含内部平台取样的失败报告，明确为历史对照。",
+  "files": [
+    {
+      "file": "adjacency.log",
+      "sha256": "706b3f59182fa7dbd060df4c89de65760a0077bec996e09336829316029254d0"
+    },
+    {
+      "file": "capture-manifest.json",
+      "sha256": "dce13b4be4e1e3d812357d4f4952b55e1e187ba33f9b8a91489daa5a520980ab"
+    },
+    {
+      "file": "flooded-1280-clear.png",
+      "sha256": "9663bd7e3fab05bed78d82bd9abfd28452a848ecba7b91efcfa911f1fb7e2907"
+    },
+    {
+      "file": "flooded-1280-play.png",
+      "sha256": "4be55ab701f858a68dbd2befa80b19d38490a26ad19e280f07d109ac71920aad"
+    },
+    {
+      "file": "flooded-1920-clear.png",
+      "sha256": "25ef4adccef1d1e86908e5f7ff1297b4fd90ee21f487d00386340ab187469150"
+    },
+    {
+      "file": "flooded-1920-play.png",
+      "sha256": "23129b5344971405a934ea9cde7951c9f7565f6bef343939642d794642deb57f"
+    },
+    {
+      "file": "interaction.log",
+      "sha256": "9d6ddaeb6ef28ef8624f2609b4c67b9a07435c0bda9b6bef627761615c74c4d8"
+    },
+    {
+      "file": "material-ground.png",
+      "sha256": "0c6feadf0b69f5fb71db5397b460c2606e4bc5ccc9039bace5bf1a526cf318fd"
+    },
+    {
+      "file": "material-intake.json",
+      "sha256": "cf0787a0dc9aed8dffd576725ceadff8c4bf6a44cffed762f758b01dfbfec072"
+    },
+    {
+      "file": "material-intake.log",
+      "sha256": "572318aacf4031af91c23056c41bab2e8cc5f017e5bf84df360fdaf203cddb6e"
+    },
+    {
+      "file": "material-water.png",
+      "sha256": "221f9f74f787715f3ed18a573093971a890a957173633d36f1ddfd1a2e5d3e4d"
+    },
+    {
+      "file": "overgrown-1280-clear.png",
+      "sha256": "044cceda630dd50cfc08648b6f2ccd1f448a1134a25517535fae7aa76cb5c34b"
+    },
+    {
+      "file": "overgrown-1280-play.png",
+      "sha256": "55582793014dbc97d0a592a49044f7c03ff630268f3e18e2edf9b95a6e16c5ad"
+    },
+    {
+      "file": "overgrown-1920-clear.png",
+      "sha256": "0a608488a3a38012f07c4ec8637c3ec6e12069891b29a0f2fab85abf814b3220"
+    },
+    {
+      "file": "overgrown-1920-play.png",
+      "sha256": "44ecf1fc1c0237ca95ef6e6ab30d13db4508c0158960c883610455fcf33a5df7"
+    },
+    {
+      "file": "passage-1280-clear.png",
+      "sha256": "cd26dfddbd2350b615e67d2801b613cdad943fb926ba9189098b84809653044e"
+    },
+    {
+      "file": "passage-1280-play.png",
+      "sha256": "0ac883cbbd1fa567dd517f0edf68e3c5f9621f9df80e25b6d14be7d23078c97f"
+    },
+    {
+      "file": "passage-1920-clear.png",
+      "sha256": "d69f8ef4e4de0ca91350db2eadae4b1760f4d4f61b39683c106216e4cbb76815"
+    },
+    {
+      "file": "passage-1920-play.png",
+      "sha256": "37f7ad86c11863d0c52af8ec859686437bbf197e3a06054ebcbe0b6240285938"
+    },
+    {
+      "file": "stone-bank-current.png",
+      "sha256": "970bd137df6a4bb6bc870fe9526e1af70761bac5ecbe6591920a2417a8b0df5e"
+    },
+    {
+      "file": "stone-bank-legacy-negative.png",
+      "sha256": "c5f32274604a4bd25eb32712314c226f91e37097f6439bc03d70646460b077e6"
+    },
+    {
+      "file": "stone-bank-reference.png",
+      "sha256": "84ceddf4246c1bf8394fb7197ddb1fd3abf74fdfc71a6607532236fc8677e39e"
+    },
+    {
+      "file": "terrain-adjacency.png",
+      "sha256": "5e090d2f33539072726d023f6de53710e0f258ae43023184a494b641b8e04189"
+    },
+    {
+      "file": "validation-run.json",
+      "sha256": "23c5baaf4f09266c0c7607a3fb27734944484af8458db20947f32c64ae4d9dea"
+    },
+    {
+      "file": "verification.json",
+      "sha256": "8b477120d646c63acae9564f01825786fdfc322e9cf9f973d6b72ccc4935c480"
+    },
+    {
+      "file": "water-contract.log",
+      "sha256": "8a9333eab0bd4c9f09ba34e91d474851fb889408863ff296af84c8c8774e0bef"
+    },
+    {
+      "file": "water-depth-basin.png",
+      "sha256": "7cf84691ffade33a6adb5ff3f485365bcc757cd49fde6945b65a343e94b395a6"
+    },
+    {
+      "file": "water-depth-continuity-comparison.png",
+      "sha256": "06e7c7b8aee5caa9c9d0d7ac279745c975f0e3257f1f9da4febe3f2e125aca54"
+    },
+    {
+      "file": "water-depth-continuity-report.json",
+      "sha256": "d5169eb00f574e703162a2ffdb6f162f0732369b4d6e9612605e094f8743e4db"
+    },
+    {
+      "file": "water-depth-continuity.log",
+      "sha256": "79128ec92749c7c0c7ac64cb28174217ad796628496db92506bf3a35ff6b5b5f"
+    },
+    {
+      "file": "water-depth-correct.png",
+      "sha256": "9d548ef7df49daec1f63485c20bcf991503a3b689bbf1b5effaa8fd98a926e04"
+    },
+    {
+      "file": "water-depth-extension-neutral.png",
+      "sha256": "135de87ca838042cc7b1f456130988a37ddbc343f3fd4e4aeef1a2bd09582ce6"
+    },
+    {
+      "file": "water-depth-hard-cut-negative.png",
+      "sha256": "756e2f593d059438f0eea8710ba7ed3b117da29844c96db55b01ec264d2942eb"
+    },
+    {
+      "file": "water-depth-narrow-strip-negative.png",
+      "sha256": "8a23fd80cd68efb47bdc535425f84a6722505649ceed5c9ab82685b607f0fec1"
+    },
+    {
+      "file": "water-depth-neutral.png",
+      "sha256": "036edbf444347fce7d44d1715f67969e68c29a3df9a09cc7a3d51dae7990c1d9"
+    },
+    {
+      "file": "water-depth-render-negative.png",
+      "sha256": "1fdd92616db87557f83b44d4f53a4785b168d0ec04944859fbe479a1f42db450"
+    },
+    {
+      "file": "water-depth-semantic-negative.png",
+      "sha256": "45e053d401308bda5f202f92164d20a18d524ba5bd61b79a2200beeb33cbe7dd"
+    },
+    {
+      "file": "water-depth-single-cell.png",
+      "sha256": "f90ad45a94723a995376c5f4cf59b1dd504a7ab8c92ec2ed6c8ba7ca298de3d8"
+    },
+    {
+      "file": "water-depth-single-neutral.png",
+      "sha256": "bf5cf144761943d0448d0e0d221a3577e788aa56807420e99113cd8fa49d308d"
+    },
+    {
+      "file": "water-visual-contract-report.json",
+      "sha256": "d55ff1458dd75313008b096e7f70d3ba938d748996109b4bc55b08c61e4e938f"
+    },
+    {
+      "file": "water-visual-diagnostic-comparison.png",
+      "sha256": "96079cf855e246ff8999bdd001997b90341bafd94dbaac96098043acd05f430c"
+    },
+    {
+      "file": "whole-scene.log",
+      "sha256": "98bda176746ae8006841c1ab18ea258e9c1549208503db8042d7c16bf560a922"
+    },
+    {
+      "file": "first-run-platform-sampling-failure.json",
+      "sha256": "3ad4bc2d63f783d4a6a26c5ea3dccbb48442a8793a2adb5cb5b9c37a46c79965"
+    }
+  ]
+}

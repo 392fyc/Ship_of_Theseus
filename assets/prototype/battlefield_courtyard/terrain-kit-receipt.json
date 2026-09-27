@@ -1,0 +1,248 @@
+{
+  "task_id": "reusable-terrain-kit-v1",
+  "status": "completed",
+  "deliverable_stage": "可复用地形库已验证并获用户外观批准；工作台正式试战接入已完成，证据见 terrain-runtime-receipt.json。",
+  "milestone_complete": true,
+  "milestone_remaining": [],
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/battlefield-courtyard-study",
+  "target_head_before": "75d9bf2c64e5504904feb8580339a08ebbb58a59",
+  "candidate_head": null,
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "沿用已批准水深，在现有任务树完成邻接复用与不可进入地形外观；不写主仓、不修改玩法规则。"
+    },
+    {
+      "contract": ".codex/project/mercury-task-contract.md",
+      "summary": "使用实际渲染、交互、来源摘要与独立审查交付未提交候选。"
+    },
+    {
+      "contract": "sot-designlib / sot-kb-write / sot-task-receipt",
+      "summary": "按roots只读核对设计来源，保存来源提交与摘要，保护跨仓既有dirty。"
+    }
+  ],
+  "changed_files": [
+    "scripts/ui/playground/courtyard_board_view.gd",
+    "scripts/ui/playground/terrain_painter.gd",
+    "scripts/ui/terrain/terrain_catalog.gd",
+    "scripts/ui/terrain/terrain_surface.gd",
+    "scripts/ui/terrain/terrain_blend.gdshader",
+    "scenes/playground/terrain_painter.tscn",
+    "assets/prototype/battlefield_courtyard/terrain_catalog.json",
+    "assets/prototype/battlefield_courtyard/terrain_examples.json",
+    "assets/prototype/battlefield_courtyard/natural-rock-v1.png",
+    "assets/prototype/battlefield_courtyard/water-depth-approved.json",
+    "assets/prototype/battlefield_courtyard/terrain-kit-sources.json",
+    "assets/prototype/battlefield_courtyard/visual_profile.json",
+    "assets/prototype/battlefield_courtyard/source-manifest.json",
+    "assets/prototype/battlefield_courtyard/candidate-receipt.json",
+    "assets/prototype/battlefield_courtyard/README.md",
+    "assets/prototype/battlefield_courtyard/terrain-kit-receipt.json",
+    "tests/test_terrain_kit.gd",
+    "tests/test_terrain_painter.gd",
+    "tests/test_courtyard_terrain_adjacency.gd",
+    "tests/capture_courtyard_material_intake.gd",
+    "tests/capture_courtyard_visual_review.gd",
+    "tests/run_courtyard_visual_validation.ps1",
+    "tests/run_terrain_kit_validation.ps1",
+    "dev_doc/ui-art-research/visual-review/README.md",
+    "dev_doc/ui-art-research/visual-review/terrain-kit.md",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/archive-manifest.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/independent-review.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/run.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-corners.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-example-courtyard.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-example-highland.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-example-wetland.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-kit-report.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-obstacles.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-pairs-01.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-pairs-02.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-pairs-03.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-pairs-04.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/painter/run.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/painter/terrain-painter-comparison.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/painter/terrain-painter-json.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/painter/terrain-painter-manual.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/painter/terrain-painter-validation.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/painter/terrain-painter-workbench-1280x720.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/adjacency.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/capture-manifest.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/flooded-1280-clear.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/flooded-1280-play.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/flooded-1920-clear.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/flooded-1920-play.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/interaction.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/material-ground.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/material-intake.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/material-intake.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/material-rock.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/material-water.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/overgrown-1280-clear.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/overgrown-1280-play.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/overgrown-1920-clear.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/overgrown-1920-play.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/passage-1280-clear.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/passage-1280-play.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/passage-1920-clear.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/passage-1920-play.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/stone-bank-current.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/stone-bank-legacy-negative.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/stone-bank-reference.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/terrain-adjacency.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/validation-run.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/verification.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-contract.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-basin.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-continuity-comparison.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-continuity-report.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-continuity.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-correct.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-extension-neutral.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-hard-cut-negative.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-narrow-strip-negative.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-neutral.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-render-negative.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-semantic-negative.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-single-cell.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-single-neutral.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-visual-contract-report.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-visual-diagnostic-comparison.png",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/whole-scene.log",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/terrain-validation-run.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/verification.json"
+  ],
+  "verification": [
+    {
+      "command": "tests/run_terrain_kit_validation.ps1 -GodotPath <Godot 4.6.3> -OutputDirectory <new-absolute-directory>",
+      "result": "pass",
+      "evidence": "final-v1：已批准水深摘要不变；原战场六步回归通过；地形库166项、编辑器28项通过；无引擎错误。"
+    },
+    {
+      "command": "同批图形与交互检查",
+      "result": "pass",
+      "evidence": "32种合法异类接壤、8组边角、5种障碍、3张新地图；14项旧邻接、97项战斗交互；12张整屏固定状态采集。"
+    },
+    {
+      "command": "手工绘图保存后与直接JSON加载比较",
+      "result": "pass",
+      "evidence": "数据相等；870x580固定状态画面逐像素相等；SHA256 ff2e7517dff46695c55fea9b1dc525d1352beddc9f3ce2967c65ff1705a0ca6e。"
+    },
+    {
+      "command": "来源与归档SHA256复算",
+      "result": "pass",
+      "evidence": "61个原始图像/日志/报告逐字节归档；15个核心来源与296个整屏来源与当前文件相同；独立审查复算302个旧回归来源无缺失或差异。"
+    },
+    {
+      "command": "独立只读审查",
+      "result": "pass",
+      "evidence": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/independent-review.json"
+    },
+    {
+      "command": "git diff --check 与保护状态核对",
+      "result": "pass",
+      "evidence": "差异检查通过；主仓及跨仓HEAD和原有dirty清单保留；230项HUD、玩法、原战术脚本及项目配置与旧水深归档摘要相同。"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "已批准深浅水效果固定复用",
+      "result": "pass",
+      "evidence": [
+        "water-depth-approved.json冻结四函数、参数和水面纹理；统一验证拒绝变化。"
+      ]
+    },
+    {
+      "criterion": "合法地形组合自动处理接壤和角点",
+      "result": "pass",
+      "evidence": [
+        "45种无方向组合明确登记，41种有效，4种排除；共享坐标混合与组合材质参数实际进入渲染。",
+        "32种合法异类直边及代表性角点图已检查；不是全部地图拓扑穷举。"
+      ]
+    },
+    {
+      "criterion": "手工与生成地图使用相同结果",
+      "result": "pass",
+      "evidence": [
+        "编辑器、JSON导入和示例均使用同一Catalog、Grid和BoardView；当前固定状态数据与像素一致。"
+      ]
+    },
+    {
+      "criterion": "提供可直接操作的拼图方式",
+      "result": "pass",
+      "evidence": [
+        "1280x720下九类按钮实际可点；左键拖画、右键取样、撤销、保存、载入、错误回滚通过。"
+      ]
+    },
+    {
+      "criterion": "不可进入地形提供多种场景外观",
+      "result": "pass",
+      "evidence": [
+        "整砌连墙、风化残墙、独立石柱、裸岩山峰、覆苔山峰；不同外观沿用WALL/PEAK。"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "Ship主工作树",
+      "result": "unchanged",
+      "evidence": "HEAD c1f34ed331ab753b04610274292005cb975feca0，原有dirty路径保留，本轮未写。"
+    },
+    {
+      "subject": "已批准HUD、玩法数据、原战术脚本与project.godot",
+      "result": "unchanged",
+      "evidence": "与water-depth-v6来源记录比较230项SHA无差异。任务树已有tactical_scene.gd镜头改动和project.godot行尾dirty排除于本轮changed_files。"
+    },
+    {
+      "subject": "SoT-fyc-space与ShipOfTheseus-KB",
+      "result": "unchanged",
+      "evidence": "只读核验；HEAD与原有dirty清单保留，来源摘要见terrain-kit-sources.json。"
+    }
+  ],
+  "residual_risks": [
+    "尚未穷举每对地形的所有边角布局；新地图仍需检查占格可辨性与遮挡。",
+    "工作台编辑地形外观，不包含单位和剧情编排。"
+  ],
+  "escalation_reason": null,
+  "evidence_archive": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/archive-manifest.json",
+  "independent_review": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/independent-review.json",
+  "target_head": "3a71ade3cac109dbdda8a90d0e47f04232f83b9f",
+  "source_schema_version": "unversioned",
+  "source_snapshot_or_commit": "snapshots/rules.json@3a71ade3cac109dbdda8a90d0e47f04232f83b9f",
+  "normalized_digest": "sha256:62495259d704c3a04ecc3d3b1effb9149ddf198180cb0bd104c98ba575782191",
+  "cross_repository_sources": [
+    {
+      "repository": "SoT-fyc-space",
+      "head": "3a71ade3cac109dbdda8a90d0e47f04232f83b9f",
+      "source": "snapshots/rules.json",
+      "schema_version": "unversioned",
+      "normalized_sha256": "62495259d704c3a04ecc3d3b1effb9149ddf198180cb0bd104c98ba575782191",
+      "used_records": [
+        "R4.1",
+        "R4.2",
+        "R4.3"
+      ],
+      "limit": "提供移动、地形修正、攻击线通则；没有逐类型独立地形表。"
+    },
+    {
+      "repository": "ShipOfTheseus-KB",
+      "head": "3b8fa3320a140af848035d84ee95d62112626807",
+      "source": "01-Game-Design/Core-Systems/grid-and-map.md",
+      "sha256": "d3ba0361b54b1cf2385e569e400c37da2f23e757248b003e955fbe9f2a349bc5",
+      "used": "九种基础地形、山地与山峰区分、无海拔玩法；本轮只读取。"
+    }
+  ],
+  "publication": {
+    "published": false,
+    "remote_ref": null
+  },
+  "visual_acceptance": {
+    "water_depth": "user_approved",
+    "new_terrain_kit": "user_approved",
+    "approval_record": "assets/prototype/battlefield_courtyard/terrain-kit-approved.json"
+  },
+  "milestone_scope": "可复用地形拼接库与工作台正式试战接入",
+  "functional_integration_receipt": "assets/prototype/battlefield_courtyard/terrain-runtime-receipt.json",
+  "current_map_size_receipt": "assets/prototype/battlefield_courtyard/terrain-map-size-receipt.json"
+}

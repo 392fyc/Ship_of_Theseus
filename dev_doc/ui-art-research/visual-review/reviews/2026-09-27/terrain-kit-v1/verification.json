@@ -1,0 +1,29 @@
+{
+  "result": "pass",
+  "archive_files_verified": 61,
+  "terrain_sources_verified": 15,
+  "whole_scene_sources_verified": 296,
+  "unchanged_hud_gameplay_and_existing_tactical_sources": 230,
+  "approved_water_baseline_unchanged": true,
+  "reviewed_native_images": [
+    "kit/terrain-pairs-01.png",
+    "kit/terrain-pairs-02.png",
+    "kit/terrain-pairs-03.png",
+    "kit/terrain-pairs-04.png",
+    "kit/terrain-corners.png",
+    "kit/terrain-obstacles.png",
+    "kit/terrain-example-courtyard.png",
+    "kit/terrain-example-wetland.png",
+    "kit/terrain-example-highland.png",
+    "painter/terrain-painter-workbench-1280x720.png",
+    "painter/terrain-painter-manual.png",
+    "regression/flooded-1280-clear.png",
+    "regression/passage-1280-clear.png"
+  ],
+  "visual_observations": [
+    "代表图片中未见持续高亮岸框或交会裂缝。",
+    "水面保持水平，山坡使用岩面；狭窄熔岩格中心可辨。",
+    "石柱独立，连墙端头与转角连贯；新障碍外观仍待用户审看。"
+  ],
+  "coverage_limit": "32种合法异类的一种直边布局加8组代表边角及3张地图；没有穷举所有组合形状。"
+}

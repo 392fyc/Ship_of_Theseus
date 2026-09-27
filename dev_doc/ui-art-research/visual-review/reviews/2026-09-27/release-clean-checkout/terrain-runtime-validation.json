@@ -1,0 +1,112 @@
+{
+  "result": "pass",
+  "approved_visual_files_unchanged": 27,
+  "approved_catalog_visual_functions_unchanged": 3,
+  "catalog_validation_scope_updated": true,
+  "sources_sha256": {
+    "scripts/ui/terrain/terrain_catalog.gd": "a07c1b6649f5906b0a33cb6e0ef672d4c9b409a381e13c4067e2a7ba391d6c60",
+    "scripts/ui/playground/terrain_painter.gd": "ca2333b61f04431f58a0ecbce43f337a9f13c084d5f45a40ede38504836e913b",
+    "assets/prototype/battlefield_courtyard/low-rubble-v1.png": "f775d1a979425068bf437aee78e15b94a407d50e830e89c02cb0f4393c04883c",
+    "assets/prototype/battlefield_courtyard/terrain_catalog.json": "9952635f32faf7d69bd32c0e883714b3273c9ce006732ad6c7b8ff4d1e7486b0",
+    "assets/prototype/battlefield_courtyard/water-surface-v5.png": "5a82396548d2ac161d9fa6d2af60caad2859f74f1254e978a1b54d5cadd9c520",
+    "assets/prototype/battlefield_courtyard/masonry-wall-v2.png.import": "820490fbbcb948a66c9368684f5f6499518055f3baa46df9e816266bd7314630",
+    "tests/test_tactical_inject_smoke.gd": "1a9d799f45ae19be98fc56ec1c23f715180f96ac9710828193304a2728bd5d43",
+    "assets/prototype/battlefield_courtyard/shrub-v1.png.import": "6f9359f3fd4759177f2aba515104e085302edee51d5a4087010f38947e57f58d",
+    "assets/prototype/battlefield_courtyard/terrain-kit-approved.json": "f57cdb796933c9379bd62281cff33e37f2d391a2e2b2d5706371e7bd442c10fa",
+    "scripts/core/tactical_manager.gd": "631f452752cb19996fbbb1656909cc59b3cb50f0224e91c0dcd7d68d55f48ee6",
+    "assets/prototype/battlefield_courtyard/stone-ground-v1.png.import": "7aab4e2360eec7d4220cea5eeb22f216479d7dd3752b75d2c4b79ba8b4b62653",
+    "assets/prototype/battlefield_courtyard/meadow-ground-v2.png": "13ccf187b42d4483fe34b525987259ad27b543d6d336b8d38cdbdfa4d0fecd58",
+    "assets/prototype/battlefield_courtyard/masonry-wall-v2.png": "dda2fb161f140090a4017f8f9b99fd72e6c7b69bf98e4355b73432c21644a23b",
+    "scripts/tactical/tactical_scene.gd": "b673d71fec75646514d378c95b8ceaf47c528424662ebfc4f86e4705f06cd618",
+    "scripts/ui/playground/battlefield_courtyard.gd": "e2f983e731f365a2680b80914f3a152775f5e11530a37b3fdf0a8c03a019926e",
+    "scripts/tactical/terrain_battle_session.gd": "95627e6f2d81b9c6f365ea61586b2bdfc2913d41fc03568f50530d109c1382ee",
+    "assets/prototype/battlefield_courtyard/terrain-catalog-visual-scope.json": "fdd023af81979948e49800f9adf9d89b98fed60be76c461778c7060c8b9e4fd6",
+    "assets/prototype/battlefield_courtyard/visual_profile.json": "8bbf74074fbca4ab6162e60e66d383c5b365eb4a6a85a8dad5f9dc1b4a5923aa",
+    "tests/run_terrain_runtime_validation.ps1": "4567e04614ca9cc472f24d98093deda74f3b491ec71f554963730de83cf2c74d",
+    "data/battlefields/terrain_workshop_test.json": "6e215316dae92cab2955041d6c6b0d361bfb834697dd93aa705f2e7b14eacbc3",
+    "assets/prototype/battlefield_courtyard/stone-ground-v1.png": "75e23e7471f98d7a8d233f21533b5fa847c0d5c9c3cc7bbd13efb954c7524826",
+    "assets/prototype/battlefield_courtyard/shrub-v1.png": "4a8ab22ce661e8285b901cc8d67dc589c6c3d950b0e28e7e948534c2740001c5",
+    "assets/prototype/battlefield_courtyard/meadow-ground-v2.png.import": "3906b1e85492b2bb0ca5ce86ee7ec1f6b90f9620f2a7527be0984ba8edd857b7",
+    "assets/prototype/battlefield_courtyard/natural-rock-v1.png": "aa7414ec6e3380e60a5b9e3b7d9383b21676a6a87015e2ebda2620b4dc73b5f6",
+    "scripts/units/unit.gd": "002a4b834c601781bb3e5e60a64569f2c9a977758bb296321694f9ab9423cfc6",
+    "scripts/ui/terrain/terrain_battle_definition.gd": "7c3c988298f3ee6f02fcb27b03652762aeaa341217aa55829e5c7df54767b867",
+    "assets/prototype/battlefield_courtyard/low-rubble-v1.png.import": "7604abd721588a095dd905596c9ee90996c04f48f597b0b9894acc6a4ae50d4e",
+    "scripts/ui/terrain/terrain_blend.gdshader": "a1ff38cab28a3d80ef0e6268344c05f8d0caee0e93b996793d143869119b6836",
+    "assets/prototype/battlefield_courtyard/courtyard-entry-v2.png": "f801ec6c25de19882f247729f591323700ad47d66270d5c7d448c078f82cc597",
+    "tests/test_terrain_map_size.gd": "82dc1a3357203c5ec340514b440c488ab0b2290603e13625133d1fc2d1329279",
+    "scenes/playground/terrain_painter.tscn": "84edf4e9d568cfe65a14e84a8cd0074ebf87ddad218a31078c2d77fa235267d4",
+    "assets/prototype/battlefield_courtyard/moss-ground-v1.png": "6c038fe09f0a9c117fe8d934c33815b820908571581dd3c0e5ea592190fd3b42",
+    "assets/prototype/battlefield_courtyard/moss-ground-v1.png.import": "ee4573d96ef13efa56569849dcfcbd01466fc982103c93732ce19d75f4ed9404",
+    "assets/prototype/battlefield_courtyard/courtyard-entry-v2.png.import": "967f0324a6b5fb240eeaf2b0caf9b52e6b6a08a75b5a96e964ec5adc801e9e69",
+    "assets/prototype/battlefield_courtyard/water-surface-v5.png.import": "6811e408f4e4cc42362c78095e586f63557066e8fc7a28f92b8e6dabb49048ea",
+    "tests/test_terrain_painter.gd": "c76075cd5a14c406c6acc584c9a51e45b87d5ca58d145edb687f9b190972a479",
+    "assets/prototype/battlefield_courtyard/natural-rock-v1.png.import": "3221a3b84d0a0b7039cba57b2be301c87b6409515bace7b61ae5a1f078a889db",
+    "scripts/ui/terrain/terrain_surface.gd": "5526db8ee3bdb8d5bc264bae24cf5d05e9670e1507fcd3ee413ce5ed7593b13f",
+    "tests/test_terrain_painter_battle_flow.gd": "83c1e1ddd959331263a2e21e2d3db51e1408117a2dae6a7110e88f3af0f93f15",
+    "assets/prototype/battlefield_courtyard/forest-tree-v2.png.import": "b094ddc63391f3a4184a4f0d156583a3c06262ff33d8245b972cd682d279c34c",
+    "assets/prototype/battlefield_courtyard/forest-tree-v2.png": "0db7cb1e145af28443d6eed31ad38c84cdcf48cd6d8cff4b2ded224a44799203",
+    "assets/prototype/battlefield_courtyard/courtyard_layouts.json": "0c3646daed45cb39f86edb7d57fc5b3c0c5a249e2afe9a55f7cb9f9ff61349e1",
+    "tests/test_terrain_kit.gd": "e2e0a780d8305fb2f7a2829f83f37c7c673feca2741355ca401b234bb2cee26b",
+    "tests/test_terrain_battle_runtime.gd": "40ac7c33196324723e10469027ed669a0e53112f2d6636010edc84238a114d43",
+    "scripts/ui/playground/courtyard_board_view.gd": "41a307633f513a9f47b15763396017121b146519186241fd95532aca5f78ddd7",
+    "assets/prototype/battlefield_courtyard/terrain_examples.json": "52832ee9c2fbd3eb119b605990eb8d18a584a42dd3a671af4b824348e8731b58"
+  },
+  "steps": [
+    {
+      "result": "pass",
+      "evidence": {
+        "captures": {
+          "map-size-10-editor-1280x720.png": "a109767efda534ea8bf0d564ba1df3d757b71bc4bef1daf803c3b4dc922fe44b",
+          "map-size-25-battle-1280x720.png": "5907d8d4c8c0c960c1cd04ddad3334ca54b3bd362588d7f843b545e624e40526",
+          "map-size-25-battle-1920x1080.png": "9fd5558269043e7e15f55991c21f46a3b5738120ac6eb3dee04c6e08215d5cad",
+          "map-size-25-editor-1280x720.png": "49d58b285ff553766dd6a6bc09d337e77fc340fa1de4365ec561077a87cb4c34",
+          "map-size-25-editor-1920x1080.png": "c5e99da8f82c076f4d5767d44edc45e0cee3dc7157811d1e75219e439d93de41"
+        },
+        "checks": 79,
+        "failures": [],
+        "max_side": 25,
+        "min_side": 10,
+        "result": "pass",
+        "square_only": true
+      },
+      "name": "map-size"
+    },
+    {
+      "result": "pass",
+      "evidence": {
+        "captures": {
+          "battle-courtyard-1280.png": "e787b89ce8b5ed9a2a5f5911a54aabf2c4bb7150c91583b77bf29c5ed88b7982",
+          "battle-courtyard-1920.png": "50a0731bffe483009dd99b2649552315151bcc56de85e994661e682d797ca2ef",
+          "battle-highland-1280.png": "0e34ffcd4169b77b0d4d750ab5addca3c9e2b1473c64545bd285719c71f685a9",
+          "battle-highland-1920.png": "ac591beaf68ca25762e3184dfa39fd70465c99505b3d038f38246a65311187fd",
+          "battle-wetland-1280.png": "5d0f5c120632e096d21153788c3d51ada6db72e1400c7313abb98106012c41f2",
+          "battle-wetland-1920.png": "9ffe583e904e636e221ea3d3bf5664c68aee1aea62e800619341e41bdb845a81"
+        },
+        "checks": 89,
+        "engine": "4.6.3-stable (official)",
+        "failures": [],
+        "global_maps_unchanged": true,
+        "result": "pass"
+      },
+      "name": "runtime"
+    },
+    {
+      "result": "pass",
+      "evidence": {
+        "failed": 0,
+        "passed": 19
+      },
+      "name": "editor-flow"
+    },
+    {
+      "result": "pass",
+      "name": "legacy-injection",
+      "checks": 20
+    },
+    {
+      "result": "pass",
+      "evidence": "terrain-regression/terrain-validation-run.json",
+      "name": "terrain-regression"
+    }
+  ]
+}

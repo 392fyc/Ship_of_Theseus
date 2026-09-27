@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "source": "scripts/ui/terrain/terrain_catalog.gd",
+  "baseline_source_sha256": "0c96396c227b1cf60665da841f1071d9f1cd8105513c4803b3b732ce7bd7ae0a",
+  "baseline_approval": "assets/prototype/battlefield_courtyard/terrain-kit-approved.json",
+  "change_authority": "用户本轮明确要求：地图仅正方形，边长最小10、最大25。",
+  "changed_scope": "尺寸常量和地图校验入口；视觉函数及其数据来源保持批准版本。此记录不扩展美术批准。",
+  "visual_data_path": "res://assets/prototype/battlefield_courtyard/terrain_catalog.json",
+  "visual_function_sha256": {
+    "catalog": "30f1a7e8eedbd3bfc2851b0f8765a145226baba78ed08eadbd4c15ca4519d2af",
+    "pair_rule": "887a42930f3765e2e9460353b5a3724f9ab8ddb3848ca221890a0c7bffb4711e",
+    "transition_style": "73f003a1e82fcdaec7ef1e2b0187d71e03c122479af7c3601657535c4adafb18"
+  }
+}

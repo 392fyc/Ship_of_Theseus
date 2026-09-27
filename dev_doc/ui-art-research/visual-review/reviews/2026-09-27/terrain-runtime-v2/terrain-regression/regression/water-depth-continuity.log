@@ -1,0 +1,12 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 596.36 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 3070 Ti
+
+[DataLoader] Loaded: 7 classes, 20 skills, 10 buffs, 8 enemies, 4 maps, 2 states, 7 talents
+[Grid] Initialized 7x7 map: basin
+[Grid] Initialized 7x7 map: hard
+[Grid] Initialized 7x7 map: legacy
+[Grid] Initialized 5x4 map: extension
+[Grid] Initialized 3x3 map: single
+[Grid] Initialized 7x7 map: material
+[Grid] Initialized 3x3 map: single-material
+COURTYARD_WATER_DEPTH_CONTINUITY_RESULT {"images_saved":true,"negative_samples_blocked":true,"overall":"PASS","positive_samples_passed":true,"source_hashes_stable":true}

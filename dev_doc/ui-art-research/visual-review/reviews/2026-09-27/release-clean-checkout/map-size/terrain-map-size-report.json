@@ -1,0 +1,15 @@
+{
+  "captures": {
+    "map-size-10-editor-1280x720.png": "a109767efda534ea8bf0d564ba1df3d757b71bc4bef1daf803c3b4dc922fe44b",
+    "map-size-25-battle-1280x720.png": "5907d8d4c8c0c960c1cd04ddad3334ca54b3bd362588d7f843b545e624e40526",
+    "map-size-25-battle-1920x1080.png": "9fd5558269043e7e15f55991c21f46a3b5738120ac6eb3dee04c6e08215d5cad",
+    "map-size-25-editor-1280x720.png": "49d58b285ff553766dd6a6bc09d337e77fc340fa1de4365ec561077a87cb4c34",
+    "map-size-25-editor-1920x1080.png": "c5e99da8f82c076f4d5767d44edc45e0cee3dc7157811d1e75219e439d93de41"
+  },
+  "checks": 79,
+  "failures": [],
+  "max_side": 25,
+  "min_side": 10,
+  "result": "pass",
+  "square_only": true
+}

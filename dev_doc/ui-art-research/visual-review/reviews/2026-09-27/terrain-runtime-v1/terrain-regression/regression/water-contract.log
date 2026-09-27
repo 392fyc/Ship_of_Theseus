@@ -1,0 +1,11 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 596.36 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 3070 Ti
+
+[DataLoader] Loaded: 7 classes, 20 skills, 10 buffs, 8 enemies, 4 maps, 2 states, 7 talents
+[Grid] Initialized 5x5 map: depth-correct
+[Grid] Initialized 5x5 map: depth-shallow-reference
+[Grid] Initialized 5x5 map: depth-shallow-tint-fault
+[Grid] Initialized 3x3 map: bank-no-edge-reference
+[Grid] Initialized 3x3 map: bank-current
+[Grid] Initialized 3x3 map: bank-legacy-band-fault
+COURTYARD_WATER_VISUAL_CONTRACT_RESULT {"images_saved":true,"negative_samples_blocked":true,"overall":"PASS","positive_samples_passed":true,"report":"water-visual-contract-report.json","source_hashes_stable":true}

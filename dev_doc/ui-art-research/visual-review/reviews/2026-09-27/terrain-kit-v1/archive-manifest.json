@@ -1,0 +1,313 @@
+{
+  "task_id": "reusable-terrain-kit-v1",
+  "source_batch": "final-v1",
+  "raw_capture_post_processing": false,
+  "copied_byte_identically": true,
+  "files": [
+    {
+      "file": "kit/run.log",
+      "sha256": "2ed69e53edd5161525b11f27d2316f0b210d9b5972a6acbeaa5518bf16dd7529",
+      "bytes": 3731
+    },
+    {
+      "file": "kit/terrain-corners.png",
+      "sha256": "de1b11a2abf0c43fa9be038a6e68d58b3127549b77cf0764ed57b7a60fe8e915",
+      "bytes": 680426
+    },
+    {
+      "file": "kit/terrain-example-courtyard.png",
+      "sha256": "d32206a4409b31705905a4e006f46f581b71863c6728238d964a7aee9d77ba78",
+      "bytes": 1758544
+    },
+    {
+      "file": "kit/terrain-example-highland.png",
+      "sha256": "286c1494aefec69f07e7961a9fb1b476f8cf3a8eb964fb482bf69b56f9b1cc68",
+      "bytes": 1776947
+    },
+    {
+      "file": "kit/terrain-example-wetland.png",
+      "sha256": "d8879db14b38d0fa58be638456c5e5c8e10ecf100c5f566bbf9c8227fe2c1ee8",
+      "bytes": 1710217
+    },
+    {
+      "file": "kit/terrain-kit-report.json",
+      "sha256": "82e22179e005cade87fa93fd6611dfb4b4819d9253a3627062e1ce165d70d7c3",
+      "bytes": 1029
+    },
+    {
+      "file": "kit/terrain-obstacles.png",
+      "sha256": "3734af12ab1b2115dc828ba8adee7c5e5f6b0ad3eac483f9c2a086d6d3b97cf1",
+      "bytes": 677623
+    },
+    {
+      "file": "kit/terrain-pairs-01.png",
+      "sha256": "6ea2ccddff817aba2790238cfc7313075c1c68eb1d3cf7480fb57c5e6da09730",
+      "bytes": 699387
+    },
+    {
+      "file": "kit/terrain-pairs-02.png",
+      "sha256": "7f67622caedfd1688ade97fbc41865c820a613e786483d6500d6f0b0f9d8803c",
+      "bytes": 750363
+    },
+    {
+      "file": "kit/terrain-pairs-03.png",
+      "sha256": "8c31c6351b368304c39e45fdf3a774f6d4c0aec2e16df6282cc685947e59f234",
+      "bytes": 631676
+    },
+    {
+      "file": "kit/terrain-pairs-04.png",
+      "sha256": "09d71e6be299b578b903dd2ab9c3233741761670cabf05aa9241612b2fcc2779",
+      "bytes": 649172
+    },
+    {
+      "file": "painter/run.log",
+      "sha256": "3c48ea1fc4e2ae499cbfbab4870e285dead6f51ed7cedd5a7e1e302e100629ad",
+      "bytes": 2973
+    },
+    {
+      "file": "painter/terrain-painter-comparison.json",
+      "sha256": "7276a39c4b12fa57b44ae539b7fab871912d1cfe5e373dd799033ded39e0355c",
+      "bytes": 306
+    },
+    {
+      "file": "painter/terrain-painter-json.png",
+      "sha256": "ff2e7517dff46695c55fea9b1dc525d1352beddc9f3ce2967c65ff1705a0ca6e",
+      "bytes": 1211352
+    },
+    {
+      "file": "painter/terrain-painter-manual.png",
+      "sha256": "ff2e7517dff46695c55fea9b1dc525d1352beddc9f3ce2967c65ff1705a0ca6e",
+      "bytes": 1211352
+    },
+    {
+      "file": "painter/terrain-painter-validation.json",
+      "sha256": "66f086cab5fe421986f8bbf4e6d280fd5ec0db06c5e3dee94f1fc36d79d838a0",
+      "bytes": 168
+    },
+    {
+      "file": "painter/terrain-painter-workbench-1280x720.png",
+      "sha256": "5906fced965836018429ff96886beef4d9f66a5ad33ce2b3e99ee48e85dc6636",
+      "bytes": 1288488
+    },
+    {
+      "file": "regression/adjacency.log",
+      "sha256": "706b3f59182fa7dbd060df4c89de65760a0077bec996e09336829316029254d0",
+      "bytes": 1624
+    },
+    {
+      "file": "regression/capture-manifest.json",
+      "sha256": "06cc93c44e1809382f5aac35c04cb3c1e62f45b514ae7e41978be526c43ee682",
+      "bytes": 39981
+    },
+    {
+      "file": "regression/flooded-1280-clear.png",
+      "sha256": "2f7441242fc074f4371e37aa441ba8166ac7caf08ccc263d97cd7f44f69e3239",
+      "bytes": 1798648
+    },
+    {
+      "file": "regression/flooded-1280-play.png",
+      "sha256": "3b67f6c39284b333d6383cc241f718eeeb2102c81fed60a6fc59045b260c7dd9",
+      "bytes": 1828501
+    },
+    {
+      "file": "regression/flooded-1920-clear.png",
+      "sha256": "6bf86da41a1b0f2afbb5e90e218766f8f3b6faf5b3a3b1a14502c365a3a6f9bd",
+      "bytes": 3695067
+    },
+    {
+      "file": "regression/flooded-1920-play.png",
+      "sha256": "5561325f80ad9be5afe4ddabe24d0d89f85b7276a4f5eb1a4d8c5025ecc6fd6a",
+      "bytes": 3743344
+    },
+    {
+      "file": "regression/interaction.log",
+      "sha256": "9d6ddaeb6ef28ef8624f2609b4c67b9a07435c0bda9b6bef627761615c74c4d8",
+      "bytes": 7473
+    },
+    {
+      "file": "regression/material-ground.png",
+      "sha256": "849ff6fe3658964587ee825173d3bf0a261fe5d67c8d7c45d5d7f0e953f058be",
+      "bytes": 636023
+    },
+    {
+      "file": "regression/material-intake.json",
+      "sha256": "c24d0a42e45da9e40f4a9c10c222eb067f68aedde14313528bb062ad0ba1db6e",
+      "bytes": 1874
+    },
+    {
+      "file": "regression/material-intake.log",
+      "sha256": "49a57f4d24d417a6d478ddd993989b26714e5d82afb728d87044bf1f7941e3f9",
+      "bytes": 472
+    },
+    {
+      "file": "regression/material-rock.png",
+      "sha256": "15f9467f373c0e4c65162d2f91ad50e734ca75223629c114edb9a57f67b5580f",
+      "bytes": 675070
+    },
+    {
+      "file": "regression/material-water.png",
+      "sha256": "8f7301690ec0a5615efc2223c6c3c5b2896787e62e2ebcabe25701b86cf7abad",
+      "bytes": 467013
+    },
+    {
+      "file": "regression/overgrown-1280-clear.png",
+      "sha256": "07856074e61df0cbddf1092c41e2d5b3752d4232bfa53497f42617bd874a0a4c",
+      "bytes": 1949806
+    },
+    {
+      "file": "regression/overgrown-1280-play.png",
+      "sha256": "4707570a9efd9d1db3aa861c668a47add0f5e6739f2b80e281e619923db7c5df",
+      "bytes": 1961882
+    },
+    {
+      "file": "regression/overgrown-1920-clear.png",
+      "sha256": "02fe46f9621ae41da075a4356312f40d65863e404fe5f421302f4804deca366e",
+      "bytes": 4034021
+    },
+    {
+      "file": "regression/overgrown-1920-play.png",
+      "sha256": "d44f6f19cba8f41e56e76b469e2d00b41b5f060ceb7383838df71f91d7d96966",
+      "bytes": 4042657
+    },
+    {
+      "file": "regression/passage-1280-clear.png",
+      "sha256": "3d63b345cd6aad13b508ec4a791ff1300fcb884d1f312c317b62b6616449b151",
+      "bytes": 1933506
+    },
+    {
+      "file": "regression/passage-1280-play.png",
+      "sha256": "8521df6371b24914589b1850c874d5102dc5d7fc4b5075a8d03d39b4b668bea2",
+      "bytes": 1956380
+    },
+    {
+      "file": "regression/passage-1920-clear.png",
+      "sha256": "eba1247251a0766e2f3e3ff56674ed049daa8b6f75e24d010723da8d4c1efd82",
+      "bytes": 3992332
+    },
+    {
+      "file": "regression/passage-1920-play.png",
+      "sha256": "eba3fa83baf5fa73bb4f20598958eb233fe058ba9858f568633502220c25e564",
+      "bytes": 4024679
+    },
+    {
+      "file": "regression/stone-bank-current.png",
+      "sha256": "8545b0b3df390932a5dfd481d424fe9c30637c2967e8a617bf48c8f2bd3e7fb3",
+      "bytes": 225157
+    },
+    {
+      "file": "regression/stone-bank-legacy-negative.png",
+      "sha256": "d43fd4199364ad2e6028766e74e16bc4ee77d14f9ea2e06a79eb109eed4baaac",
+      "bytes": 224785
+    },
+    {
+      "file": "regression/stone-bank-reference.png",
+      "sha256": "8545b0b3df390932a5dfd481d424fe9c30637c2967e8a617bf48c8f2bd3e7fb3",
+      "bytes": 225157
+    },
+    {
+      "file": "regression/terrain-adjacency.png",
+      "sha256": "aabf4701578bd74b640ab844cf9807bece9e5a45e5ad05093e99f3f0e31f773f",
+      "bytes": 889113
+    },
+    {
+      "file": "regression/validation-run.json",
+      "sha256": "befa7aa1c16725e252c9ee4d8aa5a60720a56a699ef91a4efd19d16fad93e2ed",
+      "bytes": 37976
+    },
+    {
+      "file": "regression/verification.json",
+      "sha256": "8b477120d646c63acae9564f01825786fdfc322e9cf9f973d6b72ccc4935c480",
+      "bytes": 90
+    },
+    {
+      "file": "regression/water-contract.log",
+      "sha256": "8a9333eab0bd4c9f09ba34e91d474851fb889408863ff296af84c8c8774e0bef",
+      "bytes": 779
+    },
+    {
+      "file": "regression/water-depth-basin.png",
+      "sha256": "4ab52db0dce8deb622a9a35651545449338d46c8437e082bfd9d283614668607",
+      "bytes": 430521
+    },
+    {
+      "file": "regression/water-depth-continuity-comparison.png",
+      "sha256": "7649a26e88d2f9fa16736d72dd3027db7df02203fc1ca3a6226910bf8b171b1d",
+      "bytes": 238114
+    },
+    {
+      "file": "regression/water-depth-continuity-report.json",
+      "sha256": "5cfc6843a629e9ded53c61cb46d458cbdac7e114c47aab6826dc8db53f28a922",
+      "bytes": 13523
+    },
+    {
+      "file": "regression/water-depth-continuity.log",
+      "sha256": "79128ec92749c7c0c7ac64cb28174217ad796628496db92506bf3a35ff6b5b5f",
+      "bytes": 702
+    },
+    {
+      "file": "regression/water-depth-correct.png",
+      "sha256": "e058a66431213c1b5c47dfe8b12da0a07213e59f77da9d896325b69f72d5a737",
+      "bytes": 215887
+    },
+    {
+      "file": "regression/water-depth-extension-neutral.png",
+      "sha256": "32da741301b210d6bf124c87aa785d4e2247a2bbed0e4c265901c84c913751a3",
+      "bytes": 397632
+    },
+    {
+      "file": "regression/water-depth-hard-cut-negative.png",
+      "sha256": "fc14d659dc8242c26bad25eb9d9170d851412cc0d924de3d868331403c861bd6",
+      "bytes": 361526
+    },
+    {
+      "file": "regression/water-depth-narrow-strip-negative.png",
+      "sha256": "8083ffc892fccdf62c498046cb26caaa23286fb2d0559cb57c888a6c9c663d60",
+      "bytes": 362625
+    },
+    {
+      "file": "regression/water-depth-neutral.png",
+      "sha256": "927f361da942610f144db29250ad4b9ccab5803dd25276b0906752f8e84a0d2d",
+      "bytes": 388723
+    },
+    {
+      "file": "regression/water-depth-render-negative.png",
+      "sha256": "c755a01c5f01d294cc6be808146335767d8cad9dcdc02514673b501c4421e7ac",
+      "bytes": 218115
+    },
+    {
+      "file": "regression/water-depth-semantic-negative.png",
+      "sha256": "9217e031c3626afc10dd2123e5c6d6282ce3654643ba7b68767d367a29125e2e",
+      "bytes": 217877
+    },
+    {
+      "file": "regression/water-depth-single-cell.png",
+      "sha256": "f1953cf61949c7773cd60607313c04b077dbba76ef444d4d09b8e5f324de0b07",
+      "bytes": 491577
+    },
+    {
+      "file": "regression/water-depth-single-neutral.png",
+      "sha256": "7c5d0fdf617c55078ae36006f6d0e35ae97e1edae8f1cf1b7642c617723fb973",
+      "bytes": 485059
+    },
+    {
+      "file": "regression/water-visual-contract-report.json",
+      "sha256": "473c42dab19557406f680d508296c0a909e729fb9b33ae1e1c938eef793aa2e5",
+      "bytes": 4346
+    },
+    {
+      "file": "regression/water-visual-diagnostic-comparison.png",
+      "sha256": "f0714ef1035b864b962ca52f27a46d8dd1b0236d0e1af1bd40cb5a836bcbc528",
+      "bytes": 546314
+    },
+    {
+      "file": "regression/whole-scene.log",
+      "sha256": "98bda176746ae8006841c1ab18ea258e9c1549208503db8042d7c16bf560a922",
+      "bytes": 1184
+    },
+    {
+      "file": "terrain-validation-run.json",
+      "sha256": "bb0bfdf4eeb8a5553a4086dbec44e2b5c8d813d80636cf9da722aa24624a107b",
+      "bytes": 3418
+    }
+  ]
+}

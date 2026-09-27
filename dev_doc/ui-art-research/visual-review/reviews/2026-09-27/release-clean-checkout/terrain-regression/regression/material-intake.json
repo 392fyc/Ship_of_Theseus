@@ -1,0 +1,49 @@
+{
+  "board_sha256": "41a307633f513a9f47b15763396017121b146519186241fd95532aca5f78ddd7",
+  "engine": "4.6.3-stable (official)",
+  "post_processing": false,
+  "profile_sha256": "8bbf74074fbca4ab6162e60e66d383c5b365eb4a6a85a8dad5f9dc1b4a5923aa",
+  "records": [
+    {
+      "engine_scale": 1.36,
+      "file": "material-water.png",
+      "identity_matches_manifest": true,
+      "image_sha256": "8f7301690ec0a5615efc2223c6c3c5b2896787e62e2ebcabe25701b86cf7abad",
+      "repeats": [
+        3,
+        3
+      ],
+      "source": "res://assets/prototype/battlefield_courtyard/water-surface-v5.png",
+      "source_sha256": "5a82396548d2ac161d9fa6d2af60caad2859f74f1254e978a1b54d5cadd9c520",
+      "visual_acceptance": "pending_review"
+    },
+    {
+      "engine_scale": 1.36,
+      "file": "material-ground.png",
+      "identity_matches_manifest": true,
+      "image_sha256": "849ff6fe3658964587ee825173d3bf0a261fe5d67c8d7c45d5d7f0e953f058be",
+      "repeats": [
+        3,
+        3
+      ],
+      "source": "res://assets/prototype/battlefield_courtyard/stone-ground-v1.png",
+      "source_sha256": "75e23e7471f98d7a8d233f21533b5fa847c0d5c9c3cc7bbd13efb954c7524826",
+      "visual_acceptance": "pending_review"
+    },
+    {
+      "engine_scale": 1.36,
+      "file": "material-rock.png",
+      "identity_matches_manifest": true,
+      "image_sha256": "15f9467f373c0e4c65162d2f91ad50e734ca75223629c114edb9a57f67b5580f",
+      "repeats": [
+        3,
+        3
+      ],
+      "source": "res://assets/prototype/battlefield_courtyard/natural-rock-v1.png",
+      "source_sha256": "aa7414ec6e3380e60a5b9e3b7d9383b21676a6a87015e2ebda2620b4dc73b5f6",
+      "visual_acceptance": "pending_review"
+    }
+  ],
+  "script_sha256": "5a5a85228c63e909880958c6d9c74ec1a277d8c58e38a38db95dfb60e7d85372",
+  "source_manifest_sha256": "eaec06faf3c5013d6cdb8809178cefa0974edad42fc6ea3f8a4356bfe48c49b8"
+}

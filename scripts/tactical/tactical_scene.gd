@@ -40,6 +40,8 @@ signal battle_ended(result: String)
 ## 注入模式下 ReturnButton 不 reload，改由宿主经 battle_ended 信号接管流转。
 @export var run_injected: bool = false
 var injected_map_id: String = ""
+## 已由入口校验的自定义地图；非空时优先于地图注册名，场景不修改此字典。
+var injected_map_data: Dictionary = {}
 ## 元素 Dictionary：{ class_id:String, pos:Vector2i, level?:int }
 var injected_player_units: Array = []
 ## 元素 Dictionary：{ class_id:String, pos:Vector2i, affixes?:Array, special_affix?, stat_scale?:float }
@@ -151,7 +153,10 @@ func _ready() -> void:
 ## 注入模式 spawn（仅 run_injected 时调用）：读注入清单走正式 spawn_unit 路径；
 ## 敌人 spawn 后调 apply_affixes 注入词条与数值增强（玩家不注入词条）。纯加法。
 func _spawn_injected_units() -> void:
-	tactical_manager.initialize_battle(injected_map_id)
+	if injected_map_data.is_empty():
+		tactical_manager.initialize_battle(injected_map_id)
+	else:
+		tactical_manager.initialize_battle_data(injected_map_data)
 	for cfg_v: Variant in injected_player_units:
 		if not (cfg_v is Dictionary):
 			continue
@@ -244,7 +249,7 @@ func _input(event: InputEvent) -> void:
 			_is_panning = true
 			_pan_button = MOUSE_BUTTON_RIGHT
 		if _camera != null and _is_panning:
-			_camera.position -= motion_event.relative
+			_camera.position -= motion_event.relative / _camera.zoom
 			get_viewport().set_input_as_handled()
 		elif not _should_ignore_board_pointer():
 			tactical_manager.handle_pointer_hover(motion_event.position)

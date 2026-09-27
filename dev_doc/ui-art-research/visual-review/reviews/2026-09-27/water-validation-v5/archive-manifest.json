@@ -1,0 +1,75 @@
+{
+  "batch": "water-validation-v5-release-candidate",
+  "scope": "关键原图和完整清单归档；其余原始PNG在同名外部采集批次中。",
+  "files": [
+    {
+      "file": "validation-run.json",
+      "sha256": "ab4331e7e6242f3774ab2d8a5fc7a325af98b1540a9f8accedf063cd411a4562"
+    },
+    {
+      "file": "water-visual-contract-report.json",
+      "sha256": "9106a3ca455aae9efe6a3292a167a08afb3993935b17096a14100eb556ab7be0"
+    },
+    {
+      "file": "capture-manifest.json",
+      "sha256": "329f6d9b914b977edfe5b8163f454e9b2a3295a1ee73c14d49c659f9a14ff2e7"
+    },
+    {
+      "file": "material-intake.json",
+      "sha256": "025a04c093769a7c6817530fdbee4ef5be3bae567afd0b375644a267421861c4"
+    },
+    {
+      "file": "stone-bank-current.png",
+      "sha256": "970bd137df6a4bb6bc870fe9526e1af70761bac5ecbe6591920a2417a8b0df5e"
+    },
+    {
+      "file": "water-depth-correct.png",
+      "sha256": "1ee99d976f857bdf9e58024df24a258e3e0469f6a32129df9772ef11d98f851e"
+    },
+    {
+      "file": "water-visual-diagnostic-comparison.png",
+      "sha256": "e8a7db24f53d14b3f80ff5025b52d25ad96c27f5e2fa2c72bed63e263102cffd"
+    },
+    {
+      "file": "terrain-adjacency.png",
+      "sha256": "d040c028a7f66494d96c8003726ebfeb87d59b3115266600e4aa1c2563d4d961"
+    },
+    {
+      "file": "material-water.png",
+      "sha256": "06959a1e4f06c7523c9853afb583f569d1bcd96e8b6399c651f8dcdfb4a89fa9"
+    },
+    {
+      "file": "material-ground.png",
+      "sha256": "0c6feadf0b69f5fb71db5397b460c2606e4bc5ccc9039bace5bf1a526cf318fd"
+    },
+    {
+      "file": "flooded-1280-clear.png",
+      "sha256": "a8e09a8dcbf820369ba8fcc64b26b49b752fc3b8a3a995a60ef3ce857d80d3bb"
+    },
+    {
+      "file": "water-contract.log",
+      "sha256": "c30ad6e9ffe327ecfb6aa5e42757b1a45e58e8ffb45e0862f22211e2b644c944"
+    },
+    {
+      "file": "adjacency.log",
+      "sha256": "b4f61bd1321b8c55da480696abb8c1e4926a79c87e39389ab31d9a8ff784a0c8"
+    },
+    {
+      "file": "material-intake.log",
+      "sha256": "572318aacf4031af91c23056c41bab2e8cc5f017e5bf84df360fdaf203cddb6e"
+    },
+    {
+      "file": "whole-scene.log",
+      "sha256": "98bda176746ae8006841c1ab18ea258e9c1549208503db8042d7c16bf560a922"
+    },
+    {
+      "file": "interaction.log",
+      "sha256": "9d6ddaeb6ef28ef8624f2609b4c67b9a07435c0bda9b6bef627761615c74c4d8"
+    },
+    {
+      "file": "empty-evidence-rejected.json",
+      "sha256": "02d97c2427548bdcacc811fd8fd54bd073238cac6596ba702f7ab4a74e8fb6b2"
+    }
+  ],
+  "post_processing": false
+}

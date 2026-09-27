@@ -1,0 +1,7 @@
+{
+  "id": "terrain_workshop_test",
+  "purpose": "地形工作台试战配置；角色数值与技能继续读取现有职业和敌人数据。",
+  "player_class_id": "myrmidon",
+  "enemy_class_id": "test_lancer",
+  "placement": "largest_connected_passable_region"
+}

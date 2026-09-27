@@ -1,0 +1,111 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 596.36 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 3070 Ti
+
+[DataLoader] Loaded: 7 classes, 20 skills, 10 buffs, 8 enemies, 4 maps, 2 states, 7 talents
+[Grid] Initialized 10x10 map: ?
+[PASS] 默认地图为10×10且边长只接受10至25整数
+[PASS] 1280窗口内边长、调整和试战控件可见且不重叠
+[PASS] 地形按钮仍可见：平原
+[PASS] 地形按钮仍可见：森林
+[PASS] 地形按钮仍可见：山地
+[PASS] 地形按钮仍可见：山峰
+[PASS] 地形按钮仍可见：墙体
+[PASS] 地形按钮仍可见：浅水
+[PASS] 地形按钮仍可见：深水
+[PASS] 地形按钮仍可见：熔岩
+[PASS] 地形按钮仍可见：沼泽
+[Grid] Initialized 10x10 map: ?
+[PASS] 原生截帧：map-size-10-editor-1280x720.png
+[Grid] Initialized 25x25 map: ?
+[PASS] 输入25并真实点击调整得到625格
+[PASS] 扩图保留原区域、铺石和外观
+[PASS] 扩出的格子全部补平原
+[PASS] 扩图只建立一步撤销
+[Grid] Initialized 10x10 map: ?
+[PASS] 撤销扩图恢复10×10及尺寸输入
+[Grid] Initialized 25x25 map: ?
+[PASS] 同尺寸调整不会重复建立撤销
+[PASS] 直接调整拒绝越界边长9且状态不变
+[PASS] 直接调整拒绝越界边长26且状态不变
+[Grid] Initialized 25x25 map: ?
+[PASS] 25×25最远角可真实绘制
+[Grid] Initialized 25x25 map: ?
+[PASS] 扩大区域可保存石柱变体
+[Grid] Initialized 25x25 map: ?
+[PASS] 扩大区域可保存铺石
+[PASS] 扩大区域右键取样坐标准确
+[PASS] 25×25完整地图通过统一校验
+[Grid] Initialized 10x10 map: ?
+[PASS] 缩图裁去范围外地形且原区域相同
+[PASS] 缩图裁去范围外铺石及外观
+[Grid] Initialized 25x25 map: ?
+[PASS] 撤销缩图完整恢复625格和边长显示
+[PASS] 25×25所有格角都在画布内
+[PASS] 25×25可保存
+[Grid] Initialized 25x25 map: ?
+[PASS] 清空仍保持25×25
+[Grid] Initialized 25x25 map: ?
+[PASS] 25×25保存再加载保持数据一致
+[PASS] 地图校验与试战拒绝：低于10
+[PASS] 导入拒绝并保留当前地图与撤销：低于10
+[PASS] 保存拒绝：低于10
+[PASS] 地图校验与试战拒绝：坏行
+[PASS] 导入拒绝并保留当前地图与撤销：坏行
+[PASS] 保存拒绝：坏行
+[PASS] 地图校验与试战拒绝：声明不符
+[PASS] 导入拒绝并保留当前地图与撤销：声明不符
+[PASS] 保存拒绝：声明不符
+[PASS] 地图校验与试战拒绝：宽大于高
+[PASS] 导入拒绝并保留当前地图与撤销：宽大于高
+[PASS] 保存拒绝：宽大于高
+[PASS] 地图校验与试战拒绝：超过25
+[PASS] 导入拒绝并保留当前地图与撤销：超过25
+[PASS] 保存拒绝：超过25
+[PASS] 地图校验与试战拒绝：非整数地形
+[PASS] 导入拒绝并保留当前地图与撤销：非整数地形
+[PASS] 保存拒绝：非整数地形
+[PASS] 地图校验与试战拒绝：非整数边长
+[PASS] 导入拒绝并保留当前地图与撤销：非整数边长
+[PASS] 保存拒绝：非整数边长
+[PASS] 地图校验与试战拒绝：高大于宽
+[PASS] 导入拒绝并保留当前地图与撤销：高大于宽
+[PASS] 保存拒绝：高大于宽
+[PASS] 无效保存未创建文件
+[Grid] Initialized 10x10 map: terrain_workshop_session
+[PASS] 有效边长10导入与试战接受
+[Grid] Initialized 17x17 map: terrain_workshop_session
+[PASS] 有效边长17导入与试战接受
+[Grid] Initialized 25x25 map: terrain_workshop_session
+[PASS] 有效边长25导入与试战接受
+[Grid] Initialized 25x25 map: ?
+[PASS] 拒绝无效文件后仍可重新加载25×25
+[PASS] 原生截帧：map-size-25-editor-1280x720.png
+[PASS] 尺寸1280下工作台全部格角在画布内
+[Grid] Initialized 25x25 map: terrain_workshop_session
+[Grid] Initialized 25x25 map: terrain_workshop_session
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[PASS] 25×25进入正式试战1280
+[PASS] 正式试战使用25×25及两个不同出生点
+[PASS] 正式试战棋盘避开上下HUD1280
+[PASS] 25×25正式场景点击格子可移动1280
+[PASS] 原生截帧：map-size-25-battle-1280x720.png
+[PASS] 返回编辑保留25×25及完整撤销栈1280
+[PASS] 尺寸1920下工作台全部格角在画布内
+[PASS] 原生截帧：map-size-25-editor-1920x1080.png
+[Grid] Initialized 25x25 map: terrain_workshop_session
+[Grid] Initialized 25x25 map: terrain_workshop_session
+[TacticalScene] Units spawned: 2
+[TurnManager] Round 1 queue: [剑士(player), 枪兵(enemy)]
+[TurnManager] Turn: 剑士 (player)
+[PASS] 25×25进入正式试战1920
+[PASS] 正式试战使用25×25及两个不同出生点
+[PASS] 正式试战棋盘避开上下HUD1920
+[PASS] 25×25正式场景点击格子可移动1920
+[PASS] 原生截帧：map-size-25-battle-1920x1080.png
+[PASS] 返回编辑保留25×25及完整撤销栈1920
+[PASS] 尺寸调整与试战不污染全局地图表
+[Grid] Initialized 10x10 map: ?
+[PASS] 原10×10文件可加载且控件同步
+TERRAIN_MAP_SIZE_RESULT {"captures":{"map-size-10-editor-1280x720.png":"3066dcc3a3e59d599327dcfb3808557fb882fbeb07c25aff53b2c88ffb20e04a","map-size-25-battle-1280x720.png":"24f213963d528332eafe860af8e7ae9ed9065aefbe4bff082ca93675f87ce32e","map-size-25-battle-1920x1080.png":"4424e34ef9b94fbb9382db67becac6e63c06956af38fe100ddd311f42087d346","map-size-25-editor-1280x720.png":"48fa17a45686e5fee08fffb9827c90449375d2b6dd21f12fd9c1f410eea2f548","map-size-25-editor-1920x1080.png":"3cdcdb9edbcf54e6552db64fe81d1b099f1296b16562d555fdbe40380519bf63"},"checks":79,"failures":[],"max_side":25,"min_side":10,"result":"pass","square_only":true}

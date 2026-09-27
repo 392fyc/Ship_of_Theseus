@@ -1,0 +1,212 @@
+{
+  "approval_record_unchanged_from_task_start": true,
+  "approval_record_sha256": "f57cdb796933c9379bd62281cff33e37f2d391a2e2b2d5706371e7bd442c10fa",
+  "approved_visual_files": [
+    {
+      "file": "assets/prototype/battlefield_courtyard/courtyard-entry-v2.png",
+      "unchanged": true,
+      "sha256": "f801ec6c25de19882f247729f591323700ad47d66270d5c7d448c078f82cc597"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/courtyard-entry-v2.png.import",
+      "unchanged": true,
+      "sha256": "967f0324a6b5fb240eeaf2b0caf9b52e6b6a08a75b5a96e964ec5adc801e9e69"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/courtyard_layouts.json",
+      "unchanged": true,
+      "sha256": "0c3646daed45cb39f86edb7d57fc5b3c0c5a249e2afe9a55f7cb9f9ff61349e1"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/forest-tree-v2.png",
+      "unchanged": true,
+      "sha256": "0db7cb1e145af28443d6eed31ad38c84cdcf48cd6d8cff4b2ded224a44799203"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/forest-tree-v2.png.import",
+      "unchanged": true,
+      "sha256": "b094ddc63391f3a4184a4f0d156583a3c06262ff33d8245b972cd682d279c34c"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/low-rubble-v1.png",
+      "unchanged": true,
+      "sha256": "f775d1a979425068bf437aee78e15b94a407d50e830e89c02cb0f4393c04883c"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/low-rubble-v1.png.import",
+      "unchanged": true,
+      "sha256": "7604abd721588a095dd905596c9ee90996c04f48f597b0b9894acc6a4ae50d4e"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/masonry-wall-v2.png",
+      "unchanged": true,
+      "sha256": "dda2fb161f140090a4017f8f9b99fd72e6c7b69bf98e4355b73432c21644a23b"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/masonry-wall-v2.png.import",
+      "unchanged": true,
+      "sha256": "820490fbbcb948a66c9368684f5f6499518055f3baa46df9e816266bd7314630"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/meadow-ground-v2.png",
+      "unchanged": true,
+      "sha256": "13ccf187b42d4483fe34b525987259ad27b543d6d336b8d38cdbdfa4d0fecd58"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/meadow-ground-v2.png.import",
+      "unchanged": true,
+      "sha256": "3906b1e85492b2bb0ca5ce86ee7ec1f6b90f9620f2a7527be0984ba8edd857b7"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/moss-ground-v1.png",
+      "unchanged": true,
+      "sha256": "6c038fe09f0a9c117fe8d934c33815b820908571581dd3c0e5ea592190fd3b42"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/moss-ground-v1.png.import",
+      "unchanged": true,
+      "sha256": "ee4573d96ef13efa56569849dcfcbd01466fc982103c93732ce19d75f4ed9404"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/natural-rock-v1.png",
+      "unchanged": true,
+      "sha256": "aa7414ec6e3380e60a5b9e3b7d9383b21676a6a87015e2ebda2620b4dc73b5f6"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/natural-rock-v1.png.import",
+      "unchanged": true,
+      "sha256": "3221a3b84d0a0b7039cba57b2be301c87b6409515bace7b61ae5a1f078a889db"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/shrub-v1.png",
+      "unchanged": true,
+      "sha256": "4a8ab22ce661e8285b901cc8d67dc589c6c3d950b0e28e7e948534c2740001c5"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/shrub-v1.png.import",
+      "unchanged": true,
+      "sha256": "6f9359f3fd4759177f2aba515104e085302edee51d5a4087010f38947e57f58d"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/stone-ground-v1.png",
+      "unchanged": true,
+      "sha256": "75e23e7471f98d7a8d233f21533b5fa847c0d5c9c3cc7bbd13efb954c7524826"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/stone-ground-v1.png.import",
+      "unchanged": true,
+      "sha256": "7aab4e2360eec7d4220cea5eeb22f216479d7dd3752b75d2c4b79ba8b4b62653"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/terrain_catalog.json",
+      "unchanged": true,
+      "sha256": "9952635f32faf7d69bd32c0e883714b3273c9ce006732ad6c7b8ff4d1e7486b0"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/terrain_examples.json",
+      "unchanged": true,
+      "sha256": "52832ee9c2fbd3eb119b605990eb8d18a584a42dd3a671af4b824348e8731b58"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/visual_profile.json",
+      "unchanged": true,
+      "sha256": "8bbf74074fbca4ab6162e60e66d383c5b365eb4a6a85a8dad5f9dc1b4a5923aa"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/water-surface-v5.png",
+      "unchanged": true,
+      "sha256": "5a82396548d2ac161d9fa6d2af60caad2859f74f1254e978a1b54d5cadd9c520"
+    },
+    {
+      "file": "assets/prototype/battlefield_courtyard/water-surface-v5.png.import",
+      "unchanged": true,
+      "sha256": "6811e408f4e4cc42362c78095e586f63557066e8fc7a28f92b8e6dabb49048ea"
+    },
+    {
+      "file": "scripts/ui/playground/courtyard_board_view.gd",
+      "unchanged": true,
+      "sha256": "41a307633f513a9f47b15763396017121b146519186241fd95532aca5f78ddd7"
+    },
+    {
+      "file": "scripts/ui/terrain/terrain_blend.gdshader",
+      "unchanged": true,
+      "sha256": "a1ff38cab28a3d80ef0e6268344c05f8d0caee0e93b996793d143869119b6836"
+    },
+    {
+      "file": "scripts/ui/terrain/terrain_surface.gd",
+      "unchanged": true,
+      "sha256": "5526db8ee3bdb8d5bc264bae24cf5d05e9670e1507fcd3ee413ce5ed7593b13f"
+    }
+  ],
+  "approved_catalog_functions": [
+    {
+      "function": "catalog",
+      "unchanged": true,
+      "sha256": "30f1a7e8eedbd3bfc2851b0f8765a145226baba78ed08eadbd4c15ca4519d2af"
+    },
+    {
+      "function": "pair_rule",
+      "unchanged": true,
+      "sha256": "887a42930f3765e2e9460353b5a3724f9ab8ddb3848ca221890a0c7bffb4711e"
+    },
+    {
+      "function": "transition_style",
+      "unchanged": true,
+      "sha256": "73f003a1e82fcdaec7ef1e2b0187d71e03c122479af7c3601657535c4adafb18"
+    }
+  ],
+  "catalog_visual_data_path": "res://assets/prototype/battlefield_courtyard/terrain_catalog.json",
+  "visual_capture_comparisons": [
+    {
+      "file": "terrain-corners.png",
+      "byte_identical_to_approved_capture": true,
+      "sha256": "de1b11a2abf0c43fa9be038a6e68d58b3127549b77cf0764ed57b7a60fe8e915"
+    },
+    {
+      "file": "terrain-example-courtyard.png",
+      "byte_identical_to_approved_capture": true,
+      "sha256": "d32206a4409b31705905a4e006f46f581b71863c6728238d964a7aee9d77ba78"
+    },
+    {
+      "file": "terrain-example-highland.png",
+      "byte_identical_to_approved_capture": true,
+      "sha256": "286c1494aefec69f07e7961a9fb1b476f8cf3a8eb964fb482bf69b56f9b1cc68"
+    },
+    {
+      "file": "terrain-example-wetland.png",
+      "byte_identical_to_approved_capture": true,
+      "sha256": "d8879db14b38d0fa58be638456c5e5c8e10ecf100c5f566bbf9c8227fe2c1ee8"
+    },
+    {
+      "file": "terrain-obstacles.png",
+      "byte_identical_to_approved_capture": true,
+      "sha256": "3734af12ab1b2115dc828ba8adee7c5e5f6b0ad3eac483f9c2a086d6d3b97cf1"
+    },
+    {
+      "file": "terrain-pairs-01.png",
+      "byte_identical_to_approved_capture": true,
+      "sha256": "6ea2ccddff817aba2790238cfc7313075c1c68eb1d3cf7480fb57c5e6da09730"
+    },
+    {
+      "file": "terrain-pairs-02.png",
+      "byte_identical_to_approved_capture": true,
+      "sha256": "7f67622caedfd1688ade97fbc41865c820a613e786483d6500d6f0b0f9d8803c"
+    },
+    {
+      "file": "terrain-pairs-03.png",
+      "byte_identical_to_approved_capture": true,
+      "sha256": "8c31c6351b368304c39e45fdf3a774f6d4c0aec2e16df6282cc685947e59f234"
+    },
+    {
+      "file": "terrain-pairs-04.png",
+      "byte_identical_to_approved_capture": true,
+      "sha256": "09d71e6be299b578b903dd2ab9c3233741761670cabf05aa9241612b2fcc2779"
+    }
+  ],
+  "final_source_count": 46,
+  "final_sources_still_match": true,
+  "unchanged_battle_files": [
+    "scripts/tactical/terrain_battle_session.gd",
+    "scripts/ui/terrain/terrain_battle_definition.gd"
+  ]
+}

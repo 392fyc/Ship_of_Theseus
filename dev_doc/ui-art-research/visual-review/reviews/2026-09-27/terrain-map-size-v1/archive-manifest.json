@@ -1,0 +1,603 @@
+{
+  "task_id": "square-map-size-10-25",
+  "source_batch": "final-v3",
+  "raw_capture_post_processing": false,
+  "identical_prior_images_referenced_by_sha256": true,
+  "files": [
+    {
+      "file": "editor-flow/run.log",
+      "sha256": "ee6178733c916714df1d9732aee8d40f9861cb25bacebd3c650a52ef7ad1200d",
+      "bytes": 2501,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/editor-flow/run.log"
+    },
+    {
+      "file": "editor-flow/terrain-painter-battle-1280x720.png",
+      "sha256": "5846938ddd49a05f069b8ec54e4a2af90d5bc088d0c9f7fa66ec367946a4c08f",
+      "bytes": 2025059,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/editor-flow/terrain-painter-battle-1280x720.png"
+    },
+    {
+      "file": "editor-flow/terrain-painter-battle-flow.json",
+      "sha256": "862de56d3da51da34c570de3b9b324a8a12f15558dd07512bcf9ecb8e77870f4",
+      "bytes": 192,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/editor-flow/terrain-painter-battle-flow.json"
+    },
+    {
+      "file": "editor-flow/terrain-painter-return-1280x720.png",
+      "sha256": "1ab175e140da3fe8a4c66050a7f35a5ad9b662dd8767748581bee93bef9e405f",
+      "bytes": 1301391,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/editor-flow/terrain-painter-return-1280x720.png"
+    },
+    {
+      "file": "legacy-injection/run.log",
+      "sha256": "978f83d6c37394af440238828ad8da5a41a6c61524ffcc9d8b1fcf4269ad13a0",
+      "bytes": 1705,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/legacy-injection/run.log"
+    },
+    {
+      "file": "map-size/invalid-import.json",
+      "sha256": "0992dbcdeee24c7bdbe2f40555c66399db8e71580791cbd838feeddc73534ad2",
+      "bytes": 595,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/invalid-import.json"
+    },
+    {
+      "file": "map-size/map-size-10-editor-1280x720.png",
+      "sha256": "3066dcc3a3e59d599327dcfb3808557fb882fbeb07c25aff53b2c88ffb20e04a",
+      "bytes": 1288132,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/map-size-10-editor-1280x720.png"
+    },
+    {
+      "file": "map-size/map-size-25-battle-1280x720.png",
+      "sha256": "24f213963d528332eafe860af8e7ae9ed9065aefbe4bff082ca93675f87ce32e",
+      "bytes": 2082328,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/map-size-25-battle-1280x720.png"
+    },
+    {
+      "file": "map-size/map-size-25-battle-1920x1080.png",
+      "sha256": "4424e34ef9b94fbb9382db67becac6e63c06956af38fe100ddd311f42087d346",
+      "bytes": 4487555,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/map-size-25-battle-1920x1080.png"
+    },
+    {
+      "file": "map-size/map-size-25-editor-1280x720.png",
+      "sha256": "48fa17a45686e5fee08fffb9827c90449375d2b6dd21f12fd9c1f410eea2f548",
+      "bytes": 1398090,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/map-size-25-editor-1280x720.png"
+    },
+    {
+      "file": "map-size/map-size-25-editor-1920x1080.png",
+      "sha256": "3cdcdb9edbcf54e6552db64fe81d1b099f1296b16562d555fdbe40380519bf63",
+      "bytes": 3657942,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/map-size-25-editor-1920x1080.png"
+    },
+    {
+      "file": "map-size/roundtrip-10.json",
+      "sha256": "01b7ccf055383ef2a0a37d192e5c08ead26a0c00d40e64f29b4e245e2d6c072a",
+      "bytes": 1101,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/roundtrip-10.json"
+    },
+    {
+      "file": "map-size/roundtrip-25.json",
+      "sha256": "053d3c05ce1cbe2bf4b82a2db3c6c7274cb0c0169fe4d84577c14f77c0d42fda",
+      "bytes": 7890,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/roundtrip-25.json"
+    },
+    {
+      "file": "map-size/run.log",
+      "sha256": "6e4b385a51da119544241be31da5891b9b430b0a9e5595767fc7425ca0942e23",
+      "bytes": 5795,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/run.log"
+    },
+    {
+      "file": "map-size/terrain-map-size-report.json",
+      "sha256": "78f223bec0cd4b9f0f03abe1216e7a87915ad862417d3e16c57133927e618091",
+      "bytes": 672,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/map-size/terrain-map-size-report.json"
+    },
+    {
+      "file": "runtime/battle-courtyard-1280.png",
+      "sha256": "e787b89ce8b5ed9a2a5f5911a54aabf2c4bb7150c91583b77bf29c5ed88b7982",
+      "bytes": 2021902,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-runtime-v2/runtime/battle-courtyard-1280.png"
+    },
+    {
+      "file": "runtime/battle-courtyard-1920.png",
+      "sha256": "50a0731bffe483009dd99b2649552315151bcc56de85e994661e682d797ca2ef",
+      "bytes": 4275899,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-runtime-v2/runtime/battle-courtyard-1920.png"
+    },
+    {
+      "file": "runtime/battle-highland-1280.png",
+      "sha256": "0e34ffcd4169b77b0d4d750ab5addca3c9e2b1473c64545bd285719c71f685a9",
+      "bytes": 2023572,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-runtime-v2/runtime/battle-highland-1280.png"
+    },
+    {
+      "file": "runtime/battle-highland-1920.png",
+      "sha256": "ac591beaf68ca25762e3184dfa39fd70465c99505b3d038f38246a65311187fd",
+      "bytes": 4285149,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-runtime-v2/runtime/battle-highland-1920.png"
+    },
+    {
+      "file": "runtime/battle-wetland-1280.png",
+      "sha256": "e385731dd2838eede43eb513852e214e5bf9531a6e8b2433081a5044b740f874",
+      "bytes": 2009045,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/runtime/battle-wetland-1280.png"
+    },
+    {
+      "file": "runtime/battle-wetland-1920.png",
+      "sha256": "9ffe583e904e636e221ea3d3bf5664c68aee1aea62e800619341e41bdb845a81",
+      "bytes": 4248055,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-runtime-v2/runtime/battle-wetland-1920.png"
+    },
+    {
+      "file": "runtime/run.log",
+      "sha256": "aa7e85e1ef87b56d3b9c8732b670b2cd4e2d4d5713f7e3269212f2feec7d8219",
+      "bytes": 5197,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/runtime/run.log"
+    },
+    {
+      "file": "runtime/terrain-battle-runtime-report.json",
+      "sha256": "048bbec5da7783a1b6f5cc27316da3da0d57ceeb6c2b315b78f69b59c0699a75",
+      "bytes": 748,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/runtime/terrain-battle-runtime-report.json"
+    },
+    {
+      "file": "terrain-regression/kit/run.log",
+      "sha256": "2ed69e53edd5161525b11f27d2316f0b210d9b5972a6acbeaa5518bf16dd7529",
+      "bytes": 3731,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/kit/run.log"
+    },
+    {
+      "file": "terrain-regression/kit/terrain-corners.png",
+      "sha256": "de1b11a2abf0c43fa9be038a6e68d58b3127549b77cf0764ed57b7a60fe8e915",
+      "bytes": 680426,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-corners.png"
+    },
+    {
+      "file": "terrain-regression/kit/terrain-example-courtyard.png",
+      "sha256": "d32206a4409b31705905a4e006f46f581b71863c6728238d964a7aee9d77ba78",
+      "bytes": 1758544,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-example-courtyard.png"
+    },
+    {
+      "file": "terrain-regression/kit/terrain-example-highland.png",
+      "sha256": "286c1494aefec69f07e7961a9fb1b476f8cf3a8eb964fb482bf69b56f9b1cc68",
+      "bytes": 1776947,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-example-highland.png"
+    },
+    {
+      "file": "terrain-regression/kit/terrain-example-wetland.png",
+      "sha256": "d8879db14b38d0fa58be638456c5e5c8e10ecf100c5f566bbf9c8227fe2c1ee8",
+      "bytes": 1710217,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-example-wetland.png"
+    },
+    {
+      "file": "terrain-regression/kit/terrain-kit-report.json",
+      "sha256": "82e22179e005cade87fa93fd6611dfb4b4819d9253a3627062e1ce165d70d7c3",
+      "bytes": 1029,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/kit/terrain-kit-report.json"
+    },
+    {
+      "file": "terrain-regression/kit/terrain-obstacles.png",
+      "sha256": "3734af12ab1b2115dc828ba8adee7c5e5f6b0ad3eac483f9c2a086d6d3b97cf1",
+      "bytes": 677623,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-obstacles.png"
+    },
+    {
+      "file": "terrain-regression/kit/terrain-pairs-01.png",
+      "sha256": "6ea2ccddff817aba2790238cfc7313075c1c68eb1d3cf7480fb57c5e6da09730",
+      "bytes": 699387,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-pairs-01.png"
+    },
+    {
+      "file": "terrain-regression/kit/terrain-pairs-02.png",
+      "sha256": "7f67622caedfd1688ade97fbc41865c820a613e786483d6500d6f0b0f9d8803c",
+      "bytes": 750363,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-pairs-02.png"
+    },
+    {
+      "file": "terrain-regression/kit/terrain-pairs-03.png",
+      "sha256": "8c31c6351b368304c39e45fdf3a774f6d4c0aec2e16df6282cc685947e59f234",
+      "bytes": 631676,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-pairs-03.png"
+    },
+    {
+      "file": "terrain-regression/kit/terrain-pairs-04.png",
+      "sha256": "09d71e6be299b578b903dd2ab9c3233741761670cabf05aa9241612b2fcc2779",
+      "bytes": 649172,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/kit/terrain-pairs-04.png"
+    },
+    {
+      "file": "terrain-regression/painter/run.log",
+      "sha256": "02229db2a6437a2a145502a14a0ddbdf7bf4facd82e46b519e67237481960f09",
+      "bytes": 2942,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/painter/run.log"
+    },
+    {
+      "file": "terrain-regression/painter/terrain-painter-comparison.json",
+      "sha256": "40fb74753c0885040d00c21c27eefde5213a3944e69d04eedc56c67ab396d9c7",
+      "bytes": 306,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/painter/terrain-painter-comparison.json"
+    },
+    {
+      "file": "terrain-regression/painter/terrain-painter-json.png",
+      "sha256": "590872193acd770dbac22d61bf651a73fa60b039bf5c1496176a46e6710159dd",
+      "bytes": 1191643,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-runtime-v2/terrain-regression/painter/terrain-painter-json.png"
+    },
+    {
+      "file": "terrain-regression/painter/terrain-painter-manual.png",
+      "sha256": "590872193acd770dbac22d61bf651a73fa60b039bf5c1496176a46e6710159dd",
+      "bytes": 1191643,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-runtime-v2/terrain-regression/painter/terrain-painter-json.png"
+    },
+    {
+      "file": "terrain-regression/painter/terrain-painter-validation.json",
+      "sha256": "66f086cab5fe421986f8bbf4e6d280fd5ec0db06c5e3dee94f1fc36d79d838a0",
+      "bytes": 168,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/painter/terrain-painter-validation.json"
+    },
+    {
+      "file": "terrain-regression/painter/terrain-painter-workbench-1280x720.png",
+      "sha256": "c11857494356e1bc9039293cbbc671b136b9091286d60d9a1b18c2485007a785",
+      "bytes": 1269529,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/painter/terrain-painter-workbench-1280x720.png"
+    },
+    {
+      "file": "terrain-regression/regression/adjacency.log",
+      "sha256": "706b3f59182fa7dbd060df4c89de65760a0077bec996e09336829316029254d0",
+      "bytes": 1624,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/adjacency.log"
+    },
+    {
+      "file": "terrain-regression/regression/capture-manifest.json",
+      "sha256": "355f75bfd978e2001da909781f799171f2e81771ba390bbf2c5206fbbb7b5f80",
+      "bytes": 40360,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/capture-manifest.json"
+    },
+    {
+      "file": "terrain-regression/regression/flooded-1280-clear.png",
+      "sha256": "2f7441242fc074f4371e37aa441ba8166ac7caf08ccc263d97cd7f44f69e3239",
+      "bytes": 1798648,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/flooded-1280-clear.png"
+    },
+    {
+      "file": "terrain-regression/regression/flooded-1280-play.png",
+      "sha256": "b6302a5a46bc9d81423e3d3707c3c894090a1ac8cd9032d29f20a39699f3b335",
+      "bytes": 1828764,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/flooded-1280-play.png"
+    },
+    {
+      "file": "terrain-regression/regression/flooded-1920-clear.png",
+      "sha256": "6bf86da41a1b0f2afbb5e90e218766f8f3b6faf5b3a3b1a14502c365a3a6f9bd",
+      "bytes": 3695067,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/flooded-1920-clear.png"
+    },
+    {
+      "file": "terrain-regression/regression/flooded-1920-play.png",
+      "sha256": "94a7621195cd37e14cb3a8100937c8d47117cf7f70113370d0af57f5ba41e712",
+      "bytes": 3743693,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/flooded-1920-play.png"
+    },
+    {
+      "file": "terrain-regression/regression/interaction.log",
+      "sha256": "9d6ddaeb6ef28ef8624f2609b4c67b9a07435c0bda9b6bef627761615c74c4d8",
+      "bytes": 7473,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/interaction.log"
+    },
+    {
+      "file": "terrain-regression/regression/material-ground.png",
+      "sha256": "849ff6fe3658964587ee825173d3bf0a261fe5d67c8d7c45d5d7f0e953f058be",
+      "bytes": 636023,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/material-ground.png"
+    },
+    {
+      "file": "terrain-regression/regression/material-intake.json",
+      "sha256": "c24d0a42e45da9e40f4a9c10c222eb067f68aedde14313528bb062ad0ba1db6e",
+      "bytes": 1874,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/material-intake.json"
+    },
+    {
+      "file": "terrain-regression/regression/material-intake.log",
+      "sha256": "49a57f4d24d417a6d478ddd993989b26714e5d82afb728d87044bf1f7941e3f9",
+      "bytes": 472,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/material-intake.log"
+    },
+    {
+      "file": "terrain-regression/regression/material-rock.png",
+      "sha256": "15f9467f373c0e4c65162d2f91ad50e734ca75223629c114edb9a57f67b5580f",
+      "bytes": 675070,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/material-rock.png"
+    },
+    {
+      "file": "terrain-regression/regression/material-water.png",
+      "sha256": "8f7301690ec0a5615efc2223c6c3c5b2896787e62e2ebcabe25701b86cf7abad",
+      "bytes": 467013,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/material-water.png"
+    },
+    {
+      "file": "terrain-regression/regression/overgrown-1280-clear.png",
+      "sha256": "07856074e61df0cbddf1092c41e2d5b3752d4232bfa53497f42617bd874a0a4c",
+      "bytes": 1949806,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/overgrown-1280-clear.png"
+    },
+    {
+      "file": "terrain-regression/regression/overgrown-1280-play.png",
+      "sha256": "28bf00560ff35bb9994085cac704f95b706fb8f569a907f878305c2e7240e375",
+      "bytes": 1961814,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/overgrown-1280-play.png"
+    },
+    {
+      "file": "terrain-regression/regression/overgrown-1920-clear.png",
+      "sha256": "02fe46f9621ae41da075a4356312f40d65863e404fe5f421302f4804deca366e",
+      "bytes": 4034021,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/overgrown-1920-clear.png"
+    },
+    {
+      "file": "terrain-regression/regression/overgrown-1920-play.png",
+      "sha256": "2708af4bf96c5ecc2690a98f176e7ec6216cae9e0be5194d102201cb7c693bf9",
+      "bytes": 4043056,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/overgrown-1920-play.png"
+    },
+    {
+      "file": "terrain-regression/regression/passage-1280-clear.png",
+      "sha256": "3d63b345cd6aad13b508ec4a791ff1300fcb884d1f312c317b62b6616449b151",
+      "bytes": 1933506,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/passage-1280-clear.png"
+    },
+    {
+      "file": "terrain-regression/regression/passage-1280-play.png",
+      "sha256": "d17566d75ae3efab0e87e57b3e07ea11eaab08a5c4aa992ca733efdec24fbe0e",
+      "bytes": 1956385,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/passage-1280-play.png"
+    },
+    {
+      "file": "terrain-regression/regression/passage-1920-clear.png",
+      "sha256": "eba1247251a0766e2f3e3ff56674ed049daa8b6f75e24d010723da8d4c1efd82",
+      "bytes": 3992332,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/passage-1920-clear.png"
+    },
+    {
+      "file": "terrain-regression/regression/passage-1920-play.png",
+      "sha256": "9d716cc74f70bec97005396d72401323128dae77d155ca84937ff98394128910",
+      "bytes": 4025418,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/passage-1920-play.png"
+    },
+    {
+      "file": "terrain-regression/regression/stone-bank-current.png",
+      "sha256": "8545b0b3df390932a5dfd481d424fe9c30637c2967e8a617bf48c8f2bd3e7fb3",
+      "bytes": 225157,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/stone-bank-current.png"
+    },
+    {
+      "file": "terrain-regression/regression/stone-bank-legacy-negative.png",
+      "sha256": "d43fd4199364ad2e6028766e74e16bc4ee77d14f9ea2e06a79eb109eed4baaac",
+      "bytes": 224785,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/stone-bank-legacy-negative.png"
+    },
+    {
+      "file": "terrain-regression/regression/stone-bank-reference.png",
+      "sha256": "8545b0b3df390932a5dfd481d424fe9c30637c2967e8a617bf48c8f2bd3e7fb3",
+      "bytes": 225157,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/stone-bank-current.png"
+    },
+    {
+      "file": "terrain-regression/regression/terrain-adjacency.png",
+      "sha256": "fb64c7c9d8f5baf8eda1ee5a8272452703803682333871060c60b7d85d9952c3",
+      "bytes": 889072,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/terrain-adjacency.png"
+    },
+    {
+      "file": "terrain-regression/regression/validation-run.json",
+      "sha256": "daec32afccdc67e297782e1d6e8a303b940fb605ad9b9d86b3b504c257e93d15",
+      "bytes": 38358,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/validation-run.json"
+    },
+    {
+      "file": "terrain-regression/regression/verification.json",
+      "sha256": "8b477120d646c63acae9564f01825786fdfc322e9cf9f973d6b72ccc4935c480",
+      "bytes": 90,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/verification.json"
+    },
+    {
+      "file": "terrain-regression/regression/water-contract.log",
+      "sha256": "8a9333eab0bd4c9f09ba34e91d474851fb889408863ff296af84c8c8774e0bef",
+      "bytes": 779,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/water-contract.log"
+    },
+    {
+      "file": "terrain-regression/regression/water-depth-basin.png",
+      "sha256": "4ab52db0dce8deb622a9a35651545449338d46c8437e082bfd9d283614668607",
+      "bytes": 430521,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-basin.png"
+    },
+    {
+      "file": "terrain-regression/regression/water-depth-continuity-comparison.png",
+      "sha256": "7649a26e88d2f9fa16736d72dd3027db7df02203fc1ca3a6226910bf8b171b1d",
+      "bytes": 238114,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-continuity-comparison.png"
+    },
+    {
+      "file": "terrain-regression/regression/water-depth-continuity-report.json",
+      "sha256": "dae9b7ef3f0d99967d80b7050e4896bd5ecd60ec17aeb9f6a31145b38da33967",
+      "bytes": 13523,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/water-depth-continuity-report.json"
+    },
+    {
+      "file": "terrain-regression/regression/water-depth-continuity.log",
+      "sha256": "79128ec92749c7c0c7ac64cb28174217ad796628496db92506bf3a35ff6b5b5f",
+      "bytes": 702,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/water-depth-continuity.log"
+    },
+    {
+      "file": "terrain-regression/regression/water-depth-correct.png",
+      "sha256": "e058a66431213c1b5c47dfe8b12da0a07213e59f77da9d896325b69f72d5a737",
+      "bytes": 215887,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-correct.png"
+    },
+    {
+      "file": "terrain-regression/regression/water-depth-extension-neutral.png",
+      "sha256": "32da741301b210d6bf124c87aa785d4e2247a2bbed0e4c265901c84c913751a3",
+      "bytes": 397632,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-extension-neutral.png"
+    },
+    {
+      "file": "terrain-regression/regression/water-depth-hard-cut-negative.png",
+      "sha256": "fc14d659dc8242c26bad25eb9d9170d851412cc0d924de3d868331403c861bd6",
+      "bytes": 361526,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-hard-cut-negative.png"
+    },
+    {
+      "file": "terrain-regression/regression/water-depth-narrow-strip-negative.png",
+      "sha256": "8083ffc892fccdf62c498046cb26caaa23286fb2d0559cb57c888a6c9c663d60",
+      "bytes": 362625,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-narrow-strip-negative.png"
+    },
+    {
+      "file": "terrain-regression/regression/water-depth-neutral.png",
+      "sha256": "927f361da942610f144db29250ad4b9ccab5803dd25276b0906752f8e84a0d2d",
+      "bytes": 388723,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-neutral.png"
+    },
+    {
+      "file": "terrain-regression/regression/water-depth-render-negative.png",
+      "sha256": "c755a01c5f01d294cc6be808146335767d8cad9dcdc02514673b501c4421e7ac",
+      "bytes": 218115,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-render-negative.png"
+    },
+    {
+      "file": "terrain-regression/regression/water-depth-semantic-negative.png",
+      "sha256": "9217e031c3626afc10dd2123e5c6d6282ce3654643ba7b68767d367a29125e2e",
+      "bytes": 217877,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-semantic-negative.png"
+    },
+    {
+      "file": "terrain-regression/regression/water-depth-single-cell.png",
+      "sha256": "f1953cf61949c7773cd60607313c04b077dbba76ef444d4d09b8e5f324de0b07",
+      "bytes": 491577,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-single-cell.png"
+    },
+    {
+      "file": "terrain-regression/regression/water-depth-single-neutral.png",
+      "sha256": "7c5d0fdf617c55078ae36006f6d0e35ae97e1edae8f1cf1b7642c617723fb973",
+      "bytes": 485059,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-depth-single-neutral.png"
+    },
+    {
+      "file": "terrain-regression/regression/water-visual-contract-report.json",
+      "sha256": "f8bc688097ac7391e3b011a53319a671ccf0d6733ca50565fffe6d9e4739fc4a",
+      "bytes": 4346,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/water-visual-contract-report.json"
+    },
+    {
+      "file": "terrain-regression/regression/water-visual-diagnostic-comparison.png",
+      "sha256": "f0714ef1035b864b962ca52f27a46d8dd1b0236d0e1af1bd40cb5a836bcbc528",
+      "bytes": 546314,
+      "storage": "reused_identical_capture",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-kit-v1/regression/water-visual-diagnostic-comparison.png"
+    },
+    {
+      "file": "terrain-regression/regression/whole-scene.log",
+      "sha256": "98bda176746ae8006841c1ab18ea258e9c1549208503db8042d7c16bf560a922",
+      "bytes": 1184,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/regression/whole-scene.log"
+    },
+    {
+      "file": "terrain-regression/terrain-validation-run.json",
+      "sha256": "c5580d9b22317d705c5cbb2de0426ef3efd64ea0e55239e2c49213cd86df0eb9",
+      "bytes": 3418,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-regression/terrain-validation-run.json"
+    },
+    {
+      "file": "terrain-runtime-validation.json",
+      "sha256": "4c242037580213d1008c02ada93d5c91f2ed9c43d2c6bea001ff1cbfdb46c9d1",
+      "bytes": 8260,
+      "storage": "copied_byte_identically",
+      "stored_as": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/terrain-runtime-validation.json"
+    }
+  ]
+}

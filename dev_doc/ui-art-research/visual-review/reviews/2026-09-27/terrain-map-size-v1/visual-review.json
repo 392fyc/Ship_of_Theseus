@@ -1,0 +1,34 @@
+{
+  "reviewer": "main",
+  "batch": "final-v3",
+  "verdict": "pass",
+  "method": "直接查看 Godot 原始 PNG，未裁切、合成、锐化或替换画面。",
+  "observations": [
+    {
+      "files": [
+        "map-size/map-size-10-editor-1280x720.png",
+        "map-size/map-size-25-editor-1280x720.png"
+      ],
+      "result": "pass",
+      "evidence": "边长范围与数字清楚，调整和试战按钮均完整；九种地形可见；地图格角位于画布内。"
+    },
+    {
+      "files": [
+        "map-size/map-size-25-editor-1920x1080.png"
+      ],
+      "result": "pass",
+      "evidence": "画布扩大后25格棋盘重新居中并扩大，右侧和底部不再暴露未覆盖的灰色区域。"
+    },
+    {
+      "files": [
+        "map-size/map-size-25-battle-1280x720.png",
+        "map-size/map-size-25-battle-1920x1080.png"
+      ],
+      "result": "pass",
+      "evidence": "整张棋盘在顶栏和底部HUD之间；两个出生点可见，剑气、头像与技能栏完整，试战按钮可用。"
+    }
+  ],
+  "limits": [
+    "25×25全图视野下格子和单位会变小；正式试战可使用既有缩放与拖动。没有据此批准新地图布局或遭遇平衡。"
+  ]
+}

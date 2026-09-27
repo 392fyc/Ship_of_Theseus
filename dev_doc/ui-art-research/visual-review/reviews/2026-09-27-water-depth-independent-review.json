@@ -1,0 +1,43 @@
+{
+  "date": "2026-09-27",
+  "reviewer": "water_pipeline_review",
+  "mode": "read_only",
+  "batch": "final-v6",
+  "verdict": "pass",
+  "blockers": [],
+  "scope": "水深连续性、代表水域、单格极端样例、跨界曲线与对应错误对照；不代表整体美术或用户认可。",
+  "actual_images_viewed": [
+    "water-depth-basin.png",
+    "water-depth-correct.png",
+    "water-depth-single-cell.png",
+    "flooded-1280-clear.png",
+    "water-depth-continuity-comparison.png"
+  ],
+  "findings": [
+    {
+      "criterion": "实际图解决孤立硬色块与缺少可见过渡",
+      "result": "pass",
+      "evidence": "7×7 深区连片，向浅水外围平滑变亮；单格极端仅为较弱低洼。未见明显格线、角部叠色或内部接缝。"
+    },
+    {
+      "criterion": "取样范围与检查职责一致",
+      "result": "pass",
+      "evidence": "相邻浅深格中心之间测边界过渡，完整深色端点另由 5×5 样例中的 3×3 深区核心校准。首轮约82像素长路径含深水平台，原失败报告保留；当前约37–41像素，门槛未变。"
+    },
+    {
+      "criterion": "错误对照由同一检查器拒绝",
+      "result": "pass",
+      "evidence": "四条正确曲线各10–13个中间色样本，最大步进0.0254；硬切和旧五条窄带的三条对应路径均被同一 _check_curve 拒绝。单格弱峰检查通过。"
+    },
+    {
+      "criterion": "端点标准及状态边界",
+      "result": "pass",
+      "evidence": "端点门槛仍为0.10，当前正确差约0.1115、错误浅色差为0；最终批次六步完成，仍为pending_user、candidate_unapproved。"
+    }
+  ],
+  "limits": [
+    "未重跑全套，实际读取代码、规格、报告与图片核对。",
+    "指定静态样例不能覆盖所有水域形状、动态水纹或完整美术语义。",
+    "端点色差余量较窄，后续保持正反样例校准和实际看图，不降低阈值求通过。"
+  ]
+}

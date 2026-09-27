@@ -1,0 +1,56 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 596.36 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 3070 Ti
+
+[DataLoader] Loaded: 7 classes, 20 skills, 10 buffs, 8 enemies, 4 maps, 2 states, 7 talents
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 10x10 map: terrain_courtyard
+[Grid] Initialized 10x10 map: terrain_wetland
+[Grid] Initialized 10x10 map: terrain_highland
+[Grid] Initialized 10x10 map: terrain_highland
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+[Grid] Initialized 5x5 map: terrain_kit_fixture
+TERRAIN_KIT_RESULT {"allowed_distinct_pairs_rendered":32,"captures":{"terrain-corners.png":"de1b11a2abf0c43fa9be038a6e68d58b3127549b77cf0764ed57b7a60fe8e915","terrain-example-courtyard.png":"d32206a4409b31705905a4e006f46f581b71863c6728238d964a7aee9d77ba78","terrain-example-highland.png":"286c1494aefec69f07e7961a9fb1b476f8cf3a8eb964fb482bf69b56f9b1cc68","terrain-example-wetland.png":"d8879db14b38d0fa58be638456c5e5c8e10ecf100c5f566bbf9c8227fe2c1ee8","terrain-obstacles.png":"3734af12ab1b2115dc828ba8adee7c5e5f6b0ad3eac483f9c2a086d6d3b97cf1","terrain-pairs-01.png":"6ea2ccddff817aba2790238cfc7313075c1c68eb1d3cf7480fb57c5e6da09730","terrain-pairs-02.png":"7f67622caedfd1688ade97fbc41865c820a613e786483d6500d6f0b0f9d8803c","terrain-pairs-03.png":"8c31c6351b368304c39e45fdf3a774f6d4c0aec2e16df6282cc685947e59f234","terrain-pairs-04.png":"09d71e6be299b578b903dd2ab9c3233741761670cabf05aa9241612b2fcc2779"},"checks":166,"excluded_pairs":4,"failures":[],"result":"pass"}

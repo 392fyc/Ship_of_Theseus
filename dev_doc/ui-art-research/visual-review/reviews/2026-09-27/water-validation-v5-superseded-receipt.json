@@ -1,0 +1,185 @@
+{
+  "task_id": "courtyard-water-production-validation-v5",
+  "status": "completed",
+  "revision": "water-validation-v5",
+  "deliverable_stage": "当前两处局部修正、生成与验收流程改造、实际运行和独立复核完成；整体视觉仍为待用户认可的候选。",
+  "milestone_complete": false,
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/battlefield-courtyard-study",
+  "target_head_before": "75d9bf2c64e5504904feb8580339a08ebbb58a59",
+  "candidate_head": null,
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "在独立任务工作树内完成已授权修正，保留已有改动；已批准 HUD 与玩法规则不变，独立复核不替代用户认可。"
+    },
+    {
+      "contract": ".codex/project/mercury-task-contract.md",
+      "summary": "按本轮可复现结果记录任务完成情况、证据、受保护状态与真实未决范围。"
+    },
+    {
+      "contract": "sot-task-receipt",
+      "summary": "当前回执仅覆盖水岸与流程任务；未提交候选有明确来源摘要和独立审查结果。"
+    }
+  ],
+  "changed_files": [
+    "scripts/ui/playground/courtyard_board_view.gd",
+    "tests/test_courtyard_terrain_adjacency.gd",
+    "tests/test_courtyard_water_visual_contract.gd",
+    "tests/capture_courtyard_material_intake.gd",
+    "tests/capture_courtyard_visual_review.gd",
+    "tests/run_courtyard_visual_validation.ps1",
+    "assets/prototype/battlefield_courtyard/visual_profile.json",
+    "assets/prototype/battlefield_courtyard/source-manifest.json",
+    "assets/prototype/battlefield_courtyard/water-surface-v3.png",
+    "assets/prototype/battlefield_courtyard/water-surface-v3.png.import",
+    "assets/prototype/battlefield_courtyard/water-surface-v4.png",
+    "assets/prototype/battlefield_courtyard/water-surface-v4.png.import",
+    "assets/prototype/battlefield_courtyard/water-surface-v5.png",
+    "assets/prototype/battlefield_courtyard/water-surface-v5.png.import",
+    "assets/prototype/battlefield_courtyard/README.md",
+    "assets/prototype/battlefield_courtyard/candidate-receipt.json",
+    "dev_doc/ui-art-research/visual-review/README.md",
+    "dev_doc/ui-art-research/visual-review/water-visual-contract.json",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27-water-pipeline-audit.md",
+    "dev_doc/ui-art-research/visual-review/reviews/2026-09-27-water-pipeline-independent-review.json"
+  ],
+  "evidence_archive": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/water-validation-v5/archive-manifest.json",
+  "rejected_material_evidence": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/materials-rejected/",
+  "verification": [
+    {
+      "command": "tests/run_courtyard_visual_validation.ps1 -GodotPath <godot-4.6.3> -OutputDirectory <new-absolute-directory>",
+      "result": "pass",
+      "evidence": "water-validation-v5-release-candidate；gl_compatibility；五步完成、退出 0；正确样本通过，三类坏样本被拒绝，14 项邻接和 97 项交互通过，两幅素材预览与 12 张稳定整屏已生成。"
+    },
+    {
+      "command": "同一执行入口使用只返回空对象并退出 0 的反例探针",
+      "result": "pass",
+      "evidence": "water-validation-empty-evidence-final；入口退出 1，首步 passed=false，后续四步未执行。归档 empty-evidence-rejected.json。"
+    },
+    {
+      "command": "主代理与独立审查者重算当前来源及入口摘要",
+      "result": "pass",
+      "evidence": "当前批次聚合 293 项来源，0 缺失、0 不符；整屏清单 289 项均在聚合中，runner 自身摘要匹配。"
+    },
+    {
+      "command": "主代理与独立审查者查看当前石岸、水深、材质实际截图",
+      "result": "pass",
+      "evidence": "当前石岸无连续亮带，样例中心为深水；v5 重复预览不见交叉菱格，仍能看出水平波纹重复。结论仅覆盖明确样例和观察项。"
+    },
+    {
+      "command": "git diff --check；核对受保护主仓状态；解析当前回执 JSON",
+      "result": "pass",
+      "evidence": "内容检查通过；project.godot 仅换行提示、无实际内容 diff；无跨仓写入，原有 dirty 状态保留。"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "素材生成职责明确，并经过单张、重复、实际尺寸审查。",
+      "result": "pass",
+      "evidence": [
+        "水面 PNG 不承担深浅分区、岸沿或地图布局；完整提示、原图和摘要在 source-manifest.json。",
+        "v3、v4 的交叉纹经实际检查退回；v5 经同样预览及独立复核，当前指定缺陷关闭。"
+      ]
+    },
+    {
+      "criterion": "当前石岸不存在旧式连续等宽亮带，旧错误能被同一检查拒绝。",
+      "result": "pass",
+      "evidence": [
+        "移除实色岸沿叠加，保留透明接触阴影及陆地湿暗。",
+        "四边 28 个位置：当前增亮与显著色带覆盖均为 0；忠实旧错误分别为 0.928571 和 1.0，超过 0.8 拒绝门槛。"
+      ]
+    },
+    {
+      "criterion": "水深展示样例外浅内深，数据错误与画面错误能分别拒绝。",
+      "result": "pass",
+      "evidence": [
+        "预期来自独立规格；正确中心 ID 6，中央浅水 ID 5 反例被拒绝。",
+        "正确深浅通道均值差 0.105616，错误浅色差 0.001814，固定门槛 0.10；正确与错误使用同一检查。"
+      ]
+    },
+    {
+      "criterion": "采集固定状态，拒绝不完整或跨版本证据。",
+      "result": "pass",
+      "evidence": [
+        "三场景、两分辨率、两状态共 12 图；每状态连续两帧逐字节一致。",
+        "来源摘要跨步骤及执行前后核对；缺字段、缺图、失败进程或反例未拦截即停止；空结果探针实测被拒绝。"
+      ]
+    },
+    {
+      "criterion": "复盘产生可验证行动，独立审查保留有限结论。",
+      "result": "pass",
+      "evidence": [
+        "流程文档与审计记录包含错误层、漏检原因、负责人、反例和关闭证据。",
+        "独立审查七项通过，记录深浅指标余量及重复水纹观察，不把有限检查表述为全部美术验收。"
+      ]
+    },
+    {
+      "criterion": "三场景整体视觉、完整地形规则与正式关卡交付。",
+      "result": "partial",
+      "evidence": [
+        "当前候选尚未取得整体用户认可，未提交或发布，未接入正式关卡。",
+        "九种正式地形的完整规则及任意组合覆盖不属于本轮局部修正的完成结论。"
+      ]
+    }
+  ],
+  "independent_review": {
+    "verdict": "pass_with_recorded_limits",
+    "reviewer": "water_pipeline_review",
+    "record": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27-water-pipeline-independent-review.json",
+    "scope": "独立规格、三类坏样本、素材实际预览、冻结采集、293 项来源和入口拒绝不完整结果。",
+    "limitations": [
+      "只核验明确样例与指定来源清单，不证明未知美术语义、任意地图或所有自然度均正确。",
+      "正确深浅差距仅高于阈值约 0.0056；后续继续保留正反样本并行校准，不放宽阈值求通过。",
+      "v5 仍可见水平波纹重复，不构成无限重复地形包的整体认可。"
+    ],
+    "visual_acceptance": "pending_user",
+    "baseline_status": "candidate_unapproved"
+  },
+  "protected_state": [
+    {
+      "subject": "Ship 主工作树",
+      "result": "unchanged",
+      "evidence": "HEAD c1f34ed331ab753b04610274292005cb975feca0；原有 dirty 清单保留，本轮只写任务工作树。"
+    },
+    {
+      "subject": "设计库主工作树与生产数据",
+      "result": "unchanged",
+      "evidence": "HEAD 3a71ade3cac109dbdda8a90d0e47f04232f83b9f；原有三项 dirty 保留，本轮无写入。"
+    },
+    {
+      "subject": "固定 KB vault",
+      "result": "unchanged",
+      "evidence": "HEAD 3b8fa3320a140af848035d84ee95d62112626807；原有 dirty 保留，本轮无写入。"
+    },
+    {
+      "subject": "已批准 HUD、职业技能和玩法规则",
+      "result": "unchanged",
+      "evidence": "本轮仅改视觉层、展示样例、采集检查和记录。"
+    },
+    {
+      "subject": "任务树既有战场及相机改动",
+      "result": "preserved",
+      "evidence": "既有候选代码与未跟踪资源保留；本轮回执的 changed_files 不替代整个未提交任务树清单。"
+    }
+  ],
+  "design_source": {
+    "role": "prior_context_unchanged",
+    "reference": "assets/prototype/battlefield_courtyard/terrain-design-reference.md",
+    "fresh_gameplay_verification": false,
+    "reason": "本轮不修改玩法事实；来源记录只用于保留既定范围，不作为本轮规则全验收。"
+  },
+  "residual_risks": [
+    "三场景整体视觉尚待用户认可，当前候选未纳入正式关卡或发布。",
+    "自动图像检查仅覆盖指定 3×3 水深样例和石岸四边 28 个位置；不能推出任意地图组合、缩放、构图或自然度都正确。",
+    "当前没有已批准整屏基线；当前截图不会自动转为正确答案。",
+    "水深判据余量较小，v5 重复预览仍能看出水平波纹；后续应以相同正反样例判断变更，不放宽门槛。",
+    "现有候选使用平原、森林、墙、浅水和深水；Wet、墙与深水特殊职业通行、其余正式地形及完整规则验收尚未完成。",
+    "森林闪避 +20 不是本轮设计批准；WALL 不等于建筑摧毁后的独立 Ruins；单位仍使用既有文字棋子。"
+  ],
+  "escalation_reason": null,
+  "publication": {
+    "published": false,
+    "remote_ref": null
+  }
+}

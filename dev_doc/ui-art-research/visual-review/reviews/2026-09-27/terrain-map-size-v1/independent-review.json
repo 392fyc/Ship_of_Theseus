@@ -1,0 +1,41 @@
+{
+  "reviewer": "/root/water_pipeline_review",
+  "evidence_batch": "final-v3",
+  "evidence_archive": "dev_doc/ui-art-research/visual-review/reviews/2026-09-27/terrain-map-size-v1/archive-manifest.json",
+  "overallVerdict": "pass",
+  "completeness": 1,
+  "items": [
+    {
+      "item": "仅正方形，边长10至25；扩缩图、撤销及地形数据保留",
+      "verdict": "pass",
+      "evidence": "scripts/ui/terrain/terrain_catalog.gd:5-48；scripts/ui/playground/terrain_painter.gd:121-137,556-595；tests/test_terrain_map_size.gd:40-100",
+      "detail": "尺寸控件设置了10、25和整数步长；扩图补平原，缩图裁去范围外的地形、铺石与变体。测试实际点击调整控件并验证扩缩图可撤销、边角绘制及铺石和变体的恢复。"
+    },
+    {
+      "item": "保存、导入、试战拒绝不合规尺寸；旧10×10样例可加载",
+      "verdict": "pass",
+      "evidence": "scripts/ui/playground/terrain_painter.gd:691-817；scripts/ui/terrain/terrain_battle_definition.gd:9；tests/test_terrain_map_size.gd:104-108,158-203",
+      "detail": "共用地图校验拒绝越界和非正方形尺寸；测试覆盖无效保存、导入、试战，以及从未修改的10×10残垣庭院样例保存并重新加载。旧文件验证范围限于该既有样例。"
+    },
+    {
+      "item": "25×25工作台、试战及返回状态在1280×720和1920×1080下可用",
+      "verdict": "pass",
+      "evidence": "tests/test_terrain_map_size.gd:117-159,206-243；final-v3/map-size/terrain-map-size-report.json",
+      "detail": "79项断言全部通过。五张截图已核看：两种尺寸下工作台控件可见、棋盘居中且格角未裁切；两种尺寸的战斗棋盘均避开HUD，返回后地图、撤销栈和边长值保留。"
+    },
+    {
+      "item": "已批准的绘制来源保持不变",
+      "verdict": "pass",
+      "evidence": "assets/prototype/battlefield_courtyard/terrain-catalog-visual-scope.json；final-v3/terrain-runtime-validation.json",
+      "detail": "独立复算确认批准记录SHA-256与before副本相同；27个其余批准来源无摘要差异，Catalog的PATH与三个视觉函数摘要均匹配基线。最终批次记录来源与当前工作树相符。"
+    },
+    {
+      "item": "统一验证入口及引擎错误、资源泄漏检查",
+      "verdict": "pass",
+      "evidence": "final-v3/terrain-runtime-validation.json；final-v3/map-size/terrain-map-size-report.json；final-v3下12份运行日志",
+      "detail": "统一入口五阶段均为pass；地图尺寸79/0、正式试战89/0、工作台往返19/0、旧注入20项通过。12份日志未发现脚本错误、引擎ERROR、ObjectDB泄漏或仍在使用的资源；截图摘要全部匹配。"
+    }
+  ],
+  "blockers": [],
+  "suggestions": []
+}

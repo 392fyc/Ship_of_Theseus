@@ -1,0 +1,35 @@
+{
+  "purpose": "历史缺陷与审查能力的有限样本自检，不作为当前视觉定版。",
+  "images": [
+    {
+      "file": "A.png",
+      "description": "历史积水花园，spatial-v2-reviewed；独立复看第一轮未提供已知缺陷。",
+      "sha256": "0a500a1c15a113be74bbba46d519b7e0a71b3acf63eb8918587a3679cae55632",
+      "post_processing": false
+    },
+    {
+      "file": "B.png",
+      "description": "修正后的断墙回廊，adjacency-v3；独立复看第一轮未提供已知缺陷。",
+      "sha256": "e295af7b2f83745f2791b1332fb6b94f08ec94972517a3d1bb0ab31c45c3a6e7",
+      "post_processing": false
+    },
+    {
+      "file": "C.png",
+      "description": "历史断墙回廊，spatial-v2-reviewed；独立复看第一轮未提供已知缺陷。",
+      "sha256": "c3a7f28c7cb828d991338f55741f828665c934857576c0a2ed6dcefcc097de4b",
+      "post_processing": false
+    },
+    {
+      "file": "D.png",
+      "description": "修正后的积水花园，adjacency-v3；独立复看第一轮未提供已知缺陷。",
+      "sha256": "b0cb4eb81576f49f174522ff8b24e91e62c028ac51b0f92eb275f6ca4b068ee2",
+      "post_processing": false
+    },
+    {
+      "file": "E-missing-portrait.png",
+      "description": "历史基础剑士运行帧，人物栏仍使用轮廓占位；仅主代理受提示回看。",
+      "sha256": "5db758ab556584e370c78672f332c70d5cbb72ac74e05b7846e95518aa001250",
+      "post_processing": false
+    }
+  ]
+}

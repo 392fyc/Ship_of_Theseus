@@ -1,0 +1,56 @@
+Godot Engine v4.6.3.stable.official.7d41c59c4 - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 596.36 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 3070 Ti
+
+[DataLoader] Loaded: 7 classes, 20 skills, 10 buffs, 8 enemies, 4 maps, 2 states, 7 talents
+[Grid] Initialized 10x10 map: ?
+[PASS] 工作台启动为 10×10 且使用外观预览数据
+[Grid] Initialized 10x10 map: ?
+[PASS] 示例选项 1 可载入并通过同一校验器
+[Grid] Initialized 10x10 map: ?
+[PASS] 示例选项 2 可载入并通过同一校验器
+[PASS] 湿地示例名称按 JSON 展示
+[PASS] 湿地工作台截帧为 1280×720
+[PASS] 保存湿地工作台交付图
+[Grid] Initialized 10x10 map: ?
+[PASS] 示例选项 3 可载入并通过同一校验器
+[Grid] Initialized 10x10 map: ?
+[PASS] 1280×720 下地形按钮 平原 可真实点击
+[PASS] 1280×720 下地形按钮 森林 可真实点击
+[PASS] 1280×720 下地形按钮 山地 可真实点击
+[PASS] 1280×720 下地形按钮 山峰 可真实点击
+[PASS] 1280×720 下地形按钮 墙体 可真实点击
+[PASS] 1280×720 下地形按钮 浅水 可真实点击
+[PASS] 1280×720 下地形按钮 深水 可真实点击
+[PASS] 1280×720 下地形按钮 熔岩 可真实点击
+[PASS] 1280×720 下地形按钮 沼泽 可真实点击
+[PASS] 真实点击调色板会选中目标地形
+[Grid] Initialized 10x10 map: ?
+[PASS] 点击地形按钮并点击格子会写入选中地形
+[PASS] 右键取样会选择格子地形
+[Grid] Initialized 10x10 map: ?
+[PASS] 点击撤销按钮恢复绘制前的地形
+[Grid] Initialized 10x10 map: ?
+[Grid] Initialized 10x10 map: ?
+[Grid] Initialized 10x10 map: ?
+[Grid] Initialized 10x10 map: ?
+[Grid] Initialized 10x10 map: ?
+[PASS] 拖动绘制会连续铺过中间格子
+[Grid] Initialized 10x10 map: ?
+[PASS] 一次拖动作为一步撤销
+[Grid] Initialized 10x10 map: ?
+PAINT_DIAGNOSTIC terrain=4 selected=4 variant=ruined selected_variant=ruined cell=(5, 5) screen=(821.0, 379.5947) hit=(5, 5)
+[Grid] Initialized 10x10 map: ?
+PAINT_RESULT terrain=4 variant_found=true grid_terrain=4 map_terrain=4 map_variant=ruined
+PAINT_DIAGNOSTIC terrain=3 selected=3 variant=mossy selected_variant=mossy cell=(8, 8) screen=(821.0, 498.6006) hit=(8, 8)
+[Grid] Initialized 10x10 map: ?
+PAINT_RESULT terrain=3 variant_found=true grid_terrain=3 map_terrain=3 map_variant=mossy
+[PASS] 手工绘制结果含平原铺石、残墙和苔峰变体
+[PASS] 导入拒绝非整数地形值且保持原地图
+[PASS] 文件对话框显示时点击不会穿透并绘制地图
+[Grid] Initialized 10x10 map: ?
+[Grid] Initialized 10x10 map: ?
+[PASS] 手工绘制与加载同一 JSON 的 terrain/paving/variants 完全相等
+[PASS] 固定帧下手工绘制与 JSON 加载预览像素完全一致
+[Grid] Initialized 10x10 map: ?
+[PASS] 非法地形组合显示说明并回滚该次点击
+TERRAIN_PAINTER_RESULT {"failed":0,"passed":28}

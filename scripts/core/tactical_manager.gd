@@ -10,6 +10,7 @@ extends Node
 var grid: Grid = Grid.new()
 var units: Array = []
 var battle_active: bool = false
+var _enemy_pacing_timer: Timer
 # 天赋载体（Wave 1 · A1）。懒构造：首次分发时按 DataLoader 的 states/talents 建立。
 # 无天赋数据或全部被拒收时，_dispatch_talents 立即 return，正式战斗零影响。
 #
@@ -81,6 +82,7 @@ var _talent_registry: RefCounted = null
 var _state_registry: RefCounted = null
 
 signal battle_started
+signal enemy_pacing_finished
 signal unit_killed(unit: Unit)
 signal dashboard_state_changed
 
@@ -154,7 +156,12 @@ func initialize_battle(map_id: String) -> void:
 	if map_data.is_empty():
 		push_error("[TacticalManager] Map not found: " + map_id)
 		return
-	grid.initialize(map_data)
+	initialize_battle_data(map_data)
+
+
+## 调用方验证过的地图可直接进入战斗，不需要写入 DataLoader 的全局地图表。
+func initialize_battle_data(map_data: Dictionary) -> void:
+	grid.initialize(map_data.duplicate(true))
 	_render_terrain()
 	battle_started.emit()
 
@@ -170,6 +177,10 @@ func start_battle() -> void:
 
 func stop_battle() -> void:
 	battle_active = false
+	_finish_enemy_pacing()
+	for unit: Unit in units:
+		if is_instance_valid(unit):
+			unit.cancel_movement()
 	turn_manager.stop()
 	_clear_hover_state()
 	_clear_highlights()
@@ -458,7 +469,7 @@ func _on_round_ended() -> void:
 
 
 func _do_enemy_turn(unit: Unit) -> void:
-	await get_tree().create_timer(0.3).timeout
+	await _start_enemy_pacing(0.3)
 	if not battle_active or turn_manager.current_unit != unit:
 		return
 
@@ -493,8 +504,10 @@ func _do_enemy_turn(unit: Unit) -> void:
 				GameAction.consume_normal_move(unit)
 				unit.refresh_status_icons()
 				await unit.move_to(action.target_pos, grid)
+				if not battle_active or not is_instance_valid(unit) or turn_manager.current_unit != unit:
+					return
 				grid.move_unit(unit, from, action.target_pos)
-				await get_tree().create_timer(0.15).timeout
+				await _start_enemy_pacing(0.15)
 			GameAction.Type.ATTACK:
 				print("[AI] %s: attack %s" % [
 					unit.unit_name, action.target_unit.unit_name])
@@ -507,6 +520,27 @@ func _do_enemy_turn(unit: Unit) -> void:
 	if battle_active and unit.stats.is_alive() \
 			and turn_manager.current_unit == unit:
 		turn_manager.end_current_turn()
+
+
+func _start_enemy_pacing(seconds: float) -> Signal:
+	# 到期与停止战斗共用完成信号，让等待中的动作先退出，再释放场景。
+	var timer := Timer.new()
+	timer.one_shot = true
+	timer.process_mode = Node.PROCESS_MODE_ALWAYS
+	timer.timeout.connect(_finish_enemy_pacing)
+	add_child(timer)
+	_enemy_pacing_timer = timer
+	timer.start(seconds)
+	return enemy_pacing_finished
+
+
+func _finish_enemy_pacing() -> void:
+	if not is_instance_valid(_enemy_pacing_timer):
+		return
+	_enemy_pacing_timer.stop()
+	_enemy_pacing_timer.queue_free()
+	_enemy_pacing_timer = null
+	enemy_pacing_finished.emit()
 
 
 # ── Input handling ───────────────────────────────────
@@ -1564,6 +1598,8 @@ func _execute_move(unit: Unit, target: Vector2i) -> void:
 	_clear_highlights()
 	_move_range = {}
 	await unit.move_to(target, grid)
+	if not battle_active or not is_instance_valid(unit) or turn_manager.current_unit != unit:
+		return
 	grid.move_unit(unit, from, target)
 	selected_unit = current_unit
 	_complete_move_phase(true)

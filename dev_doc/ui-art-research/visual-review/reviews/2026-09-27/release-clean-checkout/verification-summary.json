@@ -1,0 +1,37 @@
+{
+  "result": "pass",
+  "verification_sources": 46,
+  "prior_archive_files_verified": 85,
+  "first_import_exit_code": 0,
+  "full_runtime_validation_exit_code": 0,
+  "steps": [
+    {
+      "name": "map-size",
+      "result": "pass"
+    },
+    {
+      "name": "runtime",
+      "result": "pass"
+    },
+    {
+      "name": "editor-flow",
+      "result": "pass"
+    },
+    {
+      "name": "legacy-injection",
+      "result": "pass"
+    },
+    {
+      "name": "terrain-regression",
+      "result": "pass"
+    }
+  ],
+  "new_test_scope": "连续向正式Viewport派发同点鼠标按下和释放，仍由TacticalScene处理并断言单位移动；未修改生产运行代码或美术。",
+  "initial_failure": "首次全量运行的湿地合成鼠标移动断言失败。诊断再次运行89/0；初次失败的唯一触发原因无法从原日志确认。原辅助函数跨帧派发点击，存在系统鼠标事件插入导致拖动判定的机会。本次使一次点击连续派发，随后完整回归通过；保留初次失败记录，不把诊断推测记成已证实根因。",
+  "limits": [
+    "自动交互检查使用合成鼠标事件，不是物理鼠标设备测试。",
+    "本轮美术未改；人类批准依据见release-2026-09-27.md。",
+    "外部Claude审查仍待执行。"
+  ],
+  "final_metadata_import": "最终暂存元数据同步后使用Godot恢复模式导入，退出0且无引擎错误。普通第二次导入遇到已有编辑器MCP连接占用及插件日志接口错误；未修改插件，未关闭用户编辑器。"
+}
