@@ -1,0 +1,220 @@
+[
+  {
+    "file": "assets/prototype/visual_style/samples/terrain_preview_final.png",
+    "sha256": "e40f2d6685d4543c91770768a8f837b0b238f73bd8e436d7438961a15c446b53",
+    "bytes": 1424187,
+    "pixel_size": [
+      1536,
+      1024
+    ],
+    "mode": "RGBA",
+    "profile": "terrain",
+    "alpha": {
+      "transparent_ratio": 0.6556,
+      "opaque_ratio": 0.3444,
+      "semi_ratio_of_visible": 0.0,
+      "binary_alpha": true,
+      "fully_opaque": false
+    },
+    "hidden_rgb": {
+      "transparent_pixels": 1031247,
+      "light_rgb_share": 0.0,
+      "mean_rgb": [
+        0,
+        0,
+        0
+      ],
+      "checker_like": false
+    },
+    "edge_fringe": {
+      "edge_pixels": 10734,
+      "edge_mean_L": 57.95,
+      "inner_mean_L": 21.56,
+      "edge_minus_inner_L": 36.39,
+      "edge_near_white_share": 0.1462,
+      "semi_light_share": 0.0
+    },
+    "visible_checker": {
+      "suspect": false,
+      "neutral_light_share": 0.0068
+    },
+    "pixel_grid": {
+      "x": {
+        "k": 2,
+        "confidence": 0.041,
+        "phase": 0,
+        "top": [
+          [
+            2,
+            0.041
+          ],
+          [
+            4,
+            0.014
+          ],
+          [
+            6,
+            0.012
+          ],
+          [
+            8,
+            0.008
+          ]
+        ]
+      },
+      "y": {
+        "k": 2,
+        "confidence": 0.011,
+        "phase": 0,
+        "top": [
+          [
+            2,
+            0.011
+          ],
+          [
+            4,
+            0.004
+          ],
+          [
+            5,
+            0.003
+          ],
+          [
+            6,
+            0.003
+          ]
+        ]
+      }
+    },
+    "unique_colors": 51993,
+    "value": {
+      "L_mean": 17.68,
+      "L_p05": 3.68,
+      "L_p50": 16.09,
+      "L_p95": 36.2,
+      "C_mean": 5.19,
+      "C_p95": 11.5
+    },
+    "palette_top": [
+      {
+        "hex": "#4E423A",
+        "share": 0.0946,
+        "L": 29.0,
+        "C": 7.7,
+        "h": 61.6
+      },
+      {
+        "hex": "#2E2625",
+        "share": 0.0706,
+        "L": 16.0,
+        "C": 4.1,
+        "h": 30.1
+      },
+      {
+        "hex": "#2C2423",
+        "share": 0.0685,
+        "L": 15.1,
+        "C": 4.1,
+        "h": 30.2
+      },
+      {
+        "hex": "#3C3330",
+        "share": 0.0685,
+        "L": 22.1,
+        "C": 4.8,
+        "h": 44.7
+      },
+      {
+        "hex": "#443831",
+        "share": 0.0681,
+        "L": 24.6,
+        "C": 7.5,
+        "h": 57.8
+      },
+      {
+        "hex": "#342B29",
+        "share": 0.066,
+        "L": 18.4,
+        "C": 4.7,
+        "h": 37.3
+      },
+      {
+        "hex": "#231B1B",
+        "share": 0.0644,
+        "L": 10.7,
+        "C": 4.2,
+        "h": 20.6
+      },
+      {
+        "hex": "#141011",
+        "share": 0.0634,
+        "L": 5.1,
+        "C": 1.8,
+        "h": 0.7
+      },
+      {
+        "hex": "#392E29",
+        "share": 0.0615,
+        "L": 20.0,
+        "C": 6.5,
+        "h": 51.5
+      },
+      {
+        "hex": "#252020",
+        "share": 0.0613,
+        "L": 12.8,
+        "C": 2.5,
+        "h": 20.1
+      },
+      {
+        "hex": "#1A1515",
+        "share": 0.0575,
+        "L": 7.3,
+        "C": 2.6,
+        "h": 19.4
+      },
+      {
+        "hex": "#302A29",
+        "share": 0.0569,
+        "L": 17.7,
+        "C": 3.0,
+        "h": 33.2
+      },
+      {
+        "hex": "#1E1919",
+        "share": 0.0565,
+        "L": 9.3,
+        "C": 2.6,
+        "h": 20.2
+      },
+      {
+        "hex": "#2A201F",
+        "share": 0.0528,
+        "L": 13.4,
+        "C": 5.2,
+        "h": 28.5
+      },
+      {
+        "hex": "#0A0809",
+        "share": 0.048,
+        "L": 2.3,
+        "C": 0.7,
+        "h": 343.7
+      },
+      {
+        "hex": "#7C6F64",
+        "share": 0.0415,
+        "L": 47.7,
+        "C": 8.6,
+        "h": 68.6
+      }
+    ],
+    "flags": [
+      {
+        "level": "WARN",
+        "code": "grid.none",
+        "message": "未检测到一致的美术像素网格（x=2@0.041, y=2@0.011）；像素化素材可能是插值缩放或 AI 伪像素，需在原生尺寸比较与其他素材的像素密度。"
+      }
+    ]
+  }
+]

@@ -1,0 +1,1013 @@
+{
+  "repository_head_note": "以运行时工作树文件为准",
+  "checks": {
+    "C1_icon_opacity": {
+      "cases": {
+        "juhe": {
+          "file": "juhe.png",
+          "sha256": "f8fa54e668085b87073a7c252d19f09469668ac08ad7b4e8931a3385e1f3cd16",
+          "alpha_below_250_share": 0.0,
+          "alpha_mean": 1.0,
+          "pass": true
+        },
+        "xinyan": {
+          "file": "xinyan.png",
+          "sha256": "9a486c4598f343ed3a351ed95659198cdb64342227889ab415bf59404d427fa1",
+          "alpha_below_250_share": 0.8852,
+          "alpha_mean": 0.7775,
+          "pass": false
+        },
+        "yishan": {
+          "file": "yishan.png",
+          "sha256": "61188e1d26440b7bdda5ddf550dd273ed6a523941cdb0b2740be1f85b496283f",
+          "alpha_below_250_share": 0.8126,
+          "alpha_mean": 0.5269,
+          "pass": false
+        },
+        "zhanji": {
+          "file": "zhanji.png",
+          "sha256": "332ebac7d26e225e868d159b6f31b0a18e28a7f799d1e9ee1cc0c8ee98510e00",
+          "alpha_below_250_share": 0.981,
+          "alpha_mean": 0.7552,
+          "pass": false
+        },
+        "zhaojia": {
+          "file": "zhaojia.png",
+          "sha256": "1aea57c9d6a7dbcabe0f210cc4db928f9ea1d700e43c63045d5454494103a809",
+          "alpha_below_250_share": 0.7807,
+          "alpha_mean": 0.7686,
+          "pass": false
+        }
+      },
+      "calibration": {
+        "positive_juhe_passes": true,
+        "negative_yishan_rejected": true
+      }
+    },
+    "C2_long_blade_extent": {
+      "positive_final_juhe": {
+        "file": "juhe-source.png",
+        "sha256": "2b2b27fcc39071bf47154f3212342120977aadff31397aa474f3d576578a0a45",
+        "extent_ratio": 1.001,
+        "component_px": 112,
+        "pass": true
+      },
+      "negative_before_length_correction": {
+        "file": "juhe-before-length-correction.png",
+        "sha256": "77adc3809e8ef3a3cbd4bb9d2067aca4bfd9b4743c778ac9e329bd4dbf463bd4",
+        "extent_ratio": 0.539,
+        "component_px": 81,
+        "pass": false
+      },
+      "calibration_ok": true
+    },
+    "C3_icon_set_color_spread": {
+      "icons": [
+        {
+          "file": "xinyan-source.png",
+          "mean_L": 11.7,
+          "chromatic_share": 0.572,
+          "dominant_hue_deg": 33.0
+        },
+        {
+          "file": "zhanji-source.png",
+          "mean_L": 16.2,
+          "chromatic_share": 0.517,
+          "dominant_hue_deg": 33.6
+        },
+        {
+          "file": "yishan-source.png",
+          "mean_L": 9.3,
+          "chromatic_share": 0.428,
+          "dominant_hue_deg": 30.1
+        },
+        {
+          "file": "zhaojia-source.png",
+          "mean_L": 10.8,
+          "chromatic_share": 0.39,
+          "dominant_hue_deg": 40.7
+        },
+        {
+          "file": "juhe-source.png",
+          "mean_L": 5.2,
+          "chromatic_share": 0.328,
+          "dominant_hue_deg": 29.0
+        }
+      ],
+      "hue_span_deg": 11.7,
+      "needs_blind_semantic_review": true
+    },
+    "C4_portrait_edges": {
+      "negative_claude_capture_1280": {
+        "capture": "available-1280.png",
+        "scale": 1.0,
+        "panel_colour_rows": {
+          "top": 1,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 1,
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "808ebdd9beac4c054c93bdd3fd599b375a6fdf2973a06275f12ae8fe79a30d9c"
+      },
+      "negative_codex_evidence_1280": {
+        "capture": "available-1280.png",
+        "scale": 1.0,
+        "panel_colour_rows": {
+          "top": 1,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 1,
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "af76387c0c2c90f8d945e4c6a89b4104889f8e4a353e05554cf7ec0218b4a1fa"
+      },
+      "positive_fixture_gap_filled": {
+        "capture": "available-1280.png + 顶缝修正（合成正例）",
+        "scale": 1.0,
+        "panel_colour_rows": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 1,
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        },
+        "pass": true
+      },
+      "project_stretch_1920": {
+        "capture": "tactical-project-1920x1080.png",
+        "scale": 1.5,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 3,
+          "bottom": 2,
+          "left": 2,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "891c19277c7a6fa9bffe03e5e2d149ec6ee2498087804908efc288c7bcb2bbbc"
+      },
+      "calibration_ok": true
+    },
+    "C5_detail_in_frame": {
+      "cases": [
+        {
+          "frame": "combat-1280.png",
+          "detail": "portrait-detail-4x.png",
+          "best_mean_abs_error": 0.0,
+          "probe_found": true,
+          "offset": [
+            41,
+            606
+          ],
+          "pass": true
+        },
+        {
+          "frame": "combat-1280.png",
+          "detail": "end-turn-detail-4x.png",
+          "best_mean_abs_error": 0.0,
+          "probe_found": true,
+          "offset": [
+            1181,
+            621
+          ],
+          "pass": true
+        },
+        {
+          "frame": "hover-1280.png",
+          "detail": "portrait-detail-4x.png",
+          "best_mean_abs_error": 0.0,
+          "probe_found": true,
+          "offset": [
+            32,
+            596
+          ],
+          "pass": true
+        },
+        {
+          "frame": "hover-1280-generated.png",
+          "detail": "portrait-detail-4x-generated.png",
+          "best_mean_abs_error": 0.0,
+          "probe_found": true,
+          "offset": [
+            32,
+            596
+          ],
+          "pass": true
+        }
+      ],
+      "negative_mismatched_pair": {
+        "frame": "hover-1280.png",
+        "detail": "portrait-detail-4x-generated.png",
+        "best_mean_abs_error": null,
+        "probe_found": false,
+        "offset": null,
+        "pass": false
+      },
+      "negative_state_mismatch": {
+        "frame": "available-1280.png",
+        "detail": "内存中的合成细节",
+        "best_mean_abs_error": 1.316,
+        "probe_found": true,
+        "offset": [
+          500,
+          548
+        ],
+        "pass": false
+      },
+      "calibration_ok": true
+    },
+    "C6_grid_overlay": {
+      "status": "未实现",
+      "note": "网格覆盖层渲染检查（顶点与边中点亮度），按 CR-03 验收第 1 条由实施方加入。"
+    },
+    "C7_minification": {
+      "cases": [
+        {
+          "display_over_source": 0.156,
+          "needs_mipmaps": true,
+          "import_tracked": false,
+          "local_import_mipmaps": false,
+          "importer_defaults_mipmaps": false,
+          "usage": {
+            "resolved": 2,
+            "samples_mipmaps": false,
+            "detail": "texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR"
+          },
+          "reasons": [
+            ".import 未跟踪且没有 importer_defaults，修改不会进入发布",
+            "使用处过滤方式不采样 mipmap（2）"
+          ],
+          "pass": false,
+          "file": "assets/units/kensei/map_token_clean_v2.png",
+          "usage_spec": {
+            "kind": "gd",
+            "file": "scripts/units/map_token_view.gd"
+          }
+        },
+        {
+          "display_over_source": 0.089,
+          "needs_mipmaps": true,
+          "import_tracked": false,
+          "local_import_mipmaps": false,
+          "importer_defaults_mipmaps": false,
+          "usage": {
+            "resolved": "继承 → 项目默认 1",
+            "samples_mipmaps": false,
+            "detail": "未显式设置"
+          },
+          "reasons": [
+            ".import 未跟踪且没有 importer_defaults，修改不会进入发布",
+            "使用处过滤方式不采样 mipmap（继承 → 项目默认 1）"
+          ],
+          "pass": false,
+          "file": "assets/ui/skins/hud_mark_crest/marks-filled-generated.png",
+          "usage_spec": {
+            "kind": "gd",
+            "file": "scripts/ui/hud/m2/marks_panel.gd",
+            "inherit_if_absent": true
+          }
+        },
+        {
+          "display_over_source": 0.106,
+          "needs_mipmaps": true,
+          "import_tracked": false,
+          "local_import_mipmaps": false,
+          "importer_defaults_mipmaps": false,
+          "usage": {
+            "resolved": 2,
+            "samples_mipmaps": false,
+            "detail": "节点 PortraitContent texture_filter = 2"
+          },
+          "reasons": [
+            ".import 未跟踪且没有 importer_defaults，修改不会进入发布",
+            "使用处过滤方式不采样 mipmap（2）"
+          ],
+          "pass": false,
+          "file": "assets/ui/portraits/kensei_hud_portrait_generated.png",
+          "usage_spec": {
+            "kind": "tscn",
+            "file": "scenes/tactical/hud/m2/character_hud_panel.tscn",
+            "node": "PortraitContent"
+          }
+        },
+        {
+          "display_over_source": 0.106,
+          "needs_mipmaps": true,
+          "import_tracked": false,
+          "local_import_mipmaps": false,
+          "importer_defaults_mipmaps": false,
+          "usage": {
+            "resolved": 2,
+            "samples_mipmaps": false,
+            "detail": "节点 PortraitContent texture_filter = 2"
+          },
+          "reasons": [
+            ".import 未跟踪且没有 importer_defaults，修改不会进入发布",
+            "使用处过滤方式不采样 mipmap（2）"
+          ],
+          "pass": false,
+          "file": "assets/ui/portraits/myrmidon_hud_portrait_generated.png",
+          "usage_spec": {
+            "kind": "tscn",
+            "file": "scenes/tactical/hud/m2/character_hud_panel.tscn",
+            "node": "PortraitContent"
+          }
+        },
+        {
+          "display_over_source": 0.061,
+          "needs_mipmaps": true,
+          "import_tracked": true,
+          "local_import_mipmaps": false,
+          "importer_defaults_mipmaps": false,
+          "usage": {
+            "resolved": 1,
+            "samples_mipmaps": false,
+            "detail": "root.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST"
+          },
+          "reasons": [
+            "能进入发布的导入设置没有生成 mipmap",
+            "使用处过滤方式不采样 mipmap（1）"
+          ],
+          "pass": false,
+          "file": "assets/prototype/battlefield_courtyard/forest-tree-v2.png",
+          "usage_spec": {
+            "kind": "gd",
+            "file": "scripts/ui/playground/courtyard_board_view.gd",
+            "block": "root.name = \"CourtyardProp\"",
+            "window": 4
+          }
+        },
+        {
+          "display_over_source": 0.059,
+          "needs_mipmaps": true,
+          "import_tracked": true,
+          "local_import_mipmaps": false,
+          "importer_defaults_mipmaps": false,
+          "usage": {
+            "resolved": 1,
+            "samples_mipmaps": false,
+            "detail": "root.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST"
+          },
+          "reasons": [
+            "能进入发布的导入设置没有生成 mipmap",
+            "使用处过滤方式不采样 mipmap（1）"
+          ],
+          "pass": false,
+          "file": "assets/prototype/battlefield_courtyard/shrub-v1.png",
+          "usage_spec": {
+            "kind": "gd",
+            "file": "scripts/ui/playground/courtyard_board_view.gd",
+            "block": "root.name = \"CourtyardProp\"",
+            "window": 4
+          }
+        },
+        {
+          "display_over_source": 0.024,
+          "needs_mipmaps": true,
+          "import_tracked": true,
+          "local_import_mipmaps": false,
+          "importer_defaults_mipmaps": false,
+          "usage": {
+            "resolved": 1,
+            "samples_mipmaps": false,
+            "detail": "root.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST"
+          },
+          "reasons": [
+            "能进入发布的导入设置没有生成 mipmap",
+            "使用处过滤方式不采样 mipmap（1）"
+          ],
+          "pass": false,
+          "file": "assets/prototype/battlefield_courtyard/low-rubble-v1.png",
+          "usage_spec": {
+            "kind": "gd",
+            "file": "scripts/ui/playground/courtyard_board_view.gd",
+            "block": "root.name = \"CourtyardProp\"",
+            "window": 4
+          }
+        },
+        {
+          "display_over_source": 0.157,
+          "needs_mipmaps": true,
+          "import_tracked": true,
+          "local_import_mipmaps": false,
+          "importer_defaults_mipmaps": false,
+          "usage": {
+            "resolved": 1,
+            "samples_mipmaps": false,
+            "detail": "root.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST"
+          },
+          "reasons": [
+            "能进入发布的导入设置没有生成 mipmap",
+            "使用处过滤方式不采样 mipmap（1）"
+          ],
+          "pass": false,
+          "file": "assets/prototype/battlefield_courtyard/courtyard-entry-v2.png",
+          "usage_spec": {
+            "kind": "gd",
+            "file": "scripts/ui/playground/courtyard_board_view.gd",
+            "block": "root.name = \"CourtyardProp\"",
+            "window": 4
+          }
+        },
+        {
+          "display_over_source": 0.041,
+          "needs_mipmaps": true,
+          "import_tracked": true,
+          "local_import_mipmaps": false,
+          "importer_defaults_mipmaps": false,
+          "usage": {
+            "resolved": 1,
+            "samples_mipmaps": false,
+            "detail": "root.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST"
+          },
+          "reasons": [
+            "能进入发布的导入设置没有生成 mipmap",
+            "使用处过滤方式不采样 mipmap（1）"
+          ],
+          "pass": false,
+          "file": "assets/prototype/battlefield_courtyard/masonry-wall-v2.png",
+          "usage_spec": {
+            "kind": "gd",
+            "file": "scripts/ui/playground/courtyard_board_view.gd",
+            "block": "root.name = \"CourtyardWall\"",
+            "window": 5
+          }
+        },
+        {
+          "display_over_source": 0.133,
+          "needs_mipmaps": true,
+          "import_tracked": true,
+          "local_import_mipmaps": false,
+          "importer_defaults_mipmaps": false,
+          "usage": {
+            "resolved": 1,
+            "samples_mipmaps": false,
+            "detail": "texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST"
+          },
+          "reasons": [
+            "能进入发布的导入设置没有生成 mipmap",
+            "使用处过滤方式不采样 mipmap（1）"
+          ],
+          "pass": false,
+          "file": "assets/prototype/battlefield_courtyard/water-surface-v5.png",
+          "usage_spec": {
+            "kind": "gd",
+            "file": "scripts/ui/playground/courtyard_board_view.gd"
+          }
+        },
+        {
+          "display_over_source": 0.133,
+          "needs_mipmaps": true,
+          "import_tracked": true,
+          "local_import_mipmaps": false,
+          "importer_defaults_mipmaps": false,
+          "usage": {
+            "resolved": "shader:source_color, filter_linear, repeat_enable",
+            "samples_mipmaps": false,
+            "detail": "uniform sampler2D meadow : source_color, filter_linear, repeat_enable;"
+          },
+          "reasons": [
+            "能进入发布的导入设置没有生成 mipmap",
+            "使用处过滤方式不采样 mipmap（shader:source_color, filter_linear, repeat_enable）"
+          ],
+          "pass": false,
+          "file": "assets/prototype/battlefield_courtyard/meadow-ground-v2.png",
+          "usage_spec": {
+            "kind": "shader",
+            "file": "scripts/ui/terrain/terrain_blend.gdshader"
+          }
+        },
+        {
+          "display_over_source": 0.133,
+          "needs_mipmaps": true,
+          "import_tracked": true,
+          "local_import_mipmaps": false,
+          "importer_defaults_mipmaps": false,
+          "usage": {
+            "resolved": "shader:source_color, filter_linear, repeat_enable",
+            "samples_mipmaps": false,
+            "detail": "uniform sampler2D moss : source_color, filter_linear, repeat_enable;"
+          },
+          "reasons": [
+            "能进入发布的导入设置没有生成 mipmap",
+            "使用处过滤方式不采样 mipmap（shader:source_color, filter_linear, repeat_enable）"
+          ],
+          "pass": false,
+          "file": "assets/prototype/battlefield_courtyard/moss-ground-v1.png",
+          "usage_spec": {
+            "kind": "shader",
+            "file": "scripts/ui/terrain/terrain_blend.gdshader"
+          }
+        },
+        {
+          "display_over_source": 0.133,
+          "needs_mipmaps": true,
+          "import_tracked": true,
+          "local_import_mipmaps": false,
+          "importer_defaults_mipmaps": false,
+          "usage": {
+            "resolved": "shader:source_color, filter_linear, repeat_enable",
+            "samples_mipmaps": false,
+            "detail": "uniform sampler2D paving : source_color, filter_linear, repeat_enable;"
+          },
+          "reasons": [
+            "能进入发布的导入设置没有生成 mipmap",
+            "使用处过滤方式不采样 mipmap（shader:source_color, filter_linear, repeat_enable）"
+          ],
+          "pass": false,
+          "file": "assets/prototype/battlefield_courtyard/stone-ground-v1.png",
+          "usage_spec": {
+            "kind": "shader",
+            "file": "scripts/ui/terrain/terrain_blend.gdshader"
+          }
+        },
+        {
+          "display_over_source": 0.091,
+          "needs_mipmaps": true,
+          "import_tracked": true,
+          "local_import_mipmaps": false,
+          "importer_defaults_mipmaps": false,
+          "usage": {
+            "resolved": "shader:source_color, filter_linear, repeat_enable",
+            "samples_mipmaps": false,
+            "detail": "uniform sampler2D rock : source_color, filter_linear, repeat_enable;"
+          },
+          "reasons": [
+            "能进入发布的导入设置没有生成 mipmap",
+            "使用处过滤方式不采样 mipmap（shader:source_color, filter_linear, repeat_enable）"
+          ],
+          "pass": false,
+          "file": "assets/prototype/battlefield_courtyard/natural-rock-v1.png",
+          "usage_spec": {
+            "kind": "shader",
+            "file": "scripts/ui/terrain/terrain_blend.gdshader"
+          }
+        },
+        {
+          "display_over_source": 0.5,
+          "needs_mipmaps": false,
+          "pass": true,
+          "file": "assets/ui/skills/myrmidon/zhanji.png",
+          "usage_spec": {
+            "kind": "tscn",
+            "file": "scenes/tactical/hud/m2/skill_slot_button.tscn",
+            "node": "Icon"
+          }
+        },
+        {
+          "display_over_source": 1.0,
+          "needs_mipmaps": false,
+          "pass": true,
+          "file": "assets/ui/skins/hud_m2_fe/shared-frame.png",
+          "usage_spec": {
+            "kind": "gd",
+            "file": "scripts/ui/hud/m2/shared_frame_style.gd"
+          }
+        }
+      ],
+      "calibration": {
+        "cases": {
+          "正例：棋子改为 LINEAR_WITH_MIPMAPS，导入已跟踪且开 mipmap": {
+            "display_over_source": 0.156,
+            "needs_mipmaps": true,
+            "import_tracked": true,
+            "local_import_mipmaps": true,
+            "importer_defaults_mipmaps": false,
+            "usage": {
+              "resolved": 4,
+              "samples_mipmaps": true,
+              "detail": "texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS"
+            },
+            "reasons": [],
+            "pass": true
+          },
+          "反例：只在注释里写 LINEAR_WITH_MIPMAPS": {
+            "display_over_source": 0.156,
+            "needs_mipmaps": true,
+            "import_tracked": true,
+            "local_import_mipmaps": true,
+            "importer_defaults_mipmaps": false,
+            "usage": {
+              "resolved": 2,
+              "samples_mipmaps": false,
+              "detail": "texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR"
+            },
+            "reasons": [
+              "使用处过滤方式不采样 mipmap（2）"
+            ],
+            "pass": false
+          },
+          "正例：头像场景以整数 4 保存": {
+            "display_over_source": 0.106,
+            "needs_mipmaps": true,
+            "import_tracked": true,
+            "local_import_mipmaps": true,
+            "importer_defaults_mipmaps": false,
+            "usage": {
+              "resolved": 4,
+              "samples_mipmaps": true,
+              "detail": "节点 PortraitContent texture_filter = 4"
+            },
+            "reasons": [],
+            "pass": true
+          },
+          "反例：头像场景仍为整数 2": {
+            "display_over_source": 0.106,
+            "needs_mipmaps": true,
+            "import_tracked": true,
+            "local_import_mipmaps": true,
+            "importer_defaults_mipmaps": false,
+            "usage": {
+              "resolved": 2,
+              "samples_mipmaps": false,
+              "detail": "节点 PortraitContent texture_filter = 2"
+            },
+            "reasons": [
+              "使用处过滤方式不采样 mipmap（2）"
+            ],
+            "pass": false
+          },
+          "反例：只改墙体，道具仍为 NEAREST": {
+            "display_over_source": 0.061,
+            "needs_mipmaps": true,
+            "import_tracked": true,
+            "local_import_mipmaps": true,
+            "importer_defaults_mipmaps": false,
+            "usage": {
+              "resolved": 1,
+              "samples_mipmaps": false,
+              "detail": "root.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST"
+            },
+            "reasons": [
+              "使用处过滤方式不采样 mipmap（1）"
+            ],
+            "pass": false
+          },
+          "正例：墙体改为 LINEAR_WITH_MIPMAPS": {
+            "display_over_source": 0.041,
+            "needs_mipmaps": true,
+            "import_tracked": true,
+            "local_import_mipmaps": true,
+            "importer_defaults_mipmaps": false,
+            "usage": {
+              "resolved": 4,
+              "samples_mipmaps": true,
+              "detail": "root.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS"
+            },
+            "reasons": [],
+            "pass": true
+          },
+          "正例：.import 未跟踪但 importer_defaults 开 mipmap": {
+            "display_over_source": 0.156,
+            "needs_mipmaps": true,
+            "import_tracked": false,
+            "local_import_mipmaps": false,
+            "importer_defaults_mipmaps": true,
+            "usage": {
+              "resolved": 4,
+              "samples_mipmaps": true,
+              "detail": "texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS"
+            },
+            "reasons": [],
+            "pass": true
+          },
+          "反例：.import 未跟踪且没有 importer_defaults": {
+            "display_over_source": 0.156,
+            "needs_mipmaps": true,
+            "import_tracked": false,
+            "local_import_mipmaps": true,
+            "importer_defaults_mipmaps": false,
+            "usage": {
+              "resolved": 4,
+              "samples_mipmaps": true,
+              "detail": "texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS"
+            },
+            "reasons": [
+              ".import 未跟踪且没有 importer_defaults，修改不会进入发布"
+            ],
+            "pass": false
+          },
+          "正例：着色器改为 filter_linear_mipmap": {
+            "display_over_source": 0.133,
+            "needs_mipmaps": true,
+            "import_tracked": true,
+            "local_import_mipmaps": true,
+            "importer_defaults_mipmaps": false,
+            "usage": {
+              "resolved": "shader:source_color, filter_linear_mipmap, repeat_enable",
+              "samples_mipmaps": true,
+              "detail": "uniform sampler2D meadow : source_color, filter_linear_mipmap, repeat_enable;"
+            },
+            "reasons": [],
+            "pass": true
+          },
+          "反例：着色器仍为 filter_linear": {
+            "display_over_source": 0.133,
+            "needs_mipmaps": true,
+            "import_tracked": true,
+            "local_import_mipmaps": true,
+            "importer_defaults_mipmaps": false,
+            "usage": {
+              "resolved": "shader:source_color, filter_linear, repeat_enable",
+              "samples_mipmaps": false,
+              "detail": "uniform sampler2D meadow : source_color, filter_linear, repeat_enable;"
+            },
+            "reasons": [
+              "使用处过滤方式不采样 mipmap（shader:source_color, filter_linear, repeat_enable）"
+            ],
+            "pass": false
+          },
+          "正例：显示倍率 ≥ 0.5 不需要 mipmap": {
+            "display_over_source": 0.5,
+            "needs_mipmaps": false,
+            "pass": true
+          }
+        },
+        "calibration_ok": true
+      }
+    },
+    "C8_capture_config": {
+      "scripts": [
+        {
+          "unconditional_disable_lines": [
+            19
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/capture_battlefield_environment_motion.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            32
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/capture_courtyard_material_intake.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            76
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/capture_courtyard_visual_review.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            20
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/capture_hud_character_panel.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            16
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/capture_hud_crest_candidate.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            22
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/capture_hud_final_acceptance.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            18
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/capture_hud_freeze.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            16
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/capture_hud_number_candidate.gd"
+        },
+        {
+          "unconditional_disable_lines": [],
+          "conditional_disable_lines": [
+            56
+          ],
+          "declared_not_runtime": false,
+          "pass": true,
+          "script": "tests/claude_review/capture_scene_native.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            31
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/test_battlefield_courtyard.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            33
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/test_courtyard_terrain_adjacency.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            68
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/test_courtyard_water_depth_continuity.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            124
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/test_courtyard_water_visual_contract.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            16
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/test_hud_m2_runtime_dashboard.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            14
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/test_myrmidon_skill_icons.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            33
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/test_terrain_battle_runtime.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            33
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/test_terrain_kit.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            32
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/test_terrain_map_size.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            28
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/test_terrain_painter.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            27
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "tests/test_terrain_painter_battle_flow.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            15
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "dev_doc/ui-art-research/hud-myrmidon-portrait/capture_review.gd"
+        },
+        {
+          "unconditional_disable_lines": [
+            15
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false,
+          "script": "dev_doc/ui-art-research/myrmidon-skill-icons/capture_candidate.gd"
+        }
+      ],
+      "manifests": [
+        {
+          "manifest": "tactical-disabled-manifest.json",
+          "project_renderer": "forward_plus",
+          "renderer": "gl_compatibility",
+          "mismatches": [
+            "tactical-disabled-1280x720.png：拉伸参数 0 [0, 0]，项目为 1 [1280, 720]",
+            "tactical-disabled-1920x1080.png：拉伸参数 0 [0, 0]，项目为 1 [1280, 720]",
+            "渲染器 gl_compatibility ≠ 项目默认 forward_plus"
+          ],
+          "pass": false
+        },
+        {
+          "manifest": "tactical-project-manifest.json",
+          "project_renderer": "forward_plus",
+          "renderer": "gl_compatibility",
+          "mismatches": [
+            "渲染器 gl_compatibility ≠ 项目默认 forward_plus"
+          ],
+          "pass": false
+        },
+        {
+          "manifest": "tactical-forward-project-manifest.json",
+          "project_renderer": "forward_plus",
+          "renderer": "forward_plus",
+          "mismatches": [],
+          "pass": true
+        }
+      ],
+      "calibration": {
+        "cases": {
+          "正例：文件头已声明": {
+            "unconditional_disable_lines": [
+              4
+            ],
+            "conditional_disable_lines": [],
+            "declared_not_runtime": true,
+            "pass": true
+          },
+          "反例：注释含关键字但无条件关闭": {
+            "unconditional_disable_lines": [
+              4
+            ],
+            "conditional_disable_lines": [],
+            "declared_not_runtime": false,
+            "pass": false
+          },
+          "正例：条件分支内的对照模式": {
+            "unconditional_disable_lines": [],
+            "conditional_disable_lines": [
+              4
+            ],
+            "declared_not_runtime": false,
+            "pass": true
+          }
+        },
+        "calibration_ok": true
+      }
+    }
+  }
+}

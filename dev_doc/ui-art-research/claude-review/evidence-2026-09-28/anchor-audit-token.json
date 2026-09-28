@@ -1,0 +1,434 @@
+[
+  {
+    "file": "assets/prototype/visual_style/samples/map_token_source_transparent_clean_v2.png",
+    "sha256": "e6f33324c52929769d4698ed75e969470ec45748788503f4637fcb3223dc5415",
+    "bytes": 920054,
+    "pixel_size": [
+      1536,
+      1024
+    ],
+    "mode": "RGBA",
+    "profile": "map_token",
+    "alpha": {
+      "transparent_ratio": 0.8066,
+      "opaque_ratio": 0.1934,
+      "semi_ratio_of_visible": 0.0,
+      "binary_alpha": true,
+      "fully_opaque": false
+    },
+    "hidden_rgb": {
+      "transparent_pixels": 1268697,
+      "light_rgb_share": 0.0,
+      "mean_rgb": [
+        0,
+        0,
+        0
+      ],
+      "checker_like": false
+    },
+    "edge_fringe": {
+      "edge_pixels": 14334,
+      "edge_mean_L": 23.72,
+      "inner_mean_L": 8.96,
+      "edge_minus_inner_L": 14.76,
+      "edge_near_white_share": 0.0,
+      "semi_light_share": 0.0
+    },
+    "visible_checker": {
+      "suspect": false,
+      "neutral_light_share": 0.0098
+    },
+    "pixel_grid": {
+      "x": {
+        "k": 4,
+        "confidence": 0.057,
+        "phase": 0,
+        "top": [
+          [
+            4,
+            0.057
+          ],
+          [
+            8,
+            0.027
+          ],
+          [
+            12,
+            0.018
+          ],
+          [
+            16,
+            0.014
+          ]
+        ]
+      },
+      "y": {
+        "k": 4,
+        "confidence": 0.049,
+        "phase": 2,
+        "top": [
+          [
+            4,
+            0.049
+          ],
+          [
+            8,
+            0.025
+          ],
+          [
+            12,
+            0.015
+          ],
+          [
+            16,
+            0.015
+          ]
+        ]
+      }
+    },
+    "unique_colors": 109009,
+    "value": {
+      "L_mean": 20.67,
+      "L_p05": 1.43,
+      "L_p50": 15.98,
+      "L_p95": 59.11,
+      "C_mean": 13.5,
+      "C_p95": 48.12
+    },
+    "palette_top": [
+      {
+        "hex": "#8B603F",
+        "share": 0.087,
+        "L": 44.5,
+        "C": 29.1,
+        "h": 62.2
+      },
+      {
+        "hex": "#44393B",
+        "share": 0.0797,
+        "L": 25.2,
+        "C": 5.3,
+        "h": 6.0
+      },
+      {
+        "hex": "#1D1C1F",
+        "share": 0.076,
+        "L": 10.5,
+        "C": 2.3,
+        "h": 303.4
+      },
+      {
+        "hex": "#372C2E",
+        "share": 0.0726,
+        "L": 19.3,
+        "C": 5.5,
+        "h": 6.3
+      },
+      {
+        "hex": "#252125",
+        "share": 0.0673,
+        "L": 13.3,
+        "C": 3.5,
+        "h": 324.9
+      },
+      {
+        "hex": "#2C282C",
+        "share": 0.0664,
+        "L": 16.7,
+        "C": 3.4,
+        "h": 324.8
+      },
+      {
+        "hex": "#131215",
+        "share": 0.0646,
+        "L": 5.6,
+        "C": 2.0,
+        "h": 302.5
+      },
+      {
+        "hex": "#0E0B0E",
+        "share": 0.0641,
+        "L": 3.3,
+        "C": 1.7,
+        "h": 324.4
+      },
+      {
+        "hex": "#2E1518",
+        "share": 0.0605,
+        "L": 10.4,
+        "C": 13.6,
+        "h": 15.1
+      },
+      {
+        "hex": "#6B2928",
+        "share": 0.0583,
+        "L": 26.3,
+        "C": 33.3,
+        "h": 28.1
+      },
+      {
+        "hex": "#571921",
+        "share": 0.0559,
+        "L": 19.4,
+        "C": 31.0,
+        "h": 19.8
+      },
+      {
+        "hex": "#C1A27F",
+        "share": 0.0541,
+        "L": 68.5,
+        "C": 23.3,
+        "h": 74.3
+      },
+      {
+        "hex": "#0A0609",
+        "share": 0.0533,
+        "L": 1.9,
+        "C": 1.7,
+        "h": 332.3
+      },
+      {
+        "hex": "#6F422D",
+        "share": 0.0505,
+        "L": 32.8,
+        "C": 27.1,
+        "h": 50.6
+      },
+      {
+        "hex": "#020204",
+        "share": 0.0463,
+        "L": 0.6,
+        "C": 0.8,
+        "h": 290.2
+      },
+      {
+        "hex": "#1C1114",
+        "share": 0.0434,
+        "L": 6.3,
+        "C": 5.8,
+        "h": 0.9
+      }
+    ],
+    "flags": []
+  },
+  {
+    "file": "assets/prototype/visual_style/samples/map_token_preview_final_v2.png",
+    "sha256": "9c828acb5caa501a351c6628311f8d29692c9ca4454e1614dab891444b61637f",
+    "bytes": 737775,
+    "pixel_size": [
+      1536,
+      1024
+    ],
+    "mode": "RGBA",
+    "profile": "map_token",
+    "alpha": {
+      "transparent_ratio": 0.8488,
+      "opaque_ratio": 0.1512,
+      "semi_ratio_of_visible": 0.0,
+      "binary_alpha": true,
+      "fully_opaque": false
+    },
+    "hidden_rgb": {
+      "transparent_pixels": 1334997,
+      "light_rgb_share": 0.0,
+      "mean_rgb": [
+        0,
+        0,
+        0
+      ],
+      "checker_like": false
+    },
+    "edge_fringe": {
+      "edge_pixels": 17428,
+      "edge_mean_L": 69.92,
+      "inner_mean_L": 25.15,
+      "edge_minus_inner_L": 44.78,
+      "edge_near_white_share": 0.3355,
+      "semi_light_share": 0.0
+    },
+    "visible_checker": {
+      "suspect": false,
+      "neutral_light_share": 0.0331,
+      "dominant_run": 4,
+      "dominant_run_share": 0.01
+    },
+    "pixel_grid": {
+      "x": {
+        "k": 16,
+        "confidence": 0.004,
+        "phase": 9,
+        "top": [
+          [
+            16,
+            0.004
+          ],
+          [
+            3,
+            0.003
+          ],
+          [
+            10,
+            0.003
+          ],
+          [
+            11,
+            0.003
+          ]
+        ]
+      },
+      "y": {
+        "k": 2,
+        "confidence": 0.004,
+        "phase": 0,
+        "top": [
+          [
+            2,
+            0.004
+          ],
+          [
+            7,
+            0.004
+          ],
+          [
+            6,
+            0.003
+          ],
+          [
+            10,
+            0.003
+          ]
+        ]
+      }
+    },
+    "unique_colors": 92187,
+    "value": {
+      "L_mean": 21.46,
+      "L_p05": 2.04,
+      "L_p50": 14.36,
+      "L_p95": 76.21,
+      "C_mean": 11.41,
+      "C_p95": 38.26
+    },
+    "palette_top": [
+      {
+        "hex": "#1E191D",
+        "share": 0.079,
+        "L": 9.5,
+        "C": 3.9,
+        "h": 331.3
+      },
+      {
+        "hex": "#36282A",
+        "share": 0.0774,
+        "L": 17.8,
+        "C": 7.0,
+        "h": 9.9
+      },
+      {
+        "hex": "#271F23",
+        "share": 0.0737,
+        "L": 12.8,
+        "C": 4.9,
+        "h": 345.0
+      },
+      {
+        "hex": "#764838",
+        "share": 0.0683,
+        "L": 35.5,
+        "C": 25.2,
+        "h": 45.1
+      },
+      {
+        "hex": "#947666",
+        "share": 0.0681,
+        "L": 52.1,
+        "C": 16.2,
+        "h": 55.1
+      },
+      {
+        "hex": "#2A1515",
+        "share": 0.0645,
+        "L": 9.7,
+        "C": 11.6,
+        "h": 23.0
+      },
+      {
+        "hex": "#D6CAC1",
+        "share": 0.0641,
+        "L": 82.0,
+        "C": 6.5,
+        "h": 66.2
+      },
+      {
+        "hex": "#622726",
+        "share": 0.0617,
+        "L": 24.3,
+        "C": 30.1,
+        "h": 27.7
+      },
+      {
+        "hex": "#161316",
+        "share": 0.0606,
+        "L": 6.3,
+        "C": 2.5,
+        "h": 324.4
+      },
+      {
+        "hex": "#120D0F",
+        "share": 0.0601,
+        "L": 4.1,
+        "C": 2.1,
+        "h": 351.2
+      },
+      {
+        "hex": "#2C252A",
+        "share": 0.0583,
+        "L": 15.6,
+        "C": 4.9,
+        "h": 334.6
+      },
+      {
+        "hex": "#0F080A",
+        "share": 0.0575,
+        "L": 2.7,
+        "C": 2.3,
+        "h": 358.9
+      },
+      {
+        "hex": "#4E151B",
+        "share": 0.0549,
+        "L": 16.7,
+        "C": 29.3,
+        "h": 21.8
+      },
+      {
+        "hex": "#483A37",
+        "share": 0.0547,
+        "L": 25.8,
+        "C": 7.0,
+        "h": 36.8
+      },
+      {
+        "hex": "#1E1012",
+        "share": 0.0508,
+        "L": 6.2,
+        "C": 7.2,
+        "h": 10.2
+      },
+      {
+        "hex": "#050405",
+        "share": 0.0463,
+        "L": 1.2,
+        "C": 0.5,
+        "h": 324.4
+      }
+    ],
+    "flags": [
+      {
+        "level": "WARN",
+        "code": "edge.white_fringe",
+        "message": "外轮廓一圈明显偏白偏亮，疑似白底抠图残边；需在深色与品红底上目检。"
+      }
+    ]
+  }
+]
