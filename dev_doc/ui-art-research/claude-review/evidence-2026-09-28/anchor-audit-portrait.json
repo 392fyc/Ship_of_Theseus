@@ -1,0 +1,220 @@
+[
+  {
+    "file": "assets/prototype/visual_style/samples/portrait_preview_final.png",
+    "sha256": "9f123a2022abe62472530ebd13ba43587802623c0db7ff7af711f5cec5be0cf3",
+    "bytes": 1898553,
+    "pixel_size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA",
+    "profile": "portrait",
+    "alpha": {
+      "transparent_ratio": 0.7484,
+      "opaque_ratio": 0.2516,
+      "semi_ratio_of_visible": 0.0,
+      "binary_alpha": true,
+      "fully_opaque": false
+    },
+    "hidden_rgb": {
+      "transparent_pixels": 1176893,
+      "light_rgb_share": 1.0,
+      "mean_rgb": [
+        247,
+        247,
+        247
+      ],
+      "checker_like": true
+    },
+    "edge_fringe": {
+      "edge_pixels": 10060,
+      "edge_mean_L": 57.21,
+      "inner_mean_L": 19.84,
+      "edge_minus_inner_L": 37.37,
+      "edge_near_white_share": 0.0199,
+      "semi_light_share": 0.0
+    },
+    "visible_checker": {
+      "suspect": false,
+      "neutral_light_share": 0.0069
+    },
+    "pixel_grid": {
+      "x": {
+        "k": 14,
+        "confidence": 0.004,
+        "phase": 8,
+        "top": [
+          [
+            4,
+            0.004
+          ],
+          [
+            8,
+            0.004
+          ],
+          [
+            14,
+            0.004
+          ],
+          [
+            6,
+            0.003
+          ]
+        ]
+      },
+      "y": {
+        "k": 8,
+        "confidence": 0.004,
+        "phase": 6,
+        "top": [
+          [
+            8,
+            0.004
+          ],
+          [
+            4,
+            0.003
+          ],
+          [
+            12,
+            0.003
+          ],
+          [
+            14,
+            0.003
+          ]
+        ]
+      }
+    },
+    "unique_colors": 96280,
+    "value": {
+      "L_mean": 12.27,
+      "L_p05": 0.59,
+      "L_p50": 6.16,
+      "L_p95": 48.96,
+      "C_mean": 9.76,
+      "C_p95": 37.33
+    },
+    "palette_top": [
+      {
+        "hex": "#231D21",
+        "share": 0.0937,
+        "L": 11.6,
+        "C": 4.2,
+        "h": 336.6
+      },
+      {
+        "hex": "#613A2D",
+        "share": 0.0865,
+        "L": 28.8,
+        "C": 21.9,
+        "h": 44.3
+      },
+      {
+        "hex": "#1A161A",
+        "share": 0.0818,
+        "L": 7.8,
+        "C": 3.7,
+        "h": 325.0
+      },
+      {
+        "hex": "#1B090E",
+        "share": 0.0817,
+        "L": 4.2,
+        "C": 7.9,
+        "h": 3.1
+      },
+      {
+        "hex": "#070508",
+        "share": 0.0725,
+        "L": 1.5,
+        "C": 1.3,
+        "h": 314.7
+      },
+      {
+        "hex": "#0B0A0E",
+        "share": 0.0709,
+        "L": 2.9,
+        "C": 1.8,
+        "h": 299.1
+      },
+      {
+        "hex": "#47231E",
+        "share": 0.062,
+        "L": 18.5,
+        "C": 19.8,
+        "h": 33.7
+      },
+      {
+        "hex": "#100E11",
+        "share": 0.061,
+        "L": 4.2,
+        "C": 1.8,
+        "h": 314.2
+      },
+      {
+        "hex": "#AE8977",
+        "share": 0.056,
+        "L": 60.1,
+        "C": 18.9,
+        "h": 52.7
+      },
+      {
+        "hex": "#151317",
+        "share": 0.0539,
+        "L": 6.2,
+        "C": 2.9,
+        "h": 308.4
+      },
+      {
+        "hex": "#121014",
+        "share": 0.0538,
+        "L": 5.0,
+        "C": 2.5,
+        "h": 308.3
+      },
+      {
+        "hex": "#11070B",
+        "share": 0.0537,
+        "L": 2.7,
+        "C": 3.6,
+        "h": 352.5
+      },
+      {
+        "hex": "#050204",
+        "share": 0.0502,
+        "L": 0.8,
+        "C": 1.2,
+        "h": 335.7
+      },
+      {
+        "hex": "#350A12",
+        "share": 0.0453,
+        "L": 9.1,
+        "C": 22.9,
+        "h": 15.3
+      },
+      {
+        "hex": "#000001",
+        "share": 0.0399,
+        "L": 0.0,
+        "C": 0.4,
+        "h": 290.2
+      },
+      {
+        "hex": "#381517",
+        "share": 0.0372,
+        "L": 12.2,
+        "C": 19.0,
+        "h": 21.8
+      }
+    ],
+    "flags": [
+      {
+        "level": "INFO",
+        "code": "hidden.checker",
+        "message": "透明区底下残留棋盘格 RGB：来源图曾把“透明”画成棋盘格，清理只改了 alpha。忽略 alpha 的查看器会显示棋盘格；Linear 过滤或 mipmap 时依赖 Godot 的 Fix Alpha Border 防止浅色渗边，导入设置需保持开启。"
+      }
+    ]
+  }
+]

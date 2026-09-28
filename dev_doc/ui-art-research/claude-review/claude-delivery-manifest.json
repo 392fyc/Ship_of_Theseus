@@ -1,0 +1,305 @@
+{
+  "batch": "claude-review-2026-09-28",
+  "branch": "claude/art-review-full",
+  "base_head": "1fdac59db52ebdade335a106732d2dde84234cbf",
+  "status": "未提交；由用户或 Codex 核对后提交并经 scripts/codex/sot-publish.ps1 发布",
+  "note": "本清单不含自身；所有文件均为本次审查新增，未修改任何既有文件。",
+  "count": 59,
+  "files": [
+    {
+      "path": "dev_doc/ui-art-research/claude-review/claude-change-requests.md",
+      "bytes": 62727,
+      "sha256": "c37e4bb623ec6af525b3b0a5f56058a5952052421f8e5bf6edb66274d2242de3"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/claude-review-report.md",
+      "bytes": 48667,
+      "sha256": "e1f02c6aa79d33ede5398683ecd804c8b5b41f4339f60775f8f053299d33717e"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/.gdignore",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/anchor-audit-portrait.json",
+      "bytes": 4464,
+      "sha256": "19b3bf8a8c1a49c45499c545bccc033c4289362662f26fac1582caab88df2888"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/anchor-audit-terrain.json",
+      "bytes": 4357,
+      "sha256": "5c95aac9bfb90c42b794b60d63c91e8658005e1b670304379e60eedf98ed3063"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/anchor-audit-token.json",
+      "bytes": 8468,
+      "sha256": "2900a7a18817d2fce047dccea76e5019377c2f844c10f20e5a7d925b92fe4c81"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/anchor-audit-ui.json",
+      "bytes": 4350,
+      "sha256": "87ccc3c15b81db6fc4a23ba3115550de19acdf1cf0bd94576e084917c4a94ea6"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/anchor-audit-vfx.json",
+      "bytes": 4162,
+      "sha256": "42283283cf560f992eb142f5619ec62d48a367c38572e088a244eb6070e6277d"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/blind-key.json",
+      "bytes": 181,
+      "sha256": "72ba629d403927bb7a745a4d160e69294ff4ff85eb6e92788815296622dcc374"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/blind-test-prompt.md",
+      "bytes": 2831,
+      "sha256": "51526f6748b041855cb9ce721f23ec8e5f1133476a5c53c2c4b660d6852e7556"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/blind-test-reviewer-report.json",
+      "bytes": 2710,
+      "sha256": "dc43e2c34a19f9c09490cb0eb3b142fe13fd859594d8fe868e4efb3f79f7ddd4"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/claude-review-checks.json",
+      "bytes": 34328,
+      "sha256": "48591be216b7b99d65878388536bce1dd77bbb8870c580ae84e97cdae2738594"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e01_tactical_default_1280.png",
+      "bytes": 232433,
+      "sha256": "808ebdd9beac4c054c93bdd3fd599b375a6fdf2973a06275f12ae8fe79a30d9c"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e02_tactical_hover_1280.png",
+      "bytes": 246913,
+      "sha256": "6bea8ede540113784fbad3f55feb70087db78cd78ba9a70d789bdf3718906df4"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e03_harness_disabled_stretch_1920.png",
+      "bytes": 372653,
+      "sha256": "e863fe2f9b52ffb79737f6b09a0b00d37e66206054983bdc57a69d499a4b0e4b"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e04_runtime_project_stretch_1920.png",
+      "bytes": 417265,
+      "sha256": "891c19277c7a6fa9bffe03e5e2d149ec6ee2498087804908efc288c7bcb2bbbc"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e05_skill_shelf_2x.png",
+      "bytes": 90032,
+      "sha256": "9e69c71b5b5899ec448dc5a97438916041f3c4470e7f0d13dd66da96c98f99cc"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e06_action_states_2x.png",
+      "bytes": 182477,
+      "sha256": "5beb8025298a9231b5a66b65948063ac85b4b9fcfbdbcdd421c8e528ab723bc3"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e07_crests_hollow_endturn_2x.png",
+      "bytes": 52321,
+      "sha256": "9753d64417523698778e4338e25a22ed7e85bf838a8ad0f027384e08951d07b5"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e08_crest_sampling_sim_4x.png",
+      "bytes": 66542,
+      "sha256": "e0ffa7d0c28de8171e3cd187338e938402dbdfe3fe20e698e4586b410a93e478"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e09_icon_alpha_sheet.png",
+      "bytes": 554449,
+      "sha256": "8f6c5c8a189dbac47034878cd71962a38d382086f5db02ce6aa15cce9594133d"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e10_blind_set_current.png",
+      "bytes": 64914,
+      "sha256": "90d6f8cda35e7b9aeecfdbd3d8c82014c8d9df145d4cd1d47861a3fb6e66efae"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e11_blind_set_legacy.png",
+      "bytes": 64032,
+      "sha256": "950d2119c2073923ce1068531e9305c272af6c0c0f368c455f2db95ce73be20e"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e12_portrait_top_gap_8x.png",
+      "bytes": 29555,
+      "sha256": "260608d7926ebddc4f0eef424a2ca20076af7cd7bb93516b1c29d77e83765842"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e13_token_sampling_4x.png",
+      "bytes": 28177,
+      "sha256": "2c2c946ddca2fa8c52f4f28578245ed337c026e9e4bb2fb93f76d9200219dc05"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e14_runscene_occlusion_1280.png",
+      "bytes": 227353,
+      "sha256": "3acf901c4ca0e562de10411a338fd05ea56aeb5eebf5e290482940d938697d84"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e15_world_sampling_sheet.png",
+      "bytes": 314457,
+      "sha256": "26b9f06f8d1e325f2843b958857d2bad095e8b19be06f9deb4c08fda62acb0b4"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e16_courtyard_flooded_play_1280.png",
+      "bytes": 1828501,
+      "sha256": "3b67f6c39284b333d6383cc241f718eeeb2102c81fed60a6fc59045b260c7dd9"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e17_courtyard_overgrown_clear_1280.png",
+      "bytes": 1949806,
+      "sha256": "07856074e61df0cbddf1092c41e2d5b3752d4232bfa53497f42617bd874a0a4c"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e18_trial_board_3x.png",
+      "bytes": 195322,
+      "sha256": "279a917fdaef3308954a80c0caa9de67c85e78c0f270757eae719fb19edce1f8"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e19_trial_courtyard_1280.png",
+      "bytes": 2021902,
+      "sha256": "e787b89ce8b5ed9a2a5f5911a54aabf2c4bb7150c91583b77bf29c5ed88b7982"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e20_trial_25_1280.png",
+      "bytes": 2082317,
+      "sha256": "9661747c7d7e17fe805357e3804b7d5bc82b5fbc497ccf35439a3a3db5da3306"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e21_trial_25_1920.png",
+      "bytes": 4487543,
+      "sha256": "ef48a22c4d540cbf125eaa071be7c9def6259c34256f761edc3cb734ea2a484a"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e22_kit_pairs_01.png",
+      "bytes": 699387,
+      "sha256": "6ea2ccddff817aba2790238cfc7313075c1c68eb1d3cf7480fb57c5e6da09730"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e23_workbench_1280.png",
+      "bytes": 1269484,
+      "sha256": "3414e58c40e91e5876e318b4fc68f23e12dd97db2c70a6955c179c99042d2aba"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e24_door_select_1280.png",
+      "bytes": 13234,
+      "sha256": "0f520c2edac87c28a053610c4c766837015112e033d975d26d3aafe9b9dcd460"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e25_prep_1280.png",
+      "bytes": 81080,
+      "sha256": "da40a7e2ede9764e88f37916ee050a286a898342654d63b37b4a8a52eea71fb3"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e26_qi_marks_states.png",
+      "bytes": 136295,
+      "sha256": "12d12e5df44ccc557b3cb0549b81ed06981e587ae5bb309db80de936fdf8241b"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e27_motion_overview.png",
+      "bytes": 1413744,
+      "sha256": "9c38fef017f38e6b07dedde0e3239165779a41c78026d71c680543bc9ae57154"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e28_hud_2560_native_crop.png",
+      "bytes": 202204,
+      "sha256": "6e126591f5561b2d2b450ff02918b879470269d06ab41bcc4fcbcd49554cdb34"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e29_qi_thresholds_2x.png",
+      "bytes": 99547,
+      "sha256": "3f7da0b6f51d7315c47fe67e1c4bff5ef1077807978fbed6f22962a6ce5eb025"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e30_event_end_overview.png",
+      "bytes": 65030,
+      "sha256": "7ba6199544a7d49e7cb31d05418e1c4178c49df51ee5abc071bc39e82b3e2ae7"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e31_event_outcome_1280.png",
+      "bytes": 38241,
+      "sha256": "afb9c779817fa3ff6ecffcab821c0d1f45593ae45413ba1e2d3cace7f8c1e910"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e32_portrait_1920_edges_6x.png",
+      "bytes": 55157,
+      "sha256": "b8cc9a31aa45de44ae6b82816496818ef2c124c873d56332bedd4a91c394b9d6"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e33_renderer_courtyard_compare.png",
+      "bytes": 2207195,
+      "sha256": "ea77be6b408df2ec6d0795b21ca69cca581946f5f1b6388b39adaf3179c2d472"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e34_fallback_marks.png",
+      "bytes": 22012,
+      "sha256": "c98dfb214d6f8344859f995fa6bf15a2160269f4472600a6ab721307d96fbd59"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e35_gallery_1280.png",
+      "bytes": 177365,
+      "sha256": "0798532b6f172f6ad0bec3bfc5a2d2f6636e1f3058179f8da72712d783520f34"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e36_skill_tooltip_1280.png",
+      "bytes": 229062,
+      "sha256": "8a6f83d20e433734eae2201687dc65c5edbd28b789d23f2a97d3192925d8958d"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/e37_damage_forecast_1280.png",
+      "bytes": 212990,
+      "sha256": "5e7da4e728938806fcda325dfc35b8885947c990d584b3bb049d3735806749be"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/evidence-manifest.json",
+      "bytes": 18852,
+      "sha256": "a19cb6cc094ceb1fc9051942e67d62bf34995696309cb714d34018768e995f93"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/hud-frame-audit.json",
+      "bytes": 39864,
+      "sha256": "a951d926daf001677c2224cba0b2574dddf644458002180a15861a245b9f11a0"
+    },
+    {
+      "path": "dev_doc/ui-art-research/claude-review/evidence-2026-09-28/sampling-sim.json",
+      "bytes": 13274,
+      "sha256": "8a8bd294a4bb974da49aaa3d131c15002058f7b2c68acb35edbc562962c74c37"
+    },
+    {
+      "path": "tests/claude_review/art_audit.py",
+      "bytes": 12241,
+      "sha256": "b8beefa2e4164d1c593905be9175c32017d1ef3739a503bcffb7c0f124185fb6"
+    },
+    {
+      "path": "tests/claude_review/artlib.py",
+      "bytes": 16348,
+      "sha256": "85e82780402b3a133f0af08f5d826a1c40dff7162cc1376f69d5c344a920ed8c"
+    },
+    {
+      "path": "tests/claude_review/capture_battle_overlays.gd",
+      "bytes": 6988,
+      "sha256": "eba5478d0c1594783bd74963df854cba15245ef2a14021982fcf18e54c1d038c"
+    },
+    {
+      "path": "tests/claude_review/capture_run_flow_ui.gd",
+      "bytes": 3524,
+      "sha256": "6411d8a009437a0d8b118bd3d996d528d29e0070c0736388b36078f46d464f4f"
+    },
+    {
+      "path": "tests/claude_review/capture_scene_native.gd",
+      "bytes": 4271,
+      "sha256": "987747926b1fd635e39c19eb00c22233084a46fced765a2f7d1ab728afc10ebc"
+    },
+    {
+      "path": "tests/claude_review/claude_review_checks.py",
+      "bytes": 33897,
+      "sha256": "4625330edffd72400f66dd70538c6e71368480e9cafa304f189ae2580d498190"
+    },
+    {
+      "path": "tests/claude_review/sampling_sim.py",
+      "bytes": 11339,
+      "sha256": "0c0133011767f8d9788a17e5e67059cd79a430cb68b5888d50336db3aa222f99"
+    }
+  ]
+}

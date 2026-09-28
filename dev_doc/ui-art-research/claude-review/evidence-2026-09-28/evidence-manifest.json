@@ -1,0 +1,447 @@
+{
+  "batch": "claude-review-2026-09-28",
+  "repository_base": "1fdac59db52ebdade335a106732d2dde84234cbf",
+  "engine": "Godot 4.6.3-stable (official)",
+  "renderer_note": "e24、e25、e30、e31、e36、e37 与 e33 下半部分为 Forward+，其余整屏为 gl_compatibility；发行默认渲染器为 Forward+，见报告 §3.2 与 D-5。",
+  "raw_root_note": "<仓库外证据根> 为本机仓库外目录，按项目规则不写入版本控制；实际位置见交付说明。",
+  "note": "整屏为 Godot 视口原始输出；放大裁切只用于诊断，倍数写在说明中。",
+  "files": [
+    {
+      "file": "e01_tactical_default_1280.png",
+      "sha256": "808ebdd9beac4c054c93bdd3fd599b375a6fdf2973a06275f12ae8fe79a30d9c",
+      "pixel_size": [
+        1280,
+        720
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/hud/available-1280.png",
+      "description": "TacticalScene 默认战斗 1280×720；tests/capture_hud_final_acceptance.gd（关闭项目拉伸，Compatibility）；剑圣、默认地图"
+    },
+    {
+      "file": "e02_tactical_hover_1280.png",
+      "sha256": "6bea8ede540113784fbad3f55feb70087db78cd78ba9a70d789bdf3718906df4",
+      "pixel_size": [
+        1280,
+        720
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/hud/hover-1280.png",
+      "description": "同批次头像悬停属性卡"
+    },
+    {
+      "file": "e03_harness_disabled_stretch_1920.png",
+      "sha256": "e863fe2f9b52ffb79737f6b09a0b00d37e66206054983bdc57a69d499a4b0e4b",
+      "pixel_size": [
+        1920,
+        1080
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/hud/available-1920.png",
+      "description": "既有 HUD 采集 1920×1080：关闭项目拉伸，Turn Order、调试提示与战场未随 HUD 缩放"
+    },
+    {
+      "file": "e04_runtime_project_stretch_1920.png",
+      "sha256": "891c19277c7a6fa9bffe03e5e2d149ec6ee2498087804908efc288c7bcb2bbbc",
+      "pixel_size": [
+        1920,
+        1080
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/native/tactical-project-1920x1080.png",
+      "description": "tests/claude_review/capture_scene_native.gd --stretch=project（Compatibility）：保留 canvas_items 拉伸的 1920×1080"
+    },
+    {
+      "file": "e05_skill_shelf_2x.png",
+      "sha256": "9e69c71b5b5899ec448dc5a97438916041f3c4470e7f0d13dd66da96c98f99cc",
+      "pixel_size": [
+        960,
+        304
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/hud/crop_skillshelf_2x.png",
+      "description": "e01 同帧裁切 (400,548)-(880,700)，2× nearest，仅诊断"
+    },
+    {
+      "file": "e06_action_states_2x.png",
+      "sha256": "5beb8025298a9231b5a66b65948063ac85b4b9fcfbdbcdd421c8e528ab723bc3",
+      "pixel_size": [
+        640,
+        900
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/hud/action_states_2x.png",
+      "description": "同批次 available/mixed/spent 裁切 (500,548)-(820,690)，2× nearest"
+    },
+    {
+      "file": "e07_crests_hollow_endturn_2x.png",
+      "sha256": "9753d64417523698778e4338e25a22ed7e85bf838a8ad0f027384e08951d07b5",
+      "pixel_size": [
+        740,
+        398
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/hud/crop_crests_endturn_2x.png",
+      "description": "e01 同帧裁切 (880,505)-(1250,704)，2× nearest"
+    },
+    {
+      "file": "e08_crest_sampling_sim_4x.png",
+      "sha256": "e0ffa7d0c28de8171e3cd187338e938402dbdfe3fe20e698e4586b410a93e478",
+      "pixel_size": [
+        1180,
+        772
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/crest/crest_sampling_sim.png",
+      "description": "纹章按显示尺寸的离线采样模拟：无 mipmap 双线性 vs 面积降采样；源空间 14px 描边 vs 屏幕空间 2px 描边"
+    },
+    {
+      "file": "e09_icon_alpha_sheet.png",
+      "sha256": "8f6c5c8a189dbac47034878cd71962a38d382086f5db02ce6aa15cce9594133d",
+      "pixel_size": [
+        840,
+        960
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/icons/myrmidon_icon_alpha_sheet.png",
+      "description": "五枚基础剑士图标：源图 α、运行图叠槽底色、强制不透明、52px 显示"
+    },
+    {
+      "file": "e10_blind_set_current.png",
+      "sha256": "90d6f8cda35e7b9aeecfdbd3d8c82014c8d9df145d4cd1d47861a3fb6e66efae",
+      "pixel_size": [
+        900,
+        250
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/blind/blind-set-A.png",
+      "description": "盲测现行组（顺序打乱；答案见 blind-key.json；审查者原始回答见 blind-test-reviewer-report.json）"
+    },
+    {
+      "file": "e11_blind_set_legacy.png",
+      "sha256": "950d2119c2073923ce1068531e9305c272af6c0c0f368c455f2db95ce73be20e",
+      "pixel_size": [
+        900,
+        250
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/blind/blind-set-B.png",
+      "description": "盲测历史对照组：斩击替换为 style-zhanji-v2 旧版"
+    },
+    {
+      "file": "e12_portrait_top_gap_8x.png",
+      "sha256": "260608d7926ebddc4f0eef424a2ca20076af7cd7bb93516b1c29d77e83765842",
+      "pixel_size": [
+        656,
+        736
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/portrait/runtime_portrait_edges_8x.png",
+      "description": "e01 同帧头像框 (39,604)-(121,696) 8× nearest：顶边 1 行面板底色缝"
+    },
+    {
+      "file": "e13_token_sampling_4x.png",
+      "sha256": "2c2c946ddca2fa8c52f4f28578245ed337c026e9e4bb2fb93f76d9200219dc05",
+      "pixel_size": [
+        960,
+        640
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/token/kensei_single_four_directions_crop4x.png",
+      "description": "tests/capture_kensei_map_token_tactical.gd 整屏裁切 (760,290)-(1000,450)，4× nearest"
+    },
+    {
+      "file": "e14_runscene_occlusion_1280.png",
+      "sha256": "3acf901c4ca0e562de10411a338fd05ea56aeb5eebf5e290482940d938697d84",
+      "pixel_size": [
+        1280,
+        720
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/native/runscene-project-1280x720.png",
+      "description": "RunScene 首战（项目拉伸，Compatibility）：友方文字方块与血条遮住剑圣棋子"
+    },
+    {
+      "file": "e15_world_sampling_sheet.png",
+      "sha256": "26b9f06f8d1e325f2843b958857d2bad095e8b19be06f9deb4c08fda62acb0b4",
+      "pixel_size": [
+        1432,
+        5230
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/sampling-final/sampling-sim-sheet.png",
+      "description": "tests/claude_review/sampling_sim.py：按场景真实显示高度，当前采样、mip、mip−0.5 与面积滤波参考对照（数值见 sampling-sim.json）"
+    },
+    {
+      "file": "e16_courtyard_flooded_play_1280.png",
+      "sha256": "3b67f6c39284b333d6383cc241f718eeeb2102c81fed60a6fc59045b260c7dd9",
+      "pixel_size": [
+        1280,
+        720
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/courtyard/flooded-1280-play.png",
+      "description": "tests/capture_courtyard_visual_review.gd 积水花园网格态：网格交点亮星、水面色相对比"
+    },
+    {
+      "file": "e17_courtyard_overgrown_clear_1280.png",
+      "sha256": "07856074e61df0cbddf1092c41e2d5b3752d4232bfa53497f42617bd874a0a4c",
+      "pixel_size": [
+        1280,
+        720
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/courtyard/overgrown-1280-clear.png",
+      "description": "同批次荒草中庭无网格态：可战区域不可辨、单位为文字方块"
+    },
+    {
+      "file": "e18_trial_board_3x.png",
+      "sha256": "279a917fdaef3308954a80c0caa9de67c85e78c0f270757eae719fb19edce1f8",
+      "pixel_size": [
+        1110,
+        540
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/trial/courtyard_board_3x.png",
+      "description": "正式试战裁切 (330,260)-(700,440)，3× nearest：石柱黑块、涟漪圆圈、网格亮星"
+    },
+    {
+      "file": "e19_trial_courtyard_1280.png",
+      "sha256": "e787b89ce8b5ed9a2a5f5911a54aabf2c4bb7150c91583b77bf29c5ed88b7982",
+      "pixel_size": [
+        1280,
+        720
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/runtime-validation/runtime/battle-courtyard-1280.png",
+      "description": "tests/run_terrain_runtime_validation.ps1 正式试战 10×10：外围单一草土平铺"
+    },
+    {
+      "file": "e20_trial_25_1280.png",
+      "sha256": "9661747c7d7e17fe805357e3804b7d5bc82b5fbc497ccf35439a3a3db5da3306",
+      "pixel_size": [
+        1280,
+        720
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/runtime-validation/map-size/map-size-25-battle-1280x720.png",
+      "description": "同批次 25×25 正式试战 1280×720"
+    },
+    {
+      "file": "e21_trial_25_1920.png",
+      "sha256": "ef48a22c4d540cbf125eaa071be7c9def6259c34256f761edc3cb734ea2a484a",
+      "pixel_size": [
+        1920,
+        1080
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/runtime-validation/map-size/map-size-25-battle-1920x1080.png",
+      "description": "同批次 25×25 正式试战 1920×1080：四角露出世界边缘"
+    },
+    {
+      "file": "e22_kit_pairs_01.png",
+      "sha256": "6ea2ccddff817aba2790238cfc7313075c1c68eb1d3cf7480fb57c5e6da09730",
+      "pixel_size": [
+        1280,
+        760
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/runtime-validation/terrain-regression/kit/terrain-pairs-01.png",
+      "description": "同批次地形接壤组 1"
+    },
+    {
+      "file": "e23_workbench_1280.png",
+      "sha256": "3414e58c40e91e5876e318b4fc68f23e12dd97db2c70a6955c179c99042d2aba",
+      "pixel_size": [
+        1280,
+        720
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/runtime-validation/terrain-regression/painter/terrain-painter-workbench-1280x720.png",
+      "description": "同批次地图工作台"
+    },
+    {
+      "file": "e24_door_select_1280.png",
+      "sha256": "0f520c2edac87c28a053610c4c766837015112e033d975d26d3aafe9b9dcd460",
+      "pixel_size": [
+        1280,
+        720
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/runflow-v3/02-door-select.png",
+      "description": "tests/claude_review/capture_run_flow_ui.gd（项目拉伸，Forward+）选门界面"
+    },
+    {
+      "file": "e25_prep_1280.png",
+      "sha256": "da40a7e2ede9764e88f37916ee050a286a898342654d63b37b4a8a52eea71fb3",
+      "pixel_size": [
+        1280,
+        720
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/runflow-v3/03-prep.png",
+      "description": "同脚本备战界面（运输队、情报；商店区本帧未出现）"
+    },
+    {
+      "file": "e26_qi_marks_states.png",
+      "sha256": "12d12e5df44ccc557b3cb0549b81ed06981e587ae5bb309db80de936fdf8241b",
+      "pixel_size": [
+        1250,
+        336
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/qi_marks_states_strip_v2.png",
+      "description": "取自 dev_doc/ui-art-research/hud-freeze-godot 三张整屏的同区域裁切拼接（剑气 65/100、印记 111/101）"
+    },
+    {
+      "file": "e27_motion_overview.png",
+      "sha256": "9c38fef017f38e6b07dedde0e3239165779a41c78026d71c680543bc9ae57154",
+      "pixel_size": [
+        1720,
+        524
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/motion_overview.png",
+      "description": "tests/capture_battlefield_environment_motion.gd overgrown 192 帧抽 8 帧缩略"
+    },
+    {
+      "file": "e28_hud_2560_native_crop.png",
+      "sha256": "6e126591f5561b2d2b450ff02918b879470269d06ab41bcc4fcbcd49554cdb34",
+      "pixel_size": [
+        1240,
+        230
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/native-2560/hud_left_2560_1to1.png",
+      "description": "TacticalScene 2560×1440（项目拉伸）1:1 裁切 (60,1180)-(1300,1410)"
+    },
+    {
+      "file": "e29_qi_thresholds_2x.png",
+      "sha256": "3f7da0b6f51d7315c47fe67e1c4bff5ef1077807978fbed6f22962a6ce5eb025",
+      "pixel_size": [
+        780,
+        820
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/qi_thresholds_2x.png",
+      "description": "取自 hud-freeze-godot/evidence/fixture-{0,1,50,51,100}-111.png 裁切 (30,505)-(420,575)，2×：流线不随比例、51 阈值换色"
+    },
+    {
+      "file": "e30_event_end_overview.png",
+      "sha256": "7ba6199544a7d49e7cb31d05418e1c4178c49df51ee5abc071bc39e82b3e2ae7",
+      "pixel_size": [
+        1940,
+        400
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/runflow-v3/event_end_overview.png",
+      "description": "capture_run_flow_ui.gd（Forward+）事件选项、事件结果、结束面板缩略"
+    },
+    {
+      "file": "e31_event_outcome_1280.png",
+      "sha256": "afb9c779817fa3ff6ecffcab821c0d1f45593ae45413ba1e2d3cace7f8c1e910",
+      "pixel_size": [
+        1280,
+        720
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/runflow-v3/05-event-outcome.png",
+      "description": "同批次事件结果原图：[占位] 与内部 buff ID 暴露"
+    },
+    {
+      "file": "e32_portrait_1920_edges_6x.png",
+      "sha256": "b8cc9a31aa45de44ae6b82816496818ef2c124c873d56332bedd4a91c394b9d6",
+      "pixel_size": [
+        738,
+        828
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/native/portrait_1920_edges_6x.png",
+      "description": "e04 同帧头像框 6× nearest：顶边 2 行缝"
+    },
+    {
+      "file": "e33_renderer_courtyard_compare.png",
+      "sha256": "ea77be6b408df2ec6d0795b21ca69cca581946f5f1b6388b39adaf3179c2d472",
+      "pixel_size": [
+        1280,
+        820
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/renderer-courtyard/courtyard_compat_vs_forward.png",
+      "description": "庭院场景 Compatibility（上）与 Forward+（下）同尺寸对照；未固定动画时间"
+    },
+    {
+      "file": "e34_fallback_marks.png",
+      "sha256": "c98dfb214d6f8344859f995fa6bf15a2160269f4472600a6ab721307d96fbd59",
+      "pixel_size": [
+        300,
+        190
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/fallback_marks_sheet_v2.png",
+      "description": "纹章缺图回退图 marks-000 与 marks-111，原尺寸，附中文标注"
+    },
+    {
+      "file": "e35_gallery_1280.png",
+      "sha256": "0798532b6f172f6ad0bec3bfc5a2d2f6636e1f3058179f8da72712d783520f34",
+      "pixel_size": [
+        1280,
+        720
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/native/gallery-project-1280x720.png",
+      "description": "风格样例画廊（项目拉伸）"
+    },
+    {
+      "file": "e36_skill_tooltip_1280.png",
+      "sha256": "8a6f83d20e433734eae2201687dc65c5edbd28b789d23f2a97d3192925d8958d",
+      "pixel_size": [
+        1280,
+        720
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/overlays/02-skill-tooltip.png",
+      "description": "tests/claude_review/capture_battle_overlays.gd（项目拉伸，Forward+）默认战斗：悬停技能按钮的提示卡"
+    },
+    {
+      "file": "e37_damage_forecast_1280.png",
+      "sha256": "5e7da4e728938806fcda325dfc35b8885947c990d584b3bb049d3735806749be",
+      "pixel_size": [
+        1280,
+        720
+      ],
+      "raw_source": "<仓库外证据根>/sot-claude-review-20260928/raw/overlays/04-forecast.png",
+      "description": "同脚本：移动到最近敌人旁、选择斩击后悬停敌人，显示技能范围、伤害预测浮窗与头顶数字"
+    },
+    {
+      "file": "blind-key.json",
+      "sha256": "72ba629d403927bb7a745a4d160e69294ff4ff85eb6e92788815296622dcc374",
+      "description": "盲测答案表",
+      "bytes": 181
+    },
+    {
+      "file": "blind-test-reviewer-report.json",
+      "sha256": "dc43e2c34a19f9c09490cb0eb3b142fe13fd859594d8fe868e4efb3f79f7ddd4",
+      "description": "盲测审查者回答原文摘录（模型输出）",
+      "bytes": 2710
+    },
+    {
+      "file": "blind-test-prompt.md",
+      "sha256": "51526f6748b041855cb9ce721f23ec8e5f1133476a5c53c2c4b660d6852e7556",
+      "bytes": 2831,
+      "description": "盲测时交给审查者的提示词原文（本机临时路径已替换为占位符）"
+    },
+    {
+      "file": "claude-review-checks.json",
+      "sha256": "48591be216b7b99d65878388536bce1dd77bbb8870c580ae84e97cdae2738594",
+      "description": "C1–C8 检查结果与校准（C6 未实现）",
+      "bytes": 34328
+    },
+    {
+      "file": "sampling-sim.json",
+      "sha256": "8a8bd294a4bb974da49aaa3d131c15002058f7b2c68acb35edbc562962c74c37",
+      "description": "缩小采样量化数值",
+      "bytes": 13274
+    },
+    {
+      "file": "anchor-audit-ui.json",
+      "sha256": "87ccc3c15b81db6fc4a23ba3115550de19acdf1cf0bd94576e084917c4a94ea6",
+      "description": "锚点机械审计",
+      "bytes": 4350
+    },
+    {
+      "file": "anchor-audit-portrait.json",
+      "sha256": "19b3bf8a8c1a49c45499c545bccc033c4289362662f26fac1582caab88df2888",
+      "description": "锚点机械审计",
+      "bytes": 4464
+    },
+    {
+      "file": "anchor-audit-token.json",
+      "sha256": "2900a7a18817d2fce047dccea76e5019377c2f844c10f20e5a7d925b92fe4c81",
+      "description": "锚点机械审计",
+      "bytes": 8468
+    },
+    {
+      "file": "anchor-audit-terrain.json",
+      "sha256": "5c95aac9bfb90c42b794b60d63c91e8658005e1b670304379e60eedf98ed3063",
+      "description": "锚点机械审计",
+      "bytes": 4357
+    },
+    {
+      "file": "anchor-audit-vfx.json",
+      "sha256": "42283283cf560f992eb142f5619ec62d48a367c38572e088a244eb6070e6277d",
+      "description": "锚点机械审计",
+      "bytes": 4162
+    },
+    {
+      "file": "hud-frame-audit.json",
+      "sha256": "a951d926daf001677c2224cba0b2574dddf644458002180a15861a245b9f11a0",
+      "description": "HUD 框体机械审计",
+      "bytes": 39864
+    }
+  ],
+  "count": 48
+}

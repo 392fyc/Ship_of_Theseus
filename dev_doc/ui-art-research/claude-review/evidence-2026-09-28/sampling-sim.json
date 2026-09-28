@@ -1,0 +1,542 @@
+[
+  {
+    "asset": "森林树 forest-tree-v2",
+    "scene": "试战10×10 棋盘内树",
+    "resolution": "1280×720",
+    "display_h_px": 57.7,
+    "minification": 16.5,
+    "runtime_filter": "nearest",
+    "current": {
+      "de76": 7.79,
+      "jitter": 8.91,
+      "jitter_reference": 3.18
+    },
+    "mip": {
+      "de76": 2.64,
+      "jitter": 2.8,
+      "jitter_reference": 3.08
+    },
+    "mip_bias_-0.5": {
+      "de76": 2.2,
+      "jitter": 2.8,
+      "jitter_reference": 3.08
+    },
+    "jitter_criterion_applies": true,
+    "jitter_ratio_current": 2.8,
+    "mip_meets_target": true,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "森林树 forest-tree-v2",
+    "scene": "试战10×10 棋盘内树",
+    "resolution": "2560×1440",
+    "display_h_px": 115.5,
+    "minification": 8.2,
+    "runtime_filter": "nearest",
+    "current": {
+      "de76": 4.87,
+      "jitter": 5.61,
+      "jitter_reference": 2.57
+    },
+    "mip": {
+      "de76": 3.42,
+      "jitter": 2.33,
+      "jitter_reference": 2.61
+    },
+    "mip_bias_-0.5": {
+      "de76": 2.18,
+      "jitter": 2.41,
+      "jitter_reference": 2.61
+    },
+    "jitter_criterion_applies": true,
+    "jitter_ratio_current": 2.2,
+    "mip_meets_target": true,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "森林树 forest-tree-v2",
+    "scene": "试战25×25 棋盘内树",
+    "resolution": "1280×720",
+    "display_h_px": 26.2,
+    "minification": 36.2,
+    "runtime_filter": "nearest",
+    "current": {
+      "de76": 8.32,
+      "jitter": 10.14,
+      "jitter_reference": 2.29
+    },
+    "mip": {
+      "de76": 2.67,
+      "jitter": 1.43,
+      "jitter_reference": 2.17
+    },
+    "mip_bias_-0.5": {
+      "de76": 1.97,
+      "jitter": 1.92,
+      "jitter_reference": 2.17
+    },
+    "jitter_criterion_applies": true,
+    "jitter_ratio_current": 4.4,
+    "mip_meets_target": true,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "森林树 forest-tree-v2",
+    "scene": "试战25×25 棋盘内树",
+    "resolution": "2560×1440",
+    "display_h_px": 52.5,
+    "minification": 18.1,
+    "runtime_filter": "nearest",
+    "current": {
+      "de76": 7.16,
+      "jitter": 8.81,
+      "jitter_reference": 3.19
+    },
+    "mip": {
+      "de76": 2.42,
+      "jitter": 2.07,
+      "jitter_reference": 2.91
+    },
+    "mip_bias_-0.5": {
+      "de76": 2.04,
+      "jitter": 2.61,
+      "jitter_reference": 2.91
+    },
+    "jitter_criterion_applies": true,
+    "jitter_ratio_current": 2.8,
+    "mip_meets_target": true,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "森林树 forest-tree-v2",
+    "scene": "庭院树丛(1.75–2.01)",
+    "resolution": "1280×720",
+    "display_h_px": 166.3,
+    "minification": 5.7,
+    "runtime_filter": "nearest",
+    "current": {
+      "de76": 4.77,
+      "jitter": 5.19,
+      "jitter_reference": 2.67
+    },
+    "mip": {
+      "de76": 2.81,
+      "jitter": 1.67,
+      "jitter_reference": 2.52
+    },
+    "mip_bias_-0.5": {
+      "de76": 1.69,
+      "jitter": 2.32,
+      "jitter_reference": 2.52
+    },
+    "jitter_criterion_applies": true,
+    "jitter_ratio_current": 1.9,
+    "mip_meets_target": true,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "森林树 forest-tree-v2",
+    "scene": "庭院树丛(1.75–2.01)",
+    "resolution": "2560×1440",
+    "display_h_px": 332.6,
+    "minification": 2.9,
+    "runtime_filter": "nearest",
+    "current": {
+      "de76": 3.06,
+      "jitter": 2.96,
+      "jitter_reference": 1.97
+    },
+    "mip": {
+      "de76": 1.82,
+      "jitter": 1.34,
+      "jitter_reference": 1.92
+    },
+    "mip_bias_-0.5": {
+      "de76": 1.16,
+      "jitter": 1.72,
+      "jitter_reference": 1.92
+    },
+    "jitter_criterion_applies": true,
+    "jitter_ratio_current": 1.5,
+    "mip_meets_target": true,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "碎石 low-rubble-v1",
+    "scene": "试战10×10 残墙端",
+    "resolution": "1280×720",
+    "display_h_px": 11.9,
+    "minification": 41.6,
+    "runtime_filter": "nearest",
+    "current": {
+      "de76": 9.04,
+      "jitter": null,
+      "jitter_reference": null
+    },
+    "mip": {
+      "de76": 3.56,
+      "jitter": null,
+      "jitter_reference": null
+    },
+    "mip_bias_-0.5": {
+      "de76": 2.52,
+      "jitter": null,
+      "jitter_reference": null
+    },
+    "jitter_criterion_applies": false,
+    "jitter_ratio_current": null,
+    "mip_meets_target": true,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "碎石 low-rubble-v1",
+    "scene": "试战10×10 残墙端",
+    "resolution": "2560×1440",
+    "display_h_px": 23.8,
+    "minification": 20.8,
+    "runtime_filter": "nearest",
+    "current": {
+      "de76": 9.09,
+      "jitter": 14.69,
+      "jitter_reference": 3.43
+    },
+    "mip": {
+      "de76": 2.28,
+      "jitter": 1.81,
+      "jitter_reference": 2.47
+    },
+    "mip_bias_-0.5": {
+      "de76": 1.46,
+      "jitter": 2.31,
+      "jitter_reference": 2.47
+    },
+    "jitter_criterion_applies": true,
+    "jitter_ratio_current": 4.3,
+    "mip_meets_target": true,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "碎石 low-rubble-v1",
+    "scene": "试战25×25 残墙端",
+    "resolution": "1280×720",
+    "display_h_px": 5.4,
+    "minification": 91.6,
+    "runtime_filter": "nearest",
+    "current": {
+      "de76": 9.67,
+      "jitter": null,
+      "jitter_reference": null
+    },
+    "mip": {
+      "de76": 5.11,
+      "jitter": null,
+      "jitter_reference": null
+    },
+    "mip_bias_-0.5": {
+      "de76": 3.67,
+      "jitter": null,
+      "jitter_reference": null
+    },
+    "jitter_criterion_applies": false,
+    "jitter_ratio_current": null,
+    "mip_meets_target": false,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "碎石 low-rubble-v1",
+    "scene": "试战25×25 残墙端",
+    "resolution": "2560×1440",
+    "display_h_px": 10.8,
+    "minification": 45.8,
+    "runtime_filter": "nearest",
+    "current": {
+      "de76": 9.73,
+      "jitter": null,
+      "jitter_reference": null
+    },
+    "mip": {
+      "de76": 3.86,
+      "jitter": null,
+      "jitter_reference": null
+    },
+    "mip_bias_-0.5": {
+      "de76": 2.58,
+      "jitter": null,
+      "jitter_reference": null
+    },
+    "jitter_criterion_applies": false,
+    "jitter_ratio_current": null,
+    "mip_meets_target": true,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "碎石 low-rubble-v1",
+    "scene": "庭院残墙端",
+    "resolution": "1280×720",
+    "display_h_px": 17.6,
+    "minification": 28.2,
+    "runtime_filter": "nearest",
+    "current": {
+      "de76": 10.12,
+      "jitter": null,
+      "jitter_reference": null
+    },
+    "mip": {
+      "de76": 3.35,
+      "jitter": null,
+      "jitter_reference": null
+    },
+    "mip_bias_-0.5": {
+      "de76": 1.59,
+      "jitter": null,
+      "jitter_reference": null
+    },
+    "jitter_criterion_applies": false,
+    "jitter_ratio_current": null,
+    "mip_meets_target": true,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "碎石 low-rubble-v1",
+    "scene": "庭院残墙端",
+    "resolution": "2560×1440",
+    "display_h_px": 35.2,
+    "minification": 14.1,
+    "runtime_filter": "nearest",
+    "current": {
+      "de76": 6.57,
+      "jitter": 12.31,
+      "jitter_reference": 0.0
+    },
+    "mip": {
+      "de76": 2.3,
+      "jitter": 2.8,
+      "jitter_reference": 4.05
+    },
+    "mip_bias_-0.5": {
+      "de76": 1.44,
+      "jitter": 3.7,
+      "jitter_reference": 4.05
+    },
+    "jitter_criterion_applies": false,
+    "jitter_ratio_current": null,
+    "mip_meets_target": true,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "入口 courtyard-entry-v2",
+    "scene": "庭院入口(0.9)",
+    "resolution": "1280×720",
+    "display_h_px": 116.7,
+    "minification": 6.4,
+    "runtime_filter": "nearest",
+    "current": {
+      "de76": 6.72,
+      "jitter": 5.73,
+      "jitter_reference": 2.13
+    },
+    "mip": {
+      "de76": 2.85,
+      "jitter": 1.39,
+      "jitter_reference": 2.24
+    },
+    "mip_bias_-0.5": {
+      "de76": 1.77,
+      "jitter": 1.99,
+      "jitter_reference": 2.24
+    },
+    "jitter_criterion_applies": true,
+    "jitter_ratio_current": 2.7,
+    "mip_meets_target": true,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "入口 courtyard-entry-v2",
+    "scene": "庭院入口(0.9)",
+    "resolution": "2560×1440",
+    "display_h_px": 233.3,
+    "minification": 3.2,
+    "runtime_filter": "nearest",
+    "current": {
+      "de76": 3.58,
+      "jitter": 3.45,
+      "jitter_reference": 1.95
+    },
+    "mip": {
+      "de76": 2.61,
+      "jitter": 1.27,
+      "jitter_reference": 1.95
+    },
+    "mip_bias_-0.5": {
+      "de76": 2.18,
+      "jitter": 1.72,
+      "jitter_reference": 1.95
+    },
+    "jitter_criterion_applies": true,
+    "jitter_ratio_current": 1.8,
+    "mip_meets_target": true,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "剑圣棋子 SW 帧",
+    "scene": "默认战斗(镜头1.0)",
+    "resolution": "1280×720",
+    "display_h_px": 80.0,
+    "minification": 6.4,
+    "runtime_filter": "linear",
+    "current": {
+      "de76": 9.15,
+      "jitter": 5.74,
+      "jitter_reference": 2.96
+    },
+    "mip": {
+      "de76": 4.44,
+      "jitter": 1.92,
+      "jitter_reference": 2.96
+    },
+    "mip_bias_-0.5": {
+      "de76": 2.87,
+      "jitter": 2.58,
+      "jitter_reference": 2.96
+    },
+    "jitter_criterion_applies": true,
+    "jitter_ratio_current": 1.9,
+    "mip_meets_target": false,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "剑圣棋子 SW 帧",
+    "scene": "默认战斗(镜头1.0)",
+    "resolution": "2560×1440",
+    "display_h_px": 160.0,
+    "minification": 3.2,
+    "runtime_filter": "linear",
+    "current": {
+      "de76": 4.75,
+      "jitter": 3.09,
+      "jitter_reference": 2.0
+    },
+    "mip": {
+      "de76": 4.77,
+      "jitter": 1.18,
+      "jitter_reference": 2.0
+    },
+    "mip_bias_-0.5": {
+      "de76": 2.59,
+      "jitter": 1.65,
+      "jitter_reference": 2.0
+    },
+    "jitter_criterion_applies": true,
+    "jitter_ratio_current": 1.5,
+    "mip_meets_target": false,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "剑圣棋子 SW 帧",
+    "scene": "同规格用于试战10×10",
+    "resolution": "1280×720",
+    "display_h_px": 73.6,
+    "minification": 7.0,
+    "runtime_filter": "linear",
+    "current": {
+      "de76": 10.45,
+      "jitter": 6.14,
+      "jitter_reference": 2.96
+    },
+    "mip": {
+      "de76": 4.18,
+      "jitter": 1.84,
+      "jitter_reference": 2.96
+    },
+    "mip_bias_-0.5": {
+      "de76": 2.68,
+      "jitter": 2.47,
+      "jitter_reference": 2.96
+    },
+    "jitter_criterion_applies": true,
+    "jitter_ratio_current": 2.1,
+    "mip_meets_target": false,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "剑圣棋子 SW 帧",
+    "scene": "同规格用于试战10×10",
+    "resolution": "2560×1440",
+    "display_h_px": 147.2,
+    "minification": 3.5,
+    "runtime_filter": "linear",
+    "current": {
+      "de76": 6.97,
+      "jitter": 3.9,
+      "jitter_reference": 2.26
+    },
+    "mip": {
+      "de76": 4.6,
+      "jitter": 1.34,
+      "jitter_reference": 2.26
+    },
+    "mip_bias_-0.5": {
+      "de76": 2.77,
+      "jitter": 1.78,
+      "jitter_reference": 2.26
+    },
+    "jitter_criterion_applies": true,
+    "jitter_ratio_current": 1.7,
+    "mip_meets_target": false,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "剑圣棋子 SW 帧",
+    "scene": "同规格用于试战25×25",
+    "resolution": "1280×720",
+    "display_h_px": 33.4,
+    "minification": 15.3,
+    "runtime_filter": "linear",
+    "current": {
+      "de76": 13.57,
+      "jitter": 8.88,
+      "jitter_reference": 2.6
+    },
+    "mip": {
+      "de76": 4.22,
+      "jitter": 1.86,
+      "jitter_reference": 2.6
+    },
+    "mip_bias_-0.5": {
+      "de76": 2.39,
+      "jitter": 2.33,
+      "jitter_reference": 2.6
+    },
+    "jitter_criterion_applies": true,
+    "jitter_ratio_current": 3.4,
+    "mip_meets_target": false,
+    "mip_bias_-0.5_meets_target": true
+  },
+  {
+    "asset": "剑圣棋子 SW 帧",
+    "scene": "同规格用于试战25×25",
+    "resolution": "2560×1440",
+    "display_h_px": 66.9,
+    "minification": 7.7,
+    "runtime_filter": "linear",
+    "current": {
+      "de76": 11.32,
+      "jitter": 6.35,
+      "jitter_reference": 2.79
+    },
+    "mip": {
+      "de76": 3.99,
+      "jitter": 1.77,
+      "jitter_reference": 2.79
+    },
+    "mip_bias_-0.5": {
+      "de76": 2.47,
+      "jitter": 2.4,
+      "jitter_reference": 2.79
+    },
+    "jitter_criterion_applies": true,
+    "jitter_ratio_current": 2.3,
+    "mip_meets_target": true,
+    "mip_bias_-0.5_meets_target": true
+  }
+]
