@@ -180,8 +180,19 @@ def test_routing_and_root_configuration_keep_the_five_authorities_distinct() -> 
             "kb_root": "<path-to-kb-repository>",
         }
     }
-    assert ".codex/project/sot-roots.local.toml" in read_text(ROOT / ".gitignore")
-    assert not (ROOT / ".codex" / "project" / "sot-roots.local.toml").exists()
+    # sot-worktree.ps1 writes the local roots file into every task tree, so it
+    # may exist on disk; it must stay ignored and untracked.
+    local_roots = ".codex/project/sot-roots.local.toml"
+    assert local_roots in read_text(ROOT / ".gitignore")
+    tracked = subprocess.run(
+        ["git", "-C", str(ROOT), "ls-files", "--", local_roots],
+        capture_output=True, text=True, check=True,
+    ).stdout
+    assert tracked.strip() == ""
+    ignored = subprocess.run(
+        ["git", "-C", str(ROOT), "check-ignore", "-q", "--no-index", "--", local_roots],
+    )
+    assert ignored.returncode == 0
 
 
 def test_project_owned_files_do_not_embed_machine_state_or_runtime_credentials() -> None:
