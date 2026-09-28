@@ -4,7 +4,8 @@ param(
     [Parameter(Mandatory = $true)][string] $TemplateArchivePath,
     [Parameter(Mandatory = $true)][string] $OutputDirectory,
     [switch] $CaptureVisual,
-    [ValidateSet('kensei', 'myrmidon')][string] $PreviewClass = 'kensei'
+    [ValidateSet('kensei', 'myrmidon')][string] $PreviewClass = 'kensei',
+    [string] $PythonPath = 'python'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -22,6 +23,8 @@ function Invoke-Godot([string[]] $arguments, [string] $logPath) {
 }
 
 $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../..')).Path
+. (Join-Path $repoRoot 'tests/claude_review/capture-gate.ps1')
+Assert-CaptureProject $repoRoot
 $godot = (Resolve-Path -LiteralPath $GodotPath).Path
 $templateArchive = (Resolve-Path -LiteralPath $TemplateArchivePath).Path
 $outputRoot = [IO.Path]::GetFullPath($OutputDirectory)
@@ -73,7 +76,12 @@ $projectText = [regex]::Replace($projectText, $autoloadPattern, '')
 $projectText = [regex]::Replace($projectText, $pluginPattern, "enabled=PackedStringArray()`n")
 $projectText = [regex]::Replace($projectText, $settingsPattern, '')
 Assert-Build (-not $projectText.Contains('godot_mcp')) '发行副本仍引用 Godot MCP。'
+if ($CaptureVisual) {
+    Assert-Build (Test-Path -LiteralPath (Join-Path $stage 'scripts/codex/release_capture_probe.gd')) '当前提交缺少发行采集观察器。'
+    $projectText = $projectText.Replace('[autoload]', "[autoload]`nSoTReleaseCaptureProbe=`"*res://scripts/codex/release_capture_probe.gd`"")
+}
 [IO.File]::WriteAllText($projectPath, $projectText, [Text.UTF8Encoding]::new($false))
+Assert-CaptureProject $stage
 
 $scenePath = Join-Path $stage 'scenes/tactical/TacticalScene.tscn'
 $sceneText = [IO.File]::ReadAllText($scenePath)
@@ -176,7 +184,8 @@ if ($CaptureVisual) {
     $capturePath = Join-Path $outputRoot 'hud-preview-frame.png'
     $visualOut = Join-Path $logs 'visual.stdout.log'
     $visualErr = Join-Path $logs 'visual.stderr.log'
-    $visualProcess = Start-Process -FilePath (Join-Path $unpacked 'ShipOfTheseus.exe') -ArgumentList @('--write-movie', $capturePath, '--quit-after', '10') -WorkingDirectory $unpacked -WindowStyle Hidden -RedirectStandardOutput $visualOut -RedirectStandardError $visualErr -PassThru
+    $runtimeConfigPath = Join-Path $outputRoot 'release-runtime-config.json'
+    $visualProcess = Start-Process -FilePath (Join-Path $unpacked 'ShipOfTheseus.exe') -ArgumentList @('--write-movie', $capturePath, '--quit-after', '10', '--', ('--capture-config=' + $runtimeConfigPath)) -WorkingDirectory $unpacked -WindowStyle Hidden -RedirectStandardOutput $visualOut -RedirectStandardError $visualErr -PassThru
     if (-not $visualProcess.WaitForExit(30000)) {
         $visualProcess.Kill()
         throw 'Windows 游戏包在 30 秒内未完成画面捕获。'
@@ -193,11 +202,43 @@ if ($CaptureVisual) {
         $bitmap.Dispose()
     }
     $visualHash = (Get-FileHash -LiteralPath $preview -Algorithm SHA256).Hash.ToLowerInvariant()
+    $visualLines = @((Get-Content -LiteralPath $visualOut) + (Get-Content -LiteralPath $visualErr))
+    Assert-Build (@($visualLines | Where-Object { $_ -match '^(SCRIPT )?ERROR:' }).Count -eq 0) '发行采集运行出现引擎错误。'
+    Assert-Build (Test-Path -LiteralPath $runtimeConfigPath) '缺少发行采集实测配置。'
+    $runtime = Get-Content -LiteralPath $runtimeConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    Assert-Build ($runtime.frames.Count -eq $frames.Count) '实测配置帧数与实际图片帧数不同。'
+    $captureRecords = @()
+    for ($frameIndex = 0; $frameIndex -lt $frames.Count; $frameIndex++) {
+        $frame = $frames[$frameIndex]
+        $record = $runtime.frames[$frameIndex]
+        $bitmap = [Drawing.Bitmap]::new($frame.FullName)
+        try { $actualSize = @($bitmap.Width, $bitmap.Height) } finally { $bitmap.Dispose() }
+        Assert-Build (($actualSize -join ',') -eq ($record.image_size -join ',')) '实测视口与发行帧尺寸不一致。'
+        $record | Add-Member -NotePropertyName file -NotePropertyValue $frame.Name
+        $record | Add-Member -NotePropertyName sha256 -NotePropertyValue (Get-FileHash -LiteralPath $frame.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+        $record | Add-Member -NotePropertyName capture_kind -NotePropertyValue 'viewport'
+        $captureRecords += $record
+    }
+    $previewRecord = $captureRecords[-1] | ConvertTo-Json -Depth 8 | ConvertFrom-Json
+    $previewRecord.file = [IO.Path]::GetFileName($preview)
+    $previewRecord.sha256 = $visualHash
+    $previewRecord.capture_kind = 'derived_detail'
+    $previewRecord | Add-Member -NotePropertyName source_file -NotePropertyValue $frames[-1].Name
+    $previewRecord | Add-Member -NotePropertyName source_sha256 -NotePropertyValue $captureRecords[-1].sha256
+    $previewRecord | Add-Member -NotePropertyName source_region -NotePropertyValue @(0, 0, $previewRecord.image_size[0], $previewRecord.image_size[1])
+    $previewRecord | Add-Member -NotePropertyName scale -NotePropertyValue 1
+    $captureRecords += $previewRecord
+    @{renderer=$runtime.frames[0].renderer; project_stretch_mode=$runtime.frames[0].project_stretch_mode; captures=$captureRecords} |
+        ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $outputRoot 'capture-metadata.json') -Encoding utf8
+    Invoke-CaptureC8 -ProjectRoot $repoRoot -PythonPath $PythonPath -Directory $outputRoot -Name 'release'
+
 }
 
 $report = [ordered]@{
     status = 'pass'
     source_commit = $sourceCommit
+    configured_renderer = 'gl_compatibility'
+    capture_configuration = if ($CaptureVisual) { 'release-runtime-config.json' } else { $null }
     preview_class = $PreviewClass
     preview_audit_status = if ($PreviewClass -eq 'myrmidon') { 'pass' } else { 'not_applicable' }
     engine_version = $engineVersion

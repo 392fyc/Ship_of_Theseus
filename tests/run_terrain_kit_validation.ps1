@@ -1,10 +1,13 @@
 param(
     [Parameter(Mandatory = $true)][string]$GodotPath,
-    [Parameter(Mandatory = $true)][string]$OutputDirectory
+    [Parameter(Mandatory = $true)][string]$OutputDirectory,
+    [string]$PythonPath = "python"
 )
 
 $ErrorActionPreference = 'Stop'
 $taskProject = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+. (Join-Path $PSScriptRoot 'claude_review/capture-gate.ps1')
+Assert-CaptureProject $taskProject
 $taskOutput = [IO.Path]::GetFullPath($OutputDirectory)
 if (-not [IO.Path]::IsPathRooted($OutputDirectory) -or (Test-Path -LiteralPath $taskOutput)) {
     throw '请提供新的绝对输出目录。'
@@ -42,7 +45,7 @@ New-Item -ItemType Directory -Path $taskOutput | Out-Null
 $taskReceipt = [ordered]@{ result = 'running'; water_baseline_unchanged = $true; sources_sha256 = $taskSources; steps = @() }
 $taskReceiptFile = Join-Path $taskOutput 'terrain-validation-run.json'
 try {
-    & (Join-Path $PSScriptRoot 'run_courtyard_visual_validation.ps1') -GodotPath $GodotPath -OutputDirectory (Join-Path $taskOutput 'regression')
+    & (Join-Path $PSScriptRoot 'run_courtyard_visual_validation.ps1') -GodotPath $GodotPath -PythonPath $PythonPath -OutputDirectory (Join-Path $taskOutput 'regression')
     $taskRegression = Get-Content -LiteralPath (Join-Path $taskOutput 'regression/validation-run.json') -Raw | ConvertFrom-Json
     if ($taskRegression.status -ne 'automated_evidence_complete_review_pending') { throw '原有战场回归未完成。' }
     foreach ($taskLogFile in Get-ChildItem -LiteralPath (Join-Path $taskOutput 'regression') -Filter '*.log' -File) {
@@ -78,6 +81,7 @@ try {
             }
         }
         $taskReceipt.steps += @{ name = $taskSpec.name; result = 'pass'; evidence = $taskResult }
+        Invoke-CaptureC8 -ProjectRoot $taskProject -PythonPath $PythonPath -Directory $taskDirectory -Name $taskSpec.name
     }
     foreach ($taskPath in $taskSources.Keys) {
         if ((Get-FileHash -LiteralPath (Join-Path $taskProject $taskPath) -Algorithm SHA256).Hash -ine $taskSources[$taskPath]) { throw ('验收期间来源变化：' + $taskPath) }

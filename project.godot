@@ -17,7 +17,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="ShipOfTheseus"
 config/description="战棋RPG + Roguelite + 城镇建设"
 run/main_scene="res://scenes/tactical/TacticalScene.tscn"
-config/features=PackedStringArray("4.6", "Forward Plus")
+config/features=PackedStringArray("4.6", "GL Compatibility")
 
 [autoload]
 
@@ -40,3 +40,7 @@ bind_mode=0
 custom_bind_ip=""
 port_override_enabled=true
 port_override=6550
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"

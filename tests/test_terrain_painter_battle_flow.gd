@@ -247,6 +247,14 @@ func _click_control(control: Control) -> void:
 
 
 func _click_at(position: Vector2, button_index: MouseButton) -> void:
+	# 先对齐真实指针，避免系统鼠标移动在按下与松开之间改变控件悬停目标。
+	if DisplayServer.get_name() != "headless":
+		Input.warp_mouse(root.get_stretch_transform() * position)
+	var motion := InputEventMouseMotion.new()
+	motion.position = position
+	motion.global_position = position
+	root.push_input(motion, true)
+	await _frames(2)
 	var down := InputEventMouseButton.new()
 	down.position = position
 	down.button_index = button_index

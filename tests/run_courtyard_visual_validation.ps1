@@ -1,10 +1,13 @@
 param(
     [Parameter(Mandatory = $true)][string]$GodotPath,
-    [Parameter(Mandatory = $true)][string]$OutputDirectory
+    [Parameter(Mandatory = $true)][string]$OutputDirectory,
+    [string]$PythonPath = "python"
 )
 
 $ErrorActionPreference = 'Stop'
 $taskProject = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+. (Join-Path $PSScriptRoot 'claude_review/capture-gate.ps1')
+Assert-CaptureProject $taskProject
 $taskOutput = [IO.Path]::GetFullPath($OutputDirectory)
 if (-not [IO.Path]::IsPathRooted($OutputDirectory)) { throw '输出目录必须是绝对路径。' }
 if ($taskOutput.Equals($taskProject, [StringComparison]::OrdinalIgnoreCase) -or
@@ -21,7 +24,7 @@ $taskSteps = @(
     @{ name = 'adjacency'; script = 'test_courtyard_terrain_adjacency.gd'; headless = $false; marker = 'COURTYARD_ADJACENCY_RESULT' },
     @{ name = 'material-intake'; script = 'capture_courtyard_material_intake.gd'; headless = $false; marker = 'COURTYARD_MATERIAL_INTAKE_RESULT' },
     @{ name = 'whole-scene'; script = 'capture_courtyard_visual_review.gd'; headless = $false; marker = 'COURTYARD_VISUAL_CAPTURE_RESULT' },
-    @{ name = 'interaction'; script = 'test_battlefield_courtyard.gd'; headless = $true; marker = 'BATTLEFIELD_COURTYARD_RESULT' }
+    @{ name = 'interaction'; script = 'test_battlefield_courtyard.gd'; headless = $false; marker = 'BATTLEFIELD_COURTYARD_RESULT' }
 )
 $taskReceipt = [ordered]@{
     started_at_utc = [DateTime]::UtcNow.ToString('o')
@@ -205,6 +208,9 @@ try {
             $taskResult = $taskResultLine[0].ToString().Substring($taskStep.marker.Length + 1) | ConvertFrom-Json
             try {
                 Assert-StepEvidence $taskStep.name $taskResult
+                if ($taskStep.name -in @('material-intake', 'whole-scene', 'interaction')) {
+                    Invoke-CaptureC8 -ProjectRoot $taskProject -PythonPath $PythonPath -Directory $taskOutput -Name $taskStep.name
+                }
             } catch {
                 $taskSuccess = $false
                 Write-Output $_.Exception.Message

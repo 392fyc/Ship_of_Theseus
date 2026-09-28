@@ -1,10 +1,13 @@
 param(
     [Parameter(Mandatory = $true)][string]$GodotPath,
-    [Parameter(Mandatory = $true)][string]$OutputDirectory
+    [Parameter(Mandatory = $true)][string]$OutputDirectory,
+    [string]$PythonPath = "python"
 )
 
 $ErrorActionPreference = 'Stop'
 $taskProject = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+. (Join-Path $PSScriptRoot 'claude_review/capture-gate.ps1')
+Assert-CaptureProject $taskProject
 $taskOutput = [IO.Path]::GetFullPath($OutputDirectory)
 if (-not [IO.Path]::IsPathRooted($OutputDirectory) -or (Test-Path -LiteralPath $taskOutput)) {
     throw '请提供新的绝对输出目录。'
@@ -110,9 +113,10 @@ try {
                 if ([string]::IsNullOrEmpty($taskImage) -or -not (Test-Path -LiteralPath (Join-Path $taskDirectory $taskImage) -PathType Leaf)) { throw '工作台往返截图缺失。' }
             }
         }
+        Invoke-CaptureC8 -ProjectRoot $taskProject -PythonPath $PythonPath -Directory $taskDirectory -Name $taskSpec.name
         $taskReceipt.steps += @{ name = $taskSpec.name; result = 'pass'; evidence = $taskResult }
     }
-    & (Join-Path $PSScriptRoot 'run_terrain_kit_validation.ps1') -GodotPath $GodotPath -OutputDirectory (Join-Path $taskOutput 'terrain-regression')
+    & (Join-Path $PSScriptRoot 'run_terrain_kit_validation.ps1') -GodotPath $GodotPath -PythonPath $PythonPath -OutputDirectory (Join-Path $taskOutput 'terrain-regression')
     $taskRegression = Get-Content -LiteralPath (Join-Path $taskOutput 'terrain-regression/terrain-validation-run.json') -Raw | ConvertFrom-Json
     if ($taskRegression.result -cne 'pass') { throw '地形与原场景回归失败。' }
     foreach ($taskLogFile in Get-ChildItem -LiteralPath $taskOutput -Recurse -Filter '*.log' -File) {
