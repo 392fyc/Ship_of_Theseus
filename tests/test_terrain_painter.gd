@@ -1,5 +1,7 @@
 extends SceneTree
 
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
+
 const PainterScene := preload("res://scenes/playground/terrain_painter.tscn")
 const TerrainCatalog := preload("res://scripts/ui/terrain/terrain_catalog.gd")
 const EXAMPLES_PATH := "res://assets/prototype/battlefield_courtyard/terrain_examples.json"
@@ -25,8 +27,6 @@ func _check(label: String, condition: bool, detail: String = "") -> void:
 
 
 func _run() -> void:
-	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
-	root.content_scale_size = Vector2i.ZERO
 	root.size = Vector2i(1280, 720)
 	_output_dir = _argument_value("--output=")
 	_editor = PainterScene.instantiate() as Control
@@ -201,7 +201,7 @@ func _capture_workbench() -> bool:
 		return true
 	DirAccess.make_dir_recursive_absolute(_output_dir)
 	var path := _output_dir.path_join("terrain-painter-workbench-1280x720.png")
-	var save_error: Error = image.save_png(path)
+	var save_error: Error = CaptureMetadata.save_png(root, image, path)
 	_check("保存湿地工作台交付图", save_error == OK)
 	return save_error == OK
 
@@ -235,8 +235,14 @@ func _save_pixel_comparison(manual: Image, loaded: Image, same_map: bool, same_p
 	DirAccess.make_dir_recursive_absolute(_output_dir)
 	var manual_path := _output_dir.path_join("terrain-painter-manual.png")
 	var loaded_path := _output_dir.path_join("terrain-painter-json.png")
-	manual.save_png(manual_path)
-	loaded.save_png(loaded_path)
+	var manual_saved: bool = manual.save_png(manual_path) == OK
+	var loaded_saved: bool = loaded.save_png(loaded_path) == OK
+	_check("保存固定像素对照诊断图", manual_saved and loaded_saved)
+	var records: Array[Dictionary] = [
+		CaptureMetadata.capture_record(root, manual, manual_path, {"capture_kind": "diagnostic"}),
+		CaptureMetadata.capture_record(root, loaded, loaded_path, {"capture_kind": "diagnostic"})
+	]
+	_check("保存对照图配置", CaptureMetadata.write_manifest(root, _output_dir.path_join("comparison-metadata.json"), records, {"runtime_evidence": false, "diagnostic_purpose": "手工地图与JSON加载的子视口像素对照"}))
 	result["manual_sha256"] = FileAccess.get_sha256(manual_path)
 	result["loaded_sha256"] = FileAccess.get_sha256(loaded_path)
 	var report := FileAccess.open(_output_dir.path_join("terrain-painter-comparison.json"), FileAccess.WRITE)
@@ -274,23 +280,23 @@ func _click_control(control: Control) -> void:
 
 
 func _click_at(position: Vector2, button_index: MouseButton) -> void:
-	Input.warp_mouse(position)
+	Input.warp_mouse(root.get_stretch_transform() * position)
 	var motion := InputEventMouseMotion.new()
 	motion.position = position
 	motion.global_position = position
-	Input.parse_input_event(motion)
+	root.push_input(motion, true)
 	await _frames(2)
 	var down := InputEventMouseButton.new()
 	down.position = position
 	down.button_index = button_index
 	down.pressed = true
-	Input.parse_input_event(down)
+	root.push_input(down, true)
 	await _frames(2)
 	var up := InputEventMouseButton.new()
 	up.position = position
 	up.button_index = button_index
 	up.pressed = false
-	Input.parse_input_event(up)
+	root.push_input(up, true)
 	await _frames(2)
 
 
@@ -301,19 +307,19 @@ func _drag_cells(editor: Control, start: Vector2i, finish: Vector2i) -> void:
 	down.position = first
 	down.button_index = MOUSE_BUTTON_LEFT
 	down.pressed = true
-	root.push_input(down)
+	root.push_input(down, true)
 	await process_frame
 	var motion := InputEventMouseMotion.new()
 	motion.position = last
 	motion.relative = last - first
 	motion.button_mask = MOUSE_BUTTON_MASK_LEFT
-	root.push_input(motion)
+	root.push_input(motion, true)
 	await process_frame
 	var up := InputEventMouseButton.new()
 	up.position = last
 	up.button_index = MOUSE_BUTTON_LEFT
 	up.pressed = false
-	root.push_input(up)
+	root.push_input(up, true)
 	await process_frame
 
 

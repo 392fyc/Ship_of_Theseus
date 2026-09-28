@@ -1,5 +1,7 @@
 extends SceneTree
 
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
+
 const CANDIDATE_PATH := "res://scenes/playground/battlefield_courtyard.tscn"
 const LAYOUT_IDS: Array[String] = ["overgrown", "flooded", "passage"]
 const PLAYER_START := Vector2i(1, 5)
@@ -28,8 +30,6 @@ func _check(label: String, success: bool) -> void:
 
 
 func _run() -> void:
-	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
-	root.content_scale_size = Vector2i.ZERO
 	root.size = Vector2i(1280, 720)
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--output="):
@@ -178,13 +178,14 @@ func _run() -> void:
 			await _frames(4)
 			scene.fit_board()
 			await _frames(2)
-			var factor: float = float(size_value.y) / 720.0
+			var logical_size: Vector2 = root.get_visible_rect().size
+			var factor: float = logical_size.y / 720.0
 			var all_clear: bool = true
 			for y: int in grid.height:
 				for x: int in grid.width:
 					var center: Vector2 = _screen(grid, Vector2i(x, y))
 					all_clear = all_clear and center.x >= 48.0 * factor \
-						and center.x <= size_value.x - 48.0 * factor \
+						and center.x <= logical_size.x - 48.0 * factor \
 						and center.y - 22.0 * factor > HudTop * factor \
 						and center.y + 22.0 * factor < HudBottom * factor
 			_check("%s %d 全部格子留在棋盘显示区并避开 HUD" % [layout_key, size_value.x], all_clear)
@@ -378,11 +379,11 @@ func _hover_cell(scene: Node, grid: Grid, pos: Vector2i) -> void:
 
 
 func _move_pointer(pos: Vector2) -> void:
-	Input.warp_mouse(pos)
+	Input.warp_mouse(root.get_stretch_transform() * pos)
 	var motion := InputEventMouseMotion.new()
 	motion.position = pos
 	motion.global_position = pos
-	Input.parse_input_event(motion)
+	root.push_input(motion, true)
 
 
 func _pan(scene: Node, delta: Vector2) -> void:
@@ -421,7 +422,7 @@ func _capture(file_name: String) -> void:
 	await _frames(3)
 	await RenderingServer.frame_post_draw
 	var file_path: String = _output.path_join(file_name + ".png")
-	var error: Error = root.get_texture().get_image().save_png(file_path)
+	var error: Error = CaptureMetadata.save_png(root, root.get_texture().get_image(), file_path)
 	_check("保存 " + file_name, error == OK)
 	if error == OK:
 		_captures.append(file_name + ".png")

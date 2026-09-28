@@ -1,6 +1,8 @@
 extends SceneTree
+## 仅用于固定像素几何的单元测试，不代表运行配置；截图仅作诊断，不得作为视觉验收证据。
 ## 在固定 Godot 视口中采集正确样本及三种错误样本，并用同一图像检查器测量。
 
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
 const BoardView := preload("res://scripts/ui/playground/courtyard_board_view.gd")
 const PROFILE_PATH := "res://assets/prototype/battlefield_courtyard/visual_profile.json"
 const CONTRACT_PATH := "res://dev_doc/ui-art-research/visual-review/water-visual-contract.json"
@@ -86,6 +88,7 @@ var _contract: Dictionary = {}
 var _output: String = ""
 var _cases: Array[Dictionary] = []
 var _source_hashes: Dictionary = {}
+var _capture_records: Array[Dictionary] = []
 
 
 func _initialize() -> void:
@@ -145,9 +148,16 @@ func _run() -> void:
 	var diagnostic_image := root.get_texture().get_image()
 	var diagnostic_path: String = _output.path_join("water-visual-diagnostic-comparison.png")
 	var diagnostic_saved: bool = diagnostic_image.save_png(diagnostic_path) == OK
+	if diagnostic_saved:
+		_capture_records.append(CaptureMetadata.capture_record(root, diagnostic_image, diagnostic_path, {
+			"capture_kind": "diagnostic", "runtime_evidence": false,
+			"diagnostic_purpose": "fixed-pixel water contract comparison",
+		}))
+	var metadata_ok: bool = CaptureMetadata.write_manifest(root, _output.path_join("capture-metadata.json"),
+		_capture_records, {"runtime_evidence": false, "diagnostic_purpose": "fixed-pixel water contract comparison"})
 	var negative_blocked: bool = bool(results["negative_samples_blocked"])
 	var positives_passed: bool = bool(results["positive_samples_passed"])
-	var overall_pass: bool = negative_blocked and positives_passed and images_ok and stable_sources and diagnostic_saved
+	var overall_pass: bool = negative_blocked and positives_passed and images_ok and stable_sources and diagnostic_saved and metadata_ok
 	var image_hashes: Dictionary = {}
 	for filename: String in [
 		"water-depth-correct.png",
@@ -171,6 +181,11 @@ func _run() -> void:
 		"depth_core_board_scale": _contract["capture"]["depth_core_board_scale"],
 		"source_sha256": _source_hashes,
 		"image_sha256": image_hashes,
+		"renderer": str(RenderingServer.get_current_rendering_method()),
+		"project_stretch_mode": str(ProjectSettings.get_setting("display/window/stretch/mode")),
+		"runtime_evidence": false,
+		"capture_metadata_saved": metadata_ok,
+		"captures": _capture_records,
 		"checker_results": results["checker_results"],
 		"negative_samples_blocked": negative_blocked,
 		"positive_samples_passed": positives_passed,
@@ -497,7 +512,14 @@ func _save_case_images() -> bool:
 	for index: int in _cases.size():
 		var item: Dictionary = _cases[index]
 		var image: Image = (item["viewport"] as SubViewport).get_texture().get_image()
-		success = image.save_png(_output.path_join(filenames[index])) == OK and success
+		var path: String = _output.path_join(filenames[index])
+		var saved: bool = image.save_png(path) == OK
+		success = saved and success
+		if saved:
+			_capture_records.append(CaptureMetadata.capture_record(root, image, path, {
+				"capture_kind": "diagnostic", "runtime_evidence": false,
+				"diagnostic_purpose": "fixed-pixel water contract sample",
+			}))
 	return success
 
 

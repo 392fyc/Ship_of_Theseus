@@ -11,8 +11,6 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
-	root.content_scale_size = Vector2i.ZERO
 	root.size = Vector2i(1280, 720)
 	var catalog: RefCounted = Catalog.new()
 	for skill: String in SKILLS:

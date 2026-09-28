@@ -13,8 +13,6 @@ func _initialize() -> void:
 
 func _run() -> void:
 	print("=== test_hud_m2_runtime_dashboard ===")
-	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
-	root.content_scale_size = Vector2i.ZERO
 	root.size = Vector2i(1280, 720)
 	var scene: Node = (load("res://scenes/tactical/TacticalScene.tscn") as PackedScene).instantiate()
 	root.add_child(scene)
@@ -173,7 +171,7 @@ func _test_sizes_and_inspection(dashboard: Control) -> void:
 		dashboard.update_state(dashboard.get_last_state())
 		await process_frame
 		await process_frame
-		var factor: float = float(output_size.x) / 1280.0
+		var factor: float = root.get_visible_rect().size.x / 1280.0
 		var row: Control = composition.get_node("BottomRow") as Control
 		var positions: Array[float] = [32.0, 266.0, 402.0, 886.0, 1172.0]
 		var widths: Array[float] = [226.0, 128.0, 476.0, 278.0, 76.0]

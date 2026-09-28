@@ -1,7 +1,9 @@
 extends SceneTree
 
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
+var _output_dir: String = ""
+
 ## 原生窗口捕获：正式场景一张，以及从同一 manager 载荷派生的显示边界。
-const OUTPUT := "res://dev_doc/ui-art-research/hud-freeze-godot/evidence"
 
 var _failed: bool = false
 
@@ -11,12 +13,19 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--output="):
+			_output_dir = arg.trim_prefix("--output=")
+	if _output_dir.is_empty():
+		_output_dir = ProjectSettings.globalize_path("user://visual_style_playground/capture_hud_freeze/batch_%d_%d_%d" % [int(Time.get_unix_time_from_system()), OS.get_process_id(), Time.get_ticks_usec()])
+	if not _output_dir.is_absolute_path():
+		push_error("采集输出须为绝对路径。")
+		quit(1)
+		return
 	if DisplayServer.get_name() == "headless":
 		push_error("Native HUD capture requires a visible rendering display.")
 		quit(1)
 		return
-	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
-	root.content_scale_size = Vector2i.ZERO
 	root.size = Vector2i(1280, 720)
 	var scene: Node = (load("res://scenes/tactical/TacticalScene.tscn") as PackedScene).instantiate()
 	root.add_child(scene)
@@ -83,10 +92,10 @@ func _capture(name: String, dashboard: Control) -> bool:
 	if image.get_size() != root.size:
 		push_error("Viewport size mismatch: " + name)
 		return false
-	var directory: String = ProjectSettings.globalize_path(OUTPUT)
+	var directory: String = _output_dir
 	DirAccess.make_dir_recursive_absolute(directory)
 	var path: String = directory.path_join(name + ".png")
-	var err: Error = image.save_png(path)
+	var err: Error = CaptureMetadata.save_png(root, image, path)
 	if err != OK:
 		push_error("PNG save failed: " + name)
 		return false

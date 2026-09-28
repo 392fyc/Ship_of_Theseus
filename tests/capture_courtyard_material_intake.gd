@@ -1,6 +1,7 @@
 extends SceneTree
 ## 素材入库检查只生成原生预览和身份记录，不自动认可材质质量。
 
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
 const BoardView := preload("res://scripts/ui/playground/courtyard_board_view.gd")
 const BASE := "res://assets/prototype/battlefield_courtyard/"
 
@@ -29,15 +30,14 @@ func _run() -> void:
 	if DirAccess.make_dir_recursive_absolute(_output) != OK:
 		quit(1)
 		return
-	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
-	root.content_scale_size = Vector2i.ZERO
-	root.size = Vector2i(1120, 520)
+	root.size = Vector2i(1280, 720)
 	var profile: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(BASE + "visual_profile.json"))
 	var manifest: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(BASE + "source-manifest.json"))
 	var sources: Dictionary = {}
 	for item: Dictionary in manifest["assets"]:
 		sources[str(item["path"])] = item
 	var records: Array[Dictionary] = []
+	var capture_records: Array[Dictionary] = []
 	for spec: Dictionary in [{"key": "water", "name": "水面", "terrain": 5}, {"key": "ground", "name": "石材", "terrain": 0}, {"key": "rock", "name": "自然岩面", "terrain": 2}]:
 		var source: String = str(profile[spec["key"]])
 		var digest: String = FileAccess.get_sha256(source)
@@ -49,7 +49,7 @@ func _run() -> void:
 		root.add_child(page)
 		var background := ColorRect.new()
 		background.color = Color("171e22")
-		background.size = Vector2(1120, 520)
+		background.size = Vector2(1280, 720)
 		page.add_child(background)
 		_label(page, "素材检查 · " + str(spec["name"]), Vector2(24, 14), 24)
 		_label(page, "单张输入", Vector2(24, 60), 18)
@@ -102,9 +102,14 @@ func _run() -> void:
 			await process_frame
 		await RenderingServer.frame_post_draw
 		var name: String = "material-" + str(spec["key"]) + ".png"
-		if root.get_texture().get_image().save_png(_output.path_join(name)) != OK:
+		var image: Image = root.get_texture().get_image()
+		var image_path: String = _output.path_join(name)
+		if CaptureMetadata.save_png(root, image, image_path) != OK:
 			quit(1)
 			return
+		capture_records.append(CaptureMetadata.capture_record(root, image, image_path, {
+			"material": spec["key"], "capture_role": "material_intake_preview",
+		}))
 		records.append({"source": source, "source_sha256": digest, "file": name,
 			"image_sha256": FileAccess.get_sha256(_output.path_join(name)), "identity_matches_manifest": true,
 			"repeats": [3, 3], "engine_scale": 1.36, "visual_acceptance": "pending_review"})
@@ -114,11 +119,16 @@ func _run() -> void:
 	if output == null:
 		quit(1)
 		return
-	output.store_string(JSON.stringify({"engine": Engine.get_version_info()["string"], "post_processing": false,
+	var source_fields: Dictionary = {"engine": Engine.get_version_info()["string"], "post_processing": false,
 		"script_sha256": FileAccess.get_sha256("res://tests/capture_courtyard_material_intake.gd"),
 		"source_manifest_sha256": FileAccess.get_sha256(BASE + "source-manifest.json"),
 		"board_sha256": FileAccess.get_sha256("res://scripts/ui/playground/courtyard_board_view.gd"),
-		"profile_sha256": FileAccess.get_sha256(BASE + "visual_profile.json"), "records": records}, "  "))
+		"profile_sha256": FileAccess.get_sha256(BASE + "visual_profile.json"), "records": records}
+	var capture_manifest_path: String = _output.path_join("capture-metadata.json")
+	if not CaptureMetadata.write_manifest(root, capture_manifest_path, capture_records, source_fields):
+		quit(1)
+		return
+	output.store_string(JSON.stringify(CaptureMetadata.build_manifest(root, capture_records, source_fields), "  "))
 	output.close()
 	print("COURTYARD_MATERIAL_INTAKE_RESULT ", JSON.stringify({"captures": records.size(), "identity_checks": "pass", "visual_acceptance": "pending_review"}))
 	quit()

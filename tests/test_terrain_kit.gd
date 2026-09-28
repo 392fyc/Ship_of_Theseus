@@ -1,4 +1,6 @@
 extends SceneTree
+
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
 ## 实际运行所有有效异类组合，保留样图并验证输入约束、变体和共享绘制入口。
 
 const Catalog := preload("res://scripts/ui/terrain/terrain_catalog.gd")
@@ -30,9 +32,7 @@ func _run() -> void:
 		quit(2)
 		return
 	DirAccess.make_dir_recursive_absolute(output)
-	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
-	root.content_scale_size = Vector2i.ZERO
-	root.size = Vector2i(1280, 760)
+	root.size = Vector2i(1280, 720)
 	profile = JSON.parse_string(FileAccess.get_file_as_string(PROFILE))
 	var catalog := Catalog.catalog()
 	check("45种无方向组合都有显式记录", catalog["pairs"].size() == 45)
@@ -172,7 +172,7 @@ func _new_page(title: String, subtitle: String) -> void:
 	root.add_child(page)
 	var bg := ColorRect.new()
 	bg.color = Color("171e21")
-	bg.size = Vector2(1280,760)
+	bg.size = root.get_visible_rect().size
 	page.add_child(bg)
 	_label(title,Vector2(24,15),28)
 	_label(subtitle,Vector2(24,56),17)
@@ -187,7 +187,7 @@ func _label(text: String, at: Vector2, size: int) -> void:
 	page.add_child(node)
 
 func _panel(data: Dictionary, title: String, slot: int, large: bool = false, columns: int = 4) -> void:
-	var size := Vector2i(304 if columns == 4 else 404,276) if not large else Vector2i(1232,635)
+	var size := Vector2i(304 if columns == 4 else 404,276) if not large else Vector2i(1232, int(root.get_visible_rect().size.y) - 105)
 	var at := Vector2(24+(slot%columns)*(310 if columns == 4 else 414),126+(slot/columns)*314) if not large else Vector2(24,95)
 	var viewport := SubViewport.new()
 	viewport.size = size
@@ -222,5 +222,5 @@ func _frames() -> void:
 func _capture(name: String) -> void:
 	await _frames()
 	var path := output.path_join(name)
-	check("保存"+name,root.get_texture().get_image().save_png(path)==OK)
+	check("保存"+name,CaptureMetadata.save_png(root, root.get_texture().get_image(), path)==OK)
 	captures[name]=FileAccess.get_sha256(path)

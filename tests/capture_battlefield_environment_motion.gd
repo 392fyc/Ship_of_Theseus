@@ -1,5 +1,6 @@
 extends SceneTree
 
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
 const CANDIDATE_PATH := "res://scenes/playground/battlefield_courtyard.tscn"
 const CAPTURE_FPS := 24
 const CAPTURE_FRAME_COUNT := 192
@@ -9,6 +10,7 @@ const MOVE_TARGET := Vector2i(2, 5)
 
 var _output: String = ""
 var _layout_id: String = "overgrown"
+var _captures: Array[Dictionary] = []
 
 
 func _initialize() -> void:
@@ -16,8 +18,6 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
-	root.content_scale_size = Vector2i.ZERO
 	root.size = Vector2i(1280, 720)
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--output="):
@@ -122,12 +122,16 @@ func _run() -> void:
 			move_completed = true
 		var rendered_frame: Image = root.get_texture().get_image()
 		var filename: String = "frame_%06d.png" % capture_index
-		var save_error: Error = rendered_frame.save_png(_output.path_join(filename))
+		var output_path: String = _output.path_join(filename)
+		var save_error: Error = CaptureMetadata.save_png(root, rendered_frame, output_path)
 		if save_error != OK:
 			_fail("保存真实渲染帧 %s 失败：%s" % [filename, error_string(save_error)])
 			scene.queue_free()
 			quit(1)
 			return
+		_captures.append(CaptureMetadata.capture_record(root, rendered_frame, output_path, {
+			"layout": _layout_id, "frame_index": capture_index, "elapsed_seconds": elapsed,
+		}))
 		capture_index += 1
 	if not move_started or not move_completed:
 		_fail("8 秒动态捕捉期间未能完成一次合法单位移动。")
@@ -136,6 +140,14 @@ func _run() -> void:
 		return
 	if not canopy_fade_observed:
 		_fail("真实渲染期间未观察到目标森林格的树冠淡化。")
+		return
+	var manifest_path: String = _output.path_join("capture-metadata.json")
+	var source_fields: Dictionary = {"layout": _layout_id, "frames": capture_index,
+		"fps": CAPTURE_FPS, "duration_seconds": float(capture_index) / CAPTURE_FPS,
+		"move_completed": move_completed, "canopy_faded": canopy_fade_observed,
+		"annotations_hidden": annotations_hidden}
+	if not CaptureMetadata.write_manifest(root, manifest_path, _captures, source_fields):
+		_fail("无法写入动态捕捉清单。")
 		return
 	print("BATTLEFIELD_ENVIRONMENT_CAPTURE layout=%s frames=%d fps=%d duration_seconds=%.2f move_completed=%s canopy_faded=%s output=%s" % [
 		_layout_id, capture_index, CAPTURE_FPS, float(capture_index) / CAPTURE_FPS,

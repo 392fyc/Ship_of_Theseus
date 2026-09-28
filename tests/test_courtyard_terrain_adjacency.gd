@@ -1,5 +1,7 @@
 extends SceneTree
+## 仅用于固定像素几何的单元测试，不代表运行配置；截图仅作诊断，不得作为视觉验收证据。
 
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
 const BoardView := preload("res://scripts/ui/playground/courtyard_board_view.gd")
 const PROFILE_PATH := "res://assets/prototype/battlefield_courtyard/visual_profile.json"
 const LAYOUTS_PATH := "res://assets/prototype/battlefield_courtyard/courtyard_layouts.json"
@@ -15,6 +17,7 @@ var _failed: int = 0
 var _output: String = ""
 var _profile: Dictionary
 var _panels: Array[Dictionary] = []
+var _capture_records: Array[Dictionary] = []
 
 
 func _initialize() -> void:
@@ -84,7 +87,19 @@ func _run() -> void:
 		DirAccess.make_dir_recursive_absolute(_output)
 		await _frames(8)
 		await RenderingServer.frame_post_draw
-		_check("保存真实邻接对照图", root.get_texture().get_image().save_png(_output.path_join("terrain-adjacency.png")) == OK)
+		var image: Image = root.get_texture().get_image()
+		var image_path: String = _output.path_join("terrain-adjacency.png")
+		var saved: bool = image.save_png(image_path) == OK
+		_check("保存邻接诊断图", saved)
+		if saved:
+			_capture_records.append(CaptureMetadata.capture_record(root, image, image_path, {
+				"capture_kind": "diagnostic", "runtime_evidence": false,
+				"diagnostic_purpose": "fixed-pixel terrain adjacency contract",
+			}))
+		var source_fields: Dictionary = {"runtime_evidence": false,
+			"diagnostic_purpose": "fixed-pixel terrain adjacency contract"}
+		if not CaptureMetadata.write_manifest(root, _output.path_join("capture-metadata.json"), _capture_records, source_fields):
+			_check("写入诊断元数据清单", false)
 	print("COURTYARD_ADJACENCY_RESULT ", JSON.stringify({"passed": _passed, "failed": _failed}))
 	quit(1 if _failed > 0 else 0)
 
