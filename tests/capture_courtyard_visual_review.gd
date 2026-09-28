@@ -1,6 +1,7 @@
 extends SceneTree
 ## 同一次运行采集全部候选状态，并记录渲染源码与原始截图摘要。
 
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
 const SOURCES: Array[String] = [
 	"res://scripts/ui/playground/courtyard_board_view.gd",
 	"res://scripts/ui/playground/battlefield_courtyard.gd",
@@ -8,6 +9,7 @@ const SOURCES: Array[String] = [
 	"res://assets/prototype/battlefield_courtyard/courtyard_layouts.json",
 	"res://assets/prototype/battlefield_courtyard/visual_profile.json",
 	"res://tests/capture_courtyard_visual_review.gd",
+	"res://tests/claude_review/capture_metadata.gd",
 	"res://scenes/playground/battlefield_courtyard.tscn",
 	"res://scenes/tactical/TacticalScene.tscn",
 	"res://assets/ui/themes/hud_m2.tres",
@@ -73,8 +75,6 @@ func _run() -> void:
 			quit(1)
 			return
 		hashes[source] = FileAccess.get_sha256(source)
-	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
-	root.content_scale_size = Vector2i.ZERO
 	root.size = Vector2i(1280, 720)
 	var scene: Node = load("res://scenes/playground/battlefield_courtyard.tscn").instantiate()
 	root.add_child(scene)
@@ -110,30 +110,31 @@ func _run() -> void:
 					return
 				var filename: String = id + "-" + str(dimensions.x) + ("-play" if annotations else "-clear") + ".png"
 				var output_path: String = _output.path_join(filename)
-				if captured.save_png(output_path) != OK:
+				if CaptureMetadata.save_png(root, captured, output_path) != OK:
 					push_error("截图保存失败：" + filename)
 					quit(1)
 					return
-				_captures.append({"file": filename, "layout": id, "annotations": annotations,
-					"size": [dimensions.x, dimensions.y], "process_frame": Engine.get_process_frames(),
-					"animation_time": CAPTURE_TIME, "repeated_frame_identical": true,
-					"sha256": FileAccess.get_sha256(output_path)})
+				_captures.append(CaptureMetadata.capture_record(root, captured, output_path, {
+					"layout": id, "annotations": annotations, "size": [dimensions.x, dimensions.y],
+					"process_frame": Engine.get_process_frames(), "animation_time": CAPTURE_TIME,
+					"repeated_frame_identical": true,
+				}))
 	for source: String in sources:
 		if hashes[source] != FileAccess.get_sha256(source):
 			push_error("采集期间源码发生变化，本批截图不可作为同版证据。")
 			quit(1)
 			return
-	var manifest := FileAccess.open(_output.path_join("capture-manifest.json"), FileAccess.WRITE)
-	if manifest == null:
+	var source_fields: Dictionary = {"captured_at_utc": Time.get_datetime_string_from_system(true),
+		"engine": Engine.get_version_info()["string"], "post_processing": false,
+		"seed": CAPTURE_SEED, "animation_time": CAPTURE_TIME,
+		"baseline_status": "candidate_unapproved",
+		"comparison_scope": "identical consecutive frames, not aesthetic approval",
+		"sources_sha256": hashes}
+	var manifest_path: String = _output.path_join("capture-manifest.json")
+	if not CaptureMetadata.write_manifest(root, manifest_path, _captures, source_fields):
 		push_error("截图清单无法保存。")
 		quit(1)
 		return
-	manifest.store_string(JSON.stringify({"captured_at_utc": Time.get_datetime_string_from_system(true),
-		"engine": Engine.get_version_info()["string"], "post_processing": false,
-		"renderer": "gl_compatibility", "seed": CAPTURE_SEED, "animation_time": CAPTURE_TIME,
-		"baseline_status": "candidate_unapproved", "comparison_scope": "identical consecutive frames, not aesthetic approval",
-		"sources_sha256": hashes, "captures": _captures}, "  "))
-	manifest.close()
 	print("COURTYARD_VISUAL_CAPTURE_RESULT ", JSON.stringify({"captures": _captures.size(), "failed": 0}))
 	scene.queue_free()
 	await _frames(3)

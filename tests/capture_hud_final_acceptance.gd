@@ -1,9 +1,10 @@
 extends SceneTree
 
 ## 从正式战斗场景捕获行动资源、技能、人物悬停与职业资源的整屏联动。
-## 使用可见 Godot 窗口运行：--script res://tests/capture_hud_final_acceptance.gd
+## 使用项目拉伸配置采集；--output=<仓库外绝对目录> 可指定输出位置。
 
 const OUTPUT_ROOT := "user://visual_style_playground/hud_final_acceptance"
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
 
 var _directory: String = ""
 var _batch_name: String = ""
@@ -15,15 +16,21 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	var output_argument: String = ""
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--output="):
+			output_argument = arg.trim_prefix("--output=")
 	if DisplayServer.get_name().to_lower() == "headless":
 		push_error("Final HUD capture requires a visible rendering display")
 		quit(1)
 		return
-	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
-	root.content_scale_size = Vector2i.ZERO
 	root.size = Vector2i(1280, 720)
 	_batch_name = "batch_%d" % int(Time.get_unix_time_from_system())
-	_directory = ProjectSettings.globalize_path(OUTPUT_ROOT.path_join(_batch_name))
+	_directory = output_argument if not output_argument.is_empty() else ProjectSettings.globalize_path(OUTPUT_ROOT.path_join(_batch_name))
+	if not _directory.is_absolute_path():
+		push_error("Capture output must be an absolute path")
+		quit(1)
+		return
 	if DirAccess.make_dir_recursive_absolute(_directory) != OK:
 		push_error("Cannot create capture directory")
 		quit(1)
@@ -129,33 +136,28 @@ func _capture(name: String, dashboard: HudM2RuntimeDashboard,
 		push_error("Viewport size mismatch: " + name)
 		return false
 	var path: String = _directory.path_join(name + ".png")
-	if screenshot.save_png(path) != OK:
+	if CaptureMetadata.save_png(root, screenshot, path) != OK:
 		push_error("Cannot save capture: " + name)
 		return false
 	var digest: String = FileAccess.get_sha256(path)
-	_records.append({
-		"file": name + ".png",
-		"sha256": digest,
-		"width": screenshot.get_width(),
-		"height": screenshot.get_height(),
-	})
+	var record: Dictionary = CaptureMetadata.capture_record(root, screenshot, path)
+	record["width"] = screenshot.get_width()
+	record["height"] = screenshot.get_height()
+	_records.append(record)
 	print("HUD_FINAL_CAPTURE=%s SHA256=%s" % [path, digest])
 	return true
 
 
 func _save_manifest() -> bool:
 	var path: String = _directory.path_join("capture-manifest.json")
-	var file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
-	if file == null:
-		push_error("Cannot write capture manifest")
-		return false
-	file.store_string(JSON.stringify({
+	var source_fields: Dictionary = {
 		"batch": _batch_name,
 		"engine": Engine.get_version_info().get("string", "unknown"),
 		"scene": "res://scenes/tactical/TacticalScene.tscn",
-		"captures": _records,
-	}, "  "))
-	file.close()
+	}
+	if not CaptureMetadata.write_manifest(root, path, _records, source_fields):
+		push_error("Cannot write capture manifest")
+		return false
 	print("HUD_FINAL_CAPTURE_MANIFEST=%s" % path)
 	return true
 

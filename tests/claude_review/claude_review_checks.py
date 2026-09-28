@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import re
 from pathlib import Path
 
@@ -435,14 +436,15 @@ def c7_calibration(files: dict, project_text: str) -> dict:
 
 
 def _doc_header(text: str) -> str:
-    """文件开头连续的 `##` 注释块（允许夹在 extends 前后），作为采集脚本的声明区。"""
-    lines, seen = [], False
+    """仅接受首次声明之前的文件头；允许 extends 位于注释前后。"""
+    lines = []
     for ln in text.splitlines():
-        s = ln.strip()
-        if s.startswith("##"):
-            lines.append(s)
-            seen = True
-        elif seen and s and not s.startswith("#"):
+        stripped = ln.strip()
+        if stripped.startswith("##"):
+            lines.append(stripped)
+        elif not stripped or stripped.startswith("#") or stripped.startswith("extends "):
+            continue
+        else:
             break
     return "\n".join(lines)
 
@@ -468,25 +470,103 @@ def c8_script(script: Path) -> dict:
 
 
 def c8_manifest(manifest: Path) -> dict:
-    """采集清单须记录的实际参数与 project.godot 一致：canvas_items、1280×720、项目默认渲染器。"""
+    """验证采集配置和图片身份；接受原生采集清单及统一伴随清单。"""
     project = (ROOT / "project.godot").read_text(encoding="utf-8")
-    m = re.search(r'renderer/rendering_method="([^"]+)"', project)
-    project_renderer = m.group(1) if m else "forward_plus"  # 未覆盖时 Godot 默认为 forward_plus
-    mode_names = {"disabled": 0, "canvas_items": 1, "viewport": 2}
+    m = re.search(r'^renderer/rendering_method="([^"]+)"', project, re.M)
+    project_renderer = m.group(1) if m else "forward_plus"
     sm = re.search(r'^window/stretch/mode="([^"]+)"', project, re.M)
-    expected_mode = mode_names.get(sm.group(1), 0) if sm else 0
+    stretch = sm.group(1) if sm else "disabled"
+    expected_mode = {"disabled": 0, "canvas_items": 1, "viewport": 2}.get(stretch)
     vw = re.search(r"^window/size/viewport_width=(\d+)", project, re.M)
     vh = re.search(r"^window/size/viewport_height=(\d+)", project, re.M)
     expected_size = [int(vw.group(1)) if vw else 1152, int(vh.group(1)) if vh else 648]
-    data = json.loads(manifest.read_text(encoding="utf-8"))
     bad = []
-    for cap in data.get("captures", []):
-        if cap.get("content_scale_mode") != expected_mode or (expected_mode and cap.get("content_scale_size") != expected_size):
-            bad.append(f"{cap.get('file')}：拉伸参数 {cap.get('content_scale_mode')} {cap.get('content_scale_size')}，项目为 {expected_mode} {expected_size}")
+    data = {}
+    try:
+        data = json.loads(manifest.read_text(encoding="utf-8-sig"))
+        if not isinstance(data, dict):
+            raise ValueError("清单根必须为对象")
+    except (OSError, ValueError) as error:
+        return {"manifest": manifest.name, "pass": False, "mismatches": [str(error)]}
+    if data.get("runtime_evidence") is False:
+        bad.append("固定像素诊断清单不能作为运行视觉验收证据")
     if data.get("renderer") != project_renderer:
         bad.append(f"渲染器 {data.get('renderer')} ≠ 项目默认 {project_renderer}")
+    if data.get("project_stretch_mode") != stretch:
+        bad.append("缺少或不匹配项目拉伸模式")
+    captures = data.get("captures")
+    if not isinstance(captures, list) or not captures:
+        bad.append("采集记录必须为非空数组")
+        captures = []
+    names, viewport_count = set(), 0
+
+    def finite_number(value):
+        return type(value) in (int, float) and math.isfinite(value)
+
+    def positive_pair(value):
+        return isinstance(value, list) and len(value) == 2 and all(finite_number(v) and v > 0 for v in value)
+
+    def image_file(name, digest):
+        if not isinstance(name, str) or not name or Path(name).is_absolute() or ".." in Path(name).parts:
+            raise ValueError("图片路径必须为清单目录下的相对路径")
+        path = manifest.parent / name
+        if not path.resolve().is_relative_to(manifest.parent.resolve()):
+            raise ValueError("图片路径超出清单目录")
+        if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+            raise ValueError("缺少有效SHA256")
+        if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+            raise ValueError("图片SHA256不匹配")
+        with Image.open(path) as image:
+            return list(image.size)
+
+    for cap in captures:
+        if not isinstance(cap, dict):
+            bad.append("采集项必须为对象")
+            continue
+        name = cap.get("file")
+        try:
+            size = image_file(name, cap.get("sha256"))
+            if name in names:
+                raise ValueError("重复图片记录")
+            names.add(name)
+            if not positive_pair(cap.get("image_size")) or cap.get("image_size") != size:
+                raise ValueError("记录尺寸与图片实际尺寸不同")
+            if type(cap.get("content_scale_mode")) is not int or cap.get("content_scale_mode") != expected_mode or (expected_mode and cap.get("content_scale_size") != expected_size):
+                raise ValueError("拉伸参数与项目不同")
+            if cap.get("renderer", data.get("renderer")) != project_renderer or cap.get("project_stretch_mode", stretch) != stretch:
+                raise ValueError("单张采集配置与项目不同")
+            window, visible = cap.get("window_size"), cap.get("visible_rect")
+            if not positive_pair(window) or not isinstance(visible, list) or len(visible) not in (2, 4) or not all(finite_number(v) for v in visible) or not positive_pair(visible[-2:]):
+                raise ValueError("缺少有效窗口或可见区域尺寸")
+            kind = cap.get("capture_kind", "viewport")
+            if kind == "viewport":
+                viewport_count += 1
+                if size != (expected_size if expected_mode == 2 else window):
+                    raise ValueError("整屏尺寸与实际视口配置不符")
+            elif kind == "derived_detail":
+                source_size = image_file(cap.get("source_file"), cap.get("source_sha256"))
+                region = cap.get("source_region")
+                scale = cap.get("scale")
+                if (not isinstance(region, list) or len(region) != 4 or not all(finite_number(v) for v in region)
+                        or not positive_pair(region[-2:]) or not finite_number(scale) or scale <= 0):
+                    raise ValueError("派生细节缺少有效母帧区域或放大参数")
+                if region[0] < 0 or region[1] < 0 or region[0] + region[2] > source_size[0] or region[1] + region[3] > source_size[1]:
+                    raise ValueError("派生区域超出母帧")
+            else:
+                raise ValueError("未知采集类型")
+        except (OSError, ValueError, TypeError) as error:
+            bad.append(f"{name}：{error}")
+    if not viewport_count:
+        bad.append("清单没有有效整屏采集记录")
     return {"manifest": manifest.name, "project_renderer": project_renderer, "renderer": data.get("renderer"),
-            "mismatches": bad, "pass": not bad}
+            "capture_count": len(captures), "mismatches": bad, "pass": not bad}
+
+
+def c8_scripts() -> list[dict]:
+    """包含已修复的采集脚本，避免仅检查仍有禁用语句的脚本。"""
+    paths = sorted((ROOT / "tests").rglob("*.gd")) + sorted((ROOT / "dev_doc").rglob("capture_*.gd"))
+    return [c8_script(p) for p in paths if any(token in p.read_text(encoding="utf-8")
+            for token in ("save_png", "CONTENT_SCALE_MODE_DISABLED", "CaptureMetadata"))]
 
 
 def c8_calibration() -> dict:
@@ -502,12 +582,26 @@ def c8_calibration() -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--references", type=Path, required=True)
-    ap.add_argument("--hud-capture", type=Path, required=True, help="含 available-1280.png、mixed-1280.png 的仓库外目录")
+    ap.add_argument("--references", type=Path)
+    ap.add_argument("--c8-only", action="store_true", help="仅运行采集配置检查；必须提供实际清单")
+    ap.add_argument("--hud-capture", type=Path, help="含 available-1280.png、mixed-1280.png 的仓库外目录")
     ap.add_argument("--native-1920", type=Path, help="capture_scene_native.gd 保留项目拉伸的 1920×1080 整屏")
     ap.add_argument("--manifests", type=Path, nargs="*", help="capture_scene_native.gd 生成的采集清单")
     ap.add_argument("--json", type=Path, required=True)
     args = ap.parse_args()
+    if args.c8_only:
+        if not args.manifests:
+            ap.error("--c8-only 必须提供 --manifests")
+        result = {"scripts": c8_scripts(), "manifests": [c8_manifest(p) for p in args.manifests],
+                  "calibration": c8_calibration()}
+        result["pass"] = bool(result["scripts"]) and result["calibration"]["calibration_ok"] and all(
+            item["pass"] for item in result["scripts"] + result["manifests"])
+        args.json.parent.mkdir(parents=True, exist_ok=True)
+        args.json.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(json.dumps({"pass": result["pass"], "scripts": len(result["scripts"]), "manifests": len(result["manifests"])}, ensure_ascii=False))
+        return 0 if result["pass"] else 1
+    if not args.references or not args.hud_capture:
+        ap.error("完整检查必须提供 --references 和 --hud-capture")
     icons = ROOT / "assets/ui/skills/myrmidon"
     src = ROOT / "dev_doc/ui-art-research/myrmidon-skill-icons/candidate-v3"
     ev = ROOT / "dev_doc/ui-art-research"
@@ -559,10 +653,9 @@ def main() -> int:
         "calibration": c7_calibration(files, project_text),
     }
 
-    scripts = sorted((ROOT / "tests").rglob("*.gd")) + sorted((ROOT / "dev_doc").rglob("capture_*.gd"))
-    c8_scripts = [c8_script(p) for p in scripts if "CONTENT_SCALE_MODE_DISABLED" in p.read_text(encoding="utf-8")]
+    capture_scripts = c8_scripts()
     manifests = [c8_manifest(p) for p in sorted(args.manifests)] if args.manifests else []
-    out["checks"]["C8_capture_config"] = {"scripts": c8_scripts, "manifests": manifests, "calibration": c8_calibration()}
+    out["checks"]["C8_capture_config"] = {"scripts": capture_scripts, "manifests": manifests, "calibration": c8_calibration()}
 
     args.json.parent.mkdir(parents=True, exist_ok=True)
     args.json.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")

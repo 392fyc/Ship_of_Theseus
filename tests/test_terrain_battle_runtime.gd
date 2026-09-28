@@ -1,4 +1,7 @@
 extends SceneTree
+
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
+var _capture_records: Array[Dictionary] = []
 ## 自定义地形进入正式战斗：数据、通行、实际交互、重开、结果及释放验证。
 
 const Definition := preload("res://scripts/ui/terrain/terrain_battle_definition.gd")
@@ -30,8 +33,6 @@ func _run() -> void:
 		quit(2)
 		return
 	DirAccess.make_dir_recursive_absolute(output)
-	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
-	root.content_scale_size = Vector2i.ZERO
 	root.size = Vector2i(1280, 720)
 	data_loader = root.get_node("DataLoader")
 	session_script = load("res://scripts/tactical/terrain_battle_session.gd")
@@ -66,12 +67,13 @@ func _run() -> void:
 			await frames(4)
 			session.fit_board()
 			await frames(2)
-			var factor := float(dimensions.y) / 720.0
+			var logical_size: Vector2 = root.get_visible_rect().size
+			var factor := logical_size.y / 720.0
 			var clear := true
 			for y: int in manager.grid.height:
 				for x: int in manager.grid.width:
 					var at := _screen(manager.grid, Vector2i(x,y))
-					clear = clear and at.y > 130 * factor and at.y < 506 * factor and at.x > 20 * factor and at.x < dimensions.x - 200 * factor
+					clear = clear and at.y > 130 * factor and at.y < 506 * factor and at.x > 20 * factor and at.x < logical_size.x - 200 * factor
 			check("%s %d 棋盘避开工具栏和HUD" % [id,dimensions.x], clear)
 			_move_pointer(Vector2(8,8))
 			session.board_view.set_process(false)
@@ -81,7 +83,9 @@ func _run() -> void:
 			await frames(4)
 			await RenderingServer.frame_post_draw
 			var name := "battle-%s-%d.png" % [id,dimensions.x]
-			check("保存 " + name, root.get_texture().get_image().save_png(output.path_join(name)) == OK)
+			var image: Image = root.get_texture().get_image()
+			check("保存 " + name, image.save_png(output.path_join(name)) == OK)
+			_capture_records.append(CaptureMetadata.capture_record(root, image, output.path_join(name)))
 			captures[name] = FileAccess.get_sha256(output.path_join(name))
 		root.size = Vector2i(1280,720)
 		await frames(4)
@@ -120,6 +124,7 @@ func _run() -> void:
 	await _check_short_battle(maps_before)
 	# 让最后一次 timeout 回调退出，SceneTree 才会移除已到期的测试计时器。
 	await frames(2)
+	check("记录真实采集配置", CaptureMetadata.write_manifest(root, output.path_join("capture-metadata.json"), _capture_records, {"script": "res://tests/test_terrain_battle_runtime.gd"}))
 	var report := {"result":"pass" if failures.is_empty() else "fail", "checks":checks, "failures":failures,
 		"captures":captures,"engine":Engine.get_version_info()["string"],"global_maps_unchanged":data_loader.maps == maps_before}
 	var file := FileAccess.open(output.path_join("terrain-battle-runtime-report.json"),FileAccess.WRITE)
@@ -234,11 +239,11 @@ func _screen(grid: Grid, at: Vector2i) -> Vector2:
 
 
 func _move_pointer(at: Vector2) -> void:
-	Input.warp_mouse(at)
+	Input.warp_mouse(root.get_stretch_transform() * at)
 	var motion := InputEventMouseMotion.new()
 	motion.position = at
 	motion.global_position = at
-	Input.parse_input_event(motion)
+	root.push_input(motion, true)
 
 
 func click(at: Vector2) -> void:

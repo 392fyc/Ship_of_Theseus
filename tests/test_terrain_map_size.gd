@@ -1,4 +1,7 @@
 extends SceneTree
+
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
+var _capture_records: Array[Dictionary] = []
 ## 正方形地图尺寸的真实工作台操作、边界输入和正式试战检查。
 
 const Catalog := preload("res://scripts/ui/terrain/terrain_catalog.gd")
@@ -29,8 +32,6 @@ func _run() -> void:
 		quit(2)
 		return
 	DirAccess.make_dir_recursive_absolute(output)
-	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
-	root.content_scale_size = Vector2i.ZERO
 	root.size = Vector2i(1280, 720)
 	var scene := load("res://scenes/playground/terrain_painter.tscn") as PackedScene
 	editor = scene.instantiate() as Control
@@ -42,7 +43,7 @@ func _run() -> void:
 		and editor._map_side_input.step == 1)
 	check("1280窗口内边长、调整和试战控件可见且不重叠", _heading_fits())
 	for control: Control in editor.terrain_buttons.values():
-		check("地形按钮仍可见：" + control.text, Rect2(Vector2.ZERO, Vector2(root.size)).encloses(control.get_global_rect()))
+		check("地形按钮仍可见：" + control.text, root.get_visible_rect().encloses(control.get_global_rect()))
 
 	editor._sample_picker.select(0)
 	editor._load_selected_sample()
@@ -159,6 +160,7 @@ func _run() -> void:
 		and editor.current_map == initial and editor._map_side_input.value == 10)
 	editor.queue_free()
 	await frames(3)
+	check("记录真实采集配置", CaptureMetadata.write_manifest(root, output.path_join("capture-metadata.json"), _capture_records, {"script": "res://tests/test_terrain_map_size.gd"}))
 	var report := {"result": "pass" if failures.is_empty() else "fail", "checks": checks,
 		"failures": failures, "captures": captures, "min_side": 10, "max_side": 25, "square_only": true}
 	var file := FileAccess.open(output.path_join("terrain-map-size-report.json"), FileAccess.WRITE)
@@ -204,7 +206,7 @@ func _check_invalid_inputs() -> void:
 
 
 func _heading_fits() -> bool:
-	var viewport := Rect2(Vector2.ZERO, Vector2(root.size))
+	var viewport := root.get_visible_rect()
 	var previous_end := 0.0
 	for control: Control in editor._map_side_input.get_parent().get_children():
 		var rect := control.get_global_rect()
@@ -226,8 +228,8 @@ func _editor_board_fits() -> bool:
 	return true
 
 
-func _battle_board_fits(session: Node2D, resolution: Vector2i) -> bool:
-	var factor := float(resolution.x) / 1280.0
+func _battle_board_fits(session: Node2D, _resolution: Vector2i) -> bool:
+	var factor := root.get_visible_rect().size.x / 1280.0
 	var safe := Rect2(Vector2(20, 130) * factor, Vector2(1040, 380) * factor)
 	for at: Vector2i in [Vector2i(0, 0), Vector2i(24, 0), Vector2i(0, 24), Vector2i(24, 24)]:
 		var point: Vector2 = root.get_canvas_transform() * session.manager.grid.grid_to_world(at)
@@ -283,11 +285,11 @@ func click_control(control: Control) -> void:
 
 
 func click_at(at: Vector2, button: MouseButton = MOUSE_BUTTON_LEFT) -> void:
-	Input.warp_mouse(at)
+	Input.warp_mouse(root.get_stretch_transform() * at)
 	var motion := InputEventMouseMotion.new()
 	motion.position = at
 	motion.global_position = at
-	Input.parse_input_event(motion)
+	root.push_input(motion, true)
 	await frames(2)
 	for pressed: bool in [true, false]:
 		var event := InputEventMouseButton.new()
@@ -295,7 +297,7 @@ func click_at(at: Vector2, button: MouseButton = MOUSE_BUTTON_LEFT) -> void:
 		event.global_position = at
 		event.button_index = button
 		event.pressed = pressed
-		Input.parse_input_event(event)
+		root.push_input(event, true)
 		await frames(2)
 
 
@@ -311,3 +313,4 @@ func capture(name: String) -> void:
 	var image := root.get_texture().get_image()
 	check("原生截帧：" + name, image.get_size() == root.size and image.save_png(path) == OK)
 	captures[name] = FileAccess.get_sha256(path)
+	_capture_records.append(CaptureMetadata.capture_record(root, image, path))

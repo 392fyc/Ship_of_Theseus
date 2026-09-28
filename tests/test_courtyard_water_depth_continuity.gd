@@ -1,6 +1,8 @@
 extends SceneTree
+## 仅用于固定像素几何的单元测试，不代表运行配置；截图仅作诊断，不得作为视觉验收证据。
 ## 用独立样例与实际像素曲线验证水深连续性；错误对照使用同一检查器。
 
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
 const CONTRACT := "res://dev_doc/ui-art-research/visual-review/water-depth-continuity-contract.json"
 const PROFILE := "res://assets/prototype/battlefield_courtyard/visual_profile.json"
 const BOARD := "res://scripts/ui/playground/courtyard_board_view.gd"
@@ -48,6 +50,7 @@ var _cases: Dictionary = {}
 var _output: String
 var _sources: Dictionary = {}
 var _image_hashes: Dictionary = {}
+var _capture_records: Array[Dictionary] = []
 
 func _initialize() -> void:
 	_run.call_deferred()
@@ -93,9 +96,14 @@ func _run() -> void:
 	var stable: bool = true
 	for path: String in _sources:
 		stable = stable and FileAccess.get_sha256(path) == _sources[path]
-	var overall: bool = bool(results["positive_samples_passed"]) and bool(results["negative_samples_blocked"]) and image_ok and stable
+	var metadata_ok: bool = CaptureMetadata.write_manifest(root, _output.path_join("capture-metadata.json"),
+		_capture_records, {"runtime_evidence": false, "diagnostic_purpose": "fixed-pixel water depth contract"})
+	var overall: bool = bool(results["positive_samples_passed"]) and bool(results["negative_samples_blocked"]) and image_ok and stable and metadata_ok
 	var report: Dictionary = {"overall":"PASS" if overall else "FAIL", "contract_id":_spec["contract_id"],
 		"captured_at_utc":Time.get_datetime_string_from_system(true), "engine":Engine.get_version_info()["string"],
+		"renderer":str(RenderingServer.get_current_rendering_method()),
+		"project_stretch_mode":str(ProjectSettings.get_setting("display/window/stretch/mode")),
+		"runtime_evidence":false, "capture_metadata_saved":metadata_ok, "captures":_capture_records,
 		"viewport_px":[VIEW_SIZE.x, VIEW_SIZE.y], "board_scale":VIEW_SCALE, "fixed_animation_time":0.0,
 		"neutral_curves_ripples":false, "material_preview_ripples":true,
 		"positive_samples_passed":results["positive_samples_passed"], "negative_samples_blocked":results["negative_samples_blocked"],
@@ -244,6 +252,10 @@ func _save_image(filename: String, image: Image) -> bool:
 	if image.save_png(path) != OK:
 		return false
 	_image_hashes[filename] = FileAccess.get_sha256(path)
+	_capture_records.append(CaptureMetadata.capture_record(root, image, path, {
+		"capture_kind": "diagnostic", "runtime_evidence": false,
+		"diagnostic_purpose": "fixed-pixel water depth contract",
+	}))
 	return true
 
 func _show_comparison() -> void:

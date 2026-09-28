@@ -1,5 +1,8 @@
 extends SceneTree
 
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
+var _capture_records: Array[Dictionary] = []
+
 const PAINTER_SCENE_PATH := "res://scenes/playground/terrain_painter.tscn"
 
 var _passed: int = 0
@@ -24,8 +27,6 @@ func _check(label: String, condition: bool, detail: String = "") -> void:
 
 
 func _run() -> void:
-	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
-	root.content_scale_size = Vector2i.ZERO
 	root.size = Vector2i(1280, 720)
 	_output_dir = _argument_value("--output=")
 	if not _output_dir.is_empty():
@@ -214,12 +215,18 @@ func _capture(file_name: String) -> bool:
 	var image: Image = root.get_texture().get_image()
 	if image.get_size() != Vector2i(1280, 720):
 		return false
-	return image.save_png(_output_dir.path_join(file_name)) == OK
+	var path: String = _output_dir.path_join(file_name)
+	if image.save_png(path) != OK:
+		return false
+	_capture_records.append(CaptureMetadata.capture_record(root, image, path))
+	return true
 
 
 func _capture_report() -> void:
 	if _output_dir.is_empty():
 		return
+	if not _capture_records.is_empty():
+		_check("记录真实采集配置", CaptureMetadata.write_manifest(root, _output_dir.path_join("capture-metadata.json"), _capture_records, {"script": "res://tests/test_terrain_painter_battle_flow.gd"}))
 	var file := FileAccess.open(_output_dir.path_join("terrain-painter-battle-flow.json"), FileAccess.WRITE)
 	if file != null:
 		file.store_string(JSON.stringify({"resolution": [1280, 720], "passed": _passed, "failed": _failed,
@@ -240,17 +247,25 @@ func _click_control(control: Control) -> void:
 
 
 func _click_at(position: Vector2, button_index: MouseButton) -> void:
+	# 先对齐真实指针，避免系统鼠标移动在按下与松开之间改变控件悬停目标。
+	if DisplayServer.get_name() != "headless":
+		Input.warp_mouse(root.get_stretch_transform() * position)
+	var motion := InputEventMouseMotion.new()
+	motion.position = position
+	motion.global_position = position
+	root.push_input(motion, true)
+	await _frames(2)
 	var down := InputEventMouseButton.new()
 	down.position = position
 	down.button_index = button_index
 	down.pressed = true
-	root.push_input(down)
+	root.push_input(down, true)
 	await process_frame
 	var up := InputEventMouseButton.new()
 	up.position = position
 	up.button_index = button_index
 	up.pressed = false
-	root.push_input(up)
+	root.push_input(up, true)
 	await process_frame
 
 

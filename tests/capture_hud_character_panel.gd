@@ -1,7 +1,9 @@
 extends SceneTree
 
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
+var _output_dir: String = ""
+
 ## 从正式 TacticalScene 捕获人物栏常态与头像悬停态；--original 捕获原画对照。
-const OUTPUT := "res://dev_doc/ui-art-research/hud-character-panel-portrait/candidate"
 const ORIGINAL_ART := "res://assets/prototype/visual_style/samples/portrait_preview_final.png"
 
 var _variant_suffix := "-generated"
@@ -13,12 +15,19 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--output="):
+			_output_dir = arg.trim_prefix("--output=")
+	if _output_dir.is_empty():
+		_output_dir = ProjectSettings.globalize_path("user://visual_style_playground/capture_hud_character_panel/batch_%d_%d_%d" % [int(Time.get_unix_time_from_system()), OS.get_process_id(), Time.get_ticks_usec()])
+	if not _output_dir.is_absolute_path():
+		push_error("采集输出须为绝对路径。")
+		quit(1)
+		return
 	if DisplayServer.get_name() == "headless":
 		push_error("Native HUD capture requires a visible rendering display.")
 		quit(1)
 		return
-	root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
-	root.content_scale_size = Vector2i.ZERO
 	root.size = Vector2i(1280, 720)
 	var scene: Node = (load("res://scenes/tactical/TacticalScene.tscn") as PackedScene).instantiate()
 	root.add_child(scene)
@@ -76,10 +85,10 @@ func _capture(name: String, dashboard: Control) -> bool:
 	if image.get_size() != root.size:
 		push_error("Viewport size mismatch: " + name)
 		return false
-	var directory: String = ProjectSettings.globalize_path(OUTPUT)
+	var directory: String = _output_dir
 	DirAccess.make_dir_recursive_absolute(directory)
 	var path: String = directory.path_join(name + ".png")
-	if image.save_png(path) != OK:
+	if CaptureMetadata.save_png(root, image, path) != OK:
 		push_error("PNG save failed: " + name)
 		return false
 	print("CHARACTER_CAPTURE ", name, " ", image.get_width(), "x", image.get_height(), " ", FileAccess.get_sha256(path))
@@ -87,7 +96,7 @@ func _capture(name: String, dashboard: Control) -> bool:
 
 
 func _capture_portrait_detail() -> bool:
-	var directory: String = ProjectSettings.globalize_path(OUTPUT)
+	var directory: String = _output_dir
 	var source_path: String = directory.path_join("hover-1280%s.png" % _variant_suffix)
 	var source: Image = Image.load_from_file(source_path)
 	if source == null or source.get_size() != Vector2i(1280, 720):
@@ -96,7 +105,11 @@ func _capture_portrait_detail() -> bool:
 	var detail: Image = source.get_region(Rect2i(32, 596, 100, 100))
 	detail.resize(400, 400, Image.INTERPOLATE_NEAREST)
 	var target_path: String = directory.path_join("portrait-detail-4x%s.png" % _variant_suffix)
-	if detail.save_png(target_path) != OK:
+	if CaptureMetadata.save_png(root, detail, target_path, {
+		"capture_kind": "derived_detail", "source_file": source_path.get_file(),
+		"source_sha256": FileAccess.get_sha256(source_path),
+		"source_region": [32, 596, 100, 100], "scale": 4
+	}) != OK:
 		push_error("Portrait detail PNG save failed")
 		return false
 	print("CHARACTER_CAPTURE portrait-detail-4x%s 400x400 " % _variant_suffix, FileAccess.get_sha256(target_path))
