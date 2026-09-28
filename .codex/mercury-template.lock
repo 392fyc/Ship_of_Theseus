@@ -2,12 +2,12 @@
   "files": {
     "agents/mercury-acceptance.toml": "4594ded38a042a9d65d1f398de8f31257dbeeaa8a01c33d0b48c82d9f83f34f2",
     "agents/mercury-dev.toml": "55faf23ce2f4db0174eb0c0e6b7cf0d3257a634b00e8543a049c1dac3ca9b202",
-    "agents/mercury-reviewer.toml": "daff2f2ec596f4f9c8e61553ad26aeadb5bc925d466aac28722f1da57c0b491a",
+    "agents/mercury-reviewer.toml": "ec25ceddfe693179b32561b96d1b50a30323958ff53dbea7612db49a4a1c99d6",
     "project/mercury-task-contract.md": "40d206858e7c23d4918473f3f5ad482e51223c873ddbddf0e6e825fd6efbbba9",
     "rules/mercury-git-safety.rules": "a755ec542cfbbc42dd496613fc7978a3c9d0c02b94868c8c1e8338be656b22c7"
   },
   "manifest_sha256": "cd15eb678bc5fc56fee0a27ae1d144384bf7ca7e0db54013e1c90f9ab2b31239",
   "schema_version": 1,
-  "source_commit": "bceec8cad7ec3170030f05e88ea37fa0874069a7",
+  "source_commit": "faab794b25e375acde9a14399469f1a5bfcaa811",
   "source_repo": "392fyc/Mercury"
 }
