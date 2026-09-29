@@ -1,0 +1,81 @@
+# 游戏仓 CI：PR 与受保护分支推送时运行 Godot headless 回归与仓库契约测试。
+# Godot 版本与本地开发一致（4.6.3）；升级引擎时同步改 GODOT_VERSION。
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.6.3
+
+jobs:
+  godot-tests:
+    name: Godot headless 回归
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 缓存 Godot
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}-linux-x86_64
+
+      - name: 下载 Godot ${{ env.GODOT_VERSION }}
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot
+          curl -fsSL -o /tmp/godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d ~/godot
+          mv ~/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64 ~/godot/godot
+          chmod +x ~/godot/godot
+
+      - name: 运行 tests/test_*.gd
+        run: |
+          export GODOT="$HOME/godot/godot"
+          "$GODOT" --version
+          bash tools/ci/run_godot_tests.sh
+
+      - name: 上传测试日志
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-test-logs
+          path: .ci-logs/
+          retention-days: 7
+
+  repo-contract-tests:
+    name: 仓库契约与采集配置测试
+    # 这些测试调用 pwsh 与仓库内的 PowerShell 脚本，按开发环境在 Windows 上运行。
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: python -m pip install pytest pillow numpy
+
+      - name: 运行 pytest
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python -m pytest -q tests/codex tests/claude_review/test_capture_config.py

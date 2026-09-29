@@ -45,3 +45,6 @@ nul
 .handoff-config
 .handoff/
 .specify/workflows/runs/
+
+# CI 与本地测试运行日志（tools/ci/run_godot_tests.sh）
+.ci-logs/
