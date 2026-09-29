@@ -121,7 +121,8 @@ def test_agents_points_cross_repository_publication_to_shared_entrypoint():
 
     for required in [
         "scripts/codex/sot-publish.ps1",
-        "目标仓 worktree",
+        "目标仓任务 worktree",
+        "固定 vault",
         "SOT_DESIGNLIB_ROOT",
         "SOT_KB_ROOT",
         "不得因目标仓没有同名脚本而判定发布阻断",
@@ -131,16 +132,21 @@ def test_agents_points_cross_repository_publication_to_shared_entrypoint():
 
 
 def test_cross_repository_skills_expose_shared_publication_entrypoint():
-    for skill_name in ["sot-designlib", "sot-kb-write"]:
+    shared = [
+        "当前 Ship 工作根",
+        "scripts/codex/sot-publish.ps1",
+        "不得误报发布阻断",
+        "不得改用原始 `git push`",
+    ]
+    # The design library publishes from a target-repository worktree; the KB
+    # publishes from its single fixed vault on the task branch (no worktree).
+    per_skill = {
+        "sot-designlib": ["目标仓 worktree", "目标仓无需提供同名脚本"],
+        "sot-kb-write": ["固定 KB vault", "KB 仓无需提供同名脚本"],
+    }
+    for skill_name, specific in per_skill.items():
         text = read_text(SKILL_PATHS[skill_name])
-        for required in [
-            "当前 Ship 工作根",
-            "scripts/codex/sot-publish.ps1",
-            "目标仓 worktree",
-            "目标仓无需提供同名脚本",
-            "不得误报发布阻断",
-            "不得改用原始 `git push`",
-        ]:
+        for required in shared + specific:
             assert required in text, (
                 f"{skill_name} missing shared publication rule: {required}"
             )
