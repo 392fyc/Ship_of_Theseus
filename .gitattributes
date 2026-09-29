@@ -29,3 +29,7 @@
 /tests/test_terrain_map_size.gd text eol=lf
 /tests/test_terrain_painter.gd text eol=lf
 /tests/test_terrain_painter_battle_flow.gd text eol=lf
+
+# CI 脚本与清单在 Linux runner 与 WSL 中由 bash 读取，保持 LF。
+/tools/ci/*.sh text eol=lf
+/tools/ci/*.txt text eol=lf
