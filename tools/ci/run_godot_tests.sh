@@ -20,7 +20,7 @@ echo "::endgroup::"
 if [ "$import_code" -ne 0 ]; then
   echo "项目导入失败，后续测试没有意义："; tail -n 40 "$LOG_DIR/_import.log"; exit 1
 fi
-# 导入会编译全部脚本：借此做一次廉价的 GDScript 解析检查。
+# 顺带捕获导入时报出的脚本解析错误（尽力而为，不等于完整的 GDScript 解析检查）。
 if grep -aE "SCRIPT ERROR|Parse Error" "$LOG_DIR/_import.log"; then
   echo "导入时出现脚本解析错误（见上）"; exit 1
 fi

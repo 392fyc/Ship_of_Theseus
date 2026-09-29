@@ -48,12 +48,14 @@ jobs:
           mv ~/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64 ~/godot/godot
           chmod +x ~/godot/godot
 
-      # HUD 字体不含中文字形，中文经系统字体回退（开发机为 Windows 自带中文字体）。
-      # 运行器默认没有中文字体，缺它时 test_hud_m2_skill_action 的中文字形断言会失败。
+      # HUD 字体不含中文字形，中文经系统字体回退（开发机为 Windows 的微软雅黑）。
+      # 运行器默认没有中文字体，缺它时 test_hud_m2_skill_action 的中文字形断言会失败；
+      # 行高又会影响 test_visual_style_playground_load 的 720p 布局断言（Noto CJK 行高偏大，
+      # 卡片底边超出画布），所以选用度量接近微软雅黑的文泉驿微米黑。
       - name: 安装中文字体
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq fonts-noto-cjk >/dev/null
+          sudo apt-get install -y -qq --no-install-recommends fonts-wqy-microhei >/dev/null
           fc-list :lang=zh family | head -n 3
 
       - name: 运行 tests/test_*.gd
