@@ -1,8 +1,8 @@
-# 需要真实图形渲染的测试：它们在 headless 下主动拒绝运行（DisplayServer 为 headless 时退出）
-# 或需要 --output 绝对路径，由 tests/run_*.ps1 包装脚本在有显示环境的机器上调用。
+# 需要真实图形渲染的测试：它们在 headless 下主动拒绝运行（DisplayServer 为 headless 时退出）、
+# 不会自行退出，或断言依赖真实渲染；由 tests/run_*.ps1 包装脚本在有显示环境的机器上调用。
 # headless CI 跳过这些文件；新增此类测试时在这里登记，并写明原因。
 # 格式：<测试文件名，不含扩展名>  # 原因
-test_battlefield_courtyard            # 悬停与视觉断言需要实际渲染，需 --output
+test_battlefield_courtyard            # headless 下悬停/提示断言失败，需要真实视口；由 run_courtyard_visual_validation.ps1 以非 headless 运行
 test_courtyard_water_depth_continuity # 连续性检查需要实际图形渲染与 --output
 test_courtyard_water_visual_contract  # 水面视觉合同要求实际图形渲染
 test_terrain_battle_runtime           # headless 下以退出码 2 拒绝运行，需 --output

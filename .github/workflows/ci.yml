@@ -1,5 +1,6 @@
 # 游戏仓 CI：PR 与受保护分支推送时运行 Godot headless 回归与仓库契约测试。
-# Godot 版本与本地开发一致（4.6.3）；升级引擎时同步改 GODOT_VERSION。
+# Godot 版本与本地开发一致（4.6.3）；升级引擎时同步改 GODOT_VERSION 与 GODOT_SHA512
+# （取自该版本发布页的 SHA512-SUMS.txt 中 linux.x86_64.zip 一行）。
 name: CI
 
 on:
@@ -14,10 +15,12 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # 只取消同一 PR 的旧运行；受保护分支上每个合并提交都要有结果。
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   GODOT_VERSION: 4.6.3
+  GODOT_SHA512: a035258da32b77f966a5376f9fa29c30a6adde826a85ba918e1605bd1fc9823eba7d85f1dd5e748956bd2ba72827c0025ffa11bb82aec91128c407a2e723c99c
 
 jobs:
   godot-tests:
@@ -25,26 +28,37 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: 缓存 Godot
         id: cache-godot
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/godot
-          key: godot-${{ env.GODOT_VERSION }}-linux-x86_64
+          key: godot-${{ env.GODOT_VERSION }}-linux-x86_64-${{ env.GODOT_SHA512 }}
 
-      - name: 下载 Godot ${{ env.GODOT_VERSION }}
+      - name: 下载并校验 Godot ${{ env.GODOT_VERSION }}
         if: steps.cache-godot.outputs.cache-hit != 'true'
         run: |
           mkdir -p ~/godot
           curl -fsSL -o /tmp/godot.zip \
             "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          echo "${GODOT_SHA512}  /tmp/godot.zip" | sha512sum -c -
           unzip -q /tmp/godot.zip -d ~/godot
           mv ~/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64 ~/godot/godot
           chmod +x ~/godot/godot
 
+      # HUD 字体不含中文字形，中文经系统字体回退（开发机为 Windows 自带中文字体）。
+      # 运行器默认没有中文字体，缺它时 test_hud_m2_skill_action 的中文字形断言会失败。
+      - name: 安装中文字体
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk >/dev/null
+          fc-list :lang=zh family | head -n 3
+
       - name: 运行 tests/test_*.gd
+        env:
+          LOG_DIR: ${{ runner.temp }}/godot-logs
         run: |
           export GODOT="$HOME/godot/godot"
           "$GODOT" --version
@@ -52,10 +66,10 @@ jobs:
 
       - name: 上传测试日志
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: godot-test-logs
-          path: .ci-logs/
+          path: ${{ runner.temp }}/godot-logs/
           retention-days: 7
 
   repo-contract-tests:
@@ -64,11 +78,9 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 

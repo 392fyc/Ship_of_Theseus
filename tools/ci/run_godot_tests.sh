@@ -14,8 +14,16 @@ mkdir -p "$LOG_DIR"
 # 首次检出没有 .godot/ 导入缓存：先导入一次，否则 preload 的资源找不到。
 echo "::group::导入项目资源"
 timeout 600 "$GODOT" --headless --path "$ROOT" --import >"$LOG_DIR/_import.log" 2>&1
-echo "导入结束，退出码 $?（导入阶段的警告不判失败）"
+import_code=$?
+echo "导入结束，退出码 $import_code（导入阶段的警告不判失败）"
 echo "::endgroup::"
+if [ "$import_code" -ne 0 ]; then
+  echo "项目导入失败，后续测试没有意义："; tail -n 40 "$LOG_DIR/_import.log"; exit 1
+fi
+# 导入会编译全部脚本：借此做一次廉价的 GDScript 解析检查。
+if grep -aE "SCRIPT ERROR|Parse Error" "$LOG_DIR/_import.log"; then
+  echo "导入时出现脚本解析错误（见上）"; exit 1
+fi
 
 mapfile -t tests < <(cd "$ROOT" && ls tests/test_*.gd | sort)
 if [ "$#" -gt 0 ]; then
@@ -24,6 +32,9 @@ if [ "$#" -gt 0 ]; then
     for pat in "$@"; do [[ "$t" == *"$pat"* ]] && filtered+=("$t") && break; done
   done
   tests=("${filtered[@]}")
+fi
+if [ "${#tests[@]}" -eq 0 ]; then
+  echo "没有匹配的测试文件，按失败处理，避免误报通过"; exit 1
 fi
 
 # 只能在有显示环境时运行的测试（清单见 godot_render_only_tests.txt）。
