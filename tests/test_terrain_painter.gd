@@ -27,6 +27,7 @@ func _check(label: String, condition: bool, detail: String = "") -> void:
 
 
 func _run() -> void:
+	root.borderless = true
 	root.size = Vector2i(1280, 720)
 	_output_dir = _argument_value("--output=")
 	_editor = PainterScene.instantiate() as Control
@@ -193,17 +194,26 @@ func _capture_workbench() -> bool:
 	var no_actor_positions: Array[Vector2] = []
 	var no_highlights: Array[Vector2] = []
 	_editor.board_view.update_visibility_context(Vector2i(-1, -1), no_actor_positions, no_highlights)
-	await _frames(3)
-	await RenderingServer.frame_post_draw
-	var image: Image = root.get_texture().get_image()
-	_check("湿地工作台截帧为 1280×720", image.get_size() == Vector2i(1280, 720), str(image.get_size()))
 	if _output_dir.is_empty():
 		return true
 	DirAccess.make_dir_recursive_absolute(_output_dir)
-	var path := _output_dir.path_join("terrain-painter-workbench-1280x720.png")
-	var save_error: Error = CaptureMetadata.save_png(root, image, path)
-	_check("保存湿地工作台交付图", save_error == OK)
-	return save_error == OK
+	var original_size: Vector2i = root.size
+	var all_saved: bool = true
+	for dimensions: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]:
+		root.size = dimensions
+		await _frames(5)
+		await RenderingServer.frame_post_draw
+		var image: Image = root.get_texture().get_image()
+		var file_name: String = "terrain-painter-workbench-%dx%d.png" % [dimensions.x, dimensions.y]
+		var path := _output_dir.path_join(file_name)
+		var size_matches: bool = root.size == dimensions and image.get_size() == dimensions
+		_check("湿地工作台截帧为 %d×%d" % [dimensions.x, dimensions.y], size_matches, str(image.get_size()))
+		var save_error: Error = CaptureMetadata.save_png(root, image, path)
+		_check("保存湿地工作台交付图 %s" % file_name, save_error == OK)
+		all_saved = all_saved and size_matches and save_error == OK
+	root.size = original_size
+	await _frames(3)
+	return all_saved
 
 
 func _freeze_board_for_capture(board: Node2D) -> void:

@@ -24,6 +24,7 @@ func _run() -> void:
 		push_error("Final HUD capture requires a visible rendering display")
 		quit(1)
 		return
+	root.borderless = true
 	root.size = Vector2i(1280, 720)
 	_batch_name = "batch_%d" % int(Time.get_unix_time_from_system())
 	_directory = output_argument if not output_argument.is_empty() else ProjectSettings.globalize_path(OUTPUT_ROOT.path_join(_batch_name))
@@ -66,40 +67,39 @@ func _run() -> void:
 	unit.reset_action_resources()
 	scene._refresh_dashboard()
 	var success: bool = true
-	for target_size: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080)]:
+	for target_size: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]:
 		root.size = target_size
 		await process_frame
 		await process_frame
 		_move_pointer(Vector2(target_size) * Vector2(0.5, 0.4))
 		await process_frame
 		success = (await _capture("available-%d" % target_size.x, dashboard, strip, shelf)) and success
-		if target_size.x == 1280:
-			unit.consume_movement_resource()
-			unit.consume_standard_resource()
-			scene._refresh_dashboard()
-			await process_frame
-			var state: Object = strip.get("_view") as Object
-			if state == null or bool(state.get("movement_available")) \
-					or int(state.get("standard_remaining")) != 0 \
-					or int(state.get("swift_remaining")) != 1:
-				push_error("Mixed capture did not receive the movement and standard resource use")
-				success = false
-			else:
-				success = (await _capture("mixed-1280", dashboard, strip, shelf)) and success
-			unit.consume_swift_resource()
-			scene._refresh_dashboard()
-			await process_frame
-			state = strip.get("_view") as Object
-			if state == null or bool(state.get("movement_available")) \
-					or int(state.get("standard_remaining")) != 0 \
-					or int(state.get("swift_remaining")) != 0:
-				push_error("Spent capture did not receive the three consumed resources")
-				success = false
-			else:
-				success = (await _capture("spent-1280", dashboard, strip, shelf)) and success
-			unit.reset_action_resources()
-			scene._refresh_dashboard()
-			await process_frame
+		unit.consume_movement_resource()
+		unit.consume_standard_resource()
+		scene._refresh_dashboard()
+		await process_frame
+		var state: Object = strip.get("_view") as Object
+		if state == null or bool(state.get("movement_available")) \
+				or int(state.get("standard_remaining")) != 0 \
+				or int(state.get("swift_remaining")) != 1:
+			push_error("Mixed capture did not receive the movement and standard resource use")
+			success = false
+		else:
+			success = (await _capture("mixed-%d" % target_size.x, dashboard, strip, shelf)) and success
+		unit.consume_swift_resource()
+		scene._refresh_dashboard()
+		await process_frame
+		state = strip.get("_view") as Object
+		if state == null or bool(state.get("movement_available")) \
+				or int(state.get("standard_remaining")) != 0 \
+				or int(state.get("swift_remaining")) != 0:
+			push_error("Spent capture did not receive the three consumed resources")
+			success = false
+		else:
+			success = (await _capture("spent-%d" % target_size.x, dashboard, strip, shelf)) and success
+		unit.reset_action_resources()
+		scene._refresh_dashboard()
+		await process_frame
 		_move_pointer(character.get_inspection_control().get_global_rect().get_center())
 		await process_frame
 		await process_frame

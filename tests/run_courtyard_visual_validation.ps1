@@ -149,7 +149,7 @@ function Assert-StepEvidence([string]$Name, $Result) {
         }
         'material-intake' {
             Assert-Fields $Result @('captures', 'identity_checks', 'visual_acceptance')
-            Assert-Evidence ($Result.captures -eq 3 -and $Result.identity_checks -ceq 'pass' -and $Result.visual_acceptance -ceq 'pending_review') '素材检查结果不符合预期。'
+            Assert-Evidence ($Result.captures -eq 9 -and $Result.identity_checks -ceq 'pass' -and $Result.visual_acceptance -ceq 'pending_review') '素材检查结果不符合预期。'
             $taskReport = Read-Evidence 'material-intake.json'
             Assert-Fields $taskReport @('records', 'board_sha256', 'profile_sha256', 'script_sha256', 'source_manifest_sha256')
             Assert-Sources ([pscustomobject]@{
@@ -158,7 +158,7 @@ function Assert-StepEvidence([string]$Name, $Result) {
                 'res://tests/capture_courtyard_material_intake.gd' = $taskReport.script_sha256
                 'res://assets/prototype/battlefield_courtyard/source-manifest.json' = $taskReport.source_manifest_sha256
             })
-            Assert-Evidence ($taskReport.records.Count -eq 3) '素材清单数量不符。'
+            Assert-Evidence ($taskReport.records.Count -eq 9) '素材清单数量不符。'
             foreach ($taskMaterial in $taskReport.records) {
                 Assert-Fields $taskMaterial @('file', 'image_sha256', 'identity_matches_manifest', 'source', 'source_sha256')
                 Assert-BooleanTrue $taskMaterial.identity_matches_manifest '素材来源检查'
@@ -168,13 +168,13 @@ function Assert-StepEvidence([string]$Name, $Result) {
         }
         'whole-scene' {
             Assert-Fields $Result @('captures', 'failed')
-            Assert-Evidence ($Result.failed -eq 0 -and $Result.captures -eq 12) '整屏采集缺失或失败。'
+            Assert-Evidence ($Result.failed -eq 0 -and $Result.captures -eq 18) '整屏采集缺失或失败。'
             $taskReport = Read-Evidence 'capture-manifest.json'
             Assert-Fields $taskReport @('captures', 'baseline_status', 'sources_sha256')
             Assert-Sources $taskReport.sources_sha256
-            Assert-Evidence ($taskReport.baseline_status -ceq 'candidate_unapproved' -and $taskReport.captures.Count -eq 12) '整屏清单数量或基线状态不符。'
+            Assert-Evidence ($taskReport.baseline_status -ceq 'candidate_unapproved' -and $taskReport.captures.Count -eq 18) '整屏清单数量或基线状态不符。'
             foreach ($taskLayout in @('overgrown', 'flooded', 'passage')) {
-                foreach ($taskWidth in @(1280, 1920)) {
+                foreach ($taskWidth in @(1280, 1920, 2560)) {
                     foreach ($taskView in @('play', 'clear')) {
                         $taskImage = "$taskLayout-$taskWidth-$taskView.png"
                         $taskEntry = @($taskReport.captures | Where-Object { $_.file -ceq $taskImage })

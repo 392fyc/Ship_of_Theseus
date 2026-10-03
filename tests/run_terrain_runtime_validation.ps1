@@ -94,14 +94,14 @@ try {
             if ($taskResult.result -cne 'pass' -or $null -eq $taskResult.failures -or $taskResult.failures.Count -ne 0 -or
                 $taskResult.checks -lt 79 -or $taskResult.min_side -ne 10 -or $taskResult.max_side -ne 25 -or
                 $taskResult.square_only -isnot [bool] -or -not $taskResult.square_only -or
-                $taskResult.captures.PSObject.Properties.Name.Count -ne 5) { throw '地图尺寸检查未通过。' }
+                $taskResult.captures.PSObject.Properties.Name.Count -ne 9) { throw '地图尺寸检查未通过。' }
             foreach ($taskImage in $taskResult.captures.PSObject.Properties) {
                 if ((Get-FileHash -LiteralPath (Join-Path $taskDirectory $taskImage.Name) -Algorithm SHA256).Hash -ine $taskImage.Value) { throw '尺寸图像摘要不符。' }
             }
         } elseif ($taskSpec.name -eq 'runtime') {
             if ($taskResult.result -cne 'pass' -or $null -eq $taskResult.failures -or $taskResult.failures.Count -ne 0 -or
                 $taskResult.checks -lt 89 -or $taskResult.global_maps_unchanged -isnot [bool] -or -not $taskResult.global_maps_unchanged -or
-                $taskResult.captures.PSObject.Properties.Name.Count -ne 6) { throw '正式试战检查未通过。' }
+                $taskResult.captures.PSObject.Properties.Name.Count -ne 9) { throw '正式试战检查未通过。' }
             foreach ($taskImage in $taskResult.captures.PSObject.Properties) {
                 if ((Get-FileHash -LiteralPath (Join-Path $taskDirectory $taskImage.Name) -Algorithm SHA256).Hash -ine $taskImage.Value) { throw '试战图像摘要不符。' }
             }

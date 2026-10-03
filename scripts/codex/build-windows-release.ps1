@@ -179,55 +179,80 @@ if ($PreviewClass -eq 'myrmidon') {
     Assert-Build (($smokeLines -join "`n").Contains('[TurnManager] Turn: 剑士 (player)')) '解压后的程序未进入基础剑士回合。'
 }
 
-$visualHash = $null
+$visualHashes = [ordered]@{}
+$runtimeConfigurations = @()
 if ($CaptureVisual) {
-    $capturePath = Join-Path $outputRoot 'hud-preview-frame.png'
-    $visualOut = Join-Path $logs 'visual.stdout.log'
-    $visualErr = Join-Path $logs 'visual.stderr.log'
-    $runtimeConfigPath = Join-Path $outputRoot 'release-runtime-config.json'
-    $visualProcess = Start-Process -FilePath (Join-Path $unpacked 'ShipOfTheseus.exe') -ArgumentList @('--write-movie', $capturePath, '--quit-after', '10', '--', ('--capture-config=' + $runtimeConfigPath)) -WorkingDirectory $unpacked -WindowStyle Hidden -RedirectStandardOutput $visualOut -RedirectStandardError $visualErr -PassThru
-    if (-not $visualProcess.WaitForExit(30000)) {
-        $visualProcess.Kill()
-        throw 'Windows 游戏包在 30 秒内未完成画面捕获。'
-    }
-    Assert-Build ($visualProcess.ExitCode -eq 0) 'Windows 游戏包画面捕获失败。'
-    $frames = @(Get-ChildItem -LiteralPath $outputRoot -Filter 'hud-preview-frame*.png' -File | Sort-Object Name)
-    Assert-Build ($frames.Count -eq 10) 'Windows 游戏包没有生成预期的十帧画面。'
-    $preview = Join-Path $outputRoot 'hud-preview.png'
-    Add-Type -AssemblyName System.Drawing
-    $bitmap = [Drawing.Bitmap]::new($frames[-1].FullName)
-    try {
-        $bitmap.Save($preview, [Drawing.Imaging.ImageFormat]::Png)
-    } finally {
-        $bitmap.Dispose()
-    }
-    $visualHash = (Get-FileHash -LiteralPath $preview -Algorithm SHA256).Hash.ToLowerInvariant()
-    $visualLines = @((Get-Content -LiteralPath $visualOut) + (Get-Content -LiteralPath $visualErr))
-    Assert-Build (@($visualLines | Where-Object { $_ -match '^(SCRIPT )?ERROR:' }).Count -eq 0) '发行采集运行出现引擎错误。'
-    Assert-Build (Test-Path -LiteralPath $runtimeConfigPath) '缺少发行采集实测配置。'
-    $runtime = Get-Content -LiteralPath $runtimeConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
-    Assert-Build ($runtime.frames.Count -eq $frames.Count) '实测配置帧数与实际图片帧数不同。'
     $captureRecords = @()
-    for ($frameIndex = 0; $frameIndex -lt $frames.Count; $frameIndex++) {
-        $frame = $frames[$frameIndex]
-        $record = $runtime.frames[$frameIndex]
-        $bitmap = [Drawing.Bitmap]::new($frame.FullName)
-        try { $actualSize = @($bitmap.Width, $bitmap.Height) } finally { $bitmap.Dispose() }
-        Assert-Build (($actualSize -join ',') -eq ($record.image_size -join ',')) '实测视口与发行帧尺寸不一致。'
-        $record | Add-Member -NotePropertyName file -NotePropertyValue $frame.Name
-        $record | Add-Member -NotePropertyName sha256 -NotePropertyValue (Get-FileHash -LiteralPath $frame.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-        $record | Add-Member -NotePropertyName capture_kind -NotePropertyValue 'viewport'
-        $captureRecords += $record
+    foreach ($captureSize in @(@(1280, 720), @(1920, 1080), @(2560, 1440))) {
+        $captureWidth = $captureSize[0]
+        $captureResolution = $captureSize -join 'x'
+        $visualOut = Join-Path $logs ('visual-' + $captureWidth + '.stdout.log')
+        $visualErr = Join-Path $logs ('visual-' + $captureWidth + '.stderr.log')
+        $runtimeConfigPath = Join-Path $outputRoot ('release-runtime-config-' + $captureWidth + '.json')
+        $captureStart = [Diagnostics.ProcessStartInfo]::new((Join-Path $unpacked 'ShipOfTheseus.exe'))
+        $captureStart.WorkingDirectory = $unpacked
+        $captureStart.UseShellExecute = $false
+        $captureStart.CreateNoWindow = $true
+        $captureStart.WindowStyle = [Diagnostics.ProcessWindowStyle]::Hidden
+        $captureStart.RedirectStandardOutput = $true
+        $captureStart.RedirectStandardError = $true
+        foreach ($argument in @('--fixed-fps', '60', '--', ('--capture-config=' + $runtimeConfigPath), ('--capture-size=' + $captureResolution), ('--capture-directory=' + $outputRoot))) {
+            $captureStart.ArgumentList.Add($argument)
+        }
+        $visualProcess = [Diagnostics.Process]::Start($captureStart)
+        $stdoutTask = $visualProcess.StandardOutput.ReadToEndAsync()
+        $stderrTask = $visualProcess.StandardError.ReadToEndAsync()
+        if (-not $visualProcess.WaitForExit(30000)) {
+            $visualProcess.Kill()
+            $visualProcess.WaitForExit()
+            $visualProcess.Dispose()
+            throw 'Windows 游戏包在 30 秒内未完成画面捕获。'
+        }
+        [IO.File]::WriteAllText($visualOut, $stdoutTask.GetAwaiter().GetResult())
+        [IO.File]::WriteAllText($visualErr, $stderrTask.GetAwaiter().GetResult())
+        $visualExitCode = $visualProcess.ExitCode
+        $visualProcess.Dispose()
+        Assert-Build ($visualExitCode -eq 0) 'Windows 游戏包画面捕获失败。'
+        $frames = @(Get-ChildItem -LiteralPath $outputRoot -Filter ('hud-preview-' + $captureWidth + '-frame*.png') -File | Sort-Object Name)
+        Assert-Build ($frames.Count -eq 10) 'Windows 游戏包没有生成预期的十帧画面。'
+        $preview = Join-Path $outputRoot ('hud-preview-' + $captureWidth + '.png')
+        Add-Type -AssemblyName System.Drawing
+        $bitmap = [Drawing.Bitmap]::new($frames[-1].FullName)
+        try {
+            $bitmap.Save($preview, [Drawing.Imaging.ImageFormat]::Png)
+        } finally {
+            $bitmap.Dispose()
+        }
+        $visualHash = (Get-FileHash -LiteralPath $preview -Algorithm SHA256).Hash.ToLowerInvariant()
+        $visualHashes[[string]$captureWidth] = $visualHash
+        $visualLines = @((Get-Content -LiteralPath $visualOut) + (Get-Content -LiteralPath $visualErr))
+        Assert-Build (@($visualLines | Where-Object { $_ -match '^(SCRIPT )?ERROR:' }).Count -eq 0) '发行采集运行出现引擎错误。'
+        Assert-Build (Test-Path -LiteralPath $runtimeConfigPath) '缺少发行采集实测配置。'
+        $runtime = Get-Content -LiteralPath $runtimeConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        Assert-Build ($runtime.frames.Count -eq $frames.Count) '实测配置帧数与实际图片帧数不同。'
+        $runtimeConfigurations += [IO.Path]::GetFileName($runtimeConfigPath)
+        for ($frameIndex = 0; $frameIndex -lt $frames.Count; $frameIndex++) {
+            $frame = $frames[$frameIndex]
+            $record = $runtime.frames[$frameIndex]
+            $bitmap = [Drawing.Bitmap]::new($frame.FullName)
+            try { $actualSize = @($bitmap.Width, $bitmap.Height) } finally { $bitmap.Dispose() }
+            Assert-Build (($actualSize -join ',') -eq ($record.image_size -join ',')) '实测视口与发行帧尺寸不一致。'
+            $record | Add-Member -NotePropertyName file -NotePropertyValue $frame.Name
+            $record | Add-Member -NotePropertyName sha256 -NotePropertyValue (Get-FileHash -LiteralPath $frame.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            $record | Add-Member -NotePropertyName capture_kind -NotePropertyValue 'viewport'
+            $record | Add-Member -NotePropertyName capture_group -NotePropertyValue ('release-frame-' + $frameIndex)
+            $captureRecords += $record
+        }
+        $previewRecord = $captureRecords[-1] | ConvertTo-Json -Depth 8 | ConvertFrom-Json
+        $previewRecord.file = [IO.Path]::GetFileName($preview)
+        $previewRecord.sha256 = $visualHash
+        $previewRecord.capture_kind = 'derived_detail'
+        $previewRecord | Add-Member -NotePropertyName source_file -NotePropertyValue $frames[-1].Name
+        $previewRecord | Add-Member -NotePropertyName source_sha256 -NotePropertyValue $captureRecords[-1].sha256
+        $previewRecord | Add-Member -NotePropertyName source_region -NotePropertyValue @(0, 0, $previewRecord.image_size[0], $previewRecord.image_size[1])
+        $previewRecord | Add-Member -NotePropertyName scale -NotePropertyValue 1
+        $captureRecords += $previewRecord
     }
-    $previewRecord = $captureRecords[-1] | ConvertTo-Json -Depth 8 | ConvertFrom-Json
-    $previewRecord.file = [IO.Path]::GetFileName($preview)
-    $previewRecord.sha256 = $visualHash
-    $previewRecord.capture_kind = 'derived_detail'
-    $previewRecord | Add-Member -NotePropertyName source_file -NotePropertyValue $frames[-1].Name
-    $previewRecord | Add-Member -NotePropertyName source_sha256 -NotePropertyValue $captureRecords[-1].sha256
-    $previewRecord | Add-Member -NotePropertyName source_region -NotePropertyValue @(0, 0, $previewRecord.image_size[0], $previewRecord.image_size[1])
-    $previewRecord | Add-Member -NotePropertyName scale -NotePropertyValue 1
-    $captureRecords += $previewRecord
     @{renderer=$runtime.frames[0].renderer; project_stretch_mode=$runtime.frames[0].project_stretch_mode; captures=$captureRecords} |
         ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $outputRoot 'capture-metadata.json') -Encoding utf8
     Invoke-CaptureC8 -ProjectRoot $repoRoot -PythonPath $PythonPath -Directory $outputRoot -Name 'release'
@@ -238,7 +263,7 @@ $report = [ordered]@{
     status = 'pass'
     source_commit = $sourceCommit
     configured_renderer = 'gl_compatibility'
-    capture_configuration = if ($CaptureVisual) { 'release-runtime-config.json' } else { $null }
+    capture_configuration = if ($CaptureVisual) { $runtimeConfigurations } else { $null }
     preview_class = $PreviewClass
     preview_audit_status = if ($PreviewClass -eq 'myrmidon') { 'pass' } else { 'not_applicable' }
     engine_version = $engineVersion
@@ -252,7 +277,7 @@ $report = [ordered]@{
     excluded_addon_entries = $excludedAddon.Count
     license_files = @($licenses.Keys)
     smoke_exit_code = $process.ExitCode
-    visual_sha256 = $visualHash
+    visual_sha256 = $visualHashes
 }
 $report | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $outputRoot 'release-build.json') -Encoding utf8
 $report | ConvertTo-Json -Depth 4

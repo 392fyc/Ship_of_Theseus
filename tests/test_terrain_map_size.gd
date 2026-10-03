@@ -32,6 +32,7 @@ func _run() -> void:
 		quit(2)
 		return
 	DirAccess.make_dir_recursive_absolute(output)
+	root.borderless = true
 	root.size = Vector2i(1280, 720)
 	var scene := load("res://scenes/playground/terrain_painter.tscn") as PackedScene
 	editor = scene.instantiate() as Control
@@ -51,7 +52,12 @@ func _run() -> void:
 	var initial: Dictionary = editor.current_map.duplicate(true)
 	editor._undo_stack.clear()
 	editor._update_undo_button()
-	await capture("map-size-10-editor-1280x720.png")
+	for resolution: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]:
+		root.size = resolution
+		await frames(5)
+		await capture("map-size-10-editor-%dx%d.png" % [resolution.x, resolution.y])
+	root.size = Vector2i(1280, 720)
+	await frames(4)
 	await resize_by_click(25)
 	check("输入25并真实点击调整得到625格", editor.current_grid.width == 25
 		and editor.current_grid.height == 25 and editor.current_grid.cells.size() == 25
@@ -110,18 +116,19 @@ func _run() -> void:
 	await frames(4)
 	await _check_invalid_inputs()
 	check("拒绝无效文件后仍可重新加载25×25", editor._load_from_path(save_path))
-	await capture("map-size-25-editor-1280x720.png")
+	for resolution: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]:
+		root.size = resolution
+		await frames(5)
+		await capture("map-size-25-editor-%dx%d.png" % [resolution.x, resolution.y])
 
 	var map_before: Dictionary = editor.current_map.duplicate(true)
 	var undo_before: Array[Dictionary] = editor._undo_stack.duplicate(true)
 	var loader: Node = root.get_node("DataLoader")
 	var global_maps: Dictionary = loader.maps.duplicate(true)
-	for resolution: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080)]:
+	for resolution: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]:
 		root.size = resolution
 		await frames(5)
 		check("尺寸%d下工作台全部格角在画布内" % resolution.x, _editor_board_fits() and _heading_fits())
-		if resolution.x == 1920:
-			await capture("map-size-25-editor-1920x1080.png")
 		await click_control(editor._battle_button)
 		await frames(10)
 		var session: Node2D = editor._battle_session as Node2D

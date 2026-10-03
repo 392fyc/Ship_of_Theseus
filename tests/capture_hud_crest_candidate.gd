@@ -1,6 +1,7 @@
 extends SceneTree
 
 const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
+const CAPTURE_RESOLUTIONS := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]
 var _output_dir: String = ""
 
 ## 纹章接入使用正式场景与同一 manager 载荷捕获印记八态。
@@ -24,6 +25,7 @@ func _run() -> void:
 		push_error("Native HUD capture requires a visible rendering display.")
 		quit(1)
 		return
+	root.borderless = true
 	root.size = Vector2i(1280, 720)
 	var scene: Node = (load("res://scenes/tactical/TacticalScene.tscn") as PackedScene).instantiate()
 	root.add_child(scene)
@@ -31,23 +33,16 @@ func _run() -> void:
 	await process_frame
 	var dashboard: HudM2RuntimeDashboard = scene.get("_bottom_dashboard") as HudM2RuntimeDashboard
 	var state: Dictionary = scene.tactical_manager.get_dashboard_data()
-	var failed: bool = not await _capture("production-000", dashboard)
-	root.size = Vector2i(1920, 1080)
-	await process_frame
-	await process_frame
-	failed = (not await _capture("production-1920-000", dashboard)) or failed
-	root.size = Vector2i(1280, 720)
-	await process_frame
-	await process_frame
+	var failed: bool = not await _capture_group("production-000", dashboard)
 	for amount: int in [65, 100]:
 		var fixture: Dictionary = _fixture(state, amount, 7)
 		dashboard.update_state(fixture)
-		failed = (not await _capture("filled-111-qi-%d" % amount, dashboard)) or failed
+		failed = (not await _capture_group("filled-111-qi-%d" % amount, dashboard)) or failed
 	for mask: int in 8:
 		var fixture: Dictionary = _fixture(state, 65, mask)
 		dashboard.update_state(fixture)
 		var bits: String = "%d%d%d" % [int(bool(mask & 4)), int(bool(mask & 2)), int(bool(mask & 1))]
-		failed = (not await _capture("marks-" + bits, dashboard)) or failed
+		failed = (not await _capture_group("marks-" + bits, dashboard)) or failed
 	scene.queue_free()
 	await process_frame
 	quit(1 if failed else 0)
@@ -65,7 +60,17 @@ func _fixture(state: Dictionary, amount: int, mask: int) -> Dictionary:
 	return fixture
 
 
-func _capture(name: String, dashboard: Control) -> bool:
+func _capture_group(name: String, dashboard: Control) -> bool:
+	var success: bool = true
+	for resolution: Vector2i in CAPTURE_RESOLUTIONS:
+		root.size = resolution
+		await process_frame
+		await process_frame
+		success = await _capture_at_resolution(name, dashboard) and success
+	return success
+
+
+func _capture_at_resolution(name: String, dashboard: Control) -> bool:
 	for unused: int in 3:
 		await process_frame
 		await RenderingServer.frame_post_draw
@@ -73,14 +78,14 @@ func _capture(name: String, dashboard: Control) -> bool:
 		push_error("HUD is not visible: " + name)
 		return false
 	var image: Image = root.get_texture().get_image()
-	if image.get_size() != root.size:
+	if image.get_size() != root.size or root.size not in CAPTURE_RESOLUTIONS:
 		push_error("Viewport size mismatch: " + name)
 		return false
 	var directory: String = _output_dir
 	DirAccess.make_dir_recursive_absolute(directory)
-	var path: String = directory.path_join(name + ".png")
-	if CaptureMetadata.save_png(root, image, path) != OK:
-		push_error("PNG save failed: " + name)
+	var path: String = directory.path_join("%s-%dx%d.png" % [name, root.size.x, root.size.y])
+	if CaptureMetadata.save_png(root, image, path, {"capture_group": name}) != OK:
+		push_error("PNG save failed: " + path.get_file())
 		return false
-	print("CREST_CAPTURE ", name, " ", image.get_width(), "x", image.get_height(), " ", FileAccess.get_sha256(path))
+	print("CREST_CAPTURE ", path.get_file(), " ", image.get_width(), "x", image.get_height(), " ", FileAccess.get_sha256(path))
 	return true

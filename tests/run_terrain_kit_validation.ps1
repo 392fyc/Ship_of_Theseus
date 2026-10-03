@@ -67,7 +67,7 @@ try {
         $taskResult = $taskLine[0].Substring($taskSpec.marker.Length + 1) | ConvertFrom-Json
         if ($taskSpec.name -eq 'kit') {
             if ($taskResult.result -cne 'pass' -or $taskResult.failures.Count -ne 0 -or $taskResult.allowed_distinct_pairs_rendered -ne 32 -or $taskResult.excluded_pairs -ne 4) { throw '地形组合验收未通过。' }
-            if ($taskResult.captures.PSObject.Properties.Name.Count -ne 9) { throw '组合图和场景图缺失。' }
+            if ($taskResult.captures.PSObject.Properties.Name.Count -ne 27) { throw '组合图和场景图缺失。' }
             foreach ($taskImage in $taskResult.captures.PSObject.Properties) {
                 if ((Get-FileHash -LiteralPath (Join-Path $taskDirectory $taskImage.Name) -Algorithm SHA256).Hash -ine $taskImage.Value) { throw '图像摘要不符。' }
             }

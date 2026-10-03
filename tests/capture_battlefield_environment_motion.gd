@@ -11,6 +11,9 @@ const MOVE_TARGET := Vector2i(2, 5)
 var _output: String = ""
 var _layout_id: String = "overgrown"
 var _captures: Array[Dictionary] = []
+var _all_moves_completed: bool = true
+var _all_canopies_faded: bool = true
+var _all_annotations_hidden: bool = true
 
 
 func _initialize() -> void:
@@ -18,7 +21,6 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	root.size = Vector2i(1280, 720)
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--output="):
 			_output = arg.trim_prefix("--output=")
@@ -42,10 +44,40 @@ func _run() -> void:
 	if mkdir_error != OK and mkdir_error != ERR_ALREADY_EXISTS:
 		_fail("无法创建动态帧输出目录：%s" % error_string(mkdir_error))
 		return
+	root.borderless = true
+	for dimensions: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]:
+		root.size = dimensions
+		await _frames(5)
+		await RenderingServer.frame_post_draw
+		var size_probe: Image = root.get_texture().get_image()
+		if root.size != dimensions or size_probe == null or size_probe.get_size() != dimensions:
+			var actual_image_size: Vector2i = Vector2i.ZERO if size_probe == null else size_probe.get_size()
+			_fail("窗口或实际图像没有达到请求的动态捕捉尺寸：%s / %s" % [root.size, actual_image_size])
+			return
+		if not await _capture_resolution(dimensions):
+			quit(1)
+			return
+	var manifest_path: String = _output.path_join("capture-metadata.json")
+	var source_fields: Dictionary = {"layout": _layout_id, "frames_per_resolution": CAPTURE_FRAME_COUNT,
+		"frames": CAPTURE_FRAME_COUNT, "resolution_count": 3, "fps": CAPTURE_FPS,
+		"duration_seconds": float(CAPTURE_FRAME_COUNT) / CAPTURE_FPS,
+		"move_completed": _all_moves_completed, "canopy_faded": _all_canopies_faded,
+		"annotations_hidden": _all_annotations_hidden, "runtime_resolution_group_coverage": true}
+	if not CaptureMetadata.write_manifest(root, manifest_path, _captures, source_fields):
+		_fail("无法写入动态捕捉清单。")
+		return
+	print("BATTLEFIELD_ENVIRONMENT_CAPTURE layout=%s frames=%d resolutions=3 fps=%d duration_seconds=%.2f output=%s" % [
+		_layout_id, _captures.size(), CAPTURE_FPS,
+		float(CAPTURE_FRAME_COUNT) / CAPTURE_FPS, _output,
+	])
+	quit(0)
+
+
+func _capture_resolution(dimensions: Vector2i) -> bool:
 	var candidate := load(CANDIDATE_PATH) as PackedScene
 	if candidate == null:
 		_fail("无法加载庭院候选场景。")
-		return
+		return false
 	var scene: Node = candidate.instantiate()
 	scene.layout_id = _layout_id
 	root.add_child(scene)
@@ -53,8 +85,7 @@ func _run() -> void:
 	if scene.manager == null or scene.camera == null:
 		_fail("候选战斗场景未完成初始化。")
 		scene.queue_free()
-		quit(1)
-		return
+		return false
 	scene.fit_board()
 	var base_zoom: float = scene._fit_zoom
 	var base_camera_position: Vector2 = scene.camera.position
@@ -62,8 +93,7 @@ func _run() -> void:
 	if forest_cell == Vector2i(-1, -1):
 		_fail("场景 %s 没有可悬停的空森林格。" % _layout_id)
 		scene.queue_free()
-		quit(1)
-		return
+		return false
 	var hovered_tree: Node2D = null
 	for prop: Node in scene.manager.unit_layer.get_children():
 		if prop is Node2D and prop.get_meta("courtyard_cell", Vector2i(-1, -1)) == forest_cell:
@@ -71,7 +101,8 @@ func _run() -> void:
 			break
 	if hovered_tree == null:
 		_fail("森林格缺少对应的树木物体。")
-		return
+		scene.queue_free()
+		return false
 	if not scene.manager._move_range.has(MOVE_TARGET):
 		scene.manager.handle_pointer_click(_screen(scene.manager.grid, PLAYER_START))
 	await _frames(2)
@@ -116,19 +147,22 @@ func _run() -> void:
 				scene._tooltip_enabled, scene._tooltip.visible,
 			])
 			scene.queue_free()
-			quit(1)
-			return
+			return false
 		if move_started and moving_unit.grid_position == MOVE_TARGET and moving_unit.movement_used:
 			move_completed = true
 		var rendered_frame: Image = root.get_texture().get_image()
-		var filename: String = "frame_%06d.png" % capture_index
+		var filename: String = "frame_%06d-%dx%d.png" % [capture_index, dimensions.x, dimensions.y]
 		var output_path: String = _output.path_join(filename)
-		var save_error: Error = CaptureMetadata.save_png(root, rendered_frame, output_path)
+		if rendered_frame == null or root.size != dimensions or rendered_frame.get_size() != dimensions:
+			var actual_frame_size: Vector2i = Vector2i.ZERO if rendered_frame == null else rendered_frame.get_size()
+			_fail("动态帧尺寸与目标窗口不一致：%s / %s" % [dimensions, actual_frame_size])
+			scene.queue_free()
+			return false
+		var save_error: Error = rendered_frame.save_png(output_path)
 		if save_error != OK:
 			_fail("保存真实渲染帧 %s 失败：%s" % [filename, error_string(save_error)])
 			scene.queue_free()
-			quit(1)
-			return
+			return false
 		_captures.append(CaptureMetadata.capture_record(root, rendered_frame, output_path, {
 			"layout": _layout_id, "frame_index": capture_index, "elapsed_seconds": elapsed,
 		}))
@@ -136,26 +170,17 @@ func _run() -> void:
 	if not move_started or not move_completed:
 		_fail("8 秒动态捕捉期间未能完成一次合法单位移动。")
 		scene.queue_free()
-		quit(1)
-		return
+		return false
 	if not canopy_fade_observed:
 		_fail("真实渲染期间未观察到目标森林格的树冠淡化。")
-		return
-	var manifest_path: String = _output.path_join("capture-metadata.json")
-	var source_fields: Dictionary = {"layout": _layout_id, "frames": capture_index,
-		"fps": CAPTURE_FPS, "duration_seconds": float(capture_index) / CAPTURE_FPS,
-		"move_completed": move_completed, "canopy_faded": canopy_fade_observed,
-		"annotations_hidden": annotations_hidden}
-	if not CaptureMetadata.write_manifest(root, manifest_path, _captures, source_fields):
-		_fail("无法写入动态捕捉清单。")
-		return
-	print("BATTLEFIELD_ENVIRONMENT_CAPTURE layout=%s frames=%d fps=%d duration_seconds=%.2f move_completed=%s canopy_faded=%s output=%s" % [
-		_layout_id, capture_index, CAPTURE_FPS, float(capture_index) / CAPTURE_FPS,
-		move_completed, canopy_fade_observed, _output,
-	])
+		scene.queue_free()
+		return false
+	_all_moves_completed = _all_moves_completed and move_completed
+	_all_canopies_faded = _all_canopies_faded and canopy_fade_observed
+	_all_annotations_hidden = _all_annotations_hidden and annotations_hidden
 	scene.queue_free()
 	await _frames(2)
-	quit(0)
+	return true
 
 
 func _find_open_forest(grid: Grid) -> Vector2i:
@@ -173,11 +198,11 @@ func _screen(grid: Grid, pos: Vector2i) -> Vector2:
 
 
 func _move_pointer(position: Vector2) -> void:
-	Input.warp_mouse(position)
+	Input.warp_mouse(root.get_stretch_transform() * position)
 	var motion := InputEventMouseMotion.new()
 	motion.position = position
 	motion.global_position = position
-	Input.parse_input_event(motion)
+	root.push_input(motion, true)
 
 
 func _frames(count: int) -> void:

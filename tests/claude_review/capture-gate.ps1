@@ -25,4 +25,7 @@ function Invoke-CaptureC8 {
     if ($LASTEXITCODE -ne 0) { throw ('C8 采集身份检查失败：' + $Name) }
     $result = Get-Content -LiteralPath $resultPath -Raw -Encoding UTF8 | ConvertFrom-Json
     if ($result.pass -isnot [bool] -or -not $result.pass) { throw ('C8 未明确通过：' + $Name) }
+    $coveragePath = Join-Path $Directory ($Name + '-resolutions.json')
+    & $PythonPath (Join-Path $ProjectRoot 'tests/claude_review/resolution_coverage.py') --manifests $snapshot --json $coveragePath
+    if ($LASTEXITCODE -ne 0) { throw ('CR-23 三档画面状态覆盖检查失败：' + $Name) }
 }

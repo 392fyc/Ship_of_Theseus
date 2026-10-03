@@ -28,6 +28,7 @@ func _run() -> void:
 		push_error("Native HUD capture requires a visible rendering display.")
 		quit(1)
 		return
+	root.borderless = true
 	root.size = Vector2i(1280, 720)
 	var scene: Node = (load("res://scenes/tactical/TacticalScene.tscn") as PackedScene).instantiate()
 	root.add_child(scene)
@@ -42,7 +43,7 @@ func _run() -> void:
 		_override_texture.region = Rect2(240, 225, 90, 103)
 		_override_texture.filter_clip = true
 	var failed: bool = false
-	for target_size: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080)]:
+	for target_size: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]:
 		root.size = target_size
 		await process_frame
 		await process_frame

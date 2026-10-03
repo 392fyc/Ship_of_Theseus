@@ -33,6 +33,7 @@ func _run() -> void:
 		quit(2)
 		return
 	DirAccess.make_dir_recursive_absolute(output)
+	root.borderless = true
 	root.size = Vector2i(1280, 720)
 	data_loader = root.get_node("DataLoader")
 	session_script = load("res://scripts/tactical/terrain_battle_session.gd")
@@ -62,7 +63,7 @@ func _run() -> void:
 		check(id + " 基础剑士界面没有印记", not session.battle._bottom_dashboard.get_composition().get_marks_panel().visible)
 		check(id + " 正式移动范围排除阻挡地形", manager._move_range.keys().all(func(at: Vector2i) -> bool:
 			return manager.grid.get_cell(at).is_passable()))
-		for dimensions: Vector2i in [Vector2i(1280,720), Vector2i(1920,1080)]:
+		for dimensions: Vector2i in [Vector2i(1280,720), Vector2i(1920,1080), Vector2i(2560,1440)]:
 			root.size = dimensions
 			await frames(4)
 			session.fit_board()
