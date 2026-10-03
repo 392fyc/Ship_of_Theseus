@@ -28,3 +28,16 @@ python tests/claude_review/claude_review_checks.py --c8-only --manifests <清单
 D-5 已由用户裁决：Windows 发行与验证统一使用 Compatibility（gl_compatibility）。C8 的渲染器目标取自项目配置。命令行覆盖渲染器而与项目不一致时，清单应失败；不能为消除检查失败而把清单字段改写成目标值。CR-01 使用偏置 0 的 mip 模式；棋子和碎石制作显示尺寸母版，不执行偏置实验。
 
 配置及摘要通过只证明证据的采集身份，还需与原生场景对照布局，并分别记录独立审查和用户视觉验收。
+
+## CR-23 三档覆盖
+
+每种运行画面状态均采集 1280×720、1920×1080、2560×1440。全屏记录的 `capture_group` 表示同一视觉状态，跨尺寸保持一致；不同状态不能共用标识来掩盖缺图。窗口尺寸和图片尺寸必须相符，局部派生图不能补足缺失的整屏档位。
+
+```text
+python tests/claude_review/test_resolution_coverage.py
+python tests/claude_review/resolution_coverage.py --manifests <运行采集清单> --json <仓库外结果.json>
+```
+
+受控验证入口在 C8 后执行此覆盖检查。专项几何诊断保持原固定尺寸，单独记录，不能代替运行画面。发行采集同样输出三档、每档十帧及对应实测配置；每帧按序号组成跨尺寸检查组。
+
+动态环境批次通过引擎参数 `--fixed-fps 24` 固定模拟时间步，各分辨率重放相同的 192 帧序列。截图写盘耗时不能改变同一帧号的移动和渐变进度。

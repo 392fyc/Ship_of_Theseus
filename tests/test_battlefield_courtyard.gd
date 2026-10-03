@@ -30,6 +30,7 @@ func _check(label: String, success: bool) -> void:
 
 
 func _run() -> void:
+	root.borderless = true
 	root.size = Vector2i(1280, 720)
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--output="):
@@ -173,7 +174,7 @@ func _run() -> void:
 				and deep_tip.contains("深水") and deep_tip.contains("不可通行")
 				and deep_tip.contains("不阻挡攻击线"))
 
-		for size_value: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080)]:
+		for size_value: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]:
 			root.size = size_value
 			await _frames(4)
 			scene.fit_board()
@@ -257,7 +258,14 @@ func _run() -> void:
 			and grid.get_unit_at(initial_position) == null)
 		_check("%s 移动行动消费移动资源" % layout_key,
 			hero.movement_used)
-		await _capture("%s-moved-1280" % layout_key)
+		for moved_size: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]:
+			root.size = moved_size
+			await _frames(4)
+			scene.fit_board()
+			await _frames(2)
+			await _capture("%s-moved-%d" % [layout_key, moved_size.x])
+		root.size = Vector2i(1280, 720)
+		await _frames(4)
 		previous_battle = scene.battle
 		await scene.select_layout(layout_key)
 		await _frames(2)

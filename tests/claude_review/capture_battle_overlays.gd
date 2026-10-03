@@ -1,5 +1,7 @@
 extends SceneTree
 
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
+
 ## Claude 审查采集：默认战斗中的移动范围、技能悬停提示、技能范围与伤害预测浮窗。
 ## 通过真实输入路径推进：向根视口推送鼠标移动事件，由场景的输入处理调用悬停逻辑；
 ## 技能选择调用宿主既有的 request_skill_selection。保留项目拉伸；输出只写入仓库外目录。
@@ -9,6 +11,7 @@ extends SceneTree
 var _output: String = ""
 var _records: Array[Dictionary] = []
 var _failed: bool = false
+var _pointer_position: Vector2 = Vector2(20, 100)
 
 
 func _initialize() -> void:
@@ -30,6 +33,7 @@ func _run() -> void:
 		quit(1)
 		return
 	DirAccess.make_dir_recursive_absolute(_output)
+	root.borderless = true
 	root.size = Vector2i(1280, 720)
 	var packed: PackedScene = load("res://scenes/tactical/TacticalScene.tscn") as PackedScene
 	if packed == null:
@@ -39,7 +43,7 @@ func _run() -> void:
 	var scene: Node = packed.instantiate()
 	root.add_child(scene)
 	await _frames(60)
-	await _shot("01-move-range")
+	await _shot_sizes("01-move-range")
 
 	var manager: Object = scene.get("tactical_manager")
 	var dashboard: Object = scene.get("_bottom_dashboard")
@@ -56,7 +60,7 @@ func _run() -> void:
 		return
 	_move_pointer(buttons[1].get_global_rect().get_center())
 	await _frames(90)
-	await _shot("02-skill-tooltip")
+	await _shot_sizes("02-skill-tooltip")
 
 	# 先按真实点击路径把当前单位移到最近敌人的相邻格（剑圣攻击技能都是近战），再结束移动进入行动阶段。
 	var actor: Node = manager._get_dashboard_unit()
@@ -86,7 +90,7 @@ func _run() -> void:
 	manager.request_skill_selection(chosen)
 	_move_pointer(Vector2(640, 200))
 	await _frames(20)
-	await _shot("03-skill-range")
+	await _shot_sizes("03-skill-range")
 
 	var forecast_found: bool = false
 	var candidates: Array = [target] if target != null else []
@@ -98,7 +102,7 @@ func _run() -> void:
 		await _frames(12)
 		var forecaster: CanvasItem = scene.get("_damage_forecaster") as CanvasItem
 		if forecaster != null and forecaster.visible:
-			await _shot("04-forecast")
+			await _shot_sizes("04-forecast")
 			forecast_found = true
 			break
 	if not forecast_found:
@@ -116,6 +120,12 @@ func _run() -> void:
 		"captures": _records,
 	}, "  "))
 	file.close()
+	if not CaptureMetadata.write_manifest(root, _output.path_join("capture-metadata.json"), _records, {
+		"scene": "res://scenes/tactical/TacticalScene.tscn", "selected_skill": chosen,
+		"moved_next_to_enemy": moved, "forecast_captured": forecast_found,
+	}):
+		_fail_now("无法写入三档整屏采集清单")
+		return
 	scene.queue_free()
 	await process_frame
 	quit(1 if _failed else 0)
@@ -156,6 +166,8 @@ func _click(point: Vector2) -> void:
 
 
 func _move_pointer(point: Vector2) -> void:
+	_pointer_position = point
+	Input.warp_mouse(root.get_stretch_transform() * point)
 	var event := InputEventMouseMotion.new()
 	event.position = point
 	event.global_position = point
@@ -167,16 +179,27 @@ func _frames(count: int) -> void:
 		await process_frame
 
 
-func _shot(name: String) -> void:
-	await RenderingServer.frame_post_draw
-	var image: Image = root.get_texture().get_image()
-	var path: String = _output.path_join(name + ".png")
-	if image == null or image.save_png(path) != OK:
-		push_error("无法保存截图：" + name)
-		_failed = true
-		return
-	_records.append({"file": name + ".png", "sha256": FileAccess.get_sha256(path), "size": [image.get_width(), image.get_height()]})
-	print("CLAUDE_OVERLAY_CAPTURE=%s" % path)
+func _shot_sizes(name: String) -> void:
+	var original_size: Vector2i = root.size
+	for dimensions: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]:
+		root.size = dimensions
+		await _frames(5)
+		_move_pointer(_pointer_position)
+		await _frames(2)
+		await RenderingServer.frame_post_draw
+		var image: Image = root.get_texture().get_image()
+		var file_name: String = "%s-%dx%d.png" % [name, dimensions.x, dimensions.y]
+		var path: String = _output.path_join(file_name)
+		if root.size != dimensions or image == null or image.get_size() != dimensions or image.save_png(path) != OK:
+			push_error("无法保存尺寸为 %s 的截图：%s" % [dimensions, name])
+			_failed = true
+			continue
+		var record: Dictionary = CaptureMetadata.capture_record(root, image, path)
+		record["size"] = [image.get_width(), image.get_height()]
+		_records.append(record)
+		print("CLAUDE_OVERLAY_CAPTURE=%s" % path)
+	root.size = original_size
+	await _frames(3)
 
 
 func _fail_now(message: String) -> void:

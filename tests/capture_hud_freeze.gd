@@ -1,6 +1,7 @@
 extends SceneTree
 
 const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
+const CAPTURE_RESOLUTIONS := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]
 var _output_dir: String = ""
 
 ## 原生窗口捕获：正式场景一张，以及从同一 manager 载荷派生的显示边界。
@@ -26,6 +27,7 @@ func _run() -> void:
 		push_error("Native HUD capture requires a visible rendering display.")
 		quit(1)
 		return
+	root.borderless = true
 	root.size = Vector2i(1280, 720)
 	var scene: Node = (load("res://scenes/tactical/TacticalScene.tscn") as PackedScene).instantiate()
 	root.add_child(scene)
@@ -33,18 +35,14 @@ func _run() -> void:
 	await process_frame
 	var dashboard: Control = scene.get("_bottom_dashboard") as Control
 	var state: Dictionary = scene.tactical_manager.get_dashboard_data()
-	_failed = not await _capture("production", dashboard)
-	root.size = Vector2i(1920, 1080)
-	await process_frame
-	await process_frame
-	_failed = (not await _capture("production-1920", dashboard)) or _failed
+	_failed = not await _capture_group("production", dashboard)
 	root.size = Vector2i(1280, 720)
 	await process_frame
 	await process_frame
 	_move_pointer(Vector2(140, 650))
 	await process_frame
 	await process_frame
-	_failed = (not await _capture("hover-character", dashboard)) or _failed
+	_failed = (not await _capture_group("hover-character", dashboard, true)) or _failed
 	_move_pointer(Vector2(640, 320))
 	await process_frame
 	var spent: Dictionary = state.duplicate(true)
@@ -52,7 +50,7 @@ func _run() -> void:
 	spent["action_resources"]["standard_remaining"] = 0
 	spent["action_resources"]["swift_remaining"] = 0
 	dashboard.update_state(spent)
-	_failed = (not await _capture("action-spent", dashboard)) or _failed
+	_failed = (not await _capture_group("action-spent", dashboard)) or _failed
 	for amount: int in [0, 1, 50, 51, 100]:
 		var fixture: Dictionary = state.duplicate(true)
 		fixture["sword_qi"] = amount
@@ -63,7 +61,7 @@ func _run() -> void:
 			"qi_threshold_ratio": 0.5, "qi_band": &"low" if amount <= 50 else &"high",
 		}
 		dashboard.update_state(fixture)
-		_failed = (not await _capture("fixture-%d-111" % amount, dashboard)) or _failed
+		_failed = (not await _capture_group("fixture-%d-111" % amount, dashboard)) or _failed
 	for mask: int in 8:
 		var fixture: Dictionary = state.duplicate(true)
 		fixture["sword_qi"] = 65
@@ -75,13 +73,28 @@ func _run() -> void:
 		}
 		dashboard.update_state(fixture)
 		var bits: String = "%d%d%d" % [int(bool(mask & 4)), int(bool(mask & 2)), int(bool(mask & 1))]
-		_failed = (not await _capture("marks-" + bits, dashboard)) or _failed
+		_failed = (not await _capture_group("marks-" + bits, dashboard)) or _failed
 	scene.queue_free()
 	await process_frame
 	quit(1 if _failed else 0)
 
 
-func _capture(name: String, dashboard: Control) -> bool:
+func _capture_group(name: String, dashboard: Control, hover_character: bool = false) -> bool:
+	var success: bool = true
+	for resolution: Vector2i in CAPTURE_RESOLUTIONS:
+		root.size = resolution
+		await process_frame
+		await process_frame
+		if hover_character:
+			var scale: Vector2 = Vector2(resolution) / Vector2(1280, 720)
+			_move_pointer(Vector2(140, 650) * scale)
+			await process_frame
+			await process_frame
+		success = await _capture_at_resolution(name, dashboard) and success
+	return success
+
+
+func _capture_at_resolution(name: String, dashboard: Control) -> bool:
 	for unused: int in 3:
 		await process_frame
 		await RenderingServer.frame_post_draw
@@ -94,12 +107,12 @@ func _capture(name: String, dashboard: Control) -> bool:
 		return false
 	var directory: String = _output_dir
 	DirAccess.make_dir_recursive_absolute(directory)
-	var path: String = directory.path_join(name + ".png")
-	var err: Error = CaptureMetadata.save_png(root, image, path)
+	var path: String = directory.path_join("%s-%dx%d.png" % [name, root.size.x, root.size.y])
+	var err: Error = CaptureMetadata.save_png(root, image, path, {"capture_group": name})
 	if err != OK:
-		push_error("PNG save failed: " + name)
+		push_error("PNG save failed: " + path.get_file())
 		return false
-	print("CAPTURE ", name, " ", image.get_width(), "x", image.get_height(), " ", FileAccess.get_sha256(path))
+	print("CAPTURE ", path.get_file(), " ", image.get_width(), "x", image.get_height(), " ", FileAccess.get_sha256(path))
 	return true
 
 

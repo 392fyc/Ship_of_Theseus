@@ -1,4 +1,5 @@
 extends SceneTree
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
 ## 真实 TacticalScene 中剑圣地图棋子的视觉证据捕获。
 ##
 ## 运行：Godot_console.exe --path <project-root> \
@@ -13,12 +14,19 @@ const CAPTURE_NAMES := [
 const KENSEI_CLASS_ID := "kensei"
 const OFFHAND_WEAPON_ID := "wpn_swordsman_starter"
 const MAP_ID := "forest_01"
+const CAPTURE_RESOLUTIONS := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]
 
 var _capture_directory := ""
 
 
 func _initialize() -> void:
-	if not OS.get_cmdline_user_args().has("--capture-all"):
+	var capture_all: bool = false
+	for arg: String in OS.get_cmdline_user_args():
+		if arg == "--capture-all":
+			capture_all = true
+		elif arg.begins_with("--output="):
+			_capture_directory = arg.trim_prefix("--output=")
+	if not capture_all:
 		print("KENSEI_TACTICAL_CAPTURE_ARGUMENT_ERROR=missing --capture-all")
 		quit(1)
 		return
@@ -26,6 +34,8 @@ func _initialize() -> void:
 		print("KENSEI_TACTICAL_CAPTURE_UNSUPPORTED_HEADLESS=use windowed Godot console")
 		quit(1)
 		return
+	root.borderless = true
+	root.size = Vector2i(1280, 720)
 	call_deferred("_capture_all")
 
 
@@ -48,8 +58,14 @@ func _capture_all() -> void:
 
 
 func _prepare_capture_directory() -> bool:
-	var batch_name := "batch_%d" % int(Time.get_unix_time_from_system())
-	_capture_directory = ProjectSettings.globalize_path(CAPTURE_ROOT.path_join(batch_name))
+	if _capture_directory.is_empty():
+		var batch_name := "batch_%d_%d_%d" % [
+			int(Time.get_unix_time_from_system()), OS.get_process_id(), Time.get_ticks_usec(),
+		]
+		_capture_directory = ProjectSettings.globalize_path(CAPTURE_ROOT.path_join(batch_name))
+	if not _capture_directory.is_absolute_path():
+		push_error("Capture output must be an absolute directory")
+		return false
 	var make_result := DirAccess.make_dir_recursive_absolute(_capture_directory)
 	if make_result != OK:
 		push_error("Cannot create capture directory: %s (error %d)" % [_capture_directory, make_result])
@@ -139,6 +155,7 @@ func _capture_occlusion_hud_popup() -> bool:
 	return success
 
 func _make_tactical_scene(positions: Array[Vector2i]) -> Node:
+	root.size = Vector2i(1280, 720)
 	# 在 SceneTree 初始化后才 load：--script 入口的脚本预加载会早于 autoload 注册，
 	# 而 TacticalScene 的正式逻辑依赖 DataLoader autoload。
 	var tactical_scene := load("res://scenes/tactical/TacticalScene.tscn") as PackedScene
@@ -180,21 +197,26 @@ func _get_kensei_units(scene: Node, expected_count: int) -> Array[Unit]:
 
 
 func _capture_scene(file_name: String) -> bool:
-	await process_frame
-	await process_frame
-	await RenderingServer.frame_post_draw
-	var viewport: Viewport = root
-	var image := viewport.get_texture().get_image()
-	if image == null:
-		push_error("Root viewport did not provide a capture image")
-		return false
-	if image.get_width() != 1280 or image.get_height() != 720:
-		push_error("Capture size must be 1280x720, got %dx%d" % [image.get_width(), image.get_height()])
-		return false
-	var output_path := _capture_directory.path_join(file_name)
-	var save_result := image.save_png(output_path)
-	if save_result != OK:
-		push_error("Cannot save capture: %s (error %d)" % [output_path, save_result])
-		return false
-	print("KENSEI_TACTICAL_CAPTURED=%s" % output_path)
+	var capture_group: String = file_name.get_basename()
+	for resolution: Vector2i in CAPTURE_RESOLUTIONS:
+		root.size = resolution
+		await process_frame
+		await process_frame
+		await RenderingServer.frame_post_draw
+		var viewport: Viewport = root
+		var image := viewport.get_texture().get_image()
+		if image == null:
+			push_error("Root viewport did not provide a capture image")
+			return false
+		if image.get_size() != resolution or root.size != resolution:
+			push_error("Capture size must be %dx%d, got %dx%d" % [
+				resolution.x, resolution.y, image.get_width(), image.get_height()])
+			return false
+		var output_name: String = "%s-%dx%d.png" % [capture_group, resolution.x, resolution.y]
+		var output_path := _capture_directory.path_join(output_name)
+		var save_result := CaptureMetadata.save_png(root, image, output_path, {"capture_group": capture_group})
+		if save_result != OK:
+			push_error("Cannot save capture: %s (error %d)" % [output_path, save_result])
+			return false
+		print("KENSEI_TACTICAL_CAPTURED=%s" % output_path)
 	return true

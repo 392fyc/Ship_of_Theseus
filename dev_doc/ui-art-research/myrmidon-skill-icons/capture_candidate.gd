@@ -2,6 +2,7 @@ extends SceneTree
 
 const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
 const OUTPUT := "user://art-review/myrmidon-skill-icons"
+const CAPTURE_RESOLUTIONS := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]
 var _output: String = ""
 var _captures: Array[Dictionary] = []
 
@@ -18,6 +19,7 @@ func _run() -> void:
 		push_error("This capture needs a visible rendering display")
 		quit(1)
 		return
+	root.borderless = true
 	root.size = Vector2i(1280, 720)
 	if _output.is_empty():
 		var batch_name: String = "batch_%d_%d_%d" % [
@@ -41,12 +43,9 @@ func _run() -> void:
 	var dashboard: Control = scene.get("_bottom_dashboard") as Control
 	scene.tactical_manager.current_unit.set_sword_qi(65)
 	scene.tactical_manager._emit_dashboard_state_changed()
-	var ok: bool = await _capture("move-1280", dashboard)
+	var ok: bool = await _capture("move", dashboard)
 	scene.tactical_manager.request_end_move()
-	ok = (await _capture("action-1280", dashboard)) and ok
-	ok = _capture_detail(dashboard) and ok
-	root.size = Vector2i(1920, 1080)
-	ok = (await _capture("action-1920", dashboard)) and ok
+	ok = (await _capture("action", dashboard)) and ok
 	var source_fields: Dictionary = {"engine": Engine.get_version_info().get("string", "unknown"),
 		"scene": "res://scenes/tactical/TacticalScene.tscn", "runtime_evidence": true}
 	ok = CaptureMetadata.write_manifest(root, _output.path_join("capture-metadata.json"), _captures, source_fields) and ok
@@ -56,23 +55,38 @@ func _run() -> void:
 
 
 func _capture(name: String, dashboard: Control) -> bool:
-	for unused: int in 3:
+	var success: bool = true
+	for resolution: Vector2i in CAPTURE_RESOLUTIONS:
+		root.size = resolution
 		await process_frame
-		await RenderingServer.frame_post_draw
-	if not dashboard.visible:
-		push_error("Dashboard hidden at " + name)
-		return false
-	var image: Image = root.get_texture().get_image()
-	var path: String = _output.path_join(name + ".png")
-	if CaptureMetadata.save_png(root, image, path) != OK:
-		push_error("Cannot save capture: " + name)
-		return false
-	_captures.append(CaptureMetadata.capture_record(root, image, path))
-	print("MYRMIDON_HUD_CAPTURE ", name, " ", image.get_size(), " ", FileAccess.get_sha256(path))
-	return true
+		await process_frame
+		for unused: int in 3:
+			await process_frame
+			await RenderingServer.frame_post_draw
+		if not dashboard.visible:
+			push_error("Dashboard hidden at " + name)
+			success = false
+			continue
+		var image: Image = root.get_texture().get_image()
+		if image.get_size() != resolution or root.size != resolution:
+			push_error("Capture size mismatch at %s: expected %s, got %s" % [name, resolution, image.get_size()])
+			success = false
+			continue
+		var file_name: String = "%s-%dx%d.png" % [name, resolution.x, resolution.y]
+		var path: String = _output.path_join(file_name)
+		var details: Dictionary = {"capture_group": name}
+		if CaptureMetadata.save_png(root, image, path, details) != OK:
+			push_error("Cannot save capture: " + file_name)
+			success = false
+			continue
+		_captures.append(CaptureMetadata.capture_record(root, image, path, details))
+		print("MYRMIDON_HUD_CAPTURE ", file_name, " ", image.get_size(), " ", FileAccess.get_sha256(path))
+		if name == "action" and resolution == Vector2i(1280, 720):
+			success = _capture_detail(dashboard, path) and success
+	return success
 
 
-func _capture_detail(dashboard: Control) -> bool:
+func _capture_detail(dashboard: Control, source_path: String) -> bool:
 	var shelf: Control = dashboard.get_composition().get_node("BottomRow/SkillShelf") as Control
 	var slots: Array = shelf.get_skill_slots()
 	if slots.size() != 5:
@@ -84,8 +98,10 @@ func _capture_detail(dashboard: Control) -> bool:
 	var first: Rect2 = (slots[0] as Control).get_global_rect()
 	var last: Rect2 = (slots[4] as Control).get_global_rect()
 	var region := Rect2i(int(first.position.x) - 4, int(first.position.y) - 4, int(last.end.x - first.position.x) + 8, int(first.size.y) + 8)
-	var source_path: String = _output.path_join("action-1280.png")
 	var source: Image = Image.load_from_file(source_path)
+	if source == null:
+		push_error("Cannot load full-screen source for skill detail")
+		return false
 	var detail: Image = source.get_region(region)
 	detail.resize(region.size.x * 4, region.size.y * 4, Image.INTERPOLATE_NEAREST)
 	var path: String = _output.path_join("skills-detail-4x.png")

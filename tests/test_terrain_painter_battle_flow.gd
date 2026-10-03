@@ -27,6 +27,7 @@ func _check(label: String, condition: bool, detail: String = "") -> void:
 
 
 func _run() -> void:
+	root.borderless = true
 	root.size = Vector2i(1280, 720)
 	_output_dir = _argument_value("--output=")
 	if not _output_dir.is_empty():
@@ -211,15 +212,25 @@ func _named_session_count(parent: Node) -> int:
 func _capture(file_name: String) -> bool:
 	if DisplayServer.get_name() == "headless" or _output_dir.is_empty():
 		return false
-	await RenderingServer.frame_post_draw
-	var image: Image = root.get_texture().get_image()
-	if image.get_size() != Vector2i(1280, 720):
-		return false
-	var path: String = _output_dir.path_join(file_name)
-	if image.save_png(path) != OK:
-		return false
-	_capture_records.append(CaptureMetadata.capture_record(root, image, path))
-	return true
+	var original_size: Vector2i = root.size
+	var all_saved: bool = true
+	for dimensions: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]:
+		root.size = dimensions
+		await _frames(5)
+		await RenderingServer.frame_post_draw
+		var image: Image = root.get_texture().get_image()
+		var stem: String = file_name.get_basename()
+		var file_name_for_size: String = "%s-%dx%d.png" % [stem.trim_suffix("-1280x720"), dimensions.x, dimensions.y]
+		var path: String = _output_dir.path_join(file_name_for_size)
+		var size_matches: bool = root.size == dimensions and image.get_size() == dimensions
+		_check("截图尺寸 %d×%d" % [dimensions.x, dimensions.y], size_matches, str(image.get_size()))
+		var saved: bool = size_matches and image.save_png(path) == OK
+		if saved:
+			_capture_records.append(CaptureMetadata.capture_record(root, image, path))
+		all_saved = all_saved and saved
+	root.size = original_size
+	await _frames(3)
+	return all_saved
 
 
 func _capture_report() -> void:

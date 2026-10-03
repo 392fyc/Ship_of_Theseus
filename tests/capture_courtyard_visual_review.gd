@@ -75,6 +75,7 @@ func _run() -> void:
 			quit(1)
 			return
 		hashes[source] = FileAccess.get_sha256(source)
+	root.borderless = true
 	root.size = Vector2i(1280, 720)
 	var scene: Node = load("res://scenes/playground/battlefield_courtyard.tscn").instantiate()
 	root.add_child(scene)
@@ -82,7 +83,7 @@ func _run() -> void:
 	for id: String in ["overgrown", "flooded", "passage"]:
 		await scene.select_layout(id)
 		scene.board_view.set_process(false)
-		for dimensions: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080)]:
+		for dimensions: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]:
 			root.size = dimensions
 			await _frames(4)
 			scene.fit_board()

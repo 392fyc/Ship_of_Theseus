@@ -32,6 +32,7 @@ func _run() -> void:
 		quit(2)
 		return
 	DirAccess.make_dir_recursive_absolute(output)
+	root.borderless = true
 	root.size = Vector2i(1280, 720)
 	profile = JSON.parse_string(FileAccess.get_file_as_string(PROFILE))
 	var catalog := Catalog.catalog()
@@ -220,7 +221,15 @@ func _frames() -> void:
 	await RenderingServer.frame_post_draw
 
 func _capture(name: String) -> void:
+	var original_size: Vector2i = root.size
+	for dimensions: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]:
+		root.size = dimensions
+		await _frames()
+		var capture_name: String = name if dimensions == Vector2i(1280, 720) else "%s-%dx%d.png" % [name.get_basename(), dimensions.x, dimensions.y]
+		var path := output.path_join(capture_name)
+		var image: Image = root.get_texture().get_image()
+		check("%s 实际尺寸 %s" % [capture_name, dimensions], root.size == dimensions and image.get_size() == dimensions)
+		check("保存" + capture_name, CaptureMetadata.save_png(root, image, path) == OK)
+		captures[capture_name] = FileAccess.get_sha256(path)
+	root.size = original_size
 	await _frames()
-	var path := output.path_join(name)
-	check("保存"+name,CaptureMetadata.save_png(root, root.get_texture().get_image(), path)==OK)
-	captures[name]=FileAccess.get_sha256(path)

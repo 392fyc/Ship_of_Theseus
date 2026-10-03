@@ -1,15 +1,17 @@
 extends SceneTree
 
+const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
+
 ## Claude 审查采集：按项目真实拉伸设置（或关闭拉伸作对照）加载任意场景，逐尺寸保存视口原图、摘要与窗口参数。
 ## 运行：Godot_console.exe --path <project> --rendering-method gl_compatibility \
 ##   --script res://tests/claude_review/capture_scene_native.gd -- \
 ##   --scene=res://scenes/tactical/TacticalScene.tscn --output=<仓库外绝对目录> \
-##   [--sizes=1280x720,1920x1080] [--stretch=project|disabled] [--wait=90] [--prefix=名称]
+##   [--sizes=1280x720,1920x1080,2560x1440] [--stretch=project|disabled] [--wait=90] [--prefix=名称]
 ## stretch=project 保留 project.godot 的 canvas_items 拉伸，代表实际游戏；disabled 复现既有 HUD 采集脚本的做法。
 
 var _scene_path: String = ""
 var _output: String = ""
-var _sizes: Array[Vector2i] = [Vector2i(1280, 720), Vector2i(1920, 1080)]
+var _sizes: Array[Vector2i] = [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]
 var _stretch: String = "project"
 var _wait_frames: int = 90
 var _prefix: String = "capture"
@@ -55,6 +57,7 @@ func _run() -> void:
 	if _stretch == "disabled":
 		root.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
 		root.content_scale_size = Vector2i.ZERO
+	root.borderless = true
 	var packed: PackedScene = load(_scene_path) as PackedScene
 	if packed == null:
 		_fail("无法加载场景：" + _scene_path)
@@ -65,22 +68,19 @@ func _run() -> void:
 		root.size = target
 		for unused: int in _wait_frames:
 			await process_frame
+		_move_pointer_to_blank()
+		for unused: int in 2:
+			await process_frame
 		await RenderingServer.frame_post_draw
 		var image: Image = root.get_texture().get_image()
 		var file_name: String = "%s-%s-%dx%d.png" % [_prefix, _stretch, target.x, target.y]
 		var path: String = _output.path_join(file_name)
-		if image == null or image.save_png(path) != OK:
+		if image == null or root.size != target or image.get_size() != target or image.save_png(path) != OK:
 			_fail("无法保存：" + file_name)
 			return
-		_records.append({
-			"file": file_name,
-			"sha256": FileAccess.get_sha256(path),
-			"image_size": [image.get_width(), image.get_height()],
-			"window_size": [root.size.x, root.size.y],
-			"content_scale_mode": int(root.content_scale_mode),
-			"content_scale_size": [root.content_scale_size.x, root.content_scale_size.y],
-			"visible_rect": [root.get_visible_rect().size.x, root.get_visible_rect().size.y],
-		})
+		_records.append(CaptureMetadata.capture_record(root, image, path, {
+			"capture_group": "%s-%s" % [_prefix, _stretch],
+		}))
 		print("CLAUDE_CAPTURE=%s" % path)
 	var manifest := FileAccess.open(_output.path_join("%s-%s-manifest.json" % [_prefix, _stretch]), FileAccess.WRITE)
 	manifest.store_string(JSON.stringify({
@@ -92,6 +92,11 @@ func _run() -> void:
 		"captures": _records,
 	}, "  "))
 	manifest.close()
+	if not CaptureMetadata.write_manifest(root, _output.path_join("capture-metadata.json"), _records, {
+		"scene": _scene_path, "stretch": _stretch, "runtime_evidence": _stretch == "project",
+	}):
+		_fail("无法写入 C8 采集清单。")
+		return
 	scene.queue_free()
 	await process_frame
 	quit(0)
@@ -100,3 +105,12 @@ func _run() -> void:
 func _fail(message: String) -> void:
 	push_error(message)
 	quit(1)
+
+
+func _move_pointer_to_blank() -> void:
+	var logical_position := Vector2(20, 100)
+	Input.warp_mouse(root.get_stretch_transform() * logical_position)
+	var motion := InputEventMouseMotion.new()
+	motion.position = logical_position
+	motion.global_position = logical_position
+	root.push_input(motion, true)

@@ -21,7 +21,23 @@ static func capture_record(root: Window, image: Image, image_path: String,
 		"capture_kind": "viewport",
 	}
 	record.merge(details, true)
+	if str(record.get("capture_kind", "viewport")) == "viewport":
+		var capture_group: String = str(record.get("capture_group", "")).strip_edges()
+		if capture_group.is_empty():
+			capture_group = _default_capture_group(image_path.get_file())
+		if not capture_group.is_empty():
+			record["capture_group"] = capture_group
 	return record
+
+
+static func _default_capture_group(file_name: String) -> String:
+	var group: String = file_name.get_basename()
+	var resolution_pattern := RegEx.new()
+	resolution_pattern.compile("(?i)[-_]?(?:1280x720|1920x1080|2560x1440|1280|1920|2560|720|1080|1440)(?=[-_.]|$)")
+	group = resolution_pattern.sub(group, "", true)
+	group = group.replace("__", "_").replace("--", "-")
+	group = group.trim_prefix("_").trim_prefix("-").trim_suffix("_").trim_suffix("-")
+	return group.to_lower()
 
 
 static func build_manifest(root: Window, captures: Array[Dictionary],

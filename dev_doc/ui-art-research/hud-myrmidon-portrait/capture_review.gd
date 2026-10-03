@@ -2,6 +2,7 @@ extends SceneTree
 
 const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
 const OUTPUT := "user://art-review/hud-myrmidon-portrait"
+const CAPTURE_RESOLUTIONS := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]
 var _output: String = ""
 var _captures: Array[Dictionary] = []
 
@@ -18,6 +19,7 @@ func _run() -> void:
 		push_error("This review capture requires a rendering display")
 		quit(1)
 		return
+	root.borderless = true
 	root.size = Vector2i(1280, 720)
 	if _output.is_empty():
 		var batch_name: String = "batch_%d_%d_%d" % [
@@ -40,20 +42,36 @@ func _run() -> void:
 	scene.tactical_manager.current_unit.set_sword_qi(65)
 	scene.tactical_manager._emit_dashboard_state_changed()
 	scene.tactical_manager.request_end_move()
-	for unused: int in 3:
-		await process_frame
-		await RenderingServer.frame_post_draw
-	var image: Image = root.get_texture().get_image()
 	DirAccess.make_dir_recursive_absolute(_output)
-	var full_path: String = _output.path_join("combat-1280.png")
-	var ok: bool = CaptureMetadata.save_png(root, image, full_path) == OK
-	if ok:
-		_captures.append(CaptureMetadata.capture_record(root, image, full_path))
-	var composition: Control = scene.get("_bottom_dashboard").get_composition()
-	var portrait_frame: Control = composition.get_node("BottomRow/CharacterHudPanel/PortraitFrame") as Control
-	var end_button: Control = composition.get_node("BottomRow/EndTurnControl/EndTurnButton") as Control
-	ok = _save_detail(image, portrait_frame.get_global_rect(), full_path, "portrait-detail-4x.png") and ok
-	ok = _save_detail(image, end_button.get_global_rect(), full_path, "end-turn-detail-4x.png") and ok
+	var ok: bool = true
+	for resolution: Vector2i in CAPTURE_RESOLUTIONS:
+		root.size = resolution
+		await process_frame
+		await process_frame
+		for unused: int in 3:
+			await process_frame
+			await RenderingServer.frame_post_draw
+		var image: Image = root.get_texture().get_image()
+		if image.get_size() != resolution or root.size != resolution:
+			push_error("Capture size mismatch: expected %s, got %s" % [resolution, image.get_size()])
+			ok = false
+			continue
+		var file_name: String = "combat-turn-ended-%dx%d.png" % [resolution.x, resolution.y]
+		var full_path: String = _output.path_join(file_name)
+		var capture_ok: bool = CaptureMetadata.save_png(root, image, full_path,
+			{"capture_group": "combat-turn-ended"}) == OK
+		ok = capture_ok and ok
+		if not capture_ok:
+			push_error("Cannot save full-screen capture: " + file_name)
+			continue
+		_captures.append(CaptureMetadata.capture_record(root, image, full_path,
+			{"capture_group": "combat-turn-ended"}))
+		if resolution == Vector2i(1280, 720):
+			var composition: Control = scene.get("_bottom_dashboard").get_composition()
+			var portrait_frame: Control = composition.get_node("BottomRow/CharacterHudPanel/PortraitFrame") as Control
+			var end_button: Control = composition.get_node("BottomRow/EndTurnControl/EndTurnButton") as Control
+			ok = _save_detail(image, portrait_frame.get_global_rect(), full_path, "portrait-detail-4x.png") and ok
+			ok = _save_detail(image, end_button.get_global_rect(), full_path, "end-turn-detail-4x.png") and ok
 	var source_fields: Dictionary = {"engine": Engine.get_version_info().get("string", "unknown"),
 		"scene": "res://scenes/tactical/TacticalScene.tscn", "runtime_evidence": true}
 	ok = CaptureMetadata.write_manifest(root, _output.path_join("capture-metadata.json"), _captures, source_fields) and ok

@@ -30,6 +30,7 @@ func _run() -> void:
 	if DirAccess.make_dir_recursive_absolute(_output) != OK:
 		quit(1)
 		return
+	root.borderless = true
 	root.size = Vector2i(1280, 720)
 	var profile: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(BASE + "visual_profile.json"))
 	var manifest: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(BASE + "source-manifest.json"))
@@ -98,21 +99,26 @@ func _run() -> void:
 		view._time = 2.0
 		_label(page, "输入图只提供材质；水深、岸沿和格子含义由引擎数据决定。", Vector2(24, 416), 19)
 		_label(page, "本页是检查证据；重复纹理、光照或材质语义仍需逐项审查。", Vector2(24, 454), 17)
-		for frame: int in 5:
-			await process_frame
-		await RenderingServer.frame_post_draw
-		var name: String = "material-" + str(spec["key"]) + ".png"
-		var image: Image = root.get_texture().get_image()
-		var image_path: String = _output.path_join(name)
-		if CaptureMetadata.save_png(root, image, image_path) != OK:
-			quit(1)
-			return
-		capture_records.append(CaptureMetadata.capture_record(root, image, image_path, {
-			"material": spec["key"], "capture_role": "material_intake_preview",
-		}))
-		records.append({"source": source, "source_sha256": digest, "file": name,
-			"image_sha256": FileAccess.get_sha256(_output.path_join(name)), "identity_matches_manifest": true,
-			"repeats": [3, 3], "engine_scale": 1.36, "visual_acceptance": "pending_review"})
+		for dimensions: Vector2i in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]:
+			root.size = dimensions
+			for frame: int in 5:
+				await process_frame
+			await RenderingServer.frame_post_draw
+			var name: String = "material-%s-%dx%d.png" % [str(spec["key"]), dimensions.x, dimensions.y]
+			var image: Image = root.get_texture().get_image()
+			var image_path: String = _output.path_join(name)
+			if image.get_size() != dimensions or CaptureMetadata.save_png(root, image, image_path) != OK:
+				push_error("材质预览尺寸或保存失败：" + name)
+				quit(1)
+				return
+			capture_records.append(CaptureMetadata.capture_record(root, image, image_path, {
+				"material": spec["key"], "capture_role": "material_intake_preview",
+			}))
+			records.append({"source": source, "source_sha256": digest, "file": name,
+				"image_sha256": FileAccess.get_sha256(image_path), "identity_matches_manifest": true,
+				"repeats": [3, 3], "engine_scale": 1.36, "visual_acceptance": "pending_review"})
+		root.size = Vector2i(1280, 720)
+		await process_frame
 		page.queue_free()
 		await process_frame
 	var output := FileAccess.open(_output.path_join("material-intake.json"), FileAccess.WRITE)

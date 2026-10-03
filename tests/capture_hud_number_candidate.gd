@@ -1,6 +1,7 @@
 extends SceneTree
 
 const CaptureMetadata := preload("res://tests/claude_review/capture_metadata.gd")
+const CAPTURE_RESOLUTIONS := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440)]
 var _output_dir: String = ""
 
 ## 原生窗口捕获：数字可读性候选的 0、65、100 和高分辨率边界。
@@ -24,6 +25,7 @@ func _run() -> void:
 		push_error("Native HUD capture requires a visible rendering display.")
 		quit(1)
 		return
+	root.borderless = true
 	root.size = Vector2i(1280, 720)
 	var scene: Node = (load("res://scenes/tactical/TacticalScene.tscn") as PackedScene).instantiate()
 	root.add_child(scene)
@@ -42,17 +44,23 @@ func _run() -> void:
 			"qi_threshold_ratio": 0.5, "qi_band": &"low" if amount <= 50 else &"high",
 		}
 		dashboard.update_state(fixture)
-		failed = (not await _capture("qi-%d" % amount, dashboard)) or failed
-	root.size = Vector2i(1920, 1080)
-	await process_frame
-	await process_frame
-	failed = (not await _capture("qi-100-1920", dashboard)) or failed
+		failed = (not await _capture_group("qi-%d" % amount, dashboard)) or failed
 	scene.queue_free()
 	await process_frame
 	quit(1 if failed else 0)
 
 
-func _capture(name: String, dashboard: Control) -> bool:
+func _capture_group(name: String, dashboard: Control) -> bool:
+	var success: bool = true
+	for resolution: Vector2i in CAPTURE_RESOLUTIONS:
+		root.size = resolution
+		await process_frame
+		await process_frame
+		success = await _capture_at_resolution(name, dashboard) and success
+	return success
+
+
+func _capture_at_resolution(name: String, dashboard: Control) -> bool:
 	for unused: int in 3:
 		await process_frame
 		await RenderingServer.frame_post_draw
@@ -65,9 +73,9 @@ func _capture(name: String, dashboard: Control) -> bool:
 		return false
 	var directory: String = _output_dir
 	DirAccess.make_dir_recursive_absolute(directory)
-	var path: String = directory.path_join(name + ".png")
-	if CaptureMetadata.save_png(root, image, path) != OK:
-		push_error("PNG save failed: " + name)
+	var path: String = directory.path_join("%s-%dx%d.png" % [name, root.size.x, root.size.y])
+	if CaptureMetadata.save_png(root, image, path, {"capture_group": name}) != OK:
+		push_error("PNG save failed: " + path.get_file())
 		return false
-	print("NUMBER_CAPTURE ", name, " ", image.get_width(), "x", image.get_height(), " ", FileAccess.get_sha256(path))
+	print("NUMBER_CAPTURE ", path.get_file(), " ", image.get_width(), "x", image.get_height(), " ", FileAccess.get_sha256(path))
 	return true
