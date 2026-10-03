@@ -1,13 +1,14 @@
 {
   "files": {
-    "agents/mercury-acceptance.toml": "4594ded38a042a9d65d1f398de8f31257dbeeaa8a01c33d0b48c82d9f83f34f2",
-    "agents/mercury-dev.toml": "55faf23ce2f4db0174eb0c0e6b7cf0d3257a634b00e8543a049c1dac3ca9b202",
-    "agents/mercury-reviewer.toml": "ec25ceddfe693179b32561b96d1b50a30323958ff53dbea7612db49a4a1c99d6",
+    "agents/mercury-acceptance.toml": "5d950a92dbfd1b3c441436a3458b21b42601cad258426f5d2e5cfd0c4833502b",
+    "agents/mercury-dev.toml": "f44c27aa4b2c69470ccc212016c98601e557a1a6f7ef3c412765bec3270df902",
+    "agents/mercury-reviewer.toml": "3fdd674701fce45fca7a6369a0a56ca418ab703886a8b12fbf5a171c579ef57f",
+    "project/mercury-harness-ownership.md": "3dd2d5c798dbb8b3eb481029a10facdb10b6d898d6917df4454eff62538b636c",
     "project/mercury-task-contract.md": "40d206858e7c23d4918473f3f5ad482e51223c873ddbddf0e6e825fd6efbbba9",
     "rules/mercury-git-safety.rules": "a755ec542cfbbc42dd496613fc7978a3c9d0c02b94868c8c1e8338be656b22c7"
   },
-  "manifest_sha256": "cd15eb678bc5fc56fee0a27ae1d144384bf7ca7e0db54013e1c90f9ab2b31239",
+  "manifest_sha256": "4658cdca227d991c0dc708c698cee89de942c79520ec77a5892178f885f6de12",
   "schema_version": 1,
-  "source_commit": "faab794b25e375acde9a14399469f1a5bfcaa811",
+  "source_commit": "f1a254b152c3f6e624ba051d5e5983b8fb5ecb42",
   "source_repo": "392fyc/Mercury"
 }

@@ -5,7 +5,7 @@ description: "Use Codex Obsidian MCP tools to search, read, create, patch, and v
 
 # SoT KB 安全读写
 
-KB 是独立知识库，承载叙事、定性设计、用户裁决、ADR、研究和工作记录。它不是任务与验收权威，也不是活跃记忆权威：前者属于 GitHub/Git，后者属于 Mercury `.mercury/memory`。KB 中 `01-Game-Design/rules-catalog.md` 只作检索镜像，结构化玩法事实以设计库为准。
+KB 是独立知识库，承载叙事、定性设计、用户裁决、ADR、研究和工作记录。它不是任务与验收权威，也不是活跃记忆权威：前者属于 GitHub/Git，后者属于配置的活跃记忆根（默认游戏仓主 Git 工作树的 `.sot/memory`）。KB 中 `01-Game-Design/rules-catalog.md` 只作检索镜像，结构化玩法事实以设计库为准。
 
 Obsidian MCP 的 vault 逻辑根用于文档读写。KB 权威不按 worktree 分裂，所有读写都进入同一个固定 Obsidian vault。按以下顺序解析该固定 vault 及其 Git 仓库根：环境变量 `SOT_KB_ROOT`，然后是游戏仓被忽略的 `.codex/project/sot-roots.local.toml` 内 `[roots].kb_root`。两者都不存在时仍可进行只读 MCP 检索，但不得执行跨仓写入。
 

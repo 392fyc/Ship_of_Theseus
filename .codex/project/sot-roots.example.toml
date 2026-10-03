@@ -1,4 +1,5 @@
 [roots]
-mercury_root = "<path-to-mercury>"
+# Optional active-memory root; defaults to the game's primary Git worktree/.sot/memory.
+memory_root = "<path-to-active-memory>"
 designlib_root = "<path-to-design-library>"
 kb_root = "<path-to-kb-repository>"
