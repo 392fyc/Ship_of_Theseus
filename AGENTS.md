@@ -29,9 +29,20 @@
 - 当前可执行运行行为与已经落地的实现事实 → 本 `Ship_of_Theseus` 游戏仓。
 - 叙事、定性设计、用户裁决、ADR、研究和工作记录 → 独立 KB。
 - 任务范围、进度与验收证据 → GitHub/Git。
-- 活跃记忆与会话锚点 → Mercury 的 `.mercury/memory`。
+- 活跃记忆与会话锚点 → 配置的活跃记忆根；未配置时使用游戏仓主 Git 工作树中的 `.sot/memory`。
 
 权威之间冲突时，先按上述类型确定唯一来源，不在第二处复制或反向覆盖。KB 中的规则目录仅供检索，结构化规则仍以设计库为准。
+
+## SoT 与 Mercury Harness 所有权
+
+- SoT 自主维护游戏仓、设计库 app/tests/scripts、KB，以及领域 agent、配置、技能和 workflow。上述领域入口可以在 SoT 仓内直接维护。
+- Mercury 只拥有通用 Harness 模板 upstream 清单路径：`.codex/agents/mercury-*`、`.codex/rules/mercury-*`、`.codex/project/mercury-*` 和 `.codex/mercury-template.lock`。SoT 侧不得创建、修改或发起这些路径的内容变更。
+- 需要调整通用模板时，SoT 只提供需求与证据，由 Mercury 发起 Issue/PR；上游合并后再单向生成并消费 SoT 产物。不得在 SoT 反向修改生成源或锁文件。
+- 会话涉及通用 Harness 所有权或任务合同且对应文件已安装时，按需读取 `.codex/project/mercury-harness-ownership.md` 与 `.codex/project/mercury-task-contract.md`。这些合同由 Mercury generator 安装；文件缺失时不仿造、不阻断无关领域工作。
+
+## 活跃记忆根
+
+按 `SOT_MEMORY_ROOT`、当前仓被忽略的 `.codex/project/sot-roots.local.toml` 中 `[roots].memory_root`、游戏仓主 Git 工作树的 `.sot/memory` 顺序解析。确定主工作树时使用当前仓共享的 Git common directory 与 `git worktree list --porcelain`，不得把任务 worktree 路径用作项目记忆根或 bucket 身份。默认记忆目录或索引缺失时如实报告，并继续可独立完成的工作。旧 Mercury bucket 只有在显式配置为 `memory_root` 时才可只读访问；迁移必须由用户授权。
 
 ## 跨仓读取与写入
 

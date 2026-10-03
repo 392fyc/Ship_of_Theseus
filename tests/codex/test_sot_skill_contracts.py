@@ -91,10 +91,22 @@ def test_agents_is_codex_native_and_routes_each_authority():
         "用户裁决",
         "ADR",
         "GitHub/Git",
-        "Mercury",
-        ".mercury/memory",
+        "SOT_MEMORY_ROOT",
+        "[roots].memory_root",
+        ".sot/memory",
+        ".codex/agents/mercury-*",
+        ".codex/rules/mercury-*",
+        ".codex/project/mercury-*",
+        ".codex/mercury-template.lock",
+        "Mercury 发起 Issue/PR",
+        "设计库 app/tests/scripts",
+        "领域 agent、配置、技能和 workflow",
+        ".codex/project/mercury-harness-ownership.md",
+        ".codex/project/mercury-task-contract.md",
     ]:
         assert required in text, f"AGENTS.md missing authority routing term: {required}"
+    assert "MERCURY_ROOT" not in text
+    assert ".mercury/memory" not in text
 
 
 def test_agents_distinguishes_task_completion_from_milestone_completion():
@@ -212,26 +224,30 @@ def test_kb_contract_is_safe_and_records_cross_repo_context():
     assert "没有 `ifMatch`" in kb
 
 
-def test_session_skills_use_logical_mercury_memory_and_manual_handoff_only():
+def test_session_skills_use_optional_active_memory_and_manual_handoff_only():
     session_start = read_text(SKILL_PATHS["sot-session-start"])
-    assert "MERCURY_ROOT" in session_start
-    assert "[roots].mercury_root" in session_start
-    assert ".codex/project/sot-roots.local.toml" in session_start
-    assert ".mercury/memory" in session_start
+    session_end = read_text(SKILL_PATHS["sot-session-end"])
+    for text in (session_start, session_end):
+        assert "MERCURY_ROOT" not in text
+        assert "SOT_MEMORY_ROOT" in text
+        assert "[roots].memory_root" in text
+        assert ".sot/memory" in text
+        assert "git worktree list --porcelain" in text
+        assert ".mercury/memory" in text and "只读" in text
+
     assert "index.jsonl" in session_start
     assert "MEMORY.md" in session_start and "session-checkpoint.md" in session_start
-
-    session_end = read_text(SKILL_PATHS["sot-session-end"])
-    assert "MERCURY_ROOT" in session_end
-    assert "[roots].mercury_root" in session_end
-    assert ".codex/project/sot-roots.local.toml" in session_end
-    assert ".mercury/memory/projects/<project-bucket>/session-checkpoint.md" in session_end
-    assert ".mercury/memory/projects/<project-bucket>/" in session_end
-    assert "~/.Codex" not in session_end
+    assert "活跃记忆缺失" in session_start
+    assert "继续处理" in session_start
+    assert "<memory-root>/projects/<project-bucket>/session-checkpoint.md" in session_end
+    assert "<memory-root>/projects/<project-bucket>/" in session_end
     assert "user" in session_end.lower()
     assert "handoff" in session_end.lower()
     assert "manual" in session_end.lower()
     assert "不得自动" in session_end
+    assert "聊天中可直接粘贴的新会话起始指令" in session_end
+    assert "持久文档" in session_end
+    assert "用户明确要求" in session_end
 
 
 def test_task_receipt_records_cross_repository_evidence_without_self_approval():

@@ -9,6 +9,13 @@ on:
   push:
     branches: [develop, main]
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      test_ref:
+        description: Integration revision selected by the default-branch dispatch entry
+        required: false
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -29,6 +36,8 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.test_ref || github.ref }}
 
       - name: 缓存 Godot
         id: cache-godot
@@ -81,6 +90,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.test_ref || github.ref }}
 
       - uses: actions/setup-python@v7
         with:

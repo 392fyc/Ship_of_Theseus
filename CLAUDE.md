@@ -10,9 +10,15 @@
 
 ## KB
 
-正本: Obsidian Vault `D:\ShipOfTheseus\ShipOfTheseus-KB\` (`obsidian_*` MCP)
+正本: 固定 Obsidian Vault；先按 `SOT_KB_ROOT`、再按 `.codex/project/sot-roots.local.toml` 的 `[roots].kb_root` 解析 (`obsidian_*` MCP)
 - `/sot-session-start` → 开始会话 | `/sot-session-end` → 结束会话 | `/sot-kb-write` → KB写入
 - 游戏规则、公式、ADR、任务追踪 → 查 KB 与设计库规则表（见下「游戏机制」一节），不在此文件复述
+
+## 领域仓与通用 Harness
+
+SoT 自主维护游戏仓、设计库 app/tests/scripts、KB 和领域 workflow，包括领域 agent、配置与技能。Mercury 只拥有通用 Harness 模板 upstream 路径：`.codex/agents/mercury-*`、`.codex/rules/mercury-*`、`.codex/project/mercury-*`、`.codex/mercury-template.lock`。SoT 不直接创建或修改这些路径；先在 Mercury 发起 Issue/PR，再单向生成并消费更新。入口细节见 `docs/mercury-harness-consumption.md`。
+
+活跃记忆根依次使用 `SOT_MEMORY_ROOT`、本地 roots 配置的 `[roots].memory_root`、游戏仓主 Git 工作树下的 `.sot/memory`。默认记忆缺失不阻断会话。旧 Mercury bucket 只允许通过显式 `memory_root` 配置只读访问；迁移需用户授权。
 
 ## DO NOT — Security
 

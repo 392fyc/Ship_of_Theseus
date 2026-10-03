@@ -115,7 +115,11 @@ def test_codex_project_layer_is_discoverable_and_keeps_ownership_boundaries() ->
     for path in agent_paths:
         parsed = tomllib.loads(read_text(path))
         assert {"name", "description", "developer_instructions"} <= parsed.keys()
-        assert "model" not in parsed
+        if path.name.startswith("mercury-"):
+            assert parsed.get("model") == "gpt-6-luna"
+            assert parsed.get("model_reasoning_effort") == "max"
+        else:
+            assert "model" not in parsed
 
 
 def test_project_config_and_lane_agents_encode_cross_repository_receipts() -> None:
@@ -160,22 +164,42 @@ def test_project_config_and_lane_agents_encode_cross_repository_receipts() -> No
         assert required in kb_instructions
 
 
-def test_routing_and_root_configuration_keep_the_five_authorities_distinct() -> None:
+def test_routing_and_root_configuration_keep_authorities_distinct() -> None:
     routing = read_text(ROOT / ".codex" / "project" / "sot-authority-routing.md").lower()
     for required in [
         "structured gameplay",
         "current executable behavior",
         "narrative",
         "github/git",
-        ".mercury/memory",
+        ".sot/memory",
+        "sot_memory_root",
+        "[roots].memory_root",
+        "mercury-template.lock",
+        "单向生成消费",
     ]:
         assert required in routing
+    assert "mercury_root" not in routing
+    assert ".mercury/memory" not in routing
+
+    consumption = read_text(ROOT / "docs" / "mercury-harness-consumption.md").lower()
+    for required in [
+        ".codex/agents/mercury-*",
+        ".codex/rules/mercury-*",
+        ".codex/project/mercury-*",
+        ".codex/mercury-template.lock",
+        "不得创建、修改或发起",
+        "issue/pr",
+        "单向生成并消费",
+        ".codex/project/mercury-harness-ownership.md",
+        ".codex/project/mercury-task-contract.md",
+    ]:
+        assert required in consumption
 
     roots_path = ROOT / ".codex" / "project" / "sot-roots.example.toml"
     roots = tomllib.loads(read_text(roots_path))
     assert roots == {
         "roots": {
-            "mercury_root": "<path-to-mercury>",
+            "memory_root": "<path-to-active-memory>",
             "designlib_root": "<path-to-design-library>",
             "kb_root": "<path-to-kb-repository>",
         }
@@ -184,6 +208,7 @@ def test_routing_and_root_configuration_keep_the_five_authorities_distinct() -> 
     # may exist on disk; it must stay ignored and untracked.
     local_roots = ".codex/project/sot-roots.local.toml"
     assert local_roots in read_text(ROOT / ".gitignore")
+    assert ".sot/memory/" in read_text(ROOT / ".gitignore")
     tracked = subprocess.run(
         ["git", "-C", str(ROOT), "ls-files", "--", local_roots],
         capture_output=True, text=True, check=True,
@@ -193,6 +218,13 @@ def test_routing_and_root_configuration_keep_the_five_authorities_distinct() -> 
         ["git", "-C", str(ROOT), "check-ignore", "-q", "--no-index", "--", local_roots],
     )
     assert ignored.returncode == 0
+    ignored_memory = subprocess.run(
+        [
+            "git", "-C", str(ROOT), "check-ignore", "-q", "--no-index", "--",
+            ".sot/memory/index.jsonl",
+        ],
+    )
+    assert ignored_memory.returncode == 0
 
 
 def test_project_owned_files_do_not_embed_machine_state_or_runtime_credentials() -> None:
