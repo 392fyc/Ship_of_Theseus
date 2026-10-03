@@ -1,0 +1,53 @@
+# Register workflow_dispatch on the default branch. Dispatches to task branches
+# use that branch's complete CI workflow; dispatching main tests develop.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  workflow-validation:
+    name: Default-branch workflow configuration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Validate proposed workflow configuration and publication boundaries
+        run: |
+          python -m pip install PyYAML==6.0.3
+          python -B - <<'PY'
+          from pathlib import Path
+          import shlex
+          import yaml
+          workflows = {p.name: yaml.load(p.read_text(encoding='utf-8'), Loader=yaml.BaseLoader)
+                       for p in Path('.github/workflows').glob('*.yml')}
+          assert all(isinstance(w, dict) and isinstance(w.get('jobs'), dict) for w in workflows.values())
+          sync = workflows['mercury-sync.yml']
+          assert set(sync['on']) == {'schedule', 'workflow_dispatch'}
+          assert sync['permissions'] == {'contents': 'read'}
+          job = sync['jobs']['update']
+          assert job['permissions'] == {'contents': 'write', 'pull-requests': 'write',
+                                        'actions': 'write', 'checks': 'read', 'statuses': 'read'}
+          source = [s for s in job['steps'] if s.get('with', {}).get('repository') == '392fyc/Mercury']
+          assert len(source) == 1 and source[0]['with']['ref'] == 'develop'
+          assert source[0]['with']['persist-credentials'] == 'false'
+          command = shlex.split(job['steps'][-1]['run'])
+          assert '--publish-only' in command and command[command.index('--base') + 1] == 'develop'
+          assert command[command.index('--repo') + 1] == '392fyc/Ship_of_Theseus'
+          print('Workflow configuration and publication boundaries passed')
+          PY
+  integration-ci:
+    name: Existing develop integration regression
+    uses: 392fyc/Ship_of_Theseus/.github/workflows/ci.yml@develop
+    with:
+      test_ref: develop
