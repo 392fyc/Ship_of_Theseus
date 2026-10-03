@@ -1,0 +1,15 @@
+# Register workflow_dispatch on the default branch. Dispatches to task branches
+# use that branch's complete CI workflow; dispatching main tests develop.
+name: CI
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integration-ci:
+    uses: 392fyc/Ship_of_Theseus/.github/workflows/ci.yml@develop
+    with:
+      test_ref: develop
