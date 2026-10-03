@@ -9,6 +9,6 @@
   },
   "manifest_sha256": "4658cdca227d991c0dc708c698cee89de942c79520ec77a5892178f885f6de12",
   "schema_version": 1,
-  "source_commit": "6a2e7c16be8460952a40a5e0b9754e819614f229",
+  "source_commit": "f1a254b152c3f6e624ba051d5e5983b8fb5ecb42",
   "source_repo": "392fyc/Mercury"
 }

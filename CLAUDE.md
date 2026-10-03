@@ -16,7 +16,7 @@
 
 ## 领域仓与通用 Harness
 
-SoT 自主维护游戏仓、设计库 app/tests/scripts、KB 和领域 workflow，包括领域 agent、配置与技能。Mercury 只拥有通用 Harness 模板 upstream 路径：`.codex/agents/mercury-*`、`.codex/rules/mercury-*`、`.codex/project/mercury-*`、`.codex/mercury-template.lock`。SoT 不直接创建或修改这些路径；先在 Mercury 发起 Issue/PR，再单向生成并消费更新。入口细节见 `docs/mercury-harness-consumption.md`。
+SoT 自主维护游戏仓、设计库 app/tests/scripts、KB 和领域 workflow，包括领域 agent、配置与技能。Mercury 只拥有通用 Harness 模板 upstream 路径：`.codex/agents/mercury-*`、`.codex/rules/mercury-*`、`.codex/project/mercury-*`、`.codex/mercury-template.lock`。SoT 不得创建、修改或发起这些路径的内容变更。需求与证据由 SoT 提供，Issue/PR 由 Mercury 发起；上游合并后再单向生成并消费更新。入口细节见 `docs/mercury-harness-consumption.md`。
 
 活跃记忆根依次使用 `SOT_MEMORY_ROOT`、本地 roots 配置的 `[roots].memory_root`、游戏仓主 Git 工作树下的 `.sot/memory`。默认记忆缺失不阻断会话。旧 Mercury bucket 只允许通过显式 `memory_root` 配置只读访问；迁移需用户授权。
 
