@@ -70,4 +70,4 @@ jobs:
         run: >-
           python -B mercury/scripts/codex/sync-downstream-pr.py
           --target target --repo 392fyc/Ship_of_Theseus --base develop
-          --issue 43 --reviewer argus-review
+          --issue 43 --reviewer 'argus-review[bot]'
