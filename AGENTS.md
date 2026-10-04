@@ -44,11 +44,18 @@
 - SoT 自主维护游戏仓、设计库 app/tests/scripts、KB，以及领域 agent、配置、技能和 workflow。上述领域入口可以在 SoT 仓内直接维护。
 - Mercury 只拥有通用 Harness 模板 upstream 清单路径：`.codex/agents/mercury-*`、`.codex/rules/mercury-*`、`.codex/project/mercury-*` 和 `.codex/mercury-template.lock`。SoT 侧不得创建、修改或发起这些路径的内容变更。
 - 需要调整通用模板时，SoT 只提供需求与证据，由 Mercury 发起 Issue/PR；上游合并后再单向生成并消费 SoT 产物。不得在 SoT 反向修改生成源或锁文件。
-- 会话涉及通用 Harness 所有权或任务合同且对应文件已安装时，按需读取 `.codex/project/mercury-harness-ownership.md` 与 `.codex/project/mercury-task-contract.md`。这些合同由 Mercury generator 安装；文件缺失时不仿造、不阻断无关领域工作。
+- 会话涉及通用 Harness 所有权或任务合同且对应文件已安装时，按需读取 `.codex/project/mercury-harness-ownership.md`、`.codex/project/mercury-task-contract.md` 与 `.codex/project/mercury-lane-contract.md`。这些合同由 Mercury generator 安装；文件缺失时不仿造、不阻断无关领域工作。
 
 ## 活跃记忆根
 
 按 `SOT_MEMORY_ROOT`、当前仓被忽略的 `.codex/project/sot-roots.local.toml` 中 `[roots].memory_root`、游戏仓主 Git 工作树的 `.sot/memory` 顺序解析。确定主工作树时使用当前仓共享的 Git common directory 与 `git worktree list --porcelain`，不得把任务 worktree 路径用作项目记忆根或 bucket 身份。默认记忆目录或索引缺失时如实报告，并继续可独立完成的工作。旧 Mercury bucket 只有在显式配置为 `memory_root` 时才可只读访问；迁移必须由用户授权。
+
+## 多 Lane 多 Agent 协作
+
+- lane 是用户声明的工作路线，不是 agent。一条 lane 至多 1 个 Codex 会话与 1 个 Claude Code 会话，外加其他 worker；其中主导宿主掌握正式判断，另一宿主可介入审查等作业但不取代主导地位，主导宿主只在创建 lane 时或用户要求时改变。agent 介入已有 lane 不另开 lane。lane 只凭用户声明创建、改派或关闭，会话以 `[LANE=<代号>]` 确定 lane，没有时询问用户，不按工作内容推断。
+- 注册簿是活跃记忆 bucket 下的 `LANES.md`；各 lane 只改自己的小节与 `lanes/<代号>/` 目录，handoff 按宿主分文件，共享记忆文件按读取时的 sha256 做版本条件写入。
+- 主工作区不做开发；Issue / PR 加 `lane:<代号>` 标签，分支用 `<agent>/<lane>/<任务>`。跨 lane 消息不是用户授权；交叉影响开协调 Issue 由用户裁决。
+- 被禁止的裸命令使用受控入口：发布 `sot-publish.ps1`、同步基准 `sot-sync.ps1`、工作树 `sot-worktree.ps1`、共享记忆 `sot-memory.ps1 -Action Write`。完整协议见 [多 Lane 多 Agent 协作](docs/lane-collaboration.md)。
 
 ## 跨仓读取与写入
 

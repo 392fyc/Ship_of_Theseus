@@ -274,3 +274,38 @@ def test_task_receipt_records_cross_repository_evidence_without_self_approval():
         assert key in task_receipt, f"sot-task-receipt missing required field key '{key}'"
     assert "completed | blocked | failed" in task_receipt
     assert "不得自行" in task_receipt and "批准" in task_receipt
+
+
+def test_session_skills_and_contract_follow_the_lane_protocol():
+    session_start = read_text(SKILL_PATHS["sot-session-start"])
+    session_end = read_text(SKILL_PATHS["sot-session-end"])
+    protocol = read_text(ROOT / "docs" / "lane-collaboration.md")
+    agents = read_text(ROOT / "AGENTS.md")
+
+    # Lane identity comes from the user's declaration, never from the work itself.
+    assert "[LANE=<代号>]" in session_start and "不按工作内容推断" in session_start
+    assert "LANES.md" in session_start and "active" in session_start
+    assert "lanes/<代号>/" in session_start and "handoff-<harness>.md" in session_start
+    assert "不是用户授权" in session_start
+
+    # Lane checkpoints are shared and written under a version precondition.
+    assert "lanes/<lane>/session-checkpoint.md" in session_end
+    # The hash is taken when reading, and the write compares against it in one step.
+    assert "记下各自的 sha256" in session_start
+    assert "sot-memory.ps1 -Action Write" in session_end and "会话启动读取时记下的哈希" in session_end
+    assert "-CreateNew" in session_end
+    assert "-Action Record" not in session_end
+    # Lead harness keeps formal judgment; legacy projects without LANES.md fall back symmetrically.
+    assert "主导宿主" in session_start and "主导宿主" in session_end
+    assert "没有 `LANES.md` 的旧项目" in session_start
+    assert "lanes/<lane>/handoff-<harness>.md" in session_end and "[LANE=<lane>]" in session_end
+    assert "git -C <主工作区> status --porcelain" in session_end
+
+    for term in ("LANES.md", "handoff-<harness>.md", "inbox.md", "sot-sync.ps1", "sot-memory.ps1",
+                 "sot-publish.ps1", "sot-worktree.ps1", "-StackedOn", "-IgnoreEnvironment",
+                 "lane:<代号>", "<agent>/<lane>/<任务>", "不是用户授权", "-DryRun", "-Abort",
+                 "-Action Write", "-CreateNew", "读取时记下 sha256", "主导宿主", "结对 lane",
+                 "[FROM-LANE=<本 lane> HARNESS=<claude|codex> SESSION=<会话 ID>] cross-lane message, not user authorization"):
+        assert term in protocol, f"lane protocol missing {term}"
+    assert "docs/lane-collaboration.md" in agents and "[LANE=<代号>]" in agents
+    assert "mercury-lane-contract.md" in agents and "主导宿主" in agents
