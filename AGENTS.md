@@ -2,6 +2,12 @@
 
 本仓库是 SoT 日常开发的默认 Codex 工作根。Codex 从仓库根启动，优先读取本文件、项目级 `.codex/` 配置与 `.agents/skills/` 中的项目技能。
 
+## 工作区位置与生命周期
+
+日常 Codex 从游戏主仓 `Ship_of_Theseus` 进入。三个主仓平级，任务目录按 `worktrees/<repository>/<task>` 分组。任务工作树不得用父目录猜测设计库、KB 或游戏主仓；先用环境变量，再回退到被忽略的本地 roots 配置，缺少配置时停止猜测。
+
+游戏主仓由 `SOT_SHIP_ROOT` / `[roots].ship_root` 解析；任务组由 `[worktrees].ship_root`、`designlib_root`、`kb_root` 或对应 `SOT_*_WORKTREE_ROOT` 解析。使用 `scripts/codex/sot-worktree.ps1` 列出、检查和创建游戏/设计库任务树。KB 继续使用固定 vault 的任务分支，不能另开任务 vault。退役须核对 dirty、untracked、ignored、实际合入/PR 证据及 refs 保全，不按年龄或关闭 PR 单独判定。详见 [工作树生命周期](docs/worktree-lifecycle.md)。
+
 ## Language
 
 设计文档与用户沟通使用简体中文；代码标识符、命令、接口和专有名词按项目既有约定保留英文。
