@@ -199,10 +199,17 @@ def test_routing_and_root_configuration_keep_authorities_distinct() -> None:
     roots = tomllib.loads(read_text(roots_path))
     assert roots == {
         "roots": {
-            "memory_root": "<path-to-active-memory>",
+            "ship_root": "<path-to-game-main-checkout>",
             "designlib_root": "<path-to-design-library>",
             "kb_root": "<path-to-kb-repository>",
-        }
+            "memory_root": "<path-to-active-memory>",
+        },
+        # Task-tree groups read by scripts/codex/sot-worktree.ps1.
+        "worktrees": {
+            "ship_root": "<project-root>/worktrees/Ship_of_Theseus",
+            "designlib_root": "<project-root>/worktrees/SoT-fyc-space",
+            "kb_root": "<project-root>/worktrees/ShipOfTheseus-KB",
+        },
     }
     # sot-worktree.ps1 writes the local roots file into every task tree, so it
     # may exist on disk; it must stay ignored and untracked.

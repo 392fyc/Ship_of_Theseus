@@ -69,3 +69,7 @@ description: "Read and safely modify the SoT structured design authority through
 - 不手改 `snapshots/`；生产数据变更后只运行设计库既有快照生成流程。
 - 不把游戏仓的当前实现状态写成设计库的目标设计裁决。
 - 不新增平行数据平台、反向镜像层或自动迁移体系。
+
+## 任务工作树位置
+
+三个主仓平级，设计库任务组使用 `SOT_DESIGNLIB_WORKTREE_ROOT`，再回退到本地 `[worktrees].designlib_root`，落在 `worktrees/SoT-fyc-space/<task>`。不要从游戏或设计库任务树的父目录猜主仓位置。需要创建代码任务树时调用已解析游戏根的 `scripts/codex/sot-worktree.ps1 -Action Create -Repository designlib` 并明确 Task、Branch、BaseRef；这不授权生产数据写入或部署。清理前按 [工作树生命周期](../../../docs/worktree-lifecycle.md) 保全本地文件、PR 证据和 refs。

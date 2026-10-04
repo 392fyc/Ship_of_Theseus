@@ -45,3 +45,7 @@ Loaded authorities: <Git/designlib/game/KB selections>
 ```
 
 会话启动不得自动生成 handoff、创建新 Codex 任务或改写任务状态。
+
+## 工作区定位
+
+日常入口是游戏主仓；从任务工作树启动时，先确认当前 HEAD/分支与任务。游戏主仓由 `SOT_SHIP_ROOT`、再由 `[roots].ship_root` 解析；其他仓与任务组也按环境变量优先、本地 roots 回退。禁止从任务工作树父目录猜跨仓位置。需要查看已有任务树时使用游戏根的 `scripts/codex/sot-worktree.ps1 -Action List`；布局与收尾规则见 [工作树生命周期](../../../docs/worktree-lifecycle.md)。

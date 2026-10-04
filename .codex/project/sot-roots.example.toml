@@ -1,5 +1,13 @@
+# Copy to ignored sot-roots.local.toml and fill absolute local paths.
+# Use forward slashes in double quoted paths (or TOML single quoted literal paths).
 [roots]
-# Optional active-memory root; defaults to the game's primary Git worktree/.sot/memory.
-memory_root = "<path-to-active-memory>"
+ship_root = "<path-to-game-main-checkout>"
 designlib_root = "<path-to-design-library>"
 kb_root = "<path-to-kb-repository>"
+# Optional active-memory root; defaults to the game's primary Git worktree/.sot/memory.
+memory_root = "<path-to-active-memory>"
+
+[worktrees]
+ship_root = "<project-root>/worktrees/Ship_of_Theseus"
+designlib_root = "<project-root>/worktrees/SoT-fyc-space"
+kb_root = "<project-root>/worktrees/ShipOfTheseus-KB"

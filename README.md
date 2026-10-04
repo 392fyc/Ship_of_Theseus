@@ -1,6 +1,11 @@
 # Ship of Theseus — Godot 工程仓库
 
-> **本仓库不放设计文档。** 设计**正本（canonical）**统一在 Obsidian KB Vault：`D:\ShipOfTheseus\ShipOfTheseus-KB\`
+## 本地工作区入口
+
+日常 Codex 入口为游戏主仓 `Ship_of_Theseus`。主仓平级，任务工作树按 `worktrees/<repository>/<task>` 分组；不能从任务目录的父目录猜跨仓根。实际位置使用环境变量优先、本地 roots 配置回退，见 [工作树生命周期](docs/worktree-lifecycle.md)。
+
+
+> **本仓库不放设计文档。** 设计**正本（canonical）**统一在 Obsidian KB Vault：`SOT_KB_ROOT（或本地 [roots].kb_root）`
 > 2026-06-24 起，原先的设计总纲（本文件旧版）与 `dev_doc/` 下的 01–12 系列分册（回合系统 / 战斗计算 / 职业系统 / 天赋树 等）已全部迁往 KB；仓库内只保留**工程实现**、**工程文档**与**开发工具**。
 > 查设计规则请走 KB（`obsidian_*` MCP 或 `/sot-kb-write`）；各设计主题对应的 KB 路径见 [dev_doc/README.md](./dev_doc/README.md)。
 
@@ -66,7 +71,7 @@
 headless 跑法（退出码 0 = 全过）：
 
 ```
-<Godot_console.exe> --headless --path D:/ShipOfTheseus/Ship_of_Theseus --script res://tests/<文件>.gd
+<Godot_console.exe> --headless --path . --script res://tests/<文件>.gd
 ```
 
 - `tests/test_*.gd` —— 回归套件，改动后应全绿。
@@ -75,5 +80,5 @@ headless 跑法（退出码 0 = 全过）：
 
 ## 协作规则
 
-- `CLAUDE.md`（Claude Code）/ `AGENTS.md`（外部 Sub Agent）/ `OPENCODE.md`（opencode）/ `.cursorrules`（Cursor）：各工具链的硬规则，含机制红线与 GDScript 禁则。改动机制前先看这四份。
-- 分支命名 `{agent}/{task-name}`，个人作业无 PR 流程。
+- `AGENTS.md`（Codex 项目入口，Claude Code 经 `CLAUDE.md` 导入）/ `CLAUDE.md`（Claude Code 宿主差异）/ `.cursorrules`（Cursor）：各工具链的规则入口，含机制红线与 GDScript 禁则。改动机制前先看这三份。
+- 分支命名 `{agent}/{task-name}`，在任务工作树中开发；经独立审查后用 `scripts/codex/sot-publish.ps1` 发布并走 PR，不直接提交或推送 `develop`、`main`。

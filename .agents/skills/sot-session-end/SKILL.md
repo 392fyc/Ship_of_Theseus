@@ -37,3 +37,7 @@ description: "Close a Ship of Theseus Codex session by updating available active
 manual handoff 前先确认项目 bucket，并让文档包含当前提交、受保护 dirty、验收证据、未完成风险与下一任务入口。若默认 `.sot/memory` 尚不存在，可仅为用户明确要求的持久 handoff 创建所需目录和文档；不得自动复制旧 Mercury bucket。若用户配置的目标根不可用或只读，仍在聊天中提供起始指令，并明确报告持久文档未能保存。
 
 禁止自动创建新 Codex 任务、自动切换任务状态、在压缩或会话结束事件中隐式触发 handoff。
+
+## 工作树收尾
+
+结束会话不自动删除工作树。记录实际路径、HEAD、分支、PR/任务状态以及需保留的 dirty、untracked、ignored 内容；检查是否已有集成后的新提交。已授权退役具体工作树时，按 [工作树生命周期](../../../docs/worktree-lifecycle.md) 逐文件归档并核验，保留 refs，使用非 force Git 清理。年龄、无开放 PR 或 PR 已关闭不能单独判定可删除。

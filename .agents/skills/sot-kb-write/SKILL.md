@@ -61,3 +61,7 @@ Git 分支提供任务隔离，Obsidian vault 不提供任务隔离。开始 KB 
 - 不把结构化玩法数据复制成第二权威，不把 GitHub 任务状态或 Mercury 活跃记忆迁入 KB。
 - 不输出 token、密码、私钥、个人信息或匹配到的秘密文本。
 - 写入真实 KB 必须有任务授权；能力验证优先使用 dry-run、fixture 或可逆临时对象。
+
+## 固定入口与历史工作树
+
+三个主仓平级，但当前任务树的父目录不是跨仓根解析依据。`[worktrees].kb_root` / `SOT_KB_WORKTREE_ROOT` 只定位历史或明确只读用途的 KB Git 工作树目录组，不改变上述固定 vault 权威。游戏根的 `sot-worktree.ps1` 支持 KB List/Inspect，拒绝 KB Create；日常写入仍按固定 vault 的分支流程，不另开 vault，也不自动删除占用分支的工作树。见 [工作树生命周期](../../../docs/worktree-lifecycle.md)。
