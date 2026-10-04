@@ -1,6 +1,9 @@
 [CmdletBinding(PositionalBinding = $false)]
 param(
-    [switch]$DryRun
+    # -DryRun still runs `git fetch origin` (to see current PR heads); it makes no other write.
+    [switch]$DryRun,
+    # Acknowledge that this branch is stacked on the open PR head branch(es) named here.
+    [string[]]$StackedOn = @()
 )
 
 $ErrorActionPreference = "Stop"
@@ -83,6 +86,59 @@ function Get-ConfiguredRepositoryRoots {
     return $configuredRoots
 }
 
+function Write-Diagnostic([string]$Message) {
+    # Warnings go to stderr so stdout stays machine-readable.
+    [Console]::Error.WriteLine("WARNING: $Message")
+}
+function Get-StackedPullRequests {
+    param([Parameter(Mandatory = $true)][string]$CurrentBranch)
+
+    $gh = Get-Command gh -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $gh) {
+        Write-Diagnostic "gh is not available; skipped the stacked pull request check."
+        return @()
+    }
+    $json = & $gh.Source pr list --state open --limit 200 --json number,headRefName,baseRefName 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Diagnostic "gh could not list open pull requests (not signed in or no GitHub remote); skipped the stacked pull request check."
+        return @()
+    }
+    try {
+        $pullRequests = @(($json -join "`n") | ConvertFrom-Json -ErrorAction Stop)
+    } catch {
+        Write-Diagnostic "gh returned unreadable pull request data; skipped the stacked pull request check."
+        return @()
+    }
+    # Limitation: a lower PR that was rebased or force-pushed after this branch was cut can still go undetected.
+    # Refresh remote-tracking refs so other lanes' heads are visible; failure only weakens the check.
+    & git fetch --quiet origin 2>$null
+    if ($LASTEXITCODE -ne 0) { Write-Diagnostic "Could not fetch origin; the stacked pull request check may use stale refs." }
+
+    $protectedRefs = @()
+    foreach ($name in @("develop", "main", "master")) {
+        & git rev-parse --verify --quiet "refs/remotes/origin/$name^{commit}" 2>$null | Out-Null
+        if ($LASTEXITCODE -eq 0) { $protectedRefs += "refs/remotes/origin/$name" }
+    }
+    $stacked = @()
+    foreach ($pullRequest in $pullRequests) {
+        $head = [string]$pullRequest.headRefName
+        if (-not $head -or $head -eq $CurrentBranch) { continue }
+        $headRef = "refs/remotes/origin/$head"
+        & git rev-parse --verify --quiet "$headRef^{commit}" 2>$null | Out-Null
+        if ($LASTEXITCODE -ne 0) { continue }
+        # The fork point with the PR head covers a lower PR that advanced after this branch was cut.
+        $mergeBase = (& git merge-base HEAD $headRef 2>$null | Select-Object -First 1)
+        if ($LASTEXITCODE -ne 0 -or -not $mergeBase) { continue }
+        $inProtected = $false
+        foreach ($protectedRef in $protectedRefs) {
+            & git merge-base --is-ancestor $mergeBase $protectedRef 2>$null
+            if ($LASTEXITCODE -eq 0) { $inProtected = $true; break }
+        }
+        if (-not $inProtected) { $stacked += [pscustomobject]@{ Number = [int]$pullRequest.number; Head = $head } }
+    }
+    return $stacked
+}
+
 $insideWorkTree = (Invoke-Git -GitArgs @("rev-parse", "--is-inside-work-tree") | Select-Object -First 1).Trim()
 if ($insideWorkTree -ne "true") {
     throw "Run sot-publish.ps1 from a Git working tree."
@@ -131,6 +187,21 @@ $null = Invoke-Git -GitArgs @("remote", "get-url", "origin")
 $status = @(Invoke-Git -GitArgs @("status", "--porcelain"))
 if ($status.Count -ne 0) {
     throw "Working tree is not clean. Commit changes before publishing."
+}
+
+$stackedPullRequests = @(Get-StackedPullRequests -CurrentBranch $branch)
+$undeclared = @($stackedPullRequests | Where-Object { $StackedOn -notcontains $_.Head })
+if ($undeclared.Count -ne 0) {
+    $described = ($undeclared | ForEach-Object { "#$($_.Number) ($($_.Head))" }) -join ", "
+    throw "Branch '$branch' contains commits from open pull request(s) $described that are not in a protected base branch, so it is stacked on them. Re-run with -StackedOn <head branch> to publish it as a stacked change, or rebase it onto the protected base."
+}
+foreach ($declared in $StackedOn) {
+    if (@($stackedPullRequests | Where-Object { $_.Head -eq $declared }).Count -eq 0) {
+        Write-Diagnostic "-StackedOn '$declared' matches no detected open pull request dependency of this branch."
+    }
+}
+foreach ($dependency in $stackedPullRequests) {
+    Write-Output "Stacked on open pull request #$($dependency.Number) ($($dependency.Head)). Put this in the PR description: Depends on #$($dependency.Number); merge after it."
 }
 
 if ($DryRun) {
