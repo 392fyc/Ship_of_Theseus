@@ -80,5 +80,5 @@ headless 跑法（退出码 0 = 全过）：
 
 ## 协作规则
 
-- `CLAUDE.md`（Claude Code）/ `AGENTS.md`（外部 Sub Agent）/ `OPENCODE.md`（opencode）/ `.cursorrules`（Cursor）：各工具链的硬规则，含机制红线与 GDScript 禁则。改动机制前先看这四份。
+- `AGENTS.md`（Codex 项目入口，Claude Code 经 `CLAUDE.md` 导入）/ `CLAUDE.md`（Claude Code 宿主差异）/ `.cursorrules`（Cursor）：各工具链的规则入口，含机制红线与 GDScript 禁则。改动机制前先看这三份。
 - 分支命名 `{agent}/{task-name}`，个人作业无 PR 流程。
