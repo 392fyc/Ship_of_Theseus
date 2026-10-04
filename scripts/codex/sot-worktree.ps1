@@ -7,7 +7,11 @@ param(
     [Alias('Path')][string]$WorktreePath,
     [string]$Branch,
     [string]$BaseRef,
-    [string]$RootsFile = (Join-Path $PSScriptRoot '../../.codex/project/sot-roots.local.toml')
+    [string]$RootsFile = (Join-Path $PSScriptRoot '../../.codex/project/sot-roots.local.toml'),
+    # Test mode: read only -RootsFile; SOT_* environment overrides are ignored.
+    [switch]$IgnoreEnvironment,
+    # Create only: validate everything and print the plan without writing anything.
+    [switch]$DryRun
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
@@ -15,6 +19,10 @@ $git = (Get-Command git -CommandType Application -ErrorAction Stop | Select-Obje
 # Inherited Git repository overrides could defeat -C and inspect another checkout.
 foreach ($key in @('GIT_DIR','GIT_WORK_TREE','GIT_COMMON_DIR','GIT_INDEX_FILE')) {
     if ([Environment]::GetEnvironmentVariable($key)) { throw "Unset inherited $key before using this helper." }
+}
+function Write-Diagnostic([string]$Message) {
+    # Warnings go to stderr so stdout stays machine-readable.
+    [Console]::Error.WriteLine("WARNING: $Message")
 }
 function Invoke-RepoGit([string]$Root, [string[]]$Arguments) {
     $output = & $git --no-optional-locks -c core.fsmonitor=false -C $Root @Arguments
@@ -58,16 +66,24 @@ $environmentKeys = @{
     roots = @{ship_root='SOT_SHIP_ROOT'; designlib_root='SOT_DESIGNLIB_ROOT'; kb_root='SOT_KB_ROOT'; memory_root='SOT_MEMORY_ROOT'}
     worktrees = @{ship_root='SOT_SHIP_WORKTREE_ROOT'; designlib_root='SOT_DESIGNLIB_WORKTREE_ROOT'; kb_root='SOT_KB_WORKTREE_ROOT'}
 }
+$overridingVariables = @()
 foreach ($section in @('roots','worktrees')) {
     foreach ($key in $environmentKeys[$section].Keys) {
-        $value = [Environment]::GetEnvironmentVariable($environmentKeys[$section][$key])
-        if (-not [string]::IsNullOrWhiteSpace($value)) { $settings[$section][$key] = $value }
+        $value = if ($IgnoreEnvironment) { $null } else { [Environment]::GetEnvironmentVariable($environmentKeys[$section][$key]) }
+        if (-not [string]::IsNullOrWhiteSpace($value)) {
+            $settings[$section][$key] = $value
+            $overridingVariables += $environmentKeys[$section][$key]
+        }
         if (-not $settings[$section].ContainsKey($key)) { continue }
         # The optional memory root is only consumed by Create; it must not break List/Inspect.
         if ("$section.$key" -eq 'roots.memory_root' -and $Action -ne 'Create') { continue }
         $settings[$section][$key] = Full-Path $settings[$section][$key]
     }
 }
+if ($PSBoundParameters.ContainsKey('RootsFile') -and $overridingVariables.Count) {
+    Write-Diagnostic ("-RootsFile was given, but these environment variables override or supply its values: " + ($overridingVariables -join ', ') + ". Use -IgnoreEnvironment to read only the roots file.")
+}
+if ($DryRun -and $Action -ne 'Create') { Write-Diagnostic '-DryRun only applies to -Action Create and is ignored.' }
 $names = @{ship='Ship_of_Theseus'; designlib='SoT-fyc-space'; kb='ShipOfTheseus-KB'}
 # memory_root is optional: when absent, sessions use the game's primary Git worktree/.sot/memory.
 $optionalKeys = @('roots.memory_root')
@@ -112,6 +128,8 @@ if ($Action -eq 'Create') {
     if ((Test-Path -LiteralPath $target) -or $target -in $existing.path) { throw 'Task path already exists or is registered; inspect it instead.' }
     Assert-NoLink $target
     Invoke-RepoGit $root @('check-ref-format','--branch',$Branch) | Out-Null
+    & $git -C $root show-ref --verify --quiet ('refs/heads/' + $Branch)
+    if ($LASTEXITCODE -eq 0) { throw "Branch '$Branch' already exists; Create never reuses or overwrites a branch." }
     $commit = (@(Invoke-RepoGit $root @('rev-parse','--verify','--end-of-options',($BaseRef+'^{commit}'))) -join '').Trim()
     # Save the effective configuration, including environment overrides, for the next session.
     $configLines = @()
@@ -127,6 +145,16 @@ if ($Action -eq 'Create') {
             $configLines += "$key = '$value'"
         }
         $configLines += ''
+    }
+    if ($DryRun) {
+        # Plan only: no directory, branch, or file is created. The check that the local roots file is git-ignored needs the new tree and is skipped.
+        ConvertTo-Json -InputObject ([ordered]@{
+            status = 'dry-run'; repository = $Repository; task = $Task; path = $target; branch = $Branch
+            base_ref = $BaseRef; base_commit = $commit
+            local_roots_path = (Join-Path $target '.codex/project/sot-roots.local.toml')
+            local_roots_content = (($configLines -join "`n") + "`n")
+        }) -Depth 4
+        return
     }
     if (-not (Test-Path -LiteralPath $group)) { $null = New-Item -ItemType Directory -Path $group }
     Invoke-RepoGit $root @('worktree','add','-b',$Branch,'--',$target,$commit) | Out-Null
