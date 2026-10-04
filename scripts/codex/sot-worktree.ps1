@@ -47,6 +47,8 @@ if (Test-Path -LiteralPath $RootsFile -PathType Leaf) {
             $key = $Matches[1]; $quoted = $Matches[2]
             if ($settings[$section].ContainsKey($key)) { throw "Duplicate $section.$key in roots configuration." }
             $settings[$section][$key] = if ($quoted.StartsWith('"')) { $quoted | ConvertFrom-Json } else { $quoted.Substring(1,$quoted.Length-2) }
+        } elseif ($section -eq 'roots' -and $line -match '^\s*mercury_root\s*=') {
+            Write-Warning 'Ignoring retired roots.mercury_root; configure an explicit roots.memory_root if a different active-memory root is required.'
         } elseif ($line -match '^\s*(ship_root|designlib_root|kb_root|memory_root)\s*=') {
             throw 'Use a single quoted literal path or double quoted path with forward slashes in the roots file.'
         }
@@ -60,7 +62,10 @@ foreach ($section in @('roots','worktrees')) {
     foreach ($key in $environmentKeys[$section].Keys) {
         $value = [Environment]::GetEnvironmentVariable($environmentKeys[$section][$key])
         if (-not [string]::IsNullOrWhiteSpace($value)) { $settings[$section][$key] = $value }
-        if ($settings[$section].ContainsKey($key)) { $settings[$section][$key] = Full-Path $settings[$section][$key] }
+        if (-not $settings[$section].ContainsKey($key)) { continue }
+        # The optional memory root is only consumed by Create; it must not break List/Inspect.
+        if ("$section.$key" -eq 'roots.memory_root' -and $Action -ne 'Create') { continue }
+        $settings[$section][$key] = Full-Path $settings[$section][$key]
     }
 }
 $names = @{ship='Ship_of_Theseus'; designlib='SoT-fyc-space'; kb='ShipOfTheseus-KB'}
