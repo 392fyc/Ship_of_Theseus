@@ -1,0 +1,248 @@
+{
+  "schema": "sot-battle-ui-font-acceptance/1",
+  "task_id": "6f545bcc-9f5f-464d-9121-268410a71f02",
+  "request_id": "eb54a45c-070d-4ae5-affe-0e16011297d3",
+  "attempt": 1,
+  "candidate_commit": "21a77b91818fe0b71f5d9fbe684cc942250db0e2",
+  "candidate_tree": "682dd3579db930b4331f99b173b101cd984cce3c",
+  "approved_visual_baseline": [
+    {
+      "file": "dev_doc/ui-art-research/hud-final-acceptance/README.md",
+      "mode": "100644",
+      "git_blob_sha1": "83dde6c9d99d6265e3d59bd46263a3852328f2d9",
+      "bytes": 2321,
+      "sha256": "218c5a381725f8cc44893014fedb802464d76e5c1ff821fccb058dfc22f7c38f"
+    },
+    {
+      "file": "dev_doc/ui-art-research/hud-myrmidon-portrait/candidate/README.md",
+      "mode": "100644",
+      "git_blob_sha1": "30f961bcf50202649efb90789651dea8afb864d8",
+      "bytes": 1645,
+      "sha256": "012d339e653f26706863d5349263d78cfc518de2299c2f2f420105abf7957bf8"
+    },
+    {
+      "file": "dev_doc/ui-art-research/hud-myrmidon-portrait/candidate/combat-1280.png",
+      "mode": "100644",
+      "git_blob_sha1": "123f8a7c595b0257a215c99b653e1f2da6e97093",
+      "bytes": 186368,
+      "sha256": "a24d28476305a04b65fe5a62d4fa1087f7e47d80f4e642139a1d7f863c772334"
+    },
+    {
+      "file": "dev_doc/ui-art-research/hud-myrmidon-portrait/capture_review.gd",
+      "mode": "100644",
+      "git_blob_sha1": "3b46c4b1f294b2ab73424224e86a114d26a4ce61",
+      "bytes": 4450,
+      "sha256": "93662bb325e6710ae6223782e12821598ac67c4694315378bc322268a2705f24"
+    },
+    {
+      "file": "dev_doc/ui-art-research/myrmidon-skill-icons/candidate-v3/action-1280.png",
+      "mode": "100644",
+      "git_blob_sha1": "35d0a169eeaecec487c06cc629312dbadea92186",
+      "bytes": 195733,
+      "sha256": "094d282a932acf3e6ca3ff4f9dd5d04c9f9a8b611bfdf5adcf06b7476ba03bb7"
+    },
+    {
+      "file": "dev_doc/ui-art-research/myrmidon-skill-icons/source-manifest.json",
+      "mode": "100644",
+      "git_blob_sha1": "e8a335584c31e366c787f9379babef3bd5803072",
+      "bytes": 3820,
+      "sha256": "6d4d98ec492d2279694a38702ca24ad20ddcc059d8bd6932c69b2a93a4158cb9"
+    },
+    {
+      "file": "dev_doc/ui-art-research/penpot/2026-09-24-hud/README.md",
+      "mode": "100644",
+      "git_blob_sha1": "0b56d7509dd16b20ea1dc01632f0c60759b132f0",
+      "bytes": 5028,
+      "sha256": "d38acfc8f56b7cb942cd5e6c6f2607a521709d6b6fb4ef8cd2c8cc7368384339"
+    },
+    {
+      "file": "dev_doc/ui-art-research/penpot/2026-09-24-hud/manifest.json",
+      "mode": "100644",
+      "git_blob_sha1": "c23f2ca0912ba6b006ccf2983ac49f3b69c0b3a4",
+      "bytes": 6919,
+      "sha256": "95d1c9e87df56d7763c80939941bcdb894be0b22b8aec2405e91461d207f3cf6"
+    },
+    {
+      "file": "dev_doc/ui-art-research/penpot/2026-09-24-hud/previews/main-native.png",
+      "mode": "100644",
+      "git_blob_sha1": "e69176544a9705e74628ddba2eb1d10e78a7ad27",
+      "bytes": 194634,
+      "sha256": "9efff8fefa5d6c92fa29e70631c4feb2c06ee5951f150f484e8d3977e7dc2e38"
+    }
+  ],
+  "overall_UI": "BLOCKED",
+  "domain_batch": "FAIL_C4_CR24",
+  "domain_font": "PASS_CLOUD_OBSERVED_ONLY",
+  "delivery": "PASS_106_of_106_originals_127_of_127_chunks",
+  "criteria": [
+    {
+      "id": "SOURCE_INTEGRITY",
+      "status": "PASS",
+      "detail": "658 canonical Git blobs all match SHA256, bytes and Git blob SHA1 before/after execution and independent review; selected materialization, not a full checkout",
+      "evidence": [
+        "source-integrity-before-execution.json",
+        "source-integrity-after-execution.json",
+        "source-integrity-final.json",
+        "independent-font-review.json"
+      ]
+    },
+    {
+      "id": "COLD_SERIAL_IMPORT",
+      "status": "PASS",
+      "detail": "Fresh .godot/cache, versioned import/use_multiple_threads=false retained; Godot4.6.3 Compatibility import exit0, no ERROR or SCRIPT ERROR",
+      "evidence": [
+        "import/command.json",
+        "import/stdout.log",
+        "import/stderr.log",
+        "environment.json"
+      ]
+    },
+    {
+      "id": "FROZEN_FONT_RUNTIME",
+      "status": "PASS",
+      "detail": "CR10_FONT_RUNTIME_RESULT failed=0; complete required 7476-codepoint union, ordinary Label/Button, M2/legacy/default/numeric/frozen chains and raw imported font properties tested; mixed metrics retained",
+      "evidence": [
+        "font-runtime/command.json",
+        "font-runtime/stdout.log",
+        "font-runtime/stderr.log"
+      ]
+    },
+    {
+      "id": "FORMAL_SCENE_BINDING",
+      "status": "PASS",
+      "detail": "Unmodified courtyard10x10 TacticalScene and original two spawns; frozen --check-scene exit0, binding pass",
+      "evidence": [
+        "scene-binding/command.json",
+        "scene-binding/stdout.log"
+      ]
+    },
+    {
+      "id": "NINE_NATIVE_CAPTURES",
+      "status": "PASS",
+      "detail": "3 states x 3 sizes; 9 original PNG and 9 SHA-bound JSON; image/window native sizes and single frame match; intended overlays and hidden marks agree; original pixels not reencoded",
+      "evidence": [
+        "captures/capture-metadata.json",
+        "capture/command.json",
+        "same-frame-validation.json",
+        "dimensions-adjudication.json",
+        "independent-font-review.json"
+      ]
+    },
+    {
+      "id": "PACKAGED_FONT_STATE",
+      "status": "PASS",
+      "detail": "All nine captured global/visible Label font chains disable system fallback; Label counts32/33/50 by state. Button and custom-drawn nodes are not individually enumerated by same-frame collector and are covered only by frozen runtime/resource checks plus actual image observation",
+      "evidence": [
+        "captures/capture-metadata.json",
+        "font-runtime/stdout.log",
+        "independent-font-review.json"
+      ]
+    },
+    {
+      "id": "C8_CAPTURE_CONFIGURATION",
+      "status": "PASS",
+      "detail": "Unmodified --c8-only full return pass=true; exit0; original manifest/image hashes retained",
+      "evidence": [
+        "c8-result.json",
+        "c8/command.json",
+        "c8/stdout.log",
+        "c8/stderr.log"
+      ]
+    },
+    {
+      "id": "INDEPENDENT_OBSERVED_CLOUD_FONT_VISUAL",
+      "status": "PASS",
+      "detail": "Each of nine original native images independently viewed. Observed Chinese strokes, full-width punctuation, mixed Latin/numerals, tooltip and inspection readable; no missing glyph boxes, clipped text or erroneous wrapping. This is limited to visible glyphs and cloud appearance",
+      "evidence": [
+        "independent-font-review.json"
+      ]
+    },
+    {
+      "id": "C4_CR24_PORTRAIT_TOP_SEAM",
+      "status": "FAIL",
+      "detail": "All nine unmodified original images fail c4_file: top panel-colour gap 1px at720p,2px at1080p/1440p. Other edge panel-colour gaps0. Frozen C4 returns retained; exit1. Existing CR24 not repaired by this font candidate",
+      "evidence": [
+        "c4/command.json",
+        "c4/stdout.log",
+        "c4/stderr.log"
+      ]
+    },
+    {
+      "id": "EMOJI_VISUAL_APPEARANCE",
+      "status": "NOT_TESTED",
+      "detail": "U+1F480 and U+1F48E absent from the nine frames; font coverage is tested but their actual monochrome appearance is not",
+      "evidence": [
+        "independent-font-review.json"
+      ]
+    },
+    {
+      "id": "WINDOWS_FONT_APPEARANCE",
+      "status": "NOT_TESTED",
+      "detail": "local_required; cloud Linux results cannot approve Windows Chinese appearance or font taste"
+    },
+    {
+      "id": "NATIVE_PHYSICAL_MOUSE_G4",
+      "status": "NOT_TESTED",
+      "detail": "Frozen collector uses Input.warp_mouse and root.push_input; not a physical mouse/Windows interaction or G4 reentry result"
+    },
+    {
+      "id": "HARDWARE_GPU_AUDIO_PERFORMANCE",
+      "status": "NOT_TESTED",
+      "detail": "llvmpipe software renderer and Dummy audio; V-Sync unsupported warning retained"
+    },
+    {
+      "id": "OTHER_DOMAIN_GATES",
+      "status": "NOT_TESTED",
+      "detail": "CR11 implementation, CR40 extra-position avoidance and terrain small-material readability outside this font collection; old G4 BLOCKED and original UI/P0 milestone remain unfinished"
+    }
+  ],
+  "local_verification": "local-checks.json",
+  "initial_stricter_dimensions_wrapper": "FAIL_original_retained; additional Texture API equality not signed requirement",
+  "dimensions_judgment": "PASS_Window_Image_PNG_and_same_frame; four dimensions recorded; no new causal diagnosis",
+  "cloud_independent_visual_review": {
+    "file": "cr10-attempt1/independent-font-review.json",
+    "reference_map": "evidence-references.json",
+    "scope": "nine original images, visible Chinese glyphs/fullwidth punctuation/mixed numerals/Latin/tooltip/card; cloud appearance only"
+  },
+  "local_consumer_independent_review": {
+    "verdict": "PASS",
+    "record": "consumption-review.json",
+    "scope": "record accuracy; cloud observations only; no Windows or UI approval"
+  },
+  "signed_consumer_receipt": {
+    "status": "sent_exact_page_bytes_verified",
+    "record": "signed-consumer-receipt.json"
+  },
+  "native_close_ack": {
+    "status": "closed",
+    "record": "verified-closure.json",
+    "execution_count": 1
+  },
+  "user_visual_approval": "not requested or assumed",
+  "whole_CR10_complete": false,
+  "whole_UI_complete": false,
+  "P0_CR01_milestone_complete": false,
+  "publication": {
+    "published": false,
+    "pr": null
+  },
+  "local_required": [
+    "Windows Chinese font pixel appearance",
+    "independent GPU",
+    "audio",
+    "performance"
+  ],
+  "not_tested": [
+    "actual monochrome emoji appearance",
+    "physical G4 input in this font script",
+    "CR40 extra-position avoidance",
+    "CR11 implementation",
+    "TERRAIN-READABILITY-01",
+    "25x25 and ordinary combat"
+  ],
+  "local_closing_independent_review": {
+    "verdict": "PASS",
+    "record": "final-close-review.json",
+    "scope": "closing metadata only; existing original-consumption review remains valid"
+  }
+}

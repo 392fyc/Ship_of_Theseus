@@ -98,9 +98,10 @@
     },
     {
       "criterion": "Three-resolution formal-scene font pixels and line wrapping",
-      "result": "pending_cloud",
+      "result": "pass_cloud_observed_only",
       "evidence": [
-        "frozen-inputs.json; ACK verified, not domain acceptance"
+        "cloud-attempt1/acceptance.json",
+        "cloud-attempt1/evidence-references.json"
       ]
     },
     {
@@ -122,7 +123,7 @@
     }
   ],
   "residual_risks": [
-    "CR-10 overall remains incomplete pending cloud pixels and Windows appearance.",
+    "CR-10 overall remains incomplete pending Windows pixel appearance and any required user visual acceptance.",
     "Mixed-font metrics and monochrome symbols require visual acceptance.",
     "Parallel cold import native crash cause remains unconfirmed; serial import may cost time.",
     "CR-24, CR-40 additional-position avoidance and TERRAIN-READABILITY-01 remain unresolved."
@@ -139,5 +140,7 @@
     "published": false,
     "remote_ref": null,
     "pr": null
-  }
+  },
+  "cloud_followup": "cloud-attempt1/task-receipt.json",
+  "cloud_roundtrip": "closed; see cloud-attempt1/verified-closure.json; cloud observations do not complete Windows font appearance or whole CR10"
 }

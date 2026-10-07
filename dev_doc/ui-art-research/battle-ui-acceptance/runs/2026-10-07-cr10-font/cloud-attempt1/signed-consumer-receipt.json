@@ -1,0 +1,38 @@
+{
+  "schema": "sot-signed-consumption-receipt-reference/1",
+  "type": "RECEIPT",
+  "task_id": "6f545bcc-9f5f-464d-9121-268410a71f02",
+  "request_id": "155599eb-3487-4296-8904-fc3d93422604",
+  "in_reply_to": "eb54a45c-070d-4ae5-affe-0e16011297d3",
+  "attempt": 1,
+  "seq": 28,
+  "candidate_commit": "21a77b91818fe0b71f5d9fbe684cc942250db0e2",
+  "candidate_tree": "682dd3579db930b4331f99b173b101cd984cce3c",
+  "original": {
+    "page_id": "page_19e4dc76712c8191b13b01673dd33c13",
+    "reference": "library-file:fde1_bGliZmlsZV9FbjVCcjZ0dlJWZ1RXXzJmbTRmR3R3_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+    "bytes": 25002,
+    "sha256": "2cae5244d6b2c7223cd1bb2fbcc94dd84b62be9a6bc4e1bc4d9cfe7a148a5313"
+  },
+  "exact_page_readback": "PASS",
+  "native_dispatch": "sent_to_paired_YC",
+  "native_receiver_signature_verification": "PASS_receiver_reported_fixed_key_signature_expiry_nonce_native_routes",
+  "page_append_verification": {
+    "previous_blocks": 578,
+    "prior_blocks_identical": 578,
+    "final_prior_block_single_trailing_LF_normalized": false,
+    "all_prior_content_preserved": true,
+    "created_blocks": 4,
+    "sequence": 47,
+    "receipt_reference_present": true
+  },
+  "delivery_complete": true,
+  "domain_font": "PASS_CLOUD_OBSERVED_ONLY",
+  "domain_batch": "FAIL_C4_CR24",
+  "whole_UI": "BLOCKED",
+  "signed_body_sha256": "b5aed53372e72f737fef04b04d8cf88cbb7bce99dbfa626c49593bdd62abc444",
+  "native_close_ack": {
+    "status": "closed",
+    "record": "verified-closure.json"
+  }
+}

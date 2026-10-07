@@ -1,0 +1,245 @@
+{
+  "task_id": "CR-10-CLOUD-FONT-ORIGINAL-CONSUMPTION",
+  "status": "completed",
+  "completion_scope": "Cloud font original consumption and native receipt/closure completed with independent original and closing-record reviews; whole CR10/UI and Windows appearance remain incomplete",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/ui-ux/cr10-chinese-font",
+  "target_head_before": "3d7494803cfe91e8d528467ad9ee00e316e2aff9",
+  "candidate_head": "21a77b91818fe0b71f5d9fbe684cc942250db0e2",
+  "candidate_tree": "682dd3579db930b4331f99b173b101cd984cce3c",
+  "target_head": "21a77b91818fe0b71f5d9fbe684cc942250db0e2",
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "local reviewed commits only; no push/PR; retain basic swordsman no marks; no local GUI/mouse"
+    },
+    {
+      "contract": "CR-10 and signed attempt1 task",
+      "summary": "licensed packaged fonts; native three-resolution formal scene pixels; raw evidence and limitations preserved"
+    },
+    {
+      "contract": "sot-task-receipt / dot-link",
+      "summary": "exact-byte consumption and independent review precede signed receipt and native closing acknowledgement"
+    }
+  ],
+  "changed_files": [
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/cloud-attempt1/acceptance.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/cloud-attempt1/c4-raw-output.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/cloud-attempt1/c8-raw-output.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/cloud-attempt1/capture-states.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/cloud-attempt1/consumption-review.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/cloud-attempt1/evidence-references.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/cloud-attempt1/final-close-review.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/cloud-attempt1/local-checks.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/cloud-attempt1/report.md",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/cloud-attempt1/result-binding.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/cloud-attempt1/signed-consumer-receipt.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/cloud-attempt1/source-binding-verification.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/cloud-attempt1/task-receipt.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/cloud-attempt1/verified-closure.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/frozen-inputs.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/technical-task-receipt.json"
+  ],
+  "verification": [
+    {
+      "command": "governing original-byte receiver and ordered original-base64 reconstruction",
+      "result": "pass",
+      "evidence": "106 originals /127 chunks /18 empty files /7 maps"
+    },
+    {
+      "command": "git cat-file --batch exact selected candidate blobs and original before/final",
+      "result": "pass",
+      "evidence": "658 blobs"
+    },
+    {
+      "command": "frozen c4_file on nine original PNG",
+      "result": "fail",
+      "evidence": "all9 CR24 top1/2/2; cloud/local exact dictionaries equal"
+    },
+    {
+      "command": "frozen C8 and native same-frame font-state checks",
+      "result": "pass",
+      "evidence": "c8-raw-output.json; capture-states.json"
+    },
+    {
+      "command": "governing raw CLOSE_ACK receive and paired native ROOT command/reference binding",
+      "result": "pass",
+      "evidence": "verified-closure.json;7205bytes; signed receipt seq28;106/106 originals; execution_count1; receiver verdicts unchanged"
+    },
+    {
+      "command": "independent closing metadata review",
+      "result": "pass",
+      "evidence": "final-close-review.json; original evidence-consumption review remains consumption-review.json; neither grants Windows/user/UI approval"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "id": "SOURCE_INTEGRITY",
+      "status": "PASS",
+      "detail": "658 canonical Git blobs all match SHA256, bytes and Git blob SHA1 before/after execution and independent review; selected materialization, not a full checkout",
+      "evidence": [
+        "source-integrity-before-execution.json",
+        "source-integrity-after-execution.json",
+        "source-integrity-final.json",
+        "independent-font-review.json"
+      ]
+    },
+    {
+      "id": "COLD_SERIAL_IMPORT",
+      "status": "PASS",
+      "detail": "Fresh .godot/cache, versioned import/use_multiple_threads=false retained; Godot4.6.3 Compatibility import exit0, no ERROR or SCRIPT ERROR",
+      "evidence": [
+        "import/command.json",
+        "import/stdout.log",
+        "import/stderr.log",
+        "environment.json"
+      ]
+    },
+    {
+      "id": "FROZEN_FONT_RUNTIME",
+      "status": "PASS",
+      "detail": "CR10_FONT_RUNTIME_RESULT failed=0; complete required 7476-codepoint union, ordinary Label/Button, M2/legacy/default/numeric/frozen chains and raw imported font properties tested; mixed metrics retained",
+      "evidence": [
+        "font-runtime/command.json",
+        "font-runtime/stdout.log",
+        "font-runtime/stderr.log"
+      ]
+    },
+    {
+      "id": "FORMAL_SCENE_BINDING",
+      "status": "PASS",
+      "detail": "Unmodified courtyard10x10 TacticalScene and original two spawns; frozen --check-scene exit0, binding pass",
+      "evidence": [
+        "scene-binding/command.json",
+        "scene-binding/stdout.log"
+      ]
+    },
+    {
+      "id": "NINE_NATIVE_CAPTURES",
+      "status": "PASS",
+      "detail": "3 states x 3 sizes; 9 original PNG and 9 SHA-bound JSON; image/window native sizes and single frame match; intended overlays and hidden marks agree; original pixels not reencoded",
+      "evidence": [
+        "captures/capture-metadata.json",
+        "capture/command.json",
+        "same-frame-validation.json",
+        "dimensions-adjudication.json",
+        "independent-font-review.json"
+      ]
+    },
+    {
+      "id": "PACKAGED_FONT_STATE",
+      "status": "PASS",
+      "detail": "All nine captured global/visible Label font chains disable system fallback; Label counts32/33/50 by state. Button and custom-drawn nodes are not individually enumerated by same-frame collector and are covered only by frozen runtime/resource checks plus actual image observation",
+      "evidence": [
+        "captures/capture-metadata.json",
+        "font-runtime/stdout.log",
+        "independent-font-review.json"
+      ]
+    },
+    {
+      "id": "C8_CAPTURE_CONFIGURATION",
+      "status": "PASS",
+      "detail": "Unmodified --c8-only full return pass=true; exit0; original manifest/image hashes retained",
+      "evidence": [
+        "c8-result.json",
+        "c8/command.json",
+        "c8/stdout.log",
+        "c8/stderr.log"
+      ]
+    },
+    {
+      "id": "INDEPENDENT_OBSERVED_CLOUD_FONT_VISUAL",
+      "status": "PASS",
+      "detail": "Each of nine original native images independently viewed. Observed Chinese strokes, full-width punctuation, mixed Latin/numerals, tooltip and inspection readable; no missing glyph boxes, clipped text or erroneous wrapping. This is limited to visible glyphs and cloud appearance",
+      "evidence": [
+        "independent-font-review.json"
+      ]
+    },
+    {
+      "id": "C4_CR24_PORTRAIT_TOP_SEAM",
+      "status": "FAIL",
+      "detail": "All nine unmodified original images fail c4_file: top panel-colour gap 1px at720p,2px at1080p/1440p. Other edge panel-colour gaps0. Frozen C4 returns retained; exit1. Existing CR24 not repaired by this font candidate",
+      "evidence": [
+        "c4/command.json",
+        "c4/stdout.log",
+        "c4/stderr.log"
+      ]
+    },
+    {
+      "id": "EMOJI_VISUAL_APPEARANCE",
+      "status": "NOT_TESTED",
+      "detail": "U+1F480 and U+1F48E absent from the nine frames; font coverage is tested but their actual monochrome appearance is not",
+      "evidence": [
+        "independent-font-review.json"
+      ]
+    },
+    {
+      "id": "WINDOWS_FONT_APPEARANCE",
+      "status": "NOT_TESTED",
+      "detail": "local_required; cloud Linux results cannot approve Windows Chinese appearance or font taste"
+    },
+    {
+      "id": "NATIVE_PHYSICAL_MOUSE_G4",
+      "status": "NOT_TESTED",
+      "detail": "Frozen collector uses Input.warp_mouse and root.push_input; not a physical mouse/Windows interaction or G4 reentry result"
+    },
+    {
+      "id": "HARDWARE_GPU_AUDIO_PERFORMANCE",
+      "status": "NOT_TESTED",
+      "detail": "llvmpipe software renderer and Dummy audio; V-Sync unsupported warning retained"
+    },
+    {
+      "id": "OTHER_DOMAIN_GATES",
+      "status": "NOT_TESTED",
+      "detail": "CR11 implementation, CR40 extra-position avoidance and terrain small-material readability outside this font collection; old G4 BLOCKED and original UI/P0 milestone remain unfinished"
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "code, fonts, geometry, bitmap assets, gameplay and old G4 records",
+      "result": "unchanged",
+      "evidence": "frozen21a sources unchanged; only current font run records edited"
+    },
+    {
+      "subject": "main checkout",
+      "result": "unchanged",
+      "evidence": "protected d18bd3d6bb3ce507112674e5f3a0aed7fc23f079; no writes"
+    }
+  ],
+  "residual_risks": [
+    "Windows font appearance and any required user visual approval pending",
+    "CR24 top gap remains",
+    "G4 old BLOCKED; CR40 avoidance/TERRAIN-READABILITY-01 unresolved",
+    "monochrome emoji appearance not observed"
+  ],
+  "escalation_reason": null,
+  "source_snapshot_or_commit": "21a77b91818fe0b71f5d9fbe684cc942250db0e2",
+  "source_schema_version": "sot-exact-readback-reference-map/1",
+  "normalized_digest": "exact SHA256/bytes per original in evidence-references.json",
+  "whole_cr10_completed": false,
+  "whole_ui_completed": false,
+  "p0_cr01_milestone_completed": false,
+  "publication": {
+    "published": false,
+    "remote_ref": null,
+    "pr": null
+  },
+  "independent_record_review": {
+    "result": "pass",
+    "record": "consumption-review.json"
+  },
+  "signed_consumer_receipt": {
+    "status": "receiver_verified_and_native_closed",
+    "record": "signed-consumer-receipt.json"
+  },
+  "record_base_head": "3d7494803cfe91e8d528467ad9ee00e316e2aff9",
+  "record_candidate_head": null,
+  "native_close_ack": {
+    "status": "closed",
+    "record": "verified-closure.json"
+  },
+  "independent_closing_review": {
+    "result": "pass",
+    "record": "final-close-review.json"
+  }
+}

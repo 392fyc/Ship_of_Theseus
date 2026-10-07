@@ -1,0 +1,87 @@
+{
+  "schema": "sot-independent-close-record-review/1",
+  "verdict": "pass",
+  "review_scope": {
+    "purpose": "CR-10 cloud attempt1 close-record increment only; no UI or font-art approval",
+    "candidate_commit": "21a77b91818fe0b71f5d9fbe684cc942250db0e2",
+    "candidate_tree": "682dd3579db930b4331f99b173b101cd984cce3c",
+    "reviewed_records": [
+      "cloud-attempt1/verified-closure.json",
+      "cloud-attempt1/signed-consumer-receipt.json",
+      "cloud-attempt1/acceptance.json",
+      "cloud-attempt1/report.md",
+      "cloud-attempt1/task-receipt.json",
+      "frozen-inputs.json",
+      "technical-task-receipt.json"
+    ],
+    "repository_files_modified_by_reviewer": 0
+  },
+  "criteria": [
+    {
+      "id": "close-ack-native-binding-and-identity-limits",
+      "verdict": "pass",
+      "evidence": [
+        "cloud-attempt1/verified-closure.json:10-30",
+        "raw/CLOSE_ACK.json: identity_verification, receiver_signature, source/recipient/reply thread and close metadata",
+        "native-close-events.json: paired completed root read call exec-1e97a128-2c6b-4570-b492-312c8b64497c and reference publication call exec-95a6ff18-db01-4327-b49a-6f4deffb3f93"
+      ],
+      "details": "The CLOSE_ACK original is 7205 bytes with SHA-256 7eaab1f88eada4f286a4494158938eabb5a1bb9a2585c8f258b974aff36ac2a4. The paired native root command output contains the exact raw original plus matching length/hash, and the completed reply event contains the exact close reference, bytes, hash, task/request, attempt, receipt request and seq28. Raw and local closure metadata agree on task 6f545bcc-9f5f-464d-9121-268410a71f02, request eb54a45c-070d-4ae5-affe-0e16011297d3, attempt 1, receipt request 155599eb-3487-4296-8904-fc3d93422604, seq28, close time and execution_count=1. Both explicitly state receiver_signature_present/signed=false and that Page authorship or hash alone does not authenticate the receiver."
+    },
+    {
+      "id": "signed-receipt-reference-and-routing",
+      "verdict": "pass",
+      "evidence": [
+        "cloud-attempt1/signed-consumer-receipt.json:4-35",
+        "cloud-attempt1/verified-closure.json:31-48",
+        "raw/CLOSE_ACK.json: receipt"
+      ],
+      "details": "The receipt original is 25002 bytes, SHA-256 2cae5244d6b2c7223cd1bb2fbcc94dd84b62be9a6bc4e1bc4d9cfe7a148a5313, and its signed-body SHA-256 is b5aed53372e72f737fef04b04d8cf88cbb7bce99dbfa626c49593bdd62abc444. Local receipt, closure, raw CLOSE_ACK and actual envelope agree on receipt reference, request, reply-to, attempt, sequence, candidate commit/tree and receiver-reported signature/expiry/nonce/native-route verification. The close source/recipient/reply binding is kept distinct from a receiver signature."
+    },
+    {
+      "id": "full-roundtrip-and-domain-state-preservation",
+      "verdict": "pass",
+      "evidence": [
+        "cloud-attempt1/verified-closure.json:73-124",
+        "cloud-attempt1/acceptance.json:73-76,161-195,212-245",
+        "cloud-attempt1/report.md:5,22-32",
+        "cloud-attempt1/task-receipt.json:3-4,213-237",
+        "frozen-inputs.json:25,79-83",
+        "technical-task-receipt.json:132-145"
+      ],
+      "details": "Records consistently state 106/106 originals and 127/127 chunks consumed; cloud-visible font observation PASS; frozen C4/CR-24 and full batch FAIL; Windows font, actual emoji appearance, and hardware NOT_TESTED/local-required; overall UI BLOCKED; whole CR10 and P0/CR-01 milestone false. They preserve unimplemented CR-11, CR-40 extra avoidance and TERRAIN-READABILITY-01, and distinguish the transport roundtrip completion from UI/domain acceptance."
+    },
+    {
+      "id": "review-and-delivery-gates",
+      "verdict": "pass",
+      "evidence": [
+        "cloud-attempt1/acceptance.json:207-245",
+        "cloud-attempt1/task-receipt.json:3-4,221-237",
+        "cloud-attempt1/report.md:30,34",
+        "git status --short and diff name/status in target worktree"
+      ],
+      "details": "The original consumption review, this final closing-record review, and user visual approval remain separate. The task receipt says completed only for original consumption/receipt/closure and identifies final closing review as a pending local-commit gate. The candidate object still resolves to commit 21a77b9 with tree 682dd357; the current worktree contains only the scoped evidence-record directory and the two declared parent-record edits, with no code/source changes. Publication and PR remain false."
+    }
+  ],
+  "findings": [],
+  "checks_performed": [
+    "Read the Mercury harness ownership contract; verified the current worktree HEAD and exact candidate Git object/tree.",
+    "Computed raw CLOSE_ACK and receipt envelope byte lengths and SHA-256; compared references to closure and receipt records.",
+    "Compared raw CLOSE_ACK task/request/attempt/seq/routing/close count, receipt ref, frozen verdicts and completion scope to local records.",
+    "Inspected only the paired native close command and reference-publication tool-call events; confirmed exact original output, completion, and reply arguments without reading agent messages or reasoning.",
+    "Checked the scoped worktree status and diffs for non-record/source changes; no repository files were edited by this reviewer."
+  ],
+  "not_covered": [
+    "Did not revalidate the unchanged 106 originals, 127 chunks, 658 Git source entries, nine images/states, C4/C8, font runtime, image appearance, Windows package or Windows/GPU/audio/performance.",
+    "Did not rerun tests or cryptographic signature verification; this was the requested metadata-only re-review, and receiver-reported verification is preserved as such."
+  ],
+  "residual_risk": [
+    "Cloud font observation is limited to visible cloud content. Windows appearance, actual emoji appearance and hardware remain untested/local-required.",
+    "C4/CR-24 remains FAIL; full batch and overall UI remain BLOCKED; whole CR10 and milestone remain incomplete. This report does not approve visuals or complete the pending repository-record gate by itself."
+  ],
+  "source_original": {
+    "file": "<仓库外证据根>/font-final-close-review.json",
+    "bytes": 6134,
+    "sha256": "1fae104adc790907044873da08957c4bf9351c3a84a1b2de399d3d3bea34c121",
+    "processing": "replace only local evidence/worktree roots with portable placeholders; original retained outside repository"
+  }
+}

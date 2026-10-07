@@ -1,0 +1,128 @@
+{
+  "schema": "sot-native-font-closure/1",
+  "task_id": "6f545bcc-9f5f-464d-9121-268410a71f02",
+  "request_id": "eb54a45c-070d-4ae5-affe-0e16011297d3",
+  "attempt": 1,
+  "receipt_request_id": "155599eb-3487-4296-8904-fc3d93422604",
+  "receipt_seq": 28,
+  "candidate_commit": "21a77b91818fe0b71f5d9fbe684cc942250db0e2",
+  "candidate_tree": "682dd3579db930b4331f99b173b101cd984cce3c",
+  "status": "closed",
+  "closed_at": "2026-10-07T05:30:10Z",
+  "execution_count": 1,
+  "original": {
+    "file": "<仓库外证据根>/raw/CLOSE_ACK.json",
+    "page_id": "page_19e4dc76712c8191b13b01673dd33c13",
+    "reference": "library-file:fde1_bGliZmlsZV9fVW1MaHl0elZLdnpYV09JelpsYllR_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+    "bytes": 7205,
+    "sha256": "7eaab1f88eada4f286a4494158938eabb5a1bb9a2585c8f258b974aff36ac2a4"
+  },
+  "exact_original_readback": "PASS",
+  "authentication": {
+    "source": "actual paired native ROOT original-read command and reference-publication tool event",
+    "source_thread_id": "01a0f14d-b108-766c-a16a-eb31b6d9a00d",
+    "host_id": "durable",
+    "native_turn_id": "01a114d5-d352-73cc-83f1-ca8c306f036d",
+    "native_original_read_call_id": "exec-1e97a128-2c6b-4570-b492-312c8b64497c",
+    "native_reference_publication_call_id": "exec-95a6ff18-db01-4327-b49a-6f4deffb3f93",
+    "native_events": "<仓库外证据根>/native-close-events.json",
+    "receiver_signature_present": false,
+    "page_authorship_or_SHA_alone_authenticates_receiver": false,
+    "local_history": "known unavailable; not retried or used as authorization"
+  },
+  "receiver_reported_consumer_identity_verification": "verified_fixed_key_complete_signature_expiry_nonce_native_routes",
+  "signed_receipt_original": {
+    "page_id": "page_19e4dc76712c8191b13b01673dd33c13",
+    "reference": "library-file:fde1_bGliZmlsZV9FbjVCcjZ0dlJWZ1RXXzJmbTRmR3R3_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+    "bytes": 25002,
+    "sha256": "2cae5244d6b2c7223cd1bb2fbcc94dd84b62be9a6bc4e1bc4d9cfe7a148a5313",
+    "signed_body_sha256": "b5aed53372e72f737fef04b04d8cf88cbb7bce99dbfa626c49593bdd62abc444",
+    "expires_at": "2026-10-07T06:27:44Z",
+    "native_source": {
+      "source": "Root directly observed current codex_delegation.source_thread_id and existing receiver-root binding, forwarded to this verifier",
+      "source_thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9",
+      "reply_thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9",
+      "recipient_thread_id": "01a0f14d-b108-766c-a16a-eb31b6d9a00d",
+      "native_message_id": null,
+      "native_message_id_status": "not_exposed",
+      "signed_and_native_source_match": true,
+      "local_history": "known_unavailable_not_retried"
+    }
+  },
+  "result_binding": {
+    "ROOT-RESULT.json": {
+      "bytes": 23378,
+      "page_id": "page_19e4dc76712c8191b13b01673dd33c13",
+      "reference": "library-file:fde1_bGliZmlsZV9FbzVOc0F5dVVmZGU1ZVdGNjBsY29R_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "sha256": "5dd8fb8da2960b4cdc95ba842a031d98dff76ac42dab2006fe1ef2264a14c1ee"
+    },
+    "delivery-index.json": {
+      "bytes": 1973,
+      "page_id": "page_19e4dc76712c8191b13b01673dd33c13",
+      "reference": "library-file:fde1_bGliZmlsZV94cnhodzNsNlFEQlZyc3dWbEc3VXpR_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "sha256": "cc6e4e1b0c0540829b6df8907bae98f367bc96d38e8d2b3097b0b4814abfbf7d"
+    },
+    "final-reference-map.json": {
+      "bytes": 102649,
+      "page_id": "page_19e4dc76712c8191b13b01673dd33c13",
+      "reference": "library-file:fde1_bGliZmlsZV93SFd6S2Q3a1ZEZ0xORHZycVJZQkhn_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "sha256": "61d573d38d3111a326a46d35ba9a37804083af8d1daefaf30df956f121f02140"
+    }
+  },
+  "consumption_verified": {
+    "bytes": 42967521,
+    "chunks_required": 127,
+    "chunks_verified": 127,
+    "complete_original_delivery": true,
+    "missing": [],
+    "raw_png": 9,
+    "required": 106,
+    "same_frame_json": 9,
+    "supplementary_crops": 3,
+    "transport_maps_verified": 7,
+    "verified": 106,
+    "zero_bytes": 18
+  },
+  "receiver_frozen_verdicts": {
+    "domain_verdict": "FAIL",
+    "cr10_cloud_font_verdict": "PASS",
+    "failure": "All nine original images retain C4 / existing CR24 top seam failure: 1px at720p and2px at1080p/1440p; other measured edges0",
+    "original_RESULT_unchanged": true,
+    "original_RESULT_receipt_status_is_historical": "not_received; this separate close acknowledgement supersedes only transport lifecycle status"
+  },
+  "signed_consumer_judgment": {
+    "C4": "FAIL_9_top1_2_2_other0",
+    "C8": "PASS_cloud_and_local",
+    "Windows_font_appearance": "NOT_TESTED_local_required",
+    "complete_original_delivery": true,
+    "domain_batch": "FAIL_C4_CR24",
+    "emoji_appearance": "NOT_TESTED",
+    "hardware": "NOT_TESTED_local_required",
+    "milestone_completed": false,
+    "observed_cloud_font": "PASS",
+    "overall_UI": "BLOCKED",
+    "production_modified_by_consumer": false,
+    "runtime": "PASS_failed0",
+    "same_frame_signed_scope": "PASS_9",
+    "source_integrity": "PASS_658",
+    "user_visual_approval": "not_requested_or_assumed",
+    "whole_CR10_completed": false
+  },
+  "preservation": {
+    "originals": 106,
+    "original_bytes": 42967521,
+    "selected_sources": 658,
+    "all_originals_and_snapshots_unchanged": true,
+    "source_modification": false,
+    "godot_rerun": false,
+    "duplicate_execution": false,
+    "new_task_created": false,
+    "old_G4_records_unchanged": true,
+    "dedup_records_retained": true
+  },
+  "completion_scope": "Only original evidence-consumption roundtrip; no Windows/UI visual approval or milestone completion",
+  "publication": {
+    "published": false,
+    "pr": null
+  }
+}

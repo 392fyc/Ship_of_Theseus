@@ -1,0 +1,466 @@
+{
+  "local_full_return": {
+    "scripts": [
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_action_resource_bar_tactical.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_battlefield_environment_motion.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_courtyard_material_intake.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_courtyard_visual_review.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_hud_character_panel.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_hud_crest_candidate.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_hud_final_acceptance.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_hud_freeze.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_hud_number_candidate.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_kensei_map_token_tactical.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/claude_review/capture_battle_overlays.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/claude_review/capture_cr10_font_frames.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/claude_review/capture_metadata.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/claude_review/capture_run_flow_ui.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [
+          58
+        ],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/claude_review/capture_scene_native.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/test_battlefield_courtyard.gd"
+      },
+      {
+        "unconditional_disable_lines": [
+          36
+        ],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": true,
+        "pass": true,
+        "script": "tests/test_courtyard_terrain_adjacency.gd"
+      },
+      {
+        "unconditional_disable_lines": [
+          71
+        ],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": true,
+        "pass": true,
+        "script": "tests/test_courtyard_water_depth_continuity.gd"
+      },
+      {
+        "unconditional_disable_lines": [
+          127
+        ],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": true,
+        "pass": true,
+        "script": "tests/test_courtyard_water_visual_contract.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/test_terrain_battle_runtime.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/test_terrain_kit.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/test_terrain_map_size.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/test_terrain_painter.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/test_terrain_painter_battle_flow.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "dev_doc/ui-art-research/hud-myrmidon-portrait/capture_review.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "dev_doc/ui-art-research/myrmidon-skill-icons/capture_candidate.gd"
+      }
+    ],
+    "manifests": [
+      {
+        "manifest": "capture-metadata.json",
+        "project_renderer": "gl_compatibility",
+        "renderer": "gl_compatibility",
+        "capture_count": 9,
+        "mismatches": [],
+        "pass": true
+      }
+    ],
+    "calibration": {
+      "cases": {
+        "正例：文件头已声明": {
+          "unconditional_disable_lines": [
+            4
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": true,
+          "pass": true
+        },
+        "反例：注释含关键字但无条件关闭": {
+          "unconditional_disable_lines": [
+            4
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false
+        },
+        "正例：条件分支内的对照模式": {
+          "unconditional_disable_lines": [],
+          "conditional_disable_lines": [
+            4
+          ],
+          "declared_not_runtime": false,
+          "pass": true
+        }
+      },
+      "calibration_ok": true
+    },
+    "pass": true
+  },
+  "cloud_full_return": {
+    "scripts": [
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_action_resource_bar_tactical.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_battlefield_environment_motion.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_courtyard_material_intake.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_courtyard_visual_review.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_hud_character_panel.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_hud_crest_candidate.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_hud_final_acceptance.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_hud_freeze.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_hud_number_candidate.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/capture_kensei_map_token_tactical.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/claude_review/capture_battle_overlays.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/claude_review/capture_cr10_font_frames.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/claude_review/capture_metadata.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/claude_review/capture_run_flow_ui.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [
+          58
+        ],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/claude_review/capture_scene_native.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/test_battlefield_courtyard.gd"
+      },
+      {
+        "unconditional_disable_lines": [
+          36
+        ],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": true,
+        "pass": true,
+        "script": "tests/test_courtyard_terrain_adjacency.gd"
+      },
+      {
+        "unconditional_disable_lines": [
+          71
+        ],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": true,
+        "pass": true,
+        "script": "tests/test_courtyard_water_depth_continuity.gd"
+      },
+      {
+        "unconditional_disable_lines": [
+          127
+        ],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": true,
+        "pass": true,
+        "script": "tests/test_courtyard_water_visual_contract.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/test_terrain_battle_runtime.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/test_terrain_kit.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/test_terrain_map_size.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/test_terrain_painter.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/test_terrain_painter_battle_flow.gd"
+      },
+      {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "dev_doc/ui-art-research/hud-myrmidon-portrait/capture_review.gd"
+      }
+    ],
+    "manifests": [
+      {
+        "manifest": "capture-metadata.json",
+        "project_renderer": "gl_compatibility",
+        "renderer": "gl_compatibility",
+        "capture_count": 9,
+        "mismatches": [],
+        "pass": true
+      }
+    ],
+    "calibration": {
+      "cases": {
+        "正例：文件头已声明": {
+          "unconditional_disable_lines": [
+            4
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": true,
+          "pass": true
+        },
+        "反例：注释含关键字但无条件关闭": {
+          "unconditional_disable_lines": [
+            4
+          ],
+          "conditional_disable_lines": [],
+          "declared_not_runtime": false,
+          "pass": false
+        },
+        "正例：条件分支内的对照模式": {
+          "unconditional_disable_lines": [],
+          "conditional_disable_lines": [
+            4
+          ],
+          "declared_not_runtime": false,
+          "pass": true
+        }
+      },
+      "calibration_ok": true
+    },
+    "pass": true
+  },
+  "local_result": "PASS",
+  "cloud_result": "PASS",
+  "scope": "Local scans the complete worktree; cloud scans 658 selected canonical blobs. Original file paths replaced with portable root placeholders only in this record."
+}

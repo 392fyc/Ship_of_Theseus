@@ -1,0 +1,380 @@
+{
+  "count": 9,
+  "signed_native_size_and_same_frame_checks": "PASS",
+  "four_API_dimensions_recorded": true,
+  "captures": [
+    {
+      "capture_group": "font-normal",
+      "frame_binding": {
+        "end": 72,
+        "phase": "frame_post_draw",
+        "start": 72
+      },
+      "window_size": [
+        1280,
+        720
+      ],
+      "viewport_size": [
+        1280.0,
+        720.0
+      ],
+      "texture_size": [
+        1280,
+        720
+      ],
+      "image_size": [
+        1280,
+        720
+      ],
+      "map_size": [
+        10,
+        10
+      ],
+      "runtime_scene": "res://scenes/tactical/TacticalScene.tscn",
+      "example": "courtyard",
+      "input_origin": "script_warp_and_push_input",
+      "marks_visible": false,
+      "tooltip_visible": false,
+      "inspection_visible": false,
+      "system_fallback_disabled": true,
+      "file": "font-normal-1280x720.png",
+      "sha256": "123ec5a965b2388a0c02a662e9bbc1f1ce606a4b742d9b3fe1a2b9b2b8e3c7e7",
+      "state_file": "font-normal-1280x720.json",
+      "state_sha256": "f41a4eb49a8c7f0fb0ad13a9330e7de8e7b50dfa4f27fce5e0fab47d2cac6f44",
+      "visible_label_count": 32,
+      "packaged_font_chains_no_system_fallback": true
+    },
+    {
+      "capture_group": "font-skill-tooltip",
+      "frame_binding": {
+        "end": 174,
+        "phase": "frame_post_draw",
+        "start": 174
+      },
+      "window_size": [
+        1280,
+        720
+      ],
+      "viewport_size": [
+        1280.0,
+        720.0
+      ],
+      "texture_size": [
+        1280,
+        720
+      ],
+      "image_size": [
+        1280,
+        720
+      ],
+      "map_size": [
+        10,
+        10
+      ],
+      "runtime_scene": "res://scenes/tactical/TacticalScene.tscn",
+      "example": "courtyard",
+      "input_origin": "script_warp_and_push_input",
+      "marks_visible": false,
+      "tooltip_visible": true,
+      "inspection_visible": false,
+      "system_fallback_disabled": true,
+      "file": "font-skill-tooltip-1280x720.png",
+      "sha256": "e3109984e6107862de1c62a2c3beba5b4e1e5bcdb9a7e08ba2e5becded584461",
+      "state_file": "font-skill-tooltip-1280x720.json",
+      "state_sha256": "5c072902061c4e77ede471058384ac500953dd38f927a8a0f73fe59878d1fc87",
+      "visible_label_count": 33,
+      "packaged_font_chains_no_system_fallback": true
+    },
+    {
+      "capture_group": "font-portrait-inspection",
+      "frame_binding": {
+        "end": 204,
+        "phase": "frame_post_draw",
+        "start": 204
+      },
+      "window_size": [
+        1280,
+        720
+      ],
+      "viewport_size": [
+        1280.0,
+        720.0
+      ],
+      "texture_size": [
+        1280,
+        720
+      ],
+      "image_size": [
+        1280,
+        720
+      ],
+      "map_size": [
+        10,
+        10
+      ],
+      "runtime_scene": "res://scenes/tactical/TacticalScene.tscn",
+      "example": "courtyard",
+      "input_origin": "script_warp_and_push_input",
+      "marks_visible": false,
+      "tooltip_visible": false,
+      "inspection_visible": true,
+      "system_fallback_disabled": true,
+      "file": "font-portrait-inspection-1280x720.png",
+      "sha256": "1bbd6bcbe5cfe15ee0906898ebb1bb4158866b07682725544a2da81386e89a97",
+      "state_file": "font-portrait-inspection-1280x720.json",
+      "state_sha256": "c7e16415e3a53c2efd1699d76ff8e1cd56b6334224ea0c0150609d8c21788468",
+      "visible_label_count": 50,
+      "packaged_font_chains_no_system_fallback": true
+    },
+    {
+      "capture_group": "font-normal",
+      "frame_binding": {
+        "end": 280,
+        "phase": "frame_post_draw",
+        "start": 280
+      },
+      "window_size": [
+        1920,
+        1080
+      ],
+      "viewport_size": [
+        1280.0,
+        720.0
+      ],
+      "texture_size": [
+        2880,
+        1620
+      ],
+      "image_size": [
+        1920,
+        1080
+      ],
+      "map_size": [
+        10,
+        10
+      ],
+      "runtime_scene": "res://scenes/tactical/TacticalScene.tscn",
+      "example": "courtyard",
+      "input_origin": "script_warp_and_push_input",
+      "marks_visible": false,
+      "tooltip_visible": false,
+      "inspection_visible": false,
+      "system_fallback_disabled": true,
+      "file": "font-normal-1920x1080.png",
+      "sha256": "f0aa5ef121b55e9dc2973de2785201d84a6b4f2feb95110c2a7d474e165e950b",
+      "state_file": "font-normal-1920x1080.json",
+      "state_sha256": "3918b7dfae59f1f0b0cbcac830dee755b901ff5a9cd0f2fcd716a34756b8961f",
+      "visible_label_count": 32,
+      "packaged_font_chains_no_system_fallback": true
+    },
+    {
+      "capture_group": "font-skill-tooltip",
+      "frame_binding": {
+        "end": 382,
+        "phase": "frame_post_draw",
+        "start": 382
+      },
+      "window_size": [
+        1920,
+        1080
+      ],
+      "viewport_size": [
+        1280.0,
+        720.0
+      ],
+      "texture_size": [
+        2880,
+        1620
+      ],
+      "image_size": [
+        1920,
+        1080
+      ],
+      "map_size": [
+        10,
+        10
+      ],
+      "runtime_scene": "res://scenes/tactical/TacticalScene.tscn",
+      "example": "courtyard",
+      "input_origin": "script_warp_and_push_input",
+      "marks_visible": false,
+      "tooltip_visible": true,
+      "inspection_visible": false,
+      "system_fallback_disabled": true,
+      "file": "font-skill-tooltip-1920x1080.png",
+      "sha256": "c03356947f9fbd257eb13e38210cfcc01622ba5a6dda0ddf41e331470074e4e4",
+      "state_file": "font-skill-tooltip-1920x1080.json",
+      "state_sha256": "8873e55ccb933b7cca518cbeffdc46c950a3ea99c4da9a2ee06323059808c6ad",
+      "visible_label_count": 33,
+      "packaged_font_chains_no_system_fallback": true
+    },
+    {
+      "capture_group": "font-portrait-inspection",
+      "frame_binding": {
+        "end": 412,
+        "phase": "frame_post_draw",
+        "start": 412
+      },
+      "window_size": [
+        1920,
+        1080
+      ],
+      "viewport_size": [
+        1280.0,
+        720.0
+      ],
+      "texture_size": [
+        2880,
+        1620
+      ],
+      "image_size": [
+        1920,
+        1080
+      ],
+      "map_size": [
+        10,
+        10
+      ],
+      "runtime_scene": "res://scenes/tactical/TacticalScene.tscn",
+      "example": "courtyard",
+      "input_origin": "script_warp_and_push_input",
+      "marks_visible": false,
+      "tooltip_visible": false,
+      "inspection_visible": true,
+      "system_fallback_disabled": true,
+      "file": "font-portrait-inspection-1920x1080.png",
+      "sha256": "2c3ad26feae7ec2fc39cf6918338b57dc2db00677d71559d49a7787b7741cacf",
+      "state_file": "font-portrait-inspection-1920x1080.json",
+      "state_sha256": "73243b7073513a4f82faa33cbe72bb50bc1d8d185c259cca011e5eb00da6f40c",
+      "visible_label_count": 50,
+      "packaged_font_chains_no_system_fallback": true
+    },
+    {
+      "capture_group": "font-normal",
+      "frame_binding": {
+        "end": 488,
+        "phase": "frame_post_draw",
+        "start": 488
+      },
+      "window_size": [
+        2560,
+        1440
+      ],
+      "viewport_size": [
+        1280.0,
+        720.0
+      ],
+      "texture_size": [
+        5120,
+        2880
+      ],
+      "image_size": [
+        2560,
+        1440
+      ],
+      "map_size": [
+        10,
+        10
+      ],
+      "runtime_scene": "res://scenes/tactical/TacticalScene.tscn",
+      "example": "courtyard",
+      "input_origin": "script_warp_and_push_input",
+      "marks_visible": false,
+      "tooltip_visible": false,
+      "inspection_visible": false,
+      "system_fallback_disabled": true,
+      "file": "font-normal-2560x1440.png",
+      "sha256": "c137bdf7558ebd7a8bb04d99ca0093824ffa35d1b503bce4814d9a2fc7b0563c",
+      "state_file": "font-normal-2560x1440.json",
+      "state_sha256": "1b5e3d7142610b3b0232e857e855c33745bbd6b34af039aac838ccd7aacede88",
+      "visible_label_count": 32,
+      "packaged_font_chains_no_system_fallback": true
+    },
+    {
+      "capture_group": "font-skill-tooltip",
+      "frame_binding": {
+        "end": 590,
+        "phase": "frame_post_draw",
+        "start": 590
+      },
+      "window_size": [
+        2560,
+        1440
+      ],
+      "viewport_size": [
+        1280.0,
+        720.0
+      ],
+      "texture_size": [
+        5120,
+        2880
+      ],
+      "image_size": [
+        2560,
+        1440
+      ],
+      "map_size": [
+        10,
+        10
+      ],
+      "runtime_scene": "res://scenes/tactical/TacticalScene.tscn",
+      "example": "courtyard",
+      "input_origin": "script_warp_and_push_input",
+      "marks_visible": false,
+      "tooltip_visible": true,
+      "inspection_visible": false,
+      "system_fallback_disabled": true,
+      "file": "font-skill-tooltip-2560x1440.png",
+      "sha256": "6604d0bf28b6e0f5d6be60ff8bf918dc65f35dcf316125afb7acf43cb8fc71b4",
+      "state_file": "font-skill-tooltip-2560x1440.json",
+      "state_sha256": "339ca7e7b31f8730c2a735d221bb9cec0b29bc48cea32975d7aa60fede77d96f",
+      "visible_label_count": 33,
+      "packaged_font_chains_no_system_fallback": true
+    },
+    {
+      "capture_group": "font-portrait-inspection",
+      "frame_binding": {
+        "end": 620,
+        "phase": "frame_post_draw",
+        "start": 620
+      },
+      "window_size": [
+        2560,
+        1440
+      ],
+      "viewport_size": [
+        1280.0,
+        720.0
+      ],
+      "texture_size": [
+        5120,
+        2880
+      ],
+      "image_size": [
+        2560,
+        1440
+      ],
+      "map_size": [
+        10,
+        10
+      ],
+      "runtime_scene": "res://scenes/tactical/TacticalScene.tscn",
+      "example": "courtyard",
+      "input_origin": "script_warp_and_push_input",
+      "marks_visible": false,
+      "tooltip_visible": false,
+      "inspection_visible": true,
+      "system_fallback_disabled": true,
+      "file": "font-portrait-inspection-2560x1440.png",
+      "sha256": "e9cb7573d61fb999fd3218662c3c591a6dcd3ea0f935b0758111163a650defa5",
+      "state_file": "font-portrait-inspection-2560x1440.json",
+      "state_sha256": "286ae4562854b1da86b9718a815e92f0a5b0ff4a314790ebda22ecd69e767939",
+      "visible_label_count": 50,
+      "packaged_font_chains_no_system_fallback": true
+    }
+  ],
+  "initial_stricter_wrapper_all_pass": false,
+  "initial_wrapper_original": "cr10-attempt1/same-frame-validation.json",
+  "adjudication_original": "cr10-attempt1/dimensions-adjudication.json",
+  "note": "Initial wrapper additionally required Texture API dimensions equal PNG. This was not a signed or frozen-collector criterion. Its false result and original adjudication are retained. Window/Image/PNG and single-frame checks pass; API ratios are observations, not a demonstrated causal diagnosis. Visible Label only; Button/custom draws use runtime/resource checks and visual observation."
+}

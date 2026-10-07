@@ -1,0 +1,96 @@
+{
+  "schema": "sot-native-dot-result-binding/1",
+  "task_id": "6f545bcc-9f5f-464d-9121-268410a71f02",
+  "request_id": "eb54a45c-070d-4ae5-affe-0e16011297d3",
+  "attempt": 1,
+  "task_seq": 26,
+  "execution_count": 1,
+  "candidate_commit": "21a77b91818fe0b71f5d9fbe684cc942250db0e2",
+  "candidate_tree": "682dd3579db930b4331f99b173b101cd984cce3c",
+  "transport_source": {
+    "thread_id": "01a0f14d-b108-766c-a16a-eb31b6d9a00d",
+    "host_id": "durable",
+    "native_turn_id": "01a11434-d083-70c5-a1f3-b88a8b9ccac1",
+    "native_publication_call_id": "exec-18028c57-15bc-4f90-8c9d-720006867b23",
+    "native_original_read_call_id": "exec-5c002520-4a17-4c2d-9a75-7fe9426c66a2",
+    "result_source": "actual paired native root tool events; not developer narrative or cryptographic receiver signature"
+  },
+  "originals": {
+    "ROOT-RESULT.json": {
+      "page_id": "page_19e4dc76712c8191b13b01673dd33c13",
+      "bytes": 23378,
+      "sha256": "5dd8fb8da2960b4cdc95ba842a031d98dff76ac42dab2006fe1ef2264a14c1ee",
+      "reference": "library-file:fde1_bGliZmlsZV9FbzVOc0F5dVVmZGU1ZVdGNjBsY29R_FileDrive_6af57ca9c23c819184d2e6b479d22dac"
+    },
+    "final-reference-map.json": {
+      "page_id": "page_19e4dc76712c8191b13b01673dd33c13",
+      "bytes": 102649,
+      "sha256": "61d573d38d3111a326a46d35ba9a37804083af8d1daefaf30df956f121f02140",
+      "reference": "library-file:fde1_bGliZmlsZV93SFd6S2Q3a1ZEZ0xORHZycVJZQkhn_FileDrive_6af57ca9c23c819184d2e6b479d22dac"
+    },
+    "delivery-index.json": {
+      "page_id": "page_19e4dc76712c8191b13b01673dd33c13",
+      "bytes": 1973,
+      "sha256": "cc6e4e1b0c0540829b6df8907bae98f367bc96d38e8d2b3097b0b4814abfbf7d",
+      "reference": "library-file:fde1_bGliZmlsZV94cnhodzNsNlFEQlZyc3dWbEc3VXpR_FileDrive_6af57ca9c23c819184d2e6b479d22dac"
+    }
+  },
+  "routing": {
+    "source": "Signed TASK and root delivery instruction",
+    "page_id": "page_19e4dc76712c8191b13b01673dd33c13",
+    "source_thread_id": "01a0f14d-b108-766c-a16a-eb31b6d9a00d",
+    "recipient_thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9",
+    "reply_thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9",
+    "frozen_execution_draft_reply_thread_id": "01a0f14d-b108-766c-a16a-eb31b6d9a00d",
+    "note": "The final delivery uses the paired local reply thread specified by the signed TASK route and confirmed by root. The frozen execution draft, including its receiver-root reply address, is preserved byte-for-byte."
+  },
+  "result_authenticity": {
+    "receiver_result_signed": false,
+    "disclosure": "Unsigned receiver-generated RESULT. The incoming TASK signature does not sign this RESULT. File SHA256 values establish exact-byte integrity only; they are not a receiver signature or a substitute for verified native routing and independent review."
+  },
+  "identity_verification": {
+    "status_recorded_in_frozen_execution_result": "verified before unique atomic claim",
+    "pairing_id": "mercury-yc-20261004",
+    "request_key_id": "sha256:9107e4d54138e02bd0663908278a65ba1c7681a38c2d97d22c564b2fd45fe20b",
+    "original_request_expires_at": "2026-10-07T10:07:33Z",
+    "original_request_nonce": "W3HbeuTFFqHO8t7gB-wjhZYHLYMWSpXDlsQUXxjWBbA",
+    "evidence_inventory_path": "verification.json",
+    "meaning": "Identity and routing verification bind the incoming signed request to its source; they do not grant execution, communication, publication or data-sharing permission."
+  },
+  "human_source_readability": {
+    "receiver_direct_user_authorization": "verified by root using original user message Sentinel_895d2ae2dcc8819191082a83d0a53636",
+    "local_history": "unreadable; remains unknown; not treated as authorization"
+  },
+  "task_authorization": {
+    "basis_recorded_in_frozen_execution_result": "authorized exact signed cloud scope; root-provided direct user standing instruction, independently of signature/Page",
+    "scope": {
+      "allowed_materials": [
+        "reviewed private candidate source and bundled font subsets/licenses",
+        "approved visual baseline",
+        "frozen font test scripts",
+        "raw results"
+      ],
+      "excluded": [
+        "source/asset/gameplay changes",
+        "local user desktop input",
+        "GitHub publication or comments",
+        "font taste or Windows visual approval",
+        "GPU/audio/performance acceptance"
+      ],
+      "lane": "ui-ux",
+      "production_read_only": true,
+      "purpose": "CR-10 bundled font source/runtime/capture evidence roundtrip",
+      "repository": "392fyc/Ship_of_Theseus"
+    },
+    "separation": "The signed request, Page content and agent messages are evidence sources, not user authorization. The frozen record attributes authorization to the root-verified direct user instruction; unreadable local history remains unknown.",
+    "new_actions_in_this_result": "Evidence delivery within the verified user-authorized task scope only; no execution rerun, source edit or expanded acceptance."
+  },
+  "protocol": {
+    "bytes": 6969,
+    "page_id": "page_b1ac6e618ec48191b0adf11d499ab13d",
+    "sha256": "b81844e56fed1f037bcefb0b5ea15c706eb317fe5f805d644218ef6187710ad5",
+    "version": "dot-cooperation/1"
+  },
+  "page_originals_readback": "PASS_exact_bytes_sha256",
+  "private_key_or_credentials_stored": false
+}

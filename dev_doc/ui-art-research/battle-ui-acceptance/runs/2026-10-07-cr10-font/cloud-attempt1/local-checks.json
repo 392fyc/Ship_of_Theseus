@@ -1,0 +1,210 @@
+{
+  "candidate_commit": "21a77b91818fe0b71f5d9fbe684cc942250db0e2",
+  "candidate_tree": "682dd3579db930b4331f99b173b101cd984cce3c",
+  "originals": {
+    "verified": 106,
+    "required": 106,
+    "bytes": 42967521,
+    "zero_bytes": 18,
+    "raw_png": 9,
+    "same_frame_json": 9,
+    "supplementary_crops": 3,
+    "missing": []
+  },
+  "chunks": {
+    "verified": 127,
+    "required": 127
+  },
+  "source": "PASS_658",
+  "same_frame_signed_requirements": "PASS_9",
+  "initial_wrapper_all_pass": false,
+  "C4": "FAIL_9_CR24",
+  "C8": "PASS_CLOUD_AND_LOCAL",
+  "runtime": "PASS_failed0",
+  "commands": [
+    {
+      "name": "import",
+      "argv": [
+        "<Godot 4.6.3 Linux 可执行文件>",
+        "--headless",
+        "--editor",
+        "--import",
+        "--quit",
+        "--rendering-method",
+        "gl_compatibility",
+        "--path",
+        "<云端任务根>/candidate"
+      ],
+      "command": "<Godot 4.6.3 Linux 可执行文件> --headless --editor --import --quit --rendering-method gl_compatibility --path <云端任务根>/candidate",
+      "cwd": "<云端任务根>/candidate",
+      "started_at": "2026-10-07T04:17:17.293676+00:00",
+      "environment": {
+        "DISPLAY": ":0",
+        "LANG": "C.UTF-8",
+        "LC_ALL": null,
+        "TZ": "America/Argentina/Buenos_Aires",
+        "XDG_RUNTIME_DIR": "/dev/shm/codex-orbit-desktop/runtime-CP2kps",
+        "XDG_CACHE_HOME": "<云端任务根>/cr10-attempt1/cache",
+        "XDG_DATA_HOME": "<云端任务根>/cr10-attempt1/user-data",
+        "XDG_CONFIG_HOME": "<云端任务根>/cr10-attempt1/config"
+      },
+      "input_origin": "cloud_terminal_command; frozen collector uses script_warp_and_push_input",
+      "exit_code": 0,
+      "ended_at": "2026-10-07T04:17:31.251371+00:00",
+      "duration_seconds": 13.957638740999755,
+      "error_lines": [],
+      "clean_pass": true
+    },
+    {
+      "name": "font-runtime",
+      "argv": [
+        "<Godot 4.6.3 Linux 可执行文件>",
+        "--headless",
+        "--path",
+        "<云端任务根>/candidate",
+        "--rendering-method",
+        "gl_compatibility",
+        "--script",
+        "res://tests/claude_review/cr10_font_runtime_check.gd"
+      ],
+      "command": "<Godot 4.6.3 Linux 可执行文件> --headless --path <云端任务根>/candidate --rendering-method gl_compatibility --script res://tests/claude_review/cr10_font_runtime_check.gd",
+      "cwd": "<云端任务根>/candidate",
+      "started_at": "2026-10-07T04:17:31.252407+00:00",
+      "environment": {
+        "DISPLAY": ":0",
+        "LANG": "C.UTF-8",
+        "LC_ALL": null,
+        "TZ": "America/Argentina/Buenos_Aires",
+        "XDG_RUNTIME_DIR": "/dev/shm/codex-orbit-desktop/runtime-CP2kps",
+        "XDG_CACHE_HOME": "<云端任务根>/cr10-attempt1/cache",
+        "XDG_DATA_HOME": "<云端任务根>/cr10-attempt1/user-data",
+        "XDG_CONFIG_HOME": "<云端任务根>/cr10-attempt1/config"
+      },
+      "input_origin": "cloud_terminal_command; frozen collector uses script_warp_and_push_input",
+      "exit_code": 0,
+      "ended_at": "2026-10-07T04:17:31.619030+00:00",
+      "duration_seconds": 0.3665839920013241,
+      "error_lines": [],
+      "clean_pass": true
+    },
+    {
+      "name": "scene-binding",
+      "argv": [
+        "<Godot 4.6.3 Linux 可执行文件>",
+        "--headless",
+        "--path",
+        "<云端任务根>/candidate",
+        "--rendering-method",
+        "gl_compatibility",
+        "--script",
+        "res://tests/claude_review/capture_cr10_font_frames.gd",
+        "--",
+        "--check-scene"
+      ],
+      "command": "<Godot 4.6.3 Linux 可执行文件> --headless --path <云端任务根>/candidate --rendering-method gl_compatibility --script res://tests/claude_review/capture_cr10_font_frames.gd -- --check-scene",
+      "cwd": "<云端任务根>/candidate",
+      "started_at": "2026-10-07T04:17:31.619596+00:00",
+      "environment": {
+        "DISPLAY": ":0",
+        "LANG": "C.UTF-8",
+        "LC_ALL": null,
+        "TZ": "America/Argentina/Buenos_Aires",
+        "XDG_RUNTIME_DIR": "/dev/shm/codex-orbit-desktop/runtime-CP2kps",
+        "XDG_CACHE_HOME": "<云端任务根>/cr10-attempt1/cache",
+        "XDG_DATA_HOME": "<云端任务根>/cr10-attempt1/user-data",
+        "XDG_CONFIG_HOME": "<云端任务根>/cr10-attempt1/config"
+      },
+      "input_origin": "cloud_terminal_command; frozen collector uses script_warp_and_push_input",
+      "exit_code": 0,
+      "ended_at": "2026-10-07T04:17:33.943167+00:00",
+      "duration_seconds": 2.323487436000505,
+      "error_lines": [],
+      "clean_pass": true
+    },
+    {
+      "name": "capture",
+      "argv": [
+        "<Godot 4.6.3 Linux 可执行文件>",
+        "--path",
+        "<云端任务根>/candidate",
+        "--rendering-method",
+        "gl_compatibility",
+        "--audio-driver",
+        "Dummy",
+        "--script",
+        "res://tests/claude_review/capture_cr10_font_frames.gd",
+        "--",
+        "--output=<云端任务根>/cr10-attempt1/captures"
+      ],
+      "command": "<Godot 4.6.3 Linux 可执行文件> --path <云端任务根>/candidate --rendering-method gl_compatibility --audio-driver Dummy --script res://tests/claude_review/capture_cr10_font_frames.gd -- --output=<云端任务根>/cr10-attempt1/captures",
+      "cwd": "<云端任务根>/candidate",
+      "started_at": "2026-10-07T04:18:08.247803+00:00",
+      "environment": {
+        "DISPLAY": ":0",
+        "LANG": "C.UTF-8",
+        "LC_ALL": null,
+        "TZ": "America/Argentina/Buenos_Aires",
+        "XDG_RUNTIME_DIR": "/dev/shm/codex-orbit-desktop/runtime-CP2kps",
+        "XDG_CACHE_HOME": "<云端任务根>/cr10-attempt1/cache",
+        "XDG_DATA_HOME": "<云端任务根>/cr10-attempt1/user-data",
+        "XDG_CONFIG_HOME": "<云端任务根>/cr10-attempt1/config"
+      },
+      "input_origin": "cloud_terminal_command; frozen collector uses script_warp_and_push_input",
+      "exit_code": 0,
+      "ended_at": "2026-10-07T04:18:52.432639+00:00",
+      "duration_seconds": 44.18476319199908,
+      "error_lines": [],
+      "clean_pass": true
+    },
+    {
+      "name": "c4",
+      "command": "python3 -c 'import sys,json,pathlib;sys.path.insert(0,sys.argv[1]);from claude_review_checks import c4_file;fs=sorted(pathlib.Path(sys.argv[2]).glob(\"*.png\"));r={\"method\":\"unmodified frozen c4_file on all original captures\",\"count\":len(fs),\"results\":[c4_file(p) for p in fs]};print(json.dumps(r,ensure_ascii=False,indent=2));sys.exit(0 if len(fs)==9 and all(x[\"pass\"] for x in r[\"results\"]) else 1)' <云端任务根>/candidate/tests/claude_review <云端任务根>/cr10-attempt1/captures",
+      "argv": [
+        "python3",
+        "-c",
+        "import sys,json,pathlib;sys.path.insert(0,sys.argv[1]);from claude_review_checks import c4_file;fs=sorted(pathlib.Path(sys.argv[2]).glob(\"*.png\"));r={\"method\":\"unmodified frozen c4_file on all original captures\",\"count\":len(fs),\"results\":[c4_file(p) for p in fs]};print(json.dumps(r,ensure_ascii=False,indent=2));sys.exit(0 if len(fs)==9 and all(x[\"pass\"] for x in r[\"results\"]) else 1)",
+        "<云端任务根>/candidate/tests/claude_review",
+        "<云端任务根>/cr10-attempt1/captures"
+      ],
+      "cwd": "<云端任务根>/candidate",
+      "started_at": "2026-10-07T04:19:11.124227+00:00",
+      "exit_code": 1,
+      "ended_at": "2026-10-07T04:19:11.804419+00:00"
+    },
+    {
+      "name": "c8",
+      "command": "python3 <云端任务根>/candidate/tests/claude_review/claude_review_checks.py --c8-only --manifests <云端任务根>/cr10-attempt1/captures/capture-metadata.json --json <云端任务根>/cr10-attempt1/c8-result.json",
+      "argv": [
+        "python3",
+        "<云端任务根>/candidate/tests/claude_review/claude_review_checks.py",
+        "--c8-only",
+        "--manifests",
+        "<云端任务根>/cr10-attempt1/captures/capture-metadata.json",
+        "--json",
+        "<云端任务根>/cr10-attempt1/c8-result.json"
+      ],
+      "cwd": "<云端任务根>/candidate",
+      "started_at": "2026-10-07T04:19:10.946424+00:00",
+      "exit_code": 0,
+      "ended_at": "2026-10-07T04:19:11.123850+00:00"
+    }
+  ],
+  "domain_font": "PASS_CLOUD_OBSERVED_ONLY",
+  "domain_batch": "FAIL_C4_CR24",
+  "whole_UI": "BLOCKED",
+  "local_required": [
+    "Windows font pixel appearance",
+    "GPU",
+    "audio",
+    "performance"
+  ],
+  "other_not_tested": [
+    "actual emoji appearance",
+    "physical G4 mouse",
+    "CR40 extra-position avoidance",
+    "CR11 implementation",
+    "terrain readability"
+  ],
+  "originals_changed": false,
+  "godot_rerun": false
+}

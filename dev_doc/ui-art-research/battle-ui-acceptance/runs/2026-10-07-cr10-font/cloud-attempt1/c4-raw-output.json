@@ -1,0 +1,338 @@
+{
+  "implementation": "unmodified claude_review_checks.py:c4_file",
+  "cloud_full_return": {
+    "method": "unmodified frozen c4_file on all original captures",
+    "count": 9,
+    "results": [
+      {
+        "capture": "font-normal-1280x720.png",
+        "scale": 1.0,
+        "panel_colour_rows": {
+          "top": 1,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 1,
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "123ec5a965b2388a0c02a662e9bbc1f1ce606a4b742d9b3fe1a2b9b2b8e3c7e7"
+      },
+      {
+        "capture": "font-normal-1920x1080.png",
+        "scale": 1.5,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 3,
+          "bottom": 2,
+          "left": 2,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "f0aa5ef121b55e9dc2973de2785201d84a6b4f2feb95110c2a7d474e165e950b"
+      },
+      {
+        "capture": "font-normal-2560x1440.png",
+        "scale": 2.0,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 4,
+          "bottom": 3,
+          "left": 3,
+          "right": 3
+        },
+        "pass": false,
+        "sha256": "c137bdf7558ebd7a8bb04d99ca0093824ffa35d1b503bce4814d9a2fc7b0563c"
+      },
+      {
+        "capture": "font-portrait-inspection-1280x720.png",
+        "scale": 1.0,
+        "panel_colour_rows": {
+          "top": 1,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 1,
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "1bbd6bcbe5cfe15ee0906898ebb1bb4158866b07682725544a2da81386e89a97"
+      },
+      {
+        "capture": "font-portrait-inspection-1920x1080.png",
+        "scale": 1.5,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 3,
+          "bottom": 2,
+          "left": 2,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "2c3ad26feae7ec2fc39cf6918338b57dc2db00677d71559d49a7787b7741cacf"
+      },
+      {
+        "capture": "font-portrait-inspection-2560x1440.png",
+        "scale": 2.0,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 4,
+          "bottom": 3,
+          "left": 3,
+          "right": 3
+        },
+        "pass": false,
+        "sha256": "e9cb7573d61fb999fd3218662c3c591a6dcd3ea0f935b0758111163a650defa5"
+      },
+      {
+        "capture": "font-skill-tooltip-1280x720.png",
+        "scale": 1.0,
+        "panel_colour_rows": {
+          "top": 1,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 1,
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "e3109984e6107862de1c62a2c3beba5b4e1e5bcdb9a7e08ba2e5becded584461"
+      },
+      {
+        "capture": "font-skill-tooltip-1920x1080.png",
+        "scale": 1.5,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 3,
+          "bottom": 2,
+          "left": 2,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "c03356947f9fbd257eb13e38210cfcc01622ba5a6dda0ddf41e331470074e4e4"
+      },
+      {
+        "capture": "font-skill-tooltip-2560x1440.png",
+        "scale": 2.0,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 4,
+          "bottom": 3,
+          "left": 3,
+          "right": 3
+        },
+        "pass": false,
+        "sha256": "6604d0bf28b6e0f5d6be60ff8bf918dc65f35dcf316125afb7acf43cb8fc71b4"
+      }
+    ]
+  },
+  "local_full_returns": [
+    {
+      "capture": "font-normal-1280x720.png",
+      "scale": 1.0,
+      "panel_colour_rows": {
+        "top": 1,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "brass_offset": {
+        "top": 1,
+        "bottom": 1,
+        "left": 1,
+        "right": 1
+      },
+      "pass": false,
+      "sha256": "123ec5a965b2388a0c02a662e9bbc1f1ce606a4b742d9b3fe1a2b9b2b8e3c7e7"
+    },
+    {
+      "capture": "font-normal-1920x1080.png",
+      "scale": 1.5,
+      "panel_colour_rows": {
+        "top": 2,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "brass_offset": {
+        "top": 3,
+        "bottom": 2,
+        "left": 2,
+        "right": 1
+      },
+      "pass": false,
+      "sha256": "f0aa5ef121b55e9dc2973de2785201d84a6b4f2feb95110c2a7d474e165e950b"
+    },
+    {
+      "capture": "font-normal-2560x1440.png",
+      "scale": 2.0,
+      "panel_colour_rows": {
+        "top": 2,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "brass_offset": {
+        "top": 4,
+        "bottom": 3,
+        "left": 3,
+        "right": 3
+      },
+      "pass": false,
+      "sha256": "c137bdf7558ebd7a8bb04d99ca0093824ffa35d1b503bce4814d9a2fc7b0563c"
+    },
+    {
+      "capture": "font-portrait-inspection-1280x720.png",
+      "scale": 1.0,
+      "panel_colour_rows": {
+        "top": 1,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "brass_offset": {
+        "top": 1,
+        "bottom": 1,
+        "left": 1,
+        "right": 1
+      },
+      "pass": false,
+      "sha256": "1bbd6bcbe5cfe15ee0906898ebb1bb4158866b07682725544a2da81386e89a97"
+    },
+    {
+      "capture": "font-portrait-inspection-1920x1080.png",
+      "scale": 1.5,
+      "panel_colour_rows": {
+        "top": 2,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "brass_offset": {
+        "top": 3,
+        "bottom": 2,
+        "left": 2,
+        "right": 1
+      },
+      "pass": false,
+      "sha256": "2c3ad26feae7ec2fc39cf6918338b57dc2db00677d71559d49a7787b7741cacf"
+    },
+    {
+      "capture": "font-portrait-inspection-2560x1440.png",
+      "scale": 2.0,
+      "panel_colour_rows": {
+        "top": 2,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "brass_offset": {
+        "top": 4,
+        "bottom": 3,
+        "left": 3,
+        "right": 3
+      },
+      "pass": false,
+      "sha256": "e9cb7573d61fb999fd3218662c3c591a6dcd3ea0f935b0758111163a650defa5"
+    },
+    {
+      "capture": "font-skill-tooltip-1280x720.png",
+      "scale": 1.0,
+      "panel_colour_rows": {
+        "top": 1,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "brass_offset": {
+        "top": 1,
+        "bottom": 1,
+        "left": 1,
+        "right": 1
+      },
+      "pass": false,
+      "sha256": "e3109984e6107862de1c62a2c3beba5b4e1e5bcdb9a7e08ba2e5becded584461"
+    },
+    {
+      "capture": "font-skill-tooltip-1920x1080.png",
+      "scale": 1.5,
+      "panel_colour_rows": {
+        "top": 2,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "brass_offset": {
+        "top": 3,
+        "bottom": 2,
+        "left": 2,
+        "right": 1
+      },
+      "pass": false,
+      "sha256": "c03356947f9fbd257eb13e38210cfcc01622ba5a6dda0ddf41e331470074e4e4"
+    },
+    {
+      "capture": "font-skill-tooltip-2560x1440.png",
+      "scale": 2.0,
+      "panel_colour_rows": {
+        "top": 2,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "brass_offset": {
+        "top": 4,
+        "bottom": 3,
+        "left": 3,
+        "right": 3
+      },
+      "pass": false,
+      "sha256": "6604d0bf28b6e0f5d6be60ff8bf918dc65f35dcf316125afb7acf43cb8fc71b4"
+    }
+  ],
+  "exact_returns_equal": true,
+  "result": "FAIL_CR24",
+  "local_count": 9
+}

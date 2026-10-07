@@ -1,0 +1,156 @@
+{
+  "schema": "sot-independent-consumption-review/1",
+  "verdict": "pass",
+  "review_scope": {
+    "purpose": "独立核验 CR-10 字体云端原件与本地消费记录的准确性；不批准字体美术、不复审已完成的 Windows 包实现、不修改仓库。",
+    "document_worktree_head": "3d7494803cfe91e8d528467ad9ee00e316e2aff9",
+    "candidate_commit": "21a77b91818fe0b71f5d9fbe684cc942250db0e2",
+    "candidate_tree": "682dd3579db930b4331f99b173b101cd984cce3c",
+    "reviewed_run": "<任务工作树>/dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font",
+    "external_raw_root": "<仓库外证据根>/cr10/raw",
+    "reviewed_worktree_delta": {
+      "files": 12,
+      "tracked_modified": 2,
+      "new_cloud_attempt_files": 10,
+      "scope": "全部限于 CR-10 运行记录目录",
+      "repository_writes_by_reviewer": 0
+    }
+  },
+  "recorded_domain_status": {
+    "cloud_font_observation": "PASS_CLOUD_OBSERVED_ONLY",
+    "full_check_batch": "FAIL_C4_CR24",
+    "overall_ui": "BLOCKED",
+    "whole_cr10_complete": false,
+    "whole_ui_complete": false,
+    "p0_cr01_milestone_complete": false,
+    "windows_font_appearance": "NOT_TESTED_local_required",
+    "signed_consumer_receipt": "pending",
+    "native_close_ack": "pending",
+    "publication": false,
+    "user_visual_approval": "not requested or assumed"
+  },
+  "criteria": [
+    {
+      "id": "original_bytes_chunks_and_native_root_binding",
+      "verdict": "pass",
+      "verified": {
+        "original_files": 106,
+        "original_bytes": 42967521,
+        "original_sha256_mismatches": 0,
+        "transport_chunks": 127,
+        "chunk_sha256_mismatches": 0,
+        "transport_maps": 7,
+        "zero_byte_originals": 18,
+        "mapped_original_reconstructions_exact": 7,
+        "mapped_png_reconstructions": 3,
+        "mapped_utf8_text_reconstructions": 4
+      },
+      "evidence": [
+        "cloud-attempt1/evidence-references.json:4-6,3449 records the counts.",
+        "report.md:11 records 106/106 originals, 127/127 chunks, seven maps and 18 empty originals.",
+        "Independent byte-length/SHA-256 checks matched every one of the 106 files to final-reference-map.json; all 127 ordered chunks matched their map entries and reconstructed all seven mapped originals byte-for-byte: three PNG files and four UTF-8 text files.",
+        "result-binding.json:13-15,48,94 binds the actual native publication/read events and exact-read status; the two filtered native events match its thread, turn and call IDs and completed status. The three local ROOT files match the recorded byte lengths and SHA-256 values. Page-author identity was not used."
+      ]
+    },
+    {
+      "id": "658_selected_candidate_git_objects",
+      "verdict": "pass",
+      "verified": {
+        "selected_members": 658,
+        "tree_entries": 1264,
+        "manifest_tree_mismatches": 0,
+        "git_blob_mismatches": 0,
+        "before_after_final_manifest_differences": 0
+      },
+      "evidence": [
+        "cloud-attempt1/source-binding-verification.json:2-7 binds commit/tree, 658 selected members and pass status.",
+        "Independent comparison matched all 658 manifest paths, modes and blob IDs against the candidate tree, and Git blob type, byte length and SHA-256 against each manifest record. Raw before-execution, after-execution and final source lists were identical.",
+        "The source set is the documented 658-member selected materialization, not a full checkout."
+      ]
+    },
+    {
+      "id": "c4_and_c8_returns",
+      "verdict": "pass",
+      "evidence": [
+        "cloud-attempt1/c4-raw-output.json:335-337 records exact local/cloud C4 return equality and FAIL_CR24.",
+        "The existing candidate claude_review_checks.py:c4_file was run on the nine original PNGs. All nine full local returns exactly matched the stored local returns and cloud results; top panel-colour gaps are 1 px at 1280x720 and 2 px at 1920x1080 and 2560x1440, with the other measured edges at 0 px.",
+        "The existing claude_review_checks.py --c8-only check was run on the original capture manifest. Its full local return exactly matches c8-raw-output.json local_full_return and passes: 26 scripts and one manifest. c8-raw-output.json:463-465 records local and cloud PASS and explains their scan scopes differ (full local worktree versus 658 selected cloud blobs); the different full return bodies are consistent with that recorded scope."
+      ]
+    },
+    {
+      "id": "nine_original_images_same_frame_dimensions_and_font_chain",
+      "verdict": "pass",
+      "verified": {
+        "images_and_state_json": "9/9 exact SHA-bound pairs",
+        "frame_post_draw_same_start_end": "9/9",
+        "window_image_png_dimensions": "match for all 9",
+        "four_recorded_dimensions": [
+          "Window",
+          "Viewport",
+          "Texture API",
+          "Image"
+        ],
+        "capture_groups": {
+          "font-normal": {
+            "images": 3,
+            "visible_labels": 32
+          },
+          "font-skill-tooltip": {
+            "images": 3,
+            "visible_labels": 33
+          },
+          "font-portrait-inspection": {
+            "images": 3,
+            "visible_labels": 50
+          }
+        },
+        "font_fallback_chains": "system fallback disabled in all 9 global and visible-label chains"
+      },
+      "evidence": [
+        "cloud-attempt1/capture-states.json:2-4,376 records nine captures, signed same-frame/native-size PASS, all four dimensions and the retained stricter-wrapper false result.",
+        "report.md:17-19 records the 9 PNG/9 JSON result, native dimensions and fallback chain outcome.",
+        "The existing capture script code at tests/claude_review/capture_cr10_font_frames.gd:111-135 and :180-208 was checked. Recursive fallback evaluation follows its FontVariation base_font and fallbacks traversal; a missing FontVariation-level property alone is not treated as failure.",
+        "Independent comparison of all nine raw PNG and JSON byte hashes, image dimensions, frame IDs and state rows found zero mismatches. The stricter wrapper's Texture API equality requirement remains excluded; the recorded Window/Image/PNG checks pass and the original diagnostic/adjudication remain present."
+      ]
+    },
+    {
+      "id": "visible_cloud_font_observation",
+      "verdict": "pass",
+      "evidence": [
+        "All nine original native PNGs were opened with view_image: three states at 1280x720, 1920x1080 and 2560x1440. Visible Chinese glyphs, full-width punctuation, Latin/numerals, tooltip text and portrait attributes are readable without observed clipping, missing-glyph boxes or unintended wrapping.",
+        "acceptance.json:153-159 and report.md:5,20 limit this result to visible cloud-rendered content; this is not user visual approval or a font-taste decision."
+      ]
+    },
+    {
+      "id": "native_result_authenticity_and_status_limits",
+      "verdict": "pass",
+      "evidence": [
+        "result-binding.json:13-15,48-49,94 records the native source call binding, that the receiver RESULT is unsigned, and exact-byte readback status. Independent event matching corroborated call IDs/status and the three-root-file references without using Page authorship.",
+        "acceptance.json:73-76,161-196,207-229 preserves BLOCKED overall UI, FAIL_C4_CR24, cloud-only font PASS, local_required/unmeasured cases and unfinished gates.",
+        "report.md:30-34 records pending consumer receipt/CLOSE_ACK, unresolved CR-24/CR-40/TERRAIN-READABILITY-01, CR-11 not implemented, no push/PR, and separation of independent review from user visual acceptance."
+      ]
+    }
+  ],
+  "findings": [],
+  "checks_performed": [
+    "Verified document worktree HEAD, exact 12-file run-record delta, candidate commit/tree availability, and Mercury harness ownership boundary; no production-source paths changed.",
+    "Rehashed 106 originals, 127 chunks and seven chunk maps from the external raw delivery; compared every byte count and SHA-256 and reconstructed seven mapped originals (three PNG and four UTF-8 text files).",
+    "Compared 658 selected source entries with the candidate Git tree/blob objects and compared before, after and final source manifests.",
+    "Ran the existing C4 function on all nine original PNGs and compared full returns to stored local and cloud returns.",
+    "Ran the existing --c8-only validator on the original manifest and compared its full result with the stored local return; verified local and cloud summaries are both PASS with their recorded different scan scopes.",
+    "Checked nine original PNG/JSON pairs with Pillow dimensions, SHA bindings, frame_post_draw IDs, all four dimension fields, state visibility values, per-state label counts and recursive fallback semantics.",
+    "Opened all nine original PNGs with view_image.",
+    "Compared native ROOT event IDs/thread/turn/status and local ROOT file byte counts/SHA-256 with result-binding.json; did not read agent reasoning or use Page-author identity.",
+    "Scanned only the reviewed run directory for likely credentials and machine-local path literals; no credential value or machine-local path was found."
+  ],
+  "not_covered": [
+    "Windows Chinese font pixel appearance and font taste remain local_required.",
+    "Actual monochrome emoji appearance, physical G4 mouse interaction, independent GPU, audio and performance were not tested.",
+    "No Godot GUI, physical mouse or game rerun was started; the requested font evidence was consumed from the unchanged originals."
+  ],
+  "residual_risk": [
+    "The complete requested check set remains FAIL because C4 reproduces the existing CR-24 portrait top seam in all nine images.",
+    "CR-10 cloud font appearance is only a bounded Linux cloud observation; Windows appearance, emoji appearance and any user visual approval remain outstanding.",
+    "The signed consumer receipt and native CLOSE_ACK remain pending; CR-10, overall UI and P0/CR-01 milestone remain incomplete."
+  ]
+}

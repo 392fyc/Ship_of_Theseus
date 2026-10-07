@@ -22,7 +22,7 @@
     "page_id": "page_19e4dc76712c8191b13b01673dd33c13",
     "reference": "library-file:fde1_bGliZmlsZV9CVlpBNHpnTUJjcVNyMVVuQTNLbG93_FileDrive_6af57ca9c23c819184d2e6b479d22dac"
   },
-  "dispatch_state": "sent; ACK exact-byte readback and native YC source verified; Godot execution result pending",
+  "dispatch_state": "closed: 106/106 originals and127/127 chunks independently consumed; signed seq28 RECEIPT verified by YC; exact native CLOSE_ACK verified; execution_count=1",
   "case": {
     "map": "courtyard",
     "size": [
@@ -74,5 +74,9 @@
     "native_call_id": "exec-fe52f420-6cb5-41db-945c-f09bd510cc94",
     "execution_count_at_ack": 0,
     "meaning": "receipt, signature, authorization and frozen inputs only; no domain PASS"
-  }
+  },
+  "result_record": "cloud-attempt1/result-binding.json",
+  "cloud_font_result": "PASS_observed_cloud_only",
+  "full_batch_result": "FAIL_C4_CR24",
+  "closure_record": "cloud-attempt1/verified-closure.json"
 }
