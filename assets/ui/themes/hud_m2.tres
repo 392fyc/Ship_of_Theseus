@@ -1,9 +1,10 @@
-[gd_resource type="Theme" load_steps=95 format=3]
+[gd_resource type="Theme" load_steps=96 format=3]
 
 [ext_resource type="FontFile" path="res://assets/ui/themes/hud_m2_fonts.tres" id="6_numeric_font"]
 [ext_resource type="Script" path="res://scripts/ui/hud/m2/hud_font_setup.gd" id="7_font_setup"]
 [ext_resource type="Script" path="res://scripts/ui/hud/m2/shared_frame_style.gd" id="8_shared_frame"]
-[ext_resource type="FontFile" path="res://assets/fonts/source_sans_pro/SourceSansPro-Semibold.ttf" id="frozen_number_font"]
+[ext_resource type="FontVariation" path="res://assets/ui/themes/hud_m2_frozen_font.tres" id="frozen_number_font"]
+[ext_resource type="FontFile" path="res://assets/ui/themes/hud_m2_cjk_font.tres" id="9_cjk_font"]
 [ext_resource type="Texture2D" path="res://assets/ui/skins/hud_freeze/sword-base.png" id="frozen_sword_base"]
 [ext_resource type="Texture2D" path="res://assets/ui/skins/hud_freeze/sword-energy-low.png" id="frozen_sword_energy_low"]
 [ext_resource type="Texture2D" path="res://assets/ui/skins/hud_freeze/sword-energy-high.png" id="frozen_sword_energy_high"]
@@ -30,6 +31,7 @@
 
 [sub_resource type="FontFile" id="M2_TextFont"]
 script = ExtResource("7_font_setup")
+fallback_fonts = [ExtResource("9_cjk_font")]
 
 [sub_resource type="FontVariation" id="M2_EndTextFont"]
 base_font = SubResource("M2_TextFont")

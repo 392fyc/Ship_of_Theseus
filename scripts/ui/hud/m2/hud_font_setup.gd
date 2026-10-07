@@ -10,6 +10,17 @@ extends FontFile
 		source_font = value
 		if source_font != null:
 			data = source_font.data
+		_configure_font()
+
+@export var fallback_fonts: Array[Font] = []:
+	set(value):
+		fallback_fonts = value
+		_configure_font()
+
+@export var use_msdf: bool = true:
+	set(value):
+		use_msdf = value
+		multichannel_signed_distance_field = use_msdf
 
 
 func _init() -> void:
@@ -17,5 +28,11 @@ func _init() -> void:
 	var default_source: FontFile = ThemeDB.fallback_font as FontFile
 	if default_source != null:
 		data = default_source.data
-	multichannel_signed_distance_field = true
-	allow_system_fallback = true
+	_configure_font()
+
+
+func _configure_font() -> void:
+	# 主字体数据与字重不变，按资源声明的包内回退链显示缺少的字形。
+	multichannel_signed_distance_field = use_msdf
+	fallbacks = fallback_fonts
+	allow_system_fallback = false

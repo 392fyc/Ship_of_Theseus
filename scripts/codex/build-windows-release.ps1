@@ -15,6 +15,61 @@ function Assert-Build([bool] $condition, [string] $message) {
     if (-not $condition) { throw $message }
 }
 
+function Assert-CR10FontAssets([string] $root) {
+    $cjkDirectory = Join-Path $root 'assets/fonts/noto_sans_cjk_sc'
+    $cjkManifestPath = Join-Path $cjkDirectory 'source.json'
+    $cjkManifest = Get-Content -LiteralPath $cjkManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $cjkFontPath = Join-Path $cjkDirectory $cjkManifest.subset.font_file
+    $cjkLicensePath = Join-Path $cjkDirectory $cjkManifest.upstream.license_file
+    Assert-Build (Test-Path -LiteralPath $cjkFontPath -PathType Leaf) 'CR-10 字体子集缺失。'
+    Assert-Build (Test-Path -LiteralPath $cjkLicensePath -PathType Leaf) 'CR-10 字体许可证缺失。'
+    Assert-Build ((Get-FileHash -LiteralPath $cjkFontPath -Algorithm SHA256).Hash.ToLowerInvariant() -eq $cjkManifest.subset.font_sha256) 'CR-10 字体摘要与 source.json 不匹配。'
+    Assert-Build ((Get-FileHash -LiteralPath $cjkLicensePath -Algorithm SHA256).Hash.ToLowerInvariant() -eq $cjkManifest.upstream.license_sha256) 'CR-10 字体许可证摘要与 source.json 不匹配。'
+
+    $symbolsDirectory = Join-Path $root 'assets/fonts/noto_sans_symbols'
+    $symbolsManifestPath = Join-Path $symbolsDirectory 'source.json'
+    $symbolsManifest = Get-Content -LiteralPath $symbolsManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $symbolsLicensePath = Join-Path $symbolsDirectory $symbolsManifest.upstream.license_file
+    Assert-Build (Test-Path -LiteralPath $symbolsLicensePath -PathType Leaf) 'CR-10 符号字体许可证缺失。'
+    Assert-Build ((Get-FileHash -LiteralPath $symbolsLicensePath -Algorithm SHA256).Hash.ToLowerInvariant() -eq $symbolsManifest.upstream.license_sha256) 'CR-10 符号字体许可证摘要与 source.json 不匹配。'
+    $expectedSymbolsFonts = @('NotoSansSymbols2-Regular-subset.ttf', 'NotoSansSymbols-Regular-subset.ttf')
+    Assert-Build ($symbolsManifest.fonts.Count -eq $expectedSymbolsFonts.Count) 'CR-10 符号字体来源清单数量不正确。'
+    foreach ($expectedFontName in $expectedSymbolsFonts) {
+        $fontRecords = @($symbolsManifest.fonts | Where-Object { $_.font_file -eq $expectedFontName })
+        Assert-Build ($fontRecords.Count -eq 1) "CR-10 符号字体来源清单缺少唯一记录：$expectedFontName"
+        $fontRecord = $fontRecords[0]
+        $fontPath = Join-Path $symbolsDirectory $fontRecord.font_file
+        Assert-Build (Test-Path -LiteralPath $fontPath -PathType Leaf) "CR-10 符号字体子集缺失：$($fontRecord.font_file)"
+        Assert-Build ((Get-FileHash -LiteralPath $fontPath -Algorithm SHA256).Hash.ToLowerInvariant() -eq $fontRecord.font_sha256) "CR-10 符号字体摘要不匹配：$($fontRecord.font_file)"
+    }
+
+    $emojiDirectory = Join-Path $root 'assets/fonts/noto_emoji'
+    $emojiManifestPath = Join-Path $emojiDirectory 'source.json'
+    $emojiManifest = Get-Content -LiteralPath $emojiManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $emojiFontPath = Join-Path $emojiDirectory $emojiManifest.subset.font_file
+    $emojiLicensePath = Join-Path $emojiDirectory $emojiManifest.upstream.license_file
+    Assert-Build (Test-Path -LiteralPath $emojiFontPath -PathType Leaf) 'CR-10 emoji 字体子集缺失。'
+    Assert-Build (Test-Path -LiteralPath $emojiLicensePath -PathType Leaf) 'CR-10 emoji 字体许可证缺失。'
+    Assert-Build ((Get-FileHash -LiteralPath $emojiFontPath -Algorithm SHA256).Hash.ToLowerInvariant() -eq $emojiManifest.subset.font_sha256) 'CR-10 emoji 字体摘要与 source.json 不匹配。'
+    Assert-Build ((Get-FileHash -LiteralPath $emojiLicensePath -Algorithm SHA256).Hash.ToLowerInvariant() -eq $emojiManifest.upstream.license_sha256) 'CR-10 emoji 字体许可证摘要与 source.json 不匹配。'
+}
+
+function Assert-CR10FontImportSettings([string] $root) {
+    $fontSourcePaths = @(
+        'assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Regular-subset.otf',
+        'assets/fonts/noto_sans_symbols/NotoSansSymbols2-Regular-subset.ttf',
+        'assets/fonts/noto_sans_symbols/NotoSansSymbols-Regular-subset.ttf',
+        'assets/fonts/noto_emoji/NotoEmoji-Regular-400-subset.ttf'
+    )
+    foreach ($fontSourcePath in $fontSourcePaths) {
+        $importPath = Join-Path $root "$fontSourcePath.import"
+        Assert-Build (Test-Path -LiteralPath $importPath -PathType Leaf) "缺少 CR-10 字体导入设置：$fontSourcePath.import"
+        $importText = Get-Content -LiteralPath $importPath -Raw -Encoding UTF8
+        $fallbackMatch = [regex]::Match($importText, '(?m)^allow_system_fallback=(true|false)\r?$')
+        Assert-Build ($fallbackMatch.Success -and $fallbackMatch.Groups[1].Value -eq 'false') "CR-10 字体导入设置启用了系统字体回退：$fontSourcePath.import"
+    }
+}
+
 function Invoke-Godot([string[]] $arguments, [string] $logPath) {
     & $godot @arguments 2>&1 | Set-Content -LiteralPath $logPath -Encoding utf8
     Assert-Build ($LASTEXITCODE -eq 0) "Godot 命令失败；请查看 $(Split-Path $logPath -Leaf)。"
@@ -25,6 +80,7 @@ function Invoke-Godot([string[]] $arguments, [string] $logPath) {
 $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../..')).Path
 . (Join-Path $repoRoot 'tests/claude_review/capture-gate.ps1')
 Assert-CaptureProject $repoRoot
+Assert-CR10FontAssets $repoRoot
 $godot = (Resolve-Path -LiteralPath $GodotPath).Path
 $templateArchive = (Resolve-Path -LiteralPath $TemplateArchivePath).Path
 $outputRoot = [IO.Path]::GetFullPath($OutputDirectory)
@@ -63,6 +119,7 @@ $sourceZip = Join-Path $outputRoot 'source-snapshot.zip'
 & git -C $repoRoot archive --format=zip "--output=$sourceZip" HEAD project.godot assets data scenes scripts
 Assert-Build ($LASTEXITCODE -eq 0) '无法从当前提交准备游戏资源。'
 [IO.Compression.ZipFile]::ExtractToDirectory($sourceZip, $stage)
+Assert-CR10FontAssets $stage
 
 $projectPath = Join-Path $stage 'project.godot'
 $projectText = [IO.File]::ReadAllText($projectPath)
@@ -109,6 +166,7 @@ $preset = $presetTemplate.Replace('__RELEASE_TEMPLATE_PATH__', $templateForGodot
 [IO.File]::WriteAllText((Join-Path $stage 'export_presets.cfg'), $preset, [Text.UTF8Encoding]::new($false))
 
 Invoke-Godot @('--headless', '--editor', '--path', $stage, '--import', '--quit') (Join-Path $logs 'import.log')
+Assert-CR10FontImportSettings $stage
 if ($PreviewClass -eq 'myrmidon') {
     $previewCheck = Join-Path $stage 'myrmidon_preview_check.gd'
     Copy-Item -LiteralPath (Join-Path $repoRoot 'tests/test_myrmidon_qi_only.gd') -Destination $previewCheck
@@ -130,6 +188,9 @@ $licenses = [ordered]@{
     'GODOT_COPYRIGHT.txt' = 'release/licenses/godot/COPYRIGHT.txt'
     'IBM_PLEX_MONO_LICENSE.txt' = 'assets/fonts/ibm_plex_mono/LICENSE.txt'
     'SOURCE_SANS_PRO_LICENSE.txt' = 'assets/fonts/source_sans_pro/LICENSE.txt'
+    'NOTO_SANS_CJK_SC_LICENSE.txt' = 'assets/fonts/noto_sans_cjk_sc/LICENSE.txt'
+    'NOTO_SANS_SYMBOLS_LICENSE.txt' = 'assets/fonts/noto_sans_symbols/LICENSE.txt'
+    'NOTO_EMOJI_LICENSE.txt' = 'assets/fonts/noto_emoji/LICENSE.txt'
 }
 $licenseDirectory = Join-Path $dist 'licenses'
 $null = New-Item -ItemType Directory -Path $licenseDirectory
@@ -150,6 +211,34 @@ try {
     Assert-Build ($excludedAddon.Count -eq 0) '发行资源包仍包含 Godot MCP 插件。'
     $previewCheckEntries = @($resourceArchive.Entries | Where-Object { $_.FullName -like '*myrmidon_preview_check*' })
     Assert-Build ($previewCheckEntries.Count -eq 0) '发行资源包包含临时验收脚本。'
+    $fontSourcePaths = @(
+        'assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Regular-subset.otf',
+        'assets/fonts/noto_sans_symbols/NotoSansSymbols2-Regular-subset.ttf',
+        'assets/fonts/noto_sans_symbols/NotoSansSymbols-Regular-subset.ttf',
+        'assets/fonts/noto_emoji/NotoEmoji-Regular-400-subset.ttf'
+    )
+    foreach ($fontSourcePath in $fontSourcePaths) {
+        $importPath = "$fontSourcePath.import"
+        $importEntries = @($resourceArchive.Entries | Where-Object { $_.FullName -eq $importPath })
+        Assert-Build ($importEntries.Count -eq 1 -and $importEntries[0].Length -gt 0) "Windows 资源包缺少 CR-10 字体导入映射：$importPath"
+        $importStream = $importEntries[0].Open()
+        try {
+            $importBytes = [IO.MemoryStream]::new()
+            try {
+                $importStream.CopyTo($importBytes)
+                $importText = [Text.Encoding]::UTF8.GetString($importBytes.ToArray())
+            } finally {
+                $importBytes.Dispose()
+            }
+        } finally {
+            $importStream.Dispose()
+        }
+        $fontDataMatch = [regex]::Match($importText, '(?m)^path="res://([^"]+\.fontdata)"\r?$')
+        Assert-Build $fontDataMatch.Success "无法读取 CR-10 字体导入资源路径：$importPath"
+        $fontDataPath = $fontDataMatch.Groups[1].Value
+        $fontDataEntries = @($resourceArchive.Entries | Where-Object { $_.FullName -eq $fontDataPath })
+        Assert-Build ($fontDataEntries.Count -eq 1 -and $fontDataEntries[0].Length -gt 0) "Windows 资源包缺少 CR-10 导入字体数据：$fontDataPath"
+    }
 } finally {
     $resourceArchive.Dispose()
 }
@@ -162,7 +251,10 @@ $null = New-Item -ItemType Directory -Path $unpacked
 [IO.Compression.ZipFile]::ExtractToDirectory($packageZip, $unpacked)
 Assert-Build ((Test-Path -LiteralPath (Join-Path $unpacked 'ShipOfTheseus.exe')) -and (Test-Path -LiteralPath (Join-Path $unpacked 'ShipOfTheseus.pck'))) '压缩包解开后缺少 EXE 或 PCK。'
 foreach ($filename in $licenses.Keys) {
-    Assert-Build (Test-Path -LiteralPath (Join-Path $unpacked "licenses/$filename") -PathType Leaf) "压缩包解开后缺少许可说明：$filename"
+    $unpackedLicense = Join-Path $unpacked "licenses/$filename"
+    $sourceLicense = Join-Path $repoRoot $licenses[$filename]
+    Assert-Build (Test-Path -LiteralPath $unpackedLicense -PathType Leaf) "压缩包解开后缺少许可说明：$filename"
+    Assert-Build ((Get-FileHash -LiteralPath $unpackedLicense -Algorithm SHA256).Hash -eq (Get-FileHash -LiteralPath $sourceLicense -Algorithm SHA256).Hash) "压缩包中的许可说明与源文件不一致：$filename"
 }
 $smokeOut = Join-Path $logs 'smoke.stdout.log'
 $smokeErr = Join-Path $logs 'smoke.stderr.log'

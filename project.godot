@@ -22,6 +22,7 @@ config/features=PackedStringArray("4.6", "GL Compatibility")
 [autoload]
 
 DataLoader="*res://scripts/data/data_loader.gd"
+SoTFontSetup="*res://scripts/ui/font_setup.gd"
 MCPGameBridge="res://addons/godot_mcp/game_bridge/mcp_game_bridge.gd"
 
 [display]
@@ -40,6 +41,16 @@ bind_mode=0
 custom_bind_ip=""
 port_override_enabled=true
 port_override=6550
+
+[gui]
+
+theme/custom="res://assets/ui/themes/default_font.tres"
+
+[importer_defaults]
+
+font_data_dynamic={
+"allow_system_fallback": false
+}
 
 [rendering]
 

@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" path="res://assets/ui/skins/hud/character_panel_surface_v1.png" id="3_character_panel_surface"]
 [ext_resource type="Texture2D" path="res://assets/ui/skins/hud/portrait_frame_surface_v1.png" id="4_portrait_frame_surface"]
 [ext_resource type="Texture2D" path="res://assets/ui/skins/hud/potion_button_shell_v1.png" id="5_potion_button_shell"]
-[ext_resource type="FontFile" path="res://assets/fonts/ibm_plex_mono/IBMPlexMono-SemiBold.ttf" id="6_numeric_font"]
+[ext_resource type="FontFile" path="res://assets/ui/themes/hud_m2_fonts.tres" id="6_numeric_font"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_slot_normal"]
 content_margin_left = 6.0

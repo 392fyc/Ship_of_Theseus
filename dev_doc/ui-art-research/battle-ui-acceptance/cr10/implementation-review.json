@@ -1,0 +1,95 @@
+{
+  "schema": "sot-independent-review/1",
+  "task_id": "CR-10",
+  "verdict": "pass",
+  "reviewer": "/root/cr10_font_independent_review",
+  "review_type": "implementation_and_capture_tool_freeze",
+  "branch": "codex/ui-ux/cr10-chinese-font",
+  "reviewed_head": "d18bd3d6bb3ce507112674e5f3a0aed7fc23f079",
+  "reviewed_file_manifest_sha256": "d49124ab5a65477349b7e7e4a0e701d2bcf2732b716dde6d47aa62949e1076c2",
+  "reviewed_file_count": 27,
+  "blocking_findings": [],
+  "nonblocking_findings": [],
+  "checks": [
+    {
+      "check": "candidate exact scope and before/after SHA256",
+      "result": "pass",
+      "evidence": "27 files match the working diff and original review manifest; no staged files; no changes by reviewer."
+    },
+    {
+      "check": "official source/font/license/version and deterministic rebuild",
+      "result": "pass",
+      "evidence": "fontTools4.66.1, GB2312=7445, current game=1232, union=7476; all seven derived font/manifest files match candidate hashes."
+    },
+    {
+      "check": "headless temporary project import",
+      "result": "pass",
+      "evidence": "Godot4.6.3 exit0; six imported raw font resources disable system fallback; four new fontdata remaps exist and are nonempty."
+    },
+    {
+      "check": "actual runtime font chains and frozen numeric metrics",
+      "result": "pass",
+      "evidence": "CR10_FONT_RUNTIME_RESULT failed=0; ordinary Label/Button, M2/legacy text and number chains checked; SourceSans32px metrics unchanged."
+    },
+    {
+      "check": "formal scene capture tool binding",
+      "result": "pass",
+      "evidence": "headless --check-scene exit0, courtyard10x10 and TacticalScene; code schedules nine native images and paired same-frame font state."
+    },
+    {
+      "check": "release PowerShell and scoped whitespace",
+      "result": "pass",
+      "evidence": "PowerShell AST parse and git diff --check passed; source/license hash and export fontdata checks reviewed."
+    },
+    {
+      "check": "scope and portable metadata",
+      "result": "pass",
+      "evidence": "No gameplay, HUD geometry or bitmap edits; no common absolute-path/credential matches in candidate text."
+    }
+  ],
+  "deferred_checks": [
+    "Actual Windows release build and PCK-loaded font properties after local commit",
+    "Nine whole-frame font captures and visual inspection",
+    "Windows font appearance and hardware checks"
+  ],
+  "limits": [
+    "This review permits implementation/tool freeze and local commit; it is not visual acceptance or release publication.",
+    "Mixed font metrics and monochrome symbol/emoji appearance require current visual evidence.",
+    "No local GUI/input, commits or publication by reviewer."
+  ],
+  "focused_review": {
+    "verdict": "pass",
+    "reviewer": "/root/cr10_font_independent_review",
+    "scope": "three local font-directory attributes, source/license/subset exact bytes, canonical newline binding and document explanation",
+    "staged_file_count": 31,
+    "unstaged_file_count": 0,
+    "checks": [
+      {
+        "check": "13 font-directory files: index bytes, working bytes and filtered checkout bytes",
+        "result": "pass"
+      },
+      {
+        "check": "local * -text does not affect HUD paths",
+        "result": "pass"
+      },
+      {
+        "check": "upstream originals, three licenses and four subsets match source hashes",
+        "result": "pass"
+      },
+      {
+        "check": "six existing files differ only by working CRLF versus index LF",
+        "result": "pass"
+      },
+      {
+        "check": "scoped staged whitespace; only official Emoji license excluded and exact hash required",
+        "result": "pass"
+      }
+    ],
+    "record_review_limit": "Reviewer did not assess this implementation-review.json; Main records the returned original review findings. Final delivery evidence needs its own independent review.",
+    "deferred": [
+      "actual Windows build",
+      "PCK font consumption",
+      "three-resolution appearance"
+    ]
+  }
+}
