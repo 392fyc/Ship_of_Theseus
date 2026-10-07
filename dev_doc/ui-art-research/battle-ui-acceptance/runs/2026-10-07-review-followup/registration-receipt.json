@@ -1,0 +1,71 @@
+{
+  "task_id": "CLAUDE-FOLLOWUP-B-20261007",
+  "status": "completed",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/ui-ux/cr10-chinese-font",
+  "target_head_before": "b0e1ca919c4bcfa3aa16fb87872f9aa986e376ff",
+  "candidate_head": null,
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md and user followup B",
+      "summary": "Register only CR-06 and CR-40 acceptance; do not implement or publish"
+    }
+  ],
+  "changed_files": [
+    "dev_doc/ui-art-research/claude-review/claude-change-requests.md",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-review-followup/registration-receipt.json"
+  ],
+  "verification": [
+    {
+      "command": "independent read-only diff and source PNG SHA256 review",
+      "result": "pass",
+      "evidence": "/root/cr10_weight_source_review verified requested clauses and no implementation claim"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "CR-06 damage number and adjacent name/HP overlap acceptance",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/claude-review/claude-change-requests.md#CR-06",
+        "G4-FORECAST-LABEL-01"
+      ]
+    },
+    {
+      "criterion": "CR-40 avoidance including toolbar and screen edges with up/right/corner cases",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/claude-review/claude-change-requests.md#CR-40"
+      ]
+    }
+  ],
+  "independent_review": {
+    "verdict": "PASS",
+    "reviewer": "/root/cr10_weight_source_review",
+    "worktree_file_sha256": "89e2686603aaf6849a18ab67deb3c155dea7732bf4c5d7d593198bf58bec3ea2"
+  },
+  "raw_evidence": {
+    "file": "g4-v2-attempt2/desktop-1920x1080/captures/forecast-visible-1920x1080.png",
+    "bytes": 4101135,
+    "sha256": "67dc94d8b3502924faf6909b894e5ddf2aa02c15d205d02da6ca3988bb203a20",
+    "candidate": "5b64db37a3090c03471c7c071596a1147d8702dd"
+  },
+  "protected_state": [
+    {
+      "subject": "production behavior and art in Task B",
+      "result": "unchanged",
+      "evidence": "Only implementation-sheet clauses added"
+    }
+  ],
+  "residual_risks": [
+    "CR-06 and CR-40 remain unimplemented",
+    "TERRAIN-READABILITY-01 remains unfixed and has not been initiated"
+  ],
+  "escalation_reason": null,
+  "publication": {
+    "published": false,
+    "pr": null
+  },
+  "whole_ui_completed": false,
+  "p0_cr01_milestone_completed": false
+}
