@@ -1,0 +1,535 @@
+{
+  "implementation": "claude_review_checks.py:c4_file",
+  "captures": [
+    {
+      "weight": "Regular",
+      "file": "font-normal-1280x720.png",
+      "full_return": {
+        "capture": "font-normal-1280x720.png",
+        "scale": 1.0,
+        "panel_colour_rows": {
+          "top": 1,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 1,
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "7cabfb3798ae3c74ea5edbb2ae0c1ea11ed01fa08669fa5e215f5ef5a83959c7"
+      }
+    },
+    {
+      "weight": "Regular",
+      "file": "font-skill-tooltip-1280x720.png",
+      "full_return": {
+        "capture": "font-skill-tooltip-1280x720.png",
+        "scale": 1.0,
+        "panel_colour_rows": {
+          "top": 1,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 1,
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "4a4f7d245c906004caa28cbc8ac9eed153da2b73a6341130cbfa50bb425b58c2"
+      }
+    },
+    {
+      "weight": "Regular",
+      "file": "font-portrait-inspection-1280x720.png",
+      "full_return": {
+        "capture": "font-portrait-inspection-1280x720.png",
+        "scale": 1.0,
+        "panel_colour_rows": {
+          "top": 1,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 1,
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "4a393a411c4959d004cca2a330756f463b68777345fc8e9565f3e59a54c0294f"
+      }
+    },
+    {
+      "weight": "Regular",
+      "file": "font-forecast-1280x720.png",
+      "full_return": {
+        "capture": "font-forecast-1280x720.png",
+        "scale": 1.0,
+        "panel_colour_rows": {
+          "top": 1,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 1,
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "5d93f8509c3c3a6f649668056e82e20108fe06fd5276271b1b2a219639a2492b"
+      }
+    },
+    {
+      "weight": "Regular",
+      "file": "font-normal-1920x1080.png",
+      "full_return": {
+        "capture": "font-normal-1920x1080.png",
+        "scale": 1.5,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 3,
+          "bottom": 2,
+          "left": 2,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "7cbc4d42c6c29ec771c57c0993ba3e90e520f3f5dc8e4c42e128805706a9e823"
+      }
+    },
+    {
+      "weight": "Regular",
+      "file": "font-skill-tooltip-1920x1080.png",
+      "full_return": {
+        "capture": "font-skill-tooltip-1920x1080.png",
+        "scale": 1.5,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 3,
+          "bottom": 2,
+          "left": 2,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "774db0eb2d478cd4a5721fcfcc29c9fd77185b2e3ac3b9273f10cd8610f8c714"
+      }
+    },
+    {
+      "weight": "Regular",
+      "file": "font-portrait-inspection-1920x1080.png",
+      "full_return": {
+        "capture": "font-portrait-inspection-1920x1080.png",
+        "scale": 1.5,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 3,
+          "bottom": 2,
+          "left": 2,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "2ea1d1abbde6fa8fcdb6baee3e977d1a8206f0269859eb2191dfb712028df7ca"
+      }
+    },
+    {
+      "weight": "Regular",
+      "file": "font-forecast-1920x1080.png",
+      "full_return": {
+        "capture": "font-forecast-1920x1080.png",
+        "scale": 1.5,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 3,
+          "bottom": 2,
+          "left": 2,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "e2c32a9b29875f74fbc2278b36c666d419814dfcb80851eeaa3ad0d700b24dd1"
+      }
+    },
+    {
+      "weight": "Regular",
+      "file": "font-normal-2560x1440.png",
+      "full_return": {
+        "capture": "font-normal-2560x1440.png",
+        "scale": 2.0,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 4,
+          "bottom": 3,
+          "left": 3,
+          "right": 3
+        },
+        "pass": false,
+        "sha256": "ff0009797cdbedb3fe2297a65934540c076934f2a06fc0ec70a8c60e8a3ba93c"
+      }
+    },
+    {
+      "weight": "Regular",
+      "file": "font-skill-tooltip-2560x1440.png",
+      "full_return": {
+        "capture": "font-skill-tooltip-2560x1440.png",
+        "scale": 2.0,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 4,
+          "bottom": 3,
+          "left": 3,
+          "right": 3
+        },
+        "pass": false,
+        "sha256": "14b386454ee896bfc67de8f3b5532bd50d91b48a4f2e3d492a330719d2276e87"
+      }
+    },
+    {
+      "weight": "Regular",
+      "file": "font-portrait-inspection-2560x1440.png",
+      "full_return": {
+        "capture": "font-portrait-inspection-2560x1440.png",
+        "scale": 2.0,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 4,
+          "bottom": 3,
+          "left": 3,
+          "right": 3
+        },
+        "pass": false,
+        "sha256": "3f33cd8c7e51e4065047ff85bcb6939baed01dbfbe2a5dee87750187a2611c3a"
+      }
+    },
+    {
+      "weight": "Regular",
+      "file": "font-forecast-2560x1440.png",
+      "full_return": {
+        "capture": "font-forecast-2560x1440.png",
+        "scale": 2.0,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 4,
+          "bottom": 3,
+          "left": 3,
+          "right": 3
+        },
+        "pass": false,
+        "sha256": "448917e0fe17624325d3c4ba0eaaa0c94898a1a31dada560760634d313717af2"
+      }
+    },
+    {
+      "weight": "Medium",
+      "file": "font-normal-1280x720.png",
+      "full_return": {
+        "capture": "font-normal-1280x720.png",
+        "scale": 1.0,
+        "panel_colour_rows": {
+          "top": 1,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 1,
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "be5166581166ce0fcb99d01051f88c3b8f7eb4537f74e1c12d4e5a7a4bb060d6"
+      }
+    },
+    {
+      "weight": "Medium",
+      "file": "font-skill-tooltip-1280x720.png",
+      "full_return": {
+        "capture": "font-skill-tooltip-1280x720.png",
+        "scale": 1.0,
+        "panel_colour_rows": {
+          "top": 1,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 1,
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "28f97408afb7949c1978f565c4a691acc62a4551c875655bd65425b9e001c67a"
+      }
+    },
+    {
+      "weight": "Medium",
+      "file": "font-portrait-inspection-1280x720.png",
+      "full_return": {
+        "capture": "font-portrait-inspection-1280x720.png",
+        "scale": 1.0,
+        "panel_colour_rows": {
+          "top": 1,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 1,
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "29acc444d6856c3efbdf02dfea8a42c5d40fb6fc16c1ada7099dde96f0030623"
+      }
+    },
+    {
+      "weight": "Medium",
+      "file": "font-forecast-1280x720.png",
+      "full_return": {
+        "capture": "font-forecast-1280x720.png",
+        "scale": 1.0,
+        "panel_colour_rows": {
+          "top": 1,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 1,
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "dfda49eccdf065223d9c0455c6d23fc35989beb36140a6fa7b15ea865780ae61"
+      }
+    },
+    {
+      "weight": "Medium",
+      "file": "font-normal-1920x1080.png",
+      "full_return": {
+        "capture": "font-normal-1920x1080.png",
+        "scale": 1.5,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 3,
+          "bottom": 2,
+          "left": 2,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "db66fae71dba0c68b7c16d55faa79c710b08ebb31e4512c0c0603590d365aedf"
+      }
+    },
+    {
+      "weight": "Medium",
+      "file": "font-skill-tooltip-1920x1080.png",
+      "full_return": {
+        "capture": "font-skill-tooltip-1920x1080.png",
+        "scale": 1.5,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 3,
+          "bottom": 2,
+          "left": 2,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "4d07aafc08280638e9dab59353eb3b2892728dc0bae03ea53507497b14b9e881"
+      }
+    },
+    {
+      "weight": "Medium",
+      "file": "font-portrait-inspection-1920x1080.png",
+      "full_return": {
+        "capture": "font-portrait-inspection-1920x1080.png",
+        "scale": 1.5,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 3,
+          "bottom": 2,
+          "left": 2,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "bc80663b0929f70c25444e990f2cdea8e1930e8ebc35bc156dc8aac58460ab30"
+      }
+    },
+    {
+      "weight": "Medium",
+      "file": "font-forecast-1920x1080.png",
+      "full_return": {
+        "capture": "font-forecast-1920x1080.png",
+        "scale": 1.5,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 3,
+          "bottom": 2,
+          "left": 2,
+          "right": 1
+        },
+        "pass": false,
+        "sha256": "bd8ce56116d1b21ec4ed6d20f731a9e6f3f2d0b914ffd11da68eb5bc030e0ad9"
+      }
+    },
+    {
+      "weight": "Medium",
+      "file": "font-normal-2560x1440.png",
+      "full_return": {
+        "capture": "font-normal-2560x1440.png",
+        "scale": 2.0,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 4,
+          "bottom": 3,
+          "left": 3,
+          "right": 3
+        },
+        "pass": false,
+        "sha256": "b0d78f6c60164253e5689d4951ae8941ac3e561a089c286a9328ac51eb3db501"
+      }
+    },
+    {
+      "weight": "Medium",
+      "file": "font-skill-tooltip-2560x1440.png",
+      "full_return": {
+        "capture": "font-skill-tooltip-2560x1440.png",
+        "scale": 2.0,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 4,
+          "bottom": 3,
+          "left": 3,
+          "right": 3
+        },
+        "pass": false,
+        "sha256": "1e1cd84b417e6dd198d3798743b16dcaed06fb7033d2214fe7d7946db18ef089"
+      }
+    },
+    {
+      "weight": "Medium",
+      "file": "font-portrait-inspection-2560x1440.png",
+      "full_return": {
+        "capture": "font-portrait-inspection-2560x1440.png",
+        "scale": 2.0,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 4,
+          "bottom": 3,
+          "left": 3,
+          "right": 3
+        },
+        "pass": false,
+        "sha256": "5b953c42612cbae3fd63ba918552f5d3c85b84454d5d03c68350285765e61f52"
+      }
+    },
+    {
+      "weight": "Medium",
+      "file": "font-forecast-2560x1440.png",
+      "full_return": {
+        "capture": "font-forecast-2560x1440.png",
+        "scale": 2.0,
+        "panel_colour_rows": {
+          "top": 2,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 4,
+          "bottom": 3,
+          "left": 3,
+          "right": 3
+        },
+        "pass": false,
+        "sha256": "ba0329ef5887561371cf81e9d068f17038ebd29ef050582c3afa90741a0f5424"
+      }
+    }
+  ],
+  "pass": false,
+  "issue": "CR-24; independent of CR-10"
+}

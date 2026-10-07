@@ -1,0 +1,169 @@
+{
+  "candidate_commit": "b0e1ca919c4bcfa3aa16fb87872f9aa986e376ff",
+  "build": {
+    "status": "pass",
+    "source_commit": "b0e1ca919c4bcfa3aa16fb87872f9aa986e376ff",
+    "configured_renderer": "gl_compatibility",
+    "capture_configuration": null,
+    "preview_class": "myrmidon",
+    "preview_audit_status": "pass",
+    "engine_version": "4.6.3.stable.official.7d41c59c4",
+    "template_archive_sha256": "3fbe2c0e2dec9d537ab9ec97bcf8da91dcf23357fc51f67092dd068d839290a8",
+    "executable_sha256": "fda69ad440435bd93d7c0dfcc43f717badd5e051f1b3a19d60aa281e526b8cab",
+    "resource_pck_sha256": "df178d360a2607c33365b5fa9a382e03491a46dfef456f2bc0dadf294c9f51be",
+    "package_zip_sha256": "69a648b112cec2fadac5666dff44ee58540b2b99f39db08cadacea14bba736a9",
+    "package_zip_bytes": 85170213,
+    "icon_audit_sha256": "27199350c90e95f559d2970ee12d350d923d6626c91882e8c47c2b37a474c929",
+    "icon_count": 5,
+    "excluded_addon_entries": 0,
+    "license_files": [
+      "GODOT_LICENSE.txt",
+      "GODOT_COPYRIGHT.txt",
+      "IBM_PLEX_MONO_LICENSE.txt",
+      "SOURCE_SANS_PRO_LICENSE.txt",
+      "NOTO_SANS_CJK_SC_LICENSE.txt",
+      "NOTO_SANS_SYMBOLS_LICENSE.txt",
+      "NOTO_EMOJI_LICENSE.txt"
+    ],
+    "smoke_exit_code": 0,
+    "visual_sha256": {}
+  },
+  "pck_font_runtime": {
+    "exit_code": 0,
+    "pass": true,
+    "script_sha256": "1408fa67fbb1cb708fd8886257c63106dd8c383ed364601634345dad02bbdaed",
+    "adaptation": "external test script replaces one self-load res://tests path with get_script(); all package assertions unchanged",
+    "command": [
+      "<Godot 4.6.3 控制台版>",
+      "--headless",
+      "--main-pack",
+      "<仓库外证据根>/windows-release-b0e1ca9/dist/ShipOfTheseus.pck",
+      "--script",
+      "<仓库外证据根>/windows-release-b0e1ca9/pck-font-runtime.gd",
+      "--rendering-method",
+      "gl_compatibility"
+    ],
+    "stdout_sha256": "09e25083d9958c7567e0fdea300054717e214d583e255d4e378cf77694b94765",
+    "stderr_sha256": "19519abd1b30220c4e2418168e7c9c1338d23b59a5cac81fdd49e66135fe80a7"
+  },
+  "evidence_root": "<仓库外证据根>/windows-release-b0e1ca9",
+  "files": [
+    {
+      "file": "dist/licenses/GODOT_COPYRIGHT.txt",
+      "bytes": 102157,
+      "sha256": "c2d22020b33f516d77cf28bc91c0b1319bdd11b9e2494050a506c558c449da42"
+    },
+    {
+      "file": "dist/licenses/GODOT_LICENSE.txt",
+      "bytes": 1169,
+      "sha256": "0cc27400b8da8c06bb35350422c14715647cd2632c138921fd49caa6610a1ef6"
+    },
+    {
+      "file": "dist/licenses/IBM_PLEX_MONO_LICENSE.txt",
+      "bytes": 4451,
+      "sha256": "8b5d8294d1fde69598aa5fd72329602ce48b20ab536ff6528960fd2bc9250cad"
+    },
+    {
+      "file": "dist/licenses/NOTO_EMOJI_LICENSE.txt",
+      "bytes": 4330,
+      "sha256": "500bb1ccf43df7bbb522112f9133a52b16e1c35e809632f5d8609b179152de5b"
+    },
+    {
+      "file": "dist/licenses/NOTO_SANS_CJK_SC_LICENSE.txt",
+      "bytes": 4301,
+      "sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+    },
+    {
+      "file": "dist/licenses/NOTO_SANS_SYMBOLS_LICENSE.txt",
+      "bytes": 4377,
+      "sha256": "0dab92d0544f7b233403f14b84a663bdbfa746982eda629e7f4f9ffe1b036feb"
+    },
+    {
+      "file": "dist/licenses/SOURCE_SANS_PRO_LICENSE.txt",
+      "bytes": 4579,
+      "sha256": "e1d1fdcefb57985226c06fa9500d29caacfa2b1f8b8c74db911f13c6cad186a1"
+    },
+    {
+      "file": "dist/ShipOfTheseus.exe",
+      "bytes": 104518656,
+      "sha256": "fda69ad440435bd93d7c0dfcc43f717badd5e051f1b3a19d60aa281e526b8cab"
+    },
+    {
+      "file": "dist/ShipOfTheseus.pck",
+      "bytes": 49905660,
+      "sha256": "df178d360a2607c33365b5fa9a382e03491a46dfef456f2bc0dadf294c9f51be"
+    },
+    {
+      "file": "logs/export.log",
+      "bytes": 72603,
+      "sha256": "edc411c0d2438b40092e08cfd08dc1e27a05b9daf42cbfa46bd9cf09f3660399"
+    },
+    {
+      "file": "logs/import.log",
+      "bytes": 25101,
+      "sha256": "6500edb7a2e948a239c61cd5aaf68d251d12af2f925e2247147e5b5529fb5418"
+    },
+    {
+      "file": "logs/myrmidon-preview-check.log",
+      "bytes": 450,
+      "sha256": "56990f221c3527c851eb691da1eb84ab5e957f1daca9510b57873a4e9581318b"
+    },
+    {
+      "file": "logs/pack.log",
+      "bytes": 76315,
+      "sha256": "e1f6bba02670d737a8adda985beb35f8c19f94b947c888b60087be9f3b877e7d"
+    },
+    {
+      "file": "logs/smoke.stderr.log",
+      "bytes": 127,
+      "sha256": "8f73c892f0adc99f41fa480c0569eb3b12c411f02671fa2a3ab2f8707e231920"
+    },
+    {
+      "file": "logs/smoke.stdout.log",
+      "bytes": 416,
+      "sha256": "635c2678bc3cd9fd00298837f7ed7b4314addcbfa2ef5c4369372708b5bbc9d0"
+    },
+    {
+      "file": "pck-font-runtime.gd",
+      "bytes": 26183,
+      "sha256": "1408fa67fbb1cb708fd8886257c63106dd8c383ed364601634345dad02bbdaed"
+    },
+    {
+      "file": "pck-font-runtime.json",
+      "bytes": 824,
+      "sha256": "0b96c7fc03812a50e3f77d743ef0bbff36c94ed6630f6abad07cc94a95c96319"
+    },
+    {
+      "file": "pck-font-runtime.stderr.log",
+      "bytes": 361,
+      "sha256": "19519abd1b30220c4e2418168e7c9c1338d23b59a5cac81fdd49e66135fe80a7"
+    },
+    {
+      "file": "pck-font-runtime.stdout.log",
+      "bytes": 5918,
+      "sha256": "09e25083d9958c7567e0fdea300054717e214d583e255d4e378cf77694b94765"
+    },
+    {
+      "file": "release-build.json",
+      "bytes": 1154,
+      "sha256": "e1e09efb01f4fd4885f04927ab175399958f2b60d0dde8f24bcb489ca311c042"
+    },
+    {
+      "file": "resource-audit.zip",
+      "bytes": 48067073,
+      "sha256": "27199350c90e95f559d2970ee12d350d923d6626c91882e8c47c2b37a474c929"
+    },
+    {
+      "file": "ShipOfTheseus-MyrmidonHUD-Windows-x86_64.zip",
+      "bytes": 85170213,
+      "sha256": "69a648b112cec2fadac5666dff44ee58540b2b99f39db08cadacea14bba736a9"
+    }
+  ],
+  "known_warnings": [
+    "DataLoader: res://data/buildings/ absent (existing empty data directory not in archive)"
+  ],
+  "limits": [
+    "Headless package smoke starts existing 8x8 test_arena; this does not validate map constraints or implement CR-11. Windows font captures use courtyard 10x10 separately.",
+    "Package was not published; font test external adapter changes only the self-load path to get_script()."
+  ]
+}

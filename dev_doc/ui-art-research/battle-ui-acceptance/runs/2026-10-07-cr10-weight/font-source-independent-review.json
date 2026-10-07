@@ -1,0 +1,55 @@
+{
+  "reviewer": "independent native agent /root/cr10_weight_source_review",
+  "verdict": "PASS",
+  "base_commit": "1f9e90f99127bf984bdf4f59755ff3feec1eff26",
+  "scope": [
+    "tests/claude_review/build_cr10_font_subset.py",
+    "assets/fonts/noto_sans_cjk_sc/source.json",
+    "assets/fonts/noto_sans_cjk_sc/LICENSE.txt",
+    "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Regular-subset.otf",
+    "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Medium-subset.otf",
+    "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Bold-subset.otf",
+    "scripts/codex/build-windows-release.ps1"
+  ],
+  "checks": [
+    "Fixed upstream commit/tag/tree and source blob identities",
+    "External deterministic rebuild with fontTools 4.66.1 matches three candidate subset hashes",
+    "All three actual cmaps contain 7462 codepoints with identical coverage digest",
+    "Regular unchanged from HEAD; original OFL bytes preserved and bound to all three weights",
+    "Release checks cover all six subset font imports/fontdata and three licenses",
+    "PowerShell parse and diff whitespace passed"
+  ],
+  "not_covered": [
+    "Actual Windows export and runtime appearance, handled separately"
+  ],
+  "files": [
+    {
+      "file": "tests/claude_review/build_cr10_font_subset.py",
+      "sha256": "b660bb9dc39879edacbe45ee2f08a9b38d0de6ad6fb576dbf38fd4a33705d4e9"
+    },
+    {
+      "file": "assets/fonts/noto_sans_cjk_sc/source.json",
+      "sha256": "c4984f609034257327ec7fa47b4088a2b322a5da2f3eb6bd4faa4c9924ab68bb"
+    },
+    {
+      "file": "assets/fonts/noto_sans_cjk_sc/LICENSE.txt",
+      "sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+    },
+    {
+      "file": "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Regular-subset.otf",
+      "sha256": "241e7ebc37926a6a893771a8d0f2f375e385b44d9e8d400553402968a111531b"
+    },
+    {
+      "file": "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Medium-subset.otf",
+      "sha256": "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101"
+    },
+    {
+      "file": "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Bold-subset.otf",
+      "sha256": "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+    },
+    {
+      "file": "scripts/codex/build-windows-release.ps1",
+      "sha256": "df6f55080b9b0f10ac069c2cf254768fabe27c178aa9f313b87017f6b949328b"
+    }
+  ]
+}

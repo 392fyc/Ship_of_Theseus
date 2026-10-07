@@ -1,0 +1,34 @@
+{
+  "selected_body": "Medium",
+  "selected_title": "Bold",
+  "decision_by": "Codex main agent under explicit user delegation",
+  "human_approval": false,
+  "scope": "body weight choice only; independent review and final Windows appearance approval recorded separately",
+  "resolutions": [
+    "1280x720",
+    "1920x1080",
+    "2560x1440"
+  ],
+  "basis": "Medium makes Chinese names, attributes and skill descriptions closer in visual weight to the existing semibold Latin/numeric faces; Bold keeps title hierarchy. Regular is visibly thinner in all three native resolutions.",
+  "comparisons": [
+    {
+      "file": "comparison-1280x720.png",
+      "sha256": "ab25a4f3c3a15382b21ddddc85cd2424217be2c6bfe944aea8e3bf1339361112",
+      "derived": true,
+      "method": "Unscaled exact same-frame panel crops placed side by side, no pixel filtering"
+    },
+    {
+      "file": "comparison-1920x1080.png",
+      "sha256": "7757b60553ef10a52494f95c6da92d4caeb14e01f8d30eb98d7ae0562097382c",
+      "derived": true,
+      "method": "Unscaled exact same-frame panel crops placed side by side, no pixel filtering"
+    },
+    {
+      "file": "comparison-2560x1440.png",
+      "sha256": "c6927009e2556ac95f058543f5bd36d8a41c6910eaf125b29ba82be1d1162fcb",
+      "derived": true,
+      "method": "Unscaled exact same-frame panel crops placed side by side, no pixel filtering"
+    }
+  ],
+  "original_bindings": "frame-and-source-verification.json"
+}

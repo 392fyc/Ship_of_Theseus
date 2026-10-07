@@ -1,0 +1,184 @@
+{
+  "task_id": "CR-10-weight-line-height-20261007",
+  "status": "completed",
+  "status_scope": "本轮追加修正候选：实现、受托正文选择、Windows 外观独立验收及发行包检查；不代表用户整体视觉批准、发布或 Milestone 完成。",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/ui-ux/cr10-chinese-font",
+  "target_head_before": "1f9e90f99127bf984bdf4f59755ff3feec1eff26",
+  "candidate_head": "b0e1ca919c4bcfa3aa16fb87872f9aa986e376ff",
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "ui-ux 任务工作树，限定字体与呈现参数；不改变已批准布局、玩法或素材；独立审查和用户批准分开。"
+    },
+    {
+      "contract": "task.md",
+      "summary": "Medium/Bold 固定来源；Windows 三档同帧图；字体、边距、冻结数字和包内检查。"
+    },
+    {
+      "contract": "sot-task-receipt",
+      "summary": "精确候选、原件摘要、检查限制与发布状态分别记录。"
+    }
+  ],
+  "changed_files": [
+    "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Bold-subset.otf",
+    "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Medium-subset.otf",
+    "assets/fonts/noto_sans_cjk_sc/source.json",
+    "assets/ui/themes/hud_m2.tres",
+    "assets/ui/themes/hud_m2_cjk_bold_font.tres",
+    "assets/ui/themes/hud_m2_cjk_font.tres",
+    "assets/ui/themes/hud_m2_title_font.tres",
+    "dev_doc/ui-art-research/battle-ui-acceptance/cr10/font-packaging.md",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/c4-raw-output.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/c8-raw-output.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/committed-candidate-binding.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/evidence-manifest.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/font-source-independent-review.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/frame-and-source-verification.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/presentation-independent-review.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/record-independent-review.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/report.md",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/task-receipt.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/task.md",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/weight-selection.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/windows-package-verification.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/windows-visual-independent-review.json",
+    "scenes/tactical/hud/m2/character_hud_panel.tscn",
+    "scenes/tactical/hud/m2/skill_slot_button.tscn",
+    "scripts/codex/build-windows-release.ps1",
+    "scripts/ui/damage_forecaster.gd",
+    "scripts/ui/font_setup.gd",
+    "scripts/ui/hud/m2/hud_font_setup.gd",
+    "scripts/ui/hud/m2/skill_slot_button.gd",
+    "scripts/ui/turn_order_bar.gd",
+    "tests/claude_review/build_cr10_font_subset.py",
+    "tests/claude_review/capture_cr10_windows_weights.gd",
+    "tests/claude_review/cr10_font_runtime_check.gd",
+    "tests/claude_review/run_cr10_windows_weights.ps1",
+    "tests/test_hud_m2_runtime_dashboard.gd"
+  ],
+  "verification": [
+    {
+      "command": "build_cr10_font_subset.py 固定输入重复构建与独立来源复核",
+      "result": "pass",
+      "evidence": "font-source-independent-review.json"
+    },
+    {
+      "command": "Godot headless cr10_font_runtime_check.gd / test_hud_m2_runtime_dashboard.gd / test_hud_m2_skill_action.gd",
+      "result": "pass",
+      "evidence": "presentation-independent-review.json；failed=0、117通过、175通过。"
+    },
+    {
+      "command": "run_cr10_windows_weights.ps1；逐图原件/状态/局部/实际字重核验",
+      "result": "pass",
+      "evidence": "frame-and-source-verification.json；24整屏、24状态、66局部。"
+    },
+    {
+      "command": "独立读取三档 Windows 原图与精确局部，像素余量检查",
+      "result": "pass",
+      "evidence": "windows-visual-independent-review.json"
+    },
+    {
+      "command": "build-windows-release.ps1；Godot --main-pack 包内字体检查",
+      "result": "pass",
+      "evidence": "windows-package-verification.json"
+    },
+    {
+      "command": "claude_review_checks C8",
+      "result": "pass",
+      "evidence": "c8-raw-output.json"
+    },
+    {
+      "command": "claude_review_checks.c4_file 原始24整屏",
+      "result": "fail",
+      "evidence": "c4-raw-output.json；已知 CR-24 顶边1/2/2行，不属于本轮字体修复。"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "固定来源、覆盖、许可与三字重发行",
+      "result": "pass",
+      "evidence": [
+        "font-source-independent-review.json",
+        "windows-package-verification.json"
+      ]
+    },
+    {
+      "criterion": "字形一致、正文选择与标题层级",
+      "result": "pass",
+      "evidence": [
+        "weight-selection.json",
+        "windows-visual-independent-review.json"
+      ],
+      "approval_type": "Codex 受用户明确委托选择 Medium；独立审查 PASS。"
+    },
+    {
+      "criterion": "Windows 三档中文字完整，五组件外框边距≥2/3/4px",
+      "result": "pass",
+      "evidence": [
+        "windows-visual-independent-review.json"
+      ]
+    },
+    {
+      "criterion": "保留批准布局、字号与冻结剑气字体",
+      "result": "pass",
+      "evidence": [
+        "presentation-independent-review.json"
+      ]
+    },
+    {
+      "criterion": "记录内容独立审查",
+      "result": "pass",
+      "evidence": [
+        "record-independent-review.json"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "游戏主工作树与受保护分支",
+      "result": "unchanged",
+      "evidence": "主工作树 HEAD d18bd3d6bb3ce507112674e5f3a0aed7fc23f079，git status --short 为空；没有发布。"
+    },
+    {
+      "subject": "批准布局、冻结32px数字、玩法数据与非字体美术素材",
+      "result": "unchanged",
+      "evidence": "独立呈现审查及20项候选绑定。"
+    },
+    {
+      "subject": "project.godot",
+      "result": "unchanged",
+      "evidence": "工作区/索引/HEAD 的 Git blob 均为03d7120b0c38f7b00073c6b532a02a48977464f6；未纳入提交。"
+    },
+    {
+      "subject": "Mercury 所有路径、设计库与KB",
+      "result": "unchanged",
+      "evidence": "本 Task 未写入。"
+    }
+  ],
+  "residual_risks": [
+    "CR-24、CR-06/CR-40 行为和地形可读性仍未修复。",
+    "屏幕外内部输入采集不覆盖物理鼠标、音频或性能。",
+    "用户整体视觉批准未记录；没有发布或合并。"
+  ],
+  "escalation_reason": null,
+  "target_head": "b0e1ca919c4bcfa3aa16fb87872f9aa986e376ff",
+  "source_schema_version": "unversioned",
+  "source_snapshot_or_commit": "b0e1ca919c4bcfa3aa16fb87872f9aa986e376ff",
+  "normalized_digest": "精确字节摘要及 Git 换行归一化差异见 committed-candidate-binding.json；原图与状态见 evidence-manifest.json。",
+  "publication": {
+    "published": false,
+    "remote_ref": null,
+    "pr": null
+  },
+  "user_visual_approval": "not_recorded",
+  "delegated_weight_selection": "Medium body / Bold title",
+  "independent_reviews": {
+    "font_source": "pass",
+    "presentation_and_capture": "pass",
+    "windows_visual": "pass",
+    "record_accuracy": "pass"
+  },
+  "milestone_completed": false,
+  "whole_ui_accepted": false
+}

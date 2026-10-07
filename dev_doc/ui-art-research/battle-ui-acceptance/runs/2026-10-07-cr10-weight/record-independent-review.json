@@ -1,0 +1,202 @@
+{
+  "schema": "sot-independent-record-review/1",
+  "verdict": "pass",
+  "reviewed_target": {
+    "repository": "Ship_of_Theseus",
+    "head": "41b48b15a18e7bc55f64df3723ea81f49b4e4ee2",
+    "implementation_candidate": "b0e1ca919c4bcfa3aa16fb87872f9aa986e376ff",
+    "candidate_base": "1f9e90f99127bf984bdf4f59755ff3feec1eff26",
+    "ownership_contract": "SoT 领域文档由本仓维护；CR-10 文档路径不属于 Mercury 生成路径。"
+  },
+  "scope": [
+    "dev_doc/ui-art-research/battle-ui-acceptance/cr10/font-packaging.md",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/ 中的 13 份记录"
+  ],
+  "reviewed_file_sha256": [
+    {
+      "path": "dev_doc/ui-art-research/battle-ui-acceptance/cr10/font-packaging.md",
+      "sha256": "5028ae112a1362645395005f550bfa380aae19c7fe5beaf3a8e82b5a3288759b"
+    },
+    {
+      "path": "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/c4-raw-output.json",
+      "sha256": "9fc0aaaeeff70d178df82af15085ddbac40c51e0b036b5bc7404f60b90156909"
+    },
+    {
+      "path": "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/c8-raw-output.json",
+      "sha256": "632486aebeb214747f78ec5f34f8097393d11341879292472297f9d4b130aecf"
+    },
+    {
+      "path": "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/committed-candidate-binding.json",
+      "sha256": "785905866ec0491a9b89da4ff7bb7ca87a3004835f5b3d1fffb6d2c7e16c5d8d"
+    },
+    {
+      "path": "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/evidence-manifest.json",
+      "sha256": "99392b25504828f624fc17b60b59f6f956d14f8634cbe4919eabc49b824f85d5"
+    },
+    {
+      "path": "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/font-source-independent-review.json",
+      "sha256": "134793f99a2baccadeb3c87dcaa58d8e480229f303ada84d9b650ef6b237ca06"
+    },
+    {
+      "path": "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/frame-and-source-verification.json",
+      "sha256": "d6f58485ae9cf6b6415f9fa3b90dd7131451d61f22c734fb07a5f319ebaacf77"
+    },
+    {
+      "path": "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/presentation-independent-review.json",
+      "sha256": "3cbcbf56d0854a7f6e3b0cd718d65055a13f1d26310c13eb3d4f7ddb082ee16d"
+    },
+    {
+      "path": "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/report.md",
+      "sha256": "816901045538b7c56c4ada041c2eae0fe863699b49f85ba92e814ab62f670901"
+    },
+    {
+      "path": "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/task-receipt.json",
+      "sha256": "e3c170267bbe50c8da5355bf8e38c332da58b975fe6aa7ce4dce18a1e13be4e2"
+    },
+    {
+      "path": "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/task.md",
+      "sha256": "cca020e88cfd0d8e8a0735ca6f207caf0f56871f931f11b3bf23b72cb3461bcd"
+    },
+    {
+      "path": "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/weight-selection.json",
+      "sha256": "b01de263ebf54c7b94c6b3ac38580a980949a55922249c42f99c5bfd92346021"
+    },
+    {
+      "path": "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/windows-package-verification.json",
+      "sha256": "d288a26bab65fedcc9575e581a4039b780e3c464ae06eae281024c5bb2da5dc9"
+    },
+    {
+      "path": "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-weight/windows-visual-independent-review.json",
+      "sha256": "0ec628e52afc9909ca98879c68bb64d0d9c48d6dd9f12e40f8b6309237914410"
+    }
+  ],
+  "acceptance": [
+    {
+      "evidence": "任务回执和候选绑定记录均指向 b0e1ca919c4bcfa3aa16fb87872f9aa986e376ff；当前 HEAD 41b48b15a18e7bc55f64df3723ea81f49b4e4ee2 为后续登记提交。",
+      "result": "pass",
+      "criterion": "实施候选与本轮验收证据可区分绑定"
+    },
+    {
+      "evidence": "选择记录为 Medium 正文/Bold 标题，decision_by 为 Codex main agent under explicit user delegation，human_approval=false，scope 限定正文选择；整体批准为 not_recorded。",
+      "result": "pass",
+      "criterion": "受托字重选择与用户整体视觉批准分开"
+    },
+    {
+      "evidence": "c4-raw-output.json pass=false、24 captures、issue=CR-24；report.md:19 明确列为 FAIL。c8-raw-output.json pass=true，任务回执分别列项。",
+      "result": "pass",
+      "criterion": "C4 失败不被 C8 或 CR-10 结果掩盖"
+    },
+    {
+      "evidence": "task-receipt.json milestone_completed=false、whole_ui_accepted=false、user_visual_approval=not_recorded；report.md:5,46-48 明确保留边界。",
+      "result": "pass",
+      "criterion": "不把本轮写成 Milestone 或整体 UI 完成"
+    },
+    {
+      "evidence": "windows-package-verification.json 限定无窗口检查为既有 8x8 test_arena，并明确不验证地图约束或 CR-11；未发布。",
+      "result": "pass",
+      "criterion": "发行包检查只支撑包完整性结论"
+    },
+    {
+      "evidence": "已核对 134 项采集清单、93 项视觉审查图像/局部清单和 22 项发行包文件的路径、SHA-256；均与仓外原件匹配。source-manifest 摘要与 frame-and-source-verification 引用匹配；24 帧的 66 个局部均引用对应全帧 SHA。",
+      "result": "pass",
+      "criterion": "源摘要、同帧图和独立审查引用一致"
+    },
+    {
+      "evidence": "对 14 个指定文件进行 Windows 绝对路径与常见凭据前缀扫描，命中数均为 0。",
+      "result": "pass",
+      "criterion": "审查文档不含本机绝对路径或凭据"
+    }
+  ],
+  "evidence_binding": {
+    "windows_capture_root": "<仓库外证据根>/windows-attempt4",
+    "capture_manifest": {
+      "same_frame_crops": 66,
+      "full_frames": 24,
+      "hash_mismatch": 0,
+      "entries": 134,
+      "missing": 0
+    },
+    "source_manifest": {
+      "capture_run_reports_original_sources_unchanged": true,
+      "files": 1289,
+      "frame_verification_records": 548,
+      "same_frame_crop_source_hash_mismatches": 0,
+      "frame_records_matching_source_manifest": 548,
+      "frame_record_hash_mismatches": 0,
+      "sha256": "2cec55b747d5918ceb815fd4137df5c3a5654bd4f7a9830c8c0ced39b4e0e9fe"
+    },
+    "original_visual_review": {
+      "sha256": "4eea12aa92001f471f1071ae98b8b50475db6fa0005f13638d20acf4f76fbfe2",
+      "bytes": 35306,
+      "file": "windows-attempt4/windows-visual-review.json"
+    },
+    "presentation_code_review": {
+      "sha256": "a1b99fdde99842fff00eaaff4111de30717f18be82dcd6c39f5db1ef7d7a4d71",
+      "file": "presentation-independent-review/final-review.json"
+    },
+    "visual_review_file_hashes": {
+      "hash_mismatch": 0,
+      "entries": 93,
+      "missing": 0
+    },
+    "package_root": "<仓库外证据根>/windows-release-b0e1ca9",
+    "package_files": {
+      "hash_mismatch": 0,
+      "entries": 22,
+      "missing": 0,
+      "size_mismatch": 0
+    },
+    "cjk_subset_sha256": {
+      "local_font_file_hashes_match_document": true,
+      "Regular": "241e7ebc37926a6a893771a8d0f2f375e385b44d9e8d400553402968a111531b",
+      "Bold": "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4",
+      "Medium": "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101"
+    }
+  },
+  "findings": [],
+  "checks_performed": [
+    "读取 Mercury Harness 所有权合同，确认审查文档由 SoT 维护且不属于生成路径。",
+    "核对当前 HEAD、b0e1 候选提交标识及候选后登记状态；没有运行代码或 GUI。",
+    "逐文件计算 14 个指定审查文件 SHA-256。",
+    "逐项重算采集清单、视觉审查清单和发行包清单引用的文件 SHA-256/大小。",
+    "核对两个独立审查原件摘要、来源清单摘要、24 帧/66 裁切的同帧 SHA 关系。",
+    "读取 Medium/Bold 选择、用户整体批准、C4/C8、发行范围及 Milestone 状态字段。",
+    "对指定审查文件扫描本机路径和常见凭据模式。"
+  ],
+  "not_covered": [
+    "未重新启动 Windows GUI、运行采集或重跑未变化的代码、运行时及发行检查。",
+    "未重新作主观字重评价；核验的是现有独立审查原件的摘要与结构化记录。",
+    "未审查工作树中与本次文档候选无关的代码、project.godot 修改或新生成的独立回执文件。"
+  ],
+  "residual_risk": [
+    "用户整体视觉批准、发布与合并仍未记录；Milestone 和整体 UI 均未完成。",
+    "C4/CR-24 头像顶边接缝仍是明确 FAIL。",
+    "发行检查只验证候选包及其字体链，不替代 10×10 场景视觉验收、地图约束或 CR-11。"
+  ],
+  "pending_record_update": {
+    "update_to": "pass",
+    "current_value": "pending",
+    "task_receipt_fields": [
+      "independent_reviews.record_accuracy",
+      "criteria_evidence[record content independent review].result"
+    ],
+    "basis": "This receipt verdict is pass; Main may bind its external-file SHA-256 in the run record."
+  },
+  "out_of_scope_observation": "git status also reports project.godot modified; content was not inspected because it is outside this documentation-review scope.",
+  "original_report": {
+    "root": "<仓库外证据根>",
+    "file": "record-independent-review.json",
+    "bytes": 9394,
+    "sha256": "5e104bed1c0f88bdb3a706ccc47aa75a05edc86c84ed442b34e48a64ad76a4e1"
+  },
+  "copy_note": "仅转换本机路径；所审文件摘要绑定审查前版本，回执仅按授权推进记录审查状态。",
+  "authorized_post_review_change": {
+    "file": "task-receipt.json",
+    "before_sha256": "e3c170267bbe50c8da5355bf8e38c332da58b975fe6aa7ce4dce18a1e13be4e2",
+    "after_sha256": "39c26a059b9dc24d57fa96fa13e24ee8fa2978b100ecf0d1906a3e8b7c9cce7a",
+    "changes": [
+      "criteria_evidence 记录内容独立审查 pending → pass",
+      "independent_reviews.record_accuracy pending → pass"
+    ]
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "schema": "sot-independent-code-review/1",
+  "verdict": "pass",
+  "target_head": "1f9e90f99127bf984bdf4f59755ff3feec1eff26",
+  "baseline_head": "1f9e90f99127bf984bdf4f59755ff3feec1eff26",
+  "findings": [],
+  "acceptance": [
+    {
+      "result": "pass",
+      "evidence": [
+        "scripts/ui/hud/m2/hud_font_setup.gd",
+        "assets/ui/themes/hud_m2_cjk_font.tres",
+        "assets/ui/themes/hud_m2_cjk_bold_font.tres",
+        "assets/ui/themes/hud_m2_title_font.tres",
+        "tests/claude_review/cr10_font_runtime_check.gd",
+        "tests/claude_review/capture_cr10_windows_weights.gd"
+      ],
+      "criterion": "Medium 正文与 Bold 标题；Regular/Medium 对照只切换正文"
+    },
+    {
+      "result": "pass",
+      "evidence": [
+        "tests/claude_review/cr10_font_runtime_check.gd",
+        "assets/ui/themes/hud_m2.tres",
+        "assets/ui/themes/hud_m2_fonts.tres"
+      ],
+      "criterion": "保留 Latin、IBM Plex、冻结剑气数据与 32 px 度量"
+    },
+    {
+      "result": "pass",
+      "evidence": [
+        "scripts/ui/hud/m2/hud_font_setup.gd",
+        "scripts/ui/font_setup.gd",
+        "tests/claude_review/cr10_font_runtime_check.gd"
+      ],
+      "criterion": "supplementary fallback 只改深拷贝度量并保留字形数据"
+    },
+    {
+      "result": "pass",
+      "evidence": [
+        "scenes/tactical/hud/m2/character_hud_panel.tscn",
+        "scenes/tactical/hud/m2/skill_slot_button.tscn",
+        "scripts/ui/damage_forecaster.gd",
+        "scripts/ui/turn_order_bar.gd",
+        "assets/ui/themes/hud_m2.tres"
+      ],
+      "criterion": "保留批准的坐标与字号"
+    },
+    {
+      "result": "pass",
+      "evidence": [
+        "scripts/ui/hud/m2/skill_slot_button.gd:99-100",
+        "scripts/ui/hud/m2/skill_slot_button.gd:127-170",
+        "tests/test_hud_m2_skill_action.gd:135"
+      ],
+      "criterion": "RichTextLabel 保留 tooltip 原文与公开访问行为"
+    }
+  ],
+  "checks": [
+    {
+      "command": "Godot 4.6.3 --headless --path <worktree> --rendering-method gl_compatibility --script res://tests/claude_review/cr10_font_runtime_check.gd",
+      "name": "cr10_font_runtime_check",
+      "stdout": "<仓库外证据根>/presentation-independent-review/cr10-font-runtime.stdout.log",
+      "stderr": "<仓库外证据根>/presentation-independent-review/cr10-font-runtime.stderr.log",
+      "result": "exit 0; CR10_FONT_RUNTIME_RESULT failed=0"
+    },
+    {
+      "command": "Godot 4.6.3 --headless --path <worktree> --rendering-method gl_compatibility --script res://tests/test_hud_m2_runtime_dashboard.gd",
+      "name": "test_hud_m2_runtime_dashboard",
+      "stdout": "<仓库外证据根>/presentation-independent-review/hud-m2-runtime-dashboard.stdout.log",
+      "stderr": "<仓库外证据根>/presentation-independent-review/hud-m2-runtime-dashboard.stderr.log",
+      "result": "exit 0; passed=117 failed=0"
+    },
+    {
+      "command": "Godot 4.6.3 --headless --path <worktree> --rendering-method gl_compatibility --script res://tests/test_hud_m2_skill_action.gd",
+      "name": "test_hud_m2_skill_action",
+      "stdout": "<仓库外证据根>/presentation-independent-review/hud-m2-skill-action.stdout.log",
+      "stderr": "<仓库外证据根>/presentation-independent-review/hud-m2-skill-action.stderr.log",
+      "result": "exit 0; 175 passed 0 failed"
+    },
+    {
+      "command": "Godot 4.6.3 --headless --path <worktree> --rendering-method gl_compatibility --check-only --script res://tests/claude_review/capture_cr10_windows_weights.gd",
+      "name": "capture_script_parse",
+      "stdout": "<仓库外证据根>/presentation-independent-review/capture-script-check.stdout.log",
+      "stderr": "<仓库外证据根>/presentation-independent-review/capture-script-check.stderr.log",
+      "result": "exit 0"
+    }
+  ],
+  "capture_evidence": {
+    "adapter": "OpenGL 3.3.0 NVIDIA 596.36 Compatibility; NVIDIA GeForce RTX 3070 Ti",
+    "result": "both capture processes exited 0; 24 full-screen captures and 66 same-frame regions in manifests; one capture per body weight and size passed actual font-data hash guard; zero foreground samples across 834 samples per run; before/after foreground same; OS mouse calls false; hidden no_focus window at [-12000,-12000]",
+    "directory": "<仓库外证据根>/windows-attempt4",
+    "appearance_review": "pending; this code review does not certify subjective weight preference",
+    "source_manifest": "capture-run.json reports 1289 source files and original_sources_unchanged=true"
+  },
+  "launcher_source": {
+    "local_copy": "<仓库外证据根>/presentation-independent-review/godot-source",
+    "tag": "Godot 4.6.3-stable",
+    "finding": "wrapper waits for JOB_OBJECT_MSG_ACTIVE_PROCESS_ZERO before returning",
+    "file": "platform/windows/console_wrapper_windows.cpp",
+    "commit": "35e80b3a8822a9df9be390814b62f44c0a9c69e8",
+    "sha256": "2f9a2b547c3fbfd73977aa007f4f0f23994c7e5f6128d8152b54d44e4c6830c2",
+    "url": "https://github.com/godotengine/godot/blob/4.6.3-stable/platform/windows/console_wrapper_windows.cpp"
+  },
+  "changed_file_sha256": [
+    {
+      "sha256": "c4984f609034257327ec7fa47b4088a2b322a5da2f3eb6bd4faa4c9924ab68bb",
+      "path": "assets/fonts/noto_sans_cjk_sc/source.json"
+    },
+    {
+      "sha256": "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4",
+      "path": "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Bold-subset.otf"
+    },
+    {
+      "sha256": "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101",
+      "path": "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Medium-subset.otf"
+    },
+    {
+      "sha256": "9cb5cfb1ae37e0d51dcb16067281057f7c05bd8ab92b46e3584d1aff2fa9fad2",
+      "path": "assets/ui/themes/hud_m2.tres"
+    },
+    {
+      "sha256": "d43507f5e829f23c8a8f93a1b7b1c225a833e7b749f3a67ae0a4aa7e5286dc78",
+      "path": "assets/ui/themes/hud_m2_cjk_font.tres"
+    },
+    {
+      "sha256": "ff54770a48c20fc571ad15b9ff7ba2e18088a9e86784e4d68e1fa944d9dd0966",
+      "path": "assets/ui/themes/hud_m2_cjk_bold_font.tres"
+    },
+    {
+      "sha256": "2edc3b517d08e3eaca7235ee0bcc3e726b97fb91e14565dc56df01cfc0d4006e",
+      "path": "assets/ui/themes/hud_m2_title_font.tres"
+    },
+    {
+      "sha256": "9ec57b76acbb6e037df2daea1e8a91e732e3db6b01218b9bc933ff34faa2eb9c",
+      "path": "scenes/tactical/hud/m2/character_hud_panel.tscn"
+    },
+    {
+      "sha256": "f670395858e50b5f3969e335378360a241a2ed58ac903779e033299622ff1692",
+      "path": "scenes/tactical/hud/m2/skill_slot_button.tscn"
+    },
+    {
+      "sha256": "1b946614098dcb9708baae6fba359903bda85238d4de6144522246ecf59f29be",
+      "path": "scripts/ui/font_setup.gd"
+    },
+    {
+      "sha256": "67038b882a0b6780f9d4e6aea22e41a51f473084d9adce05ca488fe9008a4272",
+      "path": "scripts/ui/hud/m2/hud_font_setup.gd"
+    },
+    {
+      "sha256": "bac49ddfdb4f67a6012fcdca52812f2d13cff65b1de861c2c53b954c17796391",
+      "path": "scripts/ui/hud/m2/skill_slot_button.gd"
+    },
+    {
+      "sha256": "8d75d73639a253a8fceb8e0505a692e83ba877b802bca1495771c32b9432941e",
+      "path": "scripts/ui/damage_forecaster.gd"
+    },
+    {
+      "sha256": "7870fdef03d740c73d209ec0dedf00f9c2f9b51b5131c52c7a26c976980394ef",
+      "path": "scripts/ui/turn_order_bar.gd"
+    },
+    {
+      "sha256": "de30fd9d3aa2f3dc7c0b0b92b06a6ee9a14282e2389b85f809c1be08b18a11dd",
+      "path": "tests/claude_review/cr10_font_runtime_check.gd"
+    },
+    {
+      "sha256": "6217e3c73786cc61f26679bf1728952251b58daec81044371739a40936b06335",
+      "path": "tests/test_hud_m2_runtime_dashboard.gd"
+    },
+    {
+      "sha256": "65a7bdb5feb7877938784dd1647c28878c6d22175cc049e00d0027d78eaaa4ce",
+      "path": "tests/claude_review/capture_cr10_windows_weights.gd"
+    },
+    {
+      "sha256": "382beef85ecd7c8dc000cac3fd8bdd0840d379130e065793b51febd14bec5e32",
+      "path": "tests/claude_review/run_cr10_windows_weights.ps1"
+    }
+  ],
+  "not_covered": [
+    "Windows 截图的主观字重偏好判断；capture-run.json 将 windows_appearance 标记为 pending_image_review。"
+  ],
+  "residual_risk": "本回执仅为代码与运行时结构审查，不表示 CR-10 终验或项目发布完成。",
+  "out_of_scope_observation": "工作树另有 project.godot、scripts/codex/build-windows-release.ps1、字体打包脚本和文档等 dirty 项，本次未审查。",
+  "raw_review_sha256": "a1b99fdde99842fff00eaaff4111de30717f18be82dcd6c39f5db1ef7d7a4d71"
+}

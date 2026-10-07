@@ -1,0 +1,5073 @@
+{
+  "pass": true,
+  "base_commit": "1f9e90f99127bf984bdf4f59755ff3feec1eff26",
+  "source_manifest_sha256": "2cec55b747d5918ceb815fd4137df5c3a5654bd4f7a9830c8c0ced39b4e0e9fe",
+  "source_files_checked": 548,
+  "source_files": [
+    {
+      "bytes": 0,
+      "file": "assets/audio/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 174608,
+      "file": "assets/fonts/ibm_plex_mono/IBMPlexMono-SemiBold.ttf",
+      "sha256": "f04d7c488ddf7d1fa99f2574efc3406ea4cbe17bb1af3a1ab960f84d0c96a172"
+    },
+    {
+      "bytes": 4451,
+      "file": "assets/fonts/ibm_plex_mono/LICENSE.txt",
+      "sha256": "8b5d8294d1fde69598aa5fd72329602ce48b20ab536ff6528960fd2bc9250cad"
+    },
+    {
+      "bytes": 1241,
+      "file": "assets/fonts/ibm_plex_mono/source.json",
+      "sha256": "bdd2f6c9a53cc0ebb08bda90e40f51bd41022b6b1b6637086e318670a8be16a0"
+    },
+    {
+      "bytes": 86,
+      "file": "assets/fonts/noto_emoji/.gitattributes",
+      "sha256": "d7d8938adbc77492e08a982dece7a84fb064bce8972a0c17474f0ea43813b7a3"
+    },
+    {
+      "bytes": 4330,
+      "file": "assets/fonts/noto_emoji/LICENSE.txt",
+      "sha256": "500bb1ccf43df7bbb522112f9133a52b16e1c35e809632f5d8609b179152de5b"
+    },
+    {
+      "bytes": 2812,
+      "file": "assets/fonts/noto_emoji/NotoEmoji-Regular-400-subset.ttf",
+      "sha256": "2e1a067b485a7a8f8b8459405d712ab0465f1cb2de971b928471d815d20dbe90"
+    },
+    {
+      "bytes": 1262,
+      "file": "assets/fonts/noto_emoji/source.json",
+      "sha256": "09befe5f43b100d7c7b2dbfbd01d7cb8da01a6aae2b565960a4cdc55010534a4"
+    },
+    {
+      "bytes": 86,
+      "file": "assets/fonts/noto_sans_cjk_sc/.gitattributes",
+      "sha256": "d7d8938adbc77492e08a982dece7a84fb064bce8972a0c17474f0ea43813b7a3"
+    },
+    {
+      "bytes": 4301,
+      "file": "assets/fonts/noto_sans_cjk_sc/LICENSE.txt",
+      "sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+    },
+    {
+      "bytes": 3497576,
+      "file": "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Bold-subset.otf",
+      "sha256": "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+    },
+    {
+      "bytes": 3409012,
+      "file": "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Medium-subset.otf",
+      "sha256": "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101"
+    },
+    {
+      "bytes": 3408020,
+      "file": "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Regular-subset.otf",
+      "sha256": "241e7ebc37926a6a893771a8d0f2f375e385b44d9e8d400553402968a111531b"
+    },
+    {
+      "bytes": 214441,
+      "file": "assets/fonts/noto_sans_cjk_sc/source.json",
+      "sha256": "c4984f609034257327ec7fa47b4088a2b322a5da2f3eb6bd4faa4c9924ab68bb"
+    },
+    {
+      "bytes": 86,
+      "file": "assets/fonts/noto_sans_symbols/.gitattributes",
+      "sha256": "d7d8938adbc77492e08a982dece7a84fb064bce8972a0c17474f0ea43813b7a3"
+    },
+    {
+      "bytes": 4377,
+      "file": "assets/fonts/noto_sans_symbols/LICENSE.txt",
+      "sha256": "0dab92d0544f7b233403f14b84a663bdbfa746982eda629e7f4f9ffe1b036feb"
+    },
+    {
+      "bytes": 6508,
+      "file": "assets/fonts/noto_sans_symbols/NotoSansSymbols-Regular-subset.ttf",
+      "sha256": "029bbe8952f5e1270dbfcbf6f29fa43e2b8158a5b87e4fc80d695fefa7d1cd6f"
+    },
+    {
+      "bytes": 6664,
+      "file": "assets/fonts/noto_sans_symbols/NotoSansSymbols2-Regular-subset.ttf",
+      "sha256": "e3fba50bf66cf9f4475629b2840f27df8b0a6bde04743007c6e263ebbcba2bce"
+    },
+    {
+      "bytes": 2112,
+      "file": "assets/fonts/noto_sans_symbols/source.json",
+      "sha256": "3ccb624e0491bc5aa8dbde97ec80d7adfc8ac17833910e65b37c3f65fea255f4"
+    },
+    {
+      "bytes": 4579,
+      "file": "assets/fonts/source_sans_pro/LICENSE.txt",
+      "sha256": "e1d1fdcefb57985226c06fa9500d29caacfa2b1f8b8c74db911f13c6cad186a1"
+    },
+    {
+      "bytes": 375,
+      "file": "assets/fonts/source_sans_pro/source.json",
+      "sha256": "9bdeb09671b158e36226181308146831665321b05067c6671977cf29e9788c19"
+    },
+    {
+      "bytes": 253832,
+      "file": "assets/fonts/source_sans_pro/SourceSansPro-Semibold.ttf",
+      "sha256": "72bf9aa2e78b8c78444ae74b6be09411d5fb5bf0eb9bcdfd47082cc5d9b536df"
+    },
+    {
+      "bytes": 7132,
+      "file": "assets/prototype/battlefield_courtyard/candidate-receipt.json",
+      "sha256": "5462d97a9bd3aa66b3eced58508e632a10e6fd52938c3cb5b660e17a6aceedaf"
+    },
+    {
+      "bytes": 14797,
+      "file": "assets/prototype/battlefield_courtyard/courtyard_layouts.json",
+      "sha256": "0c3646daed45cb39f86edb7d57fc5b3c0c5a249e2afe9a55f7cb9f9ff61349e1"
+    },
+    {
+      "bytes": 1632267,
+      "file": "assets/prototype/battlefield_courtyard/courtyard-entry-v2.png",
+      "sha256": "f801ec6c25de19882f247729f591323700ad47d66270d5c7d448c078f82cc597"
+    },
+    {
+      "bytes": 996,
+      "file": "assets/prototype/battlefield_courtyard/courtyard-entry-v2.png.import",
+      "sha256": "967f0324a6b5fb240eeaf2b0caf9b52e6b6a08a75b5a96e964ec5adc801e9e69"
+    },
+    {
+      "bytes": 1733266,
+      "file": "assets/prototype/battlefield_courtyard/forest-tree-v2.png",
+      "sha256": "0db7cb1e145af28443d6eed31ad38c84cdcf48cd6d8cff4b2ded224a44799203"
+    },
+    {
+      "bytes": 985,
+      "file": "assets/prototype/battlefield_courtyard/forest-tree-v2.png.import",
+      "sha256": "b094ddc63391f3a4184a4f0d156583a3c06262ff33d8245b972cd682d279c34c"
+    },
+    {
+      "bytes": 1046432,
+      "file": "assets/prototype/battlefield_courtyard/low-rubble-v1.png",
+      "sha256": "f775d1a979425068bf437aee78e15b94a407d50e830e89c02cb0f4393c04883c"
+    },
+    {
+      "bytes": 981,
+      "file": "assets/prototype/battlefield_courtyard/low-rubble-v1.png.import",
+      "sha256": "7604abd721588a095dd905596c9ee90996c04f48f597b0b9894acc6a4ae50d4e"
+    },
+    {
+      "bytes": 3116651,
+      "file": "assets/prototype/battlefield_courtyard/masonry-wall-v2.png",
+      "sha256": "dda2fb161f140090a4017f8f9b99fd72e6c7b69bf98e4355b73432c21644a23b"
+    },
+    {
+      "bytes": 987,
+      "file": "assets/prototype/battlefield_courtyard/masonry-wall-v2.png.import",
+      "sha256": "820490fbbcb948a66c9368684f5f6499518055f3baa46df9e816266bd7314630"
+    },
+    {
+      "bytes": 2846807,
+      "file": "assets/prototype/battlefield_courtyard/meadow-ground-v2.png",
+      "sha256": "13ccf187b42d4483fe34b525987259ad27b543d6d336b8d38cdbdfa4d0fecd58"
+    },
+    {
+      "bytes": 990,
+      "file": "assets/prototype/battlefield_courtyard/meadow-ground-v2.png.import",
+      "sha256": "3906b1e85492b2bb0ca5ce86ee7ec1f6b90f9620f2a7527be0984ba8edd857b7"
+    },
+    {
+      "bytes": 3194734,
+      "file": "assets/prototype/battlefield_courtyard/moss-ground-v1.png",
+      "sha256": "6c038fe09f0a9c117fe8d934c33815b820908571581dd3c0e5ea592190fd3b42"
+    },
+    {
+      "bytes": 985,
+      "file": "assets/prototype/battlefield_courtyard/moss-ground-v1.png.import",
+      "sha256": "ee4573d96ef13efa56569849dcfcbd01466fc982103c93732ce19d75f4ed9404"
+    },
+    {
+      "bytes": 3195937,
+      "file": "assets/prototype/battlefield_courtyard/natural-rock-v1.png",
+      "sha256": "aa7414ec6e3380e60a5b9e3b7d9383b21676a6a87015e2ebda2620b4dc73b5f6"
+    },
+    {
+      "bytes": 988,
+      "file": "assets/prototype/battlefield_courtyard/natural-rock-v1.png.import",
+      "sha256": "3221a3b84d0a0b7039cba57b2be301c87b6409515bace7b61ae5a1f078a889db"
+    },
+    {
+      "bytes": 1958844,
+      "file": "assets/prototype/battlefield_courtyard/natural-water-v2.png",
+      "sha256": "f9a55ac39286b53da0f007cf9ed59d4d5fb1945ba490c8c7af7992291789e848"
+    },
+    {
+      "bytes": 990,
+      "file": "assets/prototype/battlefield_courtyard/natural-water-v2.png.import",
+      "sha256": "7ccdf6647d517b23060fd36cd9811d567d0465647bfb734b94e507f2b2366f90"
+    },
+    {
+      "bytes": 12105,
+      "file": "assets/prototype/battlefield_courtyard/README.md",
+      "sha256": "2a92fa48d86ae9f199dfb1f216545eb3dea720f35cd32f32bc1c7d971d265b66"
+    },
+    {
+      "bytes": 2247663,
+      "file": "assets/prototype/battlefield_courtyard/shallow-water-v1.png",
+      "sha256": "8d35b4c3f1796f7ffb253f0059a2a15f659718988c9c7fedd2b5b2c3ab5c9fa9"
+    },
+    {
+      "bytes": 991,
+      "file": "assets/prototype/battlefield_courtyard/shallow-water-v1.png.import",
+      "sha256": "dc03b5c6510bfc84923ce772ae5c9371a8c958c694579d7b57c1c7b244b9b514"
+    },
+    {
+      "bytes": 1519158,
+      "file": "assets/prototype/battlefield_courtyard/shrub-v1.png",
+      "sha256": "4a8ab22ce661e8285b901cc8d67dc589c6c3d950b0e28e7e948534c2740001c5"
+    },
+    {
+      "bytes": 967,
+      "file": "assets/prototype/battlefield_courtyard/shrub-v1.png.import",
+      "sha256": "6f9359f3fd4759177f2aba515104e085302edee51d5a4087010f38947e57f58d"
+    },
+    {
+      "bytes": 27844,
+      "file": "assets/prototype/battlefield_courtyard/source-manifest.json",
+      "sha256": "eaec06faf3c5013d6cdb8809178cefa0974edad42fc6ea3f8a4356bfe48c49b8"
+    },
+    {
+      "bytes": 2624558,
+      "file": "assets/prototype/battlefield_courtyard/stone-ground-v1.png",
+      "sha256": "75e23e7471f98d7a8d233f21533b5fa847c0d5c9c3cc7bbd13efb954c7524826"
+    },
+    {
+      "bytes": 988,
+      "file": "assets/prototype/battlefield_courtyard/stone-ground-v1.png.import",
+      "sha256": "7aab4e2360eec7d4220cea5eeb22f216479d7dd3752b75d2c4b79ba8b4b62653"
+    },
+    {
+      "bytes": 6967,
+      "file": "assets/prototype/battlefield_courtyard/terrain_catalog.json",
+      "sha256": "9952635f32faf7d69bd32c0e883714b3273c9ce006732ad6c7b8ff4d1e7486b0"
+    },
+    {
+      "bytes": 6739,
+      "file": "assets/prototype/battlefield_courtyard/terrain_examples.json",
+      "sha256": "52832ee9c2fbd3eb119b605990eb8d18a584a42dd3a671af4b824348e8731b58"
+    },
+    {
+      "bytes": 910,
+      "file": "assets/prototype/battlefield_courtyard/terrain-catalog-visual-scope.json",
+      "sha256": "fdd023af81979948e49800f9adf9d89b98fed60be76c461778c7060c8b9e4fd6"
+    },
+    {
+      "bytes": 2751,
+      "file": "assets/prototype/battlefield_courtyard/terrain-design-reference.md",
+      "sha256": "5f4d134004fc92afb72470875687d6502ec0179d26663e7d2639db259fd234e8"
+    },
+    {
+      "bytes": 4554,
+      "file": "assets/prototype/battlefield_courtyard/terrain-kit-approved.json",
+      "sha256": "f57cdb796933c9379bd62281cff33e37f2d391a2e2b2d5706371e7bd442c10fa"
+    },
+    {
+      "bytes": 15773,
+      "file": "assets/prototype/battlefield_courtyard/terrain-kit-receipt.json",
+      "sha256": "633463a1ca30aff49ecf047c4bb2a329ad0dd39e1d395579ff23db48aa89a983"
+    },
+    {
+      "bytes": 3850,
+      "file": "assets/prototype/battlefield_courtyard/terrain-kit-sources.json",
+      "sha256": "2095fc54415ee720e2daa4a9c1adafd0292fad4f7a0e3a928ec7285d5725f144"
+    },
+    {
+      "bytes": 12654,
+      "file": "assets/prototype/battlefield_courtyard/terrain-map-size-receipt.json",
+      "sha256": "bc663e58d4ef60f5d2c95856dc4d23bf54ebbbd9c774974ed4ced04946fa139e"
+    },
+    {
+      "bytes": 30150,
+      "file": "assets/prototype/battlefield_courtyard/terrain-runtime-receipt.json",
+      "sha256": "8c5c1427f3dfe2a88ed102299b7d784c24415e26742e1303c6fa0539cfaba997"
+    },
+    {
+      "bytes": 1929,
+      "file": "assets/prototype/battlefield_courtyard/visual_profile.json",
+      "sha256": "8bbf74074fbca4ab6162e60e66d383c5b365eb4a6a85a8dad5f9dc1b4a5923aa"
+    },
+    {
+      "bytes": 1180,
+      "file": "assets/prototype/battlefield_courtyard/water-depth-approved.json",
+      "sha256": "3f0d28405f871e3e67a2108b1e45f9824ee4a1d6b20e2f6bc7269b728764c60f"
+    },
+    {
+      "bytes": 1768055,
+      "file": "assets/prototype/battlefield_courtyard/water-surface-v3.png",
+      "sha256": "c5568f6162a9a637f64fd8a6a7be180978ce488e242fa5b67a86919f04038ae4"
+    },
+    {
+      "bytes": 991,
+      "file": "assets/prototype/battlefield_courtyard/water-surface-v3.png.import",
+      "sha256": "f051050a27db56d47fa3cf3adaaa1a6644c3529a63731168c999389ad144141d"
+    },
+    {
+      "bytes": 1511440,
+      "file": "assets/prototype/battlefield_courtyard/water-surface-v4.png",
+      "sha256": "484cc6ed34993044aa9ddaa46fe5d30456be88344bbf7965505c693073e7c962"
+    },
+    {
+      "bytes": 991,
+      "file": "assets/prototype/battlefield_courtyard/water-surface-v4.png.import",
+      "sha256": "1238a8e89c7514f4b63ff68271ac8f530d9e866ad06fe95a191eabad9171b04a"
+    },
+    {
+      "bytes": 1136615,
+      "file": "assets/prototype/battlefield_courtyard/water-surface-v5.png",
+      "sha256": "5a82396548d2ac161d9fa6d2af60caad2859f74f1254e978a1b54d5cadd9c520"
+    },
+    {
+      "bytes": 991,
+      "file": "assets/prototype/battlefield_courtyard/water-surface-v5.png.import",
+      "sha256": "6811e408f4e4cc42362c78095e586f63557066e8fc7a28f92b8e6dabb49048ea"
+    },
+    {
+      "bytes": 5073,
+      "file": "assets/prototype/hud_m2/skill-juhe.png",
+      "sha256": "13935a1c8377946fc0258171475833cde33ce87ea44902b30a4201b2ea492091"
+    },
+    {
+      "bytes": 4772,
+      "file": "assets/prototype/hud_m2/skill-xinyan.png",
+      "sha256": "c3aa9def6a9db9b308397fb2fb6f9483a59a21e2b1f7ad58e72eef4a7bddf047"
+    },
+    {
+      "bytes": 5130,
+      "file": "assets/prototype/hud_m2/skill-yishan.png",
+      "sha256": "e6dd8d6364685b544e399be3e532316d15b92e7712cab04571c439a294bd9ae2"
+    },
+    {
+      "bytes": 4442,
+      "file": "assets/prototype/hud_m2/skill-zhanji.png",
+      "sha256": "7ed2d2d7066f1826a63c6dee064f03138d47a344fbeaab8ddb071901e4d03e77"
+    },
+    {
+      "bytes": 5806,
+      "file": "assets/prototype/hud_m2/skill-zhaojia.png",
+      "sha256": "5395f67acaf9fdf413fd4357865211e764aa296fd90bc92fecbc837336919eb2"
+    },
+    {
+      "bytes": 923,
+      "file": "assets/prototype/hud_m2/source-manifest.json",
+      "sha256": "e8e5ec7f8e19985df68663213ac21d05c76dd0beb50942d44b694d26f08298ff"
+    },
+    {
+      "bytes": 763,
+      "file": "assets/prototype/viewport_angle/README.md",
+      "sha256": "16483dad342266fbbeed4d42c6add5c82f255b264a3e074a5aefa362caf1a77d"
+    },
+    {
+      "bytes": 6417,
+      "file": "assets/prototype/visual_style/README.md",
+      "sha256": "08bc91ea1701178494cfed7dcda5ac41f1cf501415f54b4354a081b2a983196a"
+    },
+    {
+      "bytes": 12304,
+      "file": "assets/prototype/visual_style/sample_manifest.json",
+      "sha256": "1e227884bffde5e28cec7b13baaed7cd55ae9860b3127885780e26d4d19433a4"
+    },
+    {
+      "bytes": 737775,
+      "file": "assets/prototype/visual_style/samples/map_token_preview_final_v2.png",
+      "sha256": "9c828acb5caa501a351c6628311f8d29692c9ca4454e1614dab891444b61637f"
+    },
+    {
+      "bytes": 920054,
+      "file": "assets/prototype/visual_style/samples/map_token_source_transparent_clean_v2.png",
+      "sha256": "e6f33324c52929769d4698ed75e969470ec45748788503f4637fcb3223dc5415"
+    },
+    {
+      "bytes": 1898553,
+      "file": "assets/prototype/visual_style/samples/portrait_preview_final.png",
+      "sha256": "9f123a2022abe62472530ebd13ba43587802623c0db7ff7af711f5cec5be0cf3"
+    },
+    {
+      "bytes": 1424187,
+      "file": "assets/prototype/visual_style/samples/terrain_preview_final.png",
+      "sha256": "e40f2d6685d4543c91770768a8f837b0b238f73bd8e436d7438961a15c446b53"
+    },
+    {
+      "bytes": 713413,
+      "file": "assets/prototype/visual_style/samples/ui_preview_final_v3.png",
+      "sha256": "0c6f5a7bbc78b889f09e9dccc0423caaef3323bf6e5170314d333ad2c5bc64b6"
+    },
+    {
+      "bytes": 2097334,
+      "file": "assets/prototype/visual_style/samples/vfx_preview_clean.png",
+      "sha256": "e4542cc0d29cc7421d801d05177e653aa85012c1bd67b303c07c966ba04ed844"
+    },
+    {
+      "bytes": 0,
+      "file": "assets/sprites/enemies/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "file": "assets/sprites/units/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "file": "assets/tilesets/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "file": "assets/ui/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 472,
+      "file": "assets/ui/catalogs/hud_m2_class_resource_profiles.json",
+      "sha256": "82045aa83f947b2234659b35656ee3878f64ea23e80cee1a142028208be898f5"
+    },
+    {
+      "bytes": 787,
+      "file": "assets/ui/catalogs/hud_m2_skill_icons.json",
+      "sha256": "368c3e90f0168aec75fe68c0c823f5292d128d076be6eb2c3e33310121f5872b"
+    },
+    {
+      "bytes": 502,
+      "file": "assets/ui/layouts/hud_m2_class_resource.tres",
+      "sha256": "492a476ac893899d69f3ec9f81f08ea28ba91ffd2314164508f6fe1d3060dba6"
+    },
+    {
+      "bytes": 2539244,
+      "file": "assets/ui/portraits/kensei_hud_portrait_generated.png",
+      "sha256": "1b8fc2322dae3f141a0a342a2d11e2604351bad8d36912f8538b908905267105"
+    },
+    {
+      "bytes": 280,
+      "file": "assets/ui/portraits/kensei_hud_portrait.tres",
+      "sha256": "b304af142f6670315522c8d88d5c24d27fecbf941544f9586dad012f93f73048"
+    },
+    {
+      "bytes": 2513297,
+      "file": "assets/ui/portraits/myrmidon_hud_portrait_generated.png",
+      "sha256": "6a887c2fd8ca3efc173180e4f39e0f594eec7c524d2578dac217b166bdf703c3"
+    },
+    {
+      "bytes": 282,
+      "file": "assets/ui/portraits/myrmidon_hud_portrait.tres",
+      "sha256": "364dffcbcb1bcb4a820a399fc11502e24b27bd3bb1bda5fd435ad7e19f33dc37"
+    },
+    {
+      "bytes": 2021,
+      "file": "assets/ui/portraits/myrmidon-source-manifest.json",
+      "sha256": "d660edcccc64e49b075514d36999ee38a599884a027142591a489912ac314939"
+    },
+    {
+      "bytes": 1246,
+      "file": "assets/ui/portraits/source-manifest.json",
+      "sha256": "091ab13940b45697d00940039670318c7f2b45a51fd0305a0d818d743c9c6118"
+    },
+    {
+      "bytes": 839,
+      "file": "assets/ui/shaders/hud_mark_hollow.gdshader",
+      "sha256": "27664050163cdbf788c05aa1b992b978e888d9545b94e1c45517214babf8891b"
+    },
+    {
+      "bytes": 12444,
+      "file": "assets/ui/skills/myrmidon/juhe.png",
+      "sha256": "f8fa54e668085b87073a7c252d19f09469668ac08ad7b4e8931a3385e1f3cd16"
+    },
+    {
+      "bytes": 24136,
+      "file": "assets/ui/skills/myrmidon/xinyan.png",
+      "sha256": "9a486c4598f343ed3a351ed95659198cdb64342227889ab415bf59404d427fa1"
+    },
+    {
+      "bytes": 23115,
+      "file": "assets/ui/skills/myrmidon/yishan.png",
+      "sha256": "61188e1d26440b7bdda5ddf550dd273ed6a523941cdb0b2740be1f85b496283f"
+    },
+    {
+      "bytes": 27949,
+      "file": "assets/ui/skills/myrmidon/zhanji.png",
+      "sha256": "332ebac7d26e225e868d159b6f31b0a18e28a7f799d1e9ee1cc0c8ee98510e00"
+    },
+    {
+      "bytes": 26711,
+      "file": "assets/ui/skills/myrmidon/zhaojia.png",
+      "sha256": "1aea57c9d6a7dbcabe0f210cc4db928f9ea1d700e43c63045d5454494103a809"
+    },
+    {
+      "bytes": 8274,
+      "file": "assets/ui/skins/hud_freeze/marks-000.png",
+      "sha256": "a1866ae31535d3238e67718a5a67adc602d0870a82f8f0c00341a1354d00794c"
+    },
+    {
+      "bytes": 8295,
+      "file": "assets/ui/skins/hud_freeze/marks-001.png",
+      "sha256": "a010a06bff508d1516c5f1ebf21265793924084f6f77d4dae53ba0a4f530c66a"
+    },
+    {
+      "bytes": 8345,
+      "file": "assets/ui/skins/hud_freeze/marks-010.png",
+      "sha256": "34ef145d70df9604c005b0e2379175e3f8c18f99f03d2fef1c1158caeba997d8"
+    },
+    {
+      "bytes": 8273,
+      "file": "assets/ui/skins/hud_freeze/marks-011.png",
+      "sha256": "2049723a634679bfb6e62fbd5385233de8f5878db57b4e11d3850a0022482895"
+    },
+    {
+      "bytes": 8587,
+      "file": "assets/ui/skins/hud_freeze/marks-100.png",
+      "sha256": "ef4cd133c7ea1f6127814a12b26e0f8dd6ed65253c99d8e51eb236a0dc6562a8"
+    },
+    {
+      "bytes": 8521,
+      "file": "assets/ui/skins/hud_freeze/marks-101.png",
+      "sha256": "40cbf50c822c63a626caa31f3fa2bbb0fcf0ff0e5d712d0821a22d36b662f7d5"
+    },
+    {
+      "bytes": 8571,
+      "file": "assets/ui/skins/hud_freeze/marks-110.png",
+      "sha256": "e18e9640e10524eb1254be63dffd4e4ddb74d6e0a3ed3cb9909a695edce62225"
+    },
+    {
+      "bytes": 8473,
+      "file": "assets/ui/skins/hud_freeze/marks-111.png",
+      "sha256": "d381b78b7b5bb7e848e51355841ae50a77e5ccce8ae2401e77c8b2e646c58504"
+    },
+    {
+      "bytes": 2582,
+      "file": "assets/ui/skins/hud_freeze/source-manifest.json",
+      "sha256": "769ff4db8ff75c01576ddf9182c552799842677d2c5556721f495a9032230249"
+    },
+    {
+      "bytes": 10811,
+      "file": "assets/ui/skins/hud_freeze/sword-base.png",
+      "sha256": "2e07ae71db148b50640e1de5d9e3cbf181bb0f7d8edb87c3bc258254d1b82c5d"
+    },
+    {
+      "bytes": 586,
+      "file": "assets/ui/skins/hud_freeze/sword-blade-mask.png",
+      "sha256": "88fd5910dfb776df188481d7b1bef56b73b155d4a56093b62a70cf7a74888540"
+    },
+    {
+      "bytes": 4318,
+      "file": "assets/ui/skins/hud_freeze/sword-energy-high.png",
+      "sha256": "6d99a0904d72e11fa758ef300453b4906a3942c98560d02ae9e673598ad357b0"
+    },
+    {
+      "bytes": 4311,
+      "file": "assets/ui/skins/hud_freeze/sword-energy-low.png",
+      "sha256": "70242ba3a9838386237eef83cc3537fa650191056faeb74ac231cf64bb0a2edb"
+    },
+    {
+      "bytes": 2381,
+      "file": "assets/ui/skins/hud_freeze/sword-flow-high.png",
+      "sha256": "32b7516cd042624713d6517d612543909a38d5bc9ec9bed426313e04777f028c"
+    },
+    {
+      "bytes": 2366,
+      "file": "assets/ui/skins/hud_freeze/sword-flow-low.png",
+      "sha256": "ebac9fb678dda4782c45c18d363a21d73ab7d311f3fa72e47dd02cd4dcc94c75"
+    },
+    {
+      "bytes": 1114,
+      "file": "assets/ui/skins/hud_m2_fe/end-frame.png",
+      "sha256": "debed1d0688bc95b63959e70afe8ba3497e37524d5e1cc5621acc3b6bce7d10d"
+    },
+    {
+      "bytes": 5206,
+      "file": "assets/ui/skins/hud_m2_fe/material-manifest.json",
+      "sha256": "b03b1c30eb7821d9cc40747a3807c19b6159b1968921622e165ab1499b111bf8"
+    },
+    {
+      "bytes": 954,
+      "file": "assets/ui/skins/hud_m2_fe/portrait-frame.png",
+      "sha256": "26d44372228183410ab00a7f8400e71a2a0e8782879cc172cddaa34d65fc02c3"
+    },
+    {
+      "bytes": 151681,
+      "file": "assets/ui/skins/hud_m2_fe/shared-collapsed.png",
+      "sha256": "04b2f55cd950eccceb4f9660c851cad8c7ac4af1c27c2768b533a6c95cc3b315"
+    },
+    {
+      "bytes": 171115,
+      "file": "assets/ui/skins/hud_m2_fe/shared-frame.png",
+      "sha256": "72822cbf24a89be7fd6a5be98d62fc1daac4c285a3b2430f1314e768836515db"
+    },
+    {
+      "bytes": 667,
+      "file": "assets/ui/skins/hud_m2_fe/slot-active.png",
+      "sha256": "b79ce10084eef7c0bbe2bd067fec230ffd8bc3887819cc940615708b020ee799"
+    },
+    {
+      "bytes": 523,
+      "file": "assets/ui/skins/hud_m2_fe/slot-empty.png",
+      "sha256": "c5c0d0cd26c3185085d5e96e7c85a4a89060cad76e2fc2f1522ae88cab497af4"
+    },
+    {
+      "bytes": 457,
+      "file": "assets/ui/skins/hud_m2_fe/slot-passive.png",
+      "sha256": "7f0203c7a64d1f146b0b3792898d85fca42119fbb0fb6143e7fd3573591dd102"
+    },
+    {
+      "bytes": 351,
+      "file": "assets/ui/skins/hud_m2_fe/slot-potion.png",
+      "sha256": "4e611fd2f36cd8b82efd3efd55ceb82599b8e45edb794f466b387324f6596d28"
+    },
+    {
+      "bytes": 435,
+      "file": "assets/ui/skins/hud_m2_fe/slot-relic.png",
+      "sha256": "de6943b15461e0b1f68aa56ddbe5b94a2b1ba89a505d88baa70982fb1a75e13f"
+    },
+    {
+      "bytes": 1132437,
+      "file": "assets/ui/skins/hud_mark_crest/marks-filled-generated.png",
+      "sha256": "a7d025a16a5b37b09e4d04342b5fe392aa89b080123e26bfac6e1ba09f1acccf"
+    },
+    {
+      "bytes": 2603,
+      "file": "assets/ui/skins/hud_mark_crest/source-manifest.json",
+      "sha256": "c8b1b73f5cf855cc14f76c833a73eb00467c33994dedafe66b7da63a99114a10"
+    },
+    {
+      "bytes": 12448,
+      "file": "assets/ui/skins/hud/action_resource_strip_surface_v1.png",
+      "sha256": "b1f1e3df3dab11f689e8c02a32f74157e8420053771e705d3c44da5f565a4948"
+    },
+    {
+      "bytes": 26322,
+      "file": "assets/ui/skins/hud/character_panel_surface_v1.png",
+      "sha256": "d324af01265ced9e1edd5e25b97dd85812ad713b386a140c2b798e64d32a97b4"
+    },
+    {
+      "bytes": 3729,
+      "file": "assets/ui/skins/hud/end_action_diamond_frame_v1.png",
+      "sha256": "bebbf640076fc6e47509d29f0b6ecae1c56c375b77d2301d798fcdb2417e0a36"
+    },
+    {
+      "bytes": 1186,
+      "file": "assets/ui/skins/hud/end_action_hourglass_emblem_v1.png",
+      "sha256": "942a532564832d2e8ba6e6257b5db775555990352b297760d0e204fd5c611b5e"
+    },
+    {
+      "bytes": 3544,
+      "file": "assets/ui/skins/hud/portrait_frame_surface_v1.png",
+      "sha256": "af554dfa2c06d966e45ce0654b667cc0eb60ca27eff3075361415a59229cf4d8"
+    },
+    {
+      "bytes": 1005,
+      "file": "assets/ui/skins/hud/potion_button_shell_v1.png",
+      "sha256": "d4f9bca956e24e1edb268689dd064ac733a3fdbc2cb677f8c54702b6beef0962"
+    },
+    {
+      "bytes": 3618,
+      "file": "assets/ui/skins/hud/skill_slot_surface_v1.png",
+      "sha256": "3e175dd60dc4833861e35539acfc53a1b11b7f1b07ef070dffa31d50f87a3d49"
+    },
+    {
+      "bytes": 48,
+      "file": "assets/ui/themes/default_font.tres",
+      "sha256": "dd814c2304f0de7e41135a646bd3d958024d743e9c5f5a327c21acbf468c7572"
+    },
+    {
+      "bytes": 845,
+      "file": "assets/ui/themes/hud_m2_cjk_bold_font.tres",
+      "sha256": "ff54770a48c20fc571ad15b9ff7ba2e18088a9e86784e4d68e1fa944d9dd0966"
+    },
+    {
+      "bytes": 847,
+      "file": "assets/ui/themes/hud_m2_cjk_font.tres",
+      "sha256": "d43507f5e829f23c8a8f93a1b7b1c225a833e7b749f3a67ae0a4aa7e5286dc78"
+    },
+    {
+      "bytes": 341,
+      "file": "assets/ui/themes/hud_m2_emoji_font.tres",
+      "sha256": "e846ffb32010e079a3bb700e1dbfcc3bd9f55373232f573e2fb37cf19bd82814"
+    },
+    {
+      "bytes": 479,
+      "file": "assets/ui/themes/hud_m2_fonts.tres",
+      "sha256": "b664f86f7c663c88e84b92fd2baefc56ef2c16273ba5396593e24ebd37aa3d6c"
+    },
+    {
+      "bytes": 220,
+      "file": "assets/ui/themes/hud_m2_frozen_font.tres",
+      "sha256": "eff1859afee77be77c4a79ab2c85d6e4bc5a6f7e49db62e8f8ef3c7cc2d74b8d"
+    },
+    {
+      "bytes": 350,
+      "file": "assets/ui/themes/hud_m2_symbols_font.tres",
+      "sha256": "f7d0f0abd898621b805d62635f536f7af975a8baae256a0f24b1af43420bb125"
+    },
+    {
+      "bytes": 351,
+      "file": "assets/ui/themes/hud_m2_symbols2_font.tres",
+      "sha256": "402c63ebe5887b24eb8f9d6d543b026b54a9a6259fb648524daf527abce769de"
+    },
+    {
+      "bytes": 488,
+      "file": "assets/ui/themes/hud_m2_title_font.tres",
+      "sha256": "2edc3b517d08e3eaca7235ee0bcc3e726b97fb91e14565dc56df01cfc0d4006e"
+    },
+    {
+      "bytes": 38168,
+      "file": "assets/ui/themes/hud_m2.tres",
+      "sha256": "9cb5cfb1ae37e0d51dcb16067281057f7c05bd8ab92b46e3584d1aff2fa9fad2"
+    },
+    {
+      "bytes": 14997,
+      "file": "assets/ui/themes/hud_structure_prototype.tres",
+      "sha256": "19f8b1d4f85b72f4474c90a58cf265fd30d8ad83490d76e6e15db46d93821237"
+    },
+    {
+      "bytes": 920054,
+      "file": "assets/units/kensei/map_token_clean_v2.png",
+      "sha256": "e6f33324c52929769d4698ed75e969470ec45748788503f4637fcb3223dc5415"
+    },
+    {
+      "bytes": 346,
+      "file": "data/affixes/base/af_heal_resist.json",
+      "sha256": "69e92cb0186979490588ea2750328499d1c0646d63a6955e34285f5cac69d47c"
+    },
+    {
+      "bytes": 357,
+      "file": "data/affixes/base/af_vanguard.json",
+      "sha256": "1930f36c2b9686cb931fdd0441745351c6602cecb61ce3fbb0a6b233e58732b5"
+    },
+    {
+      "bytes": 353,
+      "file": "data/affixes/special/afs_bulwark.json",
+      "sha256": "57cbcd606ac9c0a9c4db31bd2e2b78dc8648e8449387257b1b1b47a07484d939"
+    },
+    {
+      "bytes": 389,
+      "file": "data/affixes/special/afs_frenzy.json",
+      "sha256": "d3b1288b5f310d03e3f9794270cddd30e1b6e4a6fb861ac1b3ff8fff1ab11cc2"
+    },
+    {
+      "bytes": 266,
+      "file": "data/battlefields/terrain_workshop_test.json",
+      "sha256": "6e215316dae92cab2955041d6c6b0d361bfb834697dd93aa705f2e7b14eacbc3"
+    },
+    {
+      "bytes": 320,
+      "file": "data/buffs/burn.json",
+      "sha256": "0082fbe0e26244c648b46092f8969804dd027b6d37ee8eced528eabebdb6a5ab"
+    },
+    {
+      "bytes": 343,
+      "file": "data/buffs/defense_down.json",
+      "sha256": "5e4b4f467ca68a82d22d567003a0717bd18e8b7708e672b2001ec6fbfd4a441b"
+    },
+    {
+      "bytes": 338,
+      "file": "data/buffs/defense_up.json",
+      "sha256": "7b2f57689b19b5ba6b3dba41234661b3ef0362815bde4419be24368c06aac4d0"
+    },
+    {
+      "bytes": 327,
+      "file": "data/buffs/freeze.json",
+      "sha256": "16cd4bac4453251940ae541aacfffc9e3ee632dcefad58162a38077a85bf51ff"
+    },
+    {
+      "bytes": 328,
+      "file": "data/buffs/haste.json",
+      "sha256": "f000064329677cb2e10e97d27d2472a513db4324ccdb6032a2ee20cb557a032f"
+    },
+    {
+      "bytes": 323,
+      "file": "data/buffs/poison.json",
+      "sha256": "067a1de2933001eefa66cab04b2ce481938ddb95a04373bde6c224d30e47291f"
+    },
+    {
+      "bytes": 340,
+      "file": "data/buffs/priority_up.json",
+      "sha256": "a5f7227de3d4ce2bf1cd7e06792d74bbfe6991b3e1b345334b25facb7c111840"
+    },
+    {
+      "bytes": 327,
+      "file": "data/buffs/slow.json",
+      "sha256": "41e94802d4f0fd8bcbe41375510700cced82d74a59bc527a63f079192d09745c"
+    },
+    {
+      "bytes": 323,
+      "file": "data/buffs/stun.json",
+      "sha256": "ba621598e728972bee4fb94be98b3ecf94105e39e78e6efe0724b3162b61f8b7"
+    },
+    {
+      "bytes": 1668,
+      "file": "data/buffs/swordsman_parry_stance.json",
+      "sha256": "9cda6799afcc84b764cf907037b7433eea6550dd67a881bd8b7cc1116dc080eb"
+    },
+    {
+      "bytes": 0,
+      "file": "data/buildings/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 835,
+      "file": "data/classes/archer.json",
+      "sha256": "06279f6ea3e19416e44522736fac0960b070103636ecd6b4beb89b37981fb2e5"
+    },
+    {
+      "bytes": 779,
+      "file": "data/classes/cleric.json",
+      "sha256": "1899b2da176109efb7854624c00016b2a623b249c07e158d01baca92657fbb14"
+    },
+    {
+      "bytes": 3248,
+      "file": "data/classes/kensei.json",
+      "sha256": "cedef0c471f0337be9566ea3b3391bef46fe31897af5bf095014611f32065e29"
+    },
+    {
+      "bytes": 823,
+      "file": "data/classes/knight.json",
+      "sha256": "68cfb746651e72b7527b67bf69f57baa32389e1e12e5141501dd0c8cebcc6f91"
+    },
+    {
+      "bytes": 798,
+      "file": "data/classes/mage.json",
+      "sha256": "8e8176fbb398d3acee4190f3455a7095d23c560f0a252554405c4ef98e2fe0a5"
+    },
+    {
+      "bytes": 3146,
+      "file": "data/classes/myrmidon.json",
+      "sha256": "59c3b3452a33911230dd4fca0dc7d538570ba6e50a841fa59d8185ea60191326"
+    },
+    {
+      "bytes": 796,
+      "file": "data/classes/soldier.json",
+      "sha256": "17d28fbe24a0c99b5c20711ef311c28de1058b06e5265a3833436204ae48fc6b"
+    },
+    {
+      "bytes": 769,
+      "file": "data/enemies/goblin_archer.json",
+      "sha256": "b0e37b993a992889aba4413251c9b415c322674382270c95f73737ebc140c3f6"
+    },
+    {
+      "bytes": 760,
+      "file": "data/enemies/goblin_melee.json",
+      "sha256": "5f404291a14a04154623c384104a8811532b4371ededb442dcc08b1d78db8382"
+    },
+    {
+      "bytes": 769,
+      "file": "data/enemies/goblin_shaman.json",
+      "sha256": "628b05a6300ba67386f014e51b64982f02bf22e1216b2bc8f46fbfd33baf7c76"
+    },
+    {
+      "bytes": 561,
+      "file": "data/enemies/test_archer.json",
+      "sha256": "021fbe56624fdeb67042580e3ed0a35494ce6768676dc3176746673d5103f4da"
+    },
+    {
+      "bytes": 592,
+      "file": "data/enemies/test_dummy_regen.json",
+      "sha256": "4f2e55bf83e4f47b7fb983256f5d5e639139623d4c4e01399bfbfe412cd1adf2"
+    },
+    {
+      "bytes": 594,
+      "file": "data/enemies/test_dummy_revive.json",
+      "sha256": "c003ad197d5bbdf477e10926d15f388ce62d59f580d1491422ec1376397394ec"
+    },
+    {
+      "bytes": 538,
+      "file": "data/enemies/test_lancer.json",
+      "sha256": "5dabb3d2019610e358d71ee7358f49b7c1dd475ca3f79329f9dc5ec66b9d90fe"
+    },
+    {
+      "bytes": 543,
+      "file": "data/enemies/test_mage.json",
+      "sha256": "a4205e359d6d6494e2091330f83c2c3b0571c55a35d43cb62af04bd11e5d8b07"
+    },
+    {
+      "bytes": 431,
+      "file": "data/equipment/eq_arm_chain_mail.json",
+      "sha256": "682f0d0cdf001f67ce62f4f40289a53e37c3f749dc7f63cd7ebb4936ff684315"
+    },
+    {
+      "bytes": 400,
+      "file": "data/equipment/eq_arm_cloth_robe.json",
+      "sha256": "9cf24ab286c47097897885150d5336d977fa4e5eb8913fe85565858c8fbc3ac1"
+    },
+    {
+      "bytes": 402,
+      "file": "data/equipment/eq_arm_leather_vest.json",
+      "sha256": "b7ff3e37a30b857571e4a1d991457863328fe6c3e6a6a9eaf9092ee8176a3941"
+    },
+    {
+      "bytes": 428,
+      "file": "data/equipment/eq_arm_tower_shield.json",
+      "sha256": "0eb0e477c8e96767b64750dead83bfbfa3f45f89a9524d7b9fd400af6f777a7d"
+    },
+    {
+      "bytes": 936,
+      "file": "data/equipment/eq_wpn_armorslayer.json",
+      "sha256": "3d52b73a2d067aceb458661f35ade3b362dfdeb438e0c6a4a1635c5cbddd3dad"
+    },
+    {
+      "bytes": 1011,
+      "file": "data/equipment/eq_wpn_binding_blade.json",
+      "sha256": "b99b34620075d6c581dd6f46e927132ccf8f5c3d66d17324556d80e1a594510d"
+    },
+    {
+      "bytes": 951,
+      "file": "data/equipment/eq_wpn_brave_sword.json",
+      "sha256": "d231b332ecd6bc883c304f1c2f7c756965a962d1e080a1287768d00adc53184b"
+    },
+    {
+      "bytes": 954,
+      "file": "data/equipment/eq_wpn_durandal.json",
+      "sha256": "1af981d6cf8101a839f455cbec4d015259bfa647437081668986be56b195a1ea"
+    },
+    {
+      "bytes": 958,
+      "file": "data/equipment/eq_wpn_iron_blade.json",
+      "sha256": "f95dc7947b7e70aee6b32a108fa498b7ec5afa966442a1c9e13946a2930bd823"
+    },
+    {
+      "bytes": 1170,
+      "file": "data/equipment/eq_wpn_iron_sword.json",
+      "sha256": "e876582b5a5eaad269482e07d338d6b18aef2657cfd9f376c9b5a8e4b76d89ba"
+    },
+    {
+      "bytes": 951,
+      "file": "data/equipment/eq_wpn_killing_edge.json",
+      "sha256": "b7d5d90cc10d0988fcec66715ec2cb478ccddcc7f9cdf142545a4e8fc327e222"
+    },
+    {
+      "bytes": 936,
+      "file": "data/equipment/eq_wpn_light_brand.json",
+      "sha256": "319daf96932cfbf35c285bedbe4fe99fc962346b0d473aee103a753d0024c683"
+    },
+    {
+      "bytes": 932,
+      "file": "data/equipment/eq_wpn_longsword.json",
+      "sha256": "511f58f83fda5e17493430afcc0e3e3af2cc8dbc92e59a3b0c656b24f7d12178"
+    },
+    {
+      "bytes": 970,
+      "file": "data/equipment/eq_wpn_mani_katti.json",
+      "sha256": "18ac42b0bc484a31650f0d462a1a3576f082a60d9ad70644b365fabe9afd4235"
+    },
+    {
+      "bytes": 584,
+      "file": "data/equipment/eq_wpn_oak_staff.json",
+      "sha256": "14d3b3dad8787359f9758157d119af90c5125488ec3a4b4eff73511be63eb4df"
+    },
+    {
+      "bytes": 980,
+      "file": "data/equipment/eq_wpn_poison_sword.json",
+      "sha256": "3fa7dfda56b727fcf8d1146a709aae008895091813643985520fec51237c9dc6"
+    },
+    {
+      "bytes": 950,
+      "file": "data/equipment/eq_wpn_rapier.json",
+      "sha256": "fbd7a4993a86a4542ea70b66cfb2b81b480f32505cfc4fbb117e18e0ac83f12e"
+    },
+    {
+      "bytes": 1423,
+      "file": "data/equipment/eq_wpn_regal_blade.json",
+      "sha256": "e378c1ea7560fa64f0cbc279d16d1ea3d6ebe63c3ca8ab66b183fa84fc3a42df"
+    },
+    {
+      "bytes": 936,
+      "file": "data/equipment/eq_wpn_runesword.json",
+      "sha256": "196f20885d45c9b26d0cf52d88a0810e853ac5e4d7eead529d54f181c3e05570"
+    },
+    {
+      "bytes": 574,
+      "file": "data/equipment/eq_wpn_short_bow.json",
+      "sha256": "340a76f6e050b637e0818217f01bda85d571fcc9c1ec65ef2014d0ea95c69d93"
+    },
+    {
+      "bytes": 933,
+      "file": "data/equipment/eq_wpn_silver_blade.json",
+      "sha256": "9292dcc8b5f22224fc6bf68211964bbf8ac199633ace895b830161faf1e7bbe9"
+    },
+    {
+      "bytes": 945,
+      "file": "data/equipment/eq_wpn_silver_sword.json",
+      "sha256": "a1b8d0f212734f99866ed39d299ff0b5fda70abc0156db61a23966dd51f668ca"
+    },
+    {
+      "bytes": 948,
+      "file": "data/equipment/eq_wpn_slim_sword.json",
+      "sha256": "430502bd70ba70814c4818d18dba33bc93574edee821c71e57a1f37c7740a788"
+    },
+    {
+      "bytes": 968,
+      "file": "data/equipment/eq_wpn_sol_katti.json",
+      "sha256": "8bf588aff8f6320fe0bf0e371b1fd3307b74a232e7caf4639f9eb8a2f50c45c6"
+    },
+    {
+      "bytes": 931,
+      "file": "data/equipment/eq_wpn_steel_blade.json",
+      "sha256": "2eebe2c8c7a63eb3a5f2ed9d398f2256aadab556c33aa35f9a733b3c24664850"
+    },
+    {
+      "bytes": 589,
+      "file": "data/equipment/eq_wpn_steel_lance.json",
+      "sha256": "c78dcc65080e4262d2dbc17e0f1da48312c3b6f188fda4dfb138f7f25f6d9141"
+    },
+    {
+      "bytes": 932,
+      "file": "data/equipment/eq_wpn_steel_sword.json",
+      "sha256": "5cacddb18fbe0a567b782a959465eb0a2da93919212e6e8ff48028f88b0f8f60"
+    },
+    {
+      "bytes": 924,
+      "file": "data/equipment/eq_wpn_wo_dao.json",
+      "sha256": "8a75142ebdf18761ae35f87c521e210a91c2ec9b4add4b6293203cc60544e51c"
+    },
+    {
+      "bytes": 934,
+      "file": "data/equipment/eq_wpn_wyrmslayer.json",
+      "sha256": "bd77f542c6412cd40b6d5d997eaa29d3d226018d313d66b3f535f9d779b22495"
+    },
+    {
+      "bytes": 0,
+      "file": "data/events/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2130,
+      "file": "data/events/event_abandoned_mine.json",
+      "sha256": "a70a1e2c36e84fc22da3e4b6d21bd820b5c5e090aa9fc4b9d2205d1b7d998d7f"
+    },
+    {
+      "bytes": 1597,
+      "file": "data/events/event_blessing_altar.json",
+      "sha256": "539fcff712f55e95543f25d52e9d901aed1f6e1c46df06f61b9ab9c86130b907"
+    },
+    {
+      "bytes": 1696,
+      "file": "data/events/event_mysterious_merchant.json",
+      "sha256": "4eb964d40fbf54b32e5812da578b9d984fc08d37f2805b935628b53f6fad2625"
+    },
+    {
+      "bytes": 828,
+      "file": "data/maps/forest_01.json",
+      "sha256": "2cf519ae5a21baf97d7f4e96d369cf756541448638b982058725c33513469f87"
+    },
+    {
+      "bytes": 774,
+      "file": "data/maps/lakeside_01.json",
+      "sha256": "ad4cbf88923059e4ec094c0257f8d6bb98f8e0c2566ccbe1e38e26af22c1476a"
+    },
+    {
+      "bytes": 813,
+      "file": "data/maps/mountain_pass_01.json",
+      "sha256": "0765ae0469f541cdb23a62ddd2d7b6d219cb3d4f6e0c7eb663d88ea614651f14"
+    },
+    {
+      "bytes": 566,
+      "file": "data/maps/test_arena.json",
+      "sha256": "09582ca79620335f09234162f8170c8ef180aec17ca22ef10f56514e66841d90"
+    },
+    {
+      "bytes": 0,
+      "file": "data/relics/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 492,
+      "file": "data/relics/relic_berserker_totem.json",
+      "sha256": "2e30700fdf8ff9c65fedb8369f715dc2fcd6f313d2fa8390d1e7109a79264447"
+    },
+    {
+      "bytes": 418,
+      "file": "data/relics/relic_coin_pouch.json",
+      "sha256": "bbd5d63c436786a572a2978463050c3bc4fc6337c7d53308b917f2e2319c84f1"
+    },
+    {
+      "bytes": 430,
+      "file": "data/relics/relic_guardian_ward.json",
+      "sha256": "4d4c13884632a9290839bc1feb4b21bbaac68cc9bdf9cda51f3134eff4c31eab"
+    },
+    {
+      "bytes": 420,
+      "file": "data/relics/relic_iron_core.json",
+      "sha256": "748d3667196ff01bff9f18d3feb3c3f88716cb2d04003b35592076bc17216c52"
+    },
+    {
+      "bytes": 403,
+      "file": "data/relics/relic_keen_edge.json",
+      "sha256": "8fee7a95dd632029f5710e516e1e1275224947693a5483be8dd7381201c6462c"
+    },
+    {
+      "bytes": 423,
+      "file": "data/relics/relic_lucky_clover.json",
+      "sha256": "8edee8ea79288062fe757fffd58a581e09523124624ded1106acde80e09923d3"
+    },
+    {
+      "bytes": 435,
+      "file": "data/relics/relic_mentor_tome.json",
+      "sha256": "7b9e12a49c6a12e813548181e0ca815097173e6c980ee54a2b0bdfe2d3207072"
+    },
+    {
+      "bytes": 423,
+      "file": "data/relics/relic_scholar_seal.json",
+      "sha256": "337e7b0b8301ac6e94dafb92a0922d727cfe09b512d272b8542bce471348ba27"
+    },
+    {
+      "bytes": 405,
+      "file": "data/relics/relic_swift_boots.json",
+      "sha256": "e241b3e2ef14b327fc6c29754c199808405ddcbc23d0b91b3322670a54a045c2"
+    },
+    {
+      "bytes": 433,
+      "file": "data/relics/relic_vampiric_fang.json",
+      "sha256": "5f0a030b606208cf456d9caf12397465c692526f7dc075ddb635d1c6f58310d8"
+    },
+    {
+      "bytes": 3334,
+      "file": "data/runloop/act1_config.json",
+      "sha256": "fbd0591ed383fbace3a5dcfa0bb6f82d816704c3dbcb4d042e9cec91dac0c5c8"
+    },
+    {
+      "bytes": 472,
+      "file": "data/runloop/run_config.json",
+      "sha256": "996ea7f4c49eb5f1c039d0195f2bb466368f60ade864b96371279447ba32b36c"
+    },
+    {
+      "bytes": 573,
+      "file": "data/skills/archer_aimed_shot.json",
+      "sha256": "27309a50f10c24e30f4f1d8ec361fb045954e7d5fc3a6b8b2ec3bd5111a02ec4"
+    },
+    {
+      "bytes": 605,
+      "file": "data/skills/archer_eagle_eye.json",
+      "sha256": "0c6ebd44f35b7d6e2e43c29ad59d4b27d4c02c944f40383caacd2476d4c49579"
+    },
+    {
+      "bytes": 597,
+      "file": "data/skills/archer_piercing_arrow.json",
+      "sha256": "33d5fcc9b985b6b7aaa59546e89c9466db7a8e4f421679c0e331a33dd5d22926"
+    },
+    {
+      "bytes": 570,
+      "file": "data/skills/cleric_bless.json",
+      "sha256": "6a175b387af9343f4d6beb6cc00328a1a9e3aa477d9086491a18837564f42f1f"
+    },
+    {
+      "bytes": 500,
+      "file": "data/skills/cleric_heal.json",
+      "sha256": "3b694c75234f1250a3e08dd4b524fe83e72927ff0407513d61c73fadead94d3d"
+    },
+    {
+      "bytes": 493,
+      "file": "data/skills/cleric_holy_smite.json",
+      "sha256": "4a770bf6a4704401a35df36163d3aa6505040c40b04dc5e562e51ee545532cb8"
+    },
+    {
+      "bytes": 539,
+      "file": "data/skills/knight_charge.json",
+      "sha256": "71a96ee8bd6bc60d16a2c5675355f46c9cb62ffe15efe8c8a570e658357fecae"
+    },
+    {
+      "bytes": 469,
+      "file": "data/skills/knight_heavy_strike.json",
+      "sha256": "d7bb611fe0d6599594bb54bb8436ac7caeb0391c187eb319ab6bf28fa7e65f59"
+    },
+    {
+      "bytes": 563,
+      "file": "data/skills/knight_iron_wall.json",
+      "sha256": "ba238f11a58b2e3a1ce8b46796a4f3ced5a2b01a7f798547b9cccf4edc5638db"
+    },
+    {
+      "bytes": 577,
+      "file": "data/skills/mage_fireball.json",
+      "sha256": "df1699a2e93971397674bafac299a790a80771c096e2a3f726c55ff1a7645cfa"
+    },
+    {
+      "bytes": 634,
+      "file": "data/skills/mage_ice_bolt.json",
+      "sha256": "fd59ac364be49680aa73eac9fc2174a66b448eaaf4a29091bb2989bc801cfc25"
+    },
+    {
+      "bytes": 640,
+      "file": "data/skills/mage_mana_shield.json",
+      "sha256": "f4a9b974ac57e0ee758a16fcac1c73b5f0b5d585aaefeadb516d2439cb88cff6"
+    },
+    {
+      "bytes": 562,
+      "file": "data/skills/soldier_rally.json",
+      "sha256": "951b0a5dcc46c2a59e7ac0c634b5022127f64fc5934132881c3c205fc91e9e2f"
+    },
+    {
+      "bytes": 552,
+      "file": "data/skills/soldier_shield_bash.json",
+      "sha256": "eafd15104604b63c9c45d41c29ce9a88d083547628e159c2a5c2fb838f356e45"
+    },
+    {
+      "bytes": 442,
+      "file": "data/skills/soldier_slash.json",
+      "sha256": "fe5bed492d6afb5b17450ebb68ca6feee58807184a2fbd2cbfda15f15b987494"
+    },
+    {
+      "bytes": 952,
+      "file": "data/skills/swordsman_badao.json",
+      "sha256": "b3729a4663d6824fb0c3fdfa55ae9a692716d450b4ccc9aed56109dee4321945"
+    },
+    {
+      "bytes": 1057,
+      "file": "data/skills/swordsman_juhe.json",
+      "sha256": "37d3eabfb548ec7c0b7653deb9b44167ae2706cbf9fabc26b9f296b964377cfe"
+    },
+    {
+      "bytes": 2104,
+      "file": "data/skills/swordsman_yishan.json",
+      "sha256": "51becd1e1abe4c3610962f3354595771f82902d925a5982b7af4ca0b6c8f1e0c"
+    },
+    {
+      "bytes": 909,
+      "file": "data/skills/swordsman_zhanji.json",
+      "sha256": "1afe42118a339feb5f109d97316f9440774020de81006bf1977bbf5f4ecb19b4"
+    },
+    {
+      "bytes": 1120,
+      "file": "data/skills/swordsman_zhaojia.json",
+      "sha256": "7f431005538f49cba1696d405586ea5f5ae6249a3df751614256bff668617a22"
+    },
+    {
+      "bytes": 1345,
+      "file": "data/states/beishui.json",
+      "sha256": "3bbea3fb4759b605c615fdaae060d904a055b7fe1f8eebd08431e8253975cac3"
+    },
+    {
+      "bytes": 1214,
+      "file": "data/states/shuangchi.json",
+      "sha256": "40cf558f704e277655a8e7a85efecf7bf7d7600baecab546cd15d2439fb6d1e5"
+    },
+    {
+      "bytes": 0,
+      "file": "data/talent-tree/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2377,
+      "file": "data/talents/kensei_erdaokairen.json",
+      "sha256": "d2a46222ed8659b5791e2499080f2cd6901d0b64b4b2b5abf0d7a0858edc4b58"
+    },
+    {
+      "bytes": 2894,
+      "file": "data/talents/kensei_ertianyiliu.json",
+      "sha256": "772b959681ab7417b973b0209c0ea8ee9b2d453376608ce1f1ef5333e2ffca1c"
+    },
+    {
+      "bytes": 2006,
+      "file": "data/talents/kensei_jianqihuidang.json",
+      "sha256": "90b21697c32f1803c72ecd75553ca9367a44a01605e2d938a132ff67e4cc8516"
+    },
+    {
+      "bytes": 2217,
+      "file": "data/talents/kensei_jiaoren.json",
+      "sha256": "c8c89896d60a1ee37140d358ebb68563ceca6092999ca71b0b2f9a1e17b2622d"
+    },
+    {
+      "bytes": 1869,
+      "file": "data/talents/kensei_yanfan.json",
+      "sha256": "f467e015267aabd74037ba4a5c57808196e97fbf5c9202e7e2a15104bb191532"
+    },
+    {
+      "bytes": 1618,
+      "file": "data/talents/myrmidon_jiecuo.json",
+      "sha256": "b9f56c2085f8f5037326fb29da0a3b178ce6c366b14d4e7b6a8f1f55f11f7b67"
+    },
+    {
+      "bytes": 2580,
+      "file": "data/talents/myrmidon_sixian.json",
+      "sha256": "7eb0f360362596cf9b4ca51ef661a8c37a4e5569a7a0bc3cbf95e6e835b0d646"
+    },
+    {
+      "bytes": 1136,
+      "file": "data/terrain/terrain_combat.json",
+      "sha256": "e3cef65e96fdf52ccd1d09e173de19d4cdc45c4a9f77937dfe81036c769c46e1"
+    },
+    {
+      "bytes": 1045,
+      "file": "data/visual_profiles/kensei_map_token.json",
+      "sha256": "30e4cf892f2ece7c4488de175ce5d1f33d470cab10ad78c7f9549ddac93ac6f8"
+    },
+    {
+      "bytes": 0,
+      "file": "data/waves/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 617,
+      "file": "data/waves/wave_act1_boss_01.json",
+      "sha256": "bce0b72b8149e3eb192296ce7df647b125fd3482fdf26cb449a02f87a0acd493"
+    },
+    {
+      "bytes": 469,
+      "file": "data/waves/wave_act1_elite_01.json",
+      "sha256": "ab846dc36ccbdd1b092271b9107281925e843cf4d203ad4b44ac39c57926497d"
+    },
+    {
+      "bytes": 488,
+      "file": "data/waves/wave_act1_elite_02.json",
+      "sha256": "2edff5dec26a2b61c04b2c0da74c6a69a98fc1e73e8b287606536c9c180f677d"
+    },
+    {
+      "bytes": 420,
+      "file": "data/waves/wave_act1_normal_01.json",
+      "sha256": "1fec579e81f18383e06c23db51aeaa70763f51aa32187525f245b1a828e17c78"
+    },
+    {
+      "bytes": 424,
+      "file": "data/waves/wave_act1_normal_02.json",
+      "sha256": "8e2b489dbc3c7e28d12cffe74c63f7fa9ec2ac2334773c8eeef0790da60d34ba"
+    },
+    {
+      "bytes": 496,
+      "file": "data/waves/wave_act1_normal_03.json",
+      "sha256": "1e0fc609e2db104953c0d5fcca47b97580f3f90d5f02dc73deaee92a3d630930"
+    },
+    {
+      "bytes": 389,
+      "file": "data/waves/wave_event_mine_ambush.json",
+      "sha256": "aad8b331e034b8b07f2018537bcf0065a3d31b95eb4b1438e1dc0466498b34ed"
+    },
+    {
+      "bytes": 279,
+      "file": "data/weapons/wpn_archer_starter.json",
+      "sha256": "95180ca2f2f786b9583fc0d88fd114cade3e93670fb459896a29e3e41f182ba2"
+    },
+    {
+      "bytes": 276,
+      "file": "data/weapons/wpn_cleric_starter.json",
+      "sha256": "91da48c62419428cf0efd692ed2358442b6b7564631ba366c7b20168408c9e51"
+    },
+    {
+      "bytes": 276,
+      "file": "data/weapons/wpn_knight_starter.json",
+      "sha256": "627b70e9ab7c16a76f9386fbbbe0316c5e69af65a125d2957e7646aca2b73607"
+    },
+    {
+      "bytes": 277,
+      "file": "data/weapons/wpn_mage_starter.json",
+      "sha256": "8becd6fc252d053a1edca939831d3ff05773f79b3b5748275560815b9b886cc6"
+    },
+    {
+      "bytes": 348,
+      "file": "data/weapons/wpn_magical_ranged_basic.json",
+      "sha256": "671378309ba18db5575be0305f8944a3b2b9bbfe9b1acb7a4ea0346925ae09fc"
+    },
+    {
+      "bytes": 342,
+      "file": "data/weapons/wpn_physical_melee_basic.json",
+      "sha256": "09334121339d60d0421c286b23cd5a896853176768cb631fc5956f04e9f380d8"
+    },
+    {
+      "bytes": 349,
+      "file": "data/weapons/wpn_physical_ranged_basic.json",
+      "sha256": "d95f2d853c48320257e90436702fcd3be95d7b7e4adad32a9de7297b616a46ed"
+    },
+    {
+      "bytes": 277,
+      "file": "data/weapons/wpn_soldier_starter.json",
+      "sha256": "6391a826edd522d56b22977928aa0867466a72ba203fc760364056e86763a569"
+    },
+    {
+      "bytes": 280,
+      "file": "data/weapons/wpn_swordsman_starter.json",
+      "sha256": "47fc635a224c438b9b395f1363c6a8ae895d64d4f308cd7ff3ce8a37ac7f5e2d"
+    },
+    {
+      "bytes": 279,
+      "file": "data/weapons/wpn_test_archer.json",
+      "sha256": "1b9e4d4618effce45c36ef05e254c8eeb206d94dc300300882076496a0ea609c"
+    },
+    {
+      "bytes": 276,
+      "file": "data/weapons/wpn_test_lancer.json",
+      "sha256": "894a3c7a4a603b5876f5cc2044bace7a4aa6a3645e8a20f739b32bb3b086d563"
+    },
+    {
+      "bytes": 274,
+      "file": "data/weapons/wpn_test_mage.json",
+      "sha256": "5bf6e975a5ac274c2b3878aced426362d62c2818672a7f775907f8c95e75b597"
+    },
+    {
+      "bytes": 369,
+      "file": "data/weapons/wpn_training_dummy.json",
+      "sha256": "3775feb06e271f995aa8bf3598b5836701c2cbc545ed3eeda49c35bf7414955f"
+    },
+    {
+      "bytes": 1261,
+      "file": "project.godot",
+      "sha256": "c8c44d7453ff3d443eee7a25f5b5112687077d40705f6ea67982443ab94cddf6"
+    },
+    {
+      "bytes": 0,
+      "file": "scenes/battle/ui/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 370,
+      "file": "scenes/dev/skillbar_playground.tscn",
+      "sha256": "4fbd22698fc8b0aad7311c1670a7d555584421e464768ba1a6611fa2f049f667"
+    },
+    {
+      "bytes": 0,
+      "file": "scenes/menus/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 212,
+      "file": "scenes/playground/battlefield_courtyard.tscn",
+      "sha256": "2e3830ab2eae65d6fc14da3a7f6e7a853d4e589fb56346d5c6ab04b39de63e11"
+    },
+    {
+      "bytes": 27854,
+      "file": "scenes/playground/dashboard_variant_a.gd",
+      "sha256": "d7d08bb0a744c205c640e38ac6b1d2d0ff62a0c539923ce11eba562dcbdfdd7e"
+    },
+    {
+      "bytes": 360,
+      "file": "scenes/playground/dashboard_variant_a.tscn",
+      "sha256": "6beb8c87ba23728dfaf9c0fb6841e8b56d42673bcca735ab6aef3f37e44ac440"
+    },
+    {
+      "bytes": 15554,
+      "file": "scenes/playground/dashboard_variant_b.gd",
+      "sha256": "1b892c18e8072cf689276761da2dab4303bcba943c7ebe82fd1fd842d2fbc9c8"
+    },
+    {
+      "bytes": 360,
+      "file": "scenes/playground/dashboard_variant_b.tscn",
+      "sha256": "7cf48a0314d918c1add70d726bf90bbc8ea529d829d37e7e505064e36e08bf59"
+    },
+    {
+      "bytes": 37747,
+      "file": "scenes/playground/dashboard_variant_c.gd",
+      "sha256": "8d2f319ec665db1400f3ad11229aa3ed8ad415035f053aa10b4453251147c389"
+    },
+    {
+      "bytes": 360,
+      "file": "scenes/playground/dashboard_variant_c.tscn",
+      "sha256": "410ceb1ae4cd6a842fd2342522361a3f9772005a5d48232e608df64f18fbeb65"
+    },
+    {
+      "bytes": 360,
+      "file": "scenes/playground/map_token_runtime_playground.tscn",
+      "sha256": "c439fdacaeb7b0dc085389b5b55627aa90d0dea95f9b435d19f2a0e6f47b3b5c"
+    },
+    {
+      "bytes": 20736,
+      "file": "scenes/playground/playground_battle_ui.gd",
+      "sha256": "50f98fa1fea941828f094e82a3a346c0d661e30c07bc2d5df524ed83700ad52b"
+    },
+    {
+      "bytes": 20,
+      "file": "scenes/playground/playground_battle_ui.gd.uid",
+      "sha256": "d77e55aa9cca595f6514f83a9660f710d40c7ea2b735bfdaddbc7502804ce296"
+    },
+    {
+      "bytes": 206,
+      "file": "scenes/playground/playground_battle_ui.tscn",
+      "sha256": "f2f793679e304638d7021ae9ac5341c71a367d5df073849d8ca122d1fcfe9bfe"
+    },
+    {
+      "bytes": 9022,
+      "file": "scenes/playground/terrain_highlight_playground.gd",
+      "sha256": "fa407d257c63a374b30a8402714462d220f2bf436566e4b12bf00a00185c9ab9"
+    },
+    {
+      "bytes": 20,
+      "file": "scenes/playground/terrain_highlight_playground.gd.uid",
+      "sha256": "5f1f073bc89c1ca1f4769f5c203f4e1ffd5d1ef2e0a84371d66dfcfc8c33580c"
+    },
+    {
+      "bytes": 293,
+      "file": "scenes/playground/terrain_highlight_playground.tscn",
+      "sha256": "e39debbede5e78c854f8fad836315ddaa93a15c60c18c359d4de49d3620d3150"
+    },
+    {
+      "bytes": 324,
+      "file": "scenes/playground/terrain_painter.tscn",
+      "sha256": "84edf4e9d568cfe65a14e84a8cd0074ebf87ddad218a31078c2d77fa235267d4"
+    },
+    {
+      "bytes": 12411,
+      "file": "scenes/playground/viewport_angle_playground.gd",
+      "sha256": "53ca823335c8a9aba1f6b523b57b1d1e498a5d5466e57af0d6c4692aca82493f"
+    },
+    {
+      "bytes": 229,
+      "file": "scenes/playground/viewport_angle_playground.tscn",
+      "sha256": "68bc3a8c207b1113291712d1523477a54a3736cba76a62c8a9a234f3519486cc"
+    },
+    {
+      "bytes": 18788,
+      "file": "scenes/playground/viewport_angle_static_mockup.gd",
+      "sha256": "b17e4fdcabdd71873068be814d3067d18c23b07222acc863b76403f33a977dd9"
+    },
+    {
+      "bytes": 293,
+      "file": "scenes/playground/viewport_angle_static_mockup.tscn",
+      "sha256": "1ef5a8d243bf73a36fce74d3860555efa51b81ba3ebfda69ba5430282f43ac99"
+    },
+    {
+      "bytes": 361,
+      "file": "scenes/playground/visual_style_playground.tscn",
+      "sha256": "9b9f520f5a182fb0b6c4ef2da76afb312055cd675439bdb7a1c3968431f82c20"
+    },
+    {
+      "bytes": 0,
+      "file": "scenes/roguelite/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 309,
+      "file": "scenes/roguelite/DoorSelect.tscn",
+      "sha256": "57e5da40d7219334e21aa132e34b6d13aa34d82652b58e2efad279a611686b00"
+    },
+    {
+      "bytes": 185,
+      "file": "scenes/roguelite/RunScene.tscn",
+      "sha256": "a6ed4fc6ef047dc6493a1d5ab779bea80aad1dd4b9437db861050b957ba594d9"
+    },
+    {
+      "bytes": 227,
+      "file": "scenes/tactical/bottom_dashboard.tscn",
+      "sha256": "5631bd4338698a12b767ab9b58d83bfd44ae9ce5399cd2e748adfb4985f64978"
+    },
+    {
+      "bytes": 2741,
+      "file": "scenes/tactical/hud/action_resource_strip.tscn",
+      "sha256": "330d8731f00fc76bbee2a6be8f91edb3608a757be8a4779d611ae5f65e58c039"
+    },
+    {
+      "bytes": 2601,
+      "file": "scenes/tactical/hud/bottom_hud_composition.tscn",
+      "sha256": "49f0fff765405359b32907b48169befeb8088cb1ad85ee415fab8c9bf451f20e"
+    },
+    {
+      "bytes": 3824,
+      "file": "scenes/tactical/hud/character_hud_panel.tscn",
+      "sha256": "2bfd0f16d79cbc9678c112cafb7fb334deae08181fda0a61139880ca5a8174e3"
+    },
+    {
+      "bytes": 1896,
+      "file": "scenes/tactical/hud/end_turn_button.tscn",
+      "sha256": "709d9c66828ee0be2d48dd9cfe115eb2696c5027829af77b5c00b5e0d3b43f17"
+    },
+    {
+      "bytes": 572,
+      "file": "scenes/tactical/hud/end_turn_control.tscn",
+      "sha256": "d2310154e9f7d0475e4ea21e59593aed9bfbd520a5bffb02eef0ce156aa517b9"
+    },
+    {
+      "bytes": 1438,
+      "file": "scenes/tactical/hud/equipment_hud_panel.tscn",
+      "sha256": "add886edc1632addc8bb21d055956999153444b14bae46867f108570ab08732e"
+    },
+    {
+      "bytes": 2889,
+      "file": "scenes/tactical/hud/m2/action_resource_strip.tscn",
+      "sha256": "8bb1ef34953e2aee8dad1f18ddefab30b3596178e01c3c76394f57c47a9b9bc7"
+    },
+    {
+      "bytes": 2983,
+      "file": "scenes/tactical/hud/m2/bottom_hud_composition.tscn",
+      "sha256": "8dcbb71bff115d049777f0b5fb47b87deebf2cfa9f5b73931694a911e7aed26b"
+    },
+    {
+      "bytes": 15649,
+      "file": "scenes/tactical/hud/m2/character_hud_panel.tscn",
+      "sha256": "9ec57b76acbb6e037df2daea1e8a91e732e3db6b01218b9bc933ff34faa2eb9c"
+    },
+    {
+      "bytes": 239,
+      "file": "scenes/tactical/hud/m2/class_resource_host.tscn",
+      "sha256": "847076b62a020c122b4ae46ef12d101dfb48c1a4209113324494a5b4190b7fba"
+    },
+    {
+      "bytes": 2519,
+      "file": "scenes/tactical/hud/m2/end_turn_button.tscn",
+      "sha256": "1ff8af84bb0cfb76edf98176ca05157c2d32fe96e76e70401a76f28a676eb208"
+    },
+    {
+      "bytes": 1272,
+      "file": "scenes/tactical/hud/m2/end_turn_control.tscn",
+      "sha256": "4c5a6bb6edf834f47e1fcef6f04f45f1b5d81df52335f1da614a104b451affee"
+    },
+    {
+      "bytes": 1751,
+      "file": "scenes/tactical/hud/m2/equipment_hud_panel.tscn",
+      "sha256": "2fce6ff05cd06b0df97be85c9d472a92aec428e50b23c69ebd99e0b7a7f076eb"
+    },
+    {
+      "bytes": 2774,
+      "file": "scenes/tactical/hud/m2/potion_button.tscn",
+      "sha256": "954c64539a3a8d47fee0870522b9cce15bc38f032bde54a92576afcc51ff5404"
+    },
+    {
+      "bytes": 2202,
+      "file": "scenes/tactical/hud/m2/relic_grid.tscn",
+      "sha256": "c3585ab914eaffa1ba442f65e47c2aaff1fc621d067ffd9f463855cd35b0f529"
+    },
+    {
+      "bytes": 1070,
+      "file": "scenes/tactical/hud/m2/skill_shelf.tscn",
+      "sha256": "517708ea33758be5556b74cecead8b88b2e9e99411dad006406048ac6547bba3"
+    },
+    {
+      "bytes": 8496,
+      "file": "scenes/tactical/hud/m2/skill_slot_button.tscn",
+      "sha256": "f670395858e50b5f3969e335378360a241a2ed58ac903779e033299622ff1692"
+    },
+    {
+      "bytes": 3716,
+      "file": "scenes/tactical/hud/m2/slot_button.tscn",
+      "sha256": "546c51e23b3c4f922e59f962016b248ce10932e3b8d4166a726294bb5f3e524b"
+    },
+    {
+      "bytes": 224,
+      "file": "scenes/tactical/hud/m2/sword_resource_panel.tscn",
+      "sha256": "f81be98bce0779286b04c2d533e3fed5d0dc46e4c97012adb3d88849ce30c84e"
+    },
+    {
+      "bytes": 1335,
+      "file": "scenes/tactical/hud/potion_button.tscn",
+      "sha256": "fee8335ebabc6fe006588cb67ff502043d0e486bd40dca9a5ad874af1e8c60c7"
+    },
+    {
+      "bytes": 1962,
+      "file": "scenes/tactical/hud/relic_grid.tscn",
+      "sha256": "38c6412b2e5121d12b9684d131a4c1de7e89b42f6f45c0d58f4508171eee28be"
+    },
+    {
+      "bytes": 865,
+      "file": "scenes/tactical/hud/skill_shelf.tscn",
+      "sha256": "37657bb6f446f5ea67ac2e1c56932fdcf10f85d775321634de9c41064ec71762"
+    },
+    {
+      "bytes": 2847,
+      "file": "scenes/tactical/hud/skill_slot_button.tscn",
+      "sha256": "5c9916eeef65d96d2a1d2f7e60582cb6db018c6063c0528f9e2b4a0bc6f46cd0"
+    },
+    {
+      "bytes": 1605,
+      "file": "scenes/tactical/hud/slot_button.tscn",
+      "sha256": "6d54085abb5be37e169a3fb3851b69e5a05acc358b9b3e6bd4881405697f736f"
+    },
+    {
+      "bytes": 1205,
+      "file": "scenes/tactical/hud/value_meter.tscn",
+      "sha256": "3721a93cd124c5c50c7b21235a9aa22c630d776291ee1e5022948caef40a2e58"
+    },
+    {
+      "bytes": 199,
+      "file": "scenes/tactical/skill_bar.tscn",
+      "sha256": "64da959354cb8f6ec9c0c010aeafe478c44a47de6e411ba6edc117e6e2c90045"
+    },
+    {
+      "bytes": 2091,
+      "file": "scenes/tactical/TacticalScene.tscn",
+      "sha256": "f1d565b49bcfe937adc405d5ae102ad5b989ff2470de2df206aafdfaeeb5a0b4"
+    },
+    {
+      "bytes": 195,
+      "file": "scenes/tactical/TurnOrderBar.tscn",
+      "sha256": "37b02869a426984b308adb8a5e2f7cd1b6fe597e8c92b3a5a8e54481d78cd487"
+    },
+    {
+      "bytes": 2431,
+      "file": "scenes/tactical/Unit.tscn",
+      "sha256": "1450d1f562f7fbe38807dcd49abdfb15328a519ac9e3ffe527c5ebe0576b250a"
+    },
+    {
+      "bytes": 29163,
+      "file": "scripts/codex/build-windows-release.ps1",
+      "sha256": "df6f55080b9b0f10ac069c2cf254768fabe27c178aa9f313b87017f6b949328b"
+    },
+    {
+      "bytes": 2766,
+      "file": "scripts/codex/release_capture_probe.gd",
+      "sha256": "d96d0b207fdf7cbb1df7197611902d318b8cc6ec896b4d18391e17d30e7c53ac"
+    },
+    {
+      "bytes": 18244,
+      "file": "scripts/codex/sot-memory.ps1",
+      "sha256": "703163f152deff4d4b0d586abd4e5ba16bededad8c47f4c369056147fa0a23e8"
+    },
+    {
+      "bytes": 9609,
+      "file": "scripts/codex/sot-publish.ps1",
+      "sha256": "54c769a6450e805ba51f0578794cde1a38290bcf892d0bedabc1b19e1bfec0e0"
+    },
+    {
+      "bytes": 10129,
+      "file": "scripts/codex/sot-sync.ps1",
+      "sha256": "d5d753cb9d85504d5c7ded3f65087b8b4f8dba9bf920d75e49a1b27f2aea9d8c"
+    },
+    {
+      "bytes": 12732,
+      "file": "scripts/codex/sot-worktree.ps1",
+      "sha256": "775115349519ff1f7065df86d7273c9dfd1802a1e0eb00a866dde84ba3e86717"
+    },
+    {
+      "bytes": 4547,
+      "file": "scripts/codex/verify-myrmidon-export.ps1",
+      "sha256": "523fd7565137b18c37e8389a575f2e8b337087f572a7fc798a82f6d032c1d289"
+    },
+    {
+      "bytes": 1967,
+      "file": "scripts/core/area_calculator.gd",
+      "sha256": "5744fe8c30fc346f913cf4b129a594036715a3467c8ab421ff9314203af4c2bc"
+    },
+    {
+      "bytes": 3709,
+      "file": "scripts/core/cell.gd",
+      "sha256": "1415a4ce7ce54907c1fd5172d9499ed35b08e0c48ea3c0780ee1be50a6542619"
+    },
+    {
+      "bytes": 21,
+      "file": "scripts/core/cell.gd.uid",
+      "sha256": "040a11ecc56cb476a2ed9c60cab233b52c8c7bc977201179e023430e45c2a50d"
+    },
+    {
+      "bytes": 15777,
+      "file": "scripts/core/damage_calculator.gd",
+      "sha256": "42956f770c94a616c266b28aa512c1a165df3e6255dbb8fe73ece0866658ef2e"
+    },
+    {
+      "bytes": 21,
+      "file": "scripts/core/damage_calculator.gd.uid",
+      "sha256": "60996091557e5959e9eeebb154b6347da00ef10328830de5bbed8fff7eca5ecd"
+    },
+    {
+      "bytes": 3847,
+      "file": "scripts/core/enemy_ai.gd",
+      "sha256": "9a5f62c950c8c7e834851a323d090caaa69ca679674a0b4f937662bc0f7e77e1"
+    },
+    {
+      "bytes": 21,
+      "file": "scripts/core/enemy_ai.gd.uid",
+      "sha256": "126eaae23ad78bd9abd58b3e80726a983735b2f36294c4faf48edacad3e15a88"
+    },
+    {
+      "bytes": 6899,
+      "file": "scripts/core/game_action.gd",
+      "sha256": "7cd6f5f7c9e82cc7ce89a23a333363cdbf49fcc4b1fa1f6f180734d0d0f13197"
+    },
+    {
+      "bytes": 21,
+      "file": "scripts/core/game_action.gd.uid",
+      "sha256": "8908623d3af3a3bbbc055c8837d56f41dd75860efbbc796736593300ba3a4232"
+    },
+    {
+      "bytes": 3793,
+      "file": "scripts/core/grid.gd",
+      "sha256": "f6178b2fd3f65e25f35d855ada9d448aa6e4f759a4b2a942fb83183a0cfa0310"
+    },
+    {
+      "bytes": 20,
+      "file": "scripts/core/grid.gd.uid",
+      "sha256": "912523ebef2fd47d372de50a693493ff916867060beb8d02b0071dfd854461c4"
+    },
+    {
+      "bytes": 3882,
+      "file": "scripts/core/pathfinding.gd",
+      "sha256": "857d44ce239e4ad4cd6fd7d488f7f8fb806a4d76547837ffc80ac6ccc2ceba6e"
+    },
+    {
+      "bytes": 21,
+      "file": "scripts/core/pathfinding.gd.uid",
+      "sha256": "8684b2db02a4a75f425200e9fe3fc877725102a72c01849ef7df3b28f7b08e19"
+    },
+    {
+      "bytes": 4791,
+      "file": "scripts/core/range_calculator.gd",
+      "sha256": "caf6e373849e6d9350e4155749909b888526c1e98aed2221715398bff5c326a3"
+    },
+    {
+      "bytes": 159111,
+      "file": "scripts/core/tactical_manager.gd",
+      "sha256": "631f452752cb19996fbbb1656909cc59b3cb50f0224e91c0dcd7d68d55f48ee6"
+    },
+    {
+      "bytes": 20,
+      "file": "scripts/core/tactical_manager.gd.uid",
+      "sha256": "148b1fceb4784a0dd433a6b47d1aca61f0a6348a9cdeeb28582d1fdbdbef36ba"
+    },
+    {
+      "bytes": 3454,
+      "file": "scripts/core/turn_manager.gd",
+      "sha256": "1187a3717657acfae36d888b7882f90d7b4fec09d9606766d521d65757c92046"
+    },
+    {
+      "bytes": 21,
+      "file": "scripts/core/turn_manager.gd.uid",
+      "sha256": "57a10632ea994e1b0dea1db0f1f9df21c43d565245c88707e69095be9bf6c2ac"
+    },
+    {
+      "bytes": 2917,
+      "file": "scripts/data/data_loader.gd",
+      "sha256": "270f304155716e9120166d8fd416b3e396481a5650192df905fdec7be2894265"
+    },
+    {
+      "bytes": 21,
+      "file": "scripts/data/data_loader.gd.uid",
+      "sha256": "75d2358765c43b588a82f69e03af7f2fda13c558c082e515f71f776544675818"
+    },
+    {
+      "bytes": 5016,
+      "file": "scripts/data/state_registry.gd",
+      "sha256": "fa54a6fb514ff47b642d89a14fba6215345724351e09611bf408becb5f7381d9"
+    },
+    {
+      "bytes": 36988,
+      "file": "scripts/data/talent_registry.gd",
+      "sha256": "8aaf7b7cabb8b9240197a4333f2e63c35f09c8165fa24ab7537afeeea529970f"
+    },
+    {
+      "bytes": 4941,
+      "file": "scripts/roguelite/battle_assembler.gd",
+      "sha256": "56a16a4a5a084d6d8a519446f31c9ad9bb3083fbffeba5615c03d5689ddb0cf1"
+    },
+    {
+      "bytes": 11562,
+      "file": "scripts/roguelite/door_generator.gd",
+      "sha256": "083cb83e9b65077b9b2e11c45e6fc2b836a917a6cda997aa2bf659448b4b91c0"
+    },
+    {
+      "bytes": 4184,
+      "file": "scripts/roguelite/door_select.gd",
+      "sha256": "7fdc513e2abee00f125c4ee0961a8072d618bdebacf1d04bc10c02276aa0ee72"
+    },
+    {
+      "bytes": 13811,
+      "file": "scripts/roguelite/reward_resolver.gd",
+      "sha256": "21a42fac9f9a4d203ab5897a701e836b60b425770113e277a21a2e63fa07a997"
+    },
+    {
+      "bytes": 34004,
+      "file": "scripts/roguelite/run_manager.gd",
+      "sha256": "3a4d005794cbdc306281e463fd5f757dd35e7935661f22cd34658beb4469d83c"
+    },
+    {
+      "bytes": 35007,
+      "file": "scripts/roguelite/run_scene.gd",
+      "sha256": "10f0f7a0454f0f7f62eb6bb861c9de2194fa4e80fe8b5619ec08eafccc328e0e"
+    },
+    {
+      "bytes": 6254,
+      "file": "scripts/roguelite/run_state.gd",
+      "sha256": "7377a440a95e0d1b2e6d2ac6056faaba817239a3a183afc2fd06755f17b512b3"
+    },
+    {
+      "bytes": 31407,
+      "file": "scripts/tactical/tactical_scene.gd",
+      "sha256": "b673d71fec75646514d378c95b8ceaf47c528424662ebfc4f86e4705f06cd618"
+    },
+    {
+      "bytes": 21,
+      "file": "scripts/tactical/tactical_scene.gd.uid",
+      "sha256": "561c4efa01433af4a454de38c46185d13cf9e3c8f94b80c64713f5414003e287"
+    },
+    {
+      "bytes": 4452,
+      "file": "scripts/tactical/terrain_battle_session.gd",
+      "sha256": "95627e6f2d81b9c6f365ea61586b2bdfc2913d41fc03568f50530d109c1382ee"
+    },
+    {
+      "bytes": 5498,
+      "file": "scripts/ui/action_resource_bar.gd",
+      "sha256": "9f3639a2b79d888a91e6fdc011f0d9c294a83ca7c7d51aa173c0c786b63c8ace"
+    },
+    {
+      "bytes": 54171,
+      "file": "scripts/ui/bottom_dashboard.gd",
+      "sha256": "65c189b06ec16c5cede65beb69ef9ba7f54889c7cf1f49e72403c00222d04bba"
+    },
+    {
+      "bytes": 8736,
+      "file": "scripts/ui/damage_forecaster.gd",
+      "sha256": "8d75d73639a253a8fceb8e0505a692e83ba877b802bca1495771c32b9432941e"
+    },
+    {
+      "bytes": 8574,
+      "file": "scripts/ui/damage_popup.gd",
+      "sha256": "c5e9a9bef13ff6bf00ce161da339e8e63c50a124990a78a9f099012eed9caef4"
+    },
+    {
+      "bytes": 21,
+      "file": "scripts/ui/damage_popup.gd.uid",
+      "sha256": "5424f5580da8dd6c9e81e659ed35f14087ccc8578f0fbcf768b37940f42eb121"
+    },
+    {
+      "bytes": 2637,
+      "file": "scripts/ui/font_setup.gd",
+      "sha256": "1b946614098dcb9708baae6fba359903bda85238d4de6144522246ecf59f29be"
+    },
+    {
+      "bytes": 3862,
+      "file": "scripts/ui/hud/action_resource_glyph.gd",
+      "sha256": "d9ec242b3f16534e21925ae62ebb10b3bf427fb5fc60fd4d113a09870291bd55"
+    },
+    {
+      "bytes": 2299,
+      "file": "scripts/ui/hud/action_resource_strip.gd",
+      "sha256": "b5853eb4828511ac1dc2f2c207a603ca41d124506969d89dd55c4474bc9fb313"
+    },
+    {
+      "bytes": 573,
+      "file": "scripts/ui/hud/action_resource_view_data.gd",
+      "sha256": "3a829bcecde5808b7a3f216259ebeb42406f66fe0311d7465b5a53ca154f7b89"
+    },
+    {
+      "bytes": 2486,
+      "file": "scripts/ui/hud/bottom_hud_composition.gd",
+      "sha256": "9c76375bc0b1de0a3ef0719e6eed99a385e02a2a74da51e8b94015e658f7c1b6"
+    },
+    {
+      "bytes": 1518,
+      "file": "scripts/ui/hud/character_hud_panel.gd",
+      "sha256": "29a2171658403e2fe66cedd13af829ef15526a7bce938439403d0d11f2fcc79a"
+    },
+    {
+      "bytes": 485,
+      "file": "scripts/ui/hud/character_hud_view_data.gd",
+      "sha256": "b5384e70eff9e03f2646c1cdd8390182a1a90738e0ffb26ec52340704cff5e44"
+    },
+    {
+      "bytes": 939,
+      "file": "scripts/ui/hud/end_turn_button.gd",
+      "sha256": "df2d9800dba9cc3362668982aa95374793edab768ff270adf977209788f5b4ff"
+    },
+    {
+      "bytes": 1191,
+      "file": "scripts/ui/hud/end_turn_control.gd",
+      "sha256": "97bdc186e351423ec9524f2c4494f009ab65245b0b0f04059ddcd97b230c48f7"
+    },
+    {
+      "bytes": 399,
+      "file": "scripts/ui/hud/end_turn_view_data.gd",
+      "sha256": "0595327390bbdd3d60a3f082f1523825aa264123005e2d3ff36832f575f095eb"
+    },
+    {
+      "bytes": 1032,
+      "file": "scripts/ui/hud/equipment_hud_panel.gd",
+      "sha256": "2b098e36f9719bde26102549ea28519c39260a513628e1a3b2e9b93678ea2b56"
+    },
+    {
+      "bytes": 3659,
+      "file": "scripts/ui/hud/m2/action_resource_glyph.gd",
+      "sha256": "73e89d9ab7c7d50753d6f19af0b42d4ebac4ce543bf431434fc1f55ca44028da"
+    },
+    {
+      "bytes": 3235,
+      "file": "scripts/ui/hud/m2/action_resource_strip.gd",
+      "sha256": "60a6c5ae935171d32bb2ba1a36375de411100abd8e4e3ea4fc4e8385ac4cfffb"
+    },
+    {
+      "bytes": 2501,
+      "file": "scripts/ui/hud/m2/bottom_hud_composition.gd",
+      "sha256": "2a17b01a07882ec5b60b7cebc4c4de67476b708fa2da5bf19e8a5aa5b9eeb5a0"
+    },
+    {
+      "bytes": 7233,
+      "file": "scripts/ui/hud/m2/character_hud_panel.gd",
+      "sha256": "1823293a9939be1aa569f87d228a20197d950369d32c7ec4d72b15fa03bcc7d0"
+    },
+    {
+      "bytes": 1751,
+      "file": "scripts/ui/hud/m2/character_hud_view_data.gd",
+      "sha256": "6385ea32488572e6aaf0134168d0010831ed7645160ddd1e5a554844dfe5f245"
+    },
+    {
+      "bytes": 1420,
+      "file": "scripts/ui/hud/m2/class_resource_host.gd",
+      "sha256": "1a2535687cfcb1ec2ce8195cbf22c0788eaab51f0f7f44208339d22ec93d1850"
+    },
+    {
+      "bytes": 608,
+      "file": "scripts/ui/hud/m2/class_resource_layout.gd",
+      "sha256": "81e3601208243c13e8428cf9b0ba88bbddd7bc12aabd04d34968401da92b2bf1"
+    },
+    {
+      "bytes": 578,
+      "file": "scripts/ui/hud/m2/class_resource_profile_catalog.gd",
+      "sha256": "dce41dcf98c19b2d2d64397cfc85ce3bbde8d26fdd4ae4c7ea588636a204ba02"
+    },
+    {
+      "bytes": 188,
+      "file": "scripts/ui/hud/m2/class_resource_view_data.gd",
+      "sha256": "b1b00375f9a1cee16082a778c3da464d8b50ba66f3651b9ecefd414ed613a60f"
+    },
+    {
+      "bytes": 11981,
+      "file": "scripts/ui/hud/m2/dashboard_view_adapter.gd",
+      "sha256": "1dfc75633bcf4dcdbb63be29753f93163f6a7872cf9fafa4c006fd040d4e50e7"
+    },
+    {
+      "bytes": 1856,
+      "file": "scripts/ui/hud/m2/end_turn_button.gd",
+      "sha256": "6c0a2fd605f2309366a5441927c47904dc7f5d064bd6c1f1d18d3734c8226c1c"
+    },
+    {
+      "bytes": 839,
+      "file": "scripts/ui/hud/m2/end_turn_control.gd",
+      "sha256": "7c093163c55372dd0ded4613cc4d77532376146aa0c6390e1ef1917e29383b3b"
+    },
+    {
+      "bytes": 3382,
+      "file": "scripts/ui/hud/m2/hud_font_setup.gd",
+      "sha256": "67038b882a0b6780f9d4e6aea22e41a51f473084d9adce05ca488fe9008a4272"
+    },
+    {
+      "bytes": 3027,
+      "file": "scripts/ui/hud/m2/marks_panel.gd",
+      "sha256": "410e3bca91dfc571e48f6a827212ac404200c9acd48cb2215689d52d5d473d97"
+    },
+    {
+      "bytes": 919,
+      "file": "scripts/ui/hud/m2/popup_placement.gd",
+      "sha256": "ab8e7b43a9d8ee1cc713b7e3ffb7263c1702a88563a90c384f5a376a98cd00fb"
+    },
+    {
+      "bytes": 1130,
+      "file": "scripts/ui/hud/m2/potion_button.gd",
+      "sha256": "73ec85dad754c13909876dd0a638c6ab63bbe53bc34475d8503b239766f97fbd"
+    },
+    {
+      "bytes": 7172,
+      "file": "scripts/ui/hud/m2/runtime_dashboard.gd",
+      "sha256": "9ea932bd4b1237a3455b6abdfa93300fb7eb0ba6e07761147775b2d1318a8611"
+    },
+    {
+      "bytes": 5273,
+      "file": "scripts/ui/hud/m2/shared_frame_style.gd",
+      "sha256": "9951472e8eb85d3786d921c86e9580c45a12a51390b7ec51582096f8184442b9"
+    },
+    {
+      "bytes": 1517,
+      "file": "scripts/ui/hud/m2/shared_frame.gd",
+      "sha256": "76e937a731d034dabb45ae37ad680fa4a34b830ea962411590c004ed3275d6ad"
+    },
+    {
+      "bytes": 1626,
+      "file": "scripts/ui/hud/m2/skill_icon_catalog.gd",
+      "sha256": "86f4b9b2f6f48d85040f231c1a7de95d56e8355ed91355f125a9339cd132e667"
+    },
+    {
+      "bytes": 2756,
+      "file": "scripts/ui/hud/m2/skill_shelf.gd",
+      "sha256": "8b431a585a0d05705383b62f283e248852a1a7792e374f93f89d2d0a55c972b0"
+    },
+    {
+      "bytes": 7031,
+      "file": "scripts/ui/hud/m2/skill_slot_button.gd",
+      "sha256": "bac49ddfdb4f67a6012fcdca52812f2d13cff65b1de861c2c53b954c17796391"
+    },
+    {
+      "bytes": 1012,
+      "file": "scripts/ui/hud/m2/skill_slot_view_data.gd",
+      "sha256": "023eeba5f8c2ef056684c48be8c2a150413903b748398db9492798299c5b01b8"
+    },
+    {
+      "bytes": 3824,
+      "file": "scripts/ui/hud/m2/slot_button.gd",
+      "sha256": "8aaca037441f7b33b3c5c567d325fb19a2b9be208df8a90ae9b584d24502355a"
+    },
+    {
+      "bytes": 234,
+      "file": "scripts/ui/hud/m2/slot_view_data.gd",
+      "sha256": "7088629e43e3bc646ecccc5eb47f2a1cb4eaf890d59fff06f2105391e9ee8ed3"
+    },
+    {
+      "bytes": 2349,
+      "file": "scripts/ui/hud/m2/sword_resource_panel.gd",
+      "sha256": "c1185816b54cef7d447bb06042daf802a51608fa60c5825b9e4c9ba98b90f61f"
+    },
+    {
+      "bytes": 461,
+      "file": "scripts/ui/hud/m2/sword_resource_view_data.gd",
+      "sha256": "b59ccbd9c0a68be2ddeb7f080b37873e995c50f3ba37de2b375c68c8e68ce5aa"
+    },
+    {
+      "bytes": 986,
+      "file": "scripts/ui/hud/potion_button.gd",
+      "sha256": "e6ec40a02696c5f47da3cd5bc6dd6c1a3beda4a07bdaaadc47e91397798b3a02"
+    },
+    {
+      "bytes": 174,
+      "file": "scripts/ui/hud/potion_view_data.gd",
+      "sha256": "eccf037b82f276f2ffcd7a24ebbc45cac471364513931944029933df7a5e39f9"
+    },
+    {
+      "bytes": 963,
+      "file": "scripts/ui/hud/relic_grid.gd",
+      "sha256": "692ccac0eb6638e141223756d34baeed108bc4cfe3cbeee4b3fe9a70374aeed8"
+    },
+    {
+      "bytes": 1380,
+      "file": "scripts/ui/hud/skill_shelf.gd",
+      "sha256": "cf2eac8a779d7fb07ef23853bc5e19ac14311634adf94b7ed31fb6e431b54c55"
+    },
+    {
+      "bytes": 1787,
+      "file": "scripts/ui/hud/skill_slot_button.gd",
+      "sha256": "ce9b577dc4f0a658f9669778e608f70dd7f9d2bb425e4615fbf6f434d9c33792"
+    },
+    {
+      "bytes": 490,
+      "file": "scripts/ui/hud/skill_slot_view_data.gd",
+      "sha256": "00426aa49100dae448ea9c8ab7349eb4b69bf66711f86c2a0af33cfaea834022"
+    },
+    {
+      "bytes": 1140,
+      "file": "scripts/ui/hud/slot_button.gd",
+      "sha256": "5eb56b83bbea2ee7062ef24ae07ebda8837d4d275ef2091af7305e1f482e66a7"
+    },
+    {
+      "bytes": 226,
+      "file": "scripts/ui/hud/slot_view_data.gd",
+      "sha256": "c01f4296b10e1f30dc919f1f41452a3c3ce7df9c082bf68490bdec0996db67f5"
+    },
+    {
+      "bytes": 349,
+      "file": "scripts/ui/hud/value_meter_view_data.gd",
+      "sha256": "7e287fa239902b5c4a8c4f1af664ddead19f15228a88f87e9c0c8dfb267768f1"
+    },
+    {
+      "bytes": 1282,
+      "file": "scripts/ui/hud/value_meter.gd",
+      "sha256": "7b695b955bfdb770c0033141d94af5ae61af8fd0087636a0203604fcf79e4135"
+    },
+    {
+      "bytes": 20662,
+      "file": "scripts/ui/playground/battlefield_courtyard.gd",
+      "sha256": "e2f983e731f365a2680b80914f3a152775f5e11530a37b3fdf0a8c03a019926e"
+    },
+    {
+      "bytes": 33081,
+      "file": "scripts/ui/playground/courtyard_board_view.gd",
+      "sha256": "41a307633f513a9f47b15763396017121b146519186241fd95532aca5f78ddd7"
+    },
+    {
+      "bytes": 6650,
+      "file": "scripts/ui/playground/goth_frame.gd",
+      "sha256": "9642b0ed92a7a025c040637f468161e72cf9e81ad1b34789f27c206e835fd8d7"
+    },
+    {
+      "bytes": 28630,
+      "file": "scripts/ui/playground/map_token_runtime_playground.gd",
+      "sha256": "c3caa9eb1222b9f5c81256e9d1b3f81afc6cce43de4f61efce16310d894ea64e"
+    },
+    {
+      "bytes": 46970,
+      "file": "scripts/ui/playground/skillbar_playground.gd",
+      "sha256": "703c3b98422d0d0babd7093195809995182b4f6d16c7f7691c02e5d7e42f64f0"
+    },
+    {
+      "bytes": 37335,
+      "file": "scripts/ui/playground/terrain_painter.gd",
+      "sha256": "ca2333b61f04431f58a0ecbce43f337a9f13c084d5f45a40ede38504836e913b"
+    },
+    {
+      "bytes": 25997,
+      "file": "scripts/ui/playground/visual_style_playground.gd",
+      "sha256": "b97b9e0da0b7e27851fe077fc1aac3679b5ae46ccfb3008507b0f38e85ad2a83"
+    },
+    {
+      "bytes": 15580,
+      "file": "scripts/ui/skill_bar.gd",
+      "sha256": "be9731d45f73efca81fa318f7ba26a450a58b5b6c4e6c87d4270e8b660157fa7"
+    },
+    {
+      "bytes": 5006,
+      "file": "scripts/ui/sword_qi_bar.gd",
+      "sha256": "2a5db68f9fd64102818287b4be2b53eafd0b5e0503170b501b180c99be3c3d4e"
+    },
+    {
+      "bytes": 3312,
+      "file": "scripts/ui/terrain/terrain_battle_definition.gd",
+      "sha256": "7c3c988298f3ee6f02fcb27b03652762aeaa341217aa55829e5c7df54767b867"
+    },
+    {
+      "bytes": 5251,
+      "file": "scripts/ui/terrain/terrain_blend.gdshader",
+      "sha256": "a1ff38cab28a3d80ef0e6268344c05f8d0caee0e93b996793d143869119b6836"
+    },
+    {
+      "bytes": 5176,
+      "file": "scripts/ui/terrain/terrain_catalog.gd",
+      "sha256": "a07c1b6649f5906b0a33cb6e0ef672d4c9b409a381e13c4067e2a7ba391d6c60"
+    },
+    {
+      "bytes": 6101,
+      "file": "scripts/ui/terrain/terrain_surface.gd",
+      "sha256": "5526db8ee3bdb8d5bc264bae24cf5d05e9670e1507fcd3ee413ce5ed7593b13f"
+    },
+    {
+      "bytes": 5402,
+      "file": "scripts/ui/turn_order_bar.gd",
+      "sha256": "7870fdef03d740c73d209ec0dedf00f9c2f9b51b5131c52c7a26c976980394ef"
+    },
+    {
+      "bytes": 21,
+      "file": "scripts/ui/turn_order_bar.gd.uid",
+      "sha256": "439909b367d95f521c0f931a279d74af7239f79170221fbe582b9e9d9c4bd054"
+    },
+    {
+      "bytes": 2715,
+      "file": "scripts/units/buff_effect.gd",
+      "sha256": "2863670f1ed9dced5d95316054280058e1cfe187bc8971bca5cd03b070341606"
+    },
+    {
+      "bytes": 4619,
+      "file": "scripts/units/map_token_view.gd",
+      "sha256": "88b01c763b93599e2fbb6a67e34ab615517adf1c5c8027b420619f44b85ec237"
+    },
+    {
+      "bytes": 5138,
+      "file": "scripts/units/unit_stats.gd",
+      "sha256": "955535cda6c49180b452c0b880ad908b343d2a5ab3a1c97003e4817a185f6ccd"
+    },
+    {
+      "bytes": 21,
+      "file": "scripts/units/unit_stats.gd.uid",
+      "sha256": "2034ddbcf281b45d41407c07b0c266ad44c2e546ce178b607d7554a9c15cdf1e"
+    },
+    {
+      "bytes": 39942,
+      "file": "scripts/units/unit.gd",
+      "sha256": "002a4b834c601781bb3e5e60a64569f2c9a977758bb296321694f9ab9423cfc6"
+    },
+    {
+      "bytes": 21,
+      "file": "scripts/units/unit.gd.uid",
+      "sha256": "b41dd20e338aac4265103a0b183bacd60b6deb7a2e3bc8539e5c3f6d4fe652ec"
+    },
+    {
+      "bytes": 4912,
+      "file": "tests/_exp_results.md",
+      "sha256": "5e50fec1624f42e0ae02afa8d1f7eed00191a432973cc89cd5c8ad30d2f2d4c0"
+    },
+    {
+      "bytes": 5509,
+      "file": "tests/剑圣手动测试清单.md",
+      "sha256": "a1ca05b6b7f8a4ec8ae446b7fd04a860c45b6463d5e00824171f1ab0498d2eb4"
+    },
+    {
+      "bytes": 11712,
+      "file": "tests/剑圣资源打法实证报告.md",
+      "sha256": "70bd7a37f620fa8671bd022140756e972219cba2ee0515e00341ed226da1792c"
+    },
+    {
+      "bytes": 12480,
+      "file": "tests/门循环手动测试清单.md",
+      "sha256": "c708c2ecc6871688b7ea33efde2c49f332dcc2cc4b2aa3e4d3d42598d70a8524"
+    },
+    {
+      "bytes": 7853,
+      "file": "tests/capture_action_resource_bar_tactical.gd",
+      "sha256": "b99d072867700ca3738d2174e0744d5566059fee775be2999595c97435467aa3"
+    },
+    {
+      "bytes": 9140,
+      "file": "tests/capture_battlefield_environment_motion.gd",
+      "sha256": "a53d6bf3f46094f0cf2e4255dc6c9fa5a208d5d52b5de9e2d9d9220d10aad968"
+    },
+    {
+      "bytes": 7037,
+      "file": "tests/capture_courtyard_material_intake.gd",
+      "sha256": "2242ffb74d0790377b661358a7847147bc53cce45fce065505d79af6fbc89134"
+    },
+    {
+      "bytes": 7123,
+      "file": "tests/capture_courtyard_visual_review.gd",
+      "sha256": "016a0ebb9bbaf5ac810dbdfa2e26154a7f72adcb91d633e3754d34cddbad2c9c"
+    },
+    {
+      "bytes": 4997,
+      "file": "tests/capture_hud_character_panel.gd",
+      "sha256": "8ff0b5449cbfc3debf65a15de831ed8684fa7f0df951118b325527094167ed11"
+    },
+    {
+      "bytes": 3737,
+      "file": "tests/capture_hud_crest_candidate.gd",
+      "sha256": "a30f23b1d70ceb3dd357d4a02b4bc3eef9514c6c600318985fe5b967ceac2b7a"
+    },
+    {
+      "bytes": 7394,
+      "file": "tests/capture_hud_final_acceptance.gd",
+      "sha256": "2f7207bba872a753777d885a2385b8ca9d1a4b76c4b878e37e6461be6d8c9822"
+    },
+    {
+      "bytes": 4888,
+      "file": "tests/capture_hud_freeze.gd",
+      "sha256": "1f80249ee4b31c57fe70572c07f359dace7128272376ef391121a51a22262c3d"
+    },
+    {
+      "bytes": 3224,
+      "file": "tests/capture_hud_number_candidate.gd",
+      "sha256": "0b0d96d824af551f585c11060d1ffc04cf2e74cf1eff2480ad4c2210ac713a5b"
+    },
+    {
+      "bytes": 8051,
+      "file": "tests/capture_kensei_map_token_tactical.gd",
+      "sha256": "0c4e048e9faab627200dde22580bf6ba205dd0a28d474a0a4b9eac852f5cdd1d"
+    },
+    {
+      "bytes": 12495,
+      "file": "tests/claude_review/art_audit.py",
+      "sha256": "7678b1784c52089db5acd9b6b10b86d98b43af8c1b41e0b8821786637012ec5e"
+    },
+    {
+      "bytes": 16763,
+      "file": "tests/claude_review/artlib.py",
+      "sha256": "c61dcec738d2e3378702d844b3a9a640c265ab9920f362ec98e9103eb4f8b684"
+    },
+    {
+      "bytes": 25683,
+      "file": "tests/claude_review/build_cr10_font_subset.py",
+      "sha256": "b660bb9dc39879edacbe45ee2f08a9b38d0de6ad6fb576dbf38fd4a33705d4e9"
+    },
+    {
+      "bytes": 8271,
+      "file": "tests/claude_review/capture_battle_overlays.gd",
+      "sha256": "4cabb9225ea5dba6d71e79f0cac8eb215275e7c17353ccaf7ae9bf5ede785139"
+    },
+    {
+      "bytes": 9197,
+      "file": "tests/claude_review/capture_cr10_font_frames.gd",
+      "sha256": "5c0ead5bbe93abb9b09a2711174259691c6a954bec87781f3867a55dbabeb399"
+    },
+    {
+      "bytes": 13084,
+      "file": "tests/claude_review/capture_cr10_windows_weights.gd",
+      "sha256": "65a7bdb5feb7877938784dd1647c28878c6d22175cc049e00d0027d78eaaa4ce"
+    },
+    {
+      "bytes": 3514,
+      "file": "tests/claude_review/capture_metadata.gd",
+      "sha256": "9baac1870398cc6acb76e7e1bffa37931e2afcc2b4a68196e79a33d259214d8c"
+    },
+    {
+      "bytes": 4813,
+      "file": "tests/claude_review/capture_run_flow_ui.gd",
+      "sha256": "bda4886c0be2ec98b4c6e41a74396847051b0230a76ee41aeef422bde8f67227"
+    },
+    {
+      "bytes": 4915,
+      "file": "tests/claude_review/capture_scene_native.gd",
+      "sha256": "1de3a8d2fe9e29c7b6b7c46a5cd106dbf57d2451b4689ea2e6519715a697e652"
+    },
+    {
+      "bytes": 3288,
+      "file": "tests/claude_review/capture-contract.md",
+      "sha256": "e1422ac96fc6306b9f0d858583c3638753fc4b51c435b7bffcebf868e9562078"
+    },
+    {
+      "bytes": 1875,
+      "file": "tests/claude_review/capture-gate.ps1",
+      "sha256": "4aaa0a726bc2cd210ae095aabf02b7cb11a19392cea50b9bdd2f53188b11cdc4"
+    },
+    {
+      "bytes": 39712,
+      "file": "tests/claude_review/claude_review_checks.py",
+      "sha256": "be32bf35c7d51d50242e0dcfa11fe79f4d2b931fa4101483fee58686dd651165"
+    },
+    {
+      "bytes": 26231,
+      "file": "tests/claude_review/cr10_font_runtime_check.gd",
+      "sha256": "de30fd9d3aa2f3dc7c0b0b92b06a6ee9a14282e2389b85f809c1be08b18a11dd"
+    },
+    {
+      "bytes": 2660,
+      "file": "tests/claude_review/resolution_coverage.py",
+      "sha256": "8b495e65e4405a684ccd3d84a8d61c78c766790a47d8f4278d2ed349679c949e"
+    },
+    {
+      "bytes": 8409,
+      "file": "tests/claude_review/run_cr10_windows_weights.ps1",
+      "sha256": "382beef85ecd7c8dc000cac3fd8bdd0840d379130e065793b51febd14bec5e32"
+    },
+    {
+      "bytes": 11546,
+      "file": "tests/claude_review/sampling_sim.py",
+      "sha256": "95f0a75a2df6ceaee844538ec784f53230e261be407eacaec9e0533126fbd7c1"
+    },
+    {
+      "bytes": 5986,
+      "file": "tests/claude_review/test_capture_config.py",
+      "sha256": "9c8f254133a98fa32ac927884089193151743c865fb30c66ad8f5564319e1c03"
+    },
+    {
+      "bytes": 1923,
+      "file": "tests/claude_review/test_resolution_coverage.py",
+      "sha256": "354472009facd39e30ce410d32fb4c94f4b9b36d6ef5bbda6397e9a894eb93b0"
+    },
+    {
+      "bytes": 36084,
+      "file": "tests/codex/test_sot_lane_tooling.py",
+      "sha256": "1239c908ff39e6196b843f3780694777cef2bcbd7b3ed0fef9d57d7ec672b173"
+    },
+    {
+      "bytes": 19068,
+      "file": "tests/codex/test_sot_project_layer.py",
+      "sha256": "41711b0be1107653eb6beff875faec823c285588c299e2849bbde01e24a40be3"
+    },
+    {
+      "bytes": 12153,
+      "file": "tests/codex/test_sot_skill_contracts.py",
+      "sha256": "aead1b05698126776298df28e36c6bba3a4e378acb384c3b3b0d140ac1e261d8"
+    },
+    {
+      "bytes": 15228,
+      "file": "tests/exp_door_generation.gd",
+      "sha256": "2a75ccc54abc62e802953f4882678373ed8e4021b331aecb0f54014a5f3c3b31"
+    },
+    {
+      "bytes": 17032,
+      "file": "tests/exp_swordsman_resource_playstyles.gd",
+      "sha256": "6a54d11dea6ff11267ff5c3a6158245a179482725b38d2c71a5ace922a7136a3"
+    },
+    {
+      "bytes": 15517,
+      "file": "tests/run_courtyard_visual_validation.ps1",
+      "sha256": "640087160164eba4e9ec85692f167280197f2a882e34c1da59c671c195b01d6e"
+    },
+    {
+      "bytes": 7878,
+      "file": "tests/run_terrain_kit_validation.ps1",
+      "sha256": "8d4fb8a66e93550b98643bbf3a27bcb41d52f21bf08b8816776b3c95c36d0be6"
+    },
+    {
+      "bytes": 10465,
+      "file": "tests/run_terrain_runtime_validation.ps1",
+      "sha256": "5f4e29ae5b7add42be93de7ff252b01898afffac3a891e6bbda179cde790bacb"
+    },
+    {
+      "bytes": 4659,
+      "file": "tests/run_visual_resolution_validation.ps1",
+      "sha256": "9a819428c7bbaf9e0cbaab6e73e907c5b33c6344f40a0517338e88e04857923d"
+    },
+    {
+      "bytes": 3201,
+      "file": "tests/test_action_cost_free.gd",
+      "sha256": "94e89bded388f358033996cda73929eaae63e1015fd684ca2969e040c812d752"
+    },
+    {
+      "bytes": 8538,
+      "file": "tests/test_action_resource_bar.gd",
+      "sha256": "2f8c0c7a7a204740854d74aeb8ad3ae102558254775afc2ecdd685ffb1a019f0"
+    },
+    {
+      "bytes": 5514,
+      "file": "tests/test_action_resource_dashboard.gd",
+      "sha256": "e0442d5271d4c016ea12aca17bc3a6f2d0d91dbf018c0a7d407209cb9eadfd35"
+    },
+    {
+      "bytes": 9594,
+      "file": "tests/test_action_resource_runtime.gd",
+      "sha256": "d26a06d74c8a2818453f0bc29fd6789b6237ae0a723ee9899229304595eb820c"
+    },
+    {
+      "bytes": 8246,
+      "file": "tests/test_affix_effects.gd",
+      "sha256": "eb8efd7871f6278a9a61e118b06694a69bb514937f32efbed5a941da69d2366d"
+    },
+    {
+      "bytes": 13517,
+      "file": "tests/test_affix_system.gd",
+      "sha256": "325a45fa98f507db4acca922fdbea27bc7aa50e28b8e5303fe5156e1ed66de93"
+    },
+    {
+      "bytes": 18642,
+      "file": "tests/test_battlefield_courtyard.gd",
+      "sha256": "d66e76ea0913cffe65845a9dd1cc1399099fcba9cd332f2442f2d227cd73a3c0"
+    },
+    {
+      "bytes": 11114,
+      "file": "tests/test_courtyard_terrain_adjacency.gd",
+      "sha256": "970eabe84063dcfa2e5d0354fe0db1caa6044794811cbcc06c90b7ea924581d5"
+    },
+    {
+      "bytes": 14507,
+      "file": "tests/test_courtyard_water_depth_continuity.gd",
+      "sha256": "7b06ba18e95e70501f4647de8561f326d30a80ab5880061f56117c4375ca2e95"
+    },
+    {
+      "bytes": 24278,
+      "file": "tests/test_courtyard_water_visual_contract.gd",
+      "sha256": "57bbce929fcc999c0720b0472c5e6274543a2721b3265f584f799dcb73af3e79"
+    },
+    {
+      "bytes": 3978,
+      "file": "tests/test_damage_popup.gd",
+      "sha256": "3d230b71a30c68424ceb86ed292061ef0c83aab0b2411616de8ca344bc04426f"
+    },
+    {
+      "bytes": 10899,
+      "file": "tests/test_displacement_path.gd",
+      "sha256": "3b51eefa434e6f70eb97e76366f1c29ea67f4d6da37d9b55af791a94ab3d3a46"
+    },
+    {
+      "bytes": 22914,
+      "file": "tests/test_door_generator.gd",
+      "sha256": "620ab0a1110f8c6b99489864ca5e87e1da8fd07a1f00152647435154839aba0f"
+    },
+    {
+      "bytes": 19198,
+      "file": "tests/test_event_resolver.gd",
+      "sha256": "5fb163992237e42be9e7ada335204b0523f224989a6ab79d1aac8eaf99bd4b1c"
+    },
+    {
+      "bytes": 7000,
+      "file": "tests/test_growth_ss_reserve.gd",
+      "sha256": "92cd362955721eb53a1ed7be0ee97f1469a3b17455b88d444810be6d994bf98d"
+    },
+    {
+      "bytes": 5292,
+      "file": "tests/test_harness_dummies.gd",
+      "sha256": "39719086514d5a1363981859f0e1be1730ca784ed94fd9813b80e1b4a1dc0fc7"
+    },
+    {
+      "bytes": 8230,
+      "file": "tests/test_harness_load.gd",
+      "sha256": "0aa218d1c795a8f753829e3bff6cbf7127bcee97355a1f6c55c5aa097b2410d5"
+    },
+    {
+      "bytes": 10991,
+      "file": "tests/test_harness_regression.gd",
+      "sha256": "de9db1d4cec74cb1fe422c96cb133260cb4693e8f1e608d739934929f644389e"
+    },
+    {
+      "bytes": 3915,
+      "file": "tests/test_hud_freeze_resources.gd",
+      "sha256": "75f877843b34ce5eeb79e680c206b8a2b32a36bb927f68ab05d1276dce700ead"
+    },
+    {
+      "bytes": 11869,
+      "file": "tests/test_hud_m2_dashboard_view_adapter.gd",
+      "sha256": "0e3f9882c004f38df3ebec87db71e07dd5ae1038e866cf4fc7b6447e6a93c729"
+    },
+    {
+      "bytes": 19514,
+      "file": "tests/test_hud_m2_runtime_dashboard.gd",
+      "sha256": "6217e3c73786cc61f26679bf1728952251b58daec81044371739a40936b06335"
+    },
+    {
+      "bytes": 16060,
+      "file": "tests/test_hud_m2_skill_action.gd",
+      "sha256": "0ee1b5d8cbdb40a7978c5cfaf3cc0e585459dded2e50841d9f7bc9791baa46c1"
+    },
+    {
+      "bytes": 5499,
+      "file": "tests/test_kensei_map_token_asset.gd",
+      "sha256": "29e3635298e643a1c39ff0a1d92d4d2be18588f23c1cfe9eb9161b565c76d8e3"
+    },
+    {
+      "bytes": 23989,
+      "file": "tests/test_map_token_runtime_playground.gd",
+      "sha256": "d18753016154a335d68a36652372522868304a1f7acabb254780119ac8462398"
+    },
+    {
+      "bytes": 4461,
+      "file": "tests/test_map_token_view.gd",
+      "sha256": "e6f93511d37bfbd246888ef03cc6a1f1109ddc72690717244f30526fcd20be13"
+    },
+    {
+      "bytes": 2865,
+      "file": "tests/test_myrmidon_qi_only.gd",
+      "sha256": "b954dbe2c20c7ee4a44bc2233a06535ca4fc6c39b6819826bd63c30425e88e67"
+    },
+    {
+      "bytes": 3643,
+      "file": "tests/test_myrmidon_skill_icons.gd",
+      "sha256": "a026428d8ddbb95a80ac58c49c44202e3f6ae1f748bf3f30401f2c9d76218c15"
+    },
+    {
+      "bytes": 15758,
+      "file": "tests/test_prep_flow.gd",
+      "sha256": "eea6566e932bbeefe635d9149bc99fa526712bbe223422d8bd331afab858b6c4"
+    },
+    {
+      "bytes": 25755,
+      "file": "tests/test_run_manager.gd",
+      "sha256": "fa26cb47ae512f53e833643a2f89b8931b8ad907fcb632a07e9bd14da7d4f319"
+    },
+    {
+      "bytes": 13420,
+      "file": "tests/test_run_scene_flow.gd",
+      "sha256": "c2b4493ccd72f3524db24eba25c18ad84e988bc2bbb04c2177f1f57fc8a1ddbc"
+    },
+    {
+      "bytes": 3002,
+      "file": "tests/test_run_scene_ui.gd",
+      "sha256": "6891e989af31fdd5e4c89477d03d8ec846867bd9085224b7e8801e6decf2d3e6"
+    },
+    {
+      "bytes": 30659,
+      "file": "tests/test_runloop_data_smoke.gd",
+      "sha256": "4eb9e9ec8530a61a741355f2db07f7a2232b7029c39dcba1f3ff028f3124e97a"
+    },
+    {
+      "bytes": 19189,
+      "file": "tests/test_shop_flow.gd",
+      "sha256": "4faad3e56ffec7b79e2ca54d7b744b19a145ac99948710efc3c2b986cb9075fd"
+    },
+    {
+      "bytes": 3273,
+      "file": "tests/test_skill_attack_type.gd",
+      "sha256": "035e1d3e9051c99a77bc8796b0fe8041d93e97f7a7913d30a7477f2ef41ebe55"
+    },
+    {
+      "bytes": 17713,
+      "file": "tests/test_skill_target_mode.gd",
+      "sha256": "094ed36d0cd0ba9a502c7cf527d88ea4a8cb4e45af9f2c560cb377486312baea"
+    },
+    {
+      "bytes": 5295,
+      "file": "tests/test_skillbar_playground_load.gd",
+      "sha256": "4b5dfc8f441cbc8f757eea155e7ad0c01d8a201c62e5df43c617909455cf032b"
+    },
+    {
+      "bytes": 7030,
+      "file": "tests/test_skillbar_v3_ui.gd",
+      "sha256": "c0bbeefd9b3cc45fc83dbb16b16ad5d83c4ebbd68de213077859a1f88fd7b1bc"
+    },
+    {
+      "bytes": 16537,
+      "file": "tests/test_state_registry.gd",
+      "sha256": "20b0197fd5ac350368a96407f9289abd50cdbe473365cd900bc06d4b35ce5d2b"
+    },
+    {
+      "bytes": 10833,
+      "file": "tests/test_support_displacement.gd",
+      "sha256": "fc427994c508885849bfec857e095bbfa6f08c41b5f87378ae8c9135cd0ec5bc"
+    },
+    {
+      "bytes": 12437,
+      "file": "tests/test_swordsman_integration.gd",
+      "sha256": "494d4a94dbb134d9c02d1037f0922c99ba3a7adc78b9ba0ebaa86d384b7fce82"
+    },
+    {
+      "bytes": 8398,
+      "file": "tests/test_swordsman_p0_fixes.gd",
+      "sha256": "862711f8232380764135419228d91ef8678a8764da57f7d80ad51853b5e26e1c"
+    },
+    {
+      "bytes": 17467,
+      "file": "tests/test_swordsman_qa_impl.gd",
+      "sha256": "9c8abab387dd76bf516d4a34bd2921604dc387913c1241ef59af93e92b7c0bec"
+    },
+    {
+      "bytes": 27697,
+      "file": "tests/test_swordsman_resources.gd",
+      "sha256": "0c64082cc3f118542caea96abcf5fc6ee212e552890ce591ec25381ce74ddab0"
+    },
+    {
+      "bytes": 9738,
+      "file": "tests/test_swordsman_runtime_path.gd",
+      "sha256": "d7ff847dfd32cf71a5580701f6e11a23b2733f6f598656eb36a11893d7c3d328"
+    },
+    {
+      "bytes": 17008,
+      "file": "tests/test_swordsman_skillbar.gd",
+      "sha256": "dd3471c88e230eb601096fe56452025809ae0fe929e82066d25a94fc32b0c6ef"
+    },
+    {
+      "bytes": 6877,
+      "file": "tests/test_tactical_inject_smoke.gd",
+      "sha256": "1a9d799f45ae19be98fc56ec1c23f715180f96ac9710828193304a2728bd5d43"
+    },
+    {
+      "bytes": 3698,
+      "file": "tests/test_tactical_map_token_integration.gd",
+      "sha256": "bf649f32022af077daa680c8000e547335cda7848e1020e2b146a76b90b863ac"
+    },
+    {
+      "bytes": 58897,
+      "file": "tests/test_talent_carrier.gd",
+      "sha256": "cebe6254ffd2fdf625c699c735f21df48a9737465edf46bf2b0dd83ee0ce872f"
+    },
+    {
+      "bytes": 30411,
+      "file": "tests/test_talent_defense.gd",
+      "sha256": "e3f8540a875ce47c21b695485948dc526e4c2c102526f1ebd000da320828cc36"
+    },
+    {
+      "bytes": 60294,
+      "file": "tests/test_talent_onhit.gd",
+      "sha256": "5fb7b95ccbd95dff76fead21aaaf386b7007abc1f4629163f8b78aced5430c06"
+    },
+    {
+      "bytes": 12011,
+      "file": "tests/test_terrain_battle_runtime.gd",
+      "sha256": "7d16872d09047f21b65e8ec9253a21a7fee6ede614aa59d8391e1ccb12213795"
+    },
+    {
+      "bytes": 11403,
+      "file": "tests/test_terrain_kit.gd",
+      "sha256": "1d6da3f51be44077583c2afa05e5c5a44d72330cf75cc49ddc13d3901d569977"
+    },
+    {
+      "bytes": 15015,
+      "file": "tests/test_terrain_map_size.gd",
+      "sha256": "71d0d7f8c39441309b72b5178bad93fb250055388ba12f982b02fefd3612d7cf"
+    },
+    {
+      "bytes": 13493,
+      "file": "tests/test_terrain_painter_battle_flow.gd",
+      "sha256": "1e9143db5e0a5c53c8294b5f2fbe640134b96e6a2bb8334b7397e061b4e86be2"
+    },
+    {
+      "bytes": 15332,
+      "file": "tests/test_terrain_painter.gd",
+      "sha256": "94e55eaf630af51814943203eeda2d9f5675f425999e50bc175a2a8e8775dbc3"
+    },
+    {
+      "bytes": 7609,
+      "file": "tests/test_unit_map_token_visual.gd",
+      "sha256": "1845ea3c9ee2d1cc6c5fe4e2df52ce78cb4da17b4dcbbd46467b38d4a68bd6dc"
+    },
+    {
+      "bytes": 28674,
+      "file": "tests/test_v0_integration.gd",
+      "sha256": "6ba91739d260e14ea749296f05c552b344630c56badd85ab2bd44605ee7ada3e"
+    },
+    {
+      "bytes": 38034,
+      "file": "tests/test_visual_style_playground_load.gd",
+      "sha256": "d4a4eb9ba70cc9129d28de4e0d7673eb4a4a3a7519b1994f1b7d7f016f438c2c"
+    }
+  ],
+  "captures": [
+    {
+      "weight": "Regular",
+      "file": "font-normal-1280x720.png",
+      "sha256": "7cabfb3798ae3c74ea5edbb2ae0c1ea11ed01fa08669fa5e215f5ef5a83959c7",
+      "frame": 76,
+      "image_size": [
+        1280,
+        720
+      ],
+      "cjk_hashes": [
+        "241e7ebc37926a6a893771a8d0f2f375e385b44d9e8d400553402968a111531b",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            32,
+            596,
+            226,
+            108
+          ],
+          "file": "font-normal-1280x720-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/@Control@267/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "eb031fc08af23cf537aa914c4ad32712e79e3dbc6f89cf5f30eeeba5f89f4a72",
+          "source_sha256": "7cabfb3798ae3c74ea5edbb2ae0c1ea11ed01fa08669fa5e215f5ef5a83959c7"
+        },
+        {
+          "crop_rect": [
+            1080,
+            16,
+            180,
+            132
+          ],
+          "file": "font-normal-1280x720-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "9b524db6f97f1055b5be627bd56be3109776bf7030cb7b3cfe23caaf95d921b5",
+          "source_sha256": "7cabfb3798ae3c74ea5edbb2ae0c1ea11ed01fa08669fa5e215f5ef5a83959c7"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Regular",
+      "file": "font-skill-tooltip-1280x720.png",
+      "sha256": "4a4f7d245c906004caa28cbc8ac9eed153da2b73a6341130cbfa50bb425b58c2",
+      "frame": 178,
+      "image_size": [
+        1280,
+        720
+      ],
+      "cjk_hashes": [
+        "241e7ebc37926a6a893771a8d0f2f375e385b44d9e8d400553402968a111531b",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            32,
+            596,
+            226,
+            108
+          ],
+          "file": "font-skill-tooltip-1280x720-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/@Control@267/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "eb031fc08af23cf537aa914c4ad32712e79e3dbc6f89cf5f30eeeba5f89f4a72",
+          "source_sha256": "4a4f7d245c906004caa28cbc8ac9eed153da2b73a6341130cbfa50bb425b58c2"
+        },
+        {
+          "crop_rect": [
+            1080,
+            16,
+            180,
+            132
+          ],
+          "file": "font-skill-tooltip-1280x720-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "9b524db6f97f1055b5be627bd56be3109776bf7030cb7b3cfe23caaf95d921b5",
+          "source_sha256": "4a4f7d245c906004caa28cbc8ac9eed153da2b73a6341130cbfa50bb425b58c2"
+        },
+        {
+          "crop_rect": [
+            438,
+            438,
+            260,
+            104
+          ],
+          "file": "font-skill-tooltip-1280x720-tooltip.png",
+          "global_rect": [
+            438.0,
+            438.0,
+            260.0,
+            104.0
+          ],
+          "id": "tooltip",
+          "image_rect": [
+            438.0,
+            438.0,
+            260.0,
+            104.0
+          ],
+          "local_size": [
+            260.0,
+            104.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/@Control@267/BottomHudComposition/BottomRow/SkillShelf/SlotsCenter/Slots/@Button@290/InspectionPanel",
+          "sha256": "c9fc34350ff51fa0f64798d6e1ff93fbf4eee6885734a8d2e42ad3d118dc5aa9",
+          "source_sha256": "4a4f7d245c906004caa28cbc8ac9eed153da2b73a6341130cbfa50bb425b58c2"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Regular",
+      "file": "font-portrait-inspection-1280x720.png",
+      "sha256": "4a393a411c4959d004cca2a330756f463b68777345fc8e9565f3e59a54c0294f",
+      "frame": 208,
+      "image_size": [
+        1280,
+        720
+      ],
+      "cjk_hashes": [
+        "241e7ebc37926a6a893771a8d0f2f375e385b44d9e8d400553402968a111531b",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            32,
+            596,
+            226,
+            108
+          ],
+          "file": "font-portrait-inspection-1280x720-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/@Control@267/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "eb031fc08af23cf537aa914c4ad32712e79e3dbc6f89cf5f30eeeba5f89f4a72",
+          "source_sha256": "4a393a411c4959d004cca2a330756f463b68777345fc8e9565f3e59a54c0294f"
+        },
+        {
+          "crop_rect": [
+            1080,
+            16,
+            180,
+            132
+          ],
+          "file": "font-portrait-inspection-1280x720-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "9b524db6f97f1055b5be627bd56be3109776bf7030cb7b3cfe23caaf95d921b5",
+          "source_sha256": "4a393a411c4959d004cca2a330756f463b68777345fc8e9565f3e59a54c0294f"
+        },
+        {
+          "crop_rect": [
+            32,
+            318,
+            304,
+            188
+          ],
+          "file": "font-portrait-inspection-1280x720-attributes.png",
+          "global_rect": [
+            32.0,
+            318.0,
+            304.0,
+            188.0
+          ],
+          "id": "attributes",
+          "image_rect": [
+            32.0,
+            318.0,
+            304.0,
+            188.0
+          ],
+          "local_size": [
+            304.0,
+            188.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/@Control@267/BottomHudComposition/BottomRow/CharacterHudPanel/InspectionPanel",
+          "sha256": "a92211a367ca8d91514088b0e6eaf4837751f45ac5abf417cd167efaada08a2e",
+          "source_sha256": "4a393a411c4959d004cca2a330756f463b68777345fc8e9565f3e59a54c0294f"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Regular",
+      "file": "font-forecast-1280x720.png",
+      "sha256": "5d93f8509c3c3a6f649668056e82e20108fe06fd5276271b1b2a219639a2492b",
+      "frame": 232,
+      "image_size": [
+        1280,
+        720
+      ],
+      "cjk_hashes": [
+        "241e7ebc37926a6a893771a8d0f2f375e385b44d9e8d400553402968a111531b",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            32,
+            596,
+            226,
+            108
+          ],
+          "file": "font-forecast-1280x720-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/@Control@267/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "eb031fc08af23cf537aa914c4ad32712e79e3dbc6f89cf5f30eeeba5f89f4a72",
+          "source_sha256": "5d93f8509c3c3a6f649668056e82e20108fe06fd5276271b1b2a219639a2492b"
+        },
+        {
+          "crop_rect": [
+            1080,
+            16,
+            180,
+            132
+          ],
+          "file": "font-forecast-1280x720-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "9b524db6f97f1055b5be627bd56be3109776bf7030cb7b3cfe23caaf95d921b5",
+          "source_sha256": "5d93f8509c3c3a6f649668056e82e20108fe06fd5276271b1b2a219639a2492b"
+        },
+        {
+          "crop_rect": [
+            420,
+            60,
+            181,
+            105
+          ],
+          "file": "font-forecast-1280x720-forecast.png",
+          "global_rect": [
+            420.559997558594,
+            60.0400085449219,
+            180.0,
+            104.0
+          ],
+          "id": "forecast",
+          "image_rect": [
+            420.559997558594,
+            60.0400085449219,
+            180.0,
+            104.0
+          ],
+          "local_size": [
+            180.0,
+            104.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/@CanvasLayer@268/@Control@269",
+          "sha256": "cbbfbb32b30045975b1f694d9f3c684a311187511a4999659b74309d56d3f296",
+          "source_sha256": "5d93f8509c3c3a6f649668056e82e20108fe06fd5276271b1b2a219639a2492b"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Regular",
+      "file": "font-normal-1920x1080.png",
+      "sha256": "7cbc4d42c6c29ec771c57c0993ba3e90e520f3f5dc8e4c42e128805706a9e823",
+      "frame": 312,
+      "image_size": [
+        1920,
+        1080
+      ],
+      "cjk_hashes": [
+        "241e7ebc37926a6a893771a8d0f2f375e385b44d9e8d400553402968a111531b",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            48,
+            894,
+            339,
+            162
+          ],
+          "file": "font-normal-1920x1080-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            48.0,
+            894.0,
+            339.0,
+            162.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/@Control@759/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "b5008dcafbf6e32f01dd7eacef1aeb459711b8ec83c67f39665dc8925646c0bf",
+          "source_sha256": "7cbc4d42c6c29ec771c57c0993ba3e90e520f3f5dc8e4c42e128805706a9e823"
+        },
+        {
+          "crop_rect": [
+            1620,
+            24,
+            270,
+            198
+          ],
+          "file": "font-normal-1920x1080-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            1620.0,
+            24.0,
+            270.0,
+            198.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "738235fa48d1698792a4279b7b91ef3082da50fa40c56956bf30da15ef02090e",
+          "source_sha256": "7cbc4d42c6c29ec771c57c0993ba3e90e520f3f5dc8e4c42e128805706a9e823"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Regular",
+      "file": "font-skill-tooltip-1920x1080.png",
+      "sha256": "774db0eb2d478cd4a5721fcfcc29c9fd77185b2e3ac3b9273f10cd8610f8c714",
+      "frame": 414,
+      "image_size": [
+        1920,
+        1080
+      ],
+      "cjk_hashes": [
+        "241e7ebc37926a6a893771a8d0f2f375e385b44d9e8d400553402968a111531b",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            48,
+            894,
+            339,
+            162
+          ],
+          "file": "font-skill-tooltip-1920x1080-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            48.0,
+            894.0,
+            339.0,
+            162.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/@Control@759/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "b5008dcafbf6e32f01dd7eacef1aeb459711b8ec83c67f39665dc8925646c0bf",
+          "source_sha256": "774db0eb2d478cd4a5721fcfcc29c9fd77185b2e3ac3b9273f10cd8610f8c714"
+        },
+        {
+          "crop_rect": [
+            1620,
+            24,
+            270,
+            198
+          ],
+          "file": "font-skill-tooltip-1920x1080-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            1620.0,
+            24.0,
+            270.0,
+            198.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "738235fa48d1698792a4279b7b91ef3082da50fa40c56956bf30da15ef02090e",
+          "source_sha256": "774db0eb2d478cd4a5721fcfcc29c9fd77185b2e3ac3b9273f10cd8610f8c714"
+        },
+        {
+          "crop_rect": [
+            657,
+            657,
+            390,
+            156
+          ],
+          "file": "font-skill-tooltip-1920x1080-tooltip.png",
+          "global_rect": [
+            438.0,
+            438.0,
+            260.0,
+            104.0
+          ],
+          "id": "tooltip",
+          "image_rect": [
+            657.0,
+            657.0,
+            390.0,
+            156.0
+          ],
+          "local_size": [
+            260.0,
+            104.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/@Control@759/BottomHudComposition/BottomRow/SkillShelf/SlotsCenter/Slots/@Button@782/InspectionPanel",
+          "sha256": "48baf8b9bbf82eadf1557bd260551c1cc4a0af7ab9d9b21bc9937717fbf10ad0",
+          "source_sha256": "774db0eb2d478cd4a5721fcfcc29c9fd77185b2e3ac3b9273f10cd8610f8c714"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Regular",
+      "file": "font-portrait-inspection-1920x1080.png",
+      "sha256": "2ea1d1abbde6fa8fcdb6baee3e977d1a8206f0269859eb2191dfb712028df7ca",
+      "frame": 444,
+      "image_size": [
+        1920,
+        1080
+      ],
+      "cjk_hashes": [
+        "241e7ebc37926a6a893771a8d0f2f375e385b44d9e8d400553402968a111531b",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            48,
+            894,
+            339,
+            162
+          ],
+          "file": "font-portrait-inspection-1920x1080-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            48.0,
+            894.0,
+            339.0,
+            162.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/@Control@759/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "b5008dcafbf6e32f01dd7eacef1aeb459711b8ec83c67f39665dc8925646c0bf",
+          "source_sha256": "2ea1d1abbde6fa8fcdb6baee3e977d1a8206f0269859eb2191dfb712028df7ca"
+        },
+        {
+          "crop_rect": [
+            1620,
+            24,
+            270,
+            198
+          ],
+          "file": "font-portrait-inspection-1920x1080-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            1620.0,
+            24.0,
+            270.0,
+            198.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "738235fa48d1698792a4279b7b91ef3082da50fa40c56956bf30da15ef02090e",
+          "source_sha256": "2ea1d1abbde6fa8fcdb6baee3e977d1a8206f0269859eb2191dfb712028df7ca"
+        },
+        {
+          "crop_rect": [
+            48,
+            477,
+            456,
+            282
+          ],
+          "file": "font-portrait-inspection-1920x1080-attributes.png",
+          "global_rect": [
+            32.0,
+            318.0,
+            304.0,
+            188.0
+          ],
+          "id": "attributes",
+          "image_rect": [
+            48.0,
+            477.0,
+            456.0,
+            282.0
+          ],
+          "local_size": [
+            304.0,
+            188.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/@Control@759/BottomHudComposition/BottomRow/CharacterHudPanel/InspectionPanel",
+          "sha256": "0494e78401d8cbb98609f5a693d239284b63765895a40e23e653dda49d30bfc4",
+          "source_sha256": "2ea1d1abbde6fa8fcdb6baee3e977d1a8206f0269859eb2191dfb712028df7ca"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Regular",
+      "file": "font-forecast-1920x1080.png",
+      "sha256": "e2c32a9b29875f74fbc2278b36c666d419814dfcb80851eeaa3ad0d700b24dd1",
+      "frame": 468,
+      "image_size": [
+        1920,
+        1080
+      ],
+      "cjk_hashes": [
+        "241e7ebc37926a6a893771a8d0f2f375e385b44d9e8d400553402968a111531b",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            48,
+            894,
+            339,
+            162
+          ],
+          "file": "font-forecast-1920x1080-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            48.0,
+            894.0,
+            339.0,
+            162.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/@Control@759/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "b5008dcafbf6e32f01dd7eacef1aeb459711b8ec83c67f39665dc8925646c0bf",
+          "source_sha256": "e2c32a9b29875f74fbc2278b36c666d419814dfcb80851eeaa3ad0d700b24dd1"
+        },
+        {
+          "crop_rect": [
+            1620,
+            24,
+            270,
+            198
+          ],
+          "file": "font-forecast-1920x1080-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            1620.0,
+            24.0,
+            270.0,
+            198.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "738235fa48d1698792a4279b7b91ef3082da50fa40c56956bf30da15ef02090e",
+          "source_sha256": "e2c32a9b29875f74fbc2278b36c666d419814dfcb80851eeaa3ad0d700b24dd1"
+        },
+        {
+          "crop_rect": [
+            630,
+            90,
+            271,
+            157
+          ],
+          "file": "font-forecast-1920x1080-forecast.png",
+          "global_rect": [
+            420.559997558594,
+            60.0400085449219,
+            180.0,
+            104.0
+          ],
+          "id": "forecast",
+          "image_rect": [
+            630.839965820313,
+            90.0600128173828,
+            270.0,
+            156.0
+          ],
+          "local_size": [
+            180.0,
+            104.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/@CanvasLayer@760/@Control@761",
+          "sha256": "1017f860038e2aea5f15325abb0849778c18fc03703abb305c70848259e47316",
+          "source_sha256": "e2c32a9b29875f74fbc2278b36c666d419814dfcb80851eeaa3ad0d700b24dd1"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Regular",
+      "file": "font-normal-2560x1440.png",
+      "sha256": "ff0009797cdbedb3fe2297a65934540c076934f2a06fc0ec70a8c60e8a3ba93c",
+      "frame": 548,
+      "image_size": [
+        2560,
+        1440
+      ],
+      "cjk_hashes": [
+        "241e7ebc37926a6a893771a8d0f2f375e385b44d9e8d400553402968a111531b",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            64,
+            1192,
+            452,
+            216
+          ],
+          "file": "font-normal-2560x1440-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            64.0,
+            1192.0,
+            452.0,
+            216.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/@Control@1251/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "5d76125645a11fa94490586a333eca94aa78be3718d40fb6c30ebc02e23b187c",
+          "source_sha256": "ff0009797cdbedb3fe2297a65934540c076934f2a06fc0ec70a8c60e8a3ba93c"
+        },
+        {
+          "crop_rect": [
+            2160,
+            32,
+            360,
+            264
+          ],
+          "file": "font-normal-2560x1440-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            2160.0,
+            32.0,
+            360.0,
+            264.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "6e795d0f3ccf44c1b7c03ebbf5e9d0c0cadf46c550c2ae6b20fd511285cdc5b3",
+          "source_sha256": "ff0009797cdbedb3fe2297a65934540c076934f2a06fc0ec70a8c60e8a3ba93c"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Regular",
+      "file": "font-skill-tooltip-2560x1440.png",
+      "sha256": "14b386454ee896bfc67de8f3b5532bd50d91b48a4f2e3d492a330719d2276e87",
+      "frame": 650,
+      "image_size": [
+        2560,
+        1440
+      ],
+      "cjk_hashes": [
+        "241e7ebc37926a6a893771a8d0f2f375e385b44d9e8d400553402968a111531b",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            64,
+            1192,
+            452,
+            216
+          ],
+          "file": "font-skill-tooltip-2560x1440-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            64.0,
+            1192.0,
+            452.0,
+            216.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/@Control@1251/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "5d76125645a11fa94490586a333eca94aa78be3718d40fb6c30ebc02e23b187c",
+          "source_sha256": "14b386454ee896bfc67de8f3b5532bd50d91b48a4f2e3d492a330719d2276e87"
+        },
+        {
+          "crop_rect": [
+            2160,
+            32,
+            360,
+            264
+          ],
+          "file": "font-skill-tooltip-2560x1440-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            2160.0,
+            32.0,
+            360.0,
+            264.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "6e795d0f3ccf44c1b7c03ebbf5e9d0c0cadf46c550c2ae6b20fd511285cdc5b3",
+          "source_sha256": "14b386454ee896bfc67de8f3b5532bd50d91b48a4f2e3d492a330719d2276e87"
+        },
+        {
+          "crop_rect": [
+            876,
+            876,
+            520,
+            208
+          ],
+          "file": "font-skill-tooltip-2560x1440-tooltip.png",
+          "global_rect": [
+            438.0,
+            438.0,
+            260.0,
+            104.0
+          ],
+          "id": "tooltip",
+          "image_rect": [
+            876.0,
+            876.0,
+            520.0,
+            208.0
+          ],
+          "local_size": [
+            260.0,
+            104.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/@Control@1251/BottomHudComposition/BottomRow/SkillShelf/SlotsCenter/Slots/@Button@1274/InspectionPanel",
+          "sha256": "c42f7efe66fbb38c6098721651848622bc264cd06d60091d7523d052373fa2b9",
+          "source_sha256": "14b386454ee896bfc67de8f3b5532bd50d91b48a4f2e3d492a330719d2276e87"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Regular",
+      "file": "font-portrait-inspection-2560x1440.png",
+      "sha256": "3f33cd8c7e51e4065047ff85bcb6939baed01dbfbe2a5dee87750187a2611c3a",
+      "frame": 680,
+      "image_size": [
+        2560,
+        1440
+      ],
+      "cjk_hashes": [
+        "241e7ebc37926a6a893771a8d0f2f375e385b44d9e8d400553402968a111531b",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            64,
+            1192,
+            452,
+            216
+          ],
+          "file": "font-portrait-inspection-2560x1440-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            64.0,
+            1192.0,
+            452.0,
+            216.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/@Control@1251/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "5d76125645a11fa94490586a333eca94aa78be3718d40fb6c30ebc02e23b187c",
+          "source_sha256": "3f33cd8c7e51e4065047ff85bcb6939baed01dbfbe2a5dee87750187a2611c3a"
+        },
+        {
+          "crop_rect": [
+            2160,
+            32,
+            360,
+            264
+          ],
+          "file": "font-portrait-inspection-2560x1440-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            2160.0,
+            32.0,
+            360.0,
+            264.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "6e795d0f3ccf44c1b7c03ebbf5e9d0c0cadf46c550c2ae6b20fd511285cdc5b3",
+          "source_sha256": "3f33cd8c7e51e4065047ff85bcb6939baed01dbfbe2a5dee87750187a2611c3a"
+        },
+        {
+          "crop_rect": [
+            64,
+            636,
+            608,
+            376
+          ],
+          "file": "font-portrait-inspection-2560x1440-attributes.png",
+          "global_rect": [
+            32.0,
+            318.0,
+            304.0,
+            188.0
+          ],
+          "id": "attributes",
+          "image_rect": [
+            64.0,
+            636.0,
+            608.0,
+            376.0
+          ],
+          "local_size": [
+            304.0,
+            188.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/@Control@1251/BottomHudComposition/BottomRow/CharacterHudPanel/InspectionPanel",
+          "sha256": "9f640521134161b6c593e26c60a3d221c35854ea59292905450ffe491ca5e8b9",
+          "source_sha256": "3f33cd8c7e51e4065047ff85bcb6939baed01dbfbe2a5dee87750187a2611c3a"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Regular",
+      "file": "font-forecast-2560x1440.png",
+      "sha256": "448917e0fe17624325d3c4ba0eaaa0c94898a1a31dada560760634d313717af2",
+      "frame": 704,
+      "image_size": [
+        2560,
+        1440
+      ],
+      "cjk_hashes": [
+        "241e7ebc37926a6a893771a8d0f2f375e385b44d9e8d400553402968a111531b",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            64,
+            1192,
+            452,
+            216
+          ],
+          "file": "font-forecast-2560x1440-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            64.0,
+            1192.0,
+            452.0,
+            216.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/@Control@1251/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "5d76125645a11fa94490586a333eca94aa78be3718d40fb6c30ebc02e23b187c",
+          "source_sha256": "448917e0fe17624325d3c4ba0eaaa0c94898a1a31dada560760634d313717af2"
+        },
+        {
+          "crop_rect": [
+            2160,
+            32,
+            360,
+            264
+          ],
+          "file": "font-forecast-2560x1440-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            2160.0,
+            32.0,
+            360.0,
+            264.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "6e795d0f3ccf44c1b7c03ebbf5e9d0c0cadf46c550c2ae6b20fd511285cdc5b3",
+          "source_sha256": "448917e0fe17624325d3c4ba0eaaa0c94898a1a31dada560760634d313717af2"
+        },
+        {
+          "crop_rect": [
+            841,
+            120,
+            361,
+            209
+          ],
+          "file": "font-forecast-2560x1440-forecast.png",
+          "global_rect": [
+            420.559997558594,
+            60.0400085449219,
+            180.0,
+            104.0
+          ],
+          "id": "forecast",
+          "image_rect": [
+            841.119995117188,
+            120.080017089844,
+            360.0,
+            208.0
+          ],
+          "local_size": [
+            180.0,
+            104.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/@CanvasLayer@1252/@Control@1253",
+          "sha256": "cc972c217e67dd9b74db8585a9b21153a48212c53bfae176590a16086963aea0",
+          "source_sha256": "448917e0fe17624325d3c4ba0eaaa0c94898a1a31dada560760634d313717af2"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Medium",
+      "file": "font-normal-1280x720.png",
+      "sha256": "be5166581166ce0fcb99d01051f88c3b8f7eb4537f74e1c12d4e5a7a4bb060d6",
+      "frame": 76,
+      "image_size": [
+        1280,
+        720
+      ],
+      "cjk_hashes": [
+        "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            32,
+            596,
+            226,
+            108
+          ],
+          "file": "font-normal-1280x720-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/@Control@267/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "eee867588623469311dc7ef886b9d23c437cd4867651a62490a2440fa6c81711",
+          "source_sha256": "be5166581166ce0fcb99d01051f88c3b8f7eb4537f74e1c12d4e5a7a4bb060d6"
+        },
+        {
+          "crop_rect": [
+            1080,
+            16,
+            180,
+            132
+          ],
+          "file": "font-normal-1280x720-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "13e5f53f8e453cf27680e6316802ebbf75ec8191fda912f361ea01d02e05c68d",
+          "source_sha256": "be5166581166ce0fcb99d01051f88c3b8f7eb4537f74e1c12d4e5a7a4bb060d6"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Medium",
+      "file": "font-skill-tooltip-1280x720.png",
+      "sha256": "28f97408afb7949c1978f565c4a691acc62a4551c875655bd65425b9e001c67a",
+      "frame": 178,
+      "image_size": [
+        1280,
+        720
+      ],
+      "cjk_hashes": [
+        "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            32,
+            596,
+            226,
+            108
+          ],
+          "file": "font-skill-tooltip-1280x720-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/@Control@267/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "eee867588623469311dc7ef886b9d23c437cd4867651a62490a2440fa6c81711",
+          "source_sha256": "28f97408afb7949c1978f565c4a691acc62a4551c875655bd65425b9e001c67a"
+        },
+        {
+          "crop_rect": [
+            1080,
+            16,
+            180,
+            132
+          ],
+          "file": "font-skill-tooltip-1280x720-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "13e5f53f8e453cf27680e6316802ebbf75ec8191fda912f361ea01d02e05c68d",
+          "source_sha256": "28f97408afb7949c1978f565c4a691acc62a4551c875655bd65425b9e001c67a"
+        },
+        {
+          "crop_rect": [
+            438,
+            438,
+            260,
+            104
+          ],
+          "file": "font-skill-tooltip-1280x720-tooltip.png",
+          "global_rect": [
+            438.0,
+            438.0,
+            260.0,
+            104.0
+          ],
+          "id": "tooltip",
+          "image_rect": [
+            438.0,
+            438.0,
+            260.0,
+            104.0
+          ],
+          "local_size": [
+            260.0,
+            104.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/@Control@267/BottomHudComposition/BottomRow/SkillShelf/SlotsCenter/Slots/@Button@290/InspectionPanel",
+          "sha256": "d711a0eea8dba7a2367b384bf3b369c8e90383276e493d6eb030e4241d31280b",
+          "source_sha256": "28f97408afb7949c1978f565c4a691acc62a4551c875655bd65425b9e001c67a"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Medium",
+      "file": "font-portrait-inspection-1280x720.png",
+      "sha256": "29acc444d6856c3efbdf02dfea8a42c5d40fb6fc16c1ada7099dde96f0030623",
+      "frame": 208,
+      "image_size": [
+        1280,
+        720
+      ],
+      "cjk_hashes": [
+        "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            32,
+            596,
+            226,
+            108
+          ],
+          "file": "font-portrait-inspection-1280x720-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/@Control@267/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "eee867588623469311dc7ef886b9d23c437cd4867651a62490a2440fa6c81711",
+          "source_sha256": "29acc444d6856c3efbdf02dfea8a42c5d40fb6fc16c1ada7099dde96f0030623"
+        },
+        {
+          "crop_rect": [
+            1080,
+            16,
+            180,
+            132
+          ],
+          "file": "font-portrait-inspection-1280x720-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "13e5f53f8e453cf27680e6316802ebbf75ec8191fda912f361ea01d02e05c68d",
+          "source_sha256": "29acc444d6856c3efbdf02dfea8a42c5d40fb6fc16c1ada7099dde96f0030623"
+        },
+        {
+          "crop_rect": [
+            32,
+            318,
+            304,
+            188
+          ],
+          "file": "font-portrait-inspection-1280x720-attributes.png",
+          "global_rect": [
+            32.0,
+            318.0,
+            304.0,
+            188.0
+          ],
+          "id": "attributes",
+          "image_rect": [
+            32.0,
+            318.0,
+            304.0,
+            188.0
+          ],
+          "local_size": [
+            304.0,
+            188.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/@Control@267/BottomHudComposition/BottomRow/CharacterHudPanel/InspectionPanel",
+          "sha256": "fb488a83b8cb869c5bf9d93deb709602f23c6a54d39679879e9844fb0cd954a1",
+          "source_sha256": "29acc444d6856c3efbdf02dfea8a42c5d40fb6fc16c1ada7099dde96f0030623"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Medium",
+      "file": "font-forecast-1280x720.png",
+      "sha256": "dfda49eccdf065223d9c0455c6d23fc35989beb36140a6fa7b15ea865780ae61",
+      "frame": 232,
+      "image_size": [
+        1280,
+        720
+      ],
+      "cjk_hashes": [
+        "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            32,
+            596,
+            226,
+            108
+          ],
+          "file": "font-forecast-1280x720-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/@Control@267/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "eee867588623469311dc7ef886b9d23c437cd4867651a62490a2440fa6c81711",
+          "source_sha256": "dfda49eccdf065223d9c0455c6d23fc35989beb36140a6fa7b15ea865780ae61"
+        },
+        {
+          "crop_rect": [
+            1080,
+            16,
+            180,
+            132
+          ],
+          "file": "font-forecast-1280x720-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "13e5f53f8e453cf27680e6316802ebbf75ec8191fda912f361ea01d02e05c68d",
+          "source_sha256": "dfda49eccdf065223d9c0455c6d23fc35989beb36140a6fa7b15ea865780ae61"
+        },
+        {
+          "crop_rect": [
+            420,
+            60,
+            181,
+            105
+          ],
+          "file": "font-forecast-1280x720-forecast.png",
+          "global_rect": [
+            420.559997558594,
+            60.0400085449219,
+            180.0,
+            104.0
+          ],
+          "id": "forecast",
+          "image_rect": [
+            420.559997558594,
+            60.0400085449219,
+            180.0,
+            104.0
+          ],
+          "local_size": [
+            180.0,
+            104.0
+          ],
+          "node": "/root/@Node2D@2/TacticalScene/@CanvasLayer@268/@Control@269",
+          "sha256": "ba3fb244e769eacf6436dccee9baecf0fbbe946cf4e9ae42b37d2e6a2e1ab2b0",
+          "source_sha256": "dfda49eccdf065223d9c0455c6d23fc35989beb36140a6fa7b15ea865780ae61"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Medium",
+      "file": "font-normal-1920x1080.png",
+      "sha256": "db66fae71dba0c68b7c16d55faa79c710b08ebb31e4512c0c0603590d365aedf",
+      "frame": 312,
+      "image_size": [
+        1920,
+        1080
+      ],
+      "cjk_hashes": [
+        "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            48,
+            894,
+            339,
+            162
+          ],
+          "file": "font-normal-1920x1080-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            48.0,
+            894.0,
+            339.0,
+            162.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/@Control@759/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "ae9f0edb9893f831bd8c495d799daafc3ef20cb35043413b5f4f066b2cc2b4d6",
+          "source_sha256": "db66fae71dba0c68b7c16d55faa79c710b08ebb31e4512c0c0603590d365aedf"
+        },
+        {
+          "crop_rect": [
+            1620,
+            24,
+            270,
+            198
+          ],
+          "file": "font-normal-1920x1080-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            1620.0,
+            24.0,
+            270.0,
+            198.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "4fdeafd26affbecba4a60c16bff54860435d88f847cc21b3d08b092c0b9b58b6",
+          "source_sha256": "db66fae71dba0c68b7c16d55faa79c710b08ebb31e4512c0c0603590d365aedf"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Medium",
+      "file": "font-skill-tooltip-1920x1080.png",
+      "sha256": "4d07aafc08280638e9dab59353eb3b2892728dc0bae03ea53507497b14b9e881",
+      "frame": 414,
+      "image_size": [
+        1920,
+        1080
+      ],
+      "cjk_hashes": [
+        "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            48,
+            894,
+            339,
+            162
+          ],
+          "file": "font-skill-tooltip-1920x1080-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            48.0,
+            894.0,
+            339.0,
+            162.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/@Control@759/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "ae9f0edb9893f831bd8c495d799daafc3ef20cb35043413b5f4f066b2cc2b4d6",
+          "source_sha256": "4d07aafc08280638e9dab59353eb3b2892728dc0bae03ea53507497b14b9e881"
+        },
+        {
+          "crop_rect": [
+            1620,
+            24,
+            270,
+            198
+          ],
+          "file": "font-skill-tooltip-1920x1080-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            1620.0,
+            24.0,
+            270.0,
+            198.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "4fdeafd26affbecba4a60c16bff54860435d88f847cc21b3d08b092c0b9b58b6",
+          "source_sha256": "4d07aafc08280638e9dab59353eb3b2892728dc0bae03ea53507497b14b9e881"
+        },
+        {
+          "crop_rect": [
+            657,
+            657,
+            390,
+            156
+          ],
+          "file": "font-skill-tooltip-1920x1080-tooltip.png",
+          "global_rect": [
+            438.0,
+            438.0,
+            260.0,
+            104.0
+          ],
+          "id": "tooltip",
+          "image_rect": [
+            657.0,
+            657.0,
+            390.0,
+            156.0
+          ],
+          "local_size": [
+            260.0,
+            104.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/@Control@759/BottomHudComposition/BottomRow/SkillShelf/SlotsCenter/Slots/@Button@782/InspectionPanel",
+          "sha256": "ca288a01f2d69276385c0c7da5eaed0d3507dfc9bfaf4a327111c81fd2f7cc6f",
+          "source_sha256": "4d07aafc08280638e9dab59353eb3b2892728dc0bae03ea53507497b14b9e881"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Medium",
+      "file": "font-portrait-inspection-1920x1080.png",
+      "sha256": "bc80663b0929f70c25444e990f2cdea8e1930e8ebc35bc156dc8aac58460ab30",
+      "frame": 444,
+      "image_size": [
+        1920,
+        1080
+      ],
+      "cjk_hashes": [
+        "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            48,
+            894,
+            339,
+            162
+          ],
+          "file": "font-portrait-inspection-1920x1080-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            48.0,
+            894.0,
+            339.0,
+            162.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/@Control@759/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "ae9f0edb9893f831bd8c495d799daafc3ef20cb35043413b5f4f066b2cc2b4d6",
+          "source_sha256": "bc80663b0929f70c25444e990f2cdea8e1930e8ebc35bc156dc8aac58460ab30"
+        },
+        {
+          "crop_rect": [
+            1620,
+            24,
+            270,
+            198
+          ],
+          "file": "font-portrait-inspection-1920x1080-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            1620.0,
+            24.0,
+            270.0,
+            198.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "4fdeafd26affbecba4a60c16bff54860435d88f847cc21b3d08b092c0b9b58b6",
+          "source_sha256": "bc80663b0929f70c25444e990f2cdea8e1930e8ebc35bc156dc8aac58460ab30"
+        },
+        {
+          "crop_rect": [
+            48,
+            477,
+            456,
+            282
+          ],
+          "file": "font-portrait-inspection-1920x1080-attributes.png",
+          "global_rect": [
+            32.0,
+            318.0,
+            304.0,
+            188.0
+          ],
+          "id": "attributes",
+          "image_rect": [
+            48.0,
+            477.0,
+            456.0,
+            282.0
+          ],
+          "local_size": [
+            304.0,
+            188.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/@Control@759/BottomHudComposition/BottomRow/CharacterHudPanel/InspectionPanel",
+          "sha256": "0f82b23c10e35cceb2531b94eb41e730a21d56f2e3ca882b67fd36b1d38ceb02",
+          "source_sha256": "bc80663b0929f70c25444e990f2cdea8e1930e8ebc35bc156dc8aac58460ab30"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Medium",
+      "file": "font-forecast-1920x1080.png",
+      "sha256": "bd8ce56116d1b21ec4ed6d20f731a9e6f3f2d0b914ffd11da68eb5bc030e0ad9",
+      "frame": 468,
+      "image_size": [
+        1920,
+        1080
+      ],
+      "cjk_hashes": [
+        "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            48,
+            894,
+            339,
+            162
+          ],
+          "file": "font-forecast-1920x1080-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            48.0,
+            894.0,
+            339.0,
+            162.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/@Control@759/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "ae9f0edb9893f831bd8c495d799daafc3ef20cb35043413b5f4f066b2cc2b4d6",
+          "source_sha256": "bd8ce56116d1b21ec4ed6d20f731a9e6f3f2d0b914ffd11da68eb5bc030e0ad9"
+        },
+        {
+          "crop_rect": [
+            1620,
+            24,
+            270,
+            198
+          ],
+          "file": "font-forecast-1920x1080-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            1620.0,
+            24.0,
+            270.0,
+            198.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "4fdeafd26affbecba4a60c16bff54860435d88f847cc21b3d08b092c0b9b58b6",
+          "source_sha256": "bd8ce56116d1b21ec4ed6d20f731a9e6f3f2d0b914ffd11da68eb5bc030e0ad9"
+        },
+        {
+          "crop_rect": [
+            630,
+            90,
+            271,
+            157
+          ],
+          "file": "font-forecast-1920x1080-forecast.png",
+          "global_rect": [
+            420.559997558594,
+            60.0400085449219,
+            180.0,
+            104.0
+          ],
+          "id": "forecast",
+          "image_rect": [
+            630.839965820313,
+            90.0600128173828,
+            270.0,
+            156.0
+          ],
+          "local_size": [
+            180.0,
+            104.0
+          ],
+          "node": "/root/@Node2D@494/TacticalScene/@CanvasLayer@760/@Control@761",
+          "sha256": "52747f3b8eeb0ec9413bd9e1a0e101a63b6e37149d678cc7d41d55a220bef760",
+          "source_sha256": "bd8ce56116d1b21ec4ed6d20f731a9e6f3f2d0b914ffd11da68eb5bc030e0ad9"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Medium",
+      "file": "font-normal-2560x1440.png",
+      "sha256": "b0d78f6c60164253e5689d4951ae8941ac3e561a089c286a9328ac51eb3db501",
+      "frame": 548,
+      "image_size": [
+        2560,
+        1440
+      ],
+      "cjk_hashes": [
+        "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            64,
+            1192,
+            452,
+            216
+          ],
+          "file": "font-normal-2560x1440-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            64.0,
+            1192.0,
+            452.0,
+            216.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/@Control@1251/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "05e8d01162da118ffaa0f73b3bdc75009cdd9393958f1a7401bee3bafa2a1aae",
+          "source_sha256": "b0d78f6c60164253e5689d4951ae8941ac3e561a089c286a9328ac51eb3db501"
+        },
+        {
+          "crop_rect": [
+            2160,
+            32,
+            360,
+            264
+          ],
+          "file": "font-normal-2560x1440-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            2160.0,
+            32.0,
+            360.0,
+            264.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "b5dc834dcfcd41554e3223e16f03a35408d3f9654da786ff992e061ffbb18247",
+          "source_sha256": "b0d78f6c60164253e5689d4951ae8941ac3e561a089c286a9328ac51eb3db501"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Medium",
+      "file": "font-skill-tooltip-2560x1440.png",
+      "sha256": "1e1cd84b417e6dd198d3798743b16dcaed06fb7033d2214fe7d7946db18ef089",
+      "frame": 650,
+      "image_size": [
+        2560,
+        1440
+      ],
+      "cjk_hashes": [
+        "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            64,
+            1192,
+            452,
+            216
+          ],
+          "file": "font-skill-tooltip-2560x1440-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            64.0,
+            1192.0,
+            452.0,
+            216.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/@Control@1251/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "05e8d01162da118ffaa0f73b3bdc75009cdd9393958f1a7401bee3bafa2a1aae",
+          "source_sha256": "1e1cd84b417e6dd198d3798743b16dcaed06fb7033d2214fe7d7946db18ef089"
+        },
+        {
+          "crop_rect": [
+            2160,
+            32,
+            360,
+            264
+          ],
+          "file": "font-skill-tooltip-2560x1440-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            2160.0,
+            32.0,
+            360.0,
+            264.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "b5dc834dcfcd41554e3223e16f03a35408d3f9654da786ff992e061ffbb18247",
+          "source_sha256": "1e1cd84b417e6dd198d3798743b16dcaed06fb7033d2214fe7d7946db18ef089"
+        },
+        {
+          "crop_rect": [
+            876,
+            876,
+            520,
+            208
+          ],
+          "file": "font-skill-tooltip-2560x1440-tooltip.png",
+          "global_rect": [
+            438.0,
+            438.0,
+            260.0,
+            104.0
+          ],
+          "id": "tooltip",
+          "image_rect": [
+            876.0,
+            876.0,
+            520.0,
+            208.0
+          ],
+          "local_size": [
+            260.0,
+            104.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/@Control@1251/BottomHudComposition/BottomRow/SkillShelf/SlotsCenter/Slots/@Button@1274/InspectionPanel",
+          "sha256": "5bfa4a8057c7ecc544ea4a087797be0b553e33abf164430884939f748506a0e1",
+          "source_sha256": "1e1cd84b417e6dd198d3798743b16dcaed06fb7033d2214fe7d7946db18ef089"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Medium",
+      "file": "font-portrait-inspection-2560x1440.png",
+      "sha256": "5b953c42612cbae3fd63ba918552f5d3c85b84454d5d03c68350285765e61f52",
+      "frame": 680,
+      "image_size": [
+        2560,
+        1440
+      ],
+      "cjk_hashes": [
+        "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            64,
+            1192,
+            452,
+            216
+          ],
+          "file": "font-portrait-inspection-2560x1440-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            64.0,
+            1192.0,
+            452.0,
+            216.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/@Control@1251/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "05e8d01162da118ffaa0f73b3bdc75009cdd9393958f1a7401bee3bafa2a1aae",
+          "source_sha256": "5b953c42612cbae3fd63ba918552f5d3c85b84454d5d03c68350285765e61f52"
+        },
+        {
+          "crop_rect": [
+            2160,
+            32,
+            360,
+            264
+          ],
+          "file": "font-portrait-inspection-2560x1440-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            2160.0,
+            32.0,
+            360.0,
+            264.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "b5dc834dcfcd41554e3223e16f03a35408d3f9654da786ff992e061ffbb18247",
+          "source_sha256": "5b953c42612cbae3fd63ba918552f5d3c85b84454d5d03c68350285765e61f52"
+        },
+        {
+          "crop_rect": [
+            64,
+            636,
+            608,
+            376
+          ],
+          "file": "font-portrait-inspection-2560x1440-attributes.png",
+          "global_rect": [
+            32.0,
+            318.0,
+            304.0,
+            188.0
+          ],
+          "id": "attributes",
+          "image_rect": [
+            64.0,
+            636.0,
+            608.0,
+            376.0
+          ],
+          "local_size": [
+            304.0,
+            188.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/@Control@1251/BottomHudComposition/BottomRow/CharacterHudPanel/InspectionPanel",
+          "sha256": "b8aab007671428b5728cd98d994fadfc2042eb2b7a8f0da724201eb625f7097f",
+          "source_sha256": "5b953c42612cbae3fd63ba918552f5d3c85b84454d5d03c68350285765e61f52"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "weight": "Medium",
+      "file": "font-forecast-2560x1440.png",
+      "sha256": "ba0329ef5887561371cf81e9d068f17038ebd29ef050582c3afa90741a0f5424",
+      "frame": 704,
+      "image_size": [
+        2560,
+        1440
+      ],
+      "cjk_hashes": [
+        "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101",
+        "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4"
+      ],
+      "regions": [
+        {
+          "crop_rect": [
+            64,
+            1192,
+            452,
+            216
+          ],
+          "file": "font-forecast-2560x1440-character.png",
+          "global_rect": [
+            32.0,
+            596.0,
+            226.0,
+            108.0
+          ],
+          "id": "character",
+          "image_rect": [
+            64.0,
+            1192.0,
+            452.0,
+            216.0
+          ],
+          "local_size": [
+            226.0,
+            108.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/@Control@1251/BottomHudComposition/BottomRow/CharacterHudPanel",
+          "sha256": "05e8d01162da118ffaa0f73b3bdc75009cdd9393958f1a7401bee3bafa2a1aae",
+          "source_sha256": "ba0329ef5887561371cf81e9d068f17038ebd29ef050582c3afa90741a0f5424"
+        },
+        {
+          "crop_rect": [
+            2160,
+            32,
+            360,
+            264
+          ],
+          "file": "font-forecast-2560x1440-turn-order.png",
+          "global_rect": [
+            1080.0,
+            16.0,
+            180.0,
+            132.0
+          ],
+          "id": "turn-order",
+          "image_rect": [
+            2160.0,
+            32.0,
+            360.0,
+            264.0
+          ],
+          "local_size": [
+            180.0,
+            132.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/UILayer/TurnOrderBar",
+          "sha256": "b5dc834dcfcd41554e3223e16f03a35408d3f9654da786ff992e061ffbb18247",
+          "source_sha256": "ba0329ef5887561371cf81e9d068f17038ebd29ef050582c3afa90741a0f5424"
+        },
+        {
+          "crop_rect": [
+            841,
+            120,
+            361,
+            209
+          ],
+          "file": "font-forecast-2560x1440-forecast.png",
+          "global_rect": [
+            420.559997558594,
+            60.0400085449219,
+            180.0,
+            104.0
+          ],
+          "id": "forecast",
+          "image_rect": [
+            841.119995117188,
+            120.080017089844,
+            360.0,
+            208.0
+          ],
+          "local_size": [
+            180.0,
+            104.0
+          ],
+          "node": "/root/@Node2D@986/TacticalScene/@CanvasLayer@1252/@Control@1253",
+          "sha256": "f9fc7f61b999ab27bce31a39d066775e9774d885bd7bced80790a747881837b4",
+          "source_sha256": "ba0329ef5887561371cf81e9d068f17038ebd29ef050582c3afa90741a0f5424"
+        }
+      ],
+      "pass": true
+    }
+  ],
+  "same_frame_crops_checked": 66
+}

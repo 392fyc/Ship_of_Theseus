@@ -1,0 +1,146 @@
+{
+  "candidate_commit": "b0e1ca919c4bcfa3aa16fb87872f9aa986e376ff",
+  "pass": true,
+  "files": [
+    {
+      "file": "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Bold-subset.otf",
+      "captured_sha256": "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4",
+      "git_blob_sha256": "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4",
+      "exact_bytes": true,
+      "only_git_text_newline_normalization": false
+    },
+    {
+      "file": "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Medium-subset.otf",
+      "captured_sha256": "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101",
+      "git_blob_sha256": "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101",
+      "exact_bytes": true,
+      "only_git_text_newline_normalization": false
+    },
+    {
+      "file": "assets/fonts/noto_sans_cjk_sc/source.json",
+      "captured_sha256": "c4984f609034257327ec7fa47b4088a2b322a5da2f3eb6bd4faa4c9924ab68bb",
+      "git_blob_sha256": "c4984f609034257327ec7fa47b4088a2b322a5da2f3eb6bd4faa4c9924ab68bb",
+      "exact_bytes": true,
+      "only_git_text_newline_normalization": false
+    },
+    {
+      "file": "assets/ui/themes/hud_m2.tres",
+      "captured_sha256": "9cb5cfb1ae37e0d51dcb16067281057f7c05bd8ab92b46e3584d1aff2fa9fad2",
+      "git_blob_sha256": "17b5cce623130e2387477366ad3961ac232c7b70cb9d56ed849af3132701a6db",
+      "exact_bytes": false,
+      "only_git_text_newline_normalization": true
+    },
+    {
+      "file": "assets/ui/themes/hud_m2_cjk_bold_font.tres",
+      "captured_sha256": "ff54770a48c20fc571ad15b9ff7ba2e18088a9e86784e4d68e1fa944d9dd0966",
+      "git_blob_sha256": "ff54770a48c20fc571ad15b9ff7ba2e18088a9e86784e4d68e1fa944d9dd0966",
+      "exact_bytes": true,
+      "only_git_text_newline_normalization": false
+    },
+    {
+      "file": "assets/ui/themes/hud_m2_cjk_font.tres",
+      "captured_sha256": "d43507f5e829f23c8a8f93a1b7b1c225a833e7b749f3a67ae0a4aa7e5286dc78",
+      "git_blob_sha256": "d43507f5e829f23c8a8f93a1b7b1c225a833e7b749f3a67ae0a4aa7e5286dc78",
+      "exact_bytes": true,
+      "only_git_text_newline_normalization": false
+    },
+    {
+      "file": "assets/ui/themes/hud_m2_title_font.tres",
+      "captured_sha256": "2edc3b517d08e3eaca7235ee0bcc3e726b97fb91e14565dc56df01cfc0d4006e",
+      "git_blob_sha256": "2edc3b517d08e3eaca7235ee0bcc3e726b97fb91e14565dc56df01cfc0d4006e",
+      "exact_bytes": true,
+      "only_git_text_newline_normalization": false
+    },
+    {
+      "file": "scenes/tactical/hud/m2/character_hud_panel.tscn",
+      "captured_sha256": "9ec57b76acbb6e037df2daea1e8a91e732e3db6b01218b9bc933ff34faa2eb9c",
+      "git_blob_sha256": "cf98091e324b871786498ebb1abb89304d8585538651d8aee36a42190bea2f49",
+      "exact_bytes": false,
+      "only_git_text_newline_normalization": true
+    },
+    {
+      "file": "scenes/tactical/hud/m2/skill_slot_button.tscn",
+      "captured_sha256": "f670395858e50b5f3969e335378360a241a2ed58ac903779e033299622ff1692",
+      "git_blob_sha256": "a5969bdbcaa487f7370661d36a724086f698e3ad08781e83b5d53a72159866dd",
+      "exact_bytes": false,
+      "only_git_text_newline_normalization": true
+    },
+    {
+      "file": "scripts/codex/build-windows-release.ps1",
+      "captured_sha256": "df6f55080b9b0f10ac069c2cf254768fabe27c178aa9f313b87017f6b949328b",
+      "git_blob_sha256": "04b3b12d2aeba87e041b8596fba6a899b7935ee966dfd7e46f7e09fc827c9f7c",
+      "exact_bytes": false,
+      "only_git_text_newline_normalization": true
+    },
+    {
+      "file": "scripts/ui/damage_forecaster.gd",
+      "captured_sha256": "8d75d73639a253a8fceb8e0505a692e83ba877b802bca1495771c32b9432941e",
+      "git_blob_sha256": "fb294f9e06908250843983294edc66f2e4b45b4cd313aed97760590bc5e72fa4",
+      "exact_bytes": false,
+      "only_git_text_newline_normalization": true
+    },
+    {
+      "file": "scripts/ui/font_setup.gd",
+      "captured_sha256": "1b946614098dcb9708baae6fba359903bda85238d4de6144522246ecf59f29be",
+      "git_blob_sha256": "1b946614098dcb9708baae6fba359903bda85238d4de6144522246ecf59f29be",
+      "exact_bytes": true,
+      "only_git_text_newline_normalization": false
+    },
+    {
+      "file": "scripts/ui/hud/m2/hud_font_setup.gd",
+      "captured_sha256": "67038b882a0b6780f9d4e6aea22e41a51f473084d9adce05ca488fe9008a4272",
+      "git_blob_sha256": "01859665465a8ef284cb880416e50d375d055c6fe184c0aae821830033a93ff8",
+      "exact_bytes": false,
+      "only_git_text_newline_normalization": true
+    },
+    {
+      "file": "scripts/ui/hud/m2/skill_slot_button.gd",
+      "captured_sha256": "bac49ddfdb4f67a6012fcdca52812f2d13cff65b1de861c2c53b954c17796391",
+      "git_blob_sha256": "3af732037f877b9c77d37788a670b0bf1ebb2e0c9f471cd43557ac361251b55a",
+      "exact_bytes": false,
+      "only_git_text_newline_normalization": true
+    },
+    {
+      "file": "scripts/ui/turn_order_bar.gd",
+      "captured_sha256": "7870fdef03d740c73d209ec0dedf00f9c2f9b51b5131c52c7a26c976980394ef",
+      "git_blob_sha256": "95774dad191c42582b597499c507ff55dd47f9b7b71324fd13d6b9cc92ba2a1d",
+      "exact_bytes": false,
+      "only_git_text_newline_normalization": true
+    },
+    {
+      "file": "tests/claude_review/build_cr10_font_subset.py",
+      "captured_sha256": "b660bb9dc39879edacbe45ee2f08a9b38d0de6ad6fb576dbf38fd4a33705d4e9",
+      "git_blob_sha256": "b660bb9dc39879edacbe45ee2f08a9b38d0de6ad6fb576dbf38fd4a33705d4e9",
+      "exact_bytes": true,
+      "only_git_text_newline_normalization": false
+    },
+    {
+      "file": "tests/claude_review/capture_cr10_windows_weights.gd",
+      "captured_sha256": "65a7bdb5feb7877938784dd1647c28878c6d22175cc049e00d0027d78eaaa4ce",
+      "git_blob_sha256": "65a7bdb5feb7877938784dd1647c28878c6d22175cc049e00d0027d78eaaa4ce",
+      "exact_bytes": true,
+      "only_git_text_newline_normalization": false
+    },
+    {
+      "file": "tests/claude_review/cr10_font_runtime_check.gd",
+      "captured_sha256": "de30fd9d3aa2f3dc7c0b0b92b06a6ee9a14282e2389b85f809c1be08b18a11dd",
+      "git_blob_sha256": "de30fd9d3aa2f3dc7c0b0b92b06a6ee9a14282e2389b85f809c1be08b18a11dd",
+      "exact_bytes": true,
+      "only_git_text_newline_normalization": false
+    },
+    {
+      "file": "tests/claude_review/run_cr10_windows_weights.ps1",
+      "captured_sha256": "382beef85ecd7c8dc000cac3fd8bdd0840d379130e065793b51febd14bec5e32",
+      "git_blob_sha256": "382beef85ecd7c8dc000cac3fd8bdd0840d379130e065793b51febd14bec5e32",
+      "exact_bytes": true,
+      "only_git_text_newline_normalization": false
+    },
+    {
+      "file": "tests/test_hud_m2_runtime_dashboard.gd",
+      "captured_sha256": "6217e3c73786cc61f26679bf1728952251b58daec81044371739a40936b06335",
+      "git_blob_sha256": "249a495ca23b7a149e228eab525d8e3f0a4a065130b9a953cc416f18779f445e",
+      "exact_bytes": false,
+      "only_git_text_newline_normalization": true
+    }
+  ]
+}
