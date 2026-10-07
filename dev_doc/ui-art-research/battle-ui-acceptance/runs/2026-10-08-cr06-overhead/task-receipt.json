@@ -5,7 +5,7 @@
   "target_repository": "Ship_of_Theseus",
   "target_branch": "codex/ui-ux/cr06-overhead-layout",
   "target_head_before": "a66d7db0c5a040381c7b7c3ccac88141e09133d3",
-  "candidate_head": null,
+  "candidate_head": "6da2c0410d0dac9b04cccfef748baa222fc6a504",
   "candidate_binding": "candidate-binding.json",
   "contract_summary": [
     {
@@ -28,6 +28,8 @@
     "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/frame-and-layout-verification.json",
     "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/headless-evidence.json",
     "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/independent-review.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/post-commit-independent-review.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/post-commit-verification.json",
     "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/report.md",
     "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/task-receipt.json",
     "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/task.md",
@@ -63,6 +65,11 @@
       "command": "independent code and all original PNG review",
       "result": "pass",
       "evidence": "independent-review.json"
+    },
+    {
+      "command": "Git source/path readback and independent completion supplement",
+      "result": "pass",
+      "evidence": "post-commit-verification.json 与 post-commit-independent-review.json；原候选审查partial中的唯一提交门槛已通过。"
     }
   ],
   "criteria_evidence": [
@@ -121,5 +128,7 @@
   },
   "user_visual_approval": "not_recorded",
   "full_cr06_completed": false,
-  "milestone_completed": false
+  "milestone_completed": false,
+  "post_commit_verification": "post-commit-verification.json",
+  "independent_completion_review": "post-commit-independent-review.json"
 }

@@ -1,0 +1,40 @@
+{
+  "candidate_head": "6da2c0410d0dac9b04cccfef748baa222fc6a504",
+  "branch": "codex/ui-ux/cr06-overhead-layout",
+  "pass": true,
+  "source_blobs": [
+    {
+      "file": "scripts/tactical/tactical_scene.gd",
+      "git_blob": "95a0ce50b6f47e4c00463e4f10d10363ea618400"
+    },
+    {
+      "file": "scripts/units/unit.gd",
+      "git_blob": "bc33842c16757190a0177c94149c152c9c411802"
+    },
+    {
+      "file": "scripts/ui/unit_overhead_layout.gd",
+      "git_blob": "c776640e7bc909fe40a0665485419924b8d2522e"
+    },
+    {
+      "file": "tests/test_unit_overhead_layout.gd",
+      "git_blob": "0b7e1e56f4bb125cb2344167cd3ddfdda96c18d8"
+    },
+    {
+      "file": "tests/claude_review/capture_cr06_overhead.gd",
+      "git_blob": "6f017663a26007d232b64b6a26c6529d9cb1a033"
+    },
+    {
+      "file": "tests/claude_review/run_cr06_windows_overhead.ps1",
+      "git_blob": "13760f7880819712ff9e0f61bec349b67c29df08"
+    }
+  ],
+  "committed_file_count": 19,
+  "changed_paths_match_receipt": true,
+  "project_content_unchanged": true,
+  "publication": false,
+  "original_report": {
+    "file": "<仓库外证据根>/post-commit-verification.json",
+    "bytes": 1088,
+    "sha256": "950c063332a74bcb6d44d843ae21a55f32948c413649279d3adb3860394e2147"
+  }
+}

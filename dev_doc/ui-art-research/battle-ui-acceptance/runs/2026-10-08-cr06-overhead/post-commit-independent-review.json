@@ -1,0 +1,142 @@
+{
+  "schema": "sot-independent-post-commit-review/1",
+  "reviewed_at": "2026-10-08",
+  "verdict": "pass",
+  "clears_prior_partial_gate": true,
+  "gate": "local commit readback and Git candidate binding only",
+  "candidate": {
+    "commit": "6da2c0410d0dac9b04cccfef748baa222fc6a504",
+    "branch": "codex/ui-ux/cr06-overhead-layout",
+    "parent": "a66d7db0c5a040381c7b7c3ccac88141e09133d3",
+    "expected_parent": "a66d7db0c5a040381c7b7c3ccac88141e09133d3",
+    "post_commit_verification": "<仓库外证据根>\\post-commit-verification.json"
+  },
+  "checks": [
+    {
+      "criterion": "Current HEAD and branch match the reviewed candidate",
+      "verdict": "pass",
+      "evidence": "git rev-parse HEAD / git branch --show-current"
+    },
+    {
+      "criterion": "Commit parent is the task baseline",
+      "verdict": "pass",
+      "evidence": "git show -s --format=%P"
+    },
+    {
+      "criterion": "Six canonical source Git blobs match reviewed sources and post-commit readback",
+      "verdict": "pass",
+      "evidence": [
+        {
+          "file": "scripts/units/unit.gd",
+          "reviewed_sha256": "766c0009838c7d767f8d822327ae780f967701f9868eaeb041c64cb5df6a26ce",
+          "current_sha256": "766c0009838c7d767f8d822327ae780f967701f9868eaeb041c64cb5df6a26ce",
+          "commit_git_blob": "bc33842c16757190a0177c94149c152c9c411802",
+          "raw_worktree_blob": "d4d0cbb9162ab389037f5c91533fe05e8239cf55",
+          "filtered_worktree_git_blob": "bc33842c16757190a0177c94149c152c9c411802",
+          "post_readback_git_blob": "bc33842c16757190a0177c94149c152c9c411802",
+          "matches_review": true,
+          "filtered_commit_equals_worktree": true,
+          "matches_post_readback": true
+        },
+        {
+          "file": "scripts/tactical/tactical_scene.gd",
+          "reviewed_sha256": "24ac9f2315818098ef9b49a6366d0bc126084842fc0f75d61fdb8ad7ecbec2a7",
+          "current_sha256": "24ac9f2315818098ef9b49a6366d0bc126084842fc0f75d61fdb8ad7ecbec2a7",
+          "commit_git_blob": "95a0ce50b6f47e4c00463e4f10d10363ea618400",
+          "raw_worktree_blob": "bc00da80cc7aaf6f5eaf3e20e32e45546c6886a0",
+          "filtered_worktree_git_blob": "95a0ce50b6f47e4c00463e4f10d10363ea618400",
+          "post_readback_git_blob": "95a0ce50b6f47e4c00463e4f10d10363ea618400",
+          "matches_review": true,
+          "filtered_commit_equals_worktree": true,
+          "matches_post_readback": true
+        },
+        {
+          "file": "scripts/ui/unit_overhead_layout.gd",
+          "reviewed_sha256": "c3026ff8447d9d4019672b765dd24d265ec69755e2b8cdce95dbc84d01576526",
+          "current_sha256": "c3026ff8447d9d4019672b765dd24d265ec69755e2b8cdce95dbc84d01576526",
+          "commit_git_blob": "c776640e7bc909fe40a0665485419924b8d2522e",
+          "raw_worktree_blob": "c776640e7bc909fe40a0665485419924b8d2522e",
+          "filtered_worktree_git_blob": "c776640e7bc909fe40a0665485419924b8d2522e",
+          "post_readback_git_blob": "c776640e7bc909fe40a0665485419924b8d2522e",
+          "matches_review": true,
+          "filtered_commit_equals_worktree": true,
+          "matches_post_readback": true
+        },
+        {
+          "file": "tests/test_unit_overhead_layout.gd",
+          "reviewed_sha256": "25c9226f186eeb0cf126ac56c09d73a2e679877e68f263c14512043117f4e3b3",
+          "current_sha256": "25c9226f186eeb0cf126ac56c09d73a2e679877e68f263c14512043117f4e3b3",
+          "commit_git_blob": "0b7e1e56f4bb125cb2344167cd3ddfdda96c18d8",
+          "raw_worktree_blob": "0b7e1e56f4bb125cb2344167cd3ddfdda96c18d8",
+          "filtered_worktree_git_blob": "0b7e1e56f4bb125cb2344167cd3ddfdda96c18d8",
+          "post_readback_git_blob": "0b7e1e56f4bb125cb2344167cd3ddfdda96c18d8",
+          "matches_review": true,
+          "filtered_commit_equals_worktree": true,
+          "matches_post_readback": true
+        },
+        {
+          "file": "tests/claude_review/capture_cr06_overhead.gd",
+          "reviewed_sha256": "6a8bb7dafd3021f354698bea9b6f26f9e2e9d7e65dea199e1a48d3c67a3f1901",
+          "current_sha256": "6a8bb7dafd3021f354698bea9b6f26f9e2e9d7e65dea199e1a48d3c67a3f1901",
+          "commit_git_blob": "6f017663a26007d232b64b6a26c6529d9cb1a033",
+          "raw_worktree_blob": "6f017663a26007d232b64b6a26c6529d9cb1a033",
+          "filtered_worktree_git_blob": "6f017663a26007d232b64b6a26c6529d9cb1a033",
+          "post_readback_git_blob": "6f017663a26007d232b64b6a26c6529d9cb1a033",
+          "matches_review": true,
+          "filtered_commit_equals_worktree": true,
+          "matches_post_readback": true
+        },
+        {
+          "file": "tests/claude_review/run_cr06_windows_overhead.ps1",
+          "reviewed_sha256": "7a42614a0a798fbfeb3e755efbfda3a334ccfa391fe792ff995f75551bb6e366",
+          "current_sha256": "7a42614a0a798fbfeb3e755efbfda3a334ccfa391fe792ff995f75551bb6e366",
+          "commit_git_blob": "13760f7880819712ff9e0f61bec349b67c29df08",
+          "raw_worktree_blob": "13760f7880819712ff9e0f61bec349b67c29df08",
+          "filtered_worktree_git_blob": "13760f7880819712ff9e0f61bec349b67c29df08",
+          "post_readback_git_blob": "13760f7880819712ff9e0f61bec349b67c29df08",
+          "matches_review": true,
+          "filtered_commit_equals_worktree": true,
+          "matches_post_readback": true
+        }
+      ],
+      "autocrlf": "true"
+    },
+    {
+      "criterion": "Committed file set equals all 19 receipt paths",
+      "verdict": "pass",
+      "committed_path_count": 19,
+      "receipt_path_count": 19,
+      "set_delta": [],
+      "receipt_file": "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/task-receipt.json"
+    },
+    {
+      "criterion": "project.godot has no committed or worktree content delta",
+      "verdict": "pass",
+      "head_git_blob": "03d7120b0c38f7b00073c6b532a02a48977464f6",
+      "index_git_blob": "03d7120b0c38f7b00073c6b532a02a48977464f6",
+      "worktree_git_blob": "03d7120b0c38f7b00073c6b532a02a48977464f6",
+      "ignore_space_at_eol_diff_exit": 0,
+      "porcelain_status": [
+        " M project.godot"
+      ],
+      "autocrlf": "true",
+      "attributes": [],
+      "note": "Git status 显示 project.godot 工作树 M，但 HEAD、index、worktree 的 Git blob 相同且忽略行尾空白的 diff 为空；工作树内容与提交字节相同。未修改 index 或工作树。"
+    },
+    {
+      "criterion": "No whitespace error in the commit",
+      "verdict": "pass",
+      "evidence": "git show --check"
+    }
+  ],
+  "receipt_binding_note": "task-receipt.json 的 candidate_head 当前为 null；此补充与 post-commit-verification.json 将其 19 路径清单绑定到该 commit SHA。",
+  "scope_limits": [
+    "未重跑源码测试、C4/C8 或原图检查；其结论沿用上一份独立审查所绑定的同一六个源文件 SHA256。",
+    "该提交未发布；用户整体视觉批准、系统鼠标复测、CR-40 后续处理与完整 CR-06 新棋子仍为独立事项。"
+  ],
+  "original_report": {
+    "file": "<仓库外证据根>/post-commit-independent-review.json",
+    "bytes": 7093,
+    "sha256": "bdbbeabf689eeafa79d2c05494b7a8fe2300f10727ee29c967bc45e2ba2a431d"
+  }
+}
