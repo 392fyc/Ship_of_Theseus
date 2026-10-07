@@ -91,5 +91,35 @@
       "PCK font consumption",
       "three-resolution appearance"
     ]
+  },
+  "cold_import_fix_review": {
+    "verdict": "pass",
+    "reviewer": "/root/cr10_font_independent_review",
+    "base_commit": "74d4187182a6bc6852768473f0ac6854ecf45680",
+    "reviewed_files": [
+      "project.godot",
+      "scripts/ui/font_setup.gd"
+    ],
+    "checks": [
+      "fixed font paths load at runtime; same four-font order and failure guard",
+      "editor/import/use_multiple_threads=false only affects resource import",
+      "fresh git archive with no .godot or imported caches; 14 tracked .import setting files retained",
+      "Godot4.6.3 headless import exit0 without error markers",
+      "runtime failed=0; coverage/chains/frozen metrics",
+      "courtyard10x10 formal scene binding pass"
+    ],
+    "raw_log_sha256": {
+      "import": "898128638193f44e3d19bf57b7f81fb9c4b7a1b889196bb9ff978fbe44180fc5",
+      "runtime": "23e0295d1a54ba449d78fecc326bca8918296d309ce7e6ff4163b16ef73383f7",
+      "binding": "4b9fda63c399df40249f013949b1a8373f1a34a32c1ea6e9ddcc06bc9748c0bb"
+    },
+    "raw_result_sha256": "40a3fca70638275423c10ae0267fdc6066b730a08bca3847162262c12990d13e",
+    "raw_archive_sha256": "3690042b6f44c411de05cce59f1e204a21f66c4b517fbed97def38f5b524ccf1",
+    "limits": [
+      "74d4187 real release failed at first import and remains recorded",
+      "exact native crash cause not established",
+      "serial import may take longer",
+      "Windows release/PCK/visual not covered by this review"
+    ]
   }
 }
