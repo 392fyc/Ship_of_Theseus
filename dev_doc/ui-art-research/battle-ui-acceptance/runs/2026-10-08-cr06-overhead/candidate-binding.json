@@ -1,0 +1,37 @@
+{
+  "base_commit": "a66d7db0c5a040381c7b7c3ccac88141e09133d3",
+  "changed_sources": [
+    {
+      "file": "scripts/tactical/tactical_scene.gd",
+      "working_sha256": "24ac9f2315818098ef9b49a6366d0bc126084842fc0f75d61fdb8ad7ecbec2a7",
+      "canonical_git_blob": "95a0ce50b6f47e4c00463e4f10d10363ea618400"
+    },
+    {
+      "file": "scripts/units/unit.gd",
+      "working_sha256": "766c0009838c7d767f8d822327ae780f967701f9868eaeb041c64cb5df6a26ce",
+      "canonical_git_blob": "bc33842c16757190a0177c94149c152c9c411802"
+    },
+    {
+      "file": "scripts/ui/unit_overhead_layout.gd",
+      "working_sha256": "c3026ff8447d9d4019672b765dd24d265ec69755e2b8cdce95dbc84d01576526",
+      "canonical_git_blob": "c776640e7bc909fe40a0665485419924b8d2522e"
+    },
+    {
+      "file": "tests/test_unit_overhead_layout.gd",
+      "working_sha256": "25c9226f186eeb0cf126ac56c09d73a2e679877e68f263c14512043117f4e3b3",
+      "canonical_git_blob": "0b7e1e56f4bb125cb2344167cd3ddfdda96c18d8"
+    },
+    {
+      "file": "tests/claude_review/capture_cr06_overhead.gd",
+      "working_sha256": "6a8bb7dafd3021f354698bea9b6f26f9e2e9d7e65dea199e1a48d3c67a3f1901",
+      "canonical_git_blob": "6f017663a26007d232b64b6a26c6529d9cb1a033"
+    },
+    {
+      "file": "tests/claude_review/run_cr06_windows_overhead.ps1",
+      "working_sha256": "7a42614a0a798fbfeb3e755efbfda3a334ccfa391fe792ff995f75551bb6e366",
+      "canonical_git_blob": "13760f7880819712ff9e0f61bec349b67c29df08"
+    }
+  ],
+  "capture_source_manifest_sha256": "958caab157508e9400102211b8167bc7c2c4eaa9efde3f75b11c94c86d553fec",
+  "raw_capture_root": "<仓库外证据根>/windows-attempt2"
+}

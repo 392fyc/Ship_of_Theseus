@@ -1,0 +1,125 @@
+{
+  "task_id": "CR-06-overhead-layout-20261008",
+  "status": "completed",
+  "status_scope": "现有单位头顶信息遮挡修正及独立技术验收；完整CR-06新棋子、用户整体视觉批准与发布另记。",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/ui-ux/cr06-overhead-layout",
+  "target_head_before": "a66d7db0c5a040381c7b7c3ccac88141e09133d3",
+  "candidate_head": null,
+  "candidate_binding": "candidate-binding.json",
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md 与 Claude lane 审查处置",
+      "summary": "限定现有单位呈现，独立审查后本地提交，不发布，不改玩法、素材和已批准HUD。"
+    },
+    {
+      "contract": "claude-change-requests.md CR-06 / G4-FORECAST-LABEL-01",
+      "summary": "预测数字、血条、名牌和血量不遮挡，单位对应关系清楚，血量默认保留。"
+    }
+  ],
+  "changed_files": [
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/attempt1-visual-review.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/c4-raw-output.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/c8-raw-output.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/candidate-binding.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/capture-source-review-attempt2.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/capture-source-review.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/evidence-manifest.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/frame-and-layout-verification.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/headless-evidence.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/independent-review.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/report.md",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/task-receipt.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr06-overhead/task.md",
+    "scripts/tactical/tactical_scene.gd",
+    "scripts/ui/unit_overhead_layout.gd",
+    "scripts/units/unit.gd",
+    "tests/claude_review/capture_cr06_overhead.gd",
+    "tests/claude_review/run_cr06_windows_overhead.ps1",
+    "tests/test_unit_overhead_layout.gd"
+  ],
+  "verification": [
+    {
+      "command": "Godot headless test_unit_overhead_layout.gd",
+      "result": "pass",
+      "evidence": "3853 passed / 0 failed；headless-evidence.json"
+    },
+    {
+      "command": "run_cr06_windows_overhead.ps1 frozen working sources",
+      "result": "pass",
+      "evidence": "Windows三档9张原生整屏，同帧状态；前台窗口采样0。"
+    },
+    {
+      "command": "claude_review_checks C4/C8",
+      "result": "pass",
+      "evidence": "C4 9/9；C8 PASS；两份raw-output.json。"
+    },
+    {
+      "command": "source SHA / PNG-state SHA / same-frame / actual group geometry",
+      "result": "pass",
+      "evidence": "candidate-binding.json、frame-and-layout-verification.json、evidence-manifest.json"
+    },
+    {
+      "command": "independent code and all original PNG review",
+      "result": "pass",
+      "evidence": "independent-review.json"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "现有名牌、血条、血量及预测数字互不遮挡，保持单位归属",
+      "result": "pass",
+      "evidence": [
+        "independent-review.json",
+        "frame-and-layout-verification.json"
+      ]
+    },
+    {
+      "criterion": "三档、相机变化、稳定位置与死亡清理",
+      "result": "pass",
+      "evidence": [
+        "headless-evidence.json",
+        "independent-review.json"
+      ]
+    },
+    {
+      "criterion": "原生同帧证据、C4与C8、独立审查",
+      "result": "pass",
+      "evidence": [
+        "evidence-manifest.json",
+        "independent-review.json"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "玩法、素材、字体、HUD批准几何、基础剑士资源规则、旧采集器与原件",
+      "result": "unchanged",
+      "evidence": "只有声明的6个源文件与本运行目录变更。"
+    },
+    {
+      "subject": "project.godot",
+      "result": "unchanged",
+      "evidence": "工作副本、index与HEAD规范化blob一致；时间/换行状态不纳入提交。"
+    },
+    {
+      "subject": "主仓及受保护分支",
+      "result": "unchanged",
+      "evidence": "主仓d18bd3d6bb3ce507112674e5f3a0aed7fc23f079干净；未发布。"
+    }
+  ],
+  "residual_risks": [
+    "本机离屏内部输入未验收真实系统鼠标，后续新Dot attempt另行验证。",
+    "CR-40浮窗与试战工具栏相交仍待修正，不能据此批判断整屏通过。",
+    "完整CR-06的新棋子与C7运动像素验收仍待办。",
+    "用户整体视觉批准、发布合并、地形可读性及原P0/CR-01 Milestone尚未完成。"
+  ],
+  "escalation_reason": null,
+  "publication": {
+    "published": false,
+    "pr": null
+  },
+  "user_visual_approval": "not_recorded",
+  "full_cr06_completed": false,
+  "milestone_completed": false
+}

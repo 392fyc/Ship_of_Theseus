@@ -1,0 +1,162 @@
+{
+  "root": "<仓库外证据根>/windows-attempt2",
+  "files": [
+    {
+      "file": "capture-run.json",
+      "bytes": 5092,
+      "sha256": "a4ae06eb235d75b88ff16d3f057f90697c5b2b3503a4daca0bab7028b59ae34e"
+    },
+    {
+      "file": "captures/adjacent-forecast-hidden-1280x720.json",
+      "bytes": 8805,
+      "sha256": "695a22fad8510f58e75ebe07d736301b8b764c7c48857b2fbd9bcc86100e9fae"
+    },
+    {
+      "file": "captures/adjacent-forecast-hidden-1280x720.png",
+      "bytes": 2023486,
+      "sha256": "cb7be0bb93ca371854206d69e023e37fa00b57308cda8645f7925b0ae6d4ecc6"
+    },
+    {
+      "file": "captures/adjacent-forecast-hidden-1920x1080.json",
+      "bytes": 9322,
+      "sha256": "d6226a763639482b6900b31dfe156ba5b730183c2157d389a54dcd92bdb04775"
+    },
+    {
+      "file": "captures/adjacent-forecast-hidden-1920x1080.png",
+      "bytes": 4279371,
+      "sha256": "7e738bab5b24900ce55ddbabe3b18b9e061a0800b4877718ebbeabb1244b7859"
+    },
+    {
+      "file": "captures/adjacent-forecast-hidden-2560x1440.json",
+      "bytes": 9313,
+      "sha256": "d8ad3fc0583ad89f3d5f3d65a3f9e2050af71e2c29a5c29e6c0695cb7f3fffca"
+    },
+    {
+      "file": "captures/adjacent-forecast-hidden-2560x1440.png",
+      "bytes": 7134903,
+      "sha256": "877d1dbf6ad87a9e82728a179b319a2832c2fb65c49b5f0400da44c4ca5e81ca"
+    },
+    {
+      "file": "captures/adjacent-forecast-visible-1280x720.json",
+      "bytes": 9553,
+      "sha256": "b073474608f06d5e10afcb80ade77440609dd1588d830c8a0fe355c8ff4e82bb"
+    },
+    {
+      "file": "captures/adjacent-forecast-visible-1280x720.png",
+      "bytes": 1989054,
+      "sha256": "92fa128d703c41f95b4a3b581cbe2b8e4f87ef5ad6daadaf64b89067dac5ba17"
+    },
+    {
+      "file": "captures/adjacent-forecast-visible-1920x1080.json",
+      "bytes": 10070,
+      "sha256": "16bfb689d48df1026c90bd3cce07f225f45450704de2693756b8fd8d4e8ca497"
+    },
+    {
+      "file": "captures/adjacent-forecast-visible-1920x1080.png",
+      "bytes": 4200840,
+      "sha256": "ece84fa9fda39074b2dec1e75afde0f57b7d2314dd968622b35d16feee71abb8"
+    },
+    {
+      "file": "captures/adjacent-forecast-visible-2560x1440.json",
+      "bytes": 10061,
+      "sha256": "47c7a016096c514e3272769284d2984a267c6d14d90c5b0e04c3fe02e7bb056c"
+    },
+    {
+      "file": "captures/adjacent-forecast-visible-2560x1440.png",
+      "bytes": 7001729,
+      "sha256": "fddbf55de2364f270fb7e0566b4efab35c4c15adbb967b3e277fa438221febf9"
+    },
+    {
+      "file": "captures/camera-pan-zoom-forecast-reshown-1280x720.json",
+      "bytes": 10060,
+      "sha256": "fe8609a1214685f29ae5ac0fcb66b963ddc01a1163358d5cf2fd9b7840af8e8d"
+    },
+    {
+      "file": "captures/camera-pan-zoom-forecast-reshown-1280x720.png",
+      "bytes": 1993977,
+      "sha256": "6a56cd4192c3e27670a5aefdeaecd7f89d2ef72e16de9df03cfb5bcca009cc4e"
+    },
+    {
+      "file": "captures/camera-pan-zoom-forecast-reshown-1920x1080.json",
+      "bytes": 10078,
+      "sha256": "77ce57118694b69bb9fa11afc1b86a351389ad8dd143f052e9c48c0e479b90b2"
+    },
+    {
+      "file": "captures/camera-pan-zoom-forecast-reshown-1920x1080.png",
+      "bytes": 4149564,
+      "sha256": "3c7d95f065db50e56c61915c4c459408123e304772ca8cfba965eddb0a104de6"
+    },
+    {
+      "file": "captures/camera-pan-zoom-forecast-reshown-2560x1440.json",
+      "bytes": 10069,
+      "sha256": "30921bb8de7e34aa6605250f6b829097f51b489ab52b5aff511cce9e3f2986dd"
+    },
+    {
+      "file": "captures/camera-pan-zoom-forecast-reshown-2560x1440.png",
+      "bytes": 6907433,
+      "sha256": "43dc774aa65b90fb0b1d4a6264f346220d3943581b5732ad4f5697d9e3e9418a"
+    },
+    {
+      "file": "captures/capture-metadata.json",
+      "bytes": 12659,
+      "sha256": "deaa434495976bb9363fa9075d565dd69dc010c23e0aeba5d8a8bedd7928e60a"
+    },
+    {
+      "file": "headless-api.command.json",
+      "bytes": 1289,
+      "sha256": "28ba6b611f16e6c399e4b550d0a36b7f346ac08a04be2e341d01137c000610c1"
+    },
+    {
+      "file": "headless-api.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "headless-api.stdout.log",
+      "bytes": 870,
+      "sha256": "5aeb2039e12892aafd5807a465c0873a66f38d334c9d898d9842fd743d2314bf"
+    },
+    {
+      "file": "import.command.json",
+      "bytes": 1186,
+      "sha256": "3a1cce8bef19faa1a17e03e18bf069e54a5d51bda5b985664e116ea3b9e64f6b"
+    },
+    {
+      "file": "import.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "import.stdout.log",
+      "bytes": 46704,
+      "sha256": "f958f639585833da53e4f97f34576f3d824aa9b9681a8ca368d4850e6fd6b769"
+    },
+    {
+      "file": "source-manifest.json",
+      "bytes": 292882,
+      "sha256": "958caab157508e9400102211b8167bc7c2c4eaa9efde3f75b11c94c86d553fec"
+    },
+    {
+      "file": "windows-overhead.command.json",
+      "bytes": 47461,
+      "sha256": "d5769a78dcb74142c0b590a6df9fe7d57a83d25d7310e15a5a90f5f269e69f4f"
+    },
+    {
+      "file": "windows-overhead.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "windows-overhead.stdout.log",
+      "bytes": 4230,
+      "sha256": "26ab1470c1226bae8b5c8b003ccb375a7944c77ec1504c7fa9037ed35df80961"
+    }
+  ],
+  "original_full_frames": 9,
+  "source_files_verified": 1321,
+  "video_adapter": "NVIDIA GeForce RTX 3070 Ti",
+  "os": "Windows",
+  "renderer": "gl_compatibility",
+  "foreground_target_samples": 0,
+  "system_mouse_used": false
+}

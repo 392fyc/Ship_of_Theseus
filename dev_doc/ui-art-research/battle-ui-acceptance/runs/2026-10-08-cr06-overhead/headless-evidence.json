@@ -1,0 +1,68 @@
+{
+  "files": [
+    {
+      "file": "windows-attempt2-headless/editor-rerun.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "windows-attempt2-headless/editor-rerun.stdout.txt",
+      "bytes": 1208,
+      "sha256": "cd62bcdc019464eea52484a9fea694bf55554a60619a914c52b4ad8730608f03"
+    },
+    {
+      "file": "windows-attempt2-headless/editor.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "windows-attempt2-headless/editor.stdout.txt",
+      "bytes": 1610,
+      "sha256": "93585d0290053168824fe9821264b3e03be24b1b5b4df034d38f62e55d8ce199"
+    },
+    {
+      "file": "windows-attempt2-headless/layout-test-final.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "windows-attempt2-headless/layout-test-final.stdout.txt",
+      "bytes": 703,
+      "sha256": "42f98a644602fd86210344a304cb40b7ba20ee38f9cb3d8e2369c614dbe414cd"
+    },
+    {
+      "file": "windows-attempt2-headless/layout-test-pass.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "windows-attempt2-headless/layout-test-pass.stdout.txt",
+      "bytes": 703,
+      "sha256": "cb05eb010f1d54babe3c104de24b7abf91ceb8baf1cf9618ec1d9c3801a0745a"
+    },
+    {
+      "file": "windows-attempt2-headless/layout-test-pass2.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "windows-attempt2-headless/layout-test-pass2.stdout.txt",
+      "bytes": 703,
+      "sha256": "42f98a644602fd86210344a304cb40b7ba20ee38f9cb3d8e2369c614dbe414cd"
+    },
+    {
+      "file": "windows-attempt2-headless/layout-test.stderr.txt",
+      "bytes": 473,
+      "sha256": "4c14290ada9fb0869f252ec2d77e8e1da811ade8071e06dbfb76ac9cd769f7ff"
+    },
+    {
+      "file": "windows-attempt2-headless/layout-test.stdout.txt",
+      "bytes": 75,
+      "sha256": "b16651cbedbab0a7b519f9e5b498eea40cb33bfb72252e264a7f4c2412765d58"
+    }
+  ],
+  "final_result": "3853 passed / 0 failed; exit 0; final stderr empty",
+  "final_stdout": "windows-attempt2-headless/layout-test-final.stdout.txt",
+  "final_stderr": "windows-attempt2-headless/layout-test-final.stderr.txt",
+  "scope": "正式courtyard注入与实际Control几何回归；headless逻辑viewport覆盖不代替Windows原图或C7像素运动验收。"
+}

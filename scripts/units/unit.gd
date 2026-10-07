@@ -150,6 +150,7 @@ var _hp_label: Label = null
 var _facing: StringName = &"SE"
 var _map_token_active := false
 var _map_token_layout: Dictionary = {}
+var _overhead_ui_managed: bool = false
 
 
 func _ready() -> void:
@@ -242,6 +243,94 @@ func has_runtime_map_token() -> bool:
 func get_combat_text_anchor_world(fallback_offset_y: float) -> Vector2:
 	var offset_y := float(_map_token_layout.get("popup_anchor_y", fallback_offset_y)) if _map_token_active else fallback_offset_y
 	return global_position + Vector2(0.0, offset_y)
+
+
+## 战术场景头顶控件所需的纯呈现数据；不参与预测或战斗计算。
+func get_overhead_presentation_data() -> Dictionary:
+	var hp: int = stats.hp if stats != null else 0
+	var max_hp: int = stats.max_hp if stats != null else 0
+	var ratio: float = float(hp) / float(max_hp) if max_hp > 0 else 0.0
+	var fill_color: Color = HP_FULL_COLOR
+	if ratio <= 0.3:
+		fill_color = HP_CRIT_COLOR
+	elif ratio <= 0.6:
+		fill_color = HP_LOW_COLOR
+	var label_text: String = _unit_label.text if _unit_label != null else ""
+	return {
+		"unit_id": unit_id,
+		"unit_name": unit_name,
+		"faction": faction,
+		"faction_color": FACTION_COLORS.get(faction, Color.WHITE),
+		"grid_position": grid_position,
+		"instance_id": get_instance_id(),
+		"name_text": label_text,
+		"name_font_size": _unit_label.get_theme_font_size("font_size") if _unit_label != null else 18,
+		"hp_text": "%d / %d" % [hp, max_hp] if stats != null else "",
+		"hp_value": hp,
+		"hp_max": max_hp,
+		"hp_font_size": _hp_label.get_theme_font_size("font_size") if _hp_label != null else 9,
+		"hp_ratio": ratio,
+		"hp_color": fill_color,
+		"alive": stats != null and stats.is_alive(),
+		"body_rect": get_overhead_body_rect_screen(),
+	}
+
+
+## 返回当前可见 MapToken 或 Sprite 的屏幕空间绘制矩形。
+func get_overhead_body_rect_screen() -> Rect2:
+	var bounds: Rect2 = Rect2()
+	var has_bounds: bool = false
+	if _map_token_active and map_token_view != null and map_token_view.visible:
+		bounds = _canvas_item_rect_screen(map_token_view, map_token_view.get_rect())
+		has_bounds = true
+	elif sprite != null and sprite.visible:
+		var sprite_rect: Rect2 = _animated_sprite_local_rect(sprite)
+		if sprite_rect.size.x > 0.0 and sprite_rect.size.y > 0.0:
+			bounds = _canvas_item_rect_screen(sprite, sprite_rect)
+			has_bounds = true
+	return bounds if has_bounds else Rect2(global_position, Vector2.ZERO)
+
+
+func _animated_sprite_local_rect(animated_sprite: AnimatedSprite2D) -> Rect2:
+	var frames: SpriteFrames = animated_sprite.sprite_frames
+	if frames == null or not frames.has_animation(animated_sprite.animation):
+		return Rect2()
+	var frame_count: int = frames.get_frame_count(animated_sprite.animation)
+	if frame_count <= 0:
+		return Rect2()
+	var frame_index: int = clampi(animated_sprite.frame, 0, frame_count - 1)
+	var frame_texture: Texture2D = frames.get_frame_texture(animated_sprite.animation, frame_index)
+	if frame_texture == null:
+		return Rect2()
+	var frame_size: Vector2 = frame_texture.get_size()
+	var frame_position: Vector2 = animated_sprite.offset
+	if animated_sprite.centered:
+		frame_position -= frame_size * 0.5
+	return Rect2(frame_position, frame_size)
+
+
+## 启用统一头顶控件后关闭单位节点内的旧副本，避免两个坐标层同时绘制。
+func set_overhead_ui_managed(managed: bool) -> void:
+	_overhead_ui_managed = managed
+	if health_bar != null:
+		health_bar.visible = not managed
+	if _hp_label != null:
+		_hp_label.visible = not managed
+	if _unit_label != null:
+		_unit_label.visible = not managed
+
+
+func _canvas_item_rect_screen(item: CanvasItem, local_rect: Rect2) -> Rect2:
+	var transform: Transform2D = item.get_global_transform_with_canvas()
+	var top_left: Vector2 = transform * local_rect.position
+	var top_right: Vector2 = transform * Vector2(local_rect.end.x, local_rect.position.y)
+	var bottom_left: Vector2 = transform * Vector2(local_rect.position.x, local_rect.end.y)
+	var bottom_right: Vector2 = transform * local_rect.end
+	var min_x: float = minf(minf(top_left.x, top_right.x), minf(bottom_left.x, bottom_right.x))
+	var max_x: float = maxf(maxf(top_left.x, top_right.x), maxf(bottom_left.x, bottom_right.x))
+	var min_y: float = minf(minf(top_left.y, top_right.y), minf(bottom_left.y, bottom_right.y))
+	var max_y: float = maxf(maxf(top_left.y, top_right.y), maxf(bottom_left.y, bottom_right.y))
+	return Rect2(Vector2(min_x, min_y), Vector2(max_x - min_x, max_y - min_y))
 
 
 # ── 战斗接口 ─────────────────────────────────────────
@@ -724,6 +813,7 @@ func _apply_visuals() -> void:
 		_unit_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(_unit_label)
 
+	set_overhead_ui_managed(_overhead_ui_managed)
 	_rebuild_status_icons()
 
 

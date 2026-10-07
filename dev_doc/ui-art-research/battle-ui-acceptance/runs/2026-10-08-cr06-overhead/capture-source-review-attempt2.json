@@ -1,0 +1,78 @@
+{
+  "schema": "codex-capture-source-gate/v1",
+  "verdict": "pass",
+  "scope": "attempt2 新增采集观测字段及 getter/同帧源码增量；不包含第二批 Windows 原图验收",
+  "candidate": {
+    "head": "a66d7db0c5a040381c7b7c3ccac88141e09133d3",
+    "capture_schema": "cr06-overhead/2",
+    "capture_source_sha256": "6a8bb7dafd3021f354698bea9b6f26f9e2e9d7e65dea199e1a48d3c67a3f1901",
+    "runner_sha256": "7a42614a0a798fbfeb3e755efbfda3a334ccfa391fe792ff995f75551bb6e366",
+    "source_set_files": [
+      {
+        "path": "tests/claude_review/capture_cr06_overhead.gd",
+        "sha256": "6a8bb7dafd3021f354698bea9b6f26f9e2e9d7e65dea199e1a48d3c67a3f1901"
+      },
+      {
+        "path": "tests/claude_review/run_cr06_windows_overhead.ps1",
+        "sha256": "7a42614a0a798fbfeb3e755efbfda3a334ccfa391fe792ff995f75551bb6e366"
+      },
+      {
+        "path": "scripts/units/unit.gd",
+        "sha256": "766c0009838c7d767f8d822327ae780f967701f9868eaeb041c64cb5df6a26ce"
+      },
+      {
+        "path": "scripts/tactical/tactical_scene.gd",
+        "sha256": "24ac9f2315818098ef9b49a6366d0bc126084842fc0f75d61fdb8ad7ecbec2a7"
+      },
+      {
+        "path": "scripts/ui/unit_overhead_layout.gd",
+        "sha256": "c3026ff8447d9d4019672b765dd24d265ec69755e2b8cdce95dbc84d01576526"
+      },
+      {
+        "path": "tests/test_unit_overhead_layout.gd",
+        "sha256": "25c9226f186eeb0cf126ac56c09d73a2e679877e68f263c14512043117f4e3b3"
+      }
+    ]
+  },
+  "criteriaResults": [
+    {
+      "criterion": "冻结采集器增量仅包含实际头顶组矩形/名称的快照映射，并升级 schema。",
+      "verdict": "pass",
+      "evidence": "与 attempt1 冻结采集器逐行比较，仅 CAPTURE_SCHEMA cr06-overhead/1→/2、_normalise_units 字段列表添加 overhead_group_name 和 group_rect。当前源 SHA-256 与候选值一致。"
+    },
+    {
+      "criterion": "group_rect 和 overhead_group_name 从纯读取的实际 Control 快照取得，可用于归属核验。",
+      "verdict": "pass",
+      "evidence": "scripts/ui/unit_overhead_layout.gd:96-129 的 get_debug_snapshot 复制记录、读取 unit_ref/data/Control rect；_control_rect 只查询可见性和 get_global_rect；新增名称为每单位 OverheadGroup_<instance_id>。"
+    },
+    {
+      "criterion": "图片与状态仍在同次 frame_post_draw 后无 await、无布局修改地读取。",
+      "verdict": "pass",
+      "evidence": "tests/claude_review/capture_cr06_overhead.gd:224-226 在 await frame_post_draw 后先读原图；后续至保存前只读取 dashboard、hover、debug snapshot、指针和尺寸。get_dashboard_data 与 get_hover_world_pos 返回构造数据，未发现写状态或刷新布局。"
+    },
+    {
+      "criterion": "冻结入口/当前源码绑定明确，runner未变，project.godot 无配置内容变化。",
+      "verdict": "pass",
+      "evidence": "source_set_files 列出本次六个源文件当前 SHA-256；runner 仍为冻结 SHA。project.godot 当前 Git blob 与 HEAD 的 Git blob 相同。"
+    }
+  ],
+  "findings": [],
+  "recommendations": [],
+  "constraints": [
+    "该 PASS 只放行冻结的 attempt2 Windows 采集，不是代码整体验收。",
+    "不得把离屏 root.get_mouse_position 与 Viewport.push_input 解释为真实系统鼠标悬停通过。",
+    "继续保留 Compatibility、离屏无焦点、正式 courtyard 夹具、原图及同帧状态原件与日志。"
+  ],
+  "project_godot_binding": {
+    "head_git_blob": "03d7120b0c38f7b00073c6b532a02a48977464f6",
+    "worktree_clean_git_blob": "03d7120b0c38f7b00073c6b532a02a48977464f6",
+    "matches": true,
+    "worktree_sha256": "c8c44d7453ff3d443eee7a25f5b5112687077d40705f6ea67982443ab94cddf6"
+  },
+  "original_review": {
+    "file": "<仓库外证据根>/capture-source-review-attempt2.json",
+    "bytes": 3727,
+    "sha256": "ddf886590636241394ac128cb0caa2dc0bf8121cace44c4bf10cca236cf0bb54",
+    "portable_copy_note": "仅替换本机路径为占位；保留原件供摘要核对。"
+  }
+}

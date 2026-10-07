@@ -1,0 +1,713 @@
+{
+  "schema": "codex-acceptance-review/v1",
+  "verdict": "fail",
+  "scope": "windows-attempt1 原图与同帧状态独立验收；不代表 CR-06 整项或 Milestone 完成",
+  "candidate": {
+    "head": "a66d7db0c5a040381c7b7c3ccac88141e09133d3",
+    "batch": "<仓库外证据根>/windows-attempt1",
+    "capture_schema": "cr06-overhead/1",
+    "capture_source_sha256": "b1298c8ed606e99480c78bfde9abb180125e864142196ecd085ecfd2814ab5b3",
+    "runner_sha256": "7a42614a0a798fbfeb3e755efbfda3a334ccfa391fe792ff995f75551bb6e366"
+  },
+  "criteriaResults": [
+    {
+      "criterion": "正式 courtyard 10×10 相邻单位夹具，预测隐藏、显示与镜头平移/缩放后重显覆盖三档分辨率。",
+      "verdict": "pass",
+      "evidence": "9 份 JSON 均记录 courtyard、10×10、terrain_modified=false、gameplay_values_modified=false；隐藏组无预测，显示组和镜头组 target=test_lancer、hover_cell=[0,1] 且预测可见。"
+    },
+    {
+      "criterion": "名牌、血量、预测数字清晰且与对应单位保持稳定关系，镜头变化后随单位移动。",
+      "verdict": "partial",
+      "evidence": "9 张原图中相邻单位姓名在各自棋子上方，HP 在各自血条下，预测数字/字形贴近枪兵且不遮挡其 26/26；镜头组坐标随 Camera2D 更新。attempt1 状态含 instance_id 与目标行，但没有 overhead group 矩形和父节点名，程序化归属证据不完整。"
+    },
+    {
+      "criterion": "血条宽度不得超过单位实际投影身体，血条逻辑高度为 4。",
+      "verdict": "fail",
+      "evidence": "9 份状态的单位血条宽均为 40、高为 4；普通截图 body_rect 宽 49.68，但冻结 attempt1 unit.gd:291-294 把即使隐藏的 _unit_label 矩形并入身体框。实际占位 Sprite 纹理 64×64、UNIT_ICON_SCALE=0.45，普通视图 Camera2D zoom=0.92，投影宽约 26.5。原图中血条明显宽于可见彩色棋子身体，违反宽度限制。"
+    },
+    {
+      "criterion": "窗口三档与镜头变化后头顶信息使用当前单位位置；原图为对应尺寸的整屏图。",
+      "verdict": "pass",
+      "evidence": "三种 PNG 尺寸均分别为 1280×720、1920×1080、2560×1440；camera-pan-zoom 行的身体、名牌、血条、HP 与预测矩形均与可见组不同，并对应新 camera transform。"
+    },
+    {
+      "criterion": "原图和状态在同一 frame_post_draw 后取得并可由摘要复核。",
+      "verdict": "pass",
+      "evidence": "9 张图与 JSON 的 SHA-256 均匹配 capture-metadata.json；PNG IHDR 尺寸与状态一致；9/9 的 frame_binding.phase=frame_post_draw 且 start=end。"
+    },
+    {
+      "criterion": "离屏采集不使用系统鼠标；悬停结论与输入证据边界清楚。",
+      "verdict": "partial",
+      "evidence": "runner 记录 operating_system_mouse_calls=false，采集器使用 Viewport.push_input；状态分别记录请求坐标和 root.get_mouse_position。后者为离屏窗口坐标语义，偏离请求点，因此本批不证明真实系统鼠标悬停。"
+    }
+  ],
+  "findings": [
+    "阻断项：attempt1 用隐藏旧姓名 Label 扩大 body_rect，导致宽 40 的血条通过错误尺寸基准；原图中血条宽于实际可见单位身体。",
+    "attempt1 原图与状态的摘要、尺寸和同帧绑定检查均一致。",
+    "本批输入为离屏 Viewport.push_input；未验收真实系统鼠标悬停。"
+  ],
+  "recommendations": [
+    "以当前修订实现和第二批原图重新验收血条宽度，并检查新增 group_rect / overhead_group_name 对标签归属的证明。"
+  ],
+  "batch_integrity": {
+    "source_artifact_count": 9,
+    "all_png_and_state_hashes_match_metadata": true,
+    "all_images_same_frame_post_draw": true,
+    "all_image_dimensions_match_requested": true,
+    "captures": [
+      {
+        "file": "adjacent-forecast-hidden-1280x720.png",
+        "state_file": "adjacent-forecast-hidden-1280x720.json",
+        "image_sha256": "da959f7b508dbb8f234c49058ff9076f97325103f6ab6a6b8bf8d72638a3ae24",
+        "state_sha256": "92c96d2960cf1fcc64052b4d63b11191e76f2e9efea9ad8f88664bdf457b73d6",
+        "image_size": [
+          1280,
+          720
+        ],
+        "frame_binding": {
+          "phase": "frame_post_draw",
+          "start": 76,
+          "end": 76
+        },
+        "forecast_visible": false,
+        "hover_present": false,
+        "hover_cell": [],
+        "target_id": "test_lancer",
+        "target_body_rect": [
+          485.720001220703,
+          221.240020751953,
+          49.6800231933594,
+          27.6000061035156
+        ],
+        "target_bar_rect": [
+          490.559997558594,
+          267.840026855469,
+          40,
+          4
+        ],
+        "target_name_rect": [
+          495.559997558594,
+          167.240020751953,
+          30,
+          24
+        ],
+        "target_hp_rect": [
+          492.559997558594,
+          280.840026855469,
+          36,
+          19
+        ],
+        "target_forecast_rect": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "actor_body_rect": [
+          515.159973144531,
+          206.52001953125,
+          49.6799926757813,
+          27.6000061035156
+        ],
+        "actor_bar_rect": [
+          563,
+          253.120025634766,
+          40,
+          4
+        ],
+        "requested_mouse": [
+          20,
+          100
+        ],
+        "reported_root_mouse": [
+          13281,
+          12591
+        ]
+      },
+      {
+        "file": "adjacent-forecast-visible-1280x720.png",
+        "state_file": "adjacent-forecast-visible-1280x720.json",
+        "image_sha256": "326991b0c50a7a484e8879b6419b61b1770a0e6647ac398ebf2f87b1a96b7764",
+        "state_sha256": "f4b57228fc4301ceb094f74a56be17f3cd9e5511fba560dd8d3b08e828fbaa7a",
+        "image_size": [
+          1280,
+          720
+        ],
+        "frame_binding": {
+          "phase": "frame_post_draw",
+          "start": 88,
+          "end": 88
+        },
+        "forecast_visible": true,
+        "hover_present": true,
+        "hover_cell": [
+          0,
+          1
+        ],
+        "target_id": "test_lancer",
+        "target_body_rect": [
+          485.720001220703,
+          221.240020751953,
+          49.6800231933594,
+          27.6000061035156
+        ],
+        "target_bar_rect": [
+          490.559997558594,
+          267.840026855469,
+          40,
+          4
+        ],
+        "target_name_rect": [
+          429.559997558594,
+          194.240020751953,
+          30,
+          24
+        ],
+        "target_hp_rect": [
+          492.559997558594,
+          280.840026855469,
+          36,
+          19
+        ],
+        "target_forecast_rect": [
+          429.559997558594,
+          255.440002441406,
+          30,
+          28
+        ],
+        "actor_body_rect": [
+          515.159973144531,
+          206.52001953125,
+          49.6799926757813,
+          27.6000061035156
+        ],
+        "actor_bar_rect": [
+          563,
+          253.120025634766,
+          40,
+          4
+        ],
+        "requested_mouse": [
+          510.559997558594,
+          235.040008544922
+        ],
+        "reported_root_mouse": [
+          13281,
+          12591
+        ]
+      },
+      {
+        "file": "camera-pan-zoom-forecast-reshown-1280x720.png",
+        "state_file": "camera-pan-zoom-forecast-reshown-1280x720.json",
+        "image_sha256": "ad146a84d3a1d9cb1be59471098ee3b557808e13c363c0cd81862472d9f0f527",
+        "state_sha256": "206a53dd47b03308fb54b476986f2a95594c0386aa989ecd323e7a151b43a069",
+        "image_size": [
+          1280,
+          720
+        ],
+        "frame_binding": {
+          "phase": "frame_post_draw",
+          "start": 112,
+          "end": 112
+        },
+        "forecast_visible": true,
+        "hover_present": true,
+        "hover_cell": [
+          0,
+          1
+        ],
+        "target_id": "test_lancer",
+        "target_body_rect": [
+          380.652770996094,
+          247.865570068359,
+          55.6416015625,
+          30.9119873046875
+        ],
+        "target_bar_rect": [
+          388.473571777344,
+          297.777557373047,
+          40,
+          4
+        ],
+        "target_name_rect": [
+          327.473571777344,
+          220.865570068359,
+          30,
+          24
+        ],
+        "target_hp_rect": [
+          390.473571777344,
+          310.777557373047,
+          36,
+          19
+        ],
+        "target_forecast_rect": [
+          327.473571777344,
+          280.409576416016,
+          30,
+          28
+        ],
+        "actor_body_rect": [
+          413.625549316406,
+          231.379180908203,
+          55.6416015625,
+          30.9119873046875
+        ],
+        "actor_bar_rect": [
+          464.446350097656,
+          281.291168212891,
+          40,
+          4
+        ],
+        "requested_mouse": [
+          408.473571777344,
+          263.321594238281
+        ],
+        "reported_root_mouse": [
+          13281,
+          12591
+        ]
+      },
+      {
+        "file": "adjacent-forecast-hidden-1920x1080.png",
+        "state_file": "adjacent-forecast-hidden-1920x1080.json",
+        "image_sha256": "6cc5073c909f09d54f7b33429828f76cdf2832d142008a974744d9cb8d69c45f",
+        "state_sha256": "365ab8b689e371ed86cbdcebb32b9feabcc1fa0533bcbe87a65fd0aa2adbfe5b",
+        "image_size": [
+          1920,
+          1080
+        ],
+        "frame_binding": {
+          "phase": "frame_post_draw",
+          "start": 195,
+          "end": 195
+        },
+        "forecast_visible": false,
+        "hover_present": false,
+        "hover_cell": [],
+        "target_id": "test_lancer",
+        "target_body_rect": [
+          485.720001220703,
+          221.240020751953,
+          49.6800231933594,
+          27.6000061035156
+        ],
+        "target_bar_rect": [
+          490.559997558594,
+          267.840026855469,
+          40,
+          4
+        ],
+        "target_name_rect": [
+          495.559997558594,
+          167.240020751953,
+          30,
+          24
+        ],
+        "target_hp_rect": [
+          492.559997558594,
+          280.840026855469,
+          36,
+          19
+        ],
+        "target_forecast_rect": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "actor_body_rect": [
+          515.159973144531,
+          206.52001953125,
+          49.6799926757813,
+          27.6000061035156
+        ],
+        "actor_bar_rect": [
+          563,
+          253.120025634766,
+          40,
+          4
+        ],
+        "requested_mouse": [
+          20,
+          100
+        ],
+        "reported_root_mouse": [
+          8854,
+          8394
+        ]
+      },
+      {
+        "file": "adjacent-forecast-visible-1920x1080.png",
+        "state_file": "adjacent-forecast-visible-1920x1080.json",
+        "image_sha256": "50fafd7ed27cedf3eaa5f28f333683d699440c9496dea941d61910b2e00c4519",
+        "state_sha256": "006206f85f56ae2f1cf3ce97c2bcff459b4d8298efcbf262256ff2425d12c539",
+        "image_size": [
+          1920,
+          1080
+        ],
+        "frame_binding": {
+          "phase": "frame_post_draw",
+          "start": 207,
+          "end": 207
+        },
+        "forecast_visible": true,
+        "hover_present": true,
+        "hover_cell": [
+          0,
+          1
+        ],
+        "target_id": "test_lancer",
+        "target_body_rect": [
+          485.720001220703,
+          221.240020751953,
+          49.6800231933594,
+          27.6000061035156
+        ],
+        "target_bar_rect": [
+          490.559997558594,
+          267.840026855469,
+          40,
+          4
+        ],
+        "target_name_rect": [
+          429.559997558594,
+          194.240020751953,
+          30,
+          24
+        ],
+        "target_hp_rect": [
+          492.559997558594,
+          280.840026855469,
+          36,
+          19
+        ],
+        "target_forecast_rect": [
+          429.559997558594,
+          255.440002441406,
+          30,
+          28
+        ],
+        "actor_body_rect": [
+          515.159973144531,
+          206.52001953125,
+          49.6799926757813,
+          27.6000061035156
+        ],
+        "actor_bar_rect": [
+          563,
+          253.120025634766,
+          40,
+          4
+        ],
+        "requested_mouse": [
+          510.559997558594,
+          235.040008544922
+        ],
+        "reported_root_mouse": [
+          8854,
+          8394
+        ]
+      },
+      {
+        "file": "camera-pan-zoom-forecast-reshown-1920x1080.png",
+        "state_file": "camera-pan-zoom-forecast-reshown-1920x1080.json",
+        "image_sha256": "24b88047e043b5832ff74cad25ee238531288257f46a37be3cdf05f05a4c6dfa",
+        "state_sha256": "ccfdbc92d76b68a5bd5afb27820b7eeeb82e61086fb8d7abd5e053cb08429491",
+        "image_size": [
+          1920,
+          1080
+        ],
+        "frame_binding": {
+          "phase": "frame_post_draw",
+          "start": 231,
+          "end": 231
+        },
+        "forecast_visible": true,
+        "hover_present": true,
+        "hover_cell": [
+          0,
+          1
+        ],
+        "target_id": "test_lancer",
+        "target_body_rect": [
+          380.652770996094,
+          247.865570068359,
+          55.6416015625,
+          30.9119873046875
+        ],
+        "target_bar_rect": [
+          388.473571777344,
+          297.777557373047,
+          40,
+          4
+        ],
+        "target_name_rect": [
+          327.473571777344,
+          220.865570068359,
+          30,
+          24
+        ],
+        "target_hp_rect": [
+          390.473571777344,
+          310.777557373047,
+          36,
+          19
+        ],
+        "target_forecast_rect": [
+          327.473571777344,
+          280.409576416016,
+          30,
+          28
+        ],
+        "actor_body_rect": [
+          413.625549316406,
+          231.379180908203,
+          55.6416015625,
+          30.9119873046875
+        ],
+        "actor_bar_rect": [
+          464.446350097656,
+          281.291168212891,
+          40,
+          4
+        ],
+        "requested_mouse": [
+          408.473571777344,
+          263.321594238281
+        ],
+        "reported_root_mouse": [
+          8854,
+          8394
+        ]
+      },
+      {
+        "file": "adjacent-forecast-hidden-2560x1440.png",
+        "state_file": "adjacent-forecast-hidden-2560x1440.json",
+        "image_sha256": "ef1f990920d61eaa5e72218e30d80d33f5c4b5c9c65cc86773ccd077bba2dc9e",
+        "state_sha256": "f6f7fd2587f46290adc2f0617560a4d0363dea21303197205122cf9c97a4d2d1",
+        "image_size": [
+          2560,
+          1440
+        ],
+        "frame_binding": {
+          "phase": "frame_post_draw",
+          "start": 314,
+          "end": 314
+        },
+        "forecast_visible": false,
+        "hover_present": false,
+        "hover_cell": [],
+        "target_id": "test_lancer",
+        "target_body_rect": [
+          485.720001220703,
+          221.240020751953,
+          49.6800231933594,
+          27.6000061035156
+        ],
+        "target_bar_rect": [
+          490.559997558594,
+          267.840026855469,
+          40,
+          4
+        ],
+        "target_name_rect": [
+          495.559997558594,
+          167.240020751953,
+          30,
+          24
+        ],
+        "target_hp_rect": [
+          492.559997558594,
+          280.840026855469,
+          36,
+          19
+        ],
+        "target_forecast_rect": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "actor_body_rect": [
+          515.159973144531,
+          206.52001953125,
+          49.6799926757813,
+          27.6000061035156
+        ],
+        "actor_bar_rect": [
+          563,
+          253.120025634766,
+          40,
+          4
+        ],
+        "requested_mouse": [
+          20,
+          100
+        ],
+        "reported_root_mouse": [
+          6640.5,
+          6295.5
+        ]
+      },
+      {
+        "file": "adjacent-forecast-visible-2560x1440.png",
+        "state_file": "adjacent-forecast-visible-2560x1440.json",
+        "image_sha256": "da4a5a5fe1c0b441b2d4deea3b797f4645b14880094eaa1f58db251626d840cd",
+        "state_sha256": "ba1d85cae3c9ef4bb63366bce6eae3864b3f9264ea69abf224ee0cfc40334a7a",
+        "image_size": [
+          2560,
+          1440
+        ],
+        "frame_binding": {
+          "phase": "frame_post_draw",
+          "start": 326,
+          "end": 326
+        },
+        "forecast_visible": true,
+        "hover_present": true,
+        "hover_cell": [
+          0,
+          1
+        ],
+        "target_id": "test_lancer",
+        "target_body_rect": [
+          485.720001220703,
+          221.240020751953,
+          49.6800231933594,
+          27.6000061035156
+        ],
+        "target_bar_rect": [
+          490.559997558594,
+          267.840026855469,
+          40,
+          4
+        ],
+        "target_name_rect": [
+          429.559997558594,
+          194.240020751953,
+          30,
+          24
+        ],
+        "target_hp_rect": [
+          492.559997558594,
+          280.840026855469,
+          36,
+          19
+        ],
+        "target_forecast_rect": [
+          429.559997558594,
+          255.440002441406,
+          30,
+          28
+        ],
+        "actor_body_rect": [
+          515.159973144531,
+          206.52001953125,
+          49.6799926757813,
+          27.6000061035156
+        ],
+        "actor_bar_rect": [
+          563,
+          253.120025634766,
+          40,
+          4
+        ],
+        "requested_mouse": [
+          510.559997558594,
+          235.040008544922
+        ],
+        "reported_root_mouse": [
+          6640.5,
+          6295.5
+        ]
+      },
+      {
+        "file": "camera-pan-zoom-forecast-reshown-2560x1440.png",
+        "state_file": "camera-pan-zoom-forecast-reshown-2560x1440.json",
+        "image_sha256": "af73bf5340238df987cc61625d799159c4ff5d380abb25f4e3b056af034f59fe",
+        "state_sha256": "fcb0f06b37106e84cd4c0b04efe949c7b2f9c7f744896d96480753321720a8c9",
+        "image_size": [
+          2560,
+          1440
+        ],
+        "frame_binding": {
+          "phase": "frame_post_draw",
+          "start": 350,
+          "end": 350
+        },
+        "forecast_visible": true,
+        "hover_present": true,
+        "hover_cell": [
+          0,
+          1
+        ],
+        "target_id": "test_lancer",
+        "target_body_rect": [
+          380.652770996094,
+          247.865570068359,
+          55.6416015625,
+          30.9119873046875
+        ],
+        "target_bar_rect": [
+          388.473571777344,
+          297.777557373047,
+          40,
+          4
+        ],
+        "target_name_rect": [
+          327.473571777344,
+          220.865570068359,
+          30,
+          24
+        ],
+        "target_hp_rect": [
+          390.473571777344,
+          310.777557373047,
+          36,
+          19
+        ],
+        "target_forecast_rect": [
+          327.473571777344,
+          280.409576416016,
+          30,
+          28
+        ],
+        "actor_body_rect": [
+          413.625549316406,
+          231.379180908203,
+          55.6416015625,
+          30.9119873046875
+        ],
+        "actor_bar_rect": [
+          464.446350097656,
+          281.291168212891,
+          40,
+          4
+        ],
+        "requested_mouse": [
+          408.473571777344,
+          263.321594238281
+        ],
+        "reported_root_mouse": [
+          6640.5,
+          6295.5
+        ]
+      }
+    ],
+    "runner": {
+      "exit_code": 0,
+      "timed_out": false,
+      "foreground_target_samples": 0,
+      "operating_system_mouse_calls": false,
+      "renderer": "gl_compatibility",
+      "stderr_bytes": 0
+    }
+  },
+  "original_review": {
+    "file": "<仓库外证据根>/attempt1-visual-review.json",
+    "bytes": 19606,
+    "sha256": "7aff3d1d61fe8e1fbc23f2a75559cb25dbc57e00b7acabef701fccb132ef11fb",
+    "portable_copy_note": "仅替换本机路径为占位；保留原件供摘要核对。"
+  }
+}

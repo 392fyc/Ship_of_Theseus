@@ -1,0 +1,195 @@
+{
+  "implementation": "claude_review_checks.py:c4_file",
+  "captures": [
+    {
+      "file": "adjacent-forecast-hidden-1280x720.png",
+      "full_return": {
+        "capture": "adjacent-forecast-hidden-1280x720.png",
+        "scale": 1.0,
+        "panel_colour_rows": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 1,
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        },
+        "pass": true,
+        "sha256": "cb7be0bb93ca371854206d69e023e37fa00b57308cda8645f7925b0ae6d4ecc6"
+      }
+    },
+    {
+      "file": "adjacent-forecast-visible-1280x720.png",
+      "full_return": {
+        "capture": "adjacent-forecast-visible-1280x720.png",
+        "scale": 1.0,
+        "panel_colour_rows": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 1,
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        },
+        "pass": true,
+        "sha256": "92fa128d703c41f95b4a3b581cbe2b8e4f87ef5ad6daadaf64b89067dac5ba17"
+      }
+    },
+    {
+      "file": "camera-pan-zoom-forecast-reshown-1280x720.png",
+      "full_return": {
+        "capture": "camera-pan-zoom-forecast-reshown-1280x720.png",
+        "scale": 1.0,
+        "panel_colour_rows": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 1,
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        },
+        "pass": true,
+        "sha256": "6a56cd4192c3e27670a5aefdeaecd7f89d2ef72e16de9df03cfb5bcca009cc4e"
+      }
+    },
+    {
+      "file": "adjacent-forecast-hidden-1920x1080.png",
+      "full_return": {
+        "capture": "adjacent-forecast-hidden-1920x1080.png",
+        "scale": 1.5,
+        "panel_colour_rows": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 3,
+          "bottom": 2,
+          "left": 2,
+          "right": 1
+        },
+        "pass": true,
+        "sha256": "7e738bab5b24900ce55ddbabe3b18b9e061a0800b4877718ebbeabb1244b7859"
+      }
+    },
+    {
+      "file": "adjacent-forecast-visible-1920x1080.png",
+      "full_return": {
+        "capture": "adjacent-forecast-visible-1920x1080.png",
+        "scale": 1.5,
+        "panel_colour_rows": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 3,
+          "bottom": 2,
+          "left": 2,
+          "right": 1
+        },
+        "pass": true,
+        "sha256": "ece84fa9fda39074b2dec1e75afde0f57b7d2314dd968622b35d16feee71abb8"
+      }
+    },
+    {
+      "file": "camera-pan-zoom-forecast-reshown-1920x1080.png",
+      "full_return": {
+        "capture": "camera-pan-zoom-forecast-reshown-1920x1080.png",
+        "scale": 1.5,
+        "panel_colour_rows": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 3,
+          "bottom": 2,
+          "left": 2,
+          "right": 1
+        },
+        "pass": true,
+        "sha256": "3c7d95f065db50e56c61915c4c459408123e304772ca8cfba965eddb0a104de6"
+      }
+    },
+    {
+      "file": "adjacent-forecast-hidden-2560x1440.png",
+      "full_return": {
+        "capture": "adjacent-forecast-hidden-2560x1440.png",
+        "scale": 2.0,
+        "panel_colour_rows": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 4,
+          "bottom": 3,
+          "left": 3,
+          "right": 3
+        },
+        "pass": true,
+        "sha256": "877d1dbf6ad87a9e82728a179b319a2832c2fb65c49b5f0400da44c4ca5e81ca"
+      }
+    },
+    {
+      "file": "adjacent-forecast-visible-2560x1440.png",
+      "full_return": {
+        "capture": "adjacent-forecast-visible-2560x1440.png",
+        "scale": 2.0,
+        "panel_colour_rows": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 4,
+          "bottom": 3,
+          "left": 3,
+          "right": 3
+        },
+        "pass": true,
+        "sha256": "fddbf55de2364f270fb7e0566b4efab35c4c15adbb967b3e277fa438221febf9"
+      }
+    },
+    {
+      "file": "camera-pan-zoom-forecast-reshown-2560x1440.png",
+      "full_return": {
+        "capture": "camera-pan-zoom-forecast-reshown-2560x1440.png",
+        "scale": 2.0,
+        "panel_colour_rows": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0
+        },
+        "brass_offset": {
+          "top": 4,
+          "bottom": 3,
+          "left": 3,
+          "right": 3
+        },
+        "pass": true,
+        "sha256": "43dc774aa65b90fb0b1d4a6264f346220d3943581b5732ad4f5697d9e3e9418a"
+      }
+    }
+  ],
+  "pass": true
+}

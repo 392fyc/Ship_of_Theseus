@@ -1,0 +1,412 @@
+{
+  "schema": "sot-independent-review/1",
+  "reviewed_at": "2026-10-08",
+  "candidate": {
+    "branch": "codex/ui-ux/cr06-overhead-layout",
+    "head": "a66d7db0c5a040381c7b7c3ccac88141e09133d3",
+    "baseline": "a66d7db0c5a040381c7b7c3ccac88141e09133d3",
+    "attempt": "windows-attempt2",
+    "source_manifest": "<仓库外证据根>\\windows-attempt2\\source-manifest.json",
+    "source_bindings": [
+      {
+        "file": "scripts/units/unit.gd",
+        "current_sha256": "766c0009838c7d767f8d822327ae780f967701f9868eaeb041c64cb5df6a26ce",
+        "frozen_sha256": "766c0009838c7d767f8d822327ae780f967701f9868eaeb041c64cb5df6a26ce",
+        "matches_frozen": true
+      },
+      {
+        "file": "scripts/tactical/tactical_scene.gd",
+        "current_sha256": "24ac9f2315818098ef9b49a6366d0bc126084842fc0f75d61fdb8ad7ecbec2a7",
+        "frozen_sha256": "24ac9f2315818098ef9b49a6366d0bc126084842fc0f75d61fdb8ad7ecbec2a7",
+        "matches_frozen": true
+      },
+      {
+        "file": "scripts/ui/unit_overhead_layout.gd",
+        "current_sha256": "c3026ff8447d9d4019672b765dd24d265ec69755e2b8cdce95dbc84d01576526",
+        "frozen_sha256": "c3026ff8447d9d4019672b765dd24d265ec69755e2b8cdce95dbc84d01576526",
+        "matches_frozen": true
+      },
+      {
+        "file": "tests/test_unit_overhead_layout.gd",
+        "current_sha256": "25c9226f186eeb0cf126ac56c09d73a2e679877e68f263c14512043117f4e3b3",
+        "frozen_sha256": "25c9226f186eeb0cf126ac56c09d73a2e679877e68f263c14512043117f4e3b3",
+        "matches_frozen": true
+      },
+      {
+        "file": "tests/claude_review/capture_cr06_overhead.gd",
+        "current_sha256": "6a8bb7dafd3021f354698bea9b6f26f9e2e9d7e65dea199e1a48d3c67a3f1901",
+        "frozen_sha256": "6a8bb7dafd3021f354698bea9b6f26f9e2e9d7e65dea199e1a48d3c67a3f1901",
+        "matches_frozen": true
+      },
+      {
+        "file": "tests/claude_review/run_cr06_windows_overhead.ps1",
+        "current_sha256": "7a42614a0a798fbfeb3e755efbfda3a334ccfa391fe792ff995f75551bb6e366",
+        "frozen_sha256": "7a42614a0a798fbfeb3e755efbfda3a334ccfa391fe792ff995f75551bb6e366",
+        "matches_frozen": true
+      }
+    ],
+    "project_godot": {
+      "current_sha256": "c8c44d7453ff3d443eee7a25f5b5112687077d40705f6ea67982443ab94cddf6",
+      "frozen_sha256": "c8c44d7453ff3d443eee7a25f5b5112687077d40705f6ea67982443ab94cddf6",
+      "head_git_blob": "03d7120b0c38f7b00073c6b532a02a48977464f6",
+      "clean_worktree_git_blob": "03d7120b0c38f7b00073c6b532a02a48977464f6",
+      "content_unchanged_from_head": true,
+      "matches_frozen": true
+    }
+  },
+  "verdict": "partial",
+  "review_scope": "CR-06 现有单位头顶名牌、血条、血量和预测布局的候选代码与 Windows attempt2 原始图/同帧状态；本结论不代表 Task 或 Milestone 完成。",
+  "criteriaResults": [
+    {
+      "criterion": "正式 courtyard 10x10 场景及合法相邻单位复现；不改地形或玩法值",
+      "verdict": "pass",
+      "evidence": "attempt2/captures/*.json: 9 个状态记录均为 10x10、原始 enemy spawn [9,9]、fixture spawn [0,1]、terrain_modified=false、gameplay_values_modified=false。"
+    },
+    {
+      "criterion": "默认血量可见；预测显示/隐藏和目标归属正确，信息仍与单位对应",
+      "verdict": "pass",
+      "evidence": "9 个状态文件：hidden/visible/camera-pan-zoom-reshown 三组各 3 档；目标为 test_lancer，预测值 9 与 sword glyph 绑定目标，HP 26/26 可读，overhead_group_name 对应 unit instance_id。"
+    },
+    {
+      "criterion": "血条不宽于实际投影身体，逻辑高度 4；同单位成组、相邻信息和身体避让",
+      "verdict": "pass",
+      "evidence": "独立重算 captures/*.json 的 18 个实际 layout_units：0 几何失败；血条宽度不超 body_rect，height=4，group 包含实际控件矩形，同组控件不相交，跨单位 group 不相交且不压住邻单位身体。"
+    },
+    {
+      "criterion": "镜头移动、缩放及三档窗口下信息跟随；静止布局稳定；死亡/销毁清理",
+      "verdict": "pass",
+      "evidence": "三档原图含 camera-pan-zoom-forecast-reshown；tests/test_unit_overhead_layout.gd 覆盖 resize、camera、stable layout、death cleanup、scene teardown；layout-test-final.stdout.txt: 3853 过 / 0 失败，ALL PASS。"
+    },
+    {
+      "criterion": "9 张原始图与实际矩形在同一次 frame_post_draw 绑定并按实际尺寸记录",
+      "verdict": "pass",
+      "evidence": "windows-attempt2/captures/capture-metadata.json 和逐图 JSON：9/9 start=end 且 phase=frame_post_draw；逐张核对 PNG/状态 SHA256、requested_window_size、image_size 与实际 body/group/name/bar/HP/forecast rect；三档均为 1280x720、1920x1080、2560x1440。"
+    },
+    {
+      "criterion": "C4 与 C8 同批运行并通过",
+      "verdict": "pass",
+      "evidence": "attempt2 项目 run overlay 的 c4-raw-output.json: 9/9 captures pass；c8-raw-output.json: 28 scripts pass、manifest pass；Windows import、headless-api、windows-overhead 均 exit 0，无超时。"
+    },
+    {
+      "criterion": "冻结源集合与项目配置绑定无漂移",
+      "verdict": "pass",
+      "evidence": "六个当前源文件 SHA256 与 attempt2/source-manifest.json 逐项匹配；project.godot 当前 SHA256 与清单匹配，HEAD/worktree Git blob 相同。"
+    },
+    {
+      "criterion": "Task 完成所需本地提交回读",
+      "verdict": "partial",
+      "evidence": "本审查绑定冻结候选源码快照；当前未提供该候选的本地提交回读结果。"
+    }
+  ],
+  "evidence": {
+    "captures": [
+      {
+        "image": "adjacent-forecast-hidden-1280x720.png",
+        "state": "adjacent-forecast-hidden-1280x720.json",
+        "image_sha256": "cb7be0bb93ca371854206d69e023e37fa00b57308cda8645f7925b0ae6d4ecc6",
+        "state_sha256": "695a22fad8510f58e75ebe07d736301b8b764c7c48857b2fbd9bcc86100e9fae",
+        "recorded_image_sha256": "cb7be0bb93ca371854206d69e023e37fa00b57308cda8645f7925b0ae6d4ecc6",
+        "recorded_state_sha256": "695a22fad8510f58e75ebe07d736301b8b764c7c48857b2fbd9bcc86100e9fae",
+        "image_hash_matches_record": true,
+        "state_hash_matches_record": true,
+        "dimensions": "1280x720",
+        "case": "adjacent-forecast-hidden",
+        "frame_binding": {
+          "end": 76,
+          "phase": "frame_post_draw",
+          "start": 76
+        },
+        "two_units": true,
+        "forecast_visible": false,
+        "target": "test_lancer",
+        "requested_mouse": [
+          20.0,
+          100.0
+        ],
+        "actual_viewport_mouse": [
+          13109.0,
+          13045.0
+        ]
+      },
+      {
+        "image": "adjacent-forecast-visible-1280x720.png",
+        "state": "adjacent-forecast-visible-1280x720.json",
+        "image_sha256": "92fa128d703c41f95b4a3b581cbe2b8e4f87ef5ad6daadaf64b89067dac5ba17",
+        "state_sha256": "b073474608f06d5e10afcb80ade77440609dd1588d830c8a0fe355c8ff4e82bb",
+        "recorded_image_sha256": "92fa128d703c41f95b4a3b581cbe2b8e4f87ef5ad6daadaf64b89067dac5ba17",
+        "recorded_state_sha256": "b073474608f06d5e10afcb80ade77440609dd1588d830c8a0fe355c8ff4e82bb",
+        "image_hash_matches_record": true,
+        "state_hash_matches_record": true,
+        "dimensions": "1280x720",
+        "case": "adjacent-forecast-visible",
+        "frame_binding": {
+          "end": 88,
+          "phase": "frame_post_draw",
+          "start": 88
+        },
+        "two_units": true,
+        "forecast_visible": true,
+        "target": "test_lancer",
+        "requested_mouse": [
+          510.559997558594,
+          235.040008544922
+        ],
+        "actual_viewport_mouse": [
+          13109.0,
+          13045.0
+        ]
+      },
+      {
+        "image": "camera-pan-zoom-forecast-reshown-1280x720.png",
+        "state": "camera-pan-zoom-forecast-reshown-1280x720.json",
+        "image_sha256": "6a56cd4192c3e27670a5aefdeaecd7f89d2ef72e16de9df03cfb5bcca009cc4e",
+        "state_sha256": "fe8609a1214685f29ae5ac0fcb66b963ddc01a1163358d5cf2fd9b7840af8e8d",
+        "recorded_image_sha256": "6a56cd4192c3e27670a5aefdeaecd7f89d2ef72e16de9df03cfb5bcca009cc4e",
+        "recorded_state_sha256": "fe8609a1214685f29ae5ac0fcb66b963ddc01a1163358d5cf2fd9b7840af8e8d",
+        "image_hash_matches_record": true,
+        "state_hash_matches_record": true,
+        "dimensions": "1280x720",
+        "case": "camera-pan-zoom-forecast-reshown",
+        "frame_binding": {
+          "end": 112,
+          "phase": "frame_post_draw",
+          "start": 112
+        },
+        "two_units": true,
+        "forecast_visible": true,
+        "target": "test_lancer",
+        "requested_mouse": [
+          408.473571777344,
+          263.321594238281
+        ],
+        "actual_viewport_mouse": [
+          12369.0,
+          12709.0
+        ]
+      },
+      {
+        "image": "adjacent-forecast-hidden-1920x1080.png",
+        "state": "adjacent-forecast-hidden-1920x1080.json",
+        "image_sha256": "7e738bab5b24900ce55ddbabe3b18b9e061a0800b4877718ebbeabb1244b7859",
+        "state_sha256": "d6226a763639482b6900b31dfe156ba5b730183c2157d389a54dcd92bdb04775",
+        "recorded_image_sha256": "7e738bab5b24900ce55ddbabe3b18b9e061a0800b4877718ebbeabb1244b7859",
+        "recorded_state_sha256": "d6226a763639482b6900b31dfe156ba5b730183c2157d389a54dcd92bdb04775",
+        "image_hash_matches_record": true,
+        "state_hash_matches_record": true,
+        "dimensions": "1920x1080",
+        "case": "adjacent-forecast-hidden",
+        "frame_binding": {
+          "end": 195,
+          "phase": "frame_post_draw",
+          "start": 195
+        },
+        "two_units": true,
+        "forecast_visible": false,
+        "target": "test_lancer",
+        "requested_mouse": [
+          20.0,
+          100.0
+        ],
+        "actual_viewport_mouse": [
+          8421.3330078125,
+          8410.0
+        ]
+      },
+      {
+        "image": "adjacent-forecast-visible-1920x1080.png",
+        "state": "adjacent-forecast-visible-1920x1080.json",
+        "image_sha256": "ece84fa9fda39074b2dec1e75afde0f57b7d2314dd968622b35d16feee71abb8",
+        "state_sha256": "16bfb689d48df1026c90bd3cce07f225f45450704de2693756b8fd8d4e8ca497",
+        "recorded_image_sha256": "ece84fa9fda39074b2dec1e75afde0f57b7d2314dd968622b35d16feee71abb8",
+        "recorded_state_sha256": "16bfb689d48df1026c90bd3cce07f225f45450704de2693756b8fd8d4e8ca497",
+        "image_hash_matches_record": true,
+        "state_hash_matches_record": true,
+        "dimensions": "1920x1080",
+        "case": "adjacent-forecast-visible",
+        "frame_binding": {
+          "end": 207,
+          "phase": "frame_post_draw",
+          "start": 207
+        },
+        "two_units": true,
+        "forecast_visible": true,
+        "target": "test_lancer",
+        "requested_mouse": [
+          510.559997558594,
+          235.040008544922
+        ],
+        "actual_viewport_mouse": [
+          8421.3330078125,
+          8410.0
+        ]
+      },
+      {
+        "image": "camera-pan-zoom-forecast-reshown-1920x1080.png",
+        "state": "camera-pan-zoom-forecast-reshown-1920x1080.json",
+        "image_sha256": "3c7d95f065db50e56c61915c4c459408123e304772ca8cfba965eddb0a104de6",
+        "state_sha256": "77ce57118694b69bb9fa11afc1b86a351389ad8dd143f052e9c48c0e479b90b2",
+        "recorded_image_sha256": "3c7d95f065db50e56c61915c4c459408123e304772ca8cfba965eddb0a104de6",
+        "recorded_state_sha256": "77ce57118694b69bb9fa11afc1b86a351389ad8dd143f052e9c48c0e479b90b2",
+        "image_hash_matches_record": true,
+        "state_hash_matches_record": true,
+        "dimensions": "1920x1080",
+        "case": "camera-pan-zoom-forecast-reshown",
+        "frame_binding": {
+          "end": 231,
+          "phase": "frame_post_draw",
+          "start": 231
+        },
+        "two_units": true,
+        "forecast_visible": true,
+        "target": "test_lancer",
+        "requested_mouse": [
+          408.473571777344,
+          263.321594238281
+        ],
+        "actual_viewport_mouse": [
+          8421.3330078125,
+          8410.0
+        ]
+      },
+      {
+        "image": "adjacent-forecast-hidden-2560x1440.png",
+        "state": "adjacent-forecast-hidden-2560x1440.json",
+        "image_sha256": "877d1dbf6ad87a9e82728a179b319a2832c2fb65c49b5f0400da44c4ca5e81ca",
+        "state_sha256": "d8ad3fc0583ad89f3d5f3d65a3f9e2050af71e2c29a5c29e6c0695cb7f3fffca",
+        "recorded_image_sha256": "877d1dbf6ad87a9e82728a179b319a2832c2fb65c49b5f0400da44c4ca5e81ca",
+        "recorded_state_sha256": "d8ad3fc0583ad89f3d5f3d65a3f9e2050af71e2c29a5c29e6c0695cb7f3fffca",
+        "image_hash_matches_record": true,
+        "state_hash_matches_record": true,
+        "dimensions": "2560x1440",
+        "case": "adjacent-forecast-hidden",
+        "frame_binding": {
+          "end": 314,
+          "phase": "frame_post_draw",
+          "start": 314
+        },
+        "two_units": true,
+        "forecast_visible": false,
+        "target": "test_lancer",
+        "requested_mouse": [
+          20.0,
+          100.0
+        ],
+        "actual_viewport_mouse": [
+          6651.5,
+          6511.5
+        ]
+      },
+      {
+        "image": "adjacent-forecast-visible-2560x1440.png",
+        "state": "adjacent-forecast-visible-2560x1440.json",
+        "image_sha256": "fddbf55de2364f270fb7e0566b4efab35c4c15adbb967b3e277fa438221febf9",
+        "state_sha256": "47c7a016096c514e3272769284d2984a267c6d14d90c5b0e04c3fe02e7bb056c",
+        "recorded_image_sha256": "fddbf55de2364f270fb7e0566b4efab35c4c15adbb967b3e277fa438221febf9",
+        "recorded_state_sha256": "47c7a016096c514e3272769284d2984a267c6d14d90c5b0e04c3fe02e7bb056c",
+        "image_hash_matches_record": true,
+        "state_hash_matches_record": true,
+        "dimensions": "2560x1440",
+        "case": "adjacent-forecast-visible",
+        "frame_binding": {
+          "end": 326,
+          "phase": "frame_post_draw",
+          "start": 326
+        },
+        "two_units": true,
+        "forecast_visible": true,
+        "target": "test_lancer",
+        "requested_mouse": [
+          510.559997558594,
+          235.040008544922
+        ],
+        "actual_viewport_mouse": [
+          6797.5,
+          6454.5
+        ]
+      },
+      {
+        "image": "camera-pan-zoom-forecast-reshown-2560x1440.png",
+        "state": "camera-pan-zoom-forecast-reshown-2560x1440.json",
+        "image_sha256": "43dc774aa65b90fb0b1d4a6264f346220d3943581b5732ad4f5697d9e3e9418a",
+        "state_sha256": "30921bb8de7e34aa6605250f6b829097f51b489ab52b5aff511cce9e3f2986dd",
+        "recorded_image_sha256": "43dc774aa65b90fb0b1d4a6264f346220d3943581b5732ad4f5697d9e3e9418a",
+        "recorded_state_sha256": "30921bb8de7e34aa6605250f6b829097f51b489ab52b5aff511cce9e3f2986dd",
+        "image_hash_matches_record": true,
+        "state_hash_matches_record": true,
+        "dimensions": "2560x1440",
+        "case": "camera-pan-zoom-forecast-reshown",
+        "frame_binding": {
+          "end": 350,
+          "phase": "frame_post_draw",
+          "start": 350
+        },
+        "two_units": true,
+        "forecast_visible": true,
+        "target": "test_lancer",
+        "requested_mouse": [
+          408.473571777344,
+          263.321594238281
+        ],
+        "actual_viewport_mouse": [
+          6749.0,
+          6311.5
+        ]
+      }
+    ],
+    "unit_count": 18,
+    "geometry_failure_count": 0,
+    "geometry_failures": [],
+    "c4_pass": true,
+    "c8_pass": true,
+    "layout_test_pass": true,
+    "windows_commands": {
+      "windows-overhead": {
+        "exit_code": 0,
+        "timed_out": false,
+        "renderer": "gl_compatibility",
+        "foreground_target_samples": 0,
+        "operating_system_mouse_calls": false,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "headless-api": {
+        "exit_code": 0,
+        "timed_out": false,
+        "renderer": "gl_compatibility",
+        "foreground_target_samples": 0,
+        "operating_system_mouse_calls": false,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "import": {
+        "exit_code": 0,
+        "timed_out": false,
+        "renderer": "gl_compatibility",
+        "foreground_target_samples": 0,
+        "operating_system_mouse_calls": false,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "original_png_directory": "<仓库外证据根>\\windows-attempt2\\captures",
+    "c4": "<仓库外证据根>\\windows-attempt2\\project\\dev_doc\\ui-art-research\\battle-ui-acceptance\\runs\\2026-10-08-cr06-overhead\\c4-raw-output.json",
+    "c8": "<仓库外证据根>\\windows-attempt2\\project\\dev_doc\\ui-art-research\\battle-ui-acceptance\\runs\\2026-10-08-cr06-overhead\\c8-raw-output.json",
+    "frame_and_layout": "<仓库外证据根>\\windows-attempt2\\project\\dev_doc\\ui-art-research\\battle-ui-acceptance\\runs\\2026-10-08-cr06-overhead\\frame-and-layout-verification.json",
+    "capture_source_gate_attempt2": "<仓库外证据根>/capture-source-review-attempt2.json"
+  },
+  "findings": [
+    "CR-40 DamageForecaster 浮窗与试战工具栏在部分截图中相交，属于后续 CR-40 范围，本次不声称已修复。",
+    "本批只使用离屏 Viewport.push_input；记录了请求坐标与实际 viewport mouse 坐标，但没有验收系统鼠标悬停或 Dot 实际交互。",
+    "Task 本地提交回读尚未纳入本次候选审查结论。"
+  ],
+  "recommendations": [
+    "将本次通过结论绑定到冻结候选提交后，再单独核对本地提交回读；按已定路线另行处理 CR-40 与系统鼠标复测。"
+  ],
+  "limitations": [
+    "本结论是 CR-06 现有单位头顶布局的候选代码/原图验收，不表示用户整体视觉批准、完整 CR-06 新棋子制作、PR/发布或 P0/CR-01 Milestone 完成。"
+  ],
+  "candidate_review_verdict": "pass",
+  "original_report": {
+    "file": "<仓库外证据根>/independent-review.json",
+    "bytes": 18437,
+    "sha256": "456886e10f27f0d18480920da8b0927e72875099558dc2060178db93ec14583d",
+    "portable_copy": "本副本仅替换本机外部根；原始报告摘要保留。"
+  }
+}
