@@ -1,0 +1,143 @@
+{
+  "task_id": "CR-10-LOCAL-FONT-IMPLEMENTATION-AND-WINDOWS-PACKAGING",
+  "status": "completed",
+  "completion_scope": "Local implementation, cold import and Windows package/font consumption technical subtask only",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/ui-ux/cr10-chinese-font",
+  "target_head_before": "d18bd3d6bb3ce507112674e5f3a0aed7fc23f079",
+  "candidate_head": "21a77b91818fe0b71f5d9fbe684cc942250db0e2",
+  "candidate_tree": "682dd3579db930b4331f99b173b101cd984cce3c",
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "Independent review before commit; no local GUI or user mouse; local commit only, publication awaiting user arrangement."
+    },
+    {
+      "contract": "dev_doc/ui-art-research/claude-review/claude-change-requests.md#CR-10",
+      "summary": "Bundle licensed Chinese fonts, close system fallback, retain Latin/numeric style, verify Windows package and three-resolution visuals."
+    },
+    {
+      "contract": "sot-task-receipt",
+      "summary": "Separate technical completion from pending cloud/local visual acceptance and milestone completion."
+    }
+  ],
+  "changed_files": [
+    "assets/fonts/noto_emoji/.gitattributes",
+    "assets/fonts/noto_emoji/LICENSE.txt",
+    "assets/fonts/noto_emoji/NotoEmoji-Regular-400-subset.ttf",
+    "assets/fonts/noto_emoji/source.json",
+    "assets/fonts/noto_sans_cjk_sc/.gitattributes",
+    "assets/fonts/noto_sans_cjk_sc/LICENSE.txt",
+    "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Regular-subset.otf",
+    "assets/fonts/noto_sans_cjk_sc/source.json",
+    "assets/fonts/noto_sans_symbols/.gitattributes",
+    "assets/fonts/noto_sans_symbols/LICENSE.txt",
+    "assets/fonts/noto_sans_symbols/NotoSansSymbols-Regular-subset.ttf",
+    "assets/fonts/noto_sans_symbols/NotoSansSymbols2-Regular-subset.ttf",
+    "assets/fonts/noto_sans_symbols/source.json",
+    "assets/ui/themes/default_font.tres",
+    "assets/ui/themes/hud_m2.tres",
+    "assets/ui/themes/hud_m2_cjk_font.tres",
+    "assets/ui/themes/hud_m2_emoji_font.tres",
+    "assets/ui/themes/hud_m2_fonts.tres",
+    "assets/ui/themes/hud_m2_frozen_font.tres",
+    "assets/ui/themes/hud_m2_symbols2_font.tres",
+    "assets/ui/themes/hud_m2_symbols_font.tres",
+    "assets/ui/themes/hud_structure_prototype.tres",
+    "dev_doc/ui-art-research/battle-ui-acceptance/cr10/font-packaging.md",
+    "dev_doc/ui-art-research/battle-ui-acceptance/cr10/implementation-review.json",
+    "project.godot",
+    "scripts/codex/build-windows-release.ps1",
+    "scripts/ui/font_setup.gd",
+    "scripts/ui/hud/m2/hud_font_setup.gd",
+    "tests/claude_review/build_cr10_font_subset.py",
+    "tests/claude_review/capture_cr10_font_frames.gd",
+    "tests/claude_review/cr10_font_runtime_check.gd",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/windows-package-verification.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/frozen-inputs.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/windows-package-independent-review.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-07-cr10-font/technical-task-receipt.json"
+  ],
+  "verification": [
+    {
+      "command": "deterministic font subset generator and cmap/coverage checks",
+      "result": "pass",
+      "evidence": "GB2312=7445; current game strings=1232; union=7476; four subsets and official licenses exact; implementation-review.json."
+    },
+    {
+      "command": "fresh cold archive: Godot headless import, runtime and formal10x10 binding",
+      "result": "pass",
+      "evidence": "Independent cold serial import exit0; runtime failed=0; frozen32px metrics unchanged; implementation-review.json cold_import_fix_review."
+    },
+    {
+      "command": "build-windows-release.ps1 -PreviewClass myrmidon (no CaptureVisual)",
+      "result": "pass",
+      "evidence": "windows-package-verification.json; ZIP75927000bytes; Compatibility; seven licenses; smoke exit0."
+    },
+    {
+      "command": "godot --headless --main-pack <仓库外证据根>/windows-release-21a77b9/dist/ShipOfTheseus.pck --script <仓库外证据根>/pck-font-runtime-check.gd --rendering-method gl_compatibility",
+      "result": "pass",
+      "evidence": "Main and independent actual PCK checks exit0, failed=0, no ERROR; matching full stdout/stderr hashes."
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "Licensed bundled font coverage, runtime no system fallback, frozen numeric metrics",
+      "result": "pass",
+      "evidence": [
+        "cr10/implementation-review.json"
+      ]
+    },
+    {
+      "criterion": "Windows package includes fontdata and exact licenses; actual PCK consumes font chains",
+      "result": "pass",
+      "evidence": [
+        "windows-package-verification.json",
+        "windows-package-independent-review.json"
+      ]
+    },
+    {
+      "criterion": "Three-resolution formal-scene font pixels and line wrapping",
+      "result": "pending_cloud",
+      "evidence": [
+        "frozen-inputs.json; ACK verified, not domain acceptance"
+      ]
+    },
+    {
+      "criterion": "Windows pixel appearance and hardware",
+      "result": "not_tested",
+      "local_required": true
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "gameplay data, combat code, bitmap art, HUD geometry, old G4 batch",
+      "result": "unchanged",
+      "evidence": "31 candidate paths are restricted to fonts/themes/font setup/package/test tools/docs; no gameplay, image or old run changes."
+    },
+    {
+      "subject": "main game checkout",
+      "result": "unchanged",
+      "evidence": "Main HEAD d18bd3d6bb3ce507112674e5f3a0aed7fc23f079; git status --short empty."
+    }
+  ],
+  "residual_risks": [
+    "CR-10 overall remains incomplete pending cloud pixels and Windows appearance.",
+    "Mixed-font metrics and monochrome symbols require visual acceptance.",
+    "Parallel cold import native crash cause remains unconfirmed; serial import may cost time.",
+    "CR-24, CR-40 additional-position avoidance and TERRAIN-READABILITY-01 remain unresolved."
+  ],
+  "escalation_reason": null,
+  "whole_cr10_completed": false,
+  "whole_ui_completed": false,
+  "p0_cr01_milestone_completed": false,
+  "target_head": "21a77b91818fe0b71f5d9fbe684cc942250db0e2",
+  "source_schema_version": "unversioned",
+  "source_snapshot_or_commit": "21a77b91818fe0b71f5d9fbe684cc942250db0e2",
+  "normalized_digest": "not applicable; exact per-font and package SHA256 recorded instead",
+  "publication": {
+    "published": false,
+    "remote_ref": null,
+    "pr": null
+  }
+}

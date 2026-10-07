@@ -1,0 +1,78 @@
+{
+  "schema": "sot-frozen-font-cloud-inputs/1",
+  "task_id": "6f545bcc-9f5f-464d-9121-268410a71f02",
+  "request_id": "eb54a45c-070d-4ae5-affe-0e16011297d3",
+  "source_thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9",
+  "recipient_thread_id": "01a0f14d-b108-766c-a16a-eb31b6d9a00d",
+  "page_id": "page_19e4dc76712c8191b13b01673dd33c13",
+  "candidate_commit": "21a77b91818fe0b71f5d9fbe684cc942250db0e2",
+  "signed_body_sha256": "97716fdcc155728bf1c6480f261cfac2778a3c62e2c4f5d5327abb5921541f2d",
+  "candidate_tree": "682dd3579db930b4331f99b173b101cd984cce3c",
+  "source_count": 658,
+  "unchanged_source_count": 627,
+  "source_manifest": {
+    "file": "candidate-source-manifest.json",
+    "bytes": 185714,
+    "sha256": "b09b52cc829e4b1153f176ce697bc083e7ab0526ee50b7251874e3e83ed15646"
+  },
+  "signed_envelope": {
+    "file": "task-envelope.json",
+    "bytes": 20758,
+    "sha256": "a7fa4ade3ec716beff9ed1c2dd3ac38443a8755856f7f25e76b42d41143f223e",
+    "page_id": "page_19e4dc76712c8191b13b01673dd33c13",
+    "reference": "library-file:fde1_bGliZmlsZV9CVlpBNHpnTUJjcVNyMVVuQTNLbG93_FileDrive_6af57ca9c23c819184d2e6b479d22dac"
+  },
+  "dispatch_state": "sent; ACK exact-byte readback and native YC source verified; Godot execution result pending",
+  "case": {
+    "map": "courtyard",
+    "size": [
+      10,
+      10
+    ],
+    "scene": "TacticalScene",
+    "basic_swordsman_marks": false,
+    "input": "script warp/push_input; not physical mouse",
+    "groups": [
+      "font-normal",
+      "font-skill-tooltip",
+      "font-portrait-inspection"
+    ],
+    "resolutions": [
+      [
+        1280,
+        720
+      ],
+      [
+        1920,
+        1080
+      ],
+      [
+        2560,
+        1440
+      ]
+    ],
+    "expected_png": 9,
+    "expected_state": 9,
+    "required_checks": [
+      "C4 each portrait PNG",
+      "C8 manifest",
+      "font runtime check failed=0",
+      "same-frame state and glyph/line-wrap visual review"
+    ]
+  },
+  "publication": {
+    "published": false
+  },
+  "ack": {
+    "file": "font-ack.json",
+    "bytes": 6273,
+    "sha256": "cc63a06013a7fda018137c82265e4ba0d32cb1127a125967566fe5aae02ac188",
+    "page_id": "page_19e4dc76712c8191b13b01673dd33c13",
+    "reference": "library-file:fde1_bGliZmlsZV9Lck52aUNXWkxfUUxTY1oxeTMxS2l3_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+    "verified_native_source_thread_id": "01a0f14d-b108-766c-a16a-eb31b6d9a00d",
+    "native_turn_id": "01a11434-d083-70c5-a1f3-b88a8b9ccac1",
+    "native_call_id": "exec-fe52f420-6cb5-41db-945c-f09bd510cc94",
+    "execution_count_at_ack": 0,
+    "meaning": "receipt, signature, authorization and frozen inputs only; no domain PASS"
+  }
+}

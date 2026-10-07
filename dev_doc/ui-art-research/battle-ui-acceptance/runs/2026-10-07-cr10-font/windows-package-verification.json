@@ -1,0 +1,214 @@
+{
+  "schema": "sot-windows-font-package-verification/1",
+  "candidate_commit": "21a77b91818fe0b71f5d9fbe684cc942250db0e2",
+  "candidate_tree": "682dd3579db930b4331f99b173b101cd984cce3c",
+  "source_commit_scope": "local reviewed candidate; no push or PR",
+  "build": {
+    "status": "pass",
+    "source_commit": "21a77b91818fe0b71f5d9fbe684cc942250db0e2",
+    "configured_renderer": "gl_compatibility",
+    "capture_configuration": null,
+    "preview_class": "myrmidon",
+    "preview_audit_status": "pass",
+    "engine_version": "4.6.3.stable.official.7d41c59c4",
+    "template_archive_sha256": "3fbe2c0e2dec9d537ab9ec97bcf8da91dcf23357fc51f67092dd068d839290a8",
+    "executable_sha256": "fda69ad440435bd93d7c0dfcc43f717badd5e051f1b3a19d60aa281e526b8cab",
+    "resource_pck_sha256": "49a64a0e21b1250b253883eeae424fac736ef16e60da93ce8638fac9ef35bec1",
+    "package_zip_sha256": "d7c8792d329a37550bb68186bb9c07a80480cc062b8441a574ab3992ec8c2df8",
+    "package_zip_bytes": 75927000,
+    "icon_audit_sha256": "245d7a0e04e4870c857f34a2814acc3221f5067ca77d09d378023169b936cc34",
+    "icon_count": 5,
+    "excluded_addon_entries": 0,
+    "license_files": [
+      "GODOT_LICENSE.txt",
+      "GODOT_COPYRIGHT.txt",
+      "IBM_PLEX_MONO_LICENSE.txt",
+      "SOURCE_SANS_PRO_LICENSE.txt",
+      "NOTO_SANS_CJK_SC_LICENSE.txt",
+      "NOTO_SANS_SYMBOLS_LICENSE.txt",
+      "NOTO_EMOJI_LICENSE.txt"
+    ],
+    "smoke_exit_code": 0,
+    "visual_sha256": {}
+  },
+  "pck_font_consumption": {
+    "actual_source": "exported PCK mounted; external test script outside package",
+    "exit_code": 0,
+    "error_count": 0,
+    "runtime_pass": true,
+    "stdout_sha256": "879953a927791365b94768f62f4a8064e863d3c443ad19cf38e9cdc33e269cc3",
+    "stderr_sha256": "19519abd1b30220c4e2418168e7c9c1338d23b59a5cac81fdd49e66135fe80a7",
+    "script_sha256": "73e4cc7a7a75df9b9171b6f79de087b0644a5e00ac3e8388038d9bb67e80a87b"
+  },
+  "pck_check_command": "godot --headless --main-pack <仓库外证据根>/windows-release-21a77b9/dist/ShipOfTheseus.pck --script <仓库外证据根>/pck-font-runtime-check.gd --rendering-method gl_compatibility",
+  "font_remaps": [
+    {
+      "source": "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Regular-subset.otf",
+      "import_remap": "assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Regular-subset.otf.import",
+      "remap_sha256": "78d97b8eef98fd0d630f8391914ad3aa547dcf2d7f53fee0f2d4e4d3e2c86e09",
+      "fontdata": ".godot/imported/NotoSansCJKsc-Regular-subset.otf-6a462bceba51e83fd9503b7af8b5d062.fontdata",
+      "fontdata_bytes": 3012801,
+      "fontdata_sha256": "4e67c7102237cff8de69beebbfc0f1cb7da00d120b9123b7cc050b6c88604576"
+    },
+    {
+      "source": "assets/fonts/noto_sans_symbols/NotoSansSymbols2-Regular-subset.ttf",
+      "import_remap": "assets/fonts/noto_sans_symbols/NotoSansSymbols2-Regular-subset.ttf.import",
+      "remap_sha256": "f4cd94cd7f6535ae2141d7ba667a3ab695a256f06e53d1191bbe3ba215e4b64d",
+      "fontdata": ".godot/imported/NotoSansSymbols2-Regular-subset.ttf-7170039c8e140c28aa0db1d37cf30928.fontdata",
+      "fontdata_bytes": 5196,
+      "fontdata_sha256": "d9c71791a51f16c41842e28f5ffaedca8786ac88aeb6a7886b4675631c814b1c"
+    },
+    {
+      "source": "assets/fonts/noto_sans_symbols/NotoSansSymbols-Regular-subset.ttf",
+      "import_remap": "assets/fonts/noto_sans_symbols/NotoSansSymbols-Regular-subset.ttf.import",
+      "remap_sha256": "80e0b20dd5723ee7321846009728fa3b6547f9345635340b810c3e9b2d45f124",
+      "fontdata": ".godot/imported/NotoSansSymbols-Regular-subset.ttf-06ae387855d5a94865d0310c52c346b5.fontdata",
+      "fontdata_bytes": 4380,
+      "fontdata_sha256": "f376ac162294ea296e499eaa34d84fe39ede4dc8e64fac7f473aa4d3b3ef067e"
+    },
+    {
+      "source": "assets/fonts/noto_emoji/NotoEmoji-Regular-400-subset.ttf",
+      "import_remap": "assets/fonts/noto_emoji/NotoEmoji-Regular-400-subset.ttf.import",
+      "remap_sha256": "dd6599c8bc228f2ec0aa08b1d04562990ab2a76af12b48608944f2a764e2e497",
+      "fontdata": ".godot/imported/NotoEmoji-Regular-400-subset.ttf-299c0ff05b98af860a653cdbdf35fb31.fontdata",
+      "fontdata_bytes": 2429,
+      "fontdata_sha256": "934023f69a739246b5055883385a3a5565659b183fff88789288314656041c67"
+    }
+  ],
+  "noto_licenses": [
+    {
+      "file": "dist/licenses/NOTO_EMOJI_LICENSE.txt",
+      "bytes": 4330,
+      "sha256": "500bb1ccf43df7bbb522112f9133a52b16e1c35e809632f5d8609b179152de5b"
+    },
+    {
+      "file": "dist/licenses/NOTO_SANS_CJK_SC_LICENSE.txt",
+      "bytes": 4301,
+      "sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+    },
+    {
+      "file": "dist/licenses/NOTO_SANS_SYMBOLS_LICENSE.txt",
+      "bytes": 4377,
+      "sha256": "0dab92d0544f7b233403f14b84a663bdbfa746982eda629e7f4f9ffe1b036feb"
+    }
+  ],
+  "raw_evidence_root": "<仓库外证据根>",
+  "raw_logs": [
+    {
+      "file": "windows-release-21a77b9/logs/export.log",
+      "bytes": 71495,
+      "sha256": "b053b4881c4a743f5b08b599f7d2393d749363bf10a1ade55f52795339ffece6"
+    },
+    {
+      "file": "windows-release-21a77b9/logs/import.log",
+      "bytes": 24615,
+      "sha256": "3d670593319ee56829d951ffc99b84ddc00c713873e22adf60922607fc1661d6"
+    },
+    {
+      "file": "windows-release-21a77b9/logs/myrmidon-preview-check.log",
+      "bytes": 450,
+      "sha256": "56990f221c3527c851eb691da1eb84ab5e957f1daca9510b57873a4e9581318b"
+    },
+    {
+      "file": "windows-release-21a77b9/logs/pack.log",
+      "bytes": 75159,
+      "sha256": "b429bf88de280074a746b8718af93142e15e100ca998125da51a983357ad4598"
+    },
+    {
+      "file": "windows-release-21a77b9/logs/pck-font-runtime.stderr.log",
+      "bytes": 361,
+      "sha256": "19519abd1b30220c4e2418168e7c9c1338d23b59a5cac81fdd49e66135fe80a7"
+    },
+    {
+      "file": "windows-release-21a77b9/logs/pck-font-runtime.stdout.log",
+      "bytes": 987,
+      "sha256": "879953a927791365b94768f62f4a8064e863d3c443ad19cf38e9cdc33e269cc3"
+    },
+    {
+      "file": "windows-release-21a77b9/logs/smoke.stderr.log",
+      "bytes": 127,
+      "sha256": "8f73c892f0adc99f41fa480c0569eb3b12c411f02671fa2a3ab2f8707e231920"
+    },
+    {
+      "file": "windows-release-21a77b9/logs/smoke.stdout.log",
+      "bytes": 416,
+      "sha256": "635c2678bc3cd9fd00298837f7ed7b4314addcbfa2ef5c4369372708b5bbc9d0"
+    }
+  ],
+  "raw_files": [
+    {
+      "file": "windows-release-21a77b9/release-build.json",
+      "bytes": 1154,
+      "sha256": "4531f40f497c6cabff821b64d7c5ac6c05ceb693325121e83b2422d61f5d5334"
+    },
+    {
+      "file": "windows-release-21a77b9/pck-font-runtime.json",
+      "bytes": 777,
+      "sha256": "b39dcf37a373873531e6e09ed46c4b72c813e2e3c9da5962499dbbf540c0f3ae"
+    },
+    {
+      "file": "windows-release-21a77b9/resource-audit.zip",
+      "bytes": 38831010,
+      "sha256": "245d7a0e04e4870c857f34a2814acc3221f5067ca77d09d378023169b936cc34"
+    },
+    {
+      "file": "windows-release-21a77b9/source-snapshot.zip",
+      "bytes": 48451379,
+      "sha256": "b59af457379d6c39ea4435769eb7e6c191875c99a090631ffb1bc0600dac16e9"
+    },
+    {
+      "file": "windows-release-21a77b9/ShipOfTheseus-MyrmidonHUD-Windows-x86_64.zip",
+      "bytes": 75927000,
+      "sha256": "d7c8792d329a37550bb68186bb9c07a80480cc062b8441a574ab3992ec8c2df8"
+    }
+  ],
+  "warnings": [
+    {
+      "category": "existing DataLoader empty directory",
+      "message": "PCK font and headless smoke stderr report res://data/buildings/ missing; no SCRIPT ERROR/ERROR; no investigation or gameplay change in this task"
+    }
+  ],
+  "criteria": [
+    {
+      "criterion": "Windows package fontdata and exact Noto licenses",
+      "result": "PASS"
+    },
+    {
+      "criterion": "actual PCK-loaded font chains, coverage and frozen32px number metrics",
+      "result": "PASS"
+    },
+    {
+      "criterion": "Windows pixel appearance, GPU, audio and performance",
+      "result": "NOT_TESTED",
+      "local_required": true
+    },
+    {
+      "criterion": "formal10x10 capture visuals",
+      "result": "PENDING_CLOUD",
+      "note": "Headless release preview audit checks swordsman class; it is not map-size or visual acceptance."
+    }
+  ],
+  "prior_failed_candidate": {
+    "candidate_commit": "74d4187182a6bc6852768473f0ac6854ecf45680",
+    "phase": "first cold import",
+    "result": "FAIL",
+    "log": {
+      "file": "windows-release-74d4187/logs/import.log",
+      "bytes": 25934,
+      "sha256": "7a3339f1542d297ac2160f422b165704b1615de601524437e427dcd458d88f1e"
+    }
+  },
+  "native_crash_diagnostic": {
+    "phase": "load-at-runtime fix with default parallel cold import",
+    "exit_code": 3221225477,
+    "exact_cause": "unconfirmed",
+    "log": {
+      "file": "cold-import.log",
+      "bytes": 19673,
+      "sha256": "456d669241065065c816888f9648a5b557a9c0e99219f204d72fe015705d3aea"
+    }
+  },
+  "publication": {
+    "published": false
+  }
+}

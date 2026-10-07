@@ -52,4 +52,10 @@ godot --headless --path . --script res://tests/claude_review/cr10_font_runtime_c
 
 运行检查还会输出 `CR10_TEXT_METRICS`，用于核对 ThemeDB/M2 的真实混合字符串度量。例如本候选 Godot 4.6.3 size 9 的普通 ThemeDB 字体链 ascent/descent/height 为 `14/6/20`，其 primary-only 为 `10/3/13`；M2 默认文本链为 `13.5/5.813/18.75`，primary-only 为 `9.75/2.813/12.563`。检查记录“命中 100%”“暴击 25%”“必定生效”的 `get_string_size`。这些 API 度量变化需要纳入三档实际分辨率画面复核；运行覆盖通过不代表字形外观或排版已获美术验收。
 
-`scripts/codex/build-windows-release.ps1` 现核验三组字体及许可证清单与 SHA-256；编辑器导入后检查完整 `.import` 参数为 `allow_system_fallback=false`，并对 Windows PCK 中每个字体 `.import` 映射检查其指向的 `.fontdata` 唯一且非空。脚本将三份许可证复制到发行包 `licenses/` 并比对摘要。真实 PCK 的 FontFile/ThemeDB 字体链属性由 `cr10_font_runtime_check.gd` 在 `--main-pack` 模式下复核。当前候选尚未运行真实 Windows 发行构建；该步骤由主代理在独立审查和提交后执行。三档画面、Windows 实机显示及字体形状仍是待验收条件。
+`scripts/codex/build-windows-release.ps1` 现核验三组字体及许可证清单与 SHA-256；编辑器导入后检查完整 `.import` 参数为 `allow_system_fallback=false`，并对 Windows PCK 中每个字体 `.import` 映射检查其指向的 `.fontdata` 唯一且非空。脚本将三份许可证复制到发行包 `licenses/` 并比对摘要。真实 PCK 的 FontFile/ThemeDB 字体链属性由 `cr10_font_runtime_check.gd` 在 `--main-pack` 模式下复核。候选 `21a77b91818fe0b71f5d9fbe684cc942250db0e2` 已完成真实 Windows 无窗口发行构建、许可证打包与 PCK 字体链检查；具体原件摘要、检查范围及已有警告见 `../runs/2026-10-07-cr10-font/windows-package-verification.json`。该结果覆盖字体资源消费和字符覆盖；三档实际画面及 Windows 字体外观仍需分别验收。
+
+## 首次导入与制作设置
+
+自动加载脚本在运行树入口加载四份包内字体，避免在首次导入前解析期预加载字体。`project.godot` 设置 `editor/import/use_multiple_threads=false`，让资源导入使用串行路径；这会增加潜在导入耗时，不改变运行渲染器或玩法。全新无 `.godot` 缓存的导入、字体运行与 10×10 正式场景绑定已分别通过 Main 和独立审查者检查。
+
+此前的首次解析失败和并行导入原生崩溃日志保留在仓库外证据中，摘要记入本轮运行记录。串行导入成功不构成原生崩溃根因已经查明的证据。字段语义以 [Godot 4.6 ProjectSettings](https://docs.godotengine.org/en/4.6/classes/class_projectsettings.html#class-projectsettings-property-editor-import-use-multiple-threads) 和 [4.6.3 导入源码](https://github.com/godotengine/godot/blob/4.6.3-stable/editor/file_system/editor_file_system.cpp#L3064-L3078) 为依据。

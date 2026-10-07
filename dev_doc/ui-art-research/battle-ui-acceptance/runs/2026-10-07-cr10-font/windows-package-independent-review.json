@@ -1,0 +1,45 @@
+{
+  "schema": "sot-independent-review/1",
+  "task_id": "CR-10-WINDOWS-FONT-PACKAGING",
+  "verdict": "pass",
+  "reviewer": "/root/cr10_font_independent_review",
+  "record_kind": "Main faithful record of native independent review; not implementer approval",
+  "reviewed_head": "21a77b91818fe0b71f5d9fbe684cc942250db0e2",
+  "reviewed_tree": "682dd3579db930b4331f99b173b101cd984cce3c",
+  "scope": "Windows package evidence and actual PCK-loaded fonts only",
+  "checks": [
+    "All recorded original file and log bytes/SHA256 match",
+    "ZIP/PCK/EXE exact hashes match; seven licenses; five font licenses equal source snapshot",
+    "Pinned Noto sources, licenses and fontTools4.66.1 match",
+    "Four PCK font remaps and nonempty fontdata match",
+    "Independent actual PCK runtime exit0, failed=0, no ERROR; stdout/stderr match"
+  ],
+  "raw_independent_result": {
+    "file": "independent-pck-runtime-review-20261007/result.json",
+    "bytes": 953,
+    "sha256": "372924dfe5ff775b192aaed47b6a7a62bc333895ac3edb611314e42329a15a3c"
+  },
+  "raw_independent_logs": [
+    {
+      "file": "independent-pck-runtime-review-20261007/pck-font-runtime.stdout.log",
+      "bytes": 987,
+      "sha256": "879953a927791365b94768f62f4a8064e863d3c443ad19cf38e9cdc33e269cc3"
+    },
+    {
+      "file": "independent-pck-runtime-review-20261007/pck-font-runtime.stderr.log",
+      "bytes": 361,
+      "sha256": "19519abd1b30220c4e2418168e7c9c1338d23b59a5cac81fdd49e66135fe80a7"
+    }
+  ],
+  "known_warning": "res://data/buildings/ missing; existing empty-directory packaging warning; no investigation or rule change",
+  "not_covered": [
+    "Cloud ACK at the time of this technical review",
+    "Nine cloud native font images",
+    "Windows font pixel appearance",
+    "GPU/audio/performance"
+  ],
+  "milestone_completed": false,
+  "publication": {
+    "published": false
+  }
+}
