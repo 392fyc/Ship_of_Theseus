@@ -1,0 +1,110 @@
+{
+  "task_id": "CR-24-portrait-seam-20261008",
+  "status": "completed",
+  "status_scope": "头像贴合修正及独立技术验收完成；用户整体视觉批准与发布分别待办。",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/ui-ux/cr24-portrait-seam",
+  "target_head_before": "2aa292ca2b7f4193e6deb79ff2568221a857c207",
+  "candidate_head": null,
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md 与用户审查处置指令",
+      "summary": "独立任务树，头像贴合最小修正，独立审查后本地提交；不发布。"
+    },
+    {
+      "contract": "claude-change-requests.md CR-24",
+      "summary": "位置或尺寸补齐；C4 三档像素为准；保留画框/素材与既有HUD。"
+    }
+  ],
+  "changed_files": [
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr24/c4-raw-output.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr24/c8-raw-output.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr24/candidate-binding.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr24/evidence-manifest.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr24/frame-and-source-verification.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr24/independent-review.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr24/report.md",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr24/task-receipt.json",
+    "dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr24/task.md",
+    "scenes/tactical/hud/m2/character_hud_panel.tscn",
+    "tests/test_hud_m2_runtime_dashboard.gd"
+  ],
+  "verification": [
+    {
+      "command": "Godot headless test_hud_m2_runtime_dashboard.gd",
+      "result": "pass",
+      "evidence": "117 passed / 0 failed；实现者运行记录。"
+    },
+    {
+      "command": "run_cr10_windows_weights.ps1 frozen external stage",
+      "result": "pass",
+      "evidence": "windows-attempt2/capture-run.json、两份完整日志与命令记录。"
+    },
+    {
+      "command": "claude_review_checks.c4_file on 24 original full frames",
+      "result": "pass",
+      "evidence": "c4-raw-output.json；所有四边0行。"
+    },
+    {
+      "command": "unmodified C8 manifest/scripts/calibration",
+      "result": "pass",
+      "evidence": "c8-raw-output.json"
+    },
+    {
+      "command": "same-frame hashes and exact crop comparison; source digest verification",
+      "result": "pass",
+      "evidence": "frame-and-source-verification.json；24整屏24状态66局部548来源。"
+    },
+    {
+      "command": "Independent code, original PNG, C4/C8 and dashboard review",
+      "result": "pass",
+      "evidence": "independent-review.json；六项通过，独立重跑 dashboard 117/0。"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "三档头像四边贴合",
+      "result": "pass",
+      "evidence": [
+        "c4-raw-output.json"
+      ]
+    },
+    {
+      "criterion": "画框、素材、填充方法与其他HUD保持",
+      "result": "pass",
+      "evidence": [
+        "independent-review.json"
+      ]
+    },
+    {
+      "criterion": "独立代码和原图审查",
+      "result": "pass",
+      "evidence": [
+        "independent-review.json"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "生产素材、画框主题、字体、剑气、玩法、冻结采集脚本与C4",
+      "result": "unchanged",
+      "evidence": "生产增量只有头像内容top16→15；测试同步诊断70×79。"
+    },
+    {
+      "subject": "主工作树与受保护分支",
+      "result": "unchanged",
+      "evidence": "未对主仓开发或发布。"
+    }
+  ],
+  "residual_risks": [
+    "内容高度78→79带来的微小横向裁切已获独立原图技术审查通过；用户整体视觉批准另行记录。",
+    "CR-06、CR-40、地形可读性及原P0/CR01仍未完成。"
+  ],
+  "escalation_reason": null,
+  "publication": {
+    "published": false,
+    "pr": null
+  },
+  "user_visual_approval": "not_recorded",
+  "milestone_completed": false
+}

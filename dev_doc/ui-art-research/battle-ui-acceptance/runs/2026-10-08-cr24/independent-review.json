@@ -1,0 +1,488 @@
+{
+  "schema_version": 1,
+  "review_type": "independent_blind_acceptance",
+  "verdict": "pass",
+  "scope": "CR24 portrait top-seam candidate; technical acceptance only.",
+  "candidate": {
+    "repository": "<任务工作树>",
+    "target_head": "2aa292ca2b7f4193e6deb79ff2568221a857c207",
+    "candidate_state": "uncommitted diff on target HEAD",
+    "base_commit": "2aa292ca2b7f4193e6deb79ff2568221a857c207",
+    "changed_files": [
+      {
+        "path": "scenes/tactical/hud/m2/character_hud_panel.tscn",
+        "sha256": "03f5e89661ac419969187a613704f6307d8430bc3674f096199b8f598a0b962c",
+        "git_blob": "fd67d8de8f517b2062924edfca29a6b6d1bb0370",
+        "diff": "PortraitContent.offset_top 16.0 -> 15.0; 70x79 content rect, frame nodes and styling unchanged."
+      },
+      {
+        "path": "tests/test_hud_m2_runtime_dashboard.gd",
+        "sha256": "c22f34813636f0947143f0ad2ff605dd451607d594cbfeb5511941e522688e7a",
+        "git_blob": "05240f8f78addcea2e2043560a0a40ec645c76f8",
+        "diff": "Replaces loose portrait coverage tolerance with exact expected Rect2(13, 15, 70, 79) assertion."
+      }
+    ],
+    "git_status_observed": [
+      "M scenes/tactical/hud/m2/character_hud_panel.tscn",
+      "M tests/test_hud_m2_runtime_dashboard.gd",
+      "?? dev_doc/ui-art-research/battle-ui-acceptance/runs/2026-10-08-cr24/"
+    ],
+    "protected_state": "No Mercury-managed paths changed. The only tracked source/test changes are the two listed files; the run directory is task evidence."
+  },
+  "criteria": [
+    {
+      "id": "CR24-scope-and-frame-invariants",
+      "verdict": "pass",
+      "evidence": [
+        "git diff shows only PortraitContent.offset_top changed from 16.0 to 15.0 in the scene.",
+        "Frame control remains 72x82 and outer frame remains 72x84; portrait width remains 70; candidate rect is (13,15,70,79).",
+        "No portrait asset, theme, filter, fill mode, other HUD, or gameplay changes are present in the candidate diff.",
+        "Dashboard test now asserts the exact expected portrait Rect2.",
+        "git diff --check completed without errors (Git emitted only LF-to-CRLF normalization notices)."
+      ]
+    },
+    {
+      "id": "C4-no-background-seam-at-native-resolutions",
+      "verdict": "pass",
+      "evidence": {
+        "checker": "tests/claude_review/claude_review_checks.py:c4_file",
+        "result": "24/24 full-screen captures pass: 2 weights x 4 states x 3 native resolutions; all four panel_colour_rows edge values are zero in every capture.",
+        "resolution_edge_offsets_px": {
+          "1280x720": {
+            "top": 1,
+            "bottom": 1,
+            "left": 1,
+            "right": 1
+          },
+          "1920x1080": {
+            "top": 3,
+            "bottom": 2,
+            "left": 2,
+            "right": 1
+          },
+          "2560x1440": {
+            "top": 4,
+            "bottom": 3,
+            "left": 3,
+            "right": 3
+          }
+        },
+        "original_full_screen_pngs": [
+          {
+            "weight": "medium",
+            "state": "forecast",
+            "resolution": "1280x720",
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-forecast-1280x720.png",
+            "sha256": "8c123acf1443dc44a613ea9cb084583592412be44c7b42dd7a5e418fe919ad99",
+            "dimensions": [
+              1280,
+              720
+            ]
+          },
+          {
+            "weight": "medium",
+            "state": "forecast",
+            "resolution": "1920x1080",
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-forecast-1920x1080.png",
+            "sha256": "94812fa68023dd8768c8bffceec9b654764e60b6bae184507676c54e4612aad8",
+            "dimensions": [
+              1920,
+              1080
+            ]
+          },
+          {
+            "weight": "medium",
+            "state": "forecast",
+            "resolution": "2560x1440",
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-forecast-2560x1440.png",
+            "sha256": "e373c575e6b346af50ac6bd3f6311d8b942079b58d44b886831c42652a626480",
+            "dimensions": [
+              2560,
+              1440
+            ]
+          },
+          {
+            "weight": "medium",
+            "state": "normal",
+            "resolution": "1280x720",
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-normal-1280x720.png",
+            "sha256": "6533b8da0f9e2ba5980a9f7b9a25fc1679b32a6a83e4bdbeaa5de47526d3f2fb",
+            "dimensions": [
+              1280,
+              720
+            ]
+          },
+          {
+            "weight": "medium",
+            "state": "normal",
+            "resolution": "1920x1080",
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-normal-1920x1080.png",
+            "sha256": "12a743f2a2ba16e920050e7afccbf55f49a3f72244480c7b22a01afabed9c9f7",
+            "dimensions": [
+              1920,
+              1080
+            ]
+          },
+          {
+            "weight": "medium",
+            "state": "normal",
+            "resolution": "2560x1440",
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-normal-2560x1440.png",
+            "sha256": "3acbf218c6805a493a2599a2c580f1ee0dc50eb307efeb9de1a5b4f22768e7fc",
+            "dimensions": [
+              2560,
+              1440
+            ]
+          },
+          {
+            "weight": "medium",
+            "state": "portrait-inspection",
+            "resolution": "1280x720",
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-portrait-inspection-1280x720.png",
+            "sha256": "f23b424b1647bb8b9f07b19bc7e0ae023c5cec59f39e80e19b4a546986a1446f",
+            "dimensions": [
+              1280,
+              720
+            ]
+          },
+          {
+            "weight": "medium",
+            "state": "portrait-inspection",
+            "resolution": "1920x1080",
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-portrait-inspection-1920x1080.png",
+            "sha256": "b8e86d18ef6eccc365938d9664cb7fdf5890185507a17eac3946d9aad61a0096",
+            "dimensions": [
+              1920,
+              1080
+            ]
+          },
+          {
+            "weight": "medium",
+            "state": "portrait-inspection",
+            "resolution": "2560x1440",
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-portrait-inspection-2560x1440.png",
+            "sha256": "8f5c9602920b0618e0a7a711d4b62109048285dae4d153bdf4cd0d05577d9b2b",
+            "dimensions": [
+              2560,
+              1440
+            ]
+          },
+          {
+            "weight": "medium",
+            "state": "skill-tooltip",
+            "resolution": "1280x720",
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-skill-tooltip-1280x720.png",
+            "sha256": "e668cdedcc5efcaace8ba862645288c2b5d46d93bab0cd3c068b443931673ba0",
+            "dimensions": [
+              1280,
+              720
+            ]
+          },
+          {
+            "weight": "medium",
+            "state": "skill-tooltip",
+            "resolution": "1920x1080",
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-skill-tooltip-1920x1080.png",
+            "sha256": "e7169070867a2a88eae10cda8085fd346cc4682d57fffe57d0cccd2617838b01",
+            "dimensions": [
+              1920,
+              1080
+            ]
+          },
+          {
+            "weight": "medium",
+            "state": "skill-tooltip",
+            "resolution": "2560x1440",
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-skill-tooltip-2560x1440.png",
+            "sha256": "4185014941814dad1abf3f7eb6f20700322284817bd3c86ca448627677743f92",
+            "dimensions": [
+              2560,
+              1440
+            ]
+          },
+          {
+            "weight": "regular",
+            "state": "forecast",
+            "resolution": "1280x720",
+            "path": "<仓库外证据根>\\windows-attempt2\\regular\\font-forecast-1280x720.png",
+            "sha256": "27d798466412ca34067a69902d4953b322489825c317f0d78d3d2547b8409c80",
+            "dimensions": [
+              1280,
+              720
+            ]
+          },
+          {
+            "weight": "regular",
+            "state": "forecast",
+            "resolution": "1920x1080",
+            "path": "<仓库外证据根>\\windows-attempt2\\regular\\font-forecast-1920x1080.png",
+            "sha256": "3ab4eaa70e8d0cd152f150d830245c96f14433fb769758d74a8a744b1cb89d18",
+            "dimensions": [
+              1920,
+              1080
+            ]
+          },
+          {
+            "weight": "regular",
+            "state": "forecast",
+            "resolution": "2560x1440",
+            "path": "<仓库外证据根>\\windows-attempt2\\regular\\font-forecast-2560x1440.png",
+            "sha256": "c4b6b0a4aeba49071c4606f2840c39585aadd6788445986df9f5bf18d2c28fe7",
+            "dimensions": [
+              2560,
+              1440
+            ]
+          },
+          {
+            "weight": "regular",
+            "state": "normal",
+            "resolution": "1280x720",
+            "path": "<仓库外证据根>\\windows-attempt2\\regular\\font-normal-1280x720.png",
+            "sha256": "50b542a5dfa67ab14be6129248ed0652139ac3a894a4edb9c2c9856820475536",
+            "dimensions": [
+              1280,
+              720
+            ]
+          },
+          {
+            "weight": "regular",
+            "state": "normal",
+            "resolution": "1920x1080",
+            "path": "<仓库外证据根>\\windows-attempt2\\regular\\font-normal-1920x1080.png",
+            "sha256": "cc0ac804f1bb91c3fc0038d0e1caaa7b849a96093820c59772b51002a50bc579",
+            "dimensions": [
+              1920,
+              1080
+            ]
+          },
+          {
+            "weight": "regular",
+            "state": "normal",
+            "resolution": "2560x1440",
+            "path": "<仓库外证据根>\\windows-attempt2\\regular\\font-normal-2560x1440.png",
+            "sha256": "532192a8fd23dcd965895e3fd02fec90a17bfdc9437d8c58e780e71c1f10ba77",
+            "dimensions": [
+              2560,
+              1440
+            ]
+          },
+          {
+            "weight": "regular",
+            "state": "portrait-inspection",
+            "resolution": "1280x720",
+            "path": "<仓库外证据根>\\windows-attempt2\\regular\\font-portrait-inspection-1280x720.png",
+            "sha256": "74d96a8cd2186c51c91f7ef87d56c0caf953a2e4b04973aa572d4feb2524b19d",
+            "dimensions": [
+              1280,
+              720
+            ]
+          },
+          {
+            "weight": "regular",
+            "state": "portrait-inspection",
+            "resolution": "1920x1080",
+            "path": "<仓库外证据根>\\windows-attempt2\\regular\\font-portrait-inspection-1920x1080.png",
+            "sha256": "e132d5d0a76ae0c37b45642df290648929946b22aaa6da4692de61e08312c13f",
+            "dimensions": [
+              1920,
+              1080
+            ]
+          },
+          {
+            "weight": "regular",
+            "state": "portrait-inspection",
+            "resolution": "2560x1440",
+            "path": "<仓库外证据根>\\windows-attempt2\\regular\\font-portrait-inspection-2560x1440.png",
+            "sha256": "014f6a73cba71aa41d1fca2eb4e1fe003e9c259d53deffeef528fc5618320105",
+            "dimensions": [
+              2560,
+              1440
+            ]
+          },
+          {
+            "weight": "regular",
+            "state": "skill-tooltip",
+            "resolution": "1280x720",
+            "path": "<仓库外证据根>\\windows-attempt2\\regular\\font-skill-tooltip-1280x720.png",
+            "sha256": "e9365547a0c9e09eb9e5908269c64a3da65bea4d6f0477a27f12afaa4a339d1f",
+            "dimensions": [
+              1280,
+              720
+            ]
+          },
+          {
+            "weight": "regular",
+            "state": "skill-tooltip",
+            "resolution": "1920x1080",
+            "path": "<仓库外证据根>\\windows-attempt2\\regular\\font-skill-tooltip-1920x1080.png",
+            "sha256": "66b476876f285db063db7748e115058611c8ef6b08d29508757efd7efd4631f3",
+            "dimensions": [
+              1920,
+              1080
+            ]
+          },
+          {
+            "weight": "regular",
+            "state": "skill-tooltip",
+            "resolution": "2560x1440",
+            "path": "<仓库外证据根>\\windows-attempt2\\regular\\font-skill-tooltip-2560x1440.png",
+            "sha256": "ec2ce6e9e84137044e23cd6b113a7d7a0b67dafba3d4d8a142921332377aa5ba",
+            "dimensions": [
+              2560,
+              1440
+            ]
+          }
+        ],
+        "limitation": "C4 checks panel-color runs at the detected frame edges; it is not a universal detector for arbitrary isolated pixels. Native-size visual inspection and exact crop-to-source pixel comparisons provide additional corroboration."
+      }
+    },
+    {
+      "id": "native-size-visual-composition-and-portrait-card",
+      "verdict": "pass",
+      "evidence": {
+        "reviewed": "Medium normal and portrait-inspection full-screen captures at all three resolutions, character-panel crops, and attribute-card crops. Regular captures were independently included in the C4 edge check and frame-hash inventory.",
+        "observations": [
+          "The portrait fills the top of the brass inner frame with no visible background seam.",
+          "The portrait frame and surrounding character-panel composition remain consistent across 1280x720, 1920x1080, and 2560x1440.",
+          "The portrait-inspection attribute card keeps the same composition and geometry across the three resolutions."
+        ],
+        "medium_character_and_attribute_crops": [
+          {
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-normal-1280x720-character.png",
+            "sha256": "ca6f05abcfd7e028355f38a336c6e827f405de6b1b1776b0312d72724640aae0",
+            "dimensions": [
+              226,
+              108
+            ]
+          },
+          {
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-normal-1920x1080-character.png",
+            "sha256": "96bcdfd9a3c34bf953788fbea45e46fdd9f3621c6f27bbfd4ad4adeea45962a2",
+            "dimensions": [
+              339,
+              162
+            ]
+          },
+          {
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-normal-2560x1440-character.png",
+            "sha256": "1eed5034eef88ad96bdc0585968b7cd3ebda122ed650b8f6fb9dfb3d6ebf7613",
+            "dimensions": [
+              452,
+              216
+            ]
+          },
+          {
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-portrait-inspection-1280x720-character.png",
+            "sha256": "ca6f05abcfd7e028355f38a336c6e827f405de6b1b1776b0312d72724640aae0",
+            "dimensions": [
+              226,
+              108
+            ]
+          },
+          {
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-portrait-inspection-1920x1080-character.png",
+            "sha256": "96bcdfd9a3c34bf953788fbea45e46fdd9f3621c6f27bbfd4ad4adeea45962a2",
+            "dimensions": [
+              339,
+              162
+            ]
+          },
+          {
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-portrait-inspection-2560x1440-character.png",
+            "sha256": "1eed5034eef88ad96bdc0585968b7cd3ebda122ed650b8f6fb9dfb3d6ebf7613",
+            "dimensions": [
+              452,
+              216
+            ]
+          },
+          {
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-portrait-inspection-1280x720-attributes.png",
+            "sha256": "fb488a83b8cb869c5bf9d93deb709602f23c6a54d39679879e9844fb0cd954a1",
+            "dimensions": [
+              304,
+              188
+            ]
+          },
+          {
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-portrait-inspection-1920x1080-attributes.png",
+            "sha256": "0f82b23c10e35cceb2531b94eb41e730a21d56f2e3ca882b67fd36b1d38ceb02",
+            "dimensions": [
+              456,
+              282
+            ]
+          },
+          {
+            "path": "<仓库外证据根>\\windows-attempt2\\medium\\font-portrait-inspection-2560x1440-attributes.png",
+            "sha256": "b8aab007671428b5728cd98d994fadfc2042eb2b7a8f0da724201eb625f7097f",
+            "dimensions": [
+              608,
+              376
+            ]
+          }
+        ],
+        "crop_integrity": "Across both weights, 24 frame records and 66 crop images were checked against their same-frame JSON/source hashes; crop pixels exactly equal the referenced rectangle from the original frame."
+      }
+    },
+    {
+      "id": "C8-capture-source-configuration",
+      "verdict": "pass",
+      "evidence": {
+        "result": "27 capture scripts scanned with zero failures; Medium and Regular manifests each contain 12 captures with no mismatches; calibration passed.",
+        "renderer": "gl_compatibility",
+        "stretch_mode": "canvas_items",
+        "checker": "tests/claude_review/claude_review_checks.py:c8_scripts, c8_manifest, c8_calibration"
+      }
+    },
+    {
+      "id": "HUD-M2-runtime-regression-and-approved-constraints",
+      "verdict": "pass",
+      "evidence": {
+        "command": "& '<Godot可执行文件>' --headless --path '<任务工作树>' --script res://tests/test_hud_m2_runtime_dashboard.gd",
+        "result": "HUD_M2_RUNTIME_DASHBOARD_RESULT passed=117 failed=0",
+        "capture_invariants": "All 24 capture metadata entries report 10x10 map, marks hidden, gl_compatibility renderer, canvas_items stretch, and no gameplay-state constraint violations."
+      }
+    },
+    {
+      "id": "candidate-to-capture-source-binding",
+      "verdict": "pass",
+      "evidence": {
+        "source_manifest_path": "<仓库外证据根>\\windows-attempt2\\source-manifest.json",
+        "source_manifest_sha256": "2c1b9bd8de4a4a62a6f7c6181de59363291d1d0dbeef2154ea6931f07d881ca1",
+        "project_snapshot_entries": 1308,
+        "binding_result": "All files in the captured project snapshot match its raw-byte source manifest. The two changed scene/test files also match the current candidate bytes and the capture snapshot.",
+        "line_endings": "project.godot differs from the source ZIP only by CRLF normalization; canonical content is identical. This does not affect the candidate binding."
+      }
+    }
+  ],
+  "findings": [],
+  "recommendations": [
+    "Record this independent technical PASS in the task receipt; keep human visual approval as a separate state."
+  ],
+  "approval_state": {
+    "independent_technical_review": "pass",
+    "user_visual_approval": "not_recorded",
+    "publication_or_merge": "not_performed"
+  },
+  "commands_and_checks_actually_run": [
+    "git status --short",
+    "git rev-parse HEAD",
+    "git diff -- scenes/tactical/hud/m2/character_hud_panel.tscn tests/test_hud_m2_runtime_dashboard.gd",
+    "git diff --check",
+    "Get-FileHash -Algorithm SHA256 -LiteralPath <the two changed files>",
+    "Independent execution of c4_file for all 24 original full-screen captures.",
+    "Independent execution of c8_scripts, c8_manifest, and c8_calibration.",
+    "Independent verification of same-frame JSON, source hashes, and crop pixel equality for 66 crops.",
+    "& '<Godot可执行文件>' --headless --path '<任务工作树>' --script res://tests/test_hud_m2_runtime_dashboard.gd"
+  ],
+  "review_limitations": [
+    "This review establishes technical acceptance and does not record user visual approval.",
+    "No GUI or mouse-driven interaction was used.",
+    "The archived source ZIP is the base snapshot; the capture runner overlays the uncommitted candidate and binds the actual capture project using source-manifest.json."
+  ],
+  "original_review": {
+    "sha256": "c6f9e0de49b4faad49fbfc2cf389f928e8278a3092320ba49adb429314b3baf1",
+    "bytes": 20918,
+    "file": "<仓库外证据根>/independent-review.json",
+    "portable_copy_note": "仅将本机路径替换为占位；结论、证据和摘要保留。"
+  }
+}

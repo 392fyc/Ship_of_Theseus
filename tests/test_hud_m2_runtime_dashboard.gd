@@ -70,7 +70,9 @@ func _test_player_state(dashboard: Control, manager: Object) -> void:
 	var portrait_image: TextureRect = character.get_node("PortraitContent") as TextureRect
 	var portrait_frame: Control = character.get_node("PortraitFrame") as Control
 	_check("真实剑圣显示头像而非轮廓占位", portrait_image.texture is AtlasTexture and not character.get_node("PortraitFallback").visible)
-	_check("头像图像铺到画框内缘", portrait_image.position.x <= portrait_frame.position.x + 1.0 and portrait_image.position.y <= portrait_frame.position.y + 3.0 and portrait_image.get_rect().end.x >= portrait_frame.get_rect().end.x - 1.0 and portrait_image.get_rect().end.y >= portrait_frame.get_rect().end.y - 1.0)
+	var portrait_rect: Rect2 = portrait_image.get_rect()
+	var expected_portrait_rect := Rect2(13.0, 15.0, 70.0, 79.0)
+	_check("头像矩形补齐至70×79；期望 %s，实际 %s" % [expected_portrait_rect, portrait_rect], portrait_rect.is_equal_approx(expected_portrait_rect))
 	var portrait_button: Button = character.get_inspection_control()
 	var portrait_focus: Control = character.get_node("PortraitFocus") as Control
 	_check("只有头像区域承担属性查看入口", portrait_button.get_rect() == Rect2(12, 13, 72, 82))

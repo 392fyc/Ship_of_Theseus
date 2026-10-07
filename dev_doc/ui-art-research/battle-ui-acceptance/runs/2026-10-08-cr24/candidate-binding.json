@@ -1,0 +1,19 @@
+{
+  "base_commit": "2aa292ca2b7f4193e6deb79ff2568221a857c207",
+  "changed_sources": [
+    {
+      "file": "scenes/tactical/hud/m2/character_hud_panel.tscn",
+      "working_sha256": "03f5e89661ac419969187a613704f6307d8430bc3674f096199b8f598a0b962c",
+      "canonical_git_blob": "fd67d8de8f517b2062924edfca29a6b6d1bb0370"
+    },
+    {
+      "file": "tests/test_hud_m2_runtime_dashboard.gd",
+      "working_sha256": "c22f34813636f0947143f0ad2ff605dd451607d594cbfeb5511941e522688e7a",
+      "canonical_git_blob": "05240f8f78addcea2e2043560a0a40ec645c76f8"
+    }
+  ],
+  "C4_implementation_sha256": "be32bf35c7d51d50242e0dcfa11fe79f4d2b931fa4101483fee58686dd651165",
+  "source_manifest_sha256": "2c1b9bd8de4a4a62a6f7c6181de59363291d1d0dbeef2154ea6931f07d881ca1",
+  "capture_runner_sha256": "604f45c49bc878d30c860e62b909288a2f373104862cb4e5715b5dbf4fc394d4",
+  "capture_script_sha256": "d250de28b4dd845457339ecff53a2e3c37b9c32b25e3f705a17d85adc986244d"
+}
