@@ -20,18 +20,62 @@ from fontTools.ttLib import TTFont
 UPSTREAM_REPOSITORY = "notofonts/noto-cjk"
 UPSTREAM_TAG = "Sans2.004"
 UPSTREAM_COMMIT = "523d033d6cb47f4a80c58a35753646f5c3608a78"
-UPSTREAM_FONT_PATH = "Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf"
-UPSTREAM_FONT_URL = (
-    "https://raw.githubusercontent.com/notofonts/noto-cjk/"
-    f"{UPSTREAM_COMMIT}/{UPSTREAM_FONT_PATH}"
-)
 SOURCE_FONT_SHA256 = "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
 SOURCE_FONT_BYTES = 16437364
 SOURCE_LICENSE_SHA256 = "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+REGULAR_SOURCE_GIT_BLOB_SHA = "dc15562470b4f842321894787a0d066879ccff8b"
+MEDIUM_SOURCE_FONT_SHA256 = "ca094f6b0001fb048ca39ddd797a0cdb0179e1e55c6561e111c49c3e6a61d7b7"
+MEDIUM_SOURCE_FONT_BYTES = 16523632
+MEDIUM_SOURCE_GIT_BLOB_SHA = "00b01dff38ff8d0a345c53d64a71bfcf9ec55522"
+BOLD_SOURCE_FONT_SHA256 = "b5f0d1a190a7f9b43c310a8850630af12553df32c4c050543f9059732d9b4c0a"
+BOLD_SOURCE_FONT_BYTES = 17002248
+BOLD_SOURCE_GIT_BLOB_SHA = "ff4c0450e8a5bf0290fbb6013a72dc61a10e8e56"
 FONTTOOLS_VERSION = "4.66.1"
 FONT_FILENAME = "NotoSansCJKsc-Regular-subset.otf"
 LICENSE_FILENAME = "LICENSE.txt"
 MANIFEST_FILENAME = "source.json"
+
+CJK_FONT_STYLES = (
+    {
+        "style": "Regular",
+        "weight": 400,
+        "role": "comparison_reference",
+        "source_filename": "NotoSansCJKsc-Regular.otf",
+        "source_path": "Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf",
+        "source_sha256": SOURCE_FONT_SHA256,
+        "source_bytes": SOURCE_FONT_BYTES,
+        "source_git_blob_sha": REGULAR_SOURCE_GIT_BLOB_SHA,
+        "subset_filename": FONT_FILENAME,
+    },
+    {
+        "style": "Medium",
+        "weight": 500,
+        "role": "weight_candidate",
+        "source_filename": "NotoSansCJKsc-Medium.otf",
+        "source_path": "Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Medium.otf",
+        "source_sha256": MEDIUM_SOURCE_FONT_SHA256,
+        "source_bytes": MEDIUM_SOURCE_FONT_BYTES,
+        "source_git_blob_sha": MEDIUM_SOURCE_GIT_BLOB_SHA,
+        "subset_filename": "NotoSansCJKsc-Medium-subset.otf",
+    },
+    {
+        "style": "Bold",
+        "weight": 700,
+        "role": "weight_candidate",
+        "source_filename": "NotoSansCJKsc-Bold.otf",
+        "source_path": "Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Bold.otf",
+        "source_sha256": BOLD_SOURCE_FONT_SHA256,
+        "source_bytes": BOLD_SOURCE_FONT_BYTES,
+        "source_git_blob_sha": BOLD_SOURCE_GIT_BLOB_SHA,
+        "subset_filename": "NotoSansCJKsc-Bold-subset.otf",
+    },
+)
+
+UPSTREAM_FONT_PATH = CJK_FONT_STYLES[0]["source_path"]
+UPSTREAM_FONT_URL = (
+    "https://raw.githubusercontent.com/notofonts/noto-cjk/"
+    f"{UPSTREAM_COMMIT}/{UPSTREAM_FONT_PATH}"
+)
 
 SYMBOLS_REPOSITORY = "notofonts/noto-fonts"
 SYMBOLS_COMMIT = "ffebf8c1ee449e544955a7e813c54f9b73848eac"
@@ -243,6 +287,8 @@ def verify_fonttools_version() -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-font", type=Path, required=True)
+    parser.add_argument("--medium-source-font", type=Path, required=True)
+    parser.add_argument("--bold-source-font", type=Path, required=True)
     parser.add_argument("--symbols2-source-font", type=Path, required=True)
     parser.add_argument("--symbols-source-font", type=Path, required=True)
     parser.add_argument("--emoji-source-font", type=Path, required=True)
@@ -251,6 +297,11 @@ def main() -> int:
 
     repo_root = args.repo_root.resolve()
     source_font = args.source_font.resolve()
+    cjk_sources = {
+        "Regular": source_font,
+        "Medium": args.medium_source_font.resolve(),
+        "Bold": args.bold_source_font.resolve(),
+    }
     symbol_sources = {
         "Noto Sans Symbols2": args.symbols2_source_font.resolve(),
         "Noto Sans Symbols": args.symbols_source_font.resolve(),
@@ -264,8 +315,12 @@ def main() -> int:
     emoji_output_dir = repo_root / "assets/fonts/noto_emoji"
     emoji_license_path = emoji_output_dir / LICENSE_FILENAME
 
-    if source_font.stat().st_size != SOURCE_FONT_BYTES or sha256(source_font) != SOURCE_FONT_SHA256:
-        raise RuntimeError("Upstream CJK source font size or SHA256 does not match the pinned original.")
+    for entry in CJK_FONT_STYLES:
+        path = cjk_sources[entry["style"]]
+        if path.stat().st_size != entry["source_bytes"] or sha256(path) != entry["source_sha256"]:
+            raise RuntimeError(
+                f"Upstream CJK {entry['style']} source font size or SHA256 does not match the pinned original."
+            )
     if not license_path.is_file() or sha256(license_path) != SOURCE_LICENSE_SHA256:
         raise RuntimeError("Packaged CJK SIL OFL license is missing or has the wrong SHA256.")
     if not symbol_license_path.is_file() or sha256(symbol_license_path) != SYMBOLS_LICENSE_SHA256:
@@ -330,14 +385,37 @@ def main() -> int:
         symbol_codepoints = {entry["family"]: assigned[entry["family"]] for entry in SYMBOL_FONTS}
         emoji_codepoints = assigned["Noto Emoji Regular 400"]
 
-        cjk_hash = build_deterministic_subset(
-            source_font,
-            output_font,
-            cjk_codepoints,
-            temporary_root,
-            repo_root,
-            "cjk",
-        )
+        cjk_font_builds = {}
+        for entry in CJK_FONT_STYLES:
+            style = entry["style"]
+            subset_path = output_dir / entry["subset_filename"]
+            subset_hash = build_deterministic_subset(
+                cjk_sources[style],
+                subset_path,
+                cjk_codepoints,
+                temporary_root,
+                repo_root,
+                f"cjk_{style.lower()}",
+            )
+            cjk_font_builds[style] = {
+                "path": subset_path,
+                "sha256": subset_hash,
+                "coverage": font_codepoints(subset_path),
+            }
+
+        regular_coverage = cjk_font_builds["Regular"]["coverage"]
+        for entry in CJK_FONT_STYLES[1:]:
+            style = entry["style"]
+            style_coverage = cjk_font_builds[style]["coverage"]
+            if style_coverage != regular_coverage:
+                missing = regular_coverage - style_coverage
+                extra = style_coverage - regular_coverage
+                raise RuntimeError(
+                    f"Generated CJK {style} Unicode coverage differs from Regular; "
+                    f"missing: {codepoint_names(missing)}; extra: {codepoint_names(extra)}"
+                )
+
+        cjk_hash = cjk_font_builds["Regular"]["sha256"]
         symbol_manifests = []
         symbol_hashes = {}
         for entry in SYMBOL_FONTS:
@@ -388,6 +466,46 @@ def main() -> int:
     if combined != required:
         raise RuntimeError("Generated package fallback chain does not cover the complete required set.")
 
+    cjk_coverage = cjk_font_builds["Regular"]["coverage"]
+    cjk_font_manifests = []
+    for entry in CJK_FONT_STYLES:
+        style = entry["style"]
+        build = cjk_font_builds[style]
+        cjk_font_manifests.append(
+            {
+                "style": style,
+                "weight": entry["weight"],
+                "role": entry["role"],
+                "approval_status": "not_approved",
+                "source": {
+                    "repository": UPSTREAM_REPOSITORY,
+                    "tag": UPSTREAM_TAG,
+                    "commit": UPSTREAM_COMMIT,
+                    "font_path": entry["source_path"],
+                    "font_url": (
+                        f"https://raw.githubusercontent.com/{UPSTREAM_REPOSITORY}/"
+                        f"{UPSTREAM_COMMIT}/{entry['source_path']}"
+                    ),
+                    "source_filename": entry["source_filename"],
+                    "source_font_sha256": entry["source_sha256"],
+                    "source_font_bytes": entry["source_bytes"],
+                    "source_git_blob_sha": entry["source_git_blob_sha"],
+                    "license_file": LICENSE_FILENAME,
+                    "license_sha256": SOURCE_LICENSE_SHA256,
+                },
+                "subset": {
+                    "font_file": entry["subset_filename"],
+                    "font_sha256": build["sha256"],
+                    "font_bytes": build["path"].stat().st_size,
+                    "fonttools_version": fonttools_version,
+                    "method": "fontTools.subset with canonical table order and fixed Unicode input",
+                    "unicode_list_sha256": unicode_fingerprint(cjk_codepoints),
+                    "unicode_coverage_sha256": unicode_fingerprint(build["coverage"]),
+                    "unicode_coverage_count": len(build["coverage"]),
+                },
+            }
+        )
+
     cjk_manifest = {
         "family": "Noto Sans CJK SC",
         "style": "Regular",
@@ -417,6 +535,8 @@ def main() -> int:
             "unicode_list_sha256": unicode_fingerprint(required),
             "required_codepoints": sorted(required),
             "primary_font_codepoints": sorted(cjk_codepoints),
+            "unicode_coverage_count": len(cjk_coverage),
+            "unicode_coverage_sha256": unicode_fingerprint(cjk_coverage),
             "supplementary_fallbacks": [
                 {
                     "family": row["family"],
@@ -427,6 +547,7 @@ def main() -> int:
             ],
             "game_string_sources": source_paths,
         },
+        "fonts": cjk_font_manifests,
     }
     symbol_manifest = {
         "upstream": {
@@ -487,8 +608,9 @@ def main() -> int:
     print(
         "CR10_FONT_SUBSET_RESULT "
         f"gb2312={len(gb2312)} game_strings={len(game_strings)} "
-        f"unique={len(required)} cjk_bytes={output_font.stat().st_size} "
-        f"cjk_sha256={cjk_hash} symbol_fonts={len(symbol_manifests)} "
+        f"unique={len(required)} cjk_fonts={len(cjk_font_manifests)} "
+        f"cjk_coverage={len(cjk_coverage)} cjk_sha256={cjk_hash} "
+        f"symbol_fonts={len(symbol_manifests)} "
         f"emoji_glyphs={len(emoji_codepoints)} emoji_sha256={emoji_hash} deterministic=true"
     )
     return 0

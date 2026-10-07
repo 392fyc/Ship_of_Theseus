@@ -302,7 +302,7 @@ offset_top = 13.0
 offset_right = 288.0
 offset_bottom = 53.0
 mouse_filter = 2
-theme_type_variation = &"HudM2IdentityLabel"
+theme_type_variation = &"HudM2Title"
 autowrap_mode = 3
 vertical_alignment = 1
 

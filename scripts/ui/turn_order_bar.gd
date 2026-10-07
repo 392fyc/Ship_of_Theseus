@@ -10,6 +10,7 @@ const HEADER_COLOR := Color(0.65, 0.65, 0.75)
 const NAME_COLOR   := Color.WHITE
 const INIT_COLOR   := Color(0.55, 0.55, 0.60)
 const STATUS_COLOR := Color(0.72, 0.72, 0.78)
+const M2_TITLE_FONT := preload("res://assets/ui/themes/hud_m2_title_font.tres")
 
 const BAR_WIDTH    := 180
 const PORTRAIT_SZ  := 24
@@ -46,6 +47,7 @@ func _ready() -> void:
 
 	var header := Label.new()
 	header.text = "Turn Order"
+	header.add_theme_font_override("font", M2_TITLE_FONT)
 	header.add_theme_font_size_override("font_size", FONT_HEADER)
 	header.add_theme_color_override("font_color", HEADER_COLOR)
 	header.mouse_filter = MOUSE_FILTER_IGNORE

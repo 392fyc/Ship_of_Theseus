@@ -20,7 +20,8 @@ var _pointer_local := Vector2(-1, -1)
 @onready var _cost_label: Label = %ResourceCostText
 @onready var _focus_overlay: Control = %FocusOverlay
 @onready var _inspection_panel: Panel = %InspectionPanel
-@onready var _inspection_label: Label = %InspectionLabel
+@onready var _inspection_label: RichTextLabel = %InspectionLabel
+var _inspection_full_text: String = ""
 
 
 func _ready() -> void:
@@ -96,7 +97,7 @@ func is_inspection_visible() -> bool:
 
 
 func get_inspection_text() -> String:
-	return _inspection_label.text
+	return _inspection_full_text
 
 
 func set_inspection_obstacles(rectangles: Array[Rect2]) -> void:
@@ -127,9 +128,9 @@ func _update_focus() -> void:
 	if not is_node_ready():
 		return
 	_focus_overlay.visible = has_focus()
-	_inspection_label.text = tooltip_text if _view != null else ""
+	_set_inspection_text(tooltip_text if _view != null else "")
 	# 真实心眼说明需六行。保留既定宽度、字号、内边距和底边，仅向上增加卡片高度。
-	var inspection_height: float = maxf(104.0, _inspection_label.get_minimum_size().y + 24.0)
+	var inspection_height: float = maxf(104.0, _inspection_label.get_content_height() + 24.0)
 	var origin := Vector2.ZERO
 	var current: Control = self
 	while current != null and current.name != &"BottomHudComposition":
@@ -139,4 +140,31 @@ func _update_focus() -> void:
 	var placed: Rect2 = PopupPlacement.place_above(anchor, Vector2(260, inspection_height), _inspection_obstacles, 8.0, Rect2(0, 0, 1280, 720))
 	_inspection_panel.size = placed.size
 	_inspection_panel.position = placed.position - origin
-	_inspection_panel.visible = is_visible_in_tree() and (has_focus() or _hovered or _card_hovered or _pointer_in_inspection_bridge()) and not _inspection_label.text.is_empty()
+	_inspection_panel.visible = is_visible_in_tree() and (has_focus() or _hovered or _card_hovered or _pointer_in_inspection_bridge()) and not _inspection_full_text.is_empty()
+
+
+func _set_inspection_text(value: String) -> void:
+	if _inspection_full_text == value:
+		return
+	_inspection_full_text = value
+	_inspection_label.clear()
+	if value.is_empty():
+		return
+	var line_break := value.find("\n")
+	var title := value.substr(0, line_break) if line_break >= 0 else value
+	var body := value.substr(line_break + 1) if line_break >= 0 else ""
+	if not title.is_empty():
+		_inspection_label.push_font(
+			_inspection_label.get_theme_font(&"bold_font"),
+			_inspection_label.get_theme_font_size(&"bold_font_size")
+		)
+		_inspection_label.add_text(title)
+		_inspection_label.pop()
+	if not body.is_empty():
+		_inspection_label.add_text("\n")
+		_inspection_label.push_font(
+			_inspection_label.get_theme_font(&"normal_font"),
+			_inspection_label.get_theme_font_size(&"normal_font_size")
+		)
+		_inspection_label.add_text(body)
+		_inspection_label.pop()

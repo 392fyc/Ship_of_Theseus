@@ -26,6 +26,35 @@ function Assert-CR10FontAssets([string] $root) {
     Assert-Build ((Get-FileHash -LiteralPath $cjkFontPath -Algorithm SHA256).Hash.ToLowerInvariant() -eq $cjkManifest.subset.font_sha256) 'CR-10 字体摘要与 source.json 不匹配。'
     Assert-Build ((Get-FileHash -LiteralPath $cjkLicensePath -Algorithm SHA256).Hash.ToLowerInvariant() -eq $cjkManifest.upstream.license_sha256) 'CR-10 字体许可证摘要与 source.json 不匹配。'
 
+    $expectedCjkFonts = @(
+        @{style='Regular'; weight=400; role='comparison_reference'; font_file='NotoSansCJKsc-Regular-subset.otf'},
+        @{style='Medium'; weight=500; role='weight_candidate'; font_file='NotoSansCJKsc-Medium-subset.otf'},
+        @{style='Bold'; weight=700; role='weight_candidate'; font_file='NotoSansCJKsc-Bold-subset.otf'}
+    )
+    Assert-Build ($cjkManifest.fonts.Count -eq $expectedCjkFonts.Count) 'CR-10 CJK 字重清单数量不正确。'
+    $coverageHashes = @()
+    $coverageCounts = @()
+    foreach ($expectedFont in $expectedCjkFonts) {
+        $fontRecords = @($cjkManifest.fonts | Where-Object { $_.style -eq $expectedFont.style })
+        Assert-Build ($fontRecords.Count -eq 1) "CR-10 CJK 字重清单缺少唯一记录：$($expectedFont.style)"
+        $fontRecord = $fontRecords[0]
+        Assert-Build ($fontRecord.weight -eq $expectedFont.weight -and $fontRecord.role -eq $expectedFont.role) "CR-10 CJK 字重角色不匹配：$($expectedFont.style)"
+        Assert-Build ($fontRecord.source.repository -eq $cjkManifest.upstream.repository -and $fontRecord.source.tag -eq $cjkManifest.upstream.tag -and $fontRecord.source.commit -eq $cjkManifest.upstream.commit) "CR-10 CJK 字重来源未使用固定上游：$($expectedFont.style)"
+        Assert-Build ($fontRecord.source.source_font_sha256 -match '^[0-9a-f]{64}$' -and $fontRecord.source.source_font_bytes -gt 0) "CR-10 CJK 字重缺少源文件字节摘要：$($expectedFont.style)"
+        Assert-Build ($fontRecord.source.license_file -eq $cjkManifest.upstream.license_file -and $fontRecord.source.license_sha256 -eq $cjkManifest.upstream.license_sha256) "CR-10 CJK 字重许可来源不一致：$($expectedFont.style)"
+        Assert-Build ($fontRecord.subset.font_file -eq $expectedFont.font_file) "CR-10 CJK 字重子集文件名不正确：$($expectedFont.style)"
+        $fontPath = Join-Path $cjkDirectory $fontRecord.subset.font_file
+        Assert-Build (Test-Path -LiteralPath $fontPath -PathType Leaf) "CR-10 CJK 字重子集缺失：$($fontRecord.subset.font_file)"
+        Assert-Build ((Get-FileHash -LiteralPath $fontPath -Algorithm SHA256).Hash.ToLowerInvariant() -eq $fontRecord.subset.font_sha256) "CR-10 CJK 字重子集摘要不匹配：$($expectedFont.style)"
+        Assert-Build ((Get-Item -LiteralPath $fontPath).Length -eq $fontRecord.subset.font_bytes) "CR-10 CJK 字重子集字节数不匹配：$($expectedFont.style)"
+        Assert-Build ($fontRecord.subset.unicode_coverage_sha256 -match '^[0-9a-f]{64}$' -and $fontRecord.subset.unicode_coverage_count -gt 0) "CR-10 CJK 字重缺少 Unicode 覆盖摘要：$($expectedFont.style)"
+        $coverageHashes += $fontRecord.subset.unicode_coverage_sha256
+        $coverageCounts += $fontRecord.subset.unicode_coverage_count
+    }
+    Assert-Build (@($coverageHashes | Select-Object -Unique).Count -eq 1) 'CR-10 CJK 字重的 Unicode 覆盖不一致。'
+    Assert-Build (@($coverageCounts | Select-Object -Unique).Count -eq 1) 'CR-10 CJK 字重的 Unicode 覆盖数量不一致。'
+    Assert-Build ($coverageHashes[0] -eq $cjkManifest.subset.unicode_coverage_sha256 -and $coverageCounts[0] -eq $cjkManifest.subset.unicode_coverage_count) 'CR-10 CJK 字重 Unicode 覆盖与主清单不一致。'
+
     $symbolsDirectory = Join-Path $root 'assets/fonts/noto_sans_symbols'
     $symbolsManifestPath = Join-Path $symbolsDirectory 'source.json'
     $symbolsManifest = Get-Content -LiteralPath $symbolsManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -57,6 +86,8 @@ function Assert-CR10FontAssets([string] $root) {
 function Assert-CR10FontImportSettings([string] $root) {
     $fontSourcePaths = @(
         'assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Regular-subset.otf',
+        'assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Medium-subset.otf',
+        'assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Bold-subset.otf',
         'assets/fonts/noto_sans_symbols/NotoSansSymbols2-Regular-subset.ttf',
         'assets/fonts/noto_sans_symbols/NotoSansSymbols-Regular-subset.ttf',
         'assets/fonts/noto_emoji/NotoEmoji-Regular-400-subset.ttf'
@@ -213,6 +244,8 @@ try {
     Assert-Build ($previewCheckEntries.Count -eq 0) '发行资源包包含临时验收脚本。'
     $fontSourcePaths = @(
         'assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Regular-subset.otf',
+        'assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Medium-subset.otf',
+        'assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Bold-subset.otf',
         'assets/fonts/noto_sans_symbols/NotoSansSymbols2-Regular-subset.ttf',
         'assets/fonts/noto_sans_symbols/NotoSansSymbols-Regular-subset.ttf',
         'assets/fonts/noto_emoji/NotoEmoji-Regular-400-subset.ttf'

@@ -20,6 +20,7 @@ extends Control
 
 const PANEL_SIZE: Vector2 = Vector2(180.0, 104.0)
 const TRIANGLE_H: float = 8.0
+const M2_TITLE_FONT := preload("res://assets/ui/themes/hud_m2_title_font.tres")
 
 # ── 框色（对齐 spec.md §3 / mockup 预测器）──
 const FRAME_OUTER: Color = Color(0.031, 0.039, 0.071, 1.0)
@@ -134,7 +135,7 @@ func _draw() -> void:
 	var fnt: Font = ThemeDB.fallback_font
 	# 标题行：目标名（右对齐省略） + 「伤害预测」标签
 	var title: String = "效果预测" if _is_heal else "伤害预测"
-	draw_string(fnt, Vector2(12.0, 20.0), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, C_GOLD)
+	draw_string(M2_TITLE_FONT, Vector2(12.0, 20.0), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, C_GOLD)
 	if _target_name != "":
 		draw_string(fnt, Vector2(w - 80.0, 20.0), _target_name, HORIZONTAL_ALIGNMENT_LEFT, 76, 9, C_TEXT_SUB)
 

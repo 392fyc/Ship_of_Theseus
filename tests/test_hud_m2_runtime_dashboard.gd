@@ -210,7 +210,7 @@ func _test_sizes_and_inspection(dashboard: Control) -> void:
 	passive_slot.grab_focus()
 	await process_frame
 	var passive_card: Control = passive_slot.get_inspection_panel()
-	var passive_label: Label = passive_card.find_child("InspectionLabel", true, false) as Label
+	var passive_label: RichTextLabel = passive_card.find_child("InspectionLabel", true, false) as RichTextLabel
 	_check("真实纯被动说明向上增高且不越框", passive_card.visible and passive_card.size.x == 260.0 and passive_card.size.y > 104.0 and passive_label.position.y >= 12.0 and passive_label.position.y + passive_label.size.y <= passive_card.size.y - 12.0)
 	_move_pointer(passive_card.get_global_rect().get_center())
 	await process_frame

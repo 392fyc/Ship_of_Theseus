@@ -14965,6 +14965,8 @@
       65507,
       65509
     ],
+    "unicode_coverage_count": 7462,
+    "unicode_coverage_sha256": "2361892f34fa3ee9bbcf09e534635a438c7c8e056e7bbbe1aa7567762d1548ce",
     "supplementary_fallbacks": [
       {
         "family": "Noto Sans Symbols2",
@@ -15302,5 +15304,94 @@
       "scripts/units/unit.gd",
       "scripts/units/unit_stats.gd"
     ]
-  }
+  },
+  "fonts": [
+    {
+      "style": "Regular",
+      "weight": 400,
+      "role": "comparison_reference",
+      "approval_status": "not_approved",
+      "source": {
+        "repository": "notofonts/noto-cjk",
+        "tag": "Sans2.004",
+        "commit": "523d033d6cb47f4a80c58a35753646f5c3608a78",
+        "font_path": "Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf",
+        "font_url": "https://raw.githubusercontent.com/notofonts/noto-cjk/523d033d6cb47f4a80c58a35753646f5c3608a78/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf",
+        "source_filename": "NotoSansCJKsc-Regular.otf",
+        "source_font_sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+        "source_font_bytes": 16437364,
+        "source_git_blob_sha": "dc15562470b4f842321894787a0d066879ccff8b",
+        "license_file": "LICENSE.txt",
+        "license_sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+      },
+      "subset": {
+        "font_file": "NotoSansCJKsc-Regular-subset.otf",
+        "font_sha256": "241e7ebc37926a6a893771a8d0f2f375e385b44d9e8d400553402968a111531b",
+        "font_bytes": 3408020,
+        "fonttools_version": "4.66.1",
+        "method": "fontTools.subset with canonical table order and fixed Unicode input",
+        "unicode_list_sha256": "3b8822e0f7ee1d0f62a1db331e37ec2a7e15f4a5de22f04b0943afe51cb0cb74",
+        "unicode_coverage_sha256": "2361892f34fa3ee9bbcf09e534635a438c7c8e056e7bbbe1aa7567762d1548ce",
+        "unicode_coverage_count": 7462
+      }
+    },
+    {
+      "style": "Medium",
+      "weight": 500,
+      "role": "weight_candidate",
+      "approval_status": "not_approved",
+      "source": {
+        "repository": "notofonts/noto-cjk",
+        "tag": "Sans2.004",
+        "commit": "523d033d6cb47f4a80c58a35753646f5c3608a78",
+        "font_path": "Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Medium.otf",
+        "font_url": "https://raw.githubusercontent.com/notofonts/noto-cjk/523d033d6cb47f4a80c58a35753646f5c3608a78/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Medium.otf",
+        "source_filename": "NotoSansCJKsc-Medium.otf",
+        "source_font_sha256": "ca094f6b0001fb048ca39ddd797a0cdb0179e1e55c6561e111c49c3e6a61d7b7",
+        "source_font_bytes": 16523632,
+        "source_git_blob_sha": "00b01dff38ff8d0a345c53d64a71bfcf9ec55522",
+        "license_file": "LICENSE.txt",
+        "license_sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+      },
+      "subset": {
+        "font_file": "NotoSansCJKsc-Medium-subset.otf",
+        "font_sha256": "668e9acbda2f004f5145f14c19d3bb3fac0dc2a6506dab78fe87a76e7ce7f101",
+        "font_bytes": 3409012,
+        "fonttools_version": "4.66.1",
+        "method": "fontTools.subset with canonical table order and fixed Unicode input",
+        "unicode_list_sha256": "3b8822e0f7ee1d0f62a1db331e37ec2a7e15f4a5de22f04b0943afe51cb0cb74",
+        "unicode_coverage_sha256": "2361892f34fa3ee9bbcf09e534635a438c7c8e056e7bbbe1aa7567762d1548ce",
+        "unicode_coverage_count": 7462
+      }
+    },
+    {
+      "style": "Bold",
+      "weight": 700,
+      "role": "weight_candidate",
+      "approval_status": "not_approved",
+      "source": {
+        "repository": "notofonts/noto-cjk",
+        "tag": "Sans2.004",
+        "commit": "523d033d6cb47f4a80c58a35753646f5c3608a78",
+        "font_path": "Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Bold.otf",
+        "font_url": "https://raw.githubusercontent.com/notofonts/noto-cjk/523d033d6cb47f4a80c58a35753646f5c3608a78/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Bold.otf",
+        "source_filename": "NotoSansCJKsc-Bold.otf",
+        "source_font_sha256": "b5f0d1a190a7f9b43c310a8850630af12553df32c4c050543f9059732d9b4c0a",
+        "source_font_bytes": 17002248,
+        "source_git_blob_sha": "ff4c0450e8a5bf0290fbb6013a72dc61a10e8e56",
+        "license_file": "LICENSE.txt",
+        "license_sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+      },
+      "subset": {
+        "font_file": "NotoSansCJKsc-Bold-subset.otf",
+        "font_sha256": "78aeec072742f4aa8feebb4ab845d59e76b15ded3bccdfb6da0a11115abba8a4",
+        "font_bytes": 3497576,
+        "fonttools_version": "4.66.1",
+        "method": "fontTools.subset with canonical table order and fixed Unicode input",
+        "unicode_list_sha256": "3b8822e0f7ee1d0f62a1db331e37ec2a7e15f4a5de22f04b0943afe51cb0cb74",
+        "unicode_coverage_sha256": "2361892f34fa3ee9bbcf09e534635a438c7c8e056e7bbbe1aa7567762d1548ce",
+        "unicode_coverage_count": 7462
+      }
+    }
+  ]
 }
