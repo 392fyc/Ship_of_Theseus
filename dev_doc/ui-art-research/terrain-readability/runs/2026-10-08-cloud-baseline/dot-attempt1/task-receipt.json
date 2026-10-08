@@ -1,0 +1,106 @@
+{
+  "task_id": "ui-ux-terrain-task42-attempt1-original-consumption",
+  "status": "completed",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/ui-ux/terrain-mask-capture",
+  "target_head_before": "d4d53d1934e631ccc17940a1b19d1a68561ec722",
+  "candidate_head": null,
+  "capture_candidate_head": "d4d53d1934e631ccc17940a1b19d1a68561ec722",
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "只新增当前运行目录；独立审查与用户视觉验收分离；不推送、不建PR；保留既有project.godot状态"
+    },
+    {
+      "contract": ".codex/project/mercury-task-contract.md",
+      "summary": "记录候选、范围、实际原件及失败；无自我批准"
+    },
+    {
+      "contract": "dot-cooperation/2",
+      "sha256": "85e9f51fb3d258a52aad4c467032223883c1ef715aee6498ae9a052cd2985842",
+      "generation": "469550a9-a0b6-4d55-af41-1287ce6556f7",
+      "summary": "固定身份与真实授权、同代账本、原件消费；failed终态不伪造关闭"
+    }
+  ],
+  "changed_files": [
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-08-cloud-baseline/dot-attempt1/original-consumption-index.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-08-cloud-baseline/dot-attempt1/report.md",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-08-cloud-baseline/dot-attempt1/task-receipt.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-08-cloud-baseline/dot-attempt1/evidence-manifest.json"
+  ],
+  "verification": [
+    {
+      "command": "materialize_failed_task42.py with exact Page readback wrappers",
+      "result": "pass",
+      "evidence": "42原件/632830字节、13传输文件全部大小与SHA256一致；35容器原件还原"
+    },
+    {
+      "command": "original root claim/failed tool response and actual ledger-status",
+      "result": "pass",
+      "evidence": "failed/count1；Godot0；账本证据SHA与材料失败原件一致"
+    },
+    {
+      "command": "check_task42_input_map.py",
+      "result": "pass",
+      "evidence": "35输入与信封身份及SHA一致；manifest(1)仅文件名别名"
+    },
+    {
+      "command": "cloud whole archive and six native pixel combinations",
+      "result": "skipped",
+      "evidence": "首轮材料失败，未拼装、未启动游戏；NOT_TESTED"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "首轮失败原件完整消费",
+      "result": "pass",
+      "evidence": [
+        "original-consumption-index.json"
+      ]
+    },
+    {
+      "criterion": "首轮材料一致性",
+      "result": "fail",
+      "evidence": [
+        "report.md"
+      ]
+    },
+    {
+      "criterion": "六组原生像素与T1–T6",
+      "result": "skipped",
+      "evidence": [
+        "report.md"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "冻结工具、生产代码、素材、玩法和旧记录",
+      "result": "unchanged",
+      "evidence": "只新增dot-attempt1运行记录"
+    },
+    {
+      "subject": "既有project.godot工作区修改",
+      "result": "unchanged",
+      "evidence": "不暂存、不提交该文件"
+    }
+  ],
+  "residual_risks": [
+    "地形素材可读性未修复",
+    "像素与美术指标未测",
+    "基础UI与P0/CR01 Milestone未完成"
+  ],
+  "escalation_reason": null,
+  "publication": {
+    "published": false,
+    "remote_ref": null
+  },
+  "milestone": {
+    "status": "INCOMPLETE"
+  },
+  "consumption_receipt": {
+    "request_id": "316bb97c-9526-4886-b58d-11a810b7a75c",
+    "body_sha256": "5736f791c162a2f9dbd3ebe819f25667b5a018f77dbbe524f0ff2d79e70f84a5",
+    "meaning": "失败原件消费，不改变failed终态"
+  }
+}

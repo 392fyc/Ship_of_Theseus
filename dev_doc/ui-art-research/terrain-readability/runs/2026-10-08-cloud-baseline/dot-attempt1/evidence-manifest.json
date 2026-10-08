@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "capture_candidate_head": "d4d53d1934e631ccc17940a1b19d1a68561ec722",
+  "scope": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-08-cloud-baseline/dot-attempt1",
+  "files": [
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-08-cloud-baseline/dot-attempt1/original-consumption-index.json",
+      "bytes": 15748,
+      "sha256": "48160b558a52b6590544e196c93341365c737efccb556ce91d1dac89d0f9eceb"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-08-cloud-baseline/dot-attempt1/report.md",
+      "bytes": 2552,
+      "sha256": "1ffbf1566401138ca56024fbab7d5c32423e660c85dc46c1dda4450fee5ba614"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-08-cloud-baseline/dot-attempt1/task-receipt.json",
+      "bytes": 3691,
+      "sha256": "d49c7df826782298f00afbc81e38a67d617f75fcc1d25c77224c9cb848631347"
+    }
+  ],
+  "self_excluded": true
+}
