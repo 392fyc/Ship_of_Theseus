@@ -1,0 +1,94 @@
+{
+  "task_id": "TERRAIN-READABILITY-01-measurement-preparation",
+  "status": "completed",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/ui-ux/terrain-readability",
+  "target_head_before": "1abc1461fd1eaf2033c0519cf38f9086feb356ab",
+  "candidate_head": null,
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md; task.md; measurement.md",
+      "summary": "仅测量准备和参考；Dot图像采集；无生产或素材更改；独立审查；不发布"
+    }
+  ],
+  "changed_files": [
+    "dev_doc/ui-art-research/terrain-readability/independent-review.json",
+    "dev_doc/ui-art-research/terrain-readability/measurement.md",
+    "dev_doc/ui-art-research/terrain-readability/metrics-verification.json",
+    "dev_doc/ui-art-research/terrain-readability/reference-manifest.json",
+    "dev_doc/ui-art-research/terrain-readability/references.md",
+    "dev_doc/ui-art-research/terrain-readability/task-receipt.json",
+    "dev_doc/ui-art-research/terrain-readability/task.md",
+    "tests/claude_review/terrain_readability_metrics.py",
+    "tests/claude_review/test_terrain_readability_metrics.py"
+  ],
+  "verification": [
+    {
+      "command": "<python> -X utf8 tests/claude_review/test_terrain_readability_metrics.py -v",
+      "result": "pass",
+      "evidence": "14项正反例；source SHA与原stdout/stderr摘要见metrics-verification.json"
+    },
+    {
+      "command": "CIEDE2000作者34组数据与独立复算",
+      "result": "pass",
+      "evidence": "最大绝对误差0.000049499；公式未变，复用已观察结果"
+    },
+    {
+      "command": "official reference exact original readback",
+      "result": "pass",
+      "evidence": "reference-manifest.json；雪图287097 bytes SHA32b196…重新下载匹配，另含Square Enix原图"
+    },
+    {
+      "command": "independent-review.json",
+      "result": "pass",
+      "evidence": "两项首轮发现已修复，独立复审确认测量准备PASS；14项测试及精确来源核对"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "T1–T6数值测量准备",
+      "result": "pass",
+      "evidence": [
+        "measurement.md",
+        "metrics-verification.json"
+      ]
+    },
+    {
+      "criterion": "参考原图可追溯",
+      "result": "pass",
+      "evidence": [
+        "references.md",
+        "reference-manifest.json"
+      ]
+    },
+    {
+      "criterion": "同帧采集方法与真实像素验收分开",
+      "result": "pass",
+      "evidence": [
+        "task.md",
+        "measurement.md"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "生产代码、素材、玩法、地表接壤和水深",
+      "result": "unchanged",
+      "evidence": "只新增任务目录与两个离线Python文件，git无已有文件差异"
+    }
+  ],
+  "residual_risks": [
+    "测量准备不批准真实素材；TERRAIN-READABILITY-01仍未修复",
+    "同帧多视口采集器及六组合真实基线未完成；每类每组合至少3实例和C4/C8仍须执行",
+    "T2光源、T3暗侧部件对应、T4接地位置、T5接壤水深C7仍须独立图像检查",
+    "Dot最近一次核验中原持久去重账本不可用、桌面输入未就绪；不使用本地布局截图替代",
+    "基础战斗UI和P0/CR-01 Milestone未完成"
+  ],
+  "escalation_reason": null,
+  "publication": {
+    "published": false,
+    "pull_request": false
+  },
+  "receipt_phase": "reviewed measurement preparation before local commit",
+  "next_task_blocker": "同帧采集器仍须实现和实际校准；真实基线依赖Dot原账本与桌面输入前置"
+}

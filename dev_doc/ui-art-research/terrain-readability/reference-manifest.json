@@ -1,0 +1,36 @@
+{
+  "originals_root": "<仓库外证据根>/references",
+  "purpose": "视觉方法研究，禁止作为游戏素材",
+  "references": [
+    {
+      "file": "into-the-breach.jpg",
+      "source_page": "https://store.steampowered.com/app/590380/?l=english",
+      "source_image": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/590380/ss_567488bb66f15710b4fd40eb57446e5d652717f5.1920x1080.jpg?t=1755610784",
+      "sha256": "32b196f05ee10d171e6dad7f2505024205183ed2d10865c8c2cc085b2fd5e2c3",
+      "bytes": 287097,
+      "dimensions": [
+        1280,
+        720
+      ],
+      "reviewed_pixels": true,
+      "retrieved_date": "2026-10-08",
+      "retrieved_utc": "2026-10-08T02:33:51.157171+00:00",
+      "source_page_html_sha256": "ddc0d29737d607a67f646de986081b1f6677f673a47eaea9893beb03e36598d4",
+      "source_readback_sha256": "fb2e27c7bfa7163dc6120042a9131a05da5c607d3f5f9b1148aa290e38570b83",
+      "exact_original_redownload_match": true
+    },
+    {
+      "file": "triangle-strategy.png",
+      "source_page": "https://www.jp.square-enix.com/trianglestrategy/",
+      "source_image": "https://www.jp.square-enix.com/trianglestrategy/assets/img/top/battle/movie.png",
+      "sha256": "a3da25c90889f6c280def4b1f33609a859a91d3954e0d6859b70b47b7b911878",
+      "bytes": 478387,
+      "dimensions": [
+        699,
+        393
+      ],
+      "reviewed_pixels": true,
+      "retrieved_date": "2026-10-08"
+    }
+  ]
+}

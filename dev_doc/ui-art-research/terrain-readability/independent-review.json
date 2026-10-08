@@ -1,0 +1,39 @@
+{
+  "reviewer": "native /root/terrain_metric_review",
+  "recorded_by": "Main from independent reviewer responses",
+  "verdict": "PASS",
+  "scope": "测量准备 Task；不批准真实素材、采集器或六组合运行",
+  "reviewed_files_sha256": {
+    "dev_doc/ui-art-research/terrain-readability/task.md": "9c078c1744cc3cd367137bbe48c5d257783fa1111f4e1082382ed739932b7dfa",
+    "dev_doc/ui-art-research/terrain-readability/measurement.md": "fe4144e6e401148b1f63ea46e2fb18d2fe55026e43266d87ecd50131b453e6b0",
+    "dev_doc/ui-art-research/terrain-readability/metrics-verification.json": "25025218f95f5a1c0727327ad7d95ae12cf6c7d64fee26252fd66cca37ac4615",
+    "dev_doc/ui-art-research/terrain-readability/reference-manifest.json": "3e4a3dffcf031b60a86c1731d9e42c9daf0360d255f9e17a77b0bd5e3ee3e016",
+    "dev_doc/ui-art-research/terrain-readability/references.md": "c9e4acd00fd5fc982c0ca7fb4a79671207194f4f1b7c8f6aae0f986ec959f38d",
+    "tests/claude_review/terrain_readability_metrics.py": "b024161fb309ce7410015dfa8a998fbd3363692461031d28cd4cb3ff149f7ac7",
+    "tests/claude_review/test_terrain_readability_metrics.py": "05bcc16c4a50df00dafa29baa2853b37abfe45abbd1210369fb6141468afdcc1"
+  },
+  "first_round": {
+    "verdict": "needs_changes",
+    "findings": [
+      "Into the Breach 原图与补写的直链不符",
+      "T3暗侧轮廓未执行检查"
+    ]
+  },
+  "resolution": [
+    "从保存的官方HTML解析8个原图链接，精确重取雪图，原字节SHA匹配；清单及来源规则已改",
+    "新增1px、暗侧与L*≤12检查；完整T3缺少检查时NOT_TESTED，增加正反例"
+  ],
+  "checks": [
+    "独立运行14项数组测试通过",
+    "作者34组CIEDE2000数据独立校准误差小于0.0001；公式未变结果复用",
+    "官方参考原图与当前清单/读回日志摘要一致",
+    "读取task-receipt待结案状态；同意主代理登记本审查并完成测量准备Task"
+  ],
+  "findings": [],
+  "not_covered": [
+    "Godot实际画面",
+    "未来同帧采集器",
+    "Dot六组合真实基线",
+    "素材修改与用户视觉验收"
+  ]
+}

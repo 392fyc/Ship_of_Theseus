@@ -1,0 +1,30 @@
+{
+  "source_sha256": {
+    "tests/claude_review/terrain_readability_metrics.py": "b024161fb309ce7410015dfa8a998fbd3363692461031d28cd4cb3ff149f7ac7",
+    "tests/claude_review/test_terrain_readability_metrics.py": "05bcc16c4a50df00dafa29baa2853b37abfe45abbd1210369fb6141468afdcc1",
+    "tests/claude_review/claude_review_checks.py": "be32bf35c7d51d50242e0dcfa11fe79f4d2b931fa4101483fee58686dd651165"
+  },
+  "source_unchanged": true,
+  "command": [
+    "<python>",
+    "-X",
+    "utf8",
+    "tests/claude_review/test_terrain_readability_metrics.py",
+    "-v"
+  ],
+  "exit_code": 0,
+  "tests": 14,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "a6ca8182182ca6dea943639395c637a5d2a7e07c5f1394519cf608bd7fe8500c",
+  "ciede2000": {
+    "source": "https://hajim.rochester.edu/ece/sites/gsharma/ciede2000/dataNprograms/ciede2000testdata.txt",
+    "file_sha256": "44aebb39107128328add54fbef5ac8ee89909e50508f448a1580adea2058a4b8",
+    "rows": 34,
+    "maximum_absolute_error": 4.9498977271467126e-05,
+    "tolerance": 0.0001,
+    "passed": true,
+    "verification_reused": "delta_e00 未改计算公式；作者34组结果由独立审查者重新核对，原校准见 attempt2"
+  },
+  "scope": "离线测量校准，不是真实素材验收",
+  "raw_root": "<仓库外证据根>/metrics-check/attempt3"
+}
