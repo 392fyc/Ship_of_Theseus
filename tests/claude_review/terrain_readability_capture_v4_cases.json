@@ -1,0 +1,51 @@
+{
+  "schema_version": "terrain-readability-capture-v4-cases/1",
+  "fixture": "calibration_courtyard",
+  "source_example": "assets/prototype/battlefield_courtyard/terrain_examples.json#courtyard",
+  "capture_variant_override": {
+    "cell_in_source_10x10": [8, 7],
+    "from": "pillar",
+    "to": "ruined",
+    "captured_instance_type": "rubble"
+  },
+  "resolutions": [
+    [1280, 720],
+    [1920, 1080],
+    [2560, 1440]
+  ],
+  "cases": [
+    {
+      "map_size": [10, 10],
+      "player_unit_position": [5, 0],
+      "enemy_unit_position": [5, 9]
+    },
+    {
+      "map_size": [25, 25],
+      "player_unit_position": [5, 0],
+      "enemy_unit_position": [15, 20]
+    }
+  ],
+  "retained_sample_instances": [
+    {
+      "stable_id": "pillar@1.00,4.00",
+      "purpose": "Retain and remeasure the faded pillar under its actual runtime alpha and coverage state."
+    },
+    {
+      "stable_id": "rubble@3.12,2.08",
+      "purpose": "Retain and remeasure the rubble instance formerly covered by a unit exclusion."
+    }
+  ],
+  "configuration_contract": {
+    "builder": "TerrainBattleSession.configure_map -> TerrainBattleDefinition.build",
+    "apply_after_formal_build": true,
+    "apply_before_entering_tree": true,
+    "allowed_changed_paths": [
+      "enemy_units[0].position",
+      "player_units[0].position"
+    ],
+    "same_positions_for_all_resolutions_of_each_map_size": true,
+    "unit_counts_classes_and_all_other_fields_preserved": true,
+    "positions_must_be_distinct_passable_and_clear_of_prop_cells": true,
+    "initial_fit_board_unchanged": true
+  }
+}

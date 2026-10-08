@@ -1,0 +1,240 @@
+{
+  "schema_version": "terrain-capture-v4/source-review/1",
+  "verdict": "PASS",
+  "acceptance_scope": "SOURCE/STRUCTURE_ONLY",
+  "baseline_head": "bc84bf0fbd42863e9fa7a7e715e99e6b4c6400a3",
+  "candidate_head": "bc84bf0fbd42863e9fa7a7e715e99e6b4c6400a3",
+  "branch": "codex/ui-ux/terrain-mask-capture-v4",
+  "reviewer": "Codex independent source acceptance agent (normalization re-review)",
+  "source_bindings": [
+    {
+      "path": "tests/claude_review/capture_terrain_readability_v4.gd",
+      "bytes": 45994,
+      "sha256": "c5de3166dd13291c9145218deb702f89287d2cce6ced7580a5a632676feb10cb",
+      "line_endings": "LF"
+    },
+    {
+      "path": "tests/claude_review/validate_terrain_readability_capture_v4.py",
+      "bytes": 20826,
+      "sha256": "f81bf008bcf8fc393395be731f0456638aa449e1e6dfc0d2f10ded78e5f863eb",
+      "line_endings": "LF"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_readability_capture_v4.py",
+      "bytes": 10135,
+      "sha256": "7e46fcb7af2b0be5c42cd8ba770a35edd6353c7edb9617cebbc8bc3a83cb080c",
+      "line_endings": "LF"
+    },
+    {
+      "path": "tests/claude_review/terrain_readability_capture_v4_cases.json",
+      "bytes": 1568,
+      "sha256": "00161a0b7cba24dff1fe75e45167ed5c011488320cdd414ef48a51d3fc23e911",
+      "line_endings": "LF"
+    }
+  ],
+  "criteria_results": [
+    {
+      "id": "scope-and-candidate",
+      "criterion": "候选只新增四个 v4 工具文件及任务文档；基线文件、项目配置、既有 v1–v3、地图和素材未改。",
+      "verdict": "PASS",
+      "evidence": [
+        "candidate-status.log：HEAD 等于指定基线；仅五个未跟踪文件；project.godot 原始对象哈希等于 HEAD blob。"
+      ]
+    },
+    {
+      "id": "formal-spawn-arrangements",
+      "criterion": "固定两种地图边长的出生安排，三个分辨率复用；两边均由正式 Definition.build 独立构建后、入树前只改两个单位 position，职业、数量和其余字段保留。",
+      "verdict": "PASS",
+      "evidence": [
+        "tests/claude_review/terrain_readability_capture_v4_cases.json:11-50",
+        "tests/claude_review/capture_terrain_readability_v4.gd:52-144",
+        "tests/claude_review/capture_terrain_readability_v4.gd:322-409",
+        "<仓库外证据根>/independent-source-review/headless-summary.json：六组实际会话均核对位置、入树前标记、改动字段、职业/数量与配置摘要。"
+      ]
+    },
+    {
+      "id": "spawn-visibility-and-retained-samples",
+      "criterion": "出生格不同、可通行且避开道具格；单位和高亮保留；pillar@1.00,4.00 与 rubble@3.12,2.08 保留，记录实际覆盖与 alpha 且采集器不直接修改 alpha。",
+      "verdict": "PASS",
+      "evidence": [
+        "tests/claude_review/capture_terrain_readability_v4.gd:322-448",
+        "tests/claude_review/capture_terrain_readability_v4.gd:474-565",
+        "tests/claude_review/terrain_readability_capture_v4_cases.json:28-36",
+        "tests/claude_review/capture_terrain_readability_v3.gd:79-183",
+        "<仓库外证据根>/independent-source-review/headless-summary.json：六组均 distinct/passable/prop-clear，单位与高亮可见，两样本保留、未覆盖，alpha 来源值/实际值/目标值一致且 alpha_mutated_by_v4=false。"
+      ]
+    },
+    {
+      "id": "frozen-draw-inputs-and-frame-binding",
+      "criterion": "保留 v2 _time 同步；冻结后请求两边 BoardView 与 DetailLayer 重绘，实际 draw 回调采集关联 BoardView 输入；同帧绑定 12 图和状态，并在 headless 明确保持 NT。",
+      "verdict": "PASS",
+      "evidence": [
+        "tests/claude_review/capture_terrain_readability_v4.gd:147-217",
+        "tests/claude_review/capture_terrain_readability_v4.gd:220-319",
+        "tests/claude_review/capture_terrain_readability_v4.gd:578-658",
+        "tests/claude_review/capture_terrain_readability_v4.gd:977-1016",
+        "tests/claude_review/validate_terrain_readability_capture_v4.py:169-239",
+        "<仓库外证据根>/independent-source-review/headless-summary.json：六组 v2 同步后两侧 _time 相等，四个节点均请求重绘；draw_status=NOT_TESTED_HEADLESS，pixel_status=NOT_TESTED_HEADLESS_RENDERING_DISABLED。"
+      ]
+    },
+    {
+      "id": "inherited-pixel-gates",
+      "criterion": "继承完整 RGBA/C4/C8/排除/实例 ID/alpha>0.5/每类至少三个可见实例门槛，不以 headless 结构结果伪报像素或美术通过。",
+      "verdict": "PASS",
+      "evidence": [
+        "tests/claude_review/validate_terrain_readability_capture_v4.py:295-335",
+        "tests/claude_review/validate_terrain_readability_capture_v3.py:108-133",
+        "tests/claude_review/validate_terrain_readability_capture_v2.py:394-462",
+        "tests/claude_review/validate_terrain_readability_capture_v2.py:252-391",
+        "tests/claude_review/validate_terrain_readability_capture.py:77-108",
+        "tests/claude_review/validate_terrain_readability_capture.py:174-224",
+        "<仓库外证据根>/independent-source-review/c8-source.log：v3 与 v4 C8 源码检查均通过；headless-summary.json 明确像素未测试。"
+      ]
+    },
+    {
+      "id": "validator-entry-cli-and-error-retention",
+      "criterion": "保留单组 validate() 入口，CLI 只接受恰好完整六组；正反例覆盖新增规则，失败状态与错误不丢失。",
+      "verdict": "PASS",
+      "evidence": [
+        "tests/claude_review/validate_terrain_readability_capture_v4.py:42-166",
+        "tests/claude_review/validate_terrain_readability_capture_v4.py:169-267",
+        "tests/claude_review/validate_terrain_readability_capture_v4.py:295-372",
+        "tests/claude_review/test_terrain_readability_capture_v4.py:141-231",
+        "python-tests.log：11 项通过。",
+        "cli-one-case-validation.log 与 cli-one-case-output.json：单组 CLI 实际退出码 1、six_case_coverage=false、capture_preconditions=FAIL，270 条错误保留。"
+      ]
+    },
+    {
+      "id": "six-case-headless-runtime",
+      "criterion": "按要求对最终候选执行一次 10/25 × 1280×720、1920×1080、2560×1440 headless 状态检查，捕获真实进程退出码与 UTF-8 日志。",
+      "verdict": "PASS",
+      "evidence": [
+        "godot-headless.exit.txt：0。",
+        "godot-headless.log：六组结构状态输出及基线/候选 HEAD。",
+        "godot-v4-state.json 与 headless-summary.json：六种唯一组合均通过结构状态核对。"
+      ]
+    }
+  ],
+  "findings": [],
+  "recommendations": [],
+  "limitations": {
+    "scope": "SOURCE/STRUCTURE_ONLY",
+    "native_draw_callbacks": "NOT_TESTED",
+    "pixels": "NOT_TESTED",
+    "art_acceptance": "NOT_TESTED",
+    "milestone_acceptance": "NOT_TESTED",
+    "detail": "headless 状态只证明正式配置、输入绑定、保留样本和结构门槛；不证明 CanvasItem.draw 实际发生，也不证明原生像素测量、美术结果或 Milestone 完成。"
+  },
+  "external_evidence_root": "<仓库外证据根>/independent-source-review/",
+  "original_evidence": [
+    {
+      "file": "c8-source.exit.txt",
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "file": "c8-source.log",
+      "bytes": 378,
+      "sha256": "25a5a99686847a6ffdd5cd8893513ebe781cc96b932b07014ba06b72ce0e6621"
+    },
+    {
+      "file": "candidate-status.log",
+      "bytes": 578,
+      "sha256": "b508efec6c50268a097d71ee9f684011de9f9ceb6f23406a93cd0f1a7edbe4cf"
+    },
+    {
+      "file": "cli-one-case-manifest.json",
+      "bytes": 205,
+      "sha256": "6f1505a8cc21698a71ceb174c9c7603ebe7f023eae165cc4f996b13674c13597"
+    },
+    {
+      "file": "cli-one-case-output.json",
+      "bytes": 20063,
+      "sha256": "d8eac21a3d0227b0e05a15fef482841d09eb7f085cdf6794b6f0611f001d87fa"
+    },
+    {
+      "file": "cli-one-case-validation.exit.txt",
+      "bytes": 3,
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04"
+    },
+    {
+      "file": "cli-one-case-validation.log",
+      "bytes": 131,
+      "sha256": "b414b9cfabd0f9ac7194691e9577dbedb643705cb3ec9cb559a3c35ace2a19e5"
+    },
+    {
+      "file": "format-normalization-comparison.json",
+      "bytes": 2691,
+      "sha256": "e9c4ff84ba97f0dfc82c8d09f8f8b86b0f01c1e93aca3e076da6c7014e2dc6c1"
+    },
+    {
+      "file": "godot-headless.exit.txt",
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "file": "godot-headless.log",
+      "bytes": 835971,
+      "sha256": "bc3abf741640938333a0c7b422f757636f09561d64e57a8b85dc1142717fb97a"
+    },
+    {
+      "file": "godot-v3-route.json",
+      "bytes": 3661,
+      "sha256": "cb11d970d79d380965429748a9db3bb2c01f1f4b33b08bab06e51f9d3684ff2b"
+    },
+    {
+      "file": "godot-v4-state.json",
+      "bytes": 5160690,
+      "sha256": "27340b4858804188f4b1bef5c29f36dd8a8eeb107fc0445053f9ec80d9e8b91a"
+    },
+    {
+      "file": "headless-summary.json",
+      "bytes": 8705,
+      "sha256": "958fa07f61cd7bfee8060f9d132ad311aec2e3f6f1feed67235e19019358de36"
+    },
+    {
+      "file": "pre-format-capture_terrain_readability_v4.gd",
+      "bytes": 45998,
+      "sha256": "7d14899f17157c8fb477fbdbccde0b29fbd5c4ac080bce603171d351dfcc36bc"
+    },
+    {
+      "file": "python-tests.exit.txt",
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "file": "python-tests.log",
+      "bytes": 115,
+      "sha256": "498c89092d96cdd91269c8f3aaeaf1a89ee5c4d6fa23fbf6b687d56dedd44adf"
+    },
+    {
+      "file": "review.json",
+      "bytes": 9255,
+      "sha256": "565335e0bcb7f66ce579b69d47a4be19d6d5eb54985e2150f3728d64f4e0bfd7"
+    }
+  ],
+  "review_scope": "FORMAT_NORMALIZATION_AND_SOURCE_BINDING_REFRESH",
+  "normalization_review": {
+    "verdict": "PASS",
+    "change": "仅删除四个指定行末 TAB 字节，代码文本与换行数量保持一致。",
+    "changed_lines": [
+      78,
+      301,
+      324,
+      325
+    ],
+    "old_source_sha256": "7d14899f17157c8fb477fbdbccde0b29fbd5c4ac080bce603171d351dfcc36bc",
+    "new_source_sha256": "c5de3166dd13291c9145218deb702f89287d2cce6ced7580a5a632676feb10cb",
+    "all_other_source_bindings_unchanged": true,
+    "candidate_head_unchanged": "bc84bf0fbd42863e9fa7a7e715e99e6b4c6400a3",
+    "index_matches_current_worktree": true,
+    "runtime_evidence_reuse": "沿用既有六组 headless 证据；该证据针对旧 raw。字节比较证明代码 token、用例 JSON、配置输入与运行输入未变，因此无需重跑 Godot 六组。",
+    "comparison_evidence": "format-normalization-comparison.json"
+  },
+  "supersedes": {
+    "file": "review.json",
+    "bytes": 9255,
+    "sha256": "565335e0bcb7f66ce579b69d47a4be19d6d5eb54985e2150f3728d64f4e0bfd7",
+    "note": "保留原件；本文件仅刷新格式规范化结论与源码绑定。"
+  }
+}
