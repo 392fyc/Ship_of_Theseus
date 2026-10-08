@@ -1,0 +1,238 @@
+{
+  "schema_version": "terrain-capture-verification/1",
+  "checked_on": "2026-10-08",
+  "base_head": "787d294fdcac1375543fd517d7940b2d5b304c90",
+  "candidate_head": null,
+  "candidate_phase": "uncommitted source candidate",
+  "sources": [
+    {
+      "path": "tests/claude_review/capture_terrain_readability.gd",
+      "bytes": 94170,
+      "sha256": "db2da66848723d05caf6e1da5215afe75a524199e2dbf0e350ec663b20776266"
+    },
+    {
+      "path": "tests/claude_review/terrain_mask_draw_layer.gd",
+      "bytes": 4933,
+      "sha256": "3400d8352c7269f21c1a5ca25adb7fdf7a5d9a76419e23ab37ff87aec679970f"
+    },
+    {
+      "path": "tests/claude_review/terrain_readability_crown_regions.json",
+      "bytes": 7647,
+      "sha256": "237e3c7d5663f20dafbc7db4bf97c5e24f2c67a88d83a8f8a7a84e492a0b7767"
+    },
+    {
+      "path": "tests/claude_review/validate_terrain_readability_capture.py",
+      "bytes": 13752,
+      "sha256": "9451fac8f1ccb266a891ee9cb379130caeddc47690a77790be3ef635514035d4"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_capture_readback.py",
+      "bytes": 5058,
+      "sha256": "baf19128464b3fb28e2df281214b858a92b2868b4724491bb5554b5076841297"
+    }
+  ],
+  "checks": [
+    {
+      "name": "headless_structure",
+      "result": "PASS_STRUCTURE_ONLY",
+      "exit_code": 0,
+      "command": "godot --headless --path <task-worktree> --script res://tests/claude_review/capture_terrain_readability.gd -- --headless-check --out=<external>/worker-repair2/capture-output --map-sizes=10,25 --resolutions=1280x720,1920x1080,2560x1440",
+      "cases": [
+        {
+          "map_size": 10,
+          "resolution": [
+            1280,
+            720
+          ],
+          "actual_prop_counts": {
+            "pillar": 3,
+            "rubble": 3,
+            "tree": 12,
+            "wall": 7
+          },
+          "derived_map_sha256": "600a0a61ab1d63bf020dcdd33ac9b4e85ba3ec9b13c61cd70409b740775406cc",
+          "viewport_mapping_validation": "PASS_STRUCTURE_ONLY",
+          "pixel_status": "NOT_TESTED_HEADLESS_RENDERING_DISABLED"
+        },
+        {
+          "map_size": 10,
+          "resolution": [
+            1920,
+            1080
+          ],
+          "actual_prop_counts": {
+            "pillar": 3,
+            "rubble": 3,
+            "tree": 12,
+            "wall": 7
+          },
+          "derived_map_sha256": "600a0a61ab1d63bf020dcdd33ac9b4e85ba3ec9b13c61cd70409b740775406cc",
+          "viewport_mapping_validation": "PASS_STRUCTURE_ONLY",
+          "pixel_status": "NOT_TESTED_HEADLESS_RENDERING_DISABLED"
+        },
+        {
+          "map_size": 10,
+          "resolution": [
+            2560,
+            1440
+          ],
+          "actual_prop_counts": {
+            "pillar": 3,
+            "rubble": 3,
+            "tree": 12,
+            "wall": 7
+          },
+          "derived_map_sha256": "600a0a61ab1d63bf020dcdd33ac9b4e85ba3ec9b13c61cd70409b740775406cc",
+          "viewport_mapping_validation": "PASS_STRUCTURE_ONLY",
+          "pixel_status": "NOT_TESTED_HEADLESS_RENDERING_DISABLED"
+        },
+        {
+          "map_size": 25,
+          "resolution": [
+            1280,
+            720
+          ],
+          "actual_prop_counts": {
+            "pillar": 21,
+            "rubble": 19,
+            "tree": 75,
+            "wall": 49
+          },
+          "derived_map_sha256": "c3fa4a5de39476d48486be00b2b78e91ce738194497423ae3f6f0f428b3d25df",
+          "viewport_mapping_validation": "PASS_STRUCTURE_ONLY",
+          "pixel_status": "NOT_TESTED_HEADLESS_RENDERING_DISABLED"
+        },
+        {
+          "map_size": 25,
+          "resolution": [
+            1920,
+            1080
+          ],
+          "actual_prop_counts": {
+            "pillar": 21,
+            "rubble": 19,
+            "tree": 75,
+            "wall": 49
+          },
+          "derived_map_sha256": "c3fa4a5de39476d48486be00b2b78e91ce738194497423ae3f6f0f428b3d25df",
+          "viewport_mapping_validation": "PASS_STRUCTURE_ONLY",
+          "pixel_status": "NOT_TESTED_HEADLESS_RENDERING_DISABLED"
+        },
+        {
+          "map_size": 25,
+          "resolution": [
+            2560,
+            1440
+          ],
+          "actual_prop_counts": {
+            "pillar": 21,
+            "rubble": 19,
+            "tree": 75,
+            "wall": 49
+          },
+          "derived_map_sha256": "c3fa4a5de39476d48486be00b2b78e91ce738194497423ae3f6f0f428b3d25df",
+          "viewport_mapping_validation": "PASS_STRUCTURE_ONLY",
+          "pixel_status": "NOT_TESTED_HEADLESS_RENDERING_DISABLED"
+        }
+      ]
+    },
+    {
+      "name": "source_binding_readback",
+      "result": "PASS",
+      "checked_files": 29,
+      "mismatch_count": 0
+    },
+    {
+      "name": "python_readback_tests",
+      "result": "PASS",
+      "exit_code": 0,
+      "tests": 7,
+      "command": "python -X utf8 -m unittest discover -s tests/claude_review -p test_terrain_capture_readback.py -v",
+      "scope": "原件回读失败条件的合成数组测试，不是 Godot 像素或素材证据"
+    },
+    {
+      "name": "C8_source",
+      "result": "PASS",
+      "raw": {
+        "unconditional_disable_lines": [],
+        "conditional_disable_lines": [],
+        "declared_not_runtime": false,
+        "pass": true,
+        "script": "tests/claude_review/capture_terrain_readability.gd"
+      }
+    },
+    {
+      "name": "git_diff_check",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "name": "headless_pixel_capture_guard",
+      "result": "PASS",
+      "command": "godot --headless --path <task-worktree> --script res://tests/claude_review/capture_terrain_readability.gd -- --out=<external>/worker-repair2/guard-output",
+      "observed_exit_code": 1,
+      "expected_exit_code": 1,
+      "evidence": "拒绝无渲染环境采集像素；预期原因 Pixel capture requires a rendered desktop 已出现；未生成PNG。"
+    }
+  ],
+  "originals": [
+    {
+      "reference": "<仓库外证据根>/worker-repair2/source-bindings.json",
+      "bytes": 7503,
+      "sha256": "981fe0ce8fdf10e1c1a68085b4a61601be8a5cbc0b3813de33c9d37b9a540c8e"
+    },
+    {
+      "reference": "<仓库外证据根>/worker-repair2/headless-full.log",
+      "bytes": 782206,
+      "sha256": "d4e2c423c87a74a49678e6b3544aa2d2133a552e465b01d76e251da7d98f2229"
+    },
+    {
+      "reference": "<仓库外证据根>/worker-repair2/headless-structure.json",
+      "bytes": 1177771,
+      "sha256": "a369ce0b8b3a2a3fc065e4cc473a34fcfe496abd0993fd47364a6085d599ac74"
+    },
+    {
+      "reference": "<仓库外证据根>/readback-unit-tests-repair1.log",
+      "bytes": 1197,
+      "sha256": "eb06ddae259e9189b81be268d7d9eb7f5c8e34647da223ede65f5ac4c52a91fa"
+    },
+    {
+      "reference": "<仓库外证据根>/independent-capture-review.json",
+      "bytes": 13358,
+      "sha256": "80d82ef1ca2aff32c4f727beaf547532c790d612847335011aa412b8909db025"
+    },
+    {
+      "reference": "<仓库外证据根>/independent-capture-review-repair1.json",
+      "bytes": 10194,
+      "sha256": "1088446abd6f9b751186711cfbda57942ccbd9cae1ea06828431ef458ab2f7be"
+    },
+    {
+      "reference": "<仓库外证据根>/worker-repair2/headless-guard.log",
+      "bytes": 552,
+      "sha256": "de09cc1436f1be608c25cca872f3e676525d800d2fc1834b31ccfa5fdee1e9a2"
+    },
+    {
+      "reference": "<仓库外证据根>/crown-annotation-plot.png",
+      "bytes": 1396983,
+      "sha256": "6957cf530ba5908f98f37b0fd0cfd0dc7dcad399dae238feb0118bed8ff87433"
+    }
+  ],
+  "pixel_capture": "NOT_TESTED",
+  "C4_runtime": "NOT_TESTED",
+  "C8_runtime": "NOT_TESTED",
+  "T1_to_T6": "NOT_TESTED",
+  "negative_calibration": "NOT_TESTED",
+  "art_acceptance": "NOT_TESTED",
+  "annotation_scope": {
+    "crown_geometry": "PASS",
+    "dark_side_geometry": "NOT_TESTED",
+    "outline_geometry": "NOT_TESTED",
+    "full_T3": "NOT_TESTED"
+  },
+  "limits": [
+    "无窗口结果不能证明实际 PNG 的平色、alpha、遮挡或同像素对应。",
+    "高分辨率无窗口主纹理尺寸异常，Dot 真实采集须按原生尺寸复核并拒绝不匹配原件。",
+    "Dot 当前原生路由不可投递，备用事件插件需重新认证；未改用本机布局截图。",
+    "完整 T3 暗侧与轮廓尚未分类；缺失项不能当作负例校准成功。"
+  ]
+}

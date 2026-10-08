@@ -1,0 +1,82 @@
+{
+  "schema_version": "terrain-capture-independent-review-reference/1",
+  "reviewed_on": "2026-10-08",
+  "reviewer": "independent critic agent terrain_capture_review",
+  "baseline_head": "787d294fdcac1375543fd517d7940b2d5b304c90",
+  "candidate_head": null,
+  "phase": "reviewed uncommitted source candidate",
+  "source_gate": {
+    "verdict": "PASS",
+    "scope": "当前仅针对环境门禁修订及其证据绑定；不是采集任务或视觉验收通过。"
+  },
+  "local_wip_commit_gate": {
+    "verdict": "ALLOW_WIP_ONLY",
+    "conditions": [
+      "仅冻结本次审查所绑定的候选源码；不得将其表述为采集 Task 完成。",
+      "提交后按新 HEAD 重生成源码绑定和来源回执，保持 capture-task-receipt.status=blocked 与 milestone_status=incomplete。",
+      "不发布、不合并、不宣称 Dot Linux 实际运行或像素验证通过。"
+    ]
+  },
+  "reviewed_sources": [
+    {
+      "path": "tests/claude_review/capture_terrain_readability.gd",
+      "bytes": 94170,
+      "sha256": "db2da66848723d05caf6e1da5215afe75a524199e2dbf0e350ec663b20776266"
+    },
+    {
+      "path": "tests/claude_review/terrain_mask_draw_layer.gd",
+      "bytes": 4933,
+      "sha256": "3400d8352c7269f21c1a5ca25adb7fdf7a5d9a76419e23ab37ff87aec679970f"
+    },
+    {
+      "path": "tests/claude_review/terrain_readability_crown_regions.json",
+      "bytes": 7647,
+      "sha256": "237e3c7d5663f20dafbc7db4bf97c5e24f2c67a88d83a8f8a7a84e492a0b7767"
+    },
+    {
+      "path": "tests/claude_review/validate_terrain_readability_capture.py",
+      "bytes": 13752,
+      "sha256": "9451fac8f1ccb266a891ee9cb379130caeddc47690a77790be3ef635514035d4"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_capture_readback.py",
+      "bytes": 5058,
+      "sha256": "baf19128464b3fb28e2df281214b858a92b2868b4724491bb5554b5076841297"
+    }
+  ],
+  "resolved_findings": [
+    "B1：实例/部件ID采用平色着色器，保留源alpha；源码层通过。",
+    "B2：正式同帧读取后与离线回读均检查主/辅助视口映射一致。",
+    "环境入口：移除Windows专用限制；只拒绝headless像素采集，保留Compatibility；窗口位于云桌面原点。"
+  ],
+  "originals": [
+    {
+      "reference": "<仓库外证据根>/independent-capture-review.json",
+      "bytes": 13358,
+      "sha256": "80d82ef1ca2aff32c4f727beaf547532c790d612847335011aa412b8909db025"
+    },
+    {
+      "reference": "<仓库外证据根>/independent-capture-review-repair1.json",
+      "bytes": 10194,
+      "sha256": "1088446abd6f9b751186711cfbda57942ccbd9cae1ea06828431ef458ab2f7be"
+    },
+    {
+      "reference": "<仓库外证据根>/independent-capture-review-repair2.json",
+      "bytes": 5314,
+      "sha256": "ef1d05aa71da15f6d303b02142d5c6a4bfb658aa1c6e471d134f30d23d57fff1"
+    }
+  ],
+  "independent_check_limit": "审查者核对原始拒绝日志和源码；未能在其shell中独立调用godot重跑退出码。Main的直接执行返回与原始日志见capture-verification.json。",
+  "remaining_real_gates": [
+    "Dot 路由目前 BLOCKED，且目标 Linux 的非 headless DisplayServer 桌面运行尚未实测。",
+    "需要在 Dot 目标环境采集六种组合并验证原生尺寸、同帧数据、alpha/ID/分类/遮挡/阴影控制和重建图像。",
+    "C4/C8 runtime、T1–T6、负例校准、dark_side/outline 分类及用户美术验收均未完成；完整 T3 继续 NOT_TESTED。"
+  ],
+  "capture_task_status": "BLOCKED",
+  "milestone_status": "incomplete",
+  "human_visual_approval": "NOT_RECORDED",
+  "publication": {
+    "published": false,
+    "pull_request": false
+  }
+}

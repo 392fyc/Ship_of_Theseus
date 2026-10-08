@@ -1,0 +1,58 @@
+{
+  "schema_version": "sot-dot-readiness/1",
+  "checked_on": "2026-10-08",
+  "task": "terrain-mask-capture",
+  "request_id": "9f248013-1204-414e-b7ec-a7628b68236a",
+  "task_id": "0db9828b-a8b0-4e96-ae72-3e839cf28d0f",
+  "seq": 31,
+  "recipient_thread_id": "01a0f14d-b108-766c-a16a-eb31b6d9a00d",
+  "recipient_host": "durable",
+  "transport_status": "BLOCKED",
+  "dispatch_result": "Some requested entity was not found: thread not found",
+  "native_readback": {
+    "turn_count": 0,
+    "meaning": "当前读取没有返回轮次；不证明原会话或远端原文件已丢失。"
+  },
+  "inventory": {
+    "current_target_found": false,
+    "archived_target_found": false,
+    "archived_next_cursor": null
+  },
+  "event_queue": {
+    "is_error": true,
+    "error_code": "UNAUTHORIZED",
+    "message": "This app connection requires reauthentication. Reconnect the app and try again."
+  },
+  "receiver_checks_current": {
+    "identity_verification": "NOT_RECHECKED",
+    "human_source_readability": "NOT_RECHECKED",
+    "task_authorization": "NOT_RECHECKED",
+    "atomic_request_registration": "NOT_RECHECKED",
+    "desktop_rendering": "NOT_RECHECKED"
+  },
+  "execution": {
+    "godot_cloud_started": false,
+    "godot_local_gui_started": false,
+    "replacement_ledger_created": false,
+    "identity_changed": false
+  },
+  "originals": [
+    {
+      "reference": "<仓库外证据根>/dot-readiness/dispatch-result.json",
+      "sha256": "24690a0c8ad46eaf7fadff87b72489007650960761da19810da277b2fa4e4ed8"
+    },
+    {
+      "reference": "<仓库外证据根>/dot-readiness/thread-inventory.json",
+      "sha256": "80ceae753f6250069c0d5ffef5b2328ab09eaac2d6e27b43c79785d71133c40b"
+    },
+    {
+      "reference": "<仓库外证据根>/dot-readiness/archived-inventory.json",
+      "sha256": "5382492143289e0e648e8063a71b3bdbfca419c2316e628c4093eaee4f9b2cb6"
+    },
+    {
+      "reference": "<仓库外证据根>/dot-readiness/event-queue-result.json",
+      "sha256": "8924589351df92233eeca2011cbd42a1c340b4ff7a9f29c2ee8991e3d15e0794"
+    }
+  ],
+  "next_step": "恢复已配对原生 YC 路由后，重新核对协议、可核实持续授权及原子登记前置，再投递经独立审查冻结的采集候选。"
+}

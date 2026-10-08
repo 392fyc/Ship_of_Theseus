@@ -1,0 +1,122 @@
+{
+  "task_id": "TERRAIN-READABILITY-01-same-frame-mask-capture",
+  "status": "blocked",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/ui-ux/terrain-mask-capture",
+  "target_head_before": "787d294fdcac1375543fd517d7940b2d5b304c90",
+  "candidate_head": null,
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md; docs/worktree-lifecycle.md; docs/lane-collaboration.md",
+      "summary": "独立任务树和审查；不改生产代码、素材和玩法；不发布；共享记忆按摘要条件写入。"
+    },
+    {
+      "contract": ".codex/project/mercury-task-contract.md; .agents/skills/sot-task-receipt/SKILL.md",
+      "summary": "源码、运行证据、独立审查与阶段完成分开；未满足项保留。"
+    },
+    {
+      "contract": "capture-task.md; 用户已采纳的 Claude 2026-10-08 第二次复核",
+      "summary": "先同帧采集，再以现行素材证明墙顶T2与树冠T3失败，再调整素材和六组合复测；Dot负责原图布局采集。"
+    }
+  ],
+  "changed_files": [
+    "tests/claude_review/capture_terrain_readability.gd",
+    "tests/claude_review/terrain_mask_draw_layer.gd",
+    "tests/claude_review/terrain_readability_crown_regions.json",
+    "tests/claude_review/validate_terrain_readability_capture.py",
+    "tests/claude_review/test_terrain_capture_readback.py",
+    "dev_doc/ui-art-research/terrain-readability/task.md",
+    "dev_doc/ui-art-research/terrain-readability/capture-task.md",
+    "dev_doc/ui-art-research/terrain-readability/capture-dot-readiness.json",
+    "dev_doc/ui-art-research/terrain-readability/capture-verification.json",
+    "dev_doc/ui-art-research/terrain-readability/capture-independent-review.json",
+    "dev_doc/ui-art-research/terrain-readability/capture-task-receipt.json"
+  ],
+  "verification": [
+    {
+      "command": "Godot --headless --script res://tests/claude_review/capture_terrain_readability.gd -- --headless-check (完整参数见 capture-verification.json)",
+      "result": "pass",
+      "evidence": "6个地图尺寸/分辨率组合结构通过；没有真实PNG。"
+    },
+    {
+      "command": "python -X utf8 -m unittest discover -s tests/claude_review -p test_terrain_capture_readback.py -v",
+      "result": "pass",
+      "evidence": "7项回读正反例通过，含跨帧、错位视口、原件摘要/尺寸、重建差异、缺失掩膜等具体失败。"
+    },
+    {
+      "command": "c8_script(capture_terrain_readability.gd); 对 worker-repair2/source-bindings.json 重算",
+      "result": "pass",
+      "evidence": "C8源码通过，29项来源/材质文件的字节数与SHA256一致。"
+    },
+    {
+      "command": "Dot真实PNG的C4/C8、重建/掩膜校准与T1–T6",
+      "result": "skipped",
+      "evidence": "Dot路由当前不可投递；无新的云端图像。"
+    },
+    {
+      "command": "独立源码审查及两次定向复核",
+      "result": "pass",
+      "evidence": "capture-independent-review.json；最终source_gate PASS，仅允许本地WIP冻结；Task仍BLOCKED。"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "同帧采集入口与原件回读",
+      "result": "partial",
+      "evidence": [
+        "capture-verification.json、capture-independent-review.json：源码与结构门槛通过，实际像素尚未校准。"
+      ]
+    },
+    {
+      "criterion": "10×10/25×25三档真实基线，且每类至少3实例",
+      "result": "partial",
+      "evidence": [
+        "固定派生校准用例的实际节点计数达标；真实可见和可测数量待原图。"
+      ]
+    },
+    {
+      "criterion": "现状墙顶T2、树冠T3负例校准",
+      "result": "partial",
+      "evidence": [
+        "尚无真实测量；暗侧/轮廓未完成验证，不以空标注或部分冠草对比代替完整T3。"
+      ]
+    },
+    {
+      "criterion": "生产资产与批准显示保持现行值",
+      "result": "pass",
+      "evidence": [
+        "只修改声明的测试工具和研究记录；project.godot规范化diff为空，未夹带。"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "scripts/、scenes/、assets/、data/ 生产文件与原冻结采集器",
+      "result": "unchanged",
+      "evidence": "候选改动清单不含生产文件、原有采集器或素材。"
+    },
+    {
+      "subject": "project.godot",
+      "result": "unchanged",
+      "evidence": "保留既有M状态；git diff规范化内容为空，不提交。"
+    },
+    {
+      "subject": "原Dot配对身份、原去重账本及旧失败原件",
+      "result": "unchanged",
+      "evidence": "未换钥、未创建替代账本、未重跑旧缺片任务；本次只读状态投递失败。"
+    }
+  ],
+  "residual_risks": [
+    "高分辨率无窗口主纹理尺寸异常，必须由Dot真实渲染验证；不缩放原图规避。",
+    "实例平色、透明边缘、遮挡与重建对齐仍待真实PNG。",
+    "树冠仅crown_geometry批准，完整T3保持NOT_TESTED。",
+    "没有修改素材，TERRAIN-READABILITY-01未修复；基础战斗UI与P0/CR-01 Milestone未完成。"
+  ],
+  "escalation_reason": "已配对YC原生投递返回thread not found，备用事件插件需重新认证；需恢复可读可投递的YC入口，随后重新核对授权、登记和桌面前置。",
+  "publication": {
+    "published": false,
+    "pull_request": false
+  },
+  "receipt_phase": "reviewed source candidate before local WIP commit; post-commit full HEAD and source readback recorded externally",
+  "milestone_status": "incomplete"
+}
