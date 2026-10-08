@@ -1,0 +1,131 @@
+{
+  "schema": "terrain-capture-v3/source-review/1",
+  "recorded_at_utc": "2026-10-08T18:54:17.936041+00:00",
+  "reviewer": "independent native acceptance subagent terrain_v3_source_acceptance",
+  "verdict": "PASS",
+  "review_scope": "four new test-tool files and task contract; no native pixel or art approval",
+  "baseline_head": "1be74a111c13ad558c089b3a8bcd4be04b406220",
+  "task_contract": "dev_doc/ui-art-research/terrain-readability/capture-v3-task.md",
+  "source_bindings": [
+    {
+      "path": "tests/claude_review/capture_terrain_readability_v3.gd",
+      "bytes": 26050,
+      "sha256": "e109a5148871b0f31a57fc993d725126a9f51d0f36acb8baf0098dcb33cd7a0e",
+      "line_endings": "LF"
+    },
+    {
+      "path": "tests/claude_review/validate_terrain_readability_capture_v3.py",
+      "bytes": 9286,
+      "sha256": "81b92efaba60d2452e352e337a0347d0f92f86478b68e3a393fea5f1a68f3d17",
+      "line_endings": "LF"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_readability_capture_v3.py",
+      "bytes": 3347,
+      "sha256": "21253b05f6bafb6a8ad668d4b1792391c396c8f6d83ad604886ff35d871f4518",
+      "line_endings": "LF"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_capture_input_routing_v3.gd",
+      "bytes": 735,
+      "sha256": "b9ffa6720ffa0b60d01540baa145529f40dbe60368e34fcd2c975657032807a4",
+      "line_endings": "LF"
+    }
+  ],
+  "criteria": [
+    {
+      "criterion": "bounded new files; frozen source and production unchanged",
+      "result": "PASS",
+      "evidence": "independent git diff --quiet HEAD returned0; only task card and4 candidate files untracked"
+    },
+    {
+      "criterion": "real root input divergence and existing manager interface normalization",
+      "result": "PASS",
+      "evidence": "capture_terrain_readability_v3.gd:348; independent route diagnostic initial true/true, single root event false/true, normalization false/false; route wrapper exit0"
+    },
+    {
+      "criterion": "independently generated highlight, strict order/class/full drawing payload, no copy",
+      "result": "PASS",
+      "evidence": "capture_terrain_readability_v3.gd:149; independent highlight payload and freeze/sync checks true"
+    },
+    {
+      "criterion": "inherit frozen v2; single-case callable and strict six-case CLI",
+      "result": "PASS",
+      "evidence": "validate_terrain_readability_capture_v3.py:108,137; retained RGBA/C4/C8/at least3 visible perclass from frozen validators"
+    },
+    {
+      "criterion": "4 positive/negative Python tests and C8 source",
+      "result": "PASS",
+      "evidence": "bundled Python3.12.14 independent logs; initial Python3.14 numpy unavailable preserved"
+    },
+    {
+      "criterion": "six headless structure cases with explicit no-pixel status",
+      "result": "PASS",
+      "evidence": "independent six-case marker pass=true; final shell exitcode not retained; no Parse/Script/Error markers"
+    },
+    {
+      "criterion": "Compatibility and project stretch",
+      "result": "PASS",
+      "evidence": "project.godot:20,32,61; gl_compatibility and canvas_items unchanged"
+    }
+  ],
+  "original_review_evidence_root": "<仓库外证据根>/independent-source-review/",
+  "original_evidence": [
+    {
+      "filename": "source-acceptance-review-20261009.txt",
+      "bytes": 2631,
+      "sha256": "f16ff76978936f73fef9af794decf8f241c37575c93a833ebca5a8a2d8c9ee3b"
+    },
+    {
+      "filename": "godot-v3-input-routing.log",
+      "bytes": 845,
+      "sha256": "131a5ace89858768e0632020c68424e2fb88cf4db2f5ff32522001c857092505"
+    },
+    {
+      "filename": "input-routing-v3.json",
+      "bytes": 3603,
+      "sha256": "1119d55d82413663a75feb96bf11890010a7ad18c55b6802366f4cf9756c76a8"
+    },
+    {
+      "filename": "godot-v3-six-case-structure.log",
+      "bytes": 814710,
+      "sha256": "652d4eb03b6d0516ea5209bd9c967c7c292a5f27452e30135027fec1a5e941f9"
+    },
+    {
+      "filename": "godot-v3-summary.log",
+      "bytes": 2645,
+      "sha256": "e29ea3839ff3d202baee1a965ba9bf5b3a5aa78f5fa306ec4fe50536be132484"
+    },
+    {
+      "filename": "capture-v3-routing-integration.json",
+      "bytes": 3603,
+      "sha256": "1119d55d82413663a75feb96bf11890010a7ad18c55b6802366f4cf9756c76a8"
+    },
+    {
+      "filename": "python-v3-unit.log",
+      "bytes": 1391,
+      "sha256": "8e0508b70ff50c15124ddf3cb8202aacdabe7f567dec87d1edd35723e2ed3811"
+    },
+    {
+      "filename": "python-v3-unit-bundled.log",
+      "bytes": 921,
+      "sha256": "8f1590b5c70eb626fd3e9725c22f6d64d5eca6e8deb4daf44785c9498a2788f1"
+    },
+    {
+      "filename": "python-v3-c8.log",
+      "bytes": 796,
+      "sha256": "d93b4daf315aa787a569e5f18ffe0b4f00c715fbcc9e4695b5b602bf6da9f4c4"
+    },
+    {
+      "filename": "python-v3-c8-bundled.log",
+      "bytes": 182,
+      "sha256": "475ded786706b77bd719100a3cdce034c4cb41f774af6031305ad11c4ae544bf"
+    }
+  ],
+  "limitations": [
+    "Independent six-case async shell exitcode was not retained; full pass=true six-case output and no-error logs were observed. Independent route wrapper exitcode0.",
+    "No rendered desktop/native pixels/layout/PNG readback tested. Those remain NOT_TESTED pending Dot.",
+    "This PASS authorizes source freezing only; no user visual acceptance or Milestone completion."
+  ],
+  "next_step": "Dot first10x10/720p strict pixel prerequisite; any failure stops other5. Frozen old failures remain."
+}
