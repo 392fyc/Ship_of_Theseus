@@ -1,0 +1,75 @@
+{
+  "schema_version": "terrain-readability-tree-semantics-review/1",
+  "verdict": "PASS",
+  "annotation_sha256": "c5887a6d4dc21ef1a93192bd9aa09b65b74d7aac3b1c281ab6842c2a2afb0179",
+  "texture_sha256": "0db7cb1e145af28443d6eed31ad38c84cdcf48cd6d8cff4b2ded224a44799203",
+  "base_crown_annotation_sha256": "237e3c7d5663f20dafbc7db4bf97c5e24f2c67a88d83a8f8a7a84e492a0b7767",
+  "approved_scope": [
+    "dark_side_geometry",
+    "outline_absence"
+  ],
+  "criteriaResults": [
+    {
+      "criterion": "dark_side_geometry",
+      "verdict": "PASS",
+      "evidence": "原图与暗侧叠加图中，9个区域均落在C1-C6可见叶簇的下缘或背光侧；区域跟随叶簇形状，没有覆盖C7裸枝作为叶簇。光照方向按上左核对。候选标注说明以原图目视圈定、再与alpha及既有树冠区域相交，未按亮度或待测值选点。见 terrain_readability_tree_semantics.json:16-21、405-414；source-manifest.json:116；原图及暗侧叠加图。"
+    },
+    {
+      "criterion": "outline_absence",
+      "verdict": "PASS",
+      "evidence": "原PNG可见局部深色叶缘和枝干暗边，但其宽度、连续性和位置随叶片重叠及受光面变化；未见围绕单个叶簇或整冠形成的独立、连续、均匀描边带。叶缘暗像素与叶簇内部阴影相连，枝干暗边沿树干体积变化。生成提示词要求clean silhouette with no strong painted outline，与本次像素观感相符。见 terrain_readability_tree_semantics.json:416-423；source-manifest.json:116；原图与区域叠加图。"
+    }
+  ],
+  "image_evidence": [
+    {
+      "item": "forest-tree-v2 原始 RGBA",
+      "observation": "1536x1024原图呈现上左较亮的叶簇面与向下、向右的局部暗面。各叶簇的暗部呈斑驳、不连续的叶片重叠阴影；主干与枝条的暗边随木质纹理和形体转折，不形成独立平行轮廓线。"
+    },
+    {
+      "item": "t3-region-original-overlay",
+      "observation": "964x950原尺寸叠加显示既有C1-C7树冠包络；树冠边界与原图叶簇轮廓相符，C7标为冠内裸枝。"
+    },
+    {
+      "item": "t3-dark-side-authored-overlay",
+      "observation": "964x950原尺寸叠加显示D1-D9分布于C1-C6叶簇的背光下缘或侧面；未把枝条本身圈成暗侧叶面。"
+    }
+  ],
+  "limitations": [
+    "批准仅针对展平原PNG中可见的暗侧几何和没有独立连续强描边带这一视觉分类；不推断生成模型内部意图或源文件图层语义。",
+    "原PNG存在暗色叶缘像素及深色枝干边缘；批准不等同于声称图像中完全没有暗边像素。",
+    "本报告不审查生产渲染节点、采集脚本、wrapper或原生运行结果。"
+  ],
+  "reviewed_inputs": [
+    {
+      "path": "tests/claude_review/terrain_readability_tree_semantics.json",
+      "bytes": 7161,
+      "sha256": "c5887a6d4dc21ef1a93192bd9aa09b65b74d7aac3b1c281ab6842c2a2afb0179"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/forest-tree-v2.png",
+      "bytes": 1733266,
+      "sha256": "0db7cb1e145af28443d6eed31ad38c84cdcf48cd6d8cff4b2ded224a44799203"
+    },
+    {
+      "path": "tests/claude_review/terrain_readability_crown_regions.json",
+      "bytes": 7647,
+      "sha256": "237e3c7d5663f20dafbc7db4bf97c5e24f2c67a88d83a8f8a7a84e492a0b7767"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/source-manifest.json",
+      "bytes": 27844,
+      "sha256": "eaec06faf3c5013d6cdb8809178cefa0974edad42fc6ea3f8a4356bfe48c49b8"
+    },
+    {
+      "path": "<仓库外证据根>/t3-region-original-overlay.png",
+      "bytes": 788085,
+      "sha256": "005d110acec21e4faef556d07589ea746834de65ab9aa3c5bafd9789c000def6"
+    },
+    {
+      "path": "<仓库外证据根>/t3-dark-side-authored-overlay.png",
+      "bytes": 787574,
+      "sha256": "461c36be3e722f168890b7eceff93214a472d5ffdf00d9334eb2daa1beb865fc"
+    }
+  ],
+  "candidate_status": "pending_author_review"
+}
