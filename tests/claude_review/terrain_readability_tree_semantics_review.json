@@ -1,9 +1,9 @@
 {
   "schema_version": "terrain-readability-tree-semantics-review/1",
   "verdict": "PASS",
-  "annotation_sha256": "c5887a6d4dc21ef1a93192bd9aa09b65b74d7aac3b1c281ab6842c2a2afb0179",
+  "annotation_sha256": "b252ab5cb0978bd0bb8e8cf79a48d1fd7641231d8bcd77ca4e83b5a32c8b6f1a",
   "texture_sha256": "0db7cb1e145af28443d6eed31ad38c84cdcf48cd6d8cff4b2ded224a44799203",
-  "base_crown_annotation_sha256": "237e3c7d5663f20dafbc7db4bf97c5e24f2c67a88d83a8f8a7a84e492a0b7767",
+  "base_crown_annotation_sha256": "915256344f2674c8ade4fbd6dab47f182d7859453f8cc3b6022cdcc3eab26a27",
   "approved_scope": [
     "dark_side_geometry",
     "outline_absence"
@@ -12,12 +12,12 @@
     {
       "criterion": "dark_side_geometry",
       "verdict": "PASS",
-      "evidence": "原图与暗侧叠加图中，9个区域均落在C1-C6可见叶簇的下缘或背光侧；区域跟随叶簇形状，没有覆盖C7裸枝作为叶簇。光照方向按上左核对。候选标注说明以原图目视圈定、再与alpha及既有树冠区域相交，未按亮度或待测值选点。见 terrain_readability_tree_semantics.json:16-21、405-414；source-manifest.json:116；原图及暗侧叠加图。"
+      "evidence": "重看原始RGBA及两张原尺寸叠加图，9个D1-D9区域均落在C1-C6叶簇的背光下缘或侧面，跟随叶簇形状，未把C7裸枝标为叶簇。候选输入仅将 base_crown_annotation_sha256 从旧值更正为冻结树冠实际摘要；当前JSON与HEAD作者输入逐字段比较后仅此字段不同，review_status 仍为 pending_author_review。冻结树冠 HEAD Git blob 与工作树文件逐字节相同：7140 bytes，SHA256 915256344f2674c8ade4fbd6dab47f182d7859453f8cc3b6022cdcc3eab26a27（Git blob SHA-1 c5d029f4d3eb031da73d6130e2759354ba63b5fc）。纹理摘要与原图和叠加图输入保持既有绑定。见 terrain_readability_tree_semantics.json:13,15,19-402；source-manifest.json:114-117。"
     },
     {
       "criterion": "outline_absence",
       "verdict": "PASS",
-      "evidence": "原PNG可见局部深色叶缘和枝干暗边，但其宽度、连续性和位置随叶片重叠及受光面变化；未见围绕单个叶簇或整冠形成的独立、连续、均匀描边带。叶缘暗像素与叶簇内部阴影相连，枝干暗边沿树干体积变化。生成提示词要求clean silhouette with no strong painted outline，与本次像素观感相符。见 terrain_readability_tree_semantics.json:416-423；source-manifest.json:116；原图与区域叠加图。"
+      "evidence": "重看原始RGBA与原图区域叠加。可见局部深色叶缘和枝干暗边，但边缘宽度、连续性与位置随叶片重叠和受光面变化；没有围绕叶簇或整冠形成独立、连续、均匀的描边带。暗叶缘与内部叶片阴影相连，枝干边缘随体积纹理转折。生成提示中的“clean silhouette with no strong painted outline”与可见像素相符。批准限于展平原PNG中的可见语义分类，不追溯生成模型意图或源图层。见 terrain_readability_tree_semantics.json:403,416-426；source-manifest.json:114-117。"
     }
   ],
   "image_evidence": [
@@ -37,13 +37,13 @@
   "limitations": [
     "批准仅针对展平原PNG中可见的暗侧几何和没有独立连续强描边带这一视觉分类；不推断生成模型内部意图或源文件图层语义。",
     "原PNG存在暗色叶缘像素及深色枝干边缘；批准不等同于声称图像中完全没有暗边像素。",
-    "本报告不审查生产渲染节点、采集脚本、wrapper或原生运行结果。"
+    "作者输入仍为 pending_author_review；本报告不批准 T3 数值、云端像素、生产渲染节点、采集脚本或 Milestone。"
   ],
   "reviewed_inputs": [
     {
       "path": "tests/claude_review/terrain_readability_tree_semantics.json",
       "bytes": 7161,
-      "sha256": "c5887a6d4dc21ef1a93192bd9aa09b65b74d7aac3b1c281ab6842c2a2afb0179"
+      "sha256": "b252ab5cb0978bd0bb8e8cf79a48d1fd7641231d8bcd77ca4e83b5a32c8b6f1a"
     },
     {
       "path": "assets/prototype/battlefield_courtyard/forest-tree-v2.png",
@@ -52,8 +52,8 @@
     },
     {
       "path": "tests/claude_review/terrain_readability_crown_regions.json",
-      "bytes": 7647,
-      "sha256": "237e3c7d5663f20dafbc7db4bf97c5e24f2c67a88d83a8f8a7a84e492a0b7767"
+      "bytes": 7140,
+      "sha256": "915256344f2674c8ade4fbd6dab47f182d7859453f8cc3b6022cdcc3eab26a27"
     },
     {
       "path": "assets/prototype/battlefield_courtyard/source-manifest.json",
@@ -71,5 +71,14 @@
       "sha256": "461c36be3e722f168890b7eceff93214a472d5ffdf00d9334eb2daa1beb865fc"
     }
   ],
-  "candidate_status": "pending_author_review"
+  "candidate_status": "pending_author_review",
+  "source_byte_verification": {
+    "path": "tests/claude_review/terrain_readability_crown_regions.json",
+    "git_revision": "HEAD",
+    "git_blob_sha1": "c5d029f4d3eb031da73d6130e2759354ba63b5fc",
+    "bytes": 7140,
+    "sha256": "915256344f2674c8ade4fbd6dab47f182d7859453f8cc3b6022cdcc3eab26a27",
+    "worktree_exact_blob_match": true,
+    "method": "Read HEAD Git blob bytes with git cat-file blob; compare directly to worktree bytes; independently SHA256 both byte arrays."
+  }
 }

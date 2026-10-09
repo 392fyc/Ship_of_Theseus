@@ -10,7 +10,7 @@
   ],
   "coordinate_space": "atlas_region_local_pixels",
   "base_crown_annotation_path": "res://tests/claude_review/terrain_readability_crown_regions.json",
-  "base_crown_annotation_sha256": "237e3c7d5663f20dafbc7db4bf97c5e24f2c67a88d83a8f8a7a84e492a0b7767",
+  "base_crown_annotation_sha256": "915256344f2674c8ade4fbd6dab47f182d7859453f8cc3b6022cdcc3eab26a27",
   "author": "Codex ui-ux 主代理；对现有展平素材作人工语义分类，不追溯生成模型的内部意图。",
   "review_status": "pending_author_review",
   "annotation_method": "原图目视圈定上左光照下叶簇下方和右侧的阴影面；对应C1–C6叶簇的暗侧。与原纹理alpha及既有树冠分类相交。未按亮度、颜色或待测数值选像素；未改素材。C7为冠内裸枝，不添加假叶簇。",
