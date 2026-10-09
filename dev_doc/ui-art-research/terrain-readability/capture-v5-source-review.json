@@ -1,0 +1,226 @@
+{
+  "schema": "terrain-capture-v5/source-review/1",
+  "verdict": "PASS",
+  "baseline_head": "9187543b70f3b1430ec16c7af4153c7409f326e4",
+  "source_bindings": [
+    {
+      "path": "tests/claude_review/capture_terrain_readability_v5.gd",
+      "bytes": 32866,
+      "sha256": "a9e185345e9b3786fec6502efd21ef7a0df7dae2f481af5a1566d4292f4a0535"
+    },
+    {
+      "path": "tests/claude_review/validate_terrain_readability_capture_v5.py",
+      "bytes": 31044,
+      "sha256": "aae546e3ac9e24ae6a62889061bfe63cd35fb150cc53da33a9b5634fe8fa0939"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_readability_capture_v5.py",
+      "bytes": 19177,
+      "sha256": "df76fafcfaf2e1345380e46439489434e497bc3d1e0151dc1da878a95f41e9c5"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/capture-v5-task.md",
+      "bytes": 5544,
+      "sha256": "86dc7e7e3b587c7618acd32a38b9b8d789eaf1df3dd75d7ff2172d005da2e2af"
+    }
+  ],
+  "review_original": {
+    "filename": "review.json",
+    "bytes": 10870,
+    "sha256": "f94fda8402213d1d7f2cee2a84d709f84cb2e249c12079eb6a2cc4319078e483"
+  },
+  "independent_report": {
+    "review": "terrain-readability capture v5 final source and structure acceptance",
+    "candidate": {
+      "worktree": "<仓库外审查来源>",
+      "branch": "refs/heads/codex/ui-ux/terrain-mask-capture-v5",
+      "head": "9187543b70f3b1430ec16c7af4153c7409f326e4",
+      "controlled_status": [
+        " M project.godot (raw content matches supplied HEAD)",
+        "?? tests/claude_review/capture_terrain_readability_v5.gd",
+        "?? tests/claude_review/validate_terrain_readability_capture_v5.py",
+        "?? tests/claude_review/test_terrain_readability_capture_v5.py",
+        "?? dev_doc/ui-art-research/terrain-readability/capture-v5-task.md"
+      ],
+      "project_godot": {
+        "bytes": 1261,
+        "sha256": "c8c44d7453ff3d443eee7a25f5b5112687077d40705f6ea67982443ab94cddf6",
+        "result": "raw HEAD match"
+      },
+      "files": [
+        {
+          "path": "tests/claude_review/capture_terrain_readability_v5.gd",
+          "bytes": 32866,
+          "sha256": "a9e185345e9b3786fec6502efd21ef7a0df7dae2f481af5a1566d4292f4a0535",
+          "matches_supplied_receipt": true
+        },
+        {
+          "path": "tests/claude_review/validate_terrain_readability_capture_v5.py",
+          "bytes": 31044,
+          "sha256": "aae546e3ac9e24ae6a62889061bfe63cd35fb150cc53da33a9b5634fe8fa0939",
+          "matches_supplied_receipt": true
+        },
+        {
+          "path": "tests/claude_review/test_terrain_readability_capture_v5.py",
+          "bytes": 19177,
+          "sha256": "df76fafcfaf2e1345380e46439489434e497bc3d1e0151dc1da878a95f41e9c5",
+          "matches_supplied_receipt": true
+        },
+        {
+          "path": "dev_doc/ui-art-research/terrain-readability/capture-v5-task.md",
+          "bytes": 5544,
+          "sha256": "86dc7e7e3b587c7618acd32a38b9b8d789eaf1df3dd75d7ff2172d005da2e2af",
+          "matches_supplied_receipt": true
+        }
+      ]
+    },
+    "verdict": "pass",
+    "source_verdict": "pass",
+    "structure_verdict": "pass",
+    "native_runtime_verdict": "not_tested",
+    "criteriaResults": [
+      {
+        "criterion": "Every inherited abort stores failure state and the original failure message, writes the external v5 diagnostic before base cleanup, and marks the active case FAIL even if it has already been appended to completed cases.",
+        "verdict": "pass",
+        "evidence": "tests/claude_review/capture_terrain_readability_v5.gd:51-58 sets _failed and copies message verbatim to _v5_failure_reason, calls the external writer, then super._abort. The writer includes run_status/failure_reason/active_case at :614-657. Active FAIL precedence is at :714-717. Validator checks run_status, active_case_status, case_status, and exact reason equality at validate_terrain_readability_capture_v5.py:387-412. Regression test test_terrain_readability_capture_v5.py:307-355 covers an already-recorded case, rejects READY, and checks writer ordering."
+      },
+      {
+        "criterion": "Diagnostic construction is safe before target nodes exist or after they have been released, while retaining four role records and the nodes that are missing.",
+        "verdict": "pass",
+        "evidence": "capture_terrain_readability_v5.gd:686-712 synthesizes missing role records and guards get_path/get_class/is_visible_in_tree with is_instance_valid. The role resolver at :750-767 checks each session/node before dereferencing it. Failure fixture setup retains all four roles and missing-node list in test_terrain_readability_capture_v5.py:139-170. This is source-level safety evidence; no runtime test deliberately frees nodes."
+      },
+      {
+        "criterion": "Failure evidence retains raw draw, pre-draw, post-draw, process-boundary events and original draw phase/ordinal/request data, plus the failure reason.",
+        "verdict": "pass",
+        "evidence": "capture_terrain_readability_v5.gd:663-684 snapshots the three event streams and associations; :697-712 copies per-role draw events and missing roles; :727 includes the failure reason. Validator validate_terrain_readability_capture_v5.py:408-487 checks reason equality, raw event lists, phase/request/ordinal integrity, and missing-node consistency. Regression coverage is in test_terrain_readability_capture_v5.py:307-373."
+      },
+      {
+        "criterion": "The previously accepted deferred draw-before-pre ordering and source-byte binding remain intact.",
+        "verdict": "pass",
+        "evidence": "capture_terrain_readability_v5.gd:276-295 records pre/post callbacks and :601-610 hashes the four declared sources. Validator ordering reconstruction remains at validate_terrain_readability_capture_v5.py:77-160; the real deferred draw-to-pre-to-post-to-return-boundary fixture is at test_terrain_readability_capture_v5.py:218-229. The four current source bytes exactly match the supplied final receipt; byte/digest tampering regression is at test_terrain_readability_capture_v5.py:375-397."
+      },
+      {
+        "criterion": "All 12 required focused positive and negative Python tests pass on the final bytes.",
+        "verdict": "pass",
+        "evidence": "Exit 0; unittest output reports Ran 12 tests and OK. Log: <仓库外审查来源>, 2602 bytes, SHA256 1ebe6c3ecdfb62e5f3e70962821fa87c509e3bdf35921528a1e8c474faaa0fbc."
+      },
+      {
+        "criterion": "C8 source checking and calibration pass on the candidate.",
+        "verdict": "pass",
+        "evidence": "Bundled Python direct call to claude_review_checks.c8_scripts() and c8_calibration() exited 0: 30 scripts, 0 failures, calibration_ok=true. Full result JSON: c8-source.json, 7412 bytes, SHA256 5e31843113a2327e487885680ad69ffa606fa1a8729a786396d246552b0ee971; log: c8-source.log, 79 bytes, SHA256 dc6636aa99c7eccbd9039117076985ab133300111f29157108a1f9147f7cb458."
+      },
+      {
+        "criterion": "One final-byte no-window Godot structural run passes all six required map-size/resolution cases and preserves the historical alpha records.",
+        "verdict": "pass",
+        "evidence": "Godot subprocess returned exit 0 after 50.609 seconds, timed_out=false. v5 diagnostic has 6 cases: 10x10 and 25x25 at 1280x720, 1920x1080, and 2560x1440. All checked spawn/layout gates passed; actual manager positions matched the case configuration. Twelve retained-sample records preserved source/actual/target alpha 1.0 and alpha_mutated_by_v4=false. Headless log has 0 script/engine/parse errors."
+      }
+    ],
+    "findings": [],
+    "recommendations": [],
+    "checks": [
+      {
+        "name": "Focused Python v5 tests",
+        "command": "<仓库外审查来源> -B -m unittest -v test_terrain_readability_capture_v5.py",
+        "working_directory": "<仓库外审查来源>",
+        "exit_code": 0,
+        "result": "12 tests passed",
+        "log": {
+          "path": "<仓库外审查来源>",
+          "bytes": 2602,
+          "sha256": "1ebe6c3ecdfb62e5f3e70962821fa87c509e3bdf35921528a1e8c474faaa0fbc"
+        }
+      },
+      {
+        "name": "C8 source and calibration",
+        "command": "Bundled Python -B -c inline check: import claude_review_checks; call c8_scripts() and c8_calibration(); write complete JSON result; exit nonzero unless every script and calibration pass",
+        "working_directory": "<仓库外审查来源>",
+        "exit_code": 0,
+        "result": {
+          "pass": true,
+          "script_count": 30,
+          "failed_count": 0,
+          "calibration_ok": true
+        },
+        "result_file": {
+          "path": "<仓库外审查来源>",
+          "bytes": 7412,
+          "sha256": "5e31843113a2327e487885680ad69ffa606fa1a8729a786396d246552b0ee971"
+        },
+        "log": {
+          "path": "<仓库外审查来源>",
+          "bytes": 79,
+          "sha256": "dc6636aa99c7eccbd9039117076985ab133300111f29157108a1f9147f7cb458"
+        }
+      },
+      {
+        "name": "Final-byte headless six-case Godot structure",
+        "command_argv": [
+          "<仓库外审查来源> Files\\Godot\\4.6.3\\Godot_v4.6.3-stable_win64.exe",
+          "--headless",
+          "--path",
+          "<仓库外审查来源>",
+          "--script",
+          "re<仓库外审查来源>",
+          "--",
+          "--headless-check",
+          "--v3-diagnostic=<仓库外审查来源>",
+          "--v5-diagnostic=<仓库外审查来源>"
+        ],
+        "process_runner": "Python subprocess.run waited for the Godot process to exit; timeout=1200 seconds",
+        "exit_code": 0,
+        "duration_seconds": 50.609,
+        "timed_out": false,
+        "wrapper_result": {
+          "path": "<仓库外审查来源>",
+          "bytes": 1368,
+          "sha256": "2d4a4b7c1deefcf31546b077872850f5931de3c9a2a119a5a251415fb53752ae"
+        },
+        "log": {
+          "path": "<仓库外审查来源>",
+          "bytes": 836919,
+          "sha256": "470fd8ee88c25efcfa93f365de7074a8b6295841c3a0df389a109751c8c2cae7",
+          "script_errors": 0,
+          "engine_errors": 0,
+          "parse_errors": 0
+        },
+        "diagnostics": [
+          {
+            "path": "<仓库外审查来源>",
+            "bytes": 3661,
+            "sha256": "cb11d970d79d380965429748a9db3bb2c01f1f4b33b08bab06e51f9d3684ff2b",
+            "schema": "terrain-capture-v3-input-routing-diagnostic/1",
+            "freeze_and_sync_pass": true,
+            "normalization_pass": true,
+            "highlight_payload_pass": true
+          },
+          {
+            "path": "<仓库外审查来源>",
+            "bytes": 5202324,
+            "sha256": "d0f16fe6fe9504e0ca5b6b496c34dba834dce2138d2e022b0570f3894f0cecfa",
+            "schema": "terrain-readability-capture-v5-state-diagnostic/1",
+            "candidate_head": "9187543b70f3b1430ec16c7af4153c7409f326e4",
+            "run_status": "STATE_READY",
+            "case_count": 6,
+            "active_case_status": "STATE_READY",
+            "active_draw_status": "NOT_TESTED_HEADLESS",
+            "pixel_status": "NOT_TESTED_HEADLESS_RENDERING_DISABLED"
+          }
+        ]
+      }
+    ],
+    "limitations": [
+      "This review establishes source and headless structure acceptance only. No native GUI, mouse interaction, draw callback, pixel, or visual acceptance was performed.",
+      "Native full RGBA, C4 pixel, and C8 pixel runtime checks remain NOT_TESTED; the C8 result above is source-only."
+    ],
+    "source_changes_made": false
+  },
+  "source": "PASS",
+  "headless_structure": "PASS",
+  "native_RGBA_C4_C8_runtime": "NOT_TESTED",
+  "visual_acceptance": "NOT_TESTED",
+  "publication": {
+    "published": false,
+    "remote_ref": null
+  },
+  "milestone": "INCOMPLETE"
+}
