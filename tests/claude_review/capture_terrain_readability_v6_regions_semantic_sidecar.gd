@@ -28,6 +28,8 @@ const SEMANTIC_UNKNOWN_PART_CODE := 255
 const SEMANTIC_MAX_TOKEN := 16777215
 const SEMANTIC_EXPECTED_CAPTURE_IMAGE_COUNT := 12
 const SEMANTIC_TREE_REGION_ORDER: PackedStringArray = ["crown", "dark_side", "outline"]
+const SEMANTIC_WRITE_PROBE_SIZE := Vector2i(128, 16)
+const SEMANTIC_BLEND_FENCE_SHADER := "shader_type canvas_item;\nrender_mode unshaded, blend_mix;\nvoid fragment() { COLOR = vec4(0.0); }\n"
 
 var _semantic_sidecar_shader: Shader
 var _semantic_sidecar_viewports: Dictionary = {}
@@ -44,6 +46,8 @@ var _semantic_tree_classification_cache_key := ""
 var _semantic_write_probe_viewport: SubViewport
 var _semantic_write_probe_samples: Array[Dictionary] = []
 var _semantic_material_observations: Array[Dictionary] = []
+var _semantic_blend_fence_material: ShaderMaterial
+var _semantic_blend_fence_observations: Array[Dictionary] = []
 
 
 func _run() -> void:
@@ -71,6 +75,11 @@ func _create_semantic_sidecar_passes(resolution: Vector2i) -> bool:
 		_abort("semantic sidecar shader is missing or does not use blend_disabled")
 		return false
 	_semantic_sidecar_errors.clear()
+	_semantic_blend_fence_observations.clear()
+	var fence_shader := Shader.new()
+	fence_shader.code = SEMANTIC_BLEND_FENCE_SHADER
+	_semantic_blend_fence_material = ShaderMaterial.new()
+	_semantic_blend_fence_material.shader = fence_shader
 	if not _semantic_prepare_inventory():
 		_abort("SEMANTIC_SIDECAR_NOT_TESTED_INPUT_INVENTORY: " + "; ".join(_semantic_sidecar_errors))
 		return false
@@ -357,6 +366,15 @@ func _semantic_build_layer(viewport: SubViewport, source_layer: Node2D, mode: St
 		draw_signatures[mode] = _semantic_signature_list(source, record_index, mode)
 		instance_record["draw_leaf_signatures"] = draw_signatures
 		_semantic_sidecar_instance_records[record_index] = instance_record
+		if mode == "pair":
+			# Complete all original hierarchy/state comparisons before adding
+			# zero-output children. Source draw leaves and their order stay intact.
+			for observation: Dictionary in _semantic_material_observations:
+				if observation["mode"] != mode or observation["stable_id"] != instance_record["stable_id"]:
+					continue
+				var leaf := observation["canvas"] as CanvasItem
+				if not _semantic_add_blend_fence(leaf):
+					return false
 	return true
 
 
@@ -434,11 +452,62 @@ func _semantic_material(rgb: Array, part_code: int, mode: String) -> ShaderMater
 	return material
 
 
+func _semantic_add_blend_fence(leaf: CanvasItem) -> bool:
+	# GLES3 4.6.3 can re-enable blending on a disabled->disabled color change.
+	# A transparent MIX draw immediately behind the label leaf forces the next
+	# MIX->DISABLED transition. It writes zero source alpha, leaving RGBA intact.
+	# Clone the primitive to keep identical clipping/bounds, including Sprite2D
+	# leaves whose origin is outside the viewport but whose texture is visible.
+	var leaf_2d := leaf as Node2D
+	if leaf_2d == null or leaf.get_child_count() != 0 or leaf_2d.y_sort_enabled:
+		_semantic_sidecar_errors.append("blend fence requires a childless unsorted Node2D draw leaf: " + str(leaf.get_path()))
+		return false
+	var fence := _duplicate_canvas_tree(leaf) as Node2D
+	if fence == null:
+		_semantic_sidecar_errors.append("could not duplicate semantic primitive for zero-output blend fence")
+		return false
+	fence.name = "SemanticZeroOutputBlendFence"
+	fence.transform = Transform2D.IDENTITY
+	fence.modulate = Color.WHITE
+	fence.self_modulate = Color.WHITE
+	fence.z_index = 0
+	fence.z_as_relative = true
+	fence.show_behind_parent = true
+	fence.use_parent_material = false
+	fence.material = _semantic_blend_fence_material
+	leaf.add_child(fence)
+	_semantic_blend_fence_observations.append({
+		"leaf": leaf, "fence": fence,
+		"zero_output_shader_sha256": _sha256_text(SEMANTIC_BLEND_FENCE_SHADER),
+		"source_geometry_unchanged": true, "source_canvas_state_unchanged": true,
+	})
+	return true
+
+
+func _semantic_observed_blend_fences() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for observation: Dictionary in _semantic_blend_fence_observations:
+		var leaf := observation["leaf"] as CanvasItem
+		var fence := observation["fence"] as Node2D
+		var record: Dictionary = observation.duplicate()
+		record.erase("leaf")
+		record.erase("fence")
+		record["leaf_path"] = str(leaf.get_path())
+		record["fence_path"] = str(fence.get_path())
+		record["show_behind_parent"] = fence.show_behind_parent
+		record["z_index"] = fence.z_index
+		record["z_as_relative"] = fence.z_as_relative
+		record["local_transform"] = _transform_array(fence.transform)
+		record["shader_bound"] = fence.material == _semantic_blend_fence_material
+		result.append(record)
+	return result
+
+
 func _create_semantic_write_probe() -> void:
 	# This isolated control diagnoses label-byte loss. It never supplies terrain
 	# masks or changes the frozen twelve-image capture and acceptance rules.
 	_semantic_write_probe_samples.clear()
-	_semantic_write_probe_viewport = _new_viewport("semantic_write_probe", Vector2i(32, 16), true)
+	_semantic_write_probe_viewport = _new_viewport("semantic_write_probe", SEMANTIC_WRITE_PROBE_SIZE, true)
 	_semantic_write_probe_viewport.size_2d_override = Vector2i.ZERO
 	_semantic_write_probe_viewport.size_2d_override_stretch = false
 	_semantic_write_probe_viewport.use_hdr_2d = false
@@ -446,18 +515,31 @@ func _create_semantic_write_probe() -> void:
 	root.add_child(_semantic_write_probe_viewport)
 	var colors: Array[Array] = [[0, 0, 25], [255, 73, 19]]
 	var part_codes: Array[int] = [1, 2, 7, 255]
-	for row: int in colors.size():
-		for column: int in part_codes.size():
-			var polygon := Polygon2D.new()
-			polygon.position = Vector2(column * 8, row * 8)
-			polygon.polygon = PackedVector2Array([Vector2.ZERO, Vector2(8, 0), Vector2(8, 8), Vector2(0, 8)])
-			polygon.color = Color.WHITE
-			polygon.material = _semantic_material(colors[row], part_codes[column], "pair")
-			_semantic_write_probe_viewport.add_child(polygon)
-			_semantic_write_probe_samples.append({
-				"rect": [column * 8, row * 8, 8, 8],
-				"expected_rgba": colors[row] + [part_codes[column]],
-			})
+	var groups: Array[String] = ["constant_white", "varying_color_unfenced", "varying_color_fenced", "varying_alpha_fenced"]
+	var source_alphas: Array[float] = [1.0, 0.5, 0.125, 0.0]
+	for group_index: int in groups.size():
+		for row: int in colors.size():
+			for column: int in part_codes.size():
+				var polygon := Polygon2D.new()
+				var x := group_index * 32 + column * 8
+				polygon.position = Vector2(x, row * 8)
+				polygon.polygon = PackedVector2Array([Vector2.ZERO, Vector2(8, 0), Vector2(8, 8), Vector2(0, 8)])
+				polygon.color = Color.WHITE
+				if group_index > 0:
+					polygon.modulate = Color(0.75, 0.5, 0.25, 1.0) if column % 2 == 0 else Color.WHITE
+				if group_index == 3:
+					polygon.modulate.a = source_alphas[column]
+				polygon.material = _semantic_material(colors[row], part_codes[column], "pair")
+				_semantic_write_probe_viewport.add_child(polygon)
+				if group_index >= 2 and not _semantic_add_blend_fence(polygon):
+					_abort("semantic blend-fence control construction failed")
+					return
+				_semantic_write_probe_samples.append({
+					"group": groups[group_index], "rect": [x, row * 8, 8, 8],
+					"source_modulate": [polygon.modulate.r, polygon.modulate.g, polygon.modulate.b, polygon.modulate.a],
+					"source_alpha": polygon.modulate.a,
+					"expected_rgba": colors[row] + [part_codes[column]] if polygon.modulate.a > 0.0 else [0, 0, 0, 0],
+				})
 
 
 func _semantic_observed_material_records() -> Array[Dictionary]:
@@ -508,7 +590,7 @@ func _semantic_write_probe_record(image: Image, path: String, frame_id: int) -> 
 	return {
 		"image": _semantic_image_record("semantic_write_probe", image, path, frame_id),
 		"diagnostic_only": true, "supplies_acceptance_masks": false,
-		"source_alpha": 1.0, "samples": samples,
+		"source_alpha": "per-sample source_modulate.a; primitive alpha is 1", "samples": samples,
 		"gpu_blend_state": "NOT_OBSERVED; material declarations and raw pixels are recorded separately",
 	}
 
@@ -776,8 +858,8 @@ func _save_frame_images(images: Dictionary, case_directory: String, frame_id: in
 	if pair_image.get_size() != root.size or coverage_image.get_size() != root.size:
 		_abort("semantic sidecar images do not match the frozen main image native size")
 		return {}
-	if probe_image == null or probe_image.get_format() != Image.FORMAT_RGBA8 or probe_image.get_size() != Vector2i(32, 16):
-		_abort("semantic label-write control must provide its original 32x16 RGBA8 readback")
+	if probe_image == null or probe_image.get_format() != Image.FORMAT_RGBA8 or probe_image.get_size() != SEMANTIC_WRITE_PROBE_SIZE:
+		_abort("semantic label-write control must provide its original 128x16 RGBA8 readback")
 		return {}
 	if frames_before != frames_after or frames_after != frame_id or process_before != process_after:
 		_abort("semantic sidecar readback crossed the frozen frame/process boundary")
@@ -841,6 +923,7 @@ func _save_frame_images(images: Dictionary, case_directory: String, frame_id: in
 		},
 		"classification_maps": classification_maps,
 		"label_write_diagnostic": _semantic_write_probe_record(probe_image, probe_path, frame_id),
+		"zero_output_blend_fences": _semantic_observed_blend_fences(),
 		"observed_copy_materials": observed_materials,
 		"viewports": viewports,
 		"instance_tokens": _semantic_sidecar_instance_records.duplicate(true),
