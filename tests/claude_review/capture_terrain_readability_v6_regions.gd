@@ -515,26 +515,24 @@ func _capture_case(map_size: int, resolution: Vector2i, source_map: Dictionary, 
 	if not _tree_semantic_inputs_unchanged():
 		_abort("tree semantic inputs changed while the case was being captured; refusing the mismatched manifest")
 		return false
-	var manifest_path := _active_case_directory.path_join("capture-manifest.json")
-	var manifest_value: Variant = JSON.parse_string(FileAccess.get_file_as_string(manifest_path))
-	if not manifest_value is Dictionary:
-		_abort("could not reopen the just-written capture manifest to mark T3 as unmeasured")
-		return false
-	var manifest: Dictionary = manifest_value
-	var terrain_metrics: Dictionary = manifest.get("terrain_metrics", {}).duplicate(true)
-	var t3: Dictionary = terrain_metrics.get("T3", {}).duplicate(true)
-	t3["completeness_status"] = "NOT_RUN_BY_CAPTURE"
-	t3["full_T3_status"] = "NOT_RUN_BY_CAPTURE"
-	t3["measurement_status"] = "NOT_RUN_BY_CAPTURE"
-	t3["semantic_input_status"] = _tree_semantic_status
-	terrain_metrics["T3"] = t3
-	manifest["terrain_metrics"] = terrain_metrics
-	manifest["tree_semantic_input"] = _tree_semantic_input_record.duplicate(true)
-	manifest["complete_T3_status"] = "NOT_RUN_BY_CAPTURE"
-	if not _write_json(manifest_path, manifest):
-		_abort("could not persist the final T3 semantic input and NOT_RUN_BY_CAPTURE state")
-		return false
 	return true
+
+
+func _write_json(path: String, value: Dictionary) -> bool:
+	if path.get_file() == "capture-manifest.json":
+		# Add the final T3 state before serialization. Godot's JSON parser converts
+		# JSON numbers to floats, so reopening and rewriting loses integer evidence.
+		var terrain_metrics: Dictionary = value.get("terrain_metrics", {}).duplicate(true)
+		var t3: Dictionary = terrain_metrics.get("T3", {}).duplicate(true)
+		t3["completeness_status"] = "NOT_RUN_BY_CAPTURE"
+		t3["full_T3_status"] = "NOT_RUN_BY_CAPTURE"
+		t3["measurement_status"] = "NOT_RUN_BY_CAPTURE"
+		t3["semantic_input_status"] = _tree_semantic_status
+		terrain_metrics["T3"] = t3
+		value["terrain_metrics"] = terrain_metrics
+		value["tree_semantic_input"] = _tree_semantic_input_record.duplicate(true)
+		value["complete_T3_status"] = "NOT_RUN_BY_CAPTURE"
+	return super._write_json(path, value)
 
 
 func _path_hashes(paths: PackedStringArray) -> Dictionary:

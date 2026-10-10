@@ -41,6 +41,9 @@ var _semantic_tree_classification_image: Image
 var _semantic_tree_classification_texture: ImageTexture
 var _semantic_tree_classification_record: Dictionary = {}
 var _semantic_tree_classification_cache_key := ""
+var _semantic_write_probe_viewport: SubViewport
+var _semantic_write_probe_samples: Array[Dictionary] = []
+var _semantic_material_observations: Array[Dictionary] = []
 
 
 func _run() -> void:
@@ -97,6 +100,7 @@ func _create_semantic_sidecar_passes(resolution: Vector2i) -> bool:
 	if not _semantic_validate_viewports(resolution):
 		_abort("SEMANTIC_SIDECAR_NOT_TESTED_VIEWPORT_MAPPING: " + "; ".join(_semantic_sidecar_errors))
 		return false
+	_create_semantic_write_probe()
 	return true
 
 
@@ -109,6 +113,7 @@ func _semantic_prepare_inventory() -> bool:
 	_semantic_tree_classification_texture = null
 	_semantic_tree_classification_record.clear()
 	_semantic_tree_classification_cache_key = ""
+	_semantic_material_observations.clear()
 	var specs: Variant = _main_board.get("_props") if is_instance_valid(_main_board) else null
 	if not specs is Array:
 		_semantic_sidecar_errors.append("CourtyardBoardView._props is not an Array")
@@ -379,6 +384,10 @@ func _semantic_apply_leaf_materials(source: Node, copy: Node, record_index: int,
 			var part := _semantic_part_for_leaf(source as CanvasItem, source.get_parent() as Node2D,
 				str(_semantic_sidecar_instance_records[record_index].get("classified_kind", "")))
 			_set_semantic_material(copy_canvas, record_index, part, mode)
+			_semantic_material_observations.append({
+				"canvas": copy_canvas, "mode": mode, "relative_path": relative_path,
+				"stable_id": str(_semantic_sidecar_instance_records[record_index]["stable_id"]),
+			})
 		elif source_canvas.is_visible_in_tree() and (not source is Node2D or source.get_child_count() == 0):
 			_semantic_sidecar_errors.append("unsupported visible semantic draw leaf %s (%s)" % [str(source.get_path()), source.get_class()])
 			return false
@@ -409,16 +418,99 @@ func _semantic_part_for_leaf(leaf: CanvasItem, prop_root: Node2D, kind: String) 
 func _set_semantic_material(canvas: CanvasItem, record_index: int, part: Dictionary, mode: String) -> void:
 	var record: Dictionary = _semantic_sidecar_instance_records[record_index]
 	var rgb: Array = record.get("token_rgb", [])
+	canvas.material = _semantic_material(rgb, int(part.get("code", SEMANTIC_UNKNOWN_PART_CODE)), mode)
+
+
+func _semantic_material(rgb: Array, part_code: int, mode: String) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
 	material.shader = _semantic_sidecar_shader
 	material.set_shader_parameter("instance_token_rgb", Vector3(float(rgb[0]) / 255.0,
 		float(rgb[1]) / 255.0, float(rgb[2]) / 255.0))
-	material.set_shader_parameter("part_code_alpha", float(part.get("code", SEMANTIC_UNKNOWN_PART_CODE)) / 255.0)
+	material.set_shader_parameter("part_code_alpha", float(part_code) / 255.0)
 	material.set_shader_parameter("coverage_output", mode == "coverage")
 	material.set_shader_parameter("semantic_region_map_enabled", false)
 	material.set_shader_parameter("semantic_atlas_size", Vector2.ONE)
 	material.set_shader_parameter("semantic_atlas_region", Vector4(0.0, 0.0, 1.0, 1.0))
-	canvas.material = material
+	return material
+
+
+func _create_semantic_write_probe() -> void:
+	# This isolated control diagnoses label-byte loss. It never supplies terrain
+	# masks or changes the frozen twelve-image capture and acceptance rules.
+	_semantic_write_probe_samples.clear()
+	_semantic_write_probe_viewport = _new_viewport("semantic_write_probe", Vector2i(32, 16), true)
+	_semantic_write_probe_viewport.size_2d_override = Vector2i.ZERO
+	_semantic_write_probe_viewport.size_2d_override_stretch = false
+	_semantic_write_probe_viewport.use_hdr_2d = false
+	_semantic_write_probe_viewport.msaa_2d = Viewport.MSAA_DISABLED
+	root.add_child(_semantic_write_probe_viewport)
+	var colors: Array[Array] = [[0, 0, 25], [255, 73, 19]]
+	var part_codes: Array[int] = [1, 2, 7, 255]
+	for row: int in colors.size():
+		for column: int in part_codes.size():
+			var polygon := Polygon2D.new()
+			polygon.position = Vector2(column * 8, row * 8)
+			polygon.polygon = PackedVector2Array([Vector2.ZERO, Vector2(8, 0), Vector2(8, 8), Vector2(0, 8)])
+			polygon.color = Color.WHITE
+			polygon.material = _semantic_material(colors[row], part_codes[column], "pair")
+			_semantic_write_probe_viewport.add_child(polygon)
+			_semantic_write_probe_samples.append({
+				"rect": [column * 8, row * 8, 8, 8],
+				"expected_rgba": colors[row] + [part_codes[column]],
+			})
+
+
+func _semantic_observed_material_records() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for observation: Dictionary in _semantic_material_observations:
+		var canvas := observation.get("canvas") as CanvasItem
+		var record: Dictionary = observation.duplicate()
+		record.erase("canvas")
+		record["canvas_valid"] = is_instance_valid(canvas)
+		if is_instance_valid(canvas):
+			record["use_parent_material"] = canvas.use_parent_material
+			var material := canvas.material as ShaderMaterial
+			record["shader_material_bound"] = material != null and material.shader != null
+			if material != null and material.shader != null:
+				var rgb: Variant = material.get_shader_parameter("instance_token_rgb")
+				record["shader_code_sha256"] = _sha256_text(material.shader.code)
+				record["shader_declares_blend_disabled"] = material.shader.code.contains("render_mode blend_disabled")
+				record["instance_token_rgb"] = [rgb.x, rgb.y, rgb.z] if rgb is Vector3 else str(rgb)
+				record["part_code_alpha"] = material.get_shader_parameter("part_code_alpha")
+				record["coverage_output"] = material.get_shader_parameter("coverage_output")
+				record["semantic_region_map_enabled"] = material.get_shader_parameter("semantic_region_map_enabled")
+		result.append(record)
+	return result
+
+
+func _semantic_write_probe_record(image: Image, path: String, frame_id: int) -> Dictionary:
+	var bytes := image.get_data()
+	var samples: Array[Dictionary] = []
+	for sample: Dictionary in _semantic_write_probe_samples:
+		var rect: Array = sample["rect"]
+		var expected: Array = sample["expected_rgba"]
+		var mismatches := 0
+		var observed: Dictionary = {}
+		# Read only the 6x6 interior of each solid primitive, excluding raster edges.
+		for y: int in range(int(rect[1]) + 1, int(rect[1]) + 7):
+			for x: int in range(int(rect[0]) + 1, int(rect[0]) + 7):
+				var offset := (y * image.get_width() + x) * 4
+				var rgba: Array[int] = [bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]]
+				var key := str(rgba)
+				observed[key] = int(observed.get(key, 0)) + 1
+				if rgba != expected:
+					mismatches += 1
+		var record: Dictionary = sample.duplicate(true)
+		record["sampled_pixels"] = 36
+		record["mismatched_pixels"] = mismatches
+		record["observed_rgba_counts"] = observed
+		samples.append(record)
+	return {
+		"image": _semantic_image_record("semantic_write_probe", image, path, frame_id),
+		"diagnostic_only": true, "supplies_acceptance_masks": false,
+		"source_alpha": 1.0, "samples": samples,
+		"gpu_blend_state": "NOT_OBSERVED; material declarations and raw pixels are recorded separately",
+	}
 
 
 func _semantic_apply_tree_classification_map(source_root: Node2D, source_to_copy: Dictionary,
@@ -671,6 +763,11 @@ func _save_frame_images(images: Dictionary, case_directory: String, frame_id: in
 		return {}
 	var pair_image := pair_viewport.get_texture().get_image()
 	var coverage_image := coverage_viewport.get_texture().get_image()
+	if not is_instance_valid(_semantic_write_probe_viewport):
+		_abort("semantic label-write control viewport was released before same-frame readback")
+		return {}
+	var probe_image := _semantic_write_probe_viewport.get_texture().get_image()
+	var observed_materials := _semantic_observed_material_records()
 	var frames_after := Engine.get_frames_drawn()
 	var process_after := Engine.get_process_frames()
 	if pair_image == null or pair_image.is_empty() or coverage_image == null or coverage_image.is_empty():
@@ -679,6 +776,9 @@ func _save_frame_images(images: Dictionary, case_directory: String, frame_id: in
 	if pair_image.get_size() != root.size or coverage_image.get_size() != root.size:
 		_abort("semantic sidecar images do not match the frozen main image native size")
 		return {}
+	if probe_image == null or probe_image.get_format() != Image.FORMAT_RGBA8 or probe_image.get_size() != Vector2i(32, 16):
+		_abort("semantic label-write control must provide its original 32x16 RGBA8 readback")
+		return {}
 	if frames_before != frames_after or frames_after != frame_id or process_before != process_after:
 		_abort("semantic sidecar readback crossed the frozen frame/process boundary")
 		return {}
@@ -686,6 +786,10 @@ func _save_frame_images(images: Dictionary, case_directory: String, frame_id: in
 	var coverage_path := case_directory.path_join("semantic_coverage.png")
 	if pair_image.save_png(pair_path) != OK or coverage_image.save_png(coverage_path) != OK:
 		_abort("failed to save semantic sidecar PNG readback")
+		return {}
+	var probe_path := case_directory.path_join("semantic_write_probe.png")
+	if probe_image.save_png(probe_path) != OK:
+		_abort("failed to save semantic label-write control PNG")
 		return {}
 	var classification_maps: Dictionary = {}
 	if _semantic_tree_classification_image != null:
@@ -736,6 +840,8 @@ func _save_frame_images(images: Dictionary, case_directory: String, frame_id: in
 			"semantic_coverage": _semantic_image_record("semantic_coverage", coverage_image, coverage_path, frame_id),
 		},
 		"classification_maps": classification_maps,
+		"label_write_diagnostic": _semantic_write_probe_record(probe_image, probe_path, frame_id),
+		"observed_copy_materials": observed_materials,
 		"viewports": viewports,
 		"instance_tokens": _semantic_sidecar_instance_records.duplicate(true),
 		"draw_order_stable_ids": _semantic_sidecar_draw_order_stable_ids(),
@@ -776,11 +882,9 @@ func _write_json(path: String, value: Dictionary) -> bool:
 		_abort("semantic sidecar readback record is missing when the final capture manifest is written")
 		return false
 	var manifest_bytes := FileAccess.get_file_as_bytes(path)
-	var manifest_value: Variant = JSON.parse_string(manifest_bytes.get_string_from_utf8())
-	if not manifest_value is Dictionary:
-		_abort("could not reopen final capture manifest to bind the semantic sidecar sibling")
-		return false
-	var capture_manifest: Dictionary = manifest_value
+	# The parent serializes this same dictionary once. Keep its native integer
+	# fields while binding the sidecar to the exact final file bytes.
+	var capture_manifest: Dictionary = value.duplicate(true)
 	var candidate: Dictionary = capture_manifest.get("candidate", {})
 	var source_hashes: Dictionary = candidate.get("source_sha256", {}).duplicate(true)
 	var input_paths := PackedStringArray(TREE_SEMANTICS_INPUT_PATHS)
@@ -895,6 +999,11 @@ func _candidate_record() -> Dictionary:
 func _close_sessions_and_passes() -> void:
 	var sidecar_viewports := _semantic_sidecar_viewports.duplicate()
 	_semantic_sidecar_viewports.clear()
+	if is_instance_valid(_semantic_write_probe_viewport):
+		_semantic_write_probe_viewport.queue_free()
+	_semantic_write_probe_viewport = null
+	_semantic_write_probe_samples.clear()
+	_semantic_material_observations.clear()
 	super._close_sessions_and_passes()
 	for viewport_value: Variant in sidecar_viewports.values():
 		var viewport := viewport_value as SubViewport
