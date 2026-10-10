@@ -198,6 +198,56 @@ def _tree_fixture() -> tuple[dict, dict, dict[str, np.ndarray], np.ndarray, np.n
 
 
 class TerrainSemanticSidecarTests(unittest.TestCase):
+    def _classification_errors(self, codes: list[int]) -> list[str]:
+        image = _rgba(1, len(codes))
+        image[0, :, 0] = codes
+        image[0, :, 3] = np.where(image[0, :, 0] != 0, 255, 0)
+        raw = _png_bytes(image)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "tree-regions.png"
+            path.write_bytes(raw)
+            decoded = sidecar._read_rgba_png(
+                path, expected_size=[len(codes), 1],
+                expected_sha256=hashlib.sha256(raw).hexdigest(),
+                expected_bytes=len(raw))
+        np.testing.assert_array_equal(decoded, image)
+        record = {
+            "status": "READY",
+            "atlas_uv_mapping": {
+                "uv_space": "Godot 4.6 CanvasItem UV is normalized over the original atlas texture used by AtlasTexture",
+                "atlas_pixel": "UV * atlas_size",
+                "region_local_uv": "(atlas_pixel - atlas_region.position) / atlas_region.size",
+                "region_texel": "floor(region_local_uv * region_map_size); map texels represent source region pixel centers",
+                "sampler": "filter_nearest, repeat_disable",
+            },
+            "map_has_mipmaps": False,
+            "coverage_samples_classification_map": False,
+            "pair_samples_classification_map": True,
+            "source_alpha_sampler": "original Sprite2D AtlasTexture TEXTURE through incoming COLOR.a",
+            "fallback_part_code": 255,
+            "map_rgb_role": "R is a code byte normalized to 0..1; G/B are zero",
+            "map_alpha_role": "255 marks a reviewed code texel; it is never used as source opacity",
+            "source_data_sha256": hashlib.sha256(decoded.tobytes()).hexdigest(),
+        }
+        tree = {"type": "tree", "stable_id": "tree-a", "tree_region_inputs": {
+            "classification_map": record,
+            "source_alpha_sampler": "original Sprite2D AtlasTexture COLOR.a; source texture filter/repeat/mipmap remain unchanged",
+            "region_map_does_not_supply_alpha": True,
+            "single_source_sprite_draw_preserves_order": True,
+        }}
+        return sidecar.validate_tree_classification_map(
+            {"classification_maps": {"tree_regions": record}}, [tree],
+            {"tree_classification_map": decoded})
+
+    def test_tree_classification_preserves_decoded_rgba8_code_bytes(self):
+        self.assertEqual(self._classification_errors([0, 7, 8, 9]), [])
+
+    def test_tree_classification_rejects_unreviewed_and_wrapped_code_bytes(self):
+        for code in (1, 6, 10, 11, 247, 248, 249, 255):
+            with self.subTest(code=code):
+                errors = self._classification_errors([0, code])
+                self.assertIn("tree 类别图含非审查部件码", errors)
+
     def test_token_bytes_round_trip_and_duplicate_tokens_fail(self):
         for token in (1, 0x123456, 0xFFFFFF):
             self.assertEqual(sidecar.rgb_to_token(sidecar.token_to_rgb(token)), token)

@@ -435,7 +435,8 @@ def validate_tree_classification_map(sidecar: dict, instance_tokens: list[dict],
     expected_data_sha = sha256_bytes(image.tobytes())
     if record.get("source_data_sha256") != expected_data_sha:
         errors.append("tree 类别图解码后 RGBA 原字节摘要不匹配")
-    code = np.rint(image[..., 0].astype(np.float64) * 255.0).astype(np.uint8)
+    # PNG decoding already returns RGBA8 code bytes, not normalized channels.
+    code = image[..., 0]
     alpha = image[..., 3]
     allowed = {0, PART_CODES["tree_crown"], PART_CODES["tree_dark_side"], PART_CODES["tree_outline"]}
     if np.any(~np.isin(code, np.fromiter(allowed, dtype=np.uint8))):
