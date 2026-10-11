@@ -365,6 +365,75 @@ class TerrainSemanticSidecarTests(unittest.TestCase):
         self.assertIn("delta_l", row["T3"])
         self.assertIn("delta_e00", row["T3"])
 
+    def test_tree_trunk_occludes_other_crowns_without_hiding_crown_classification_errors(self):
+        manifest, semantic, images, pair, coverage, instances, blocked = _tree_fixture()
+        manifest["viewports"] = {"main": {"final_transform": [1, 0, 0, 1, 0, 0],
+                                          "canvas_transform": [1, 0, 0, 1, 0, 0]}}
+        instances[0]["draw_leaf_inputs"] = [{
+            "node_class": "Sprite2D", "draw_bounds_local": [0, 0, 64, 64],
+            "global_transform": [1, 0, 0, 1, 0, 0], "texture": {"size": [64, 64]},
+            "frame": 0, "region_enabled": False, "flip_h": False, "flip_v": False,
+        }]
+        classes = _rgba(64, 64)
+        classes[20:40, 20:40, 0] = sidecar.PART_CODES["tree_crown"]
+        classes[20:40, 30:40, 0] = sidecar.PART_CODES["tree_dark_side"]
+        classes[20:40, 20:40, 3] = 255
+        pair[40:43, 30:32, :3] = sidecar.token_to_rgb(instances[0]["token"])
+        pair[40:43, 30:32, 3] = sidecar.UNKNOWN_PART_CODE
+        coverage[40:43, 30:32] = (242, 0, 0, 255)
+        # A different tree's crown-only pass is behind this visible trunk.
+        images["tree_crown_union"][41, 31] = (255, 255, 255, 255)
+        row = sidecar.measure_t3_trees(manifest, semantic, images, pair, coverage,
+                                       instances, blocked, classification_map=classes)[0]
+        self.assertEqual(row["T3"]["status"], "PASS")
+        self.assertEqual(row["T3"]["legitimate_non_crown_pixels"], 6)
+        self.assertEqual(row["T3"]["unclassified_tree_pixels_alpha_gt_0_5"], 0)
+        self.assertEqual(row["T3"]["tree_crown_alignment"]["union_mismatch_pixels"], 0)
+
+        missing_crown = pair.copy()
+        missing_crown[25, 25, 3] = sidecar.UNKNOWN_PART_CODE
+        row = sidecar.measure_t3_trees(manifest, semantic, images, missing_crown, coverage,
+                                       instances, blocked, classification_map=classes)[0]
+        self.assertEqual(row["T3"]["status"], "NOT_TESTED")
+        self.assertEqual(row["T3"]["tree_crown_alignment"]["source_region_code_mismatch_pixels"], 1)
+        self.assertEqual(row["T3"]["unclassified_tree_pixels_alpha_gt_0_5"], 1)
+        mislabeled_trunk = pair.copy()
+        mislabeled_trunk[41, 31, 3] = sidecar.PART_CODES["tree_crown"]
+        row = sidecar.measure_t3_trees(manifest, semantic, images, mislabeled_trunk, coverage,
+                                       instances, blocked, classification_map=classes)[0]
+        self.assertEqual(row["T3"]["status"], "NOT_TESTED")
+        self.assertEqual(row["T3"]["tree_crown_alignment"]["source_region_code_mismatch_pixels"], 1)
+        row = sidecar.measure_t3_trees(manifest, semantic, images, pair, coverage,
+                                       instances, blocked)[0]
+        self.assertEqual(row["T3"]["status"], "NOT_TESTED")
+        self.assertGreater(len(row["T3"]["tree_crown_alignment"]["source_region_projection_errors"]), 0)
+
+    def test_source_region_projection_uses_negative_scale_flip_and_rejects_outside_labels(self):
+        manifest = {"viewports": {"main": {"final_transform": [1, 0, 0, 1, 0, 0],
+                                           "canvas_transform": [1, 0, 0, 1, 0, 0]}}}
+        classes = _rgba(1, 4)
+        classes[0, :, 0] = [7, 8, 0, 9]
+        classes[0, :, 3] = [255, 255, 0, 255]
+        leaf = {"node_class": "Sprite2D", "draw_bounds_local": [0, 0, 4, 1],
+                "global_transform": [-1, 0, 0, 1, 4, 0], "texture": {"size": [4, 1]},
+                "frame": 0, "region_enabled": False, "flip_h": False, "flip_v": False}
+        records = [{"token": 1, "type": "tree", "draw_leaf_inputs": [leaf]}]
+        tokens = np.ones((1, 4), dtype=np.uint32)
+        visible = np.ones((1, 4), dtype=bool)
+        codes, errors = sidecar._project_visible_tree_codes(manifest, records, tokens, visible, classes)
+        self.assertEqual(errors, [])
+        self.assertEqual(codes[0].tolist(), [9, 0, 8, 7])
+        leaf["flip_h"] = True
+        codes, errors = sidecar._project_visible_tree_codes(manifest, records, tokens, visible, classes)
+        self.assertEqual(errors, [])
+        self.assertEqual(codes[0].tolist(), [7, 8, 0, 9])
+        _codes, errors = sidecar._project_visible_tree_codes(
+            manifest, records, np.ones((1, 5), dtype=np.uint32), np.ones((1, 5), dtype=bool), classes)
+        self.assertTrue(any("outside" in error for error in errors))
+        del leaf["draw_bounds_local"]
+        _codes, errors = sidecar._project_visible_tree_codes(manifest, records, tokens, visible, classes)
+        self.assertTrue(any("bounds missing" in error for error in errors))
+
     def test_empty_outline_is_not_absence_without_approved_scope(self):
         manifest, sidecar_manifest, images, pair, coverage, instances, blocked = _tree_fixture()
         tree = manifest["tree_semantic_input"]
@@ -465,6 +534,91 @@ class TerrainSemanticSidecarTests(unittest.TestCase):
         self.assertEqual(sidecar._negative_control([tree_row], batch_ready=True)["status"],
                          "ESTABLISHED")
         self.assertEqual(sidecar._negative_control(rows, batch_ready=False)["status"], "NOT_TESTED")
+
+    def test_nonzero_draw_alpha_can_quantize_to_zero_without_becoming_a_sample(self):
+        pair = _rgba(1, 1, (0, 0, 1), sidecar.PART_CODES["wall_top"])
+        coverage = _rgba(1, 1, (0, 0, 0), 255)
+        records = [{"stable_id": "wall-a", "type": "wall", "token": 1,
+                    "token_rgb": [0, 0, 1]}]
+        self.assertEqual(sidecar.validate_label_coverage_arrays(pair, coverage, records), [])
+        visible, _ = sidecar.alpha_sample_masks(coverage)
+        self.assertFalse(visible.any())
+        coverage[0, 0, 3] = 0
+        self.assertTrue(sidecar.validate_label_coverage_arrays(pair, coverage, records))
+
+    def test_ground_shadow_does_not_remove_objects_but_units_still_do(self):
+        images = {role: _rgba(3, 3) for role in (
+            "main", "exclusions", "grid", "contact_shadow", "ground", "ground_without_shadow")}
+        pair, coverage = _rgba(3, 3), _rgba(3, 3)
+        records = []
+        for i in range(3):
+            pair[1, i] = (*sidecar.token_to_rgb(i+1), sidecar.PART_CODES["whole_instance"])
+            coverage[1, i] = (200, 0, 0, 255)
+            images["contact_shadow"][1, i, 3] = 255
+            images["ground"][1, i, 0] = 1
+            records.append({"type": "rubble", "token": i+1, "stable_id": str(i)})
+        outer, errors = sidecar._blocking_mask(images)
+        objects, object_errors = sidecar._blocking_mask(images, ground_samples=False)
+        self.assertEqual(errors + object_errors, [])
+        self.assertEqual(int(outer.sum()), 3)
+        self.assertFalse(objects.any())
+        counts = sidecar.visible_instance_counts(pair, coverage, records, objects)
+        self.assertEqual(counts["rubble"]["visible_instances"], 3)
+        images["exclusions"][1, 1, 3] = 255
+        objects, _ = sidecar._blocking_mask(images, ground_samples=False)
+        counts = sidecar.visible_instance_counts(pair, coverage, records, objects)
+        self.assertEqual(counts["rubble"]["visible_instances"], 2)
+        self.assertEqual(counts["rubble"]["status"], "FAIL")
+
+    def test_nonopaque_tree_anchor_uses_geometry_and_exact_rgba_and_rejects_wrong_ids(self):
+        props, legacy, parts = _rgba(12, 12), _rgba(12, 12), _rgba(12, 12)
+        pair, coverage = _rgba(12, 12), _rgba(12, 12)
+        records = [
+            {"stable_id": "wall", "token": 1, "type": "wall", "draw_leaf_inputs": [
+                {"node_class": "Polygon2D", "draw_bounds_local": [7, 7, 3, 3],
+                 "global_transform": [1, 0, 0, 1, 0, 0]}]},
+            {"stable_id": "tree", "token": 2, "type": "tree", "draw_leaf_inputs": [
+                {"node_class": "Sprite2D", "draw_bounds_local": [2, 2, 3, 3],
+                 "global_transform": [1, 0, 0, 1, 0, 0]}]},
+        ]
+        capture = {"instances": [{"stable_id": "wall", "color": "#010203"},
+                                  {"stable_id": "tree", "color": "#040506"}],
+                   "viewports": {"main": {"canvas_transform": [1, 0, 0, 1, 0, 0],
+                                           "final_transform": [1, 0, 0, 1, 0, 0]}}}
+        for at, rgb, token, alpha, code in (
+            ((8, 8), (1, 2, 3), 1, 255, sidecar.PART_CODES["wall_top"]),
+            ((3, 3), (4, 5, 6), 2, 253, sidecar.PART_CODES["tree_crown"]),
+        ):
+            props[at] = (0, 0, 0, alpha)
+            legacy[at] = (*rgb, alpha)
+            pair[at] = (*sidecar.token_to_rgb(token), code)
+            coverage[at] = (alpha, 0, 0, 255)
+        images = {"props": props, "instance_ids": legacy, "part_ids": parts}
+        result = sidecar.pixel_alignment_report(capture, images, pair, coverage, records)
+        self.assertEqual(result["status"], "PASS")
+        self.assertEqual(result["isolated_source_matches_by_kind"]["tree"], 1)
+        for bad_token in (1, 255):
+            changed = pair.copy()
+            changed[3, 3, :3] = sidecar.token_to_rgb(bad_token)
+            self.assertEqual(sidecar.pixel_alignment_report(capture, images, changed, coverage, records)["status"], "FAIL")
+        missing_bounds = copy.deepcopy(records)
+        del missing_bounds[1]["draw_leaf_inputs"][0]["draw_bounds_local"]
+        self.assertEqual(sidecar.pixel_alignment_report(capture, images, pair, coverage, missing_bounds)["status"], "FAIL")
+        overlap = copy.deepcopy(records)
+        overlap.append({"stable_id": "unknown", "type": "unknown", "token": 3,
+                        "draw_leaf_inputs": copy.deepcopy(records[1]["draw_leaf_inputs"])})
+        self.assertEqual(sidecar.pixel_alignment_report(capture, images, pair, coverage, overlap)["status"], "FAIL")
+
+    def test_rotated_tree_bounds_do_not_claim_aabb_corners_as_source_pixels(self):
+        capture = {"viewports": {"main": {"canvas_transform": [1, 0, 0, 1, 0, 0],
+                                          "final_transform": [1, 0, 0, 1, 0, 0]}}}
+        records = [{"type": "tree", "token": 9, "draw_leaf_inputs": [
+            {"node_class": "Sprite2D", "draw_bounds_local": [0, 0, 4, 4],
+             "global_transform": [1, 1, -1, 1, 5, 1]}]}]
+        owners, errors = sidecar._single_source_footprint_owners(capture, records, (12, 12))
+        self.assertEqual(errors, [])
+        self.assertEqual(int(owners[1, 1]), 0)
+        self.assertEqual(int(owners[4, 4]), 9)
 
     @staticmethod
     def _wall_metric(status: str = "FAIL") -> dict:

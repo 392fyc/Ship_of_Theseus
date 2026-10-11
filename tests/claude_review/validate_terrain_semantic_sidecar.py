@@ -127,8 +127,8 @@ def validate_label_coverage_arrays(pair: np.ndarray, coverage: np.ndarray,
         errors.append("非零实例 token 必须带非零部件码")
     if not np.array_equal(labels_present, covered):
         errors.append("label token 与 coverage.A 覆盖标记在像素坐标上不一致")
-    if np.any(covered & (coverage[..., 0] == 0)):
-        errors.append("coverage.A 标记覆盖时 coverage.R 原始 alpha 不得为 0")
+    # A nonzero floating source alpha can round to zero in RGBA8. A still
+    # records the draw; R>127 remains the unchanged measurement threshold.
     if np.any((~covered) & np.any(coverage[..., :3] != 0, axis=2)):
         errors.append("coverage 标记为空的像素必须为零背景")
     if np.any((coverage[..., 3] != 0) & (coverage[..., 3] != 255)):
@@ -562,6 +562,75 @@ def sidecar_source_errors(capture: dict, sidecar: dict, source_root: Path) -> li
     return errors
 
 
+def _source_transform_matrix(value: object) -> np.ndarray:
+    if not isinstance(value, list) or len(value) != 6:
+        raise ValueError("missing six-value transform")
+    a = np.asarray(value, dtype=np.float64)
+    if not np.isfinite(a).all():
+        raise ValueError("nonfinite transform")
+    result = np.array([[a[0], a[2], a[4]], [a[1], a[3], a[5]], [0, 0, 1]])
+    if abs(np.linalg.det(result)) < 1e-12:
+        raise ValueError("singular transform")
+    return result
+
+
+def _single_source_footprint_owners(capture: dict, instance_tokens: list[dict],
+                                  shape: tuple[int, int]) -> tuple[np.ndarray, list[str]]:
+    """Conservative source geometry, independent of sidecar/legacy pixel IDs."""
+    matrix = _source_transform_matrix
+
+    height, width = shape
+    owners = np.zeros(shape, dtype=np.uint32)
+    counts = np.zeros(shape, dtype=np.uint16)
+    errors: list[str] = []
+    try:
+        view = capture["viewports"]["main"]
+        screen = matrix(view["final_transform"]) @ matrix(view["canvas_transform"])
+        for record in instance_tokens:
+            footprint = np.zeros(shape, dtype=bool)
+            source_support = np.zeros(shape, dtype=bool)
+            leaves = record.get("draw_leaf_inputs")
+            if not isinstance(leaves, list) or not leaves:
+                raise ValueError("source draw leaves missing")
+            for leaf in leaves:
+                bounds = leaf.get("draw_bounds_local")
+                if not isinstance(bounds, list) or len(bounds) != 4:
+                    raise ValueError("source primitive bounds missing")
+                x, y, w, h = np.asarray(bounds, dtype=np.float64)
+                if not np.isfinite([x, y, w, h]).all() or w <= 0 or h <= 0:
+                    raise ValueError("invalid source primitive bounds")
+                points = np.array([[x, y, 1], [x+w, y, 1],
+                                   [x+w, y+h, 1], [x, y+h, 1]])
+                transform = screen @ matrix(leaf.get("global_transform"))
+                projected = (transform @ points.T).T[:, :2]
+                # Entire projected bounds plus a pixel of raster uncertainty;
+                # overlaps are excluded even where a source texel is transparent.
+                low = np.floor(projected.min(axis=0) - 1).astype(np.int64)
+                high = np.ceil(projected.max(axis=0) + 1).astype(np.int64)
+                left, right = max(0, int(low[0])), min(width, int(high[0]))
+                top, bottom = max(0, int(low[1])), min(height, int(high[1]))
+                if left < right and top < bottom:
+                    footprint[top:bottom, left:right] = True
+                    if record.get("type") == "tree":
+                        if leaf.get("node_class") != "Sprite2D":
+                            raise ValueError("tree anchor requires the actual Sprite2D primitive")
+                        yy, xx = np.mgrid[top:bottom, left:right]
+                        centers = np.stack((xx + .5, yy + .5, np.ones_like(xx)), axis=-1)
+                        local = centers @ np.linalg.inv(transform).T
+                        # Claim only source pixel centers inside the actual
+                        # transformed half-open sprite quad, including rotations
+                        # and negative scales. Expanded AABBs only exclude peers.
+                        inside = (local[..., 0] >= x) & (local[..., 0] < x+w) \
+                            & (local[..., 1] >= y) & (local[..., 1] < y+h)
+                        source_support[top:bottom, left:right] |= inside
+            counts += footprint
+            owners[source_support] = int(record["token"])
+    except (KeyError, TypeError, ValueError, OverflowError) as error:
+        errors.append(f"单实例源几何配准输入无效: {error}")
+    owners[counts != 1] = 0
+    return owners, errors
+
+
 def pixel_alignment_report(capture: dict, images: dict[str, np.ndarray],
                            pair: np.ndarray, coverage: np.ndarray,
                            instance_tokens: list[dict]) -> dict:
@@ -632,11 +701,37 @@ def pixel_alignment_report(capture: dict, images: dict[str, np.ndarray],
                 instance_matches_by_kind[kind] = instance_matches_by_kind.get(kind, 0) + count
     if instance_mismatches:
         errors.append(f"同坐标 exact opaque legacy instance ID 与 sidecar token 不一致: {instance_mismatches}")
-    if opaque_instance_matches <= 0:
-        errors.append("没有任何 exact opaque legacy ID 像素可证明 sidecar 的实际像素配准")
+    isolated_matches = 0
+    isolated_mismatches = 0
+    isolated_by_kind: dict[str, int] = {}
+    # Alpha 253 foliage cannot supply a fully opaque anchor. Only independent
+    # single-instance geometry and exact observed RGBA can extend registration.
+    # Blended palette coincidences never determine an instance owner.
+    if instance_matches_by_kind.get("tree", 0) <= 0:
+        owners, geometry_errors = _single_source_footprint_owners(capture, instance_tokens, pair.shape[:2])
+        errors.extend(geometry_errors)
+        exact_alpha = covered & prop_mask & (alpha_bytes > 127) \
+            & (legacy_alpha == alpha_bytes) & (props[..., 3] == legacy_alpha)
+        for old_rgb, old_records in old_rgb_to_ids.items():
+            if len(old_records) != 1:
+                continue
+            expected = semantic_by_stable[str(old_records[0]["stable_id"])]
+            expected_token = int(expected["token"])
+            comparable = exact_alpha & (owners == expected_token) \
+                & np.all(legacy_rgb == np.array(old_rgb, dtype=np.uint8), axis=2)
+            mismatch = comparable & (token_pixels != expected_token)
+            isolated_mismatches += int(mismatch.sum())
+            matches = int((comparable & ~mismatch).sum())
+            isolated_matches += matches
+            kind = str(expected.get("type", ""))
+            isolated_by_kind[kind] = isolated_by_kind.get(kind, 0) + matches
+        if isolated_mismatches:
+            errors.append(f"单实例源几何内 exact RGBA 与 sidecar token 不一致: {isolated_mismatches}")
     for kind in ("tree", "wall"):
-        if instance_matches_by_kind.get(kind, 0) <= 0:
-            errors.append(f"没有 {kind} exact opaque ID 配准锚点，不能对该类别声称像素对齐")
+        if instance_matches_by_kind.get(kind, 0) + isolated_by_kind.get(kind, 0) <= 0:
+            errors.append(f"没有 {kind} exact RGBA ID 配准锚点，不能对该类别声称像素对齐")
+    if opaque_instance_matches + isolated_matches <= 0:
+        errors.append("没有任何 exact RGBA legacy ID 像素可证明 sidecar 的实际像素配准")
 
     part_classes = capture.get("masks", {}).get("part_ids", {}).get("classes", {})
     old_part_rgb_to_code: dict[tuple[int, int, int], list[int]] = {}
@@ -673,12 +768,15 @@ def pixel_alignment_report(capture: dict, images: dict[str, np.ndarray],
     return {
         "status": result_status,
         "errors": errors,
-        "method": "exact RGBA pixel comparison only; old labels are compared only when an opaque observed byte color maps uniquely; no nearest-color decoding",
+        "method": "exact opaque RGBA anchors, or exact RGB and identical observed alpha>127 inside independently recorded single-instance source bounds; no blended palette or nearest-color decoding",
         "props_alpha_gt_0_5_pixels": int(prop_mask.sum()),
         "props_alpha_missing_labels": missing_labels,
         "opaque_instance_matches": opaque_instance_matches,
         "opaque_instance_mismatches": instance_mismatches,
         "opaque_instance_matches_by_kind": instance_matches_by_kind,
+        "isolated_source_instance_matches": isolated_matches,
+        "isolated_source_instance_mismatches": isolated_mismatches,
+        "isolated_source_matches_by_kind": isolated_by_kind,
         "opaque_part_matches": opaque_part_matches,
         "opaque_part_mismatches": part_mismatches,
     }
@@ -690,17 +788,21 @@ def _exact_palette_mask(image: np.ndarray, rgb: tuple[int, int, int] | None) -> 
     return (image[..., 3] > 127) & np.all(image[..., :3] == np.array(rgb, dtype=np.uint8), axis=2)
 
 
-def _blocking_mask(images: dict[str, np.ndarray]) -> tuple[np.ndarray, list[str]]:
+def _blocking_mask(images: dict[str, np.ndarray], *, ground_samples: bool = True) -> tuple[np.ndarray, list[str]]:
     reasons: list[str] = []
     shape = images["main"].shape[:2]
     blocked = np.zeros(shape, dtype=bool)
-    for role, label in (("exclusions", "units/HUD/exclusions"),
-                        ("grid", "grid"), ("contact_shadow", "contact shadow")):
+    roles = [("exclusions", "units/HUD/exclusions"), ("grid", "grid")]
+    if ground_samples:
+        roles.append(("contact_shadow", "contact shadow"))
+    for role, label in roles:
         image = images.get(role)
         if not _valid_rgba(image) or image.shape[:2] != shape:
             reasons.append(f"missing or size-mismatched {label} mask")
             continue
         blocked |= image[..., 3] > 127
+    if not ground_samples:
+        return blocked, reasons
     ground = images.get("ground")
     ground_without_shadow = images.get("ground_without_shadow")
     if not _valid_rgba(ground) or not _valid_rgba(ground_without_shadow) \
@@ -743,7 +845,9 @@ def _not_tested(reason: str, **values: Any) -> dict:
 
 def measure_t2_instances(manifest: dict, images: dict[str, np.ndarray],
                          pair: np.ndarray, coverage: np.ndarray,
-                         instance_tokens: list[dict], blocked: np.ndarray) -> dict:
+                         instance_tokens: list[dict], blocked: np.ndarray,
+                         object_blocked: np.ndarray | None = None) -> dict:
+    object_blocked = blocked if object_blocked is None else object_blocked
     main = images["main"]
     main_lab = checks.lab(main[..., :3])
     ground_types = images.get("ground_types")
@@ -768,7 +872,7 @@ def measure_t2_instances(manifest: dict, images: dict[str, np.ndarray],
         if kind not in T2_PARTS:
             continue
         token = int(instance["token"])
-        own_mask = (tokens == token) & visible_alpha & ~blocked
+        own_mask = (tokens == token) & visible_alpha & ~object_blocked
         top_mask = own_mask & np.isin(pair[..., 3], T2_PARTS[kind]["top"])
         side_mask = own_mask & np.isin(pair[..., 3], T2_PARTS[kind]["side"])
         outer_ring = metrics.morph(own_mask, 4) & ~own_mask
@@ -823,9 +927,70 @@ def _tree_semantic_measurement_gate(manifest: dict, sidecar: dict) -> list[str]:
     return errors
 
 
+def _project_visible_tree_codes(manifest: dict, tree_records: list[dict],
+                                tokens: np.ndarray, visible: np.ndarray,
+                                classification_map: np.ndarray | None) -> tuple[np.ndarray, list[str]]:
+    """Read bound source region texels at actual native Sprite2D pixel centers.
+
+    Token selects the recorded source to check, never its expected part code.
+    No geometric erosion, nearest-color inference or alpha change is permitted.
+    """
+    result = np.zeros(tokens.shape, dtype=np.uint8)
+    errors: list[str] = []
+    if not _valid_rgba(classification_map):
+        return result, ["bound tree classification RGBA map is unavailable for source-region projection"]
+    assigned = np.zeros(tokens.shape, dtype=bool)
+    tree_pixels = np.zeros(tokens.shape, dtype=bool)
+    try:
+        view = manifest["viewports"]["main"]
+        screen = _source_transform_matrix(view["final_transform"]) @ _source_transform_matrix(view["canvas_transform"])
+        map_height, map_width = classification_map.shape[:2]
+        for record in tree_records:
+            own = (tokens == int(record["token"])) & visible
+            tree_pixels |= own
+            leaves = record.get("draw_leaf_inputs")
+            if not isinstance(leaves, list) or len(leaves) != 1 or leaves[0].get("node_class") != "Sprite2D":
+                raise ValueError("tree region projection requires its single actual Sprite2D")
+            leaf = leaves[0]
+            if leaf.get("frame") != 0 or leaf.get("region_enabled") is not False:
+                raise ValueError("tree source frame/region configuration is unsupported")
+            bounds = leaf.get("draw_bounds_local")
+            if not isinstance(bounds, list) or len(bounds) != 4:
+                raise ValueError("source Sprite2D bounds missing")
+            x, y, w, h = np.asarray(bounds, dtype=float)
+            if not np.isfinite([x, y, w, h]).all() or w != map_width or h != map_height:
+                raise ValueError("source Sprite2D bounds differ from the bound atlas-region map")
+            if leaf.get("texture", {}).get("size") != [map_width, map_height]:
+                raise ValueError("source texture size differs from the bound atlas-region map")
+            if type(leaf.get("flip_h")) is not bool or type(leaf.get("flip_v")) is not bool:
+                raise ValueError("source Sprite2D flip flags missing")
+            yy, xx = np.nonzero(own)
+            centers = np.stack((xx + .5, yy + .5, np.ones(len(xx))), axis=-1)
+            local = centers @ np.linalg.inv(screen @ _source_transform_matrix(leaf["global_transform"])).T
+            u, v = (local[:, 0] - x) / w, (local[:, 1] - y) / h
+            inside = (u >= 0) & (u < 1) & (v >= 0) & (v < 1)
+            if leaf["flip_h"]:
+                u = 1 - u
+            if leaf["flip_v"]:
+                v = 1 - v
+            ix, iy = np.floor(u * map_width).astype(int), np.floor(v * map_height).astype(int)
+            inside &= (ix >= 0) & (ix < map_width) & (iy >= 0) & (iy < map_height)
+            sample_x, sample_y = xx[inside], yy[inside]
+            result[sample_y, sample_x] = classification_map[iy[inside], ix[inside], 0]
+            assigned[sample_y, sample_x] = True
+        if np.any(tree_pixels & ~assigned):
+            errors.append("visible tree labels extend outside their independently recorded source Sprite2D")
+    except (KeyError, TypeError, ValueError, OverflowError) as error:
+        errors.append(f"tree source-region projection inputs are incomplete: {error}")
+    return result, errors
+
+
 def measure_t3_trees(manifest: dict, sidecar: dict, images: dict[str, np.ndarray],
                      pair: np.ndarray, coverage: np.ndarray,
-                     instance_tokens: list[dict], blocked: np.ndarray) -> list[dict]:
+                     instance_tokens: list[dict], blocked: np.ndarray,
+                     object_blocked: np.ndarray | None = None,
+                     classification_map: np.ndarray | None = None) -> list[dict]:
+    object_blocked = blocked if object_blocked is None else object_blocked
     main = images["main"]
     main_lab = checks.lab(main[..., :3])
     ground_types = images.get("ground_types")
@@ -847,26 +1012,47 @@ def measure_t3_trees(manifest: dict, sidecar: dict, images: dict[str, np.ndarray
     all_tree_tokens = {int(record["token"]) for record in tree_records if type(record.get("token")) is int}
     any_tree_token = np.isin(tokens, np.fromiter(all_tree_tokens, dtype=np.uint32)) if all_tree_tokens else np.zeros(tokens.shape, bool)
     any_non_tree_prop = (coverage[..., 3] == 255) & ~any_tree_token
-    crown_expected_visible = (tree_union & ~blocked & ~any_non_tree_prop) if tree_union is not None else np.zeros(tokens.shape, bool)
-    semantic_tree_regions = any_tree_token & np.isin(pair[..., 3], np.fromiter(TREE_PART_CODES, dtype=np.uint8)) & visible_alpha
-    tree_unknown = any_tree_token & (pair[..., 3] == UNKNOWN_PART_CODE) & visible_alpha
+    semantic_tree_regions = any_tree_token & np.isin(pair[..., 3], np.fromiter(TREE_PART_CODES, dtype=np.uint8)) & visible_alpha & ~object_blocked
+    tree_visible = any_tree_token & visible_alpha & ~object_blocked
+    all_tree_unknown = tree_visible & (pair[..., 3] == UNKNOWN_PART_CODE)
+    legitimate_non_crown = np.zeros(tokens.shape, dtype=bool)
+    projection_mismatches = np.zeros(tokens.shape, dtype=bool)
+    projection_errors: list[str] = []
+    if classification_map is not None or all_tree_unknown.any():
+        expected_codes, projection_errors = _project_visible_tree_codes(
+            manifest, tree_records, tokens, tree_visible, classification_map)
+        palette_errors += projection_errors
+        if not projection_errors:
+            expected_labels = np.where(expected_codes == 0, UNKNOWN_PART_CODE, expected_codes)
+            projection_mismatches = tree_visible & (pair[..., 3] != expected_labels)
+            legitimate_non_crown = all_tree_unknown & (expected_codes == 0)
+    tree_unknown = all_tree_unknown & ~legitimate_non_crown
+    # The legacy union draws only crowns: a later tree's legitimate trunk must
+    # still occlude crowns behind it. Keep the original union comparison after
+    # this independently verified source-region exclusion and alpha threshold.
+    crown_expected_visible = (tree_union & visible_alpha & ~object_blocked & ~any_non_tree_prop
+                              & ~legitimate_non_crown) if tree_union is not None else np.zeros(tokens.shape, bool)
     crown_xor = crown_expected_visible ^ semantic_tree_regions
     crown_alignment = {
-        "status": "PASS" if not crown_xor.any() and not tree_unknown.any() else "FAIL",
+        "status": "PASS" if not crown_xor.any() and not tree_unknown.any()
+                  and not projection_mismatches.any() and not projection_errors else "FAIL",
         "expected_visible_crown_pixels": int(crown_expected_visible.sum()),
         "sidecar_reviewed_crown_pixels": int(semantic_tree_regions.sum()),
         "union_mismatch_pixels": int(crown_xor.sum()),
         "unclassified_tree_pixels_alpha_gt_0_5": int(tree_unknown.sum()),
-        "basis": "same-coordinate exact comparison with frozen tree_crown_union alpha; no transform-only alignment claim",
+        "source_region_code_mismatch_pixels": int(projection_mismatches.sum()),
+        "legitimate_non_crown_occluding_pixels": int(legitimate_non_crown.sum()),
+        "source_region_projection_errors": projection_errors,
+        "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion",
     }
     output: list[dict] = []
     for instance in tree_records:
         token = int(instance["token"])
-        own_visible = (tokens == token) & visible_alpha & ~blocked
+        own_visible = (tokens == token) & visible_alpha & ~object_blocked
         crown = own_visible & np.isin(pair[..., 3], tuple(TREE_PART_CODES))
         dark_side = own_visible & (pair[..., 3] == PART_CODES["tree_dark_side"])
         outline = own_visible & (pair[..., 3] == PART_CODES["tree_outline"])
-        unknown = own_visible & (pair[..., 3] == UNKNOWN_PART_CODE)
+        unknown = own_visible & tree_unknown
         outside_ring = metrics.morph(crown, 4) & ~crown
         grass = outside_ring & tree_palette_pixels & (coverage[..., 3] == 0) & ~blocked
         uncertain_crown = int((crown & uncertain_alpha).sum())
@@ -888,6 +1074,7 @@ def measure_t3_trees(manifest: dict, sidecar: dict, images: dict[str, np.ndarray
             "alpha_threshold_for_samples": ">127/255",
             "uncertain_if_alpha_below": 0.98,
             "unclassified_tree_pixels_alpha_gt_0_5": int(unknown.sum()),
+            "legitimate_non_crown_pixels": int((own_visible & legitimate_non_crown).sum()),
             "tree_crown_alignment": crown_alignment,
             "outline_status": outline_status,
         }
@@ -1011,12 +1198,15 @@ def validate_case(capture_manifest_path: Path, source_root: Path,
         alignment = {"status": "NOT_TESTED", "errors": ["alignment 的 frozen/source 图像不完整"]}
     sidecar_errors += alignment.get("errors", []) if alignment.get("status") == "FAIL" else []
     blocked = np.zeros(arrays["semantic_pair"].shape[:2], dtype=bool) if arrays.get("semantic_pair") is not None else np.zeros((0, 0), bool)
+    object_blocked = blocked
     blocking_errors: list[str] = []
     if capture_images and arrays.get("semantic_pair") is not None:
         blocked, blocking_errors = _blocking_mask(capture_images)
+        object_blocked, object_errors = _blocking_mask(capture_images, ground_samples=False)
+        blocking_errors += object_errors
     sidecar_errors += blocking_errors
     sidecar_visible = visible_instance_counts(arrays["semantic_pair"], arrays["semantic_coverage"],
-                                              instance_tokens, blocked) if arrays.get("semantic_pair") is not None \
+                                              instance_tokens, object_blocked) if arrays.get("semantic_pair") is not None \
         and arrays.get("semantic_coverage") is not None and blocked.shape == arrays["semantic_pair"].shape[:2] else {}
     visible_errors = [f"sidecar {kind} visible instances {record.get('visible_instances', 0)} < 3"
                       for kind, record in sidecar_visible.items() if record.get("status") != "PASS"]
@@ -1027,9 +1217,10 @@ def validate_case(capture_manifest_path: Path, source_root: Path,
     t3: list[dict] = []
     if ready:
         t2 = measure_t2_instances(capture, capture_images, arrays["semantic_pair"],
-                                  arrays["semantic_coverage"], instance_tokens, blocked)
+                                  arrays["semantic_coverage"], instance_tokens, blocked, object_blocked)
         t3 = measure_t3_trees(capture, sidecar, capture_images, arrays["semantic_pair"],
-                              arrays["semantic_coverage"], instance_tokens, blocked)
+                              arrays["semantic_coverage"], instance_tokens, blocked, object_blocked,
+                              arrays.get("tree_classification_map"))
     else:
         reason = "冻结 V6/V5 或 sidecar provenance/alignment/visible-instance gate 未通过"
         for instance in instance_tokens if isinstance(instance_tokens, list) else []:

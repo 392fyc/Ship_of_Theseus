@@ -35,6 +35,7 @@ var _semantic_sidecar_shader: Shader
 var _semantic_sidecar_viewports: Dictionary = {}
 var _semantic_sidecar_draw_order: Array[Node2D] = []
 var _semantic_sidecar_runtime_records: Array[Dictionary] = []
+var _semantic_measurement_view_state: Dictionary = {}
 var _semantic_sidecar_record_index_by_node_id: Dictionary = {}
 var _semantic_sidecar_instance_records: Array[Dictionary] = []
 var _semantic_sidecar_readback_record: Dictionary = {}
@@ -67,6 +68,40 @@ func _create_capture_passes(resolution: Vector2i, profile: Dictionary) -> bool:
 	if not await super._create_capture_passes(resolution, profile):
 		return false
 	return _create_semantic_sidecar_passes(resolution)
+
+
+func _establish_frozen_capture_state() -> bool:
+	# Use the formal cancellation action, retaining both units and HighlightLayer.
+	# Range-tinted props are unsuitable for the static material comparison state.
+	_semantic_measurement_view_state = {"action": "ui_cancel", "synthetic_input": true,
+		"camera_changed": false, "units_hidden": false, "sessions": []}
+	for session: Node2D in [_main_session, _reconstruction_session]:
+		var manager := session.get("manager") as Node
+		if not is_instance_valid(manager) or not manager.has_method("_input"):
+			_abort("formal cancellation input is unavailable")
+			return false
+		var selected_before: bool = is_instance_valid(manager.get("selected_unit"))
+		var cancel := InputEventAction.new()
+		cancel.action = "ui_cancel"
+		cancel.pressed = true
+		manager.call("_input", cancel)
+		_semantic_measurement_view_state["sessions"].append({
+			"selected_before": selected_before,
+			"selected_after": is_instance_valid(manager.get("selected_unit")),
+		})
+	# Settle deferred range removal and the production alpha recovery. No prop
+	# alpha, unit location, terrain, camera or material is assigned by this step.
+	await _frames(16)
+	for session: Node2D in [_main_session, _reconstruction_session]:
+		var manager := session.get("manager") as Node
+		var layer := manager.get("highlight_layer") as Node2D
+		if is_instance_valid(manager.get("selected_unit")) or not is_instance_valid(layer) \
+				or not layer.is_visible_in_tree() or layer.get_child_count() != 0:
+			_abort("ui_cancel did not settle an unselected state with visible empty HighlightLayer")
+			return false
+	_semantic_measurement_view_state["settle_process_frames"] = 16
+	_semantic_measurement_view_state["highlight_layers_visible_and_empty"] = true
+	return await super._establish_frozen_capture_state()
 
 
 func _create_semantic_sidecar_passes(resolution: Vector2i) -> bool:
@@ -249,6 +284,7 @@ func _semantic_draw_leaf_input(canvas: CanvasItem, relative_path: String) -> Dic
 		"texture_filter": int(canvas.texture_filter),
 		"texture_repeat": int(canvas.texture_repeat),
 		"alpha_source": "incoming CanvasItem COLOR.a after source texture/primitive alpha and inherited modulation",
+		"draw_bounds_local": _semantic_draw_bounds_local(canvas),
 		"material_class": canvas.material.get_class() if canvas.material != null else "",
 		"ancestor_canvas_inputs": _semantic_ancestor_canvas_inputs(canvas),
 	}
@@ -276,6 +312,27 @@ func _semantic_draw_leaf_input(canvas: CanvasItem, relative_path: String) -> Dic
 		record["texture"] = _texture_record(line.texture)
 		record["texture_mode"] = int(line.texture_mode)
 	return record
+
+
+func _semantic_draw_bounds_local(canvas: CanvasItem) -> Array:
+	# Conservative primitive bounds are independent of the encoded labels. They
+	# only identify unambiguous registration anchors, never measurement samples.
+	if canvas is Sprite2D:
+		return _rect_array((canvas as Sprite2D).get_rect())
+	var points := PackedVector2Array()
+	var margin := 0.0
+	if canvas is Polygon2D:
+		points = (canvas as Polygon2D).polygon
+	elif canvas is Line2D:
+		var line := canvas as Line2D
+		points = line.points
+		margin = line.width * maxf(1.0, line.sharp_limit)
+	if points.is_empty():
+		return []
+	var bounds := Rect2(points[0], Vector2.ZERO)
+	for point: Vector2 in points:
+		bounds = bounds.expand(point)
+	return _rect_array(bounds.grow(margin))
 
 
 func _semantic_ancestor_canvas_inputs(canvas: CanvasItem) -> Array[Dictionary]:
@@ -937,7 +994,8 @@ func _save_frame_images(images: Dictionary, case_directory: String, frame_id: in
 		"tree_region_code_map_changes_draw_order": false,
 		"tag_alpha_is_not_opacity": true,
 		"coverage_channels": {"R": "original effective source alpha in RGBA8", "A": "255 means a visible source draw covered this pixel"},
-		"pixel_alignment": "NOT_TESTED_UNTIL_RAW_PIXEL_VALIDATOR_CROSS_CHECKS_LEGACY_UNIQUE_OPAQUE_PIXELS_AND_TREE_CROWN",
+		"measurement_view_state": _semantic_measurement_view_state.duplicate(true),
+		"pixel_alignment": "NOT_TESTED_UNTIL_RAW_PIXEL_VALIDATOR_CROSS_CHECKS_EXACT_RGBA_SOURCE_ANCHORS_AND_TREE_CROWN",
 		"complete_T2_status": "NOT_RUN_BY_CAPTURE",
 		"complete_T3_status": "NOT_RUN_BY_CAPTURE",
 	}
