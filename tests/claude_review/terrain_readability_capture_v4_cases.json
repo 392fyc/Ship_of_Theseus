@@ -16,7 +16,7 @@
   "cases": [
     {
       "map_size": [10, 10],
-      "player_unit_position": [5, 0],
+      "player_unit_position": [9, 2],
       "enemy_unit_position": [5, 9]
     },
     {

@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+from io import BytesIO
 import json
 import math
 from pathlib import Path
@@ -9,6 +11,7 @@ import re
 import subprocess
 
 import numpy as np
+from PIL import Image
 
 import claude_review_checks as checks
 import validate_terrain_readability_capture as v1
@@ -24,6 +27,7 @@ V2_SOURCES = (
     "tests/claude_review/validate_terrain_readability_capture_v2.py",
     "tests/claude_review/test_terrain_readability_capture_v2.py",
 )
+PORTRAIT_CAPTURE_GROUP = "portrait-hud"
 
 
 def _pair(value: object, name: str) -> list[int] | None:
@@ -391,6 +395,168 @@ def instance_coverage_errors(instance_counts: dict, visible_counts: dict) -> lis
             if instance_counts.get(kind, 0) < 3 or visible_counts.get(kind, 0) < 3]
 
 
+def _portrait_window_viewport_errors(viewport: object, size: list[int]) -> list[str]:
+    """Apply the existing v2 main-Window texture mapping rule to the companion."""
+    if not isinstance(viewport, dict):
+        return ["C4 伴随画面缺少原生 Window viewport 记录"]
+    errors: list[str] = []
+    if (viewport.get("viewport_kind") != "Window" or viewport.get("window_size") != size
+            or viewport.get("size") != size):
+        errors.append("C4 伴随 viewport 未记录所请求的 Window 物理尺寸")
+    scale = viewport.get("stretch_scale")
+    transform = viewport.get("stretch_transform")
+    if not _finite_vector(scale, 2) or not _finite_vector(transform, 6) or any(value <= 0 for value in scale or []):
+        errors.append("C4 伴随 Window stretch transform/scale 缺失或无效")
+    else:
+        basis_scale = [math.hypot(transform[0], transform[1]), math.hypot(transform[2], transform[3])]
+        if not np.allclose(basis_scale, scale, atol=1e-6, rtol=0):
+            errors.append("C4 伴随 Window stretch scale 与 transform basis 不符")
+        expected_texture_size = [math.ceil(size[i] * scale[i]) for i in range(2)]
+        if (viewport.get("texture_reported_size") != expected_texture_size
+                or viewport.get("texture_size") != expected_texture_size):
+            errors.append("C4 伴随 Window Texture 尺寸不符合物理尺寸乘 stretch scale")
+    if viewport.get("native_size") != size or viewport.get("image_size") != size:
+        errors.append("C4 伴随原始 Image native_size/image_size 必须等于请求尺寸")
+    for field, length in (("canvas_transform", 6), ("final_transform", 6), ("visible_rect", 4)):
+        if not _finite_vector(viewport.get(field), length):
+            errors.append(f"C4 伴随 Window {field} 缺失或无效")
+    return errors
+
+
+def _portrait_image_errors(root: Path, record: object, size: list[int], frame_id: int,
+                           terrain_images: dict) -> tuple[Path | None, list[str]]:
+    errors: list[str] = []
+    if not isinstance(record, dict):
+        return None, ["C4 伴随画面缺少 portrait_hud 图像记录"]
+    if record.get("role") != "portrait_hud":
+        errors.append("C4 伴随 PNG 角色必须是 portrait_hud")
+    if record.get("capture_group") != PORTRAIT_CAPTURE_GROUP:
+        errors.append("C4 伴随 PNG 未使用独立 portrait-hud 采集组")
+    if record.get("mime_type") != "image/png" or record.get("pixel_format") != "RGBA8":
+        errors.append("C4 伴随 PNG 格式记录必须是 image/png 和 RGBA8")
+    if record.get("image_size") != size:
+        errors.append("C4 伴随 PNG 记录尺寸与请求原生尺寸不一致")
+    if type(record.get("frame_id")) is not int or record.get("frame_id") != frame_id:
+        errors.append("C4 伴随 PNG 角色或帧号与独立 frame_post_draw 不一致")
+    byte_count = record.get("bytes")
+    if type(byte_count) is not int or byte_count <= 0:
+        errors.append("C4 伴随 PNG 缺少原文件字节数")
+    digest = record.get("sha256")
+    if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+        errors.append("C4 伴随 PNG 缺少有效原文件 SHA256")
+    try:
+        path = v1.safe_child(root, record.get("path"))
+        terrain_paths = {
+            v1.safe_child(root, terrain_record.get("path")).resolve()
+            for terrain_record in terrain_images.values()
+            if isinstance(terrain_record, dict) and isinstance(terrain_record.get("path"), str)
+        }
+        if path.resolve() in terrain_paths:
+            errors.append("C4 伴随 PNG 不能复用 12 张地形同帧图像中的文件")
+        raw = path.read_bytes()
+        if type(byte_count) is int and len(raw) != byte_count:
+            errors.append("C4 伴随 PNG 原文件字节数不一致")
+        if isinstance(digest, str) and re.fullmatch(r"[0-9a-f]{64}", digest) and hashlib.sha256(raw).hexdigest() != digest:
+            errors.append("C4 伴随 PNG 原文件 SHA256 不一致")
+        try:
+            with Image.open(BytesIO(raw)) as image:
+                image.load()
+                if image.format != "PNG":
+                    errors.append("C4 伴随原文件格式不是 PNG")
+                if list(image.size) != size:
+                    errors.append("C4 伴随原 PNG 原生尺寸不一致")
+                if image.mode != "RGBA":
+                    errors.append("C4 伴随原 PNG 像素格式不是 RGBA8")
+        except (OSError, ValueError) as error:
+            errors.append(f"C4 伴随 PNG 无法解码: {error}")
+        return path, errors
+    except (OSError, ValueError, TypeError) as error:
+        errors.append(f"C4 伴随 PNG 路径或原文件无效: {error}")
+        return None, errors
+
+
+def portrait_c4(manifest_path: Path, data: dict, source_root: Path) -> dict:
+    """Check C4 on its real HUD frame, independently of the terrain masks."""
+    companion = data.get("portrait_companion")
+    if companion is None:
+        semantic_entry = "res://tests/claude_review/capture_terrain_readability_v6_regions_semantic_sidecar.gd"
+        if semantic_entry in data.get("sources", {}):
+            return {"pass": False, "errors": ["新版语义采集缺少必需的 C4 头像伴随画面"],
+                    "source": "portrait_companion"}
+        return checks.c4_file(v1.safe_child(manifest_path.parent, data["images"]["main"]["path"]))
+    errors: list[str] = []
+    try:
+        if companion.get("schema_version") != "terrain-portrait-companion/1":
+            errors.append("C4 伴随画面 schema 无效")
+        case = data["case"]
+        size = case["requested_resolution"]
+        frame = companion["common_frame"]
+        errors += v1.frame_errors(frame)
+        terrain_frame = data.get("common_frame", {}).get("frame_id")
+        frame_id = frame.get("frame_id")
+        if type(terrain_frame) is not int or type(frame_id) is not int or frame_id >= terrain_frame:
+            errors.append("C4 伴随画面必须在取消选择之前独立采集")
+        if (companion.get("case_name") != case["name"]
+                or companion.get("candidate") != data["candidate"]
+                or companion.get("initial_fit") != case["initial_fit"]):
+            errors.append("C4 伴随画面的用例、候选或相机不匹配")
+        if (companion.get("capture_group") != PORTRAIT_CAPTURE_GROUP
+                or frame.get("capture_group") != PORTRAIT_CAPTURE_GROUP
+                or frame.get("image_count") != 1
+                or frame.get("image_roles") != ["portrait_hud"]
+                or companion.get("capture_group") == case["name"]):
+            errors.append("C4 伴随帧没有与 12 张地形图像的同帧组明确分开")
+        spawn = data["capture_state"]["terrain_v4_spawn_configuration"]["main"]
+        if companion.get("formal_configuration_sha256") != spawn["actual_formal_configuration_sha256"]:
+            errors.append("C4 伴随画面的正式地图配置不匹配")
+        if (companion.get("state") != "formal_selected_unit_before_measurement_cancel"
+                or companion.get("portrait_visible") is not True
+                or not isinstance(companion.get("selected_unit"), str)
+                or not companion["selected_unit"].strip()):
+            errors.append("C4 伴随画面没有已选单位的可见头像")
+        texture = companion["portrait_texture_path"]
+        if not texture.startswith("res://") or hashlib.sha256(v1.safe_child(
+                source_root, texture.removeprefix("res://")).read_bytes()).hexdigest() != companion["portrait_texture_sha256"]:
+            errors.append("C4 头像纹理原件不匹配")
+        scale = min(size[0] / 1280, size[1] / 720)
+        # The actual HUD frame is inset one native pixel from C4's unchanged
+        # search rectangle: the algorithm rect has a one-pixel margin on each edge.
+        algorithm_rect = checks.PORTRAIT_FRAME_1280
+        expected = [(algorithm_rect[0] + 1) * scale, (algorithm_rect[1] + 1) * scale,
+                    (algorithm_rect[2] - 2) * scale, (algorithm_rect[3] - 2) * scale]
+        rect = companion.get("portrait_frame_native_rect")
+        if not _finite_vector(rect, 4) or not np.allclose(rect, expected, atol=.01, rtol=0):
+            errors.append("C4 采集到的原生头像框没有对应 C4 算法搜索区域内缩一像素的正式边框")
+        image = companion["image"]
+        image_path, image_errors = _portrait_image_errors(
+            manifest_path.parent, image, size, frame_id, data.get("images", {}))
+        errors += image_errors
+        view = companion["viewport"]
+        errors += _portrait_window_viewport_errors(view, size)
+        c8_capture = companion.get("c8_capture")
+        captures = data.get("captures")
+        if not isinstance(c8_capture, dict) or not isinstance(captures, list) or c8_capture not in captures:
+            errors.append("C4 伴随画面未纳入 C8")
+        elif isinstance(image, dict):
+            if (c8_capture.get("file") != image.get("path")
+                    or c8_capture.get("sha256") != image.get("sha256")
+                    or c8_capture.get("image_size") != image.get("image_size")
+                    or c8_capture.get("capture_group") != PORTRAIT_CAPTURE_GROUP
+                    or c8_capture.get("role") != "portrait_hud"
+                    or c8_capture.get("frame_id") != frame_id
+                    or c8_capture.get("capture_kind") != "viewport"):
+                errors.append("C8 伴随记录没有绑定同一 portrait_hud PNG、帧号和独立采集组")
+            elif image_path is not None and c8_capture.get("file") != image_path.name:
+                errors.append("C8 伴随记录路径与经过受控路径解析的 PNG 文件不一致")
+        if errors:
+            return {"pass": False, "errors": errors, "source": "portrait_companion"}
+        assert image_path is not None
+        result = checks.c4_file(image_path)
+        return dict(result, source="portrait_companion", frame_id=frame_id)
+    except (KeyError, TypeError, ValueError, OSError, AttributeError) as error:
+        return {"pass": False, "errors": [f"C4 伴随画面记录无效: {error}"], "source": "portrait_companion"}
+
+
 def validate(manifest_path: Path, source_root: Path, expected_head: str) -> dict:
     data = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
     errors: list[str] = []
@@ -444,7 +610,7 @@ def validate(manifest_path: Path, source_root: Path, expected_head: str) -> dict
     previous_root = checks.ROOT
     try:
         checks.ROOT = source_root
-        c4 = checks.c4_file(v1.safe_child(manifest_path.parent, data["images"]["main"]["path"])) if "main" in images else {"pass": False, "reason": "缺少主图"}
+        c4 = portrait_c4(manifest_path, data, source_root) if "main" in images else {"pass": False, "reason": "缺少主图"}
         c8 = checks.c8_manifest(manifest_path)
         c8_v1 = checks.c8_script(v1.safe_child(source_root, V1_SCRIPT))
         c8_v2 = checks.c8_script(v1.safe_child(source_root, V2_SCRIPT))

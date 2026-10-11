@@ -620,6 +620,56 @@ class TerrainSemanticSidecarTests(unittest.TestCase):
         self.assertEqual(int(owners[1, 1]), 0)
         self.assertEqual(int(owners[4, 4]), 9)
 
+    def test_zero_width_polygon_bounds_preserve_conservative_exclusion_and_tree_anchors(self):
+        identity = [1, 0, 0, 1, 0, 0]
+        pillars = []
+        for token, x in enumerate((2.0, 4.0, 6.0), start=1):
+            points = [[x, 0.0], [x, 1.0], [x, 3.0], [x, 4.0]]
+            pillars.append({"type": "pillar", "token": token, "draw_leaf_inputs": [{
+                "node_class": "Polygon2D", "draw_bounds_local": [x, 0.0, 0.0, 4.0],
+                "polygon": points, "global_transform": identity,
+            }]})
+        records = pillars + [
+            {"type": "tree", "token": 4, "draw_leaf_inputs": [{
+                "node_class": "Sprite2D", "draw_bounds_local": [2.0, 1.0, 2.0, 2.0],
+                "global_transform": identity,
+            }]},
+            {"type": "tree", "token": 5, "draw_leaf_inputs": [{
+                "node_class": "Sprite2D", "draw_bounds_local": [8.0, 5.0, 2.0, 2.0],
+                "global_transform": identity,
+            }]},
+        ]
+        capture = {"viewports": {"main": {"canvas_transform": identity,
+                                          "final_transform": identity}}}
+
+        owners, errors = sidecar._single_source_footprint_owners(capture, records, (10, 12))
+
+        self.assertEqual(errors, [])
+        self.assertEqual(int(owners[1, 2]), 0)  # The line's padded bounds exclude the overlapping tree.
+        self.assertEqual(int(owners[5, 8]), 5)  # Later, isolated tree geometry still supplies an anchor.
+
+    def test_zero_or_invalid_source_bounds_remain_rejected(self):
+        identity = [1, 0, 0, 1, 0, 0]
+        capture = {"viewports": {"main": {"canvas_transform": identity,
+                                          "final_transform": identity}}}
+        invalid_leaves = (
+            {"node_class": "Polygon2D", "draw_bounds_local": [1.0, 0.0, -1.0, 4.0],
+             "polygon": [[1.0, 0.0], [1.0, 4.0], [0.0, 4.0]], "global_transform": identity},
+            {"node_class": "Sprite2D", "draw_bounds_local": [1.0, 0.0, float("nan"), 4.0],
+             "global_transform": identity},
+            {"node_class": "Sprite2D", "draw_bounds_local": [1.0, 1.0, 0.0, 0.0],
+             "global_transform": identity},
+            {"node_class": "Polygon2D", "draw_bounds_local": [1.0, 0.0, 0.0, 4.0],
+             "polygon": [[1.0, 0.0], [1.5, 1.0], [1.0, 4.0]], "global_transform": identity},
+        )
+        for leaf in invalid_leaves:
+            with self.subTest(leaf=leaf):
+                record_type = "tree" if leaf["node_class"] == "Sprite2D" else "pillar"
+                owners, errors = sidecar._single_source_footprint_owners(
+                    capture, [{"type": record_type, "token": 1, "draw_leaf_inputs": [leaf]}], (8, 8))
+                self.assertTrue(any("invalid source primitive bounds" in error for error in errors))
+                self.assertFalse(owners.any())
+
     @staticmethod
     def _wall_metric(status: str = "FAIL") -> dict:
         return {"status": status, "top_pixels": 8, "side_pixels": 9,

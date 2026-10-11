@@ -597,8 +597,24 @@ def _single_source_footprint_owners(capture: dict, instance_tokens: list[dict],
                 if not isinstance(bounds, list) or len(bounds) != 4:
                     raise ValueError("source primitive bounds missing")
                 x, y, w, h = np.asarray(bounds, dtype=np.float64)
-                if not np.isfinite([x, y, w, h]).all() or w <= 0 or h <= 0:
+                if not np.isfinite([x, y, w, h]).all() or w < 0 or h < 0:
                     raise ValueError("invalid source primitive bounds")
+                if w == 0 or h == 0:
+                    # A captured Polygon2D may be a finite line with zero area.
+                    # Keep its padded bounds as a conservative exclusion, but
+                    # allow that only when its actual points prove the bounds.
+                    polygon = np.asarray(leaf.get("polygon"), dtype=np.float64)
+                    if (leaf.get("node_class") != "Polygon2D" or w == 0 and h == 0
+                            or polygon.ndim != 2 or polygon.shape[1] != 2 or polygon.shape[0] < 3
+                            or not np.isfinite(polygon).all()):
+                        raise ValueError("invalid source primitive bounds")
+                    polygon_min = polygon.min(axis=0)
+                    polygon_max = polygon.max(axis=0)
+                    polygon_bounds = np.array([polygon_min[0], polygon_min[1],
+                                               polygon_max[0] - polygon_min[0],
+                                               polygon_max[1] - polygon_min[1]])
+                    if not np.allclose(polygon_bounds, [x, y, w, h], rtol=0.0, atol=1e-6):
+                        raise ValueError("invalid source primitive bounds")
                 points = np.array([[x, y, 1], [x+w, y, 1],
                                    [x+w, y+h, 1], [x, y+h, 1]])
                 transform = screen @ matrix(leaf.get("global_transform"))

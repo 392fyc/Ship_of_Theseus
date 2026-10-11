@@ -4,6 +4,7 @@ extends "res://tests/claude_review/capture_terrain_readability_v6_regions.gd"
 const SEMANTIC_SIDECAR_SCHEMA := "terrain-semantic-sidecar/1"
 const SEMANTIC_SIDECAR_SHADER_PATH := "res://tests/claude_review/terrain_semantic_sidecar.gdshader"
 const SEMANTIC_SIDECAR_MANIFEST := "semantic-sidecar-manifest.json"
+const PORTRAIT_COMPANION_CAPTURE_GROUP := "portrait-hud"
 const SEMANTIC_SIDECAR_SOURCE_PATHS: PackedStringArray = [
 	"res://tests/claude_review/capture_terrain_readability_v6_regions_semantic_sidecar.gd",
 	SEMANTIC_SIDECAR_SHADER_PATH,
@@ -36,6 +37,7 @@ var _semantic_sidecar_viewports: Dictionary = {}
 var _semantic_sidecar_draw_order: Array[Node2D] = []
 var _semantic_sidecar_runtime_records: Array[Dictionary] = []
 var _semantic_measurement_view_state: Dictionary = {}
+var _semantic_portrait_companion: Dictionary = {}
 var _semantic_sidecar_record_index_by_node_id: Dictionary = {}
 var _semantic_sidecar_instance_records: Array[Dictionary] = []
 var _semantic_sidecar_readback_record: Dictionary = {}
@@ -71,10 +73,14 @@ func _create_capture_passes(resolution: Vector2i, profile: Dictionary) -> bool:
 
 
 func _establish_frozen_capture_state() -> bool:
+	_semantic_portrait_companion.clear()
+	if not _headless_check and not await _semantic_capture_portrait_companion():
+		return false
 	# Use the formal cancellation action, retaining both units and HighlightLayer.
 	# Range-tinted props are unsuitable for the static material comparison state.
 	_semantic_measurement_view_state = {"action": "ui_cancel", "synthetic_input": true,
-		"camera_changed": false, "units_hidden": false, "sessions": []}
+		"camera_changed": false, "units_hidden": false, "sessions": [],
+		"formal_configuration_sha256": _sha256_text(JSON.stringify(_main_session.get("_configured_map")))}
 	for session: Node2D in [_main_session, _reconstruction_session]:
 		var manager := session.get("manager") as Node
 		if not is_instance_valid(manager) or not manager.has_method("_input"):
@@ -102,6 +108,118 @@ func _establish_frozen_capture_state() -> bool:
 	_semantic_measurement_view_state["settle_process_frames"] = 16
 	_semantic_measurement_view_state["highlight_layers_visible_and_empty"] = true
 	return await super._establish_frozen_capture_state()
+
+
+func _semantic_capture_portrait_companion() -> bool:
+	# C4 needs the selected-unit HUD. Keep this earlier frame separate from the
+	# unselected, same-frame terrain measurement and its twelve frozen images.
+	if not is_instance_valid(_main_battle) or not is_instance_valid(_main_manager):
+		_abort("C4 companion requires the formal battle and manager nodes")
+		return false
+	var dashboard_value: Variant = _main_battle.get("_bottom_dashboard")
+	var selected_value: Variant = _main_manager.get("selected_unit")
+	if not is_instance_valid(dashboard_value) or not dashboard_value is Control \
+			or not is_instance_valid(selected_value) or not selected_value is Node:
+		_abort("C4 companion requires the formal selected-unit dashboard")
+		return false
+	var dashboard := dashboard_value as Control
+	var selected := selected_value as Node
+	if not dashboard.has_method("get_composition"):
+		_abort("C4 companion dashboard has no get_composition method")
+		return false
+	var composition_value: Variant = dashboard.call("get_composition")
+	if not is_instance_valid(composition_value) or not composition_value is Control:
+		_abort("C4 companion is missing the formal dashboard composition node")
+		return false
+	var composition := composition_value as Control
+	var bottom_row_value: Node = composition.get_node_or_null("BottomRow")
+	if not is_instance_valid(bottom_row_value) or not bottom_row_value is Control:
+		_abort("C4 companion is missing BottomRow")
+		return false
+	var bottom_row := bottom_row_value as Control
+	var panel_value: Node = bottom_row.get_node_or_null("CharacterHudPanel")
+	if not is_instance_valid(panel_value) or not panel_value is Control:
+		_abort("C4 companion is missing BottomRow/CharacterHudPanel")
+		return false
+	var panel := panel_value as Control
+	var portrait_value: Node = panel.get_node_or_null("PortraitContent")
+	var border_value: Node = panel.get_node_or_null("PortraitFrame")
+	if not is_instance_valid(portrait_value) or not portrait_value is TextureRect:
+		_abort("C4 companion is missing CharacterHudPanel/PortraitContent")
+		return false
+	if not is_instance_valid(border_value) or not border_value is Control:
+		_abort("C4 companion is missing CharacterHudPanel/PortraitFrame")
+		return false
+	var portrait := portrait_value as TextureRect
+	var border := border_value as Control
+	if portrait.texture == null or portrait.texture.resource_path.is_empty() \
+			or not FileAccess.file_exists(portrait.texture.resource_path):
+		_abort("C4 companion PortraitContent has no existing source texture")
+		return false
+	if border.size.x <= 0.0 or border.size.y <= 0.0:
+		_abort("C4 companion PortraitFrame has an empty layout rectangle")
+		return false
+	await RenderingServer.frame_post_draw
+	var drawn_before := Engine.get_frames_drawn()
+	var process_before := Engine.get_process_frames()
+	var window := root as Window
+	if not is_instance_valid(window):
+		_abort("C4 companion has no formal native Window")
+		return false
+	var captured: Image = window.get_texture().get_image()
+	if captured == null or captured.is_empty():
+		_abort("C4 companion native Window readback is empty")
+		return false
+	var transform: Transform2D = window.get_final_transform() * border.get_global_transform_with_canvas()
+	var corners: Array[Vector2] = [transform * Vector2.ZERO, transform * Vector2(border.size.x, 0.0),
+		transform * border.size, transform * Vector2(0.0, border.size.y)]
+	var minimum := corners[0]
+	var maximum := corners[0]
+	for corner: Vector2 in corners:
+		minimum.x = minf(minimum.x, corner.x)
+		minimum.y = minf(minimum.y, corner.y)
+		maximum.x = maxf(maximum.x, corner.x)
+		maximum.y = maxf(maximum.y, corner.y)
+	var viewport := _viewport_record(root as Viewport, captured)
+	var visible := panel.is_visible_in_tree() and portrait.is_visible_in_tree() and border.is_visible_in_tree()
+	var texture_path := portrait.texture.resource_path
+	var drawn_after := Engine.get_frames_drawn()
+	var process_after := Engine.get_process_frames()
+	if not visible or _main_manager.get("selected_unit") != selected \
+			or drawn_before != drawn_after or process_before != process_after \
+			or captured.get_size() != root.size:
+		_abort("C4 companion selection, visibility, or native frame changed during readback")
+		return false
+	captured.convert(Image.FORMAT_RGBA8)
+	var path := _active_case_directory.path_join("portrait-hud.png")
+	if captured.save_png(path) != OK:
+		_abort("could not save C4 companion original")
+		return false
+	var image_record := _semantic_image_record("portrait_hud", captured, path, drawn_before)
+	image_record["capture_group"] = PORTRAIT_COMPANION_CAPTURE_GROUP
+	var c8_capture: Dictionary = CAPTURE_METADATA.capture_record(window, captured, path,
+		{"capture_group": PORTRAIT_COMPANION_CAPTURE_GROUP})
+	c8_capture["role"] = "portrait_hud"
+	c8_capture["frame_id"] = drawn_before
+	_semantic_portrait_companion = {
+		"schema_version": "terrain-portrait-companion/1", "case_name": _active_case_name,
+		"capture_group": PORTRAIT_COMPANION_CAPTURE_GROUP,
+		"state": "formal_selected_unit_before_measurement_cancel", "selected_unit": str(selected.name),
+		"portrait_visible": visible, "portrait_texture_path": texture_path,
+		"portrait_texture_sha256": FileAccess.get_sha256(texture_path),
+		"portrait_frame_native_rect": [minimum.x, minimum.y, maximum.x - minimum.x, maximum.y - minimum.y],
+		"candidate": _candidate_record(), "initial_fit": _camera_record(),
+		"formal_configuration_sha256": _sha256_text(JSON.stringify(_main_session.get("_configured_map"))),
+		"viewport": viewport, "image": image_record,
+		"common_frame": {"callback": "RenderingServer.frame_post_draw", "frame_id": drawn_before,
+			"frames_drawn_before": drawn_before, "frames_drawn_after": drawn_after,
+			"process_frames_before": process_before, "process_frames_after": process_after,
+			"same_callback": true, "readback_awaits_between_images": false,
+			"capture_group": PORTRAIT_COMPANION_CAPTURE_GROUP, "image_count": 1,
+			"image_roles": ["portrait_hud"]},
+		"c8_capture": c8_capture,
+	}
+	return true
 
 
 func _create_semantic_sidecar_passes(resolution: Vector2i) -> bool:
@@ -1016,6 +1134,12 @@ func _semantic_image_record(role: String, image: Image, path: String, frame_id: 
 
 
 func _write_json(path: String, value: Dictionary) -> bool:
+	if path.get_file() == "capture-manifest.json":
+		if _semantic_portrait_companion.is_empty():
+			_abort("C4 portrait companion is missing")
+			return false
+		value["portrait_companion"] = _semantic_portrait_companion.duplicate(true)
+		(value["captures"] as Array).append(_semantic_portrait_companion["c8_capture"])
 	var succeeded: bool = super._write_json(path, value)
 	if not succeeded or path.get_file() != "capture-manifest.json":
 		return succeeded

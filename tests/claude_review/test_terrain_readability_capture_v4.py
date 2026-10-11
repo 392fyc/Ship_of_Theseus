@@ -30,7 +30,7 @@ def _case_data() -> dict:
 
 
 def _spawn_state() -> dict:
-    expected = {"player": [5, 0], "enemy": [5, 9]}
+    expected = {"player": [9, 2], "enemy": [5, 9]}
     role_record = {
         "builder": "TerrainBattleSession.configure_map -> TerrainBattleDefinition.build",
         "original_formal_configuration_sha256": DIGEST,
