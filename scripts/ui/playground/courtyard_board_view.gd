@@ -159,6 +159,15 @@ func _process(delta: float) -> void:
 		_detail_layer.queue_redraw()
 
 
+func _prop_tint(key: String, fallback: Color) -> Color:
+	var tints: Dictionary = profile.get("prop_tints", {})
+	var rgba: Array = tints.get(key, [])
+	if rgba.size() != 4:
+		return fallback
+	# RGB 可超过 1 以提亮道具；alpha 仍独立保留。
+	return Color(float(rgba[0]), float(rgba[1]), float(rgba[2]), float(rgba[3]))
+
+
 func _atlas(spec: Dictionary) -> AtlasTexture:
 	var texture := AtlasTexture.new()
 	texture.atlas = load(str(spec["texture"])) as Texture2D
@@ -511,14 +520,14 @@ func _build_board_props() -> void:
 				_props.append({"node": relief, "wind": false, "bounds": Rect2(-36, -86, 72, 105)})
 			if terrain == Cell.Terrain.FOREST:
 				var tree_node: Node2D = _add_sprite(_tree, profile["tree"], point(x, y), 0.91 + float((x * 3 + y) % 3) * 0.055,
-					Color("dedac1"), true, (x + y) % 2 == 0)
+					_prop_tint("tree", Color("dedac1")), true, (x + y) % 2 == 0)
 				tree_node.set_meta("courtyard_cell", pos)
 			elif terrain == Cell.Terrain.WALL:
 				if _architecture_walls.has(pos):
 					continue
 				_add_wall_shape(pos)
 				if visual_variant_at(pos) == "ruined" and wall_connection_mask(pos) in [0, 1, 2, 4, 8]:
-					_add_sprite(_rubble, profile["rubble"], point(x + 0.12, y + 0.08), 0.35, Color("acae97"))
+					_add_sprite(_rubble, profile["rubble"], point(x + 0.12, y + 0.08), 0.35, _prop_tint("rubble", Color("acae97")))
 
 
 func _is_wall(pos: Vector2i) -> bool:
@@ -638,16 +647,16 @@ func _build_architecture_walls() -> void:
 		_add_wall_shape(cell)
 		var mask: int = wall_connection_mask(cell)
 		if mask in [1, 2, 4, 8]:
-			_add_sprite(_rubble, profile["rubble"], point(cell.x + 0.10, cell.y + 0.10), 0.29, Color("b1b19a"))
+			_add_sprite(_rubble, profile["rubble"], point(cell.x + 0.10, cell.y + 0.10), 0.29, _prop_tint("environment_rubble", Color("b1b19a")))
 
 
 func _grove(positions: Array, size_scale: float) -> void:
 	for i: int in positions.size():
 		var p: Vector2 = positions[i]
 		_add_sprite(_tree, profile["tree"], point(p.x, p.y), size_scale + float(i % 3) * 0.13,
-			Color("a4b096"), true, i % 2 == 0)
+			_prop_tint("environment_tree", Color("a4b096")), true, i % 2 == 0)
 		if i % 2 == 0:
-			_add_sprite(_shrub, profile["shrub"], point(p.x + 0.45, p.y + 0.3), 0.9, Color("a2b083"))
+			_add_sprite(_shrub, profile["shrub"], point(p.x + 0.45, p.y + 0.3), 0.9, _prop_tint("shrub", Color("a2b083")))
 
 
 func _add_sprite(texture: Texture2D, spec: Dictionary, foot: Vector2, size_scale: float,
@@ -727,12 +736,14 @@ func _add_wall_shape(cell: Vector2i) -> void:
 		if base[next].x >= base[edge].x or _is_join_edge(base[edge], base[next], connection_mask):
 			continue
 		_polygon(root, PackedVector2Array([top[edge], top[next], base[next], base[edge]]),
-			Color("aaa792") if base[next].y > base[edge].y else Color("7f8372"), true)
-	_polygon(root, top, Color("b6b29b"))
+			_prop_tint("wall_lit_side", Color("aaa792")) if base[next].y > base[edge].y else _prop_tint("wall_dark_side", Color("7f8372")), true)
+	_polygon(root, top, _prop_tint("wall_top", Color("b6b29b")))
 	for edge: int in base.size():
 		var next: int = (edge + 1) % base.size()
 		if not _is_join_edge(base[edge], base[next], connection_mask):
-			_line(root, PackedVector2Array([top[edge], top[next]]), Color("777e6738"), 0.45)
+			var lit_edge: bool = top[next].x > top[edge].x and top[next].y < top[edge].y
+			var edge_tint: Color = _prop_tint("wall_lit_edge", Color("777e6738")) if lit_edge else _prop_tint("wall_other_edge", Color("777e6738"))
+			_line(root, PackedVector2Array([top[edge], top[next]]), edge_tint, 0.45)
 	_actor_layer.add_child(root)
 	_props.append({"node": root, "wind": false, "bounds": Rect2(-34, -height - 17, 68, height + 34)})
 
@@ -743,14 +754,14 @@ func _add_pillar(cell: Vector2i) -> void:
 	root.position = point(cell.x, cell.y)
 	var foot := PackedVector2Array([Vector2(0, -9), Vector2(16, -2), Vector2(16, 3), Vector2(0, 11), Vector2(-16, 3), Vector2(-16, -2)])
 	var shaft := PackedVector2Array([Vector2(0, -6), Vector2(10, -1), Vector2(10, 2), Vector2(0, 7), Vector2(-10, 2), Vector2(-10, -1)])
-	_polygon(root, foot, Color("777d69"))
+	_polygon(root, foot, _prop_tint("pillar_foot", Color("777d69")))
 	var top: PackedVector2Array = shaft.duplicate()
 	for i: int in top.size():
 		top[i].y -= 38.0 + sin(float(i) * 1.5 + float(cell.x)) * 2.0
 	for edge: int in range(2, 5):
 		var next: int = (edge + 1) % shaft.size()
-		_polygon(root, PackedVector2Array([top[edge], top[next], shaft[next], shaft[edge]]), Color("a5a691") if edge < 3 else Color("7a806e"), true)
-	_polygon(root, top, Color("c0bca6"))
+		_polygon(root, PackedVector2Array([top[edge], top[next], shaft[next], shaft[edge]]), _prop_tint("pillar_lit_side", Color("a5a691")) if edge < 3 else _prop_tint("pillar_dark_side", Color("7a806e")), true)
+	_polygon(root, top, _prop_tint("pillar_top", Color("c0bca6")))
 	_actor_layer.add_child(root)
 	_props.append({"node": root, "wind": false, "bounds": Rect2(-18, -48, 36, 61)})
 
