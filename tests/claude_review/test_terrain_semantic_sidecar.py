@@ -349,6 +349,221 @@ class TerrainSemanticSidecarTests(unittest.TestCase):
         self.assertIn("side_l", rows[0])
         self.assertIn("paving_l", rows[0])
 
+    def test_measurement_version_defaults_and_explicit_v1_keep_frozen_results(self):
+        manifest, images, pair, coverage, instances, blocked = _wall_fixture()
+        self.assertEqual(
+            sidecar.measure_t2_instances(manifest, images, pair, coverage, instances, blocked),
+            sidecar.measure_t2_instances(manifest, images, pair, coverage, instances, blocked,
+                                         measurement_version="v1"),
+        )
+        manifest, tree_manifest, images, pair, coverage, instances, blocked = _tree_fixture()
+        self.assertEqual(
+            sidecar.measure_t3_trees(manifest, tree_manifest, images, pair, coverage,
+                                     instances, blocked),
+            sidecar.measure_t3_trees(manifest, tree_manifest, images, pair, coverage,
+                                     instances, blocked, measurement_version="v1"),
+        )
+
+    def test_v2_t2_uses_non_water_surface_classes_and_reports_each_instance_reference(self):
+        manifest, images, pair, coverage, instances, blocked = _wall_fixture()
+        manifest["instances"] = [{"stable_id": "wall-a", "type": "wall", "cell": [3, 1]}]
+        forest = (40, 160, 70)
+        water = (0, 0, 128)
+        images["ground_types"][..., :3] = water
+        manifest["masks"]["ground_types"]["classes"] = {
+            "forest": {"color": "#28a046", "semantic": "forest"},
+            "deep_water": {"color": "#000080", "semantic": "deep_water"},
+            "wall_tile": {"color": "#654321", "semantic": "wall"},
+        }
+        token = instances[0]["token"]
+        own = ((pair[..., 0].astype(np.uint32) << 16)
+               | (pair[..., 1].astype(np.uint32) << 8)
+               | pair[..., 2]) == token
+        own &= coverage[..., 0] > 127
+        ring = sidecar.metrics.morph(own, 4) & ~own
+        eligible = ring & (coverage[..., 3] == 0) & ~blocked
+        positions = np.argwhere(eligible)[:31]
+        self.assertEqual(len(positions), 31)
+        for y, x in positions:
+            images["ground_types"][y, x, :3] = forest
+        remaining = np.argwhere(eligible)
+        for y, x in remaining[31:35]:
+            images["ground_types"][y, x, :3] = (101, 67, 33)
+
+        row = sidecar.measure_t2_instances(
+            manifest, images, pair, coverage, instances, blocked, measurement_version="v2",
+        )["wall"][0]
+        self.assertEqual(row["reference_surface_pixels"], 35)
+        self.assertEqual(row["reference_surface_categories"], [
+            {"name": "forest", "semantic": "forest", "pixels": 31},
+            {"name": "wall_tile", "semantic": "wall", "pixels": 4},
+        ])
+        self.assertGreater(row["water_pixels_excluded_from_reference"], 0)
+        self.assertNotIn("deep_water", [item["name"] for item in row["reference_surface_categories"]])
+        self.assertNotIn("paving_pixels", row)
+        self.assertNotIn("paving_l", row)
+
+    def test_v2_wall_reference_uses_connected_group_union_outer_ring(self):
+        manifest, images, pair, coverage, instances, blocked = _wall_fixture()
+        first = instances[0]
+        second_token = 0x345678
+        second_rgb = sidecar.token_to_rgb(second_token)
+        second = {"stable_id": "wall-b", "token": second_token,
+                  "token_rgb": list(second_rgb), "type": "wall"}
+        top_b, side_b = np.s_[20:30, 38:46], np.s_[20:30, 46:56]
+        pair[top_b][..., :3] = second_rgb
+        pair[top_b][..., 3] = sidecar.PART_CODES["wall_top"]
+        pair[side_b][..., :3] = second_rgb
+        pair[side_b][..., 3] = sidecar.PART_CODES["wall_side"]
+        coverage[top_b][..., 0] = 242
+        coverage[side_b][..., 0] = 245
+        coverage[top_b][..., 3] = 255
+        coverage[side_b][..., 3] = 255
+        images["main"][top_b] = (220, 220, 220, 255)
+        images["main"][side_b] = (70, 70, 70, 255)
+        manifest["instances"] = [
+            {"stable_id": "wall-a", "type": "wall", "cell": [3, 1]},
+            {"stable_id": "wall-b", "type": "wall", "cell": [4, 1]},
+        ]
+        blocked[20:30, 37:39] = True
+        rows = sidecar.measure_t2_instances(
+            manifest, images, pair, coverage, [first, second], blocked,
+            measurement_version="v2",
+        )["wall"]
+        self.assertEqual(len(rows), 2)
+        expected_group = {
+            "group_id": "wall-group-01",
+            "members": ["wall-a", "wall-b"],
+            "member_cells_xy": {"wall-a": [3, 1], "wall-b": [4, 1]},
+            "member_visible_mask_pixels": {"wall-a": 180, "wall-b": 180},
+            "member_measurement_mask_pixels": {"wall-a": 170, "wall-b": 170},
+            "connectivity": rows[0]["measurement_group"]["connectivity"],
+            "status": "PASS",
+            "reason": None,
+        }
+        self.assertEqual(rows[0]["measurement_group"], expected_group)
+        self.assertEqual(rows[1]["measurement_group"], expected_group)
+
+        token_image = ((pair[..., 0].astype(np.uint32) << 16)
+                       | (pair[..., 1].astype(np.uint32) << 8) | pair[..., 2])
+        visible = coverage[..., 0] > 127
+        union = (((token_image == first["token"]) | (token_image == second_token))
+                 & visible & ~blocked)
+        reference_ring = sidecar.metrics.morph(union, 4) & ~union
+        paving = sidecar._exact_palette_mask(images["ground_types"], (120, 120, 120))
+        expected_pixels = int((reference_ring & paving & (coverage[..., 3] == 0) & ~blocked).sum())
+        self.assertEqual(rows[0]["reference_surface_pixels"], expected_pixels)
+        self.assertEqual(rows[1]["reference_surface_pixels"], expected_pixels)
+        single_ring = sidecar.metrics.morph(
+            (token_image == first["token"]) & visible & ~blocked, 4,
+        ) & ~((token_image == first["token"]) & visible & ~blocked)
+        single_pixels = int((single_ring & paving & (coverage[..., 3] == 0) & ~blocked).sum())
+        self.assertNotEqual(expected_pixels, single_pixels)
+
+    def test_captured_wall_groups_require_cell_and_mask_contact_without_radius_expansion(self):
+        height = width = 32
+        pair = _rgba(height, width)
+        coverage = _rgba(height, width)
+        records = []
+        capture_instances = []
+        for stable_id, token, cell, region in (
+            ("wall-a", 1, [0, 0], np.s_[2:6, 2:6]),
+            ("wall-b", 2, [0, 1], np.s_[2:6, 6:10]),
+            ("wall-c", 3, [0, 2], np.s_[20:24, 20:24]),
+        ):
+            rgb = sidecar.token_to_rgb(token)
+            pair[region][..., :3] = rgb
+            pair[region][..., 3] = sidecar.PART_CODES["wall_top"]
+            coverage[region][..., 0] = 255
+            coverage[region][..., 3] = 255
+            records.append({"stable_id": stable_id, "token": token,
+                            "token_rgb": list(rgb), "type": "wall"})
+            capture_instances.append({"stable_id": stable_id, "type": "wall", "cell": cell})
+        groups = sidecar._captured_connected_groups(
+            {"instances": capture_instances}, records, pair, coverage, kind="wall",
+        )
+        self.assertEqual(groups["wall-a"]["measurement_group"]["members"], ["wall-a", "wall-b"])
+        self.assertEqual(groups["wall-b"]["measurement_group"]["group_id"], "wall-group-01")
+        self.assertEqual(groups["wall-c"]["measurement_group"]["members"], ["wall-c"])
+        self.assertEqual(groups["wall-c"]["measurement_group"]["group_id"], "wall-group-02")
+
+    def test_v2_tree_clump_shares_grass_ring_but_keeps_each_crown_metric(self):
+        manifest, tree_manifest, images, pair, coverage, instances, blocked = _tree_fixture()
+        first = instances[0]
+        second_token = 0x123321
+        second_rgb = sidecar.token_to_rgb(second_token)
+        second = {"stable_id": "tree-b", "token": second_token,
+                  "token_rgb": list(second_rgb), "type": "tree"}
+        second_crown, second_dark = np.s_[20:40, 40:60], np.s_[20:40, 50:60]
+        pair[second_crown][..., :3] = second_rgb
+        pair[second_crown][..., 3] = sidecar.PART_CODES["tree_crown"]
+        pair[second_dark][..., 3] = sidecar.PART_CODES["tree_dark_side"]
+        coverage[second_crown][..., 0] = 242
+        coverage[second_dark][..., 0] = 245
+        coverage[second_crown][..., 3] = 255
+        coverage[second_dark][..., 3] = 255
+        images["main"][second_crown] = (80, 150, 40, 255)
+        images["tree_crown_union"][second_crown] = (255, 255, 255, 255)
+        manifest["instances"] = [
+            {"stable_id": "tree-a", "type": "tree", "cell": [0, 0]},
+            {"stable_id": "tree-b", "type": "tree", "cell": [0, 1]},
+        ]
+        instances[0]["stable_id"] = "tree-a"
+        instances.append(second)
+        rows = sidecar.measure_t3_trees(
+            manifest, tree_manifest, images, pair, coverage, instances, blocked,
+            measurement_version="v2",
+        )
+        self.assertEqual(len(rows), 2)
+        group = rows[0]["T3"]["measurement_group"]
+        self.assertEqual(group["members"], ["tree-a", "tree-b"])
+        self.assertEqual(rows[1]["T3"]["measurement_group"], group)
+        self.assertEqual(rows[0]["T3"]["crown_pixels"], 400)
+        self.assertEqual(rows[1]["T3"]["crown_pixels"], 400)
+        self.assertEqual(rows[0]["T3"]["outer_grass_pixels"],
+                         rows[1]["T3"]["outer_grass_pixels"])
+        self.assertNotEqual(rows[0]["T3"]["delta_l"], rows[1]["T3"]["delta_l"])
+        self.assertEqual(rows[0]["T3"]["status"] in ("PASS", "FAIL"), True)
+        self.assertEqual(rows[1]["T3"]["status"] in ("PASS", "FAIL"), True)
+
+    def test_v2_pillar_side_uses_only_code_four(self):
+        height = width = 64
+        token = 0x234567
+        rgb = sidecar.token_to_rgb(token)
+        pair = _rgba(height, width)
+        coverage = _rgba(height, width)
+        top, side, base = np.s_[20:28, 20:30], np.s_[28:38, 20:30], np.s_[38:42, 20:30]
+        for region, code in ((top, sidecar.PART_CODES["pillar_top"]),
+                             (side, sidecar.PART_CODES["pillar_side"]),
+                             (base, sidecar.PART_CODES["pillar_base"])):
+            pair[region][..., :3] = rgb
+            pair[region][..., 3] = code
+            coverage[region][..., 0] = 245
+            coverage[region][..., 3] = 255
+        main = _rgba(height, width, (125, 125, 125), 255)
+        main[top] = (220, 220, 220, 255)
+        main[side] = (70, 70, 70, 255)
+        main[base] = (90, 90, 90, 255)
+        ground = _rgba(height, width, (120, 120, 120), 255)
+        images = {"main": main, "ground_types": ground}
+        manifest = {"instances": [{"stable_id": "pillar-a", "type": "pillar", "cell": [1, 4]}],
+                    "masks": {"ground_types": {"classes": {
+                        "paving": {"color": "#787878", "semantic": "paving"},
+                        "grass": {"color": "#28a028", "semantic": "grass"},
+                    }}}}
+        instances = [{"stable_id": "pillar-a", "token": token, "token_rgb": list(rgb),
+                      "type": "pillar"}]
+        blocked = np.zeros((height, width), dtype=bool)
+        v1_row = sidecar.measure_t2_instances(
+            manifest, images, pair, coverage, instances, blocked,
+        )["pillar"][0]
+        v2_row = sidecar.measure_t2_instances(
+            manifest, images, pair, coverage, instances, blocked, measurement_version="v2",
+        )["pillar"][0]
+        self.assertEqual(v1_row["side_pixels"], 140)
+        self.assertEqual(v2_row["side_pixels"], 100)
+        self.assertEqual(v2_row["side_part_codes"], [sidecar.PART_CODES["pillar_side"]])
+
     def test_tree_t3_includes_dark_side_in_crown_and_calls_both_frozen_metrics(self):
         manifest, sidecar_manifest, images, pair, coverage, instances, blocked = _tree_fixture()
         rows = sidecar.measure_t3_trees(manifest, sidecar_manifest, images, pair,
@@ -535,6 +750,24 @@ class TerrainSemanticSidecarTests(unittest.TestCase):
                          "ESTABLISHED")
         self.assertEqual(sidecar._negative_control(rows, batch_ready=False)["status"], "NOT_TESTED")
 
+    def test_v2_negative_control_uses_reference_surface_fields_without_paving_aliases(self):
+        v2_row = {
+            "status": "FAIL", "top_pixels": 8, "side_pixels": 9,
+            "reference_surface_pixels": 10,
+            "top_l": 30.0, "side_l": 29.0, "reference_surface_l": 25.0,
+        }
+        report = sidecar._negative_control(
+            [v2_row], batch_ready=True, measurement_version="v2",
+        )
+        self.assertEqual(report["status"], "ESTABLISHED")
+        self.assertEqual(report["measured_failures"], 1)
+        self.assertEqual(sidecar._negative_control_metric(v2_row, "v1"), ("NOT_TESTED", False))
+        incomplete = dict(v2_row)
+        incomplete.pop("reference_surface_pixels")
+        self.assertEqual(sidecar._negative_control(
+            [incomplete], batch_ready=True, measurement_version="v2",
+        )["status"], "NOT_TESTED")
+
     def test_nonzero_draw_alpha_can_quantize_to_zero_without_becoming_a_sample(self):
         pair = _rgba(1, 1, (0, 0, 1), sidecar.PART_CODES["wall_top"])
         coverage = _rgba(1, 1, (0, 0, 0), 255)
@@ -711,6 +944,19 @@ class TerrainSemanticSidecarTests(unittest.TestCase):
         self.assertEqual(gate["negative_controls"]["old_wall_T2"]["status"], "ESTABLISHED")
         self.assertEqual(gate["negative_controls"]["old_tree_complete_T3"]["status"], "ESTABLISHED")
         self.assertEqual(gate["negative_controls"]["old_wall_T2"]["rows_with_numeric_metric_evidence"], 1)
+        self.assertEqual(gate["material_gate"], "OPEN_FOR_MATERIAL_ITERATION_REVIEW")
+
+    def test_v2_pilot_gate_uses_reference_surface_metric_names(self):
+        wall = {
+            "status": "FAIL", "top_pixels": 8, "side_pixels": 9,
+            "reference_surface_pixels": 10,
+            "top_l": 30.0, "side_l": 29.0, "reference_surface_l": 25.0,
+        }
+        pilot = self._case_result(10, (1280, 720), wall=[wall], trees=[self._tree_metric()])
+        pilot["measurement_version"] = "v2"
+        gate = sidecar._pilot_gate(pilot)
+        self.assertEqual(gate["negative_controls"]["old_wall_T2"]["status"], "ESTABLISHED")
+        self.assertEqual(gate["negative_controls"]["old_wall_T2"]["measured_failures"], 1)
         self.assertEqual(gate["material_gate"], "OPEN_FOR_MATERIAL_ITERATION_REVIEW")
 
     def test_pilot_prerequisites_pass_with_invalid_or_missing_failures_continues_closed(self):
