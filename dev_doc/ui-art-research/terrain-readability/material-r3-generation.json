@@ -1,0 +1,70 @@
+{
+  "schema": "sot-material-generation/1",
+  "status": "candidate_pending_native_measurement",
+  "tool": "image_gen.imagegen",
+  "reference": {
+    "role": "edit_target",
+    "file": "assets/prototype/battlefield_courtyard/forest-tree-v2.png",
+    "bytes": 1733266,
+    "sha256": "0db7cb1e145af28443d6eed31ad38c84cdcf48cd6d8cff4b2ded224a44799203"
+  },
+  "prompt": "Edit this existing Ship of Theseus isometric tactical-game tree sprite as a tightly controlled material revision, not a redesign. Keep the exact tree, branch arrangement, leaf-clump placement, rooted trunk, outer silhouette, atlas position and margins, canvas aspect ratio, scale and left-upper light direction. Preserve transparent background and fine alpha boundaries; do not add a background, halo, ground plane, objects or cast-shadow plate. This sprite is shown only about 60 pixels tall over dark mottled olive-brown ground. Its leaves currently disappear into that ground. Change ONLY foliage colour and tonal structure: lift dark and medium foliage tones to a readable restrained warm olive/sage green, compress existing leaf highlights so no white/yellow clipping or sparkling bright leaf tips occur, make foliage read as softly lit grouped volumes instead of salt-and-pepper noise. Retain shaded foliage on the lower/right undersides and dark gaps between clumps, keep detailed but subdued texture. Keep trunk, branches and roots their original dark muted brown, clearly distinct from leaves; do not brighten bark or add outlines everywhere. Aim for a modest foliage-to-ground luminance difference, not glowing bright green or saturated yellow. Do not introduce hard colour blocks. Output ONLY one revised standalone sprite in the original composition, transparent PNG. This is a production candidate to compare with the frozen original; exact geometry preservation is critical.",
+  "requested_transparent_background": true,
+  "output": {
+    "file": "assets/prototype/battlefield_courtyard/forest-tree-v3.png",
+    "bytes": 1734825,
+    "sha256": "616f54a6816f026d0154c390460ea4b90fdf3ddcbc8b782dcf295feffbf0be52",
+    "dimensions": [
+      1536,
+      1024
+    ],
+    "rgba_alpha_range": [
+      0,
+      254
+    ],
+    "nonzero_alpha_pixels": 474253
+  },
+  "processing": [
+    "内置imagegen以现有v2为编辑目标生成",
+    "生成PNG按原字节复制至任务工作树；未进行其他位图处理"
+  ],
+  "comparison": {
+    "alpha_equal": false,
+    "changed_alpha_pixels": 444887,
+    "qualification": "生成结果改变透明边缘，不能沿用旧源码摘要或假设几何分类无须复核"
+  },
+  "integration": {
+    "active": true,
+    "proposed_atlas_region": [
+      286,
+      33,
+      964,
+      950
+    ],
+    "proposed_display_size": [
+      66,
+      65.04
+    ],
+    "proposed_foot_offset": [
+      37.5,
+      61.5
+    ],
+    "filter": "NEAREST at Sprite2D parent CourtyardProp; inherited as existing source",
+    "requirements": [
+      "新图独立视觉及分类审查",
+      "需要时调整源图几何分类并绑定新摘要",
+      "使用当前冻结v3和Atlas采集器进行Dot原图复测"
+    ],
+    "material_changes": "仅替换tree.texture；保留既有tree/environment_tree着色系数、尺寸、Atlas区域、锚点及其他profile值。"
+  },
+  "basis": {
+    "result_task": "TASK98",
+    "head": "f047ce757051f366678a74f2739f9d94399d9a61",
+    "trees": {
+      "PASS": 1,
+      "FAIL": 11,
+      "NOT_TESTED": 0
+    },
+    "direction": "保持墙柱通过的明暗结构，修正树叶中间调与高光，避免统一增益导致亮树过冲"
+  }
+}

@@ -1,7 +1,7 @@
 {
   "schema_version": "terrain-readability-regions/1",
-  "texture_path": "res://assets/prototype/battlefield_courtyard/forest-tree-v2.png",
-  "texture_sha256": "0db7cb1e145af28443d6eed31ad38c84cdcf48cd6d8cff4b2ded224a44799203",
+  "texture_path": "res://assets/prototype/battlefield_courtyard/forest-tree-v3.png",
+  "texture_sha256": "616f54a6816f026d0154c390460ea4b90fdf3ddcbc8b782dcf295feffbf0be52",
   "atlas_region": [
     286,
     33,
@@ -9,7 +9,7 @@
     950
   ],
   "coordinate_space": "atlas_region_local_pixels",
-  "annotation_method": "原图目视圈定树冠各簇的包络，包含冠内细枝，排除主干与树根；与原纹理 alpha 相交。不按亮度或颜色阈值选择像素。",
+  "annotation_method": "在forest-tree-v3.png的原始1536x1024图上逐簇目视核对既有冠区包络；坐标为AtlasTexture区域局部像素，含冠内细枝、排除主干与树根，并与v3实际alpha相交。不按颜色、亮度或测量结果挑选像素。与v2并排复核后，C1-C7顶点均仍贴合可见簇边/冠内枝条，未发现需要移动顶点的明确空间错位，因此只更新源绑定，不改几何。",
   "review_status": "approved",
   "regions": {
     "crown": [
@@ -496,12 +496,123 @@
     "outline": []
   },
   "classification_notes": {
-    "crown": "仅几何分类经独立原图叠加审查通过；不代表引擎投影、实际像素对齐或美术验收。",
-    "dark_side": "没有作者定义的暗侧分区；空数组表示未提供，不代表已通过。",
-    "outline": "当前生产节点没有独立添加描边；位图内轮廓语义未经核实，空数组不能据此声称图内无描边。"
+    "crown": "作者已对v3原图复核C1-C7：叶簇位置和总体边界与既有包络一致，顶点坐标保留。alpha确有变化，故这组新绑定几何仍须独立原图叠加审查；不代表引擎投影、像素对齐或美术验收。",
+    "dark_side": "暗侧按上左受光下叶簇下缘/侧面语义分类，见树木语义作者标注D1-D9。单独空数组或本作者文字均不构成独立批准。",
+    "outline": "此轮只记录展平PNG内可见轮廓语义；没有将枝干纹理暗边当作冠区边界。图内是否存在独立连续描边仍待新图独立审查。"
   },
   "approved_scope": [
     "crown_geometry"
   ],
-  "review_basis": "2026-10-08 独立 reviewer 对绑定原图及 C1–C7 叠加图核查：crown_geometry PASS；暗侧、描边和完整 T3 未批准。"
+  "review_basis": "作者基于v3原图及v3 crown overlay逐区重核C1-C7；坐标无变化是因为本轮直接观察未发现边界错位。此文件为待独立审查的作者输入，不批准任何运行或测量结果。",
+  "author_region_notes": [
+    {
+      "id": "C1",
+      "decision": "retained",
+      "basis": "上部与左/中部主冠簇；v3顶部叶簇和向右下延展处仍落在原包络内，边界未见需要挪点的空间偏差。"
+    },
+    {
+      "id": "C2",
+      "decision": "retained",
+      "basis": "左侧下方的大叶簇；最左与下缘的叶片轮廓仍由原包络跟随，枝干分叉留在簇内，主干和根系在包络之外。"
+    },
+    {
+      "id": "C3",
+      "decision": "retained",
+      "basis": "主冠右侧中部叶簇；上左至下右的外缘仍由原多边形覆盖，内侧与C1之间的枝叶空隙保持分开。"
+    },
+    {
+      "id": "C4",
+      "decision": "retained",
+      "basis": "右上方独立小叶簇；原多边形仍围住该簇和冠内短枝，没有扩到相邻C5。"
+    },
+    {
+      "id": "C5",
+      "decision": "retained",
+      "basis": "右下方较大的下垂叶簇；右缘和底缘与v3叶片外形相符，簇内枝条属于冠内细枝，主干与树根仍排除。"
+    },
+    {
+      "id": "C6",
+      "decision": "retained",
+      "basis": "主干右上方的小型内侧叶簇；原包络仍对应该独立叶团，与C3、C5之间的裸枝/空隙没有合并。"
+    },
+    {
+      "id": "C7",
+      "decision": "retained",
+      "basis": "C1与C3之间的冠内裸枝走向仍在原细长包络内；它只属于几何冠区中的枝条，不作为叶簇或暗侧叶面。"
+    }
+  ],
+  "source_comparison": {
+    "reference_texture_path": "res://assets/prototype/battlefield_courtyard/forest-tree-v2.png",
+    "reference_texture_sha256": "0db7cb1e145af28443d6eed31ad38c84cdcf48cd6d8cff4b2ded224a44799203",
+    "changed_alpha_pixels": 444887,
+    "decision": "两图整体构图与冠簇位置一致，但不声称alpha保留；v3绑定新纹理摘要。"
+  },
+  "independent_review": {
+    "reviewer_role": "independent reviewer",
+    "reviewed_at": "2026-10-13",
+    "verdict": "PASS",
+    "approved_scope": [
+      "crown_geometry"
+    ],
+    "source_texture": {
+      "path": "assets/prototype/battlefield_courtyard/forest-tree-v3.png",
+      "sha256": "616f54a6816f026d0154c390460ea4b90fdf3ddcbc8b782dcf295feffbf0be52"
+    },
+    "evidence_files": [
+      {
+        "item": "v3_original",
+        "path": "assets/prototype/battlefield_courtyard/forest-tree-v3.png",
+        "bytes": 1734825,
+        "sha256": "616f54a6816f026d0154c390460ea4b90fdf3ddcbc8b782dcf295feffbf0be52"
+      },
+      {
+        "item": "crown_overlay",
+        "path": "<仓库外证据根>/tree-r3-review-crown-overlay.png",
+        "bytes": 1044489,
+        "sha256": "1952311eab137723205af00069fc4aa7d1693e09428c6b2c10aa4325432e70b8"
+      }
+    ],
+    "criteria_results": [
+      {
+        "id": "C1",
+        "verdict": "PASS",
+        "observation": "上部及左/中部主冠叶簇边界与v3叶片外缘相符；冠内枝条保留在冠区，主干不在多边形内。"
+      },
+      {
+        "id": "C2",
+        "verdict": "PASS",
+        "observation": "左下大型叶簇包络覆盖可见簇边和冠内分枝；主干与树根位于多边形外。"
+      },
+      {
+        "id": "C3",
+        "verdict": "PASS",
+        "observation": "右侧中部叶簇边界跟随叶片；与C1及C5之间的枝叶空隙保持分开。"
+      },
+      {
+        "id": "C4",
+        "verdict": "PASS",
+        "observation": "右上独立小叶簇由单独包络覆盖，没有并入C5。"
+      },
+      {
+        "id": "C5",
+        "verdict": "PASS",
+        "observation": "右下下垂叶簇的外缘由包络跟随；簇内短枝在冠内，主干和根部仍在外。"
+      },
+      {
+        "id": "C6",
+        "verdict": "PASS",
+        "observation": "主干右侧小型内侧叶簇单独落在包络中，与周围裸枝及空隙分开。"
+      },
+      {
+        "id": "C7",
+        "verdict": "PASS",
+        "observation": "C1与C3间细长包络覆盖冠内裸枝；它仅是冠几何中的细枝，不认作叶簇或叶片暗面。"
+      }
+    ],
+    "method": "直接查看v3原始RGBA与C1-C7原尺寸叠加；逐簇核对现有顶点，检查冠内细枝及主干/根部排除情况。不按亮度或颜色阈值判断。",
+    "limitations": [
+      "批准仅涵盖展平PNG上的crown_geometry分类。",
+      "不代表Godot投影、Dot原生测量或最终美术批准。"
+    ]
+  }
 }

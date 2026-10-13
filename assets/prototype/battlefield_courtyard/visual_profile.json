@@ -70,7 +70,7 @@
   "backdrop_color": "13171dff",
   "meadow": "res://assets/prototype/battlefield_courtyard/meadow-ground-v2.png",
   "tree": {
-    "texture": "res://assets/prototype/battlefield_courtyard/forest-tree-v2.png",
+    "texture": "res://assets/prototype/battlefield_courtyard/forest-tree-v3.png",
     "region": [
       286,
       33,

@@ -1,9 +1,9 @@
 {
   "schema_version": "terrain-readability-tree-semantics-review/1",
   "verdict": "PASS",
-  "annotation_sha256": "b252ab5cb0978bd0bb8e8cf79a48d1fd7641231d8bcd77ca4e83b5a32c8b6f1a",
-  "texture_sha256": "0db7cb1e145af28443d6eed31ad38c84cdcf48cd6d8cff4b2ded224a44799203",
-  "base_crown_annotation_sha256": "915256344f2674c8ade4fbd6dab47f182d7859453f8cc3b6022cdcc3eab26a27",
+  "annotation_sha256": "19629f720a67c42cdd18d8ab69b388e9e696ec58e3676321820f5912015281a3",
+  "texture_sha256": "616f54a6816f026d0154c390460ea4b90fdf3ddcbc8b782dcf295feffbf0be52",
+  "base_crown_annotation_sha256": "d344c1a5c5e0560295588341e0cddf35a3c1840bd64772a45da146824dd7668c",
   "approved_scope": [
     "dark_side_geometry",
     "outline_absence"
@@ -12,73 +12,127 @@
     {
       "criterion": "dark_side_geometry",
       "verdict": "PASS",
-      "evidence": "重看原始RGBA及两张原尺寸叠加图，9个D1-D9区域均落在C1-C6叶簇的背光下缘或侧面，跟随叶簇形状，未把C7裸枝标为叶簇。候选输入仅将 base_crown_annotation_sha256 从旧值更正为冻结树冠实际摘要；当前JSON与HEAD作者输入逐字段比较后仅此字段不同，review_status 仍为 pending_author_review。冻结树冠 HEAD Git blob 与工作树文件逐字节相同：7140 bytes，SHA256 915256344f2674c8ade4fbd6dab47f182d7859453f8cc3b6022cdcc3eab26a27（Git blob SHA-1 c5d029f4d3eb031da73d6130e2759354ba63b5fc）。纹理摘要与原图和叠加图输入保持既有绑定。见 terrain_readability_tree_semantics.json:13,15,19-402；source-manifest.json:114-117。"
+      "evidence": "v3原图、C1-C7叠加、D1-D9暗侧叠加及局部v2/v3放大对照：D1-D9分别落在C1-C6叶簇的下缘或侧面阴影叶面，边界跟随成片叶面。区域内保留了纹理自然起伏，没有按亮度筛掉局部亮叶点；C7裸枝、主干和树根没有被标成叶片暗侧。九个闭合多边形均对应可见叶片区域。"
     },
     {
       "criterion": "outline_absence",
       "verdict": "PASS",
-      "evidence": "重看原始RGBA与原图区域叠加。可见局部深色叶缘和枝干暗边，但边缘宽度、连续性与位置随叶片重叠和受光面变化；没有围绕叶簇或整冠形成独立、连续、均匀的描边带。暗叶缘与内部叶片阴影相连，枝干边缘随体积纹理转折。生成提示中的“clean silhouette with no strong painted outline”与可见像素相符。批准限于展平原PNG中的可见语义分类，不追溯生成模型意图或源图层。见 terrain_readability_tree_semantics.json:403,416-426；source-manifest.json:114-117。"
+      "evidence": "v3原PNG及叠加图可见叶缘、叶簇间隙和枝干局部暗边；其宽度与走向随叶片重叠和枝干体积变化，没有围绕叶簇或整冠独立连续、均匀的强描边带。空outline数组与可见图像相符，批准的是这项狭义缺席分类。"
     }
   ],
   "image_evidence": [
     {
-      "item": "forest-tree-v2 原始 RGBA",
-      "observation": "1536x1024原图呈现上左较亮的叶簇面与向下、向右的局部暗面。各叶簇的暗部呈斑驳、不连续的叶片重叠阴影；主干与枝条的暗边随木质纹理和形体转折，不形成独立平行轮廓线。"
+      "item": "forest-tree-v3.png原始RGBA",
+      "observation": "新图中叶面整体色相变绿、明暗层次有变化；叶簇位置和总体构图与v2对应。主干、分枝与根系保持为木质区域。透明边缘可见低alpha柔和过渡。"
     },
     {
-      "item": "t3-region-original-overlay",
-      "observation": "964x950原尺寸叠加显示既有C1-C7树冠包络；树冠边界与原图叶簇轮廓相符，C7标为冠内裸枝。"
+      "item": "tree-r3-review-crown-overlay.png",
+      "observation": "C1-C6分别沿着六个可见叶簇，C7沿C1与C3之间冠内裸枝。所有冠区均避开主干根部；枝条和叶簇间空隙按几何边界区分。"
     },
     {
-      "item": "t3-dark-side-authored-overlay",
-      "observation": "964x950原尺寸叠加显示D1-D9分布于C1-C6叶簇的背光下缘或侧面；未把枝条本身圈成暗侧叶面。"
+      "item": "tree-r3-review-dark-side-overlay.png",
+      "observation": "D1-D9位于各自叶簇的下缘或侧面；没有把C7裸枝、主干或树根圈作暗侧叶面。红色区域是语义区域覆盖显示，不是通过亮度阈值筛选的像素集。"
+    },
+    {
+      "item": "tree-r3-review-dark-side-zoom.png",
+      "observation": "九个区域的v2/v3并排局部图中，叶片暗侧关系在颜色改变后仍能辨认；所见的叶片纹理起伏不改变区域按叶面几何分类。"
+    },
+    {
+      "item": "forest-tree-v2.png参考原图",
+      "observation": "旧图也有低alpha柔边；与v3并看没有发现新增的外扩实质性光晕或连续描边。"
     }
   ],
+  "alpha_edge_comparison": {
+    "v2": {
+      "alpha_ge_4_pixels": 421983,
+      "alpha_ge_4_bbox_xyxy": [
+        291,
+        36,
+        1242,
+        981
+      ],
+      "outer_280px_max_alpha": 1,
+      "outer_280px_nonzero_count": 402
+    },
+    "v3": {
+      "alpha_ge_4_pixels": 416678,
+      "alpha_ge_4_bbox_xyxy": [
+        290,
+        36,
+        1244,
+        981
+      ],
+      "outer_280px_max_alpha": 1,
+      "outer_280px_nonzero_count": 565
+    },
+    "changed_alpha_pixels": 444887
+  },
   "limitations": [
-    "批准仅针对展平原PNG中可见的暗侧几何和没有独立连续强描边带这一视觉分类；不推断生成模型内部意图或源文件图层语义。",
-    "原PNG存在暗色叶缘像素及深色枝干边缘；批准不等同于声称图像中完全没有暗边像素。",
-    "作者输入仍为 pending_author_review；本报告不批准 T3 数值、云端像素、生产渲染节点、采集脚本或 Milestone。"
+    "仅批准新纹理绑定下的dark_side_geometry与outline_absence语义分类，不批准T3数值或色彩可读性阈值。",
+    "作者标注terrain_readability_tree_semantics.json的review_status保持pending_author_review。",
+    "新材质仍需Dot原生测量；本审查不构成最终美术批准、Godot运行验收或Milestone批准。"
   ],
   "reviewed_inputs": [
     {
       "path": "tests/claude_review/terrain_readability_tree_semantics.json",
-      "bytes": 7161,
-      "sha256": "b252ab5cb0978bd0bb8e8cf79a48d1fd7641231d8bcd77ca4e83b5a32c8b6f1a"
+      "bytes": 9519,
+      "sha256": "19629f720a67c42cdd18d8ab69b388e9e696ec58e3676321820f5912015281a3"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/forest-tree-v3.png",
+      "bytes": 1734825,
+      "sha256": "616f54a6816f026d0154c390460ea4b90fdf3ddcbc8b782dcf295feffbf0be52"
+    },
+    {
+      "path": "tests/claude_review/terrain_readability_crown_regions.json",
+      "bytes": 12075,
+      "sha256": "d344c1a5c5e0560295588341e0cddf35a3c1840bd64772a45da146824dd7668c"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/visual_profile.json",
+      "bytes": 2690,
+      "sha256": "9f0e9308577c78d0cd83d9523459f2d161b87f053270c2eec600907b0578e053"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/source-manifest.json",
+      "bytes": 30060,
+      "sha256": "994ed475c8e3c63382a2a93335085f07d650d0ac79cdc5540ce4e61406232015"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/material-r3-generation.json",
+      "bytes": 3584,
+      "sha256": "d3c96f43c420c33014a24867db843f4f498b1206a197d5ec0dd7e6c0c033e4d8"
+    },
+    {
+      "path": "<仓库外证据根>/tree-r3-review-crown-overlay.png",
+      "bytes": 1044489,
+      "sha256": "1952311eab137723205af00069fc4aa7d1693e09428c6b2c10aa4325432e70b8"
+    },
+    {
+      "path": "<仓库外证据根>/tree-r3-review-dark-side-overlay.png",
+      "bytes": 1055649,
+      "sha256": "581fc739e5218e84b64971d60916e21b55e12faca74dbe0ce7a8dbd646e22770"
+    },
+    {
+      "path": "<仓库外证据根>/tree-r3-review-dark-side-zoom.png",
+      "bytes": 390081,
+      "sha256": "fa74fd3f85dc861ee05eb15c9ebecaf1abc23dd4b53389c478fb8ddae2b2bd4b"
     },
     {
       "path": "assets/prototype/battlefield_courtyard/forest-tree-v2.png",
       "bytes": 1733266,
       "sha256": "0db7cb1e145af28443d6eed31ad38c84cdcf48cd6d8cff4b2ded224a44799203"
-    },
-    {
-      "path": "tests/claude_review/terrain_readability_crown_regions.json",
-      "bytes": 7140,
-      "sha256": "915256344f2674c8ade4fbd6dab47f182d7859453f8cc3b6022cdcc3eab26a27"
-    },
-    {
-      "path": "assets/prototype/battlefield_courtyard/source-manifest.json",
-      "bytes": 27844,
-      "sha256": "eaec06faf3c5013d6cdb8809178cefa0974edad42fc6ea3f8a4356bfe48c49b8"
-    },
-    {
-      "path": "<仓库外证据根>/t3-region-original-overlay.png",
-      "bytes": 788085,
-      "sha256": "005d110acec21e4faef556d07589ea746834de65ab9aa3c5bafd9789c000def6"
-    },
-    {
-      "path": "<仓库外证据根>/t3-dark-side-authored-overlay.png",
-      "bytes": 787574,
-      "sha256": "461c36be3e722f168890b7eceff93214a472d5ffdf00d9334eb2daa1beb865fc"
     }
   ],
-  "candidate_status": "pending_author_review",
-  "source_byte_verification": {
-    "path": "tests/claude_review/terrain_readability_crown_regions.json",
-    "git_revision": "HEAD",
-    "git_blob_sha1": "c5d029f4d3eb031da73d6130e2759354ba63b5fc",
-    "bytes": 7140,
-    "sha256": "915256344f2674c8ade4fbd6dab47f182d7859453f8cc3b6022cdcc3eab26a27",
-    "worktree_exact_blob_match": true,
-    "method": "Read HEAD Git blob bytes with git cat-file blob; compare directly to worktree bytes; independently SHA256 both byte arrays."
+  "candidate_status": "candidate_pending_native_measurement",
+  "review_context": {
+    "baseline_head": "f047ce757051f366678a74f2739f9d94399d9a61",
+    "prior_TASK98_tree_counts": {
+      "PASS": 1,
+      "FAIL": 11,
+      "NOT_TESTED": 0
+    },
+    "godot_run": "not_performed",
+    "dot_native_measurement": "pending"
   }
 }

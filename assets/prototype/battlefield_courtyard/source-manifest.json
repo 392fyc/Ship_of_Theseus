@@ -121,7 +121,7 @@
       ],
       "mode": "RGBA",
       "transparent_background": true,
-      "active": true,
+      "active": false,
       "usage": "森林主体与场外林带；使用 AtlasTexture，保留树干、树冠和根部；与单位按前后排序并遮挡淡化。"
     },
     {
@@ -211,6 +211,23 @@
       "usage": "山地、山峰和熔岩冷却表面的共用岩材；使用运行时地形混合，不把整体场景烘焙进图片。",
       "sha256": "aa7414ec6e3380e60a5b9e3b7d9383b21676a6a87015e2ebda2620b4dc73b5f6",
       "active": true
+    },
+    {
+      "path": "forest-tree-v3.png",
+      "source_file": "exec-2548a1c8-1f84-4cc8-9dfc-7316bbd96775.png",
+      "prompt": "Edit this existing Ship of Theseus isometric tactical-game tree sprite as a tightly controlled material revision, not a redesign. Keep the exact tree, branch arrangement, leaf-clump placement, rooted trunk, outer silhouette, atlas position and margins, canvas aspect ratio, scale and left-upper light direction. Preserve transparent background and fine alpha boundaries; do not add a background, halo, ground plane, objects or cast-shadow plate. This sprite is shown only about 60 pixels tall over dark mottled olive-brown ground. Its leaves currently disappear into that ground. Change ONLY foliage colour and tonal structure: lift dark and medium foliage tones to a readable restrained warm olive/sage green, compress existing leaf highlights so no white/yellow clipping or sparkling bright leaf tips occur, make foliage read as softly lit grouped volumes instead of salt-and-pepper noise. Retain shaded foliage on the lower/right undersides and dark gaps between clumps, keep detailed but subdued texture. Keep trunk, branches and roots their original dark muted brown, clearly distinct from leaves; do not brighten bark or add outlines everywhere. Aim for a modest foliage-to-ground luminance difference, not glowing bright green or saturated yellow. Do not introduce hard colour blocks. Output ONLY one revised standalone sprite in the original composition, transparent PNG. This is a production candidate to compare with the frozen original; exact geometry preservation is critical.",
+      "sha256": "616f54a6816f026d0154c390460ea4b90fdf3ddcbc8b782dcf295feffbf0be52",
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "transparent_background": true,
+      "active": true,
+      "usage": "第三轮树木可读性候选；叶片中间调提亮并控制高光，交由独立标注审查及Dot原生测量。",
+      "reference_edit_target": "forest-tree-v2.png",
+      "generation_record": "dev_doc/ui-art-research/terrain-readability/material-r3-generation.json",
+      "intake_status": "candidate_native_measurement_pending"
     }
   ],
   "rules_source": {

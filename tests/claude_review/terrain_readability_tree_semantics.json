@@ -1,7 +1,7 @@
 {
   "schema_version": "terrain-readability-tree-semantics/1",
-  "texture_path": "res://assets/prototype/battlefield_courtyard/forest-tree-v2.png",
-  "texture_sha256": "0db7cb1e145af28443d6eed31ad38c84cdcf48cd6d8cff4b2ded224a44799203",
+  "texture_path": "res://assets/prototype/battlefield_courtyard/forest-tree-v3.png",
+  "texture_sha256": "616f54a6816f026d0154c390460ea4b90fdf3ddcbc8b782dcf295feffbf0be52",
   "atlas_region": [
     286,
     33,
@@ -10,10 +10,10 @@
   ],
   "coordinate_space": "atlas_region_local_pixels",
   "base_crown_annotation_path": "res://tests/claude_review/terrain_readability_crown_regions.json",
-  "base_crown_annotation_sha256": "915256344f2674c8ade4fbd6dab47f182d7859453f8cc3b6022cdcc3eab26a27",
+  "base_crown_annotation_sha256": "d344c1a5c5e0560295588341e0cddf35a3c1840bd64772a45da146824dd7668c",
   "author": "Codex ui-ux 主代理；对现有展平素材作人工语义分类，不追溯生成模型的内部意图。",
   "review_status": "pending_author_review",
-  "annotation_method": "原图目视圈定上左光照下叶簇下方和右侧的阴影面；对应C1–C6叶簇的暗侧。与原纹理alpha及既有树冠分类相交。未按亮度、颜色或待测数值选像素；未改素材。C7为冠内裸枝，不添加假叶簇。",
+  "annotation_method": "在forest-tree-v3.png原始1536x1024图上按上左受光方向逐区核对C1-C6叶簇的下缘/侧面暗部。与v3实际alpha及新绑定的C1-C7几何相交；不按亮度、颜色阈值或待测数值选像素。与v2逐区对照后D1-D9仍贴合对应暗侧叶片区域，未发现需移动顶点的明确边界错位，因此保留多边形顶点；暗面亮度已经变化，不能据此推断T3达标。C7裸枝不标成叶片暗侧。",
   "light_direction": "upper_left",
   "regions": {
     "dark_side": [
@@ -415,13 +415,73 @@
   ],
   "outline_semantics": {
     "present": false,
-    "reason": "本次人工分类把可见叶缘暗像素归为叶片阴影和簇内纹理。原图没有独立、连续的一圈描边带；树枝与树干的暗边属于枝干体积阴影。生产路径也未添加独立描边节点或描边材质。空outline数组仅表示这项待独审的明确缺席声明，单独的空数组不构成批准。",
+    "reason": "作者在v3原图中可见深色叶缘和枝干阴影，但边缘随叶片重叠和枝干体积纹理变化，未见围绕叶簇或整冠连续、均匀的独立描边带。此为作者的展平图观察，仍待独立审查；空outline数组本身不代表通过。",
     "evidence": [
-      "assets/prototype/battlefield_courtyard/forest-tree-v2.png 原图叶缘与枝叶间隙",
-      "assets/prototype/battlefield_courtyard/source-manifest.json forest-tree-v2.png prompt: clean silhouette with no strong painted outline; Gentle upper-left illumination",
-      "scripts/ui/playground/courtyard_board_view.gd _add_tree 使用单个AtlasTexture Sprite2D"
+      "assets/prototype/battlefield_courtyard/forest-tree-v3.png 原图叶缘、叶簇间隙与枝干像素"
     ],
-    "limitation": "生成提示词只说明意图；独立审查须以原PNG及叠加图核对实际语义。若不能确认缺席，保留NOT_TESTED。"
+    "limitation": "生成提示词不作为像素语义证据；独立审查须绑定v3原PNG、本文件及新绑定的冠区文件，并明确批准dark_side_geometry与outline_absence。若不能确认缺席，保留NOT_TESTED。"
   },
-  "approval_rule": "只接受独立报告绑定本文件、原PNG和既有树冠标注的SHA256，并明确批准dark_side_geometry及outline_absence。当前文件不含任何已批准声明。"
+  "approval_rule": "只接受独立报告绑定本文件、forest-tree-v3.png原PNG和新绑定的树冠标注SHA256，并明确批准dark_side_geometry及outline_absence。当前文件不含任何已批准声明。",
+  "author_region_notes": [
+    {
+      "id": "D1",
+      "label": "C1右侧下垂叶簇",
+      "decision": "retained",
+      "basis": "C1中右侧下垂叶团的背光面；v3叶片变亮后仍可见叶片重叠的暗面，现有闭合边界仍跟随该叶团。"
+    },
+    {
+      "id": "D2",
+      "label": "C1下缘叶簇",
+      "decision": "retained",
+      "basis": "C1左下缘窄叶团；边界仍落在枝下方的叶片阴面，没有扩到C2或将裸枝当叶片。"
+    },
+    {
+      "id": "D3",
+      "label": "C2左下叶簇",
+      "decision": "retained",
+      "basis": "C2最左侧下垂叶团；v3同一叶团的下/右侧仍比其上左受光叶面暗，原多边形未跨出该局部簇。"
+    },
+    {
+      "id": "D4",
+      "label": "C2下缘叶簇",
+      "decision": "retained",
+      "basis": "C2下缘内侧叶团；v3叶片颜色转绿但簇的遮光面仍在原边界覆盖范围内，与主干分开。"
+    },
+    {
+      "id": "D5",
+      "label": "C3下缘叶簇",
+      "decision": "retained",
+      "basis": "C3中央偏右叶团的下缘；暗部沿叶片重叠面分布，未把相邻枝条空隙并入为叶面。"
+    },
+    {
+      "id": "D6",
+      "label": "C4右下叶簇",
+      "decision": "retained",
+      "basis": "C4孤立右上簇的右下侧；v3小簇轮廓与原边界对应，阴面仍在簇的下/右侧。"
+    },
+    {
+      "id": "D7",
+      "label": "C5右侧叶簇",
+      "decision": "retained",
+      "basis": "C5外侧下垂叶团右侧；新图仍显示较暗的叶片重叠面，边界没有包到主枝。"
+    },
+    {
+      "id": "D8",
+      "label": "C5下缘叶簇",
+      "decision": "retained",
+      "basis": "C5下缘叶团；原多边形仍顺着下垂叶片暗面，没有覆盖树根或冠外背景。"
+    },
+    {
+      "id": "D9",
+      "label": "C6下缘叶簇",
+      "decision": "retained",
+      "basis": "C6位于主干右侧的小叶团下缘；v3仍有局部遮光叶面，边界未向C7裸枝延伸。"
+    }
+  ],
+  "source_comparison": {
+    "reference_texture_path": "res://assets/prototype/battlefield_courtyard/forest-tree-v2.png",
+    "reference_texture_sha256": "0db7cb1e145af28443d6eed31ad38c84cdcf48cd6d8cff4b2ded224a44799203",
+    "changed_alpha_pixels": 444887,
+    "decision": "D1-D9的坐标经v3原图叠加及局部放大对照后保留；不得称alpha或阴影强度与v2相同。"
+  }
 }
