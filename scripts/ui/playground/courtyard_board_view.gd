@@ -743,7 +743,9 @@ func _add_wall_shape(cell: Vector2i) -> void:
 		if not _is_join_edge(base[edge], base[next], connection_mask):
 			var lit_edge: bool = top[next].x > top[edge].x and top[next].y < top[edge].y
 			var edge_tint: Color = _prop_tint("wall_lit_edge", Color("777e6738")) if lit_edge else _prop_tint("wall_other_edge", Color("777e6738"))
-			_line(root, PackedVector2Array([top[edge], top[next]]), edge_tint, 0.45)
+			var strokes: Dictionary = profile.get("prop_strokes", {})
+			var edge_width: float = float(strokes.get("wall_lit_edge" if lit_edge else "wall_other_edge", 0.45))
+			_line(root, PackedVector2Array([top[edge], top[next]]), edge_tint, edge_width)
 	_actor_layer.add_child(root)
 	_props.append({"node": root, "wind": false, "bounds": Rect2(-34, -height - 17, 68, height + 34)})
 
@@ -789,7 +791,9 @@ func _polygon(parent: Node2D, points: PackedVector2Array, tint: Color, wall_face
 		node.uv = PackedVector2Array([Vector2(u0, -(points[3].y - points[0].y) * 20.0),
 			Vector2(u1, -(points[2].y - points[1].y) * 20.0), Vector2(u1, 0), Vector2(u0, 0)])
 		node.texture = _masonry
-	node.color = tint
+	# Polygon2D 的顶点颜色会压到 RGBA8；节点着色保留大于 1 的亮度系数。
+	node.color = Color(1.0, 1.0, 1.0, tint.a)
+	node.self_modulate = Color(tint.r, tint.g, tint.b, 1.0)
 	parent.add_child(node)
 
 
