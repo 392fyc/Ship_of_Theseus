@@ -403,6 +403,251 @@ class TerrainSemanticSidecarTests(unittest.TestCase):
         self.assertNotIn("paving_pixels", row)
         self.assertNotIn("paving_l", row)
 
+    def test_v3_t2_uses_land_whitelist_and_opaque_environment_ground(self):
+        manifest, images, pair, coverage, instances, blocked = _wall_fixture()
+        manifest["instances"] = [{"stable_id": "wall-a", "type": "wall", "cell": [3, 1]}]
+        manifest["masks"]["ground_types"]["classes"] = {
+            "plain": {"color": "#00FF00", "semantic": "plain"},
+            "forest": {"color": "#008000", "semantic": "forest"},
+            "paving": {"color": "#FF8000", "semantic": "_is_paved_at cell flag"},
+            "wall": {"color": "#808080", "semantic": "wall"},
+            "swamp": {"color": "#8000FF", "semantic": "swamp"},
+            "mountain": {"color": "#996600", "semantic": "mountain"},
+            "peak": {"color": "#FF0000", "semantic": "peak"},
+            "lava": {"color": "#B84000", "semantic": "lava"},
+            "deep_water": {"color": "#000080", "semantic": "deep_water"},
+        }
+        ground_types = images["ground_types"]
+        ground_types[:] = (0, 0, 0, 0)
+        images["ground"] = _rgba(*ground_types.shape[:2], (31, 42, 53), 0)
+        token = instances[0]["token"]
+        tokens = ((pair[..., 0].astype(np.uint32) << 16)
+                  | (pair[..., 1].astype(np.uint32) << 8)
+                  | pair[..., 2])
+        own = (tokens == token) & (coverage[..., 0] > 127)
+        outer_ring = sidecar.metrics.morph(own, 4) & ~own
+        eligible = np.argwhere(outer_ring & (coverage[..., 3] == 0) & ~blocked)
+        self.assertGreaterEqual(len(eligible), 12)
+
+        allowed = [
+            ("plain", (0, 255, 0)),
+            ("forest", (0, 128, 0)),
+            ("paving", (255, 128, 0)),
+            ("wall", (128, 128, 128)),
+            ("swamp", (128, 0, 255)),
+        ]
+        rejected = [
+            ("mountain", (153, 102, 0)),
+            ("peak", (255, 0, 0)),
+            ("lava", (184, 64, 0)),
+            ("deep_water", (0, 0, 128)),
+        ]
+        for index, (name, color) in enumerate(allowed + rejected):
+            y, x = eligible[index]
+            ground_types[y, x] = (*color, 255)
+        environment_y, environment_x = eligible[9]
+        ground_types[environment_y, environment_x] = (0, 0, 0, 0)
+        images["ground"][environment_y, environment_x, 3] = 255
+        partial_y, partial_x = eligible[10]
+        ground_types[partial_y, partial_x] = (0, 0, 0, 0)
+        images["ground"][partial_y, partial_x, 3] = 254
+        transparent_y, transparent_x = eligible[11]
+        ground_types[transparent_y, transparent_x] = (0, 0, 0, 0)
+        images["ground"][transparent_y, transparent_x, 3] = 0
+        reference_mask = np.zeros(ground_types.shape[:2], dtype=bool)
+        for y, x in eligible[:5]:
+            reference_mask[y, x] = True
+        reference_mask[environment_y, environment_x] = True
+
+        row = sidecar.measure_t2_instances(
+            manifest, images, pair, coverage, instances, blocked,
+            measurement_version="v3",
+        )["wall"][0]
+        categories = {item["name"]: item["pixels"]
+                      for item in row["reference_surface_categories"]}
+        self.assertEqual(row["reference_surface_pixels"], 6)
+        self.assertEqual({name: categories[name] for name, _color in allowed},
+                         {name: 1 for name, _color in allowed})
+        self.assertEqual(categories["environment_ground"], 1)
+        self.assertEqual(row["water_pixels_excluded_from_reference"], 1)
+        self.assertEqual(row["reference_scope"], "group")
+        self.assertNotIn("mountain", categories)
+        self.assertNotIn("peak", categories)
+        self.assertNotIn("lava", categories)
+        self.assertEqual(
+            row["reference_surface_l"],
+            float(np.median(checks.lab(images["main"][reference_mask, :3])[..., 0])),
+        )
+
+        instances[0]["type"] = "pillar"
+        pair[20:30, 20:28, 3] = sidecar.PART_CODES["pillar_top"]
+        pair[20:30, 28:38, 3] = sidecar.PART_CODES["pillar_side"]
+        pillar_row = sidecar.measure_t2_instances(
+            manifest, images, pair, coverage, instances, blocked,
+            measurement_version="v3",
+        )["pillar"][0]
+        self.assertEqual(pillar_row["reference_scope"], "instance")
+
+    def test_v3_t3_keeps_plain_forest_and_environment_ground_with_diagnostic_counts(self):
+        manifest, tree_manifest, images, pair, coverage, instances, blocked = _tree_fixture()
+        manifest["instances"] = [{"stable_id": "tree-a", "type": "tree", "cell": [2, 3]}]
+        manifest["masks"]["ground_types"]["classes"] = {
+            "plain": {"color": "#00FF00", "semantic": "plain"},
+            "forest": {"color": "#008000", "semantic": "forest"},
+            "paving": {"color": "#FF8000", "semantic": "paving"},
+            "wall": {"color": "#808080", "semantic": "wall"},
+            "swamp": {"color": "#8000FF", "semantic": "swamp"},
+            "mountain": {"color": "#996600", "semantic": "mountain"},
+            "deep_water": {"color": "#000080", "semantic": "deep_water"},
+        }
+        ground_types = images["ground_types"]
+        ground_types[:] = (0, 0, 0, 0)
+        images["ground"] = _rgba(*ground_types.shape[:2], (210, 20, 160), 0)
+        images["ground_without_shadow"] = images["ground"].copy()
+        images["grid"] = _rgba(*ground_types.shape[:2])
+        images["exclusions"] = _rgba(*ground_types.shape[:2])
+        images["contact_shadow"] = _rgba(*ground_types.shape[:2])
+        tokens = ((pair[..., 0].astype(np.uint32) << 16)
+                  | (pair[..., 1].astype(np.uint32) << 8)
+                  | pair[..., 2])
+        own = (tokens == instances[0]["token"]) & (coverage[..., 0] > 127)
+        outer_ring = sidecar.metrics.morph(own, 4) & ~own
+        eligible = np.argwhere(outer_ring & (coverage[..., 3] == 0) & ~blocked)
+        self.assertGreaterEqual(len(eligible), 16)
+
+        typed = [
+            ("plain", (0, 255, 0)),
+            ("forest", (0, 128, 0)),
+            ("paving", (255, 128, 0)),
+            ("wall", (128, 128, 128)),
+            ("swamp", (128, 0, 255)),
+            ("mountain", (153, 102, 0)),
+            ("deep_water", (0, 0, 128)),
+        ]
+        for index, (_name, color) in enumerate(typed):
+            y, x = eligible[index]
+            ground_types[y, x] = (*color, 255)
+        environment = eligible[7]
+        environment_y, environment_x = environment
+        ground_types[environment_y, environment_x] = (0, 0, 0, 0)
+        images["ground"][environment_y, environment_x, 3] = 255
+        partial_environment = eligible[8]
+        ground_types[tuple(partial_environment)] = (0, 0, 0, 0)
+        images["ground"][tuple(partial_environment)][3] = 254
+        images["ground_without_shadow"][environment_y, environment_x, 3] = 255
+        images["ground_without_shadow"][tuple(partial_environment)][3] = 254
+        transparent_environment = eligible[9]
+        ground_types[tuple(transparent_environment)] = (0, 0, 0, 0)
+        images["ground"][tuple(transparent_environment)][3] = 0
+
+        prop_y, prop_x = eligible[10]
+        other_token = 0x112233
+        pair[prop_y, prop_x] = (*sidecar.token_to_rgb(other_token),
+                                sidecar.PART_CODES["unknown"])
+        coverage[prop_y, prop_x] = (255, 0, 0, 255)
+        images["exclusions"][prop_y, prop_x, 3] = 255
+        blocked[prop_y, prop_x] = True
+        grid_y, grid_x = eligible[11]
+        images["grid"][grid_y, grid_x, 3] = 255
+        blocked[grid_y, grid_x] = True
+        contact_y, contact_x = eligible[12]
+        images["contact_shadow"][contact_y, contact_x, 3] = 255
+        blocked[contact_y, contact_x] = True
+        shadow_y, shadow_x = eligible[13]
+        images["ground_without_shadow"][shadow_y, shadow_x, 0] += 1
+        blocked[shadow_y, shadow_x] = True
+
+        rows = sidecar.measure_t3_trees(
+            manifest, tree_manifest, images, pair, coverage, instances, blocked,
+            object_blocked=blocked, measurement_version="v3",
+        )
+        row = rows[0]["T3"]
+        categories = {item["name"]: item["pixels"] for item in row["outer_grass_categories"]}
+        self.assertEqual(row["outer_grass_pixels"], 3)
+        self.assertEqual(categories, {"forest": 1, "plain": 1, "environment_ground": 1})
+        self.assertEqual(row["reference_scope"], "group")
+        self.assertEqual(row["outer_ring_usable_ground_pixels"], 3)
+        self.assertEqual(row["outer_ring_prop_covered_pixels"], 1)
+        self.assertEqual(row["outer_ring_excluded_pixels"], 1)
+        self.assertEqual(row["outer_ring_grid_pixels"], 1)
+        self.assertEqual(row["outer_ring_contact_shadow_pixels"], 1)
+        self.assertEqual(row["outer_ring_ground_shadow_difference_pixels"], 1)
+        self.assertGreater(row["outer_ring_total_pixels"],
+                           row["outer_ring_usable_ground_pixels"])
+        self.assertTrue(row["outer_ring_counts_overlap"])
+        self.assertIn("可重叠", row["outer_ring_counting_note"])
+        self.assertGreater(row["outer_ring_unclassified_pixels"], 3)
+
+        ground_before = row["delta_l"]
+        images["ground"][..., :3] = (0, 0, 0)
+        row_after_ground_rgb_change = sidecar.measure_t3_trees(
+            manifest, tree_manifest, images, pair, coverage, instances, blocked,
+            object_blocked=blocked, measurement_version="v3",
+        )[0]["T3"]
+        self.assertEqual(row_after_ground_rgb_change["delta_l"], ground_before)
+
+        images["tree_crown_union"][..., 3] = 0
+        misaligned = sidecar.measure_t3_trees(
+            manifest, tree_manifest, images, pair, coverage, instances, blocked,
+            object_blocked=blocked, measurement_version="v3",
+        )[0]["T3"]
+        self.assertEqual(misaligned["status"], "NOT_TESTED")
+        self.assertIn("alignment", misaligned["not_tested_reason_categories"])
+
+        manifest["tree_semantic_input"]["approved_scope"] = []
+        tree_manifest["tree_semantic_input"]["approved_scope"] = []
+        unapproved = sidecar.measure_t3_trees(
+            manifest, tree_manifest, images, pair, coverage, instances, blocked,
+            object_blocked=blocked, measurement_version="v3",
+        )[0]["T3"]
+        self.assertEqual(unapproved["status"], "NOT_TESTED")
+        self.assertIn("source", unapproved["not_tested_reason_categories"])
+
+    def test_v3_batch_counts_not_tested_t3_causes_across_six_cases(self):
+        case_specs = [
+            (10, (1280, 720), ["source", "alignment"]),
+            (10, (1920, 1080), ["geometry"]),
+            (10, (2560, 1440), ["no_outer_ring_reference"]),
+            (25, (1280, 720), ["source"]),
+            (25, (1920, 1080), ["geometry", "alignment"]),
+            (25, (2560, 1440), ["no_outer_ring_reference"]),
+        ]
+        results = []
+        for index, (size, resolution, categories) in enumerate(case_specs):
+            result = self._case_result(size, resolution, trees=[{
+                "stable_id": f"tree-{index}",
+                "T3": {"status": "NOT_TESTED",
+                       "not_tested_reason_categories": categories},
+            }])
+            result["case"]["name"] = f"case-{index}"
+            results.append(result)
+        manifests = [Path(f"capture-{index}.json") for index in range(6)]
+        with mock.patch.object(sidecar, "validate_case", side_effect=results):
+            output = sidecar.validate_batch(
+                manifests, ROOT, "candidate", measurement_version="v3",
+            )
+        summary = output["T3_not_tested_reason_summary"]
+        self.assertEqual(output["measurement_version"], "v3")
+        self.assertEqual(summary["not_tested_tree_instances"], 6)
+        self.assertEqual(summary["reason_counts"], {
+            "source": 2,
+            "geometry": 2,
+            "alignment": 2,
+            "no_outer_ring_reference": 2,
+            "outline": 0,
+        })
+        self.assertIn("可重叠", summary["counting_note"])
+
+    def test_v3_pilot_report_names_measurement_version(self):
+        pilot = self._case_result(10, (1280, 720), trees=[self._tree_metric("PASS")])
+        with mock.patch.object(sidecar, "validate_case", return_value=pilot):
+            output = sidecar.validate_pilot(
+                [Path("pilot/capture-manifest.json")], ROOT, "candidate",
+                measurement_version="v3",
+            )
+        self.assertEqual(output["measurement_version"], "v3")
+        self.assertEqual(sidecar.validation_exit_code("pilot", output), 0)
+
     def test_v2_wall_reference_uses_connected_group_union_outer_ring(self):
         manifest, images, pair, coverage, instances, blocked = _wall_fixture()
         first = instances[0]

@@ -54,7 +54,13 @@ T2_PARTS_V2 = {
     "wall": {"top": (PART_CODES["wall_top"],), "side": (PART_CODES["wall_side"],)},
     "pillar": {"top": (PART_CODES["pillar_top"],), "side": (PART_CODES["pillar_side"],)},
 }
-MEASUREMENT_VERSIONS = ("v1", "v2")
+MEASUREMENT_VERSIONS = ("v1", "v2", "v3")
+T2_LAND_V3_SEMANTICS = frozenset({"plain", "forest", "paving", "wall", "swamp"})
+T2_LAND_V3_EXCLUDED = frozenset({"lava", "peak", "mountain"})
+T3_GRASS_V3_SEMANTICS = frozenset({"plain", "forest"})
+T3_NOT_TESTED_REASON_CATEGORIES = (
+    "source", "geometry", "alignment", "no_outer_ring_reference", "outline",
+)
 TREE_PART_CODES = {
     PART_CODES["tree_crown"], PART_CODES["tree_dark_side"], PART_CODES["tree_outline"]
 }
@@ -1068,6 +1074,122 @@ def _land_reference_samples(outer_ring: np.ndarray, ground_types: np.ndarray,
     return reference, categories, int(excluded_water.sum())
 
 
+def _land_surface_palette_v3(manifest: dict) -> tuple[dict[str, dict], dict[str, dict], list[str]]:
+    """Return the explicit S5/L1 T2 whitelist while preserving exact palette colors."""
+    all_land, water, errors = _land_surface_palette(manifest)
+    land = {
+        name: record for name, record in all_land.items()
+        if name.lower() not in T2_LAND_V3_EXCLUDED
+        and record["semantic"] not in T2_LAND_V3_EXCLUDED
+        and (name.lower() in T2_LAND_V3_SEMANTICS
+             or record["semantic"] in T2_LAND_V3_SEMANTICS)
+    }
+    return land, water, errors
+
+
+def _tree_reference_palette_v3(manifest: dict) -> tuple[dict[str, dict], dict[str, dict], list[str]]:
+    """Keep plain/forest grass references and add opaque unclassified environment ground."""
+    classes = manifest.get("masks", {}).get("ground_types", {}).get("classes", {})
+    if not isinstance(classes, dict):
+        return {}, {}, ["frozen ground_types palette is missing"]
+    land: dict[str, dict] = {}
+    water: dict[str, dict] = {}
+    for name, value in classes.items():
+        if not isinstance(value, dict):
+            continue
+        color = _rgb_from_hex(value.get("color"))
+        if color is None:
+            continue
+        semantic = str(value.get("semantic", "")).lower()
+        is_water = "water" in str(name).lower() or "water" in semantic
+        record = {"rgb": color, "semantic": semantic}
+        if is_water:
+            water[str(name)] = record
+        elif (str(name).lower() in T2_LAND_V3_EXCLUDED
+              or semantic in T2_LAND_V3_EXCLUDED):
+            continue
+        elif (str(name).lower() in T3_GRASS_V3_SEMANTICS
+              or semantic in T3_GRASS_V3_SEMANTICS
+              or "grass" in semantic or "forest" in semantic):
+            land[str(name)] = record
+    return land, water, []
+
+
+def _v3_reference_samples(outer_ring: np.ndarray, ground_types: np.ndarray,
+                          ground: np.ndarray, coverage: np.ndarray,
+                          blocked: np.ndarray, land_palette: dict[str, dict],
+                          water_palette: dict[str, dict]) -> tuple[np.ndarray, list[dict], int]:
+    eligible = outer_ring & (coverage[..., 3] == 0) & ~blocked
+    reference = np.zeros(outer_ring.shape, dtype=bool)
+    categories: list[dict] = []
+    for name in sorted(land_palette):
+        record = land_palette[name]
+        mask = eligible & _exact_palette_mask(ground_types, record["rgb"])
+        pixels = int(mask.sum())
+        reference |= mask
+        if pixels:
+            categories.append({"name": name, "semantic": record["semantic"], "pixels": pixels})
+
+    # Alpha-zero ground_types pixels are environment_ground only when the same-frame
+    # actual ground render is fully opaque; its RGB is never used as a sample color.
+    environment_ground = (eligible & (ground_types[..., 3] == 0)
+                          & (ground[..., 3] == 255))
+    environment_pixels = int(environment_ground.sum())
+    reference |= environment_ground
+    if environment_pixels:
+        categories.append({
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": environment_pixels,
+        })
+
+    excluded_water = np.zeros(outer_ring.shape, dtype=bool)
+    for record in water_palette.values():
+        excluded_water |= eligible & _exact_palette_mask(ground_types, record["rgb"])
+    return reference, categories, int(excluded_water.sum())
+
+
+def _outer_ring_composition_v3(outer_ring: np.ndarray, images: dict[str, np.ndarray],
+                               coverage: np.ndarray, ground_types: np.ndarray,
+                               usable_ground: np.ndarray) -> dict[str, Any]:
+    shape = outer_ring.shape
+
+    def alpha_mask(role: str) -> np.ndarray:
+        image = images.get(role)
+        if not _valid_rgba(image) or image.shape[:2] != shape:
+            return np.zeros(shape, dtype=bool)
+        return image[..., 3] > 127
+
+    ground = images.get("ground")
+    ground_without_shadow = images.get("ground_without_shadow")
+    shadow_difference = (
+        np.any(ground != ground_without_shadow, axis=2)
+        if _valid_rgba(ground) and _valid_rgba(ground_without_shadow)
+        and ground.shape == ground_without_shadow.shape and ground.shape[:2] == shape
+        else np.zeros(shape, dtype=bool)
+    )
+    unclassified_pixels = (
+        int((outer_ring & (ground_types[..., 3] == 0)).sum())
+        if _valid_rgba(ground_types) and ground_types.shape[:2] == shape
+        else None
+    )
+    return {
+        "outer_ring_total_pixels": int(outer_ring.sum()),
+        "outer_ring_prop_covered_pixels": int((outer_ring & (coverage[..., 3] == 255)).sum()),
+        "outer_ring_excluded_pixels": int((outer_ring & alpha_mask("exclusions")).sum()),
+        "outer_ring_grid_pixels": int((outer_ring & alpha_mask("grid")).sum()),
+        "outer_ring_contact_shadow_pixels": int((outer_ring & alpha_mask("contact_shadow")).sum()),
+        "outer_ring_ground_shadow_difference_pixels": int((outer_ring & shadow_difference).sum()),
+        "outer_ring_unclassified_pixels": unclassified_pixels,
+        "outer_ring_usable_ground_pixels": int(usable_ground.sum()),
+        "outer_ring_counts_overlap": True,
+        "outer_ring_counting_note": (
+            "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。"
+            "可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。"
+        ),
+    }
+
+
 def measure_t2_instances(manifest: dict, images: dict[str, np.ndarray],
                          pair: np.ndarray, coverage: np.ndarray,
                          instance_tokens: list[dict], blocked: np.ndarray,
@@ -1075,9 +1197,10 @@ def measure_t2_instances(manifest: dict, images: dict[str, np.ndarray],
                          measurement_version: str = "v1") -> dict:
     if measurement_version not in MEASUREMENT_VERSIONS:
         raise ValueError(f"measurement_version must be one of {MEASUREMENT_VERSIONS}")
-    if measurement_version == "v2":
+    if measurement_version in ("v2", "v3"):
         return _measure_t2_instances_v2(manifest, images, pair, coverage,
-                                        instance_tokens, blocked, object_blocked)
+                                        instance_tokens, blocked, object_blocked,
+                                        measurement_version=measurement_version)
     object_blocked = blocked if object_blocked is None else object_blocked
     main = images["main"]
     main_lab = checks.lab(main[..., :3])
@@ -1135,15 +1258,23 @@ def measure_t2_instances(manifest: dict, images: dict[str, np.ndarray],
 def _measure_t2_instances_v2(manifest: dict, images: dict[str, np.ndarray],
                              pair: np.ndarray, coverage: np.ndarray,
                              instance_tokens: list[dict], blocked: np.ndarray,
-                             object_blocked: np.ndarray | None = None) -> dict:
+                             object_blocked: np.ndarray | None = None,
+                             measurement_version: str = "v2") -> dict:
     object_blocked = blocked if object_blocked is None else object_blocked
     main = images["main"]
     main_lab = checks.lab(main[..., :3])
     ground_types = images.get("ground_types")
-    land_palette, water_palette, palette_errors = _land_surface_palette(manifest)
+    if measurement_version == "v3":
+        land_palette, water_palette, palette_errors = _land_surface_palette_v3(manifest)
+    else:
+        land_palette, water_palette, palette_errors = _land_surface_palette(manifest)
     output: dict[str, list[dict]] = {"wall": [], "pillar": []}
     if not _valid_rgba(ground_types) or ground_types.shape[:2] != main.shape[:2]:
         palette_errors.append("ground_types RGBA image is missing or size-mismatched")
+    ground = images.get("ground")
+    if measurement_version == "v3" and (
+            not _valid_rgba(ground) or ground.shape[:2] != main.shape[:2]):
+        palette_errors.append("same-frame ground RGBA image is missing or size-mismatched")
     visible_alpha, uncertain_alpha = alpha_sample_masks(coverage)
     tokens = ((pair[..., 0].astype(np.uint32) << 16)
               | (pair[..., 1].astype(np.uint32) << 8)
@@ -1159,6 +1290,12 @@ def _measure_t2_instances_v2(manifest: dict, images: dict[str, np.ndarray],
                 result = {"stable_id": instance.get("stable_id"), "type": kind,
                           "token": instance.get("token"), "status": "NOT_TESTED",
                           "reason": reason}
+                if measurement_version == "v3":
+                    result["reference_scope"] = (
+                        "group" if kind == "wall" and wall_groups.get(
+                            instance.get("stable_id"), {}).get("measurement_group")
+                        else "instance"
+                    )
                 if kind == "wall":
                     group = wall_groups.get(instance.get("stable_id"), {})
                     if group.get("measurement_group"):
@@ -1177,8 +1314,15 @@ def _measure_t2_instances_v2(manifest: dict, images: dict[str, np.ndarray],
         group_info = wall_groups.get(stable_id, {}) if kind == "wall" else {}
         ring_source = group_info.get("measurement_group_mask", own_mask)
         outer_ring = metrics.morph(ring_source, 4) & ~ring_source
-        reference, categories, excluded_water = _land_reference_samples(
-            outer_ring, ground_types, coverage, blocked, land_palette, water_palette)
+        if measurement_version == "v3" and not palette_errors:
+            reference, categories, excluded_water = _v3_reference_samples(
+                outer_ring, ground_types, ground, coverage, blocked,
+                land_palette, water_palette)
+        elif measurement_version == "v3":
+            reference, categories, excluded_water = np.zeros(outer_ring.shape, dtype=bool), [], 0
+        else:
+            reference, categories, excluded_water = _land_reference_samples(
+                outer_ring, ground_types, coverage, blocked, land_palette, water_palette)
         counts = {
             "top_pixels": int(top_mask.sum()),
             "side_pixels": int(side_mask.sum()),
@@ -1191,6 +1335,11 @@ def _measure_t2_instances_v2(manifest: dict, images: dict[str, np.ndarray],
             "alpha_threshold_for_samples": ">127/255",
             "uncertain_if_alpha_below": 0.98,
         }
+        if measurement_version == "v3":
+            counts["reference_scope"] = (
+                "group" if kind == "wall" and group_info.get("measurement_group")
+                else "instance"
+            )
         group_status = group_info.get("measurement_group_status", "PASS")
         if kind == "wall" and group_status != "PASS":
             result = _not_tested("wall group connectivity is incomplete", **counts)
@@ -1312,16 +1461,29 @@ def measure_t3_trees(manifest: dict, sidecar: dict, images: dict[str, np.ndarray
     main = images["main"]
     main_lab = checks.lab(main[..., :3])
     ground_types = images.get("ground_types")
+    ground = images.get("ground")
     crown_union = images.get("tree_crown_union")
-    _paving, grass_palette, palette_errors = _ground_palette(manifest)
+    if measurement_version == "v3":
+        grass_records, water_palette, palette_errors = _tree_reference_palette_v3(manifest)
+    else:
+        _paving, grass_palette, palette_errors = _ground_palette(manifest)
+        water_palette = {}
     semantic_gate_errors = _tree_semantic_measurement_gate(manifest, sidecar)
     if not _valid_rgba(ground_types) or not _valid_rgba(crown_union):
         palette_errors.append("frozen ground_types or tree_crown_union RGBA image is missing")
+    if measurement_version == "v3" and (
+            not _valid_rgba(ground) or ground.shape[:2] != main.shape[:2]
+            or not _valid_rgba(ground_types) or ground_types.shape[:2] != main.shape[:2]):
+        palette_errors.append("same-frame ground or ground_types RGBA image is missing or size-mismatched")
     tree_union = crown_union[..., 3] > 127 if _valid_rgba(crown_union) else None
     tree_palette_pixels = np.zeros(main.shape[:2], dtype=bool)
     if _valid_rgba(ground_types):
-        for rgb in grass_palette:
-            tree_palette_pixels |= _exact_palette_mask(ground_types, rgb)
+        if measurement_version == "v3":
+            for record in grass_records.values():
+                tree_palette_pixels |= _exact_palette_mask(ground_types, record["rgb"])
+        else:
+            for rgb in grass_palette:
+                tree_palette_pixels |= _exact_palette_mask(ground_types, rgb)
     tokens = ((pair[..., 0].astype(np.uint32) << 16)
               | (pair[..., 1].astype(np.uint32) << 8)
               | pair[..., 2].astype(np.uint32))
@@ -1331,7 +1493,7 @@ def measure_t3_trees(manifest: dict, sidecar: dict, images: dict[str, np.ndarray
         manifest, instance_tokens, pair, coverage,
         kind="tree", member_part_codes=TREE_PART_CODES,
         object_blocked=object_blocked,
-    ) if measurement_version == "v2" else {})
+    ) if measurement_version in ("v2", "v3") else {})
     all_tree_tokens = {int(record["token"]) for record in tree_records if type(record.get("token")) is int}
     any_tree_token = np.isin(tokens, np.fromiter(all_tree_tokens, dtype=np.uint32)) if all_tree_tokens else np.zeros(tokens.shape, bool)
     any_non_tree_prop = (coverage[..., 3] == 255) & ~any_tree_token
@@ -1376,11 +1538,21 @@ def measure_t3_trees(manifest: dict, sidecar: dict, images: dict[str, np.ndarray
         dark_side = own_visible & (pair[..., 3] == PART_CODES["tree_dark_side"])
         outline = own_visible & (pair[..., 3] == PART_CODES["tree_outline"])
         unknown = own_visible & tree_unknown
-        group_info = tree_groups.get(instance.get("stable_id"), {}) if measurement_version == "v2" else {}
+        group_info = (tree_groups.get(instance.get("stable_id"), {})
+                      if measurement_version in ("v2", "v3") else {})
         ring_source = (group_info.get("measurement_group_mask", crown)
-                       if measurement_version == "v2" else crown)
+                       if measurement_version in ("v2", "v3") else crown)
         outside_ring = metrics.morph(ring_source, 4) & ~ring_source
-        grass = outside_ring & tree_palette_pixels & (coverage[..., 3] == 0) & ~blocked
+        if measurement_version == "v3" and not palette_errors:
+            grass, grass_categories, excluded_water = _v3_reference_samples(
+                outside_ring, ground_types, ground, coverage, blocked,
+                grass_records, water_palette)
+        elif measurement_version == "v3":
+            grass = np.zeros(outside_ring.shape, dtype=bool)
+            grass_categories, excluded_water = [], 0
+        else:
+            grass = outside_ring & tree_palette_pixels & (coverage[..., 3] == 0) & ~blocked
+            grass_categories, excluded_water = [], 0
         uncertain_crown = int((crown & uncertain_alpha).sum())
         outline_semantics = manifest.get("tree_semantic_input", {}).get("outline_semantics", {})
         if isinstance(outline_semantics, dict) and outline_semantics.get("present") is False:
@@ -1404,11 +1576,19 @@ def measure_t3_trees(manifest: dict, sidecar: dict, images: dict[str, np.ndarray
             "tree_crown_alignment": crown_alignment,
             "outline_status": outline_status,
         }
-        if measurement_version == "v2" and group_info.get("measurement_group"):
+        if measurement_version == "v3":
+            counts["outer_grass_categories"] = grass_categories
+            counts["water_pixels_excluded_from_reference"] = excluded_water
+            counts["reference_scope"] = (
+                "group" if group_info.get("measurement_group") else "instance"
+            )
+            counts.update(_outer_ring_composition_v3(
+                outside_ring, images, coverage, ground_types, grass))
+        if measurement_version in ("v2", "v3") and group_info.get("measurement_group"):
             counts["measurement_group"] = group_info["measurement_group"]
             counts["measurement_group_status"] = group_info["measurement_group_status"]
         reasons = list(semantic_gate_errors) + list(palette_errors)
-        if measurement_version == "v2" and group_info.get("measurement_group_status") != "PASS":
+        if measurement_version in ("v2", "v3") and group_info.get("measurement_group_status") != "PASS":
             reasons.append("tree clump connectivity is incomplete")
         if crown_alignment["status"] != "PASS":
             reasons.append("sidecar tree regions do not exactly cover the visible frozen crown geometry")
@@ -1418,9 +1598,79 @@ def measure_t3_trees(manifest: dict, sidecar: dict, images: dict[str, np.ndarray
             reasons.append("visible tree pixels alpha>0.5 remain unclassified")
         if outline_status == "NOT_TESTED":
             reasons.append("outline absence/presence is not independently resolved")
+        reason_categories: list[str] = []
+        if measurement_version == "v3":
+            reason_details: dict[str, list[str]] = {
+                "source": [],
+                "geometry": [],
+                "alignment": [],
+                "no_outer_ring_reference": [],
+                "outline": [],
+            }
+            outline_gate_errors = [
+                error for error in semantic_gate_errors if "outline" in error.lower()
+            ]
+            reason_details["source"].extend(
+                error for error in semantic_gate_errors if error not in outline_gate_errors
+            )
+            reason_details["outline"].extend(outline_gate_errors)
+            unavailable_class_map_errors = [
+                error for error in palette_errors
+                if "classification rgba map is unavailable" in error.lower()
+            ]
+            reason_details["source"].extend(unavailable_class_map_errors)
+            geometry_palette_errors = [
+                error for error in palette_errors
+                if error not in unavailable_class_map_errors
+                and "extend outside" not in error.lower()
+                and any(token in error.lower() for token in (
+                    "projection", "region", "transform", "bounds", "sprites2d", "texture size",
+                ))
+            ]
+            source_palette_errors = [
+                error for error in palette_errors
+                if error not in geometry_palette_errors
+                and error not in unavailable_class_map_errors
+                and "extend outside" not in error.lower()
+            ]
+            reason_details["source"].extend(source_palette_errors)
+            if group_info.get("measurement_group_status") != "PASS":
+                reason_details["geometry"].append("tree clump connectivity is incomplete")
+            reason_details["geometry"].extend(geometry_palette_errors)
+            if not counts["crown_pixels"] or not counts["dark_side_pixels"]:
+                reason_details["geometry"].append("crown or dark-side geometry has no visible samples")
+            if crown_alignment["status"] != "PASS":
+                reason_details["alignment"].append(
+                    "sidecar tree regions do not exactly cover the visible frozen crown geometry")
+            reason_details["alignment"].extend(
+                error for error in palette_errors if "extend outside" in error.lower()
+            )
+            if unknown.any():
+                reason_details["alignment"].append(
+                    "visible tree pixels alpha>0.5 remain unclassified")
+            if not counts["outer_grass_pixels"]:
+                reason_details["no_outer_ring_reference"].append(
+                    "no unoccluded radius-4 outer-ring ground reference is available")
+            if outline_status == "NOT_TESTED":
+                reason_details["outline"].append(
+                    "outline absence/presence is not independently resolved")
+            reason_categories = [
+                category for category in T3_NOT_TESTED_REASON_CATEGORIES
+                if reason_details[category]
+            ]
+            counts["not_tested_reason_categories"] = reason_categories
+            counts["not_tested_reasons"] = list(dict.fromkeys(
+                reason for category in T3_NOT_TESTED_REASON_CATEGORIES
+                for reason in reason_details[category]
+            ))
         if reasons:
             outline_result = _not_tested("; ".join(dict.fromkeys(reasons)), **counts)
-            foliage_result = _not_tested("T3 source/geometry/sample gate is incomplete", **counts)
+            if measurement_version == "v3":
+                detail = "; ".join(counts["not_tested_reasons"]) or "T3 measurement gate is incomplete"
+                outline_result = _not_tested(detail, **counts)
+                foliage_result = _not_tested(detail, **counts)
+            else:
+                foliage_result = _not_tested("T3 source/geometry/sample gate is incomplete", **counts)
         else:
             outline_result = metrics.foliage_outline(
                 main_lab[..., 0], crown, outline, dark_side,
@@ -1430,6 +1680,9 @@ def measure_t3_trees(manifest: dict, sidecar: dict, images: dict[str, np.ndarray
             )
             outline_result.update(counts)
             foliage_result.update(counts)
+            if measurement_version == "v3":
+                foliage_result.setdefault("not_tested_reason_categories", [])
+                foliage_result.setdefault("not_tested_reasons", [])
         output.append({
             "stable_id": instance.get("stable_id"),
             "token": token,
@@ -1437,6 +1690,42 @@ def measure_t3_trees(manifest: dict, sidecar: dict, images: dict[str, np.ndarray
             "T3": foliage_result,
         })
     return output
+
+
+def _t3_not_tested_reason_summary(cases: list[dict]) -> dict[str, Any]:
+    reason_counts = {category: 0 for category in T3_NOT_TESTED_REASON_CATEGORIES}
+    not_tested_instances = 0
+    per_case: list[dict[str, Any]] = []
+    for case in cases:
+        case_counts = {category: 0 for category in T3_NOT_TESTED_REASON_CATEGORIES}
+        case_instances = 0
+        for record in case.get("T3_tree_instances", []):
+            metric = record.get("T3", {}) if isinstance(record, dict) else {}
+            if not isinstance(metric, dict) or metric.get("status") != "NOT_TESTED":
+                continue
+            case_instances += 1
+            categories = metric.get("not_tested_reason_categories", [])
+            if not isinstance(categories, list):
+                continue
+            for category in set(categories):
+                if category in reason_counts:
+                    reason_counts[category] += 1
+                    case_counts[category] += 1
+        not_tested_instances += case_instances
+        per_case.append({
+            "manifest": case.get("manifest"),
+            "not_tested_tree_instances": case_instances,
+            "reason_counts": case_counts,
+        })
+    return {
+        "not_tested_tree_instances": not_tested_instances,
+        "reason_counts": reason_counts,
+        "per_case": per_case,
+        "counting_note": (
+            "每个原因按树实例计数；同一实例可同时命中多个原因，因此各原因计数可重叠。"
+            "外环字段分别与同一半径4像素外环求交，道具覆盖、排除、网格等计数也可重叠。"
+        ),
+    }
 
 
 def visible_instance_counts(pair: np.ndarray, coverage: np.ndarray,
@@ -1563,10 +1852,47 @@ def validate_case(capture_manifest_path: Path, source_root: Path,
             kind = instance.get("type") if isinstance(instance, dict) else ""
             record = {"stable_id": instance.get("stable_id"), "status": "NOT_TESTED", "reason": reason}
             if kind in t2:
+                if measurement_version == "v3":
+                    record["reference_scope"] = "group" if kind == "wall" else "instance"
                 t2[kind].append(record)
             elif kind == "tree":
-                t3.append({"stable_id": instance.get("stable_id"),
-                           "T3": _not_tested(reason), "outline_check": _not_tested(reason)})
+                if measurement_version == "v3":
+                    reason_categories: list[str] = []
+                    if frozen.get("capture_preconditions") != "PASS" or sidecar_errors:
+                        reason_categories.append("source")
+                    if alignment.get("status") != "PASS":
+                        reason_categories.append("alignment")
+                    if visible_errors:
+                        reason_categories.append("geometry")
+                    if not reason_categories:
+                        reason_categories.append("source")
+                    unmeasured_outer_ring = {
+                        "outer_ring_total_pixels": None,
+                        "outer_ring_prop_covered_pixels": None,
+                        "outer_ring_excluded_pixels": None,
+                        "outer_ring_grid_pixels": None,
+                        "outer_ring_contact_shadow_pixels": None,
+                        "outer_ring_ground_shadow_difference_pixels": None,
+                        "outer_ring_unclassified_pixels": None,
+                        "outer_ring_usable_ground_pixels": None,
+                        "outer_ring_counts_overlap": True,
+                        "outer_ring_counting_note": (
+                            "前置门未通过，未计算外环像素数；可用地面和分类原因均为未测。"
+                            "正式计数时各项与同一外环分别求交，可重叠。"
+                        ),
+                    }
+                    unavailable_t3 = _not_tested(
+                        reason,
+                        reference_scope="group",
+                        not_tested_reason_categories=reason_categories,
+                        not_tested_reasons=[reason],
+                        **unmeasured_outer_ring,
+                    )
+                    t3.append({"stable_id": instance.get("stable_id"),
+                               "T3": unavailable_t3, "outline_check": _not_tested(reason)})
+                else:
+                    t3.append({"stable_id": instance.get("stable_id"),
+                               "T3": _not_tested(reason), "outline_check": _not_tested(reason)})
     case = capture.get("case", {})
     result = {
         "manifest": capture_manifest_path.name,
@@ -1583,7 +1909,7 @@ def validate_case(capture_manifest_path: Path, source_root: Path,
         "measurement_status": "MEASURED_WHERE_READY" if ready else "NOT_TESTED",
         "art_acceptance": "NOT_TESTED",
     }
-    if measurement_version == "v2":
+    if measurement_version in ("v2", "v3"):
         wall_groups = {
             row["measurement_group"]["group_id"]: row["measurement_group"]
             for row in t2["wall"] if isinstance(row.get("measurement_group"), dict)
@@ -1592,7 +1918,7 @@ def validate_case(capture_manifest_path: Path, source_root: Path,
             row["T3"]["measurement_group"]["group_id"]: row["T3"]["measurement_group"]
             for row in t3 if isinstance(row.get("T3", {}).get("measurement_group"), dict)
         }
-        result["measurement_version"] = "v2"
+        result["measurement_version"] = measurement_version
         result["measurement_groups"] = {
             "wall_groups": [wall_groups[key] for key in sorted(wall_groups)],
             "tree_clumps": [tree_groups[key] for key in sorted(tree_groups)],
@@ -1635,10 +1961,10 @@ def _negative_control_metric(row: dict, measurement_version: str = "v1") -> tupl
         status = str(t3.get("status", "NOT_TESTED"))
         return (status if complete and status in ("PASS", "FAIL") else "NOT_TESTED", complete)
     sample_keys = (("top_pixels", "side_pixels", "reference_surface_pixels")
-                   if measurement_version == "v2" else
+                   if measurement_version in ("v2", "v3") else
                    ("top_pixels", "side_pixels", "paving_pixels"))
     metric_keys = (("top_l", "side_l", "reference_surface_l")
-                   if measurement_version == "v2" else
+                   if measurement_version in ("v2", "v3") else
                    ("top_l", "side_l", "paving_l"))
     complete = (
         all(type(row.get(key)) is int and row[key] > 0 for key in sample_keys)
@@ -1771,8 +2097,8 @@ def validate_pilot(manifest_paths: list[Path], source_root: Path,
         "art_acceptance": "NOT_TESTED",
         "note": "Pilot exit status is determined only by the single 10x10/1280x720 frozen and semantic prerequisites. A passing pilot continues even when either numeric negative control is missing or not FAIL; in that case material_gate remains CLOSED. No other capture or art acceptance is implied.",
     }
-    if measurement_version == "v2":
-        output["measurement_version"] = "v2"
+    if measurement_version in ("v2", "v3"):
+        output["measurement_version"] = measurement_version
     return output
 
 
@@ -1821,8 +2147,10 @@ def validate_batch(manifest_paths: list[Path], source_root: Path,
         "art_acceptance": "NOT_TESTED",
         "note": "Metrics come only from main-image pixels at exact same coordinates; full RGBA/candidate/C4/C8 and sidecar pixel-alignment gates precede measurement. A .98 uncertainty flag never removes an alpha>0.5 sample. The material iteration gate uses only the pilot rows; the six-case final gate is separate. No T1-T6 or art-acceptance completion is implied.",
     }
-    if measurement_version == "v2":
-        output["measurement_version"] = "v2"
+    if measurement_version == "v3":
+        output["T3_not_tested_reason_summary"] = _t3_not_tested_reason_summary(results)
+    if measurement_version in ("v2", "v3"):
+        output["measurement_version"] = measurement_version
     return output
 
 
@@ -1872,8 +2200,8 @@ def main() -> int:
         "material_gate": output["material_gate"],
         "art_acceptance": output["art_acceptance"],
     }
-    if args.measurement_version == "v2":
-        summary["measurement_version"] = "v2"
+    if args.measurement_version in ("v2", "v3"):
+        summary["measurement_version"] = args.measurement_version
     print(json.dumps(summary, ensure_ascii=False))
     return validation_exit_code(args.phase, output)
 
