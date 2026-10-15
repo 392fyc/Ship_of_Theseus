@@ -1,0 +1,269 @@
+{
+  "protocol": "dot-local/0.2",
+  "pairing_id": "mercury-yc-20261004",
+  "client_id": "mercury-local-7334946d-3de4-4fbe-be56-5815c673e99d",
+  "key_id": "sha256:9107e4d54138e02bd0663908278a65ba1c7681a38c2d97d22c564b2fd45fe20b",
+  "source_thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9",
+  "reply_thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9",
+  "recipient_thread_id": "01a118cf-9fad-76e2-99af-46a5f9a550fc",
+  "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391",
+  "type": "RECEIPT",
+  "request_id": "67947825-6173-46b4-84b8-453065ff734c",
+  "nonce": "ff79267b-a67f-4844-af0f-72dfa705653d",
+  "attempt": 0,
+  "seq": 118,
+  "in_reply_to": "b789ea8b-f460-481f-8e18-70070a0f9f5a",
+  "expires_at": "2026-10-15T13:58:54.058Z",
+  "scope": {
+    "lane": "ui-ux",
+    "project": "Ship_of_Theseus",
+    "action": "consume_TASK117_originals_and_close_cloud_single_pilot",
+    "allowed": [
+      "确认595份原件、105个载体与17张原PNG的精确收取及原任务绑定",
+      "确认五项固定命令各执行一次、1487份来源原字节与11次前后快照一致",
+      "保存原正式FAIL与新发现的内部接缝测量问题；验签后关闭已消费交付"
+    ],
+    "excluded": [
+      "任何新测试、重跑、六组采集或素材修改",
+      "改动阈值、冻结原件或历史负例结论",
+      "改变权限、协议、generation、固定身份或其他任务状态"
+    ]
+  },
+  "payload": {
+    "issued_at": "2026-10-15T09:58:54.058Z",
+    "cooperation_protocol": {
+      "bytes": 10105,
+      "page_id": "page_a66cc77252f88191847cb871a41805fe",
+      "reference": "library-file:fde1_bGliZmlsZV92c3BlMGNtSlNmR3BRX21SMjEyNDFR_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "sha256": "85e9f51fb3d258a52aad4c467032223883c1ef715aee6498ae9a052cd2985842",
+      "version": "dot-cooperation/2"
+    },
+    "replay_generation": "469550a9-a0b6-4d55-af41-1287ce6556f7",
+    "original_task_request_id": "d3b69232-7c81-47d2-9c0c-6819b04388ea",
+    "original_task_body_sha256": "6dd908186065d4c337d071bfdc687b0b58cc49f47859aa9ba701009c969112e9",
+    "candidate_commit": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+    "candidate_tree": "74fedd57ac90868f5ff2a921a57ccbfc6e73f3fa",
+    "result_original": {
+      "request_id": "b789ea8b-f460-481f-8e18-70070a0f9f5a",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9GX3FOV2FDLWxxN1FsM0EzVVZQeFRR_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "bytes": 15568,
+      "sha256": "44df13f216d9a8ee6b8113c9eab616a69e1e38fe8a30d5a5a6e22631ee8ce1b5"
+    },
+    "full_original_map": {
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9ncmtKbTVPN2J3emJWUDNodHJuMWdR_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "bytes": 187904,
+      "sha256": "4eb051a292003b238f7387f35153d743489faf86515f22a84d91e6e933ac9c4b"
+    },
+    "native_receiver_adoption": {
+      "page_id": "page_6e2084798c348191b9abbef150c2ea22",
+      "thread_id": "7fe1a9c6-2f3a-5cb2-84cd-860f12e1a0c5",
+      "message_id": "7b37a362-a8f0-52f5-a710-2677ec0933a1",
+      "conversation_id": "01a118cf-9fad-76e2-99af-46a5f9a550fc"
+    },
+    "main_consumption": {
+      "status": "PASS",
+      "original_count": 595,
+      "original_bytes": 25231569,
+      "png_count": 17,
+      "carrier_count": 105,
+      "source_files": 1487,
+      "source_snapshots": 11,
+      "commands_once_each": 5,
+      "all_original_size_and_sha256_verified": true,
+      "reproduction_max_float_difference": 2.1316282072803006e-14,
+      "independent_review_required_before_signature": true
+    },
+    "ledger_preconditions": {
+      "required_state_before_send": "readback_verified",
+      "execution_start_count": 1,
+      "evidence_sha256": "5a4b745bc4bc4a9ef235c0c4d2ddb34d1557f43fd1f8e6d1317b88557af944c0",
+      "evidence_artifact": "main-consumption.json",
+      "original_result_sha256": "44df13f216d9a8ee6b8113c9eab616a69e1e38fe8a30d5a5a6e22631ee8ce1b5"
+    },
+    "close_instruction": "原YC核对完整签名、持续授权、原TASK117、RESULT和本消费回执后，读取实际readback_verified/count1并转为closed，保存精确关闭ACK和原生采用。仅关闭证据交付，不启动测试，不改原FAIL、其他任务或素材。",
+    "result_page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+    "native_adoption_page_id": "page_6e2084798c348191b9abbef150c2ea22",
+    "human_source": {
+      "current_human_continuation_locator": {
+        "read_tool": "mcp__codex_app__read_thread",
+        "text": "可以继续进行你的任务。",
+        "thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9",
+        "turn_id": "01a12c51-71c8-77f1-94b9-fbf743e0f154",
+        "user_message_id": "01a12c51-7241-7442-88a9-bac689fa2a3f"
+      },
+      "current_user_continuation_observation": {
+        "qualification": "Main directly observed the original user messages. Receiver independently applies its directly readable standing authority; this locator is not authorization.",
+        "text": "人类最新裁决采纳U1组外边界，并选A冻结树图、采用T3＋视觉＋C9；持续授权继续墙柱修复和Dot云端测试。",
+        "thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9",
+        "turn_id": null
+      },
+      "direct_original_user_basis": [
+        {
+          "scope": "Paired YC cloud battle-UI tests, signed delivery, original readback, concrete acceptance",
+          "source_item_id": "msg_01a11136-62b0-7a81-a947-7a510458cde2",
+          "turn_id": "01a11136-5dcd-79f0-8b79-b690eadeb6f5"
+        },
+        {
+          "scope": "Continue remaining approved V6 pilot and two-gate terrain-readability tasks",
+          "source_item_id": "msg_01a11f5f-826f-7da0-9f94-76c1eef15d07",
+          "turn_id": "01a11f5f-820a-78c3-a077-f578775b4e68"
+        },
+        {
+          "scope": "Private Mercury/Dot coordination and mutual native wakeup",
+          "source_item_id": "msg_01a1242f-3d12-7dd1-bb6b-7605e5203857",
+          "turn_id": "01a1242f-3c91-7043-9955-1c0de167f4a2"
+        }
+      ],
+      "latest_native_restart_authorization_locator": {
+        "read_tool": "codex_app.read_thread",
+        "thread_id": "01a0fffa-a9e3-70a1-a80f-6dfcd59a879a",
+        "turn_id": "01a12a38-11cd-70d3-8998-e1796bc572d6",
+        "user_message_id": "01a12a38-1516-7761-82be-351bb2e074fd"
+      },
+      "note": "Receiver must directly apply standing SoT private-material/cloud layout and input test authorization; this signed body is not a new human authorization.",
+      "receiver_direct_standing_message_id": "Sentinel_27e22fa56c1481919e10eba497f7d539",
+      "receiver_existing_transport_mock_authorization": [
+        "01a10614-009b-7336-9b68-f64c7901dc57",
+        "01a106a6-4f93-73c4-80a8-fb8b14343c2b"
+      ],
+      "receiver_root_migration_message_id": "Sentinel_e7e068f563d48191b19f9ae995d9cccf",
+      "source_thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9"
+    }
+  },
+  "artifacts": [
+    {
+      "name": "original-readback-verification.json",
+      "filename": "original-readback-verification.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9tZmViRktTM3hqMmJUVXdOZmtRTlln_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "bytes": 217655,
+      "sha256": "489df72fbeb741a66d37aab7f5e990d311a236b6f7140aa6ef71600800eede88"
+    },
+    {
+      "name": "main-runtime-verification.json",
+      "filename": "main-runtime-verification.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9kY3NKbWFQaUd3Q3RGbjIwVWxLMjdn_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "bytes": 91004,
+      "sha256": "b585c145ab2640379b739fccdd48f7feb0d795e7da23fff5a9da5220078acd23"
+    },
+    {
+      "name": "material-analysis.json",
+      "filename": "material-analysis.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9CYUNpeUU4Y3I5R2Q2dm9vSVk0X2hR_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "bytes": 26443,
+      "sha256": "b0ef6ac51c47bef8129134202e69639d041375b8508ff2133b6ecc1c4b45003a"
+    },
+    {
+      "name": "internal-seam-proof.json",
+      "filename": "internal-seam-proof.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9VMEpaYno5RVVGemJKTmd3RGQyajl3_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "bytes": 3775,
+      "sha256": "10988d36afc25747d312da52f971e9ac9a02bf866f663a7e6ac8e5b69316ff85"
+    },
+    {
+      "name": "blind-reviews.portable.json",
+      "filename": "blind-reviews.portable.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9CNEV2MndFTXNENUJWdHltQl93eGV3_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "bytes": 5808,
+      "sha256": "d184d6c1e80b8864f1167f87121faf76e1291008d2ad1860d6ca9a40962e0cd1"
+    },
+    {
+      "name": "main-consumption.json",
+      "filename": "main-consumption.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV81WmxRS21TZklhejFBY3MzTGliczNn_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "bytes": 4530,
+      "sha256": "5a4b745bc4bc4a9ef235c0c4d2ddb34d1557f43fd1f8e6d1317b88557af944c0"
+    }
+  ],
+  "delivery_status": "Main_readback_verified_pending_YC_close_after_required_review_and_transition",
+  "domain_verdict": {
+    "status": "FAIL_U1_NUMERICAL_ACCEPTANCE",
+    "formal_original_unchanged": true,
+    "formal_summary": {
+      "wall": {
+        "T1": {
+          "PASS": 1,
+          "FAIL": 5,
+          "NOT_TESTED": 1
+        },
+        "T6": {
+          "PASS": 6,
+          "FAIL": 0,
+          "NOT_TESTED": 1
+        }
+      },
+      "pillar": {
+        "T1": {
+          "PASS": 0,
+          "FAIL": 3,
+          "NOT_TESTED": 0
+        },
+        "T6": {
+          "PASS": 0,
+          "FAIL": 3,
+          "NOT_TESTED": 0
+        }
+      },
+      "tree": {
+        "T1": {
+          "PASS": 1,
+          "FAIL": 11,
+          "NOT_TESTED": 0
+        },
+        "T6": {
+          "PASS": 1,
+          "FAIL": 11,
+          "NOT_TESTED": 0
+        }
+      },
+      "rubble": {
+        "T1": {
+          "PASS": 0,
+          "FAIL": 2,
+          "NOT_TESTED": 1
+        },
+        "T6": {
+          "PASS": 2,
+          "FAIL": 0,
+          "NOT_TESTED": 1
+        }
+      }
+    },
+    "C4": "PASS",
+    "C8": "PASS",
+    "T2": {
+      "wall": "7/7 PASS",
+      "pillar": "3/3 PASS"
+    },
+    "tree_T3": "12/12 PASS",
+    "tree_C9": {
+      "status": "PASS",
+      "passed": 11,
+      "failed": 1,
+      "not_tested": 0,
+      "denominator_all_declared_trees": 12,
+      "passing_fraction": 0.9166666666666666,
+      "required_fraction": 0.8,
+      "required_delta_e00_each_mode": 10,
+      "requires_both_modes_per_tree": true
+    },
+    "measurement_defect": {
+      "id": "R6-MASK-INTERNAL-SEAM-01",
+      "confirmed": true,
+      "original_FAIL_not_reclassified": true,
+      "acceptance_fix_not_applied": true
+    },
+    "column_blind_gate": "FAIL_AMBIGUOUS_IDENTITY",
+    "T4": "offline diagnostic PASS; awaiting Claude method review",
+    "T5": "ground RGBA identical; mean shifts zero",
+    "visual_approval": "PENDING_CLAUDE_REVIEW",
+    "six_case_coverage": "NOT_STARTED"
+  }
+}

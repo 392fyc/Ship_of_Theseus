@@ -1,0 +1,850 @@
+{
+  "schema": "sot-r6-material-diagnostic/1",
+  "candidate_commit": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+  "edge_diagnostic": {
+    "acceptance_uses_frozen_approved_measurement": true,
+    "counts_checked_against_formal_rows": true,
+    "overlay_is_analysis_not_original": true,
+    "legend": {
+      "green": "passing local gap>=10",
+      "red": "covered local gap<10",
+      "yellow": "uncovered edge retained denominator"
+    },
+    "part_codes": {
+      "pillar_base": 5,
+      "pillar_side": 4,
+      "pillar_top": 3,
+      "tree_crown": 7,
+      "tree_dark_side": 8,
+      "tree_outline": 9,
+      "unknown": 255,
+      "wall_outline": 6,
+      "wall_side": 2,
+      "wall_top": 1,
+      "whole_instance": 10
+    },
+    "rows": [
+      {
+        "stable_id": "pillar@1.00,4.00",
+        "type": "pillar",
+        "official_T1": {
+          "status": "FAIL",
+          "median_delta_l": 15.980313038789383,
+          "inner_median_l": 36.59091170313778,
+          "group_outer_median_l": 20.610598664348394,
+          "perimeter_edges": 286,
+          "full_instance_perimeter_edges": 286,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 405,
+          "group_outer_sample_pixels": 484,
+          "covered_perimeter_edges": 285,
+          "passing_perimeter_edges": 172,
+          "measurable_share": 0.9965034965034965,
+          "passing_share": 0.6013986013986014,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "edge_part_breakdown": {
+          "255": {
+            "passing": 61,
+            "local_contrast_below_10": 3,
+            "uncovered": 0
+          },
+          "3": {
+            "passing": 17,
+            "local_contrast_below_10": 0,
+            "uncovered": 0
+          },
+          "4": {
+            "passing": 68,
+            "local_contrast_below_10": 110,
+            "uncovered": 1
+          },
+          "5": {
+            "passing": 26,
+            "local_contrast_below_10": 0,
+            "uncovered": 0
+          }
+        }
+      },
+      {
+        "stable_id": "pillar@1.00,7.00",
+        "type": "pillar",
+        "official_T1": {
+          "status": "FAIL",
+          "median_delta_l": 16.107470158929644,
+          "inner_median_l": 36.34460522541705,
+          "group_outer_median_l": 20.237135066487404,
+          "perimeter_edges": 284,
+          "full_instance_perimeter_edges": 284,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 383,
+          "group_outer_sample_pixels": 405,
+          "covered_perimeter_edges": 270,
+          "passing_perimeter_edges": 149,
+          "measurable_share": 0.9507042253521126,
+          "passing_share": 0.5246478873239436,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "edge_part_breakdown": {
+          "255": {
+            "passing": 42,
+            "local_contrast_below_10": 6,
+            "uncovered": 0
+          },
+          "3": {
+            "passing": 15,
+            "local_contrast_below_10": 0,
+            "uncovered": 0
+          },
+          "4": {
+            "passing": 63,
+            "local_contrast_below_10": 114,
+            "uncovered": 10
+          },
+          "5": {
+            "passing": 29,
+            "local_contrast_below_10": 1,
+            "uncovered": 4
+          }
+        }
+      },
+      {
+        "stable_id": "pillar@8.00,4.00",
+        "type": "pillar",
+        "official_T1": {
+          "status": "FAIL",
+          "median_delta_l": 17.975469673008035,
+          "inner_median_l": 36.32097369211098,
+          "group_outer_median_l": 18.345504019102947,
+          "perimeter_edges": 294,
+          "full_instance_perimeter_edges": 294,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 417,
+          "group_outer_sample_pixels": 512,
+          "covered_perimeter_edges": 294,
+          "passing_perimeter_edges": 202,
+          "measurable_share": 1.0,
+          "passing_share": 0.6870748299319728,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "edge_part_breakdown": {
+          "255": {
+            "passing": 63,
+            "local_contrast_below_10": 3,
+            "uncovered": 0
+          },
+          "3": {
+            "passing": 14,
+            "local_contrast_below_10": 0,
+            "uncovered": 0
+          },
+          "4": {
+            "passing": 99,
+            "local_contrast_below_10": 89,
+            "uncovered": 0
+          },
+          "5": {
+            "passing": 26,
+            "local_contrast_below_10": 0,
+            "uncovered": 0
+          }
+        }
+      },
+      {
+        "stable_id": "wall@3.00,1.00",
+        "type": "wall",
+        "official_T1": {
+          "status": "PASS",
+          "median_delta_l": 24.744958055431326,
+          "inner_median_l": 42.38269906390571,
+          "group_outer_median_l": 17.637741008474386,
+          "perimeter_edges": 103,
+          "full_instance_perimeter_edges": 188,
+          "same_group_seam_edges_removed": 85,
+          "inner_pixels": 262,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 96,
+          "passing_perimeter_edges": 89,
+          "measurable_share": 0.9320388349514563,
+          "passing_share": 0.8640776699029126,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "edge_part_breakdown": {
+          "6": {
+            "passing": 37,
+            "local_contrast_below_10": 0,
+            "uncovered": 0
+          },
+          "1": {
+            "passing": 32,
+            "local_contrast_below_10": 4,
+            "uncovered": 3
+          },
+          "2": {
+            "passing": 20,
+            "local_contrast_below_10": 3,
+            "uncovered": 4
+          }
+        }
+      },
+      {
+        "stable_id": "wall@3.00,2.00",
+        "type": "wall",
+        "official_T1": {
+          "status": "FAIL",
+          "median_delta_l": 21.680802424215898,
+          "inner_median_l": 39.318543432690284,
+          "group_outer_median_l": 17.637741008474386,
+          "perimeter_edges": 211,
+          "full_instance_perimeter_edges": 254,
+          "same_group_seam_edges_removed": 43,
+          "inner_pixels": 335,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 184,
+          "passing_perimeter_edges": 139,
+          "measurable_share": 0.8720379146919431,
+          "passing_share": 0.6587677725118484,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "edge_part_breakdown": {
+          "6": {
+            "passing": 41,
+            "local_contrast_below_10": 0,
+            "uncovered": 0
+          },
+          "1": {
+            "passing": 2,
+            "local_contrast_below_10": 22,
+            "uncovered": 1
+          },
+          "2": {
+            "passing": 96,
+            "local_contrast_below_10": 23,
+            "uncovered": 26
+          }
+        }
+      },
+      {
+        "stable_id": "wall@4.00,1.00",
+        "type": "wall",
+        "official_T1": {
+          "status": "FAIL",
+          "median_delta_l": 22.528104286341026,
+          "inner_median_l": 40.16584529481541,
+          "group_outer_median_l": 17.637741008474386,
+          "perimeter_edges": 147,
+          "full_instance_perimeter_edges": 232,
+          "same_group_seam_edges_removed": 85,
+          "inner_pixels": 351,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 147,
+          "passing_perimeter_edges": 90,
+          "measurable_share": 1.0,
+          "passing_share": 0.6122448979591837,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "edge_part_breakdown": {
+          "1": {
+            "passing": 45,
+            "local_contrast_below_10": 28,
+            "uncovered": 0
+          },
+          "2": {
+            "passing": 45,
+            "local_contrast_below_10": 29,
+            "uncovered": 0
+          }
+        }
+      },
+      {
+        "stable_id": "wall@5.00,1.00",
+        "type": "wall",
+        "official_T1": {
+          "status": "FAIL",
+          "median_delta_l": 23.860867131092398,
+          "inner_median_l": 41.498608139566784,
+          "group_outer_median_l": 17.637741008474386,
+          "perimeter_edges": 128,
+          "full_instance_perimeter_edges": 220,
+          "same_group_seam_edges_removed": 92,
+          "inner_pixels": 324,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 114,
+          "passing_perimeter_edges": 72,
+          "measurable_share": 0.890625,
+          "passing_share": 0.5625,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "edge_part_breakdown": {
+          "1": {
+            "passing": 44,
+            "local_contrast_below_10": 21,
+            "uncovered": 7
+          },
+          "2": {
+            "passing": 28,
+            "local_contrast_below_10": 21,
+            "uncovered": 7
+          }
+        }
+      },
+      {
+        "stable_id": "wall@6.00,1.00",
+        "type": "wall",
+        "official_T1": {
+          "status": "FAIL",
+          "median_delta_l": 24.898999728775557,
+          "inner_median_l": 42.53674073724994,
+          "group_outer_median_l": 17.637741008474386,
+          "perimeter_edges": 104,
+          "full_instance_perimeter_edges": 178,
+          "same_group_seam_edges_removed": 74,
+          "inner_pixels": 257,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 85,
+          "passing_perimeter_edges": 56,
+          "measurable_share": 0.8173076923076923,
+          "passing_share": 0.5384615384615384,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "edge_part_breakdown": {
+          "1": {
+            "passing": 38,
+            "local_contrast_below_10": 12,
+            "uncovered": 4
+          },
+          "2": {
+            "passing": 18,
+            "local_contrast_below_10": 16,
+            "uncovered": 15
+          },
+          "6": {
+            "passing": 0,
+            "local_contrast_below_10": 1,
+            "uncovered": 0
+          }
+        }
+      },
+      {
+        "stable_id": "wall@6.00,2.00",
+        "type": "wall",
+        "official_T1": {
+          "status": "FAIL",
+          "median_delta_l": 21.70194850683268,
+          "inner_median_l": 39.339689515307064,
+          "group_outer_median_l": 17.637741008474386,
+          "perimeter_edges": 199,
+          "full_instance_perimeter_edges": 260,
+          "same_group_seam_edges_removed": 61,
+          "inner_pixels": 348,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 171,
+          "passing_perimeter_edges": 113,
+          "measurable_share": 0.8592964824120602,
+          "passing_share": 0.5678391959798995,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "edge_part_breakdown": {
+          "6": {
+            "passing": 20,
+            "local_contrast_below_10": 0,
+            "uncovered": 0
+          },
+          "1": {
+            "passing": 2,
+            "local_contrast_below_10": 29,
+            "uncovered": 0
+          },
+          "2": {
+            "passing": 91,
+            "local_contrast_below_10": 29,
+            "uncovered": 28
+          }
+        }
+      },
+      {
+        "stable_id": "wall@8.00,7.00",
+        "type": "wall",
+        "official_T1": {
+          "status": "NOT_TESTED",
+          "reason": "实例没有足够的2像素内核",
+          "reason_category": "no_interior_core",
+          "median_delta_l": 25.22977703546433,
+          "inner_median_l": 44.45264680900386,
+          "group_outer_median_l": 19.22286977353953,
+          "perimeter_edges": 100,
+          "full_instance_perimeter_edges": 100,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 67,
+          "group_outer_sample_pixels": 89,
+          "covered_perimeter_edges": null,
+          "passing_perimeter_edges": null,
+          "measurable_share": null,
+          "passing_share": null,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "edge_part_breakdown": {
+          "1": {
+            "passing": 36,
+            "local_contrast_below_10": 0,
+            "uncovered": 0
+          },
+          "2": {
+            "passing": 25,
+            "local_contrast_below_10": 3,
+            "uncovered": 36
+          }
+        }
+      }
+    ]
+  },
+  "surface_statistics": [
+    {
+      "stable_id": "pillar@1.00,4.00",
+      "part": "pillar_base",
+      "pixels": 123,
+      "median_L": 31.491536700607334,
+      "median_C": 6.934048159193262,
+      "median_hue_deg": 78.07659712106864,
+      "L_iqr": 3.6617743888077214
+    },
+    {
+      "stable_id": "pillar@1.00,4.00",
+      "part": "pillar_side",
+      "pixels": 534,
+      "median_L": 36.54481675018101,
+      "median_C": 6.832585071186371,
+      "median_hue_deg": 77.77918043861061,
+      "L_iqr": 5.074526354638337
+    },
+    {
+      "stable_id": "pillar@1.00,4.00",
+      "part": "pillar_top",
+      "pixels": 136,
+      "median_L": 47.70737733508465,
+      "median_C": 7.782799086816205,
+      "median_hue_deg": 78.62184267637436,
+      "L_iqr": 5.917483667108996
+    },
+    {
+      "stable_id": "pillar@1.00,7.00",
+      "part": "pillar_base",
+      "pixels": 108,
+      "median_L": 31.885380886867402,
+      "median_C": 6.667762113800898,
+      "median_hue_deg": 79.02225366984969,
+      "L_iqr": 3.919408768782482
+    },
+    {
+      "stable_id": "pillar@1.00,7.00",
+      "part": "pillar_side",
+      "pixels": 423,
+      "median_L": 36.616451046567214,
+      "median_C": 6.6056468766949585,
+      "median_hue_deg": 78.25236988642084,
+      "L_iqr": 5.012180809247511
+    },
+    {
+      "stable_id": "pillar@1.00,7.00",
+      "part": "pillar_top",
+      "pixels": 127,
+      "median_L": 48.03683582996243,
+      "median_C": 7.627685088623662,
+      "median_hue_deg": 78.88260444518973,
+      "L_iqr": 4.532137935585908
+    },
+    {
+      "stable_id": "pillar@8.00,4.00",
+      "part": "pillar_base",
+      "pixels": 124,
+      "median_L": 31.479961682030094,
+      "median_C": 6.807159280209868,
+      "median_hue_deg": 77.97850126459288,
+      "L_iqr": 3.8447541027730487
+    },
+    {
+      "stable_id": "pillar@8.00,4.00",
+      "part": "pillar_side",
+      "pixels": 590,
+      "median_L": 36.209251684357305,
+      "median_C": 6.809437288592543,
+      "median_hue_deg": 77.61511208833362,
+      "L_iqr": 4.996358949025257
+    },
+    {
+      "stable_id": "pillar@8.00,4.00",
+      "part": "pillar_top",
+      "pixels": 137,
+      "median_L": 49.19533201773042,
+      "median_C": 8.2072429710699,
+      "median_hue_deg": 77.79402360661098,
+      "L_iqr": 6.998571264136295
+    },
+    {
+      "stable_id": "wall@3.00,1.00",
+      "part": "wall_outline",
+      "pixels": 24,
+      "median_L": 41.67157370697011,
+      "median_C": 6.72992274822342,
+      "median_hue_deg": 91.23301342512525,
+      "L_iqr": 8.960702483166848
+    },
+    {
+      "stable_id": "wall@3.00,1.00",
+      "part": "wall_side",
+      "pixels": 307,
+      "median_L": 35.18354626694158,
+      "median_C": 7.123652877460431,
+      "median_hue_deg": 77.79992091197767,
+      "L_iqr": 8.13216593861143
+    },
+    {
+      "stable_id": "wall@3.00,1.00",
+      "part": "wall_top",
+      "pixels": 463,
+      "median_L": 47.60131380537341,
+      "median_C": 6.787704381822166,
+      "median_hue_deg": 77.70255914569876,
+      "L_iqr": 5.021598897957965
+    },
+    {
+      "stable_id": "wall@3.00,2.00",
+      "part": "wall_outline",
+      "pixels": 32,
+      "median_L": 42.95412338595317,
+      "median_C": 5.709869047574062,
+      "median_hue_deg": 89.71763777311902,
+      "L_iqr": 9.937597616329612
+    },
+    {
+      "stable_id": "wall@3.00,2.00",
+      "part": "wall_side",
+      "pixels": 492,
+      "median_L": 36.717464214938076,
+      "median_C": 7.4323216107016625,
+      "median_hue_deg": 78.34466737522897,
+      "L_iqr": 7.023691548727385
+    },
+    {
+      "stable_id": "wall@3.00,2.00",
+      "part": "wall_top",
+      "pixels": 350,
+      "median_L": 47.727871249399485,
+      "median_C": 6.845862635771419,
+      "median_hue_deg": 77.89294553515401,
+      "L_iqr": 4.807867949910182
+    },
+    {
+      "stable_id": "wall@4.00,1.00",
+      "part": "wall_outline",
+      "status": "NOT_TESTED",
+      "pixels": 0
+    },
+    {
+      "stable_id": "wall@4.00,1.00",
+      "part": "wall_side",
+      "pixels": 680,
+      "median_L": 34.89482658927582,
+      "median_C": 7.3659096946683364,
+      "median_hue_deg": 78.13651141321998,
+      "L_iqr": 5.709975114071362
+    },
+    {
+      "stable_id": "wall@4.00,1.00",
+      "part": "wall_top",
+      "pixels": 410,
+      "median_L": 48.05118541298965,
+      "median_C": 6.945662101203646,
+      "median_hue_deg": 77.86821049352817,
+      "L_iqr": 5.189608045147935
+    },
+    {
+      "stable_id": "wall@5.00,1.00",
+      "part": "wall_outline",
+      "status": "NOT_TESTED",
+      "pixels": 0
+    },
+    {
+      "stable_id": "wall@5.00,1.00",
+      "part": "wall_side",
+      "pixels": 588,
+      "median_L": 34.95669623435761,
+      "median_C": 7.35693649873108,
+      "median_hue_deg": 78.38297388927799,
+      "L_iqr": 6.238895408034757
+    },
+    {
+      "stable_id": "wall@5.00,1.00",
+      "part": "wall_top",
+      "pixels": 425,
+      "median_L": 47.67638828476024,
+      "median_C": 7.046141710795958,
+      "median_hue_deg": 77.8452625755208,
+      "L_iqr": 4.362909910514226
+    },
+    {
+      "stable_id": "wall@6.00,1.00",
+      "part": "wall_outline",
+      "pixels": 13,
+      "median_L": 47.429987444316914,
+      "median_C": 6.161196408426368,
+      "median_hue_deg": 89.6561422392583,
+      "L_iqr": 4.690400224224575
+    },
+    {
+      "stable_id": "wall@6.00,1.00",
+      "part": "wall_side",
+      "pixels": 250,
+      "median_L": 36.17354134522263,
+      "median_C": 7.138494943975569,
+      "median_hue_deg": 77.58706400250348,
+      "L_iqr": 9.398700563992492
+    },
+    {
+      "stable_id": "wall@6.00,1.00",
+      "part": "wall_top",
+      "pixels": 391,
+      "median_L": 47.86134417015255,
+      "median_C": 7.2910653513581964,
+      "median_hue_deg": 78.37099046534917,
+      "L_iqr": 5.701799893022098
+    },
+    {
+      "stable_id": "wall@6.00,2.00",
+      "part": "wall_outline",
+      "pixels": 26,
+      "median_L": 45.7119184230081,
+      "median_C": 6.735672484428106,
+      "median_hue_deg": 91.2227438858259,
+      "L_iqr": 6.798332790274507
+    },
+    {
+      "stable_id": "wall@6.00,2.00",
+      "part": "wall_side",
+      "pixels": 523,
+      "median_L": 36.49316708641267,
+      "median_C": 7.2619021494649205,
+      "median_hue_deg": 78.3439329129959,
+      "L_iqr": 6.837854730741618
+    },
+    {
+      "stable_id": "wall@6.00,2.00",
+      "part": "wall_top",
+      "pixels": 343,
+      "median_L": 47.701986193965844,
+      "median_C": 6.7531375081432605,
+      "median_hue_deg": 77.96454248619743,
+      "L_iqr": 5.7375016656869064
+    },
+    {
+      "stable_id": "wall@8.00,7.00",
+      "part": "wall_outline",
+      "status": "NOT_TESTED",
+      "pixels": 0
+    },
+    {
+      "stable_id": "wall@8.00,7.00",
+      "part": "wall_side",
+      "pixels": 33,
+      "median_L": 34.911303844011,
+      "median_C": 6.908416476133991,
+      "median_hue_deg": 76.57224566152011,
+      "L_iqr": 11.048939194634649
+    },
+    {
+      "stable_id": "wall@8.00,7.00",
+      "part": "wall_top",
+      "pixels": 34,
+      "median_L": 49.0745266029749,
+      "median_C": 6.583241559977242,
+      "median_hue_deg": 77.75600821265697,
+      "L_iqr": 4.398204463555075
+    }
+  ],
+  "T4": {
+    "formula": "frozen terrain_readability_metrics.contact_shadow",
+    "sample_policy": "actual contact mask minus rendered props alpha>0.5, grid and UI; source-alpha seam holes do not supply ground samples; nearest captured bottom segments",
+    "geometry_source": "semantic frame actual draw_leaf_inputs polygons and transforms; pillar first base polygon, wall_side bottom two vertices",
+    "width_policy": "maximum sampled distance to actual bottom segments, not full polygon diameter",
+    "cell_width_px": 58.88000106811542,
+    "cell_affine_fit_max_error": 5.684341886080801e-13,
+    "rows": [
+      {
+        "stable_id": "pillar@1.00,4.00",
+        "type": "pillar",
+        "sample_pixels": 95,
+        "check": {
+          "status": "PASS",
+          "darkness_l": 9.53822369485632,
+          "width_px": 4.00077025094933,
+          "cell_width_px": 58.88000106811542
+        }
+      },
+      {
+        "stable_id": "pillar@1.00,7.00",
+        "type": "pillar",
+        "sample_pixels": 64,
+        "check": {
+          "status": "PASS",
+          "darkness_l": 8.716251450136387,
+          "width_px": 4.28317889950219,
+          "cell_width_px": 58.88000106811542
+        }
+      },
+      {
+        "stable_id": "pillar@8.00,4.00",
+        "type": "pillar",
+        "sample_pixels": 100,
+        "check": {
+          "status": "PASS",
+          "darkness_l": 9.128254914548233,
+          "width_px": 4.11095772790878,
+          "cell_width_px": 58.88000106811542
+        }
+      },
+      {
+        "stable_id": "wall@3.00,1.00",
+        "type": "wall",
+        "sample_pixels": 27,
+        "check": {
+          "status": "PASS",
+          "darkness_l": 8.77495329821068,
+          "width_px": 3.3540853329009543,
+          "cell_width_px": 58.88000106811542
+        }
+      },
+      {
+        "stable_id": "wall@3.00,2.00",
+        "type": "wall",
+        "sample_pixels": 124,
+        "check": {
+          "status": "PASS",
+          "darkness_l": 8.70683245041523,
+          "width_px": 3.354085332900955,
+          "cell_width_px": 58.88000106811542
+        }
+      },
+      {
+        "stable_id": "wall@4.00,1.00",
+        "type": "wall",
+        "sample_pixels": 67,
+        "check": {
+          "status": "PASS",
+          "darkness_l": 9.047376919854145,
+          "width_px": 1.9051108268639483,
+          "cell_width_px": 58.88000106811542
+        }
+      },
+      {
+        "stable_id": "wall@5.00,1.00",
+        "type": "wall",
+        "sample_pixels": 45,
+        "check": {
+          "status": "PASS",
+          "darkness_l": 8.304487919639723,
+          "width_px": 1.905110826863984,
+          "cell_width_px": 58.88000106811542
+        }
+      },
+      {
+        "stable_id": "wall@6.00,1.00",
+        "type": "wall",
+        "sample_pixels": 22,
+        "check": {
+          "status": "PASS",
+          "darkness_l": 9.165842527044726,
+          "width_px": 3.0678671987539676,
+          "cell_width_px": 58.88000106811542
+        }
+      },
+      {
+        "stable_id": "wall@6.00,2.00",
+        "type": "wall",
+        "sample_pixels": 114,
+        "check": {
+          "status": "PASS",
+          "darkness_l": 9.344965226594836,
+          "width_px": 3.0678671987539676,
+          "cell_width_px": 58.88000106811542
+        }
+      },
+      {
+        "stable_id": "wall@8.00,7.00",
+        "type": "wall",
+        "sample_pixels": 26,
+        "check": {
+          "status": "PASS",
+          "darkness_l": 8.18027409662231,
+          "width_px": 3.1751975063226996,
+          "cell_width_px": 58.88000106811542
+        }
+      }
+    ]
+  },
+  "T5": {
+    "formula": "frozen terrain_readability_metrics.ground_stability",
+    "baseline": "TASK115 same10x10/1280x720 ground_without_shadow",
+    "same_ground_type_masks": true,
+    "paving_pixels": 26037,
+    "grass_plain_or_forest_pixels": 41684,
+    "ground_rgba_equal_pixels": 921600,
+    "ground_total_pixels": 921600,
+    "check": {
+      "status": "PASS",
+      "paving_iqr": 6.4249506879459375,
+      "baseline_paving_iqr": 6.4249506879459375,
+      "paving_mean_shift": 0.0,
+      "grass_mean_shift": 0.0
+    }
+  }
+}

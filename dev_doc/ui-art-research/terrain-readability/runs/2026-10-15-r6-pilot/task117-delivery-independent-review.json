@@ -1,0 +1,514 @@
+{
+  "schema": "sot-task117-delivery-independent-review/1",
+  "verdict": "pass",
+  "verdict_scope": "只确认TASK117原件交付完整性和formal v2复算；不批准美术、视觉或最终任务验收。",
+  "candidate": {
+    "commit": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+    "tree": "74fedd57ac90868f5ff2a921a57ccbfc6e73f3fa",
+    "parent": "e829b006953ecaa9aef5292a1ae4a5422d5401a3",
+    "source_files": 1487
+  },
+  "request_binding": {
+    "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391",
+    "request_id": "d3b69232-7c81-47d2-9c0c-6819b04388ea",
+    "result_id": "b789ea8b-f460-481f-8e18-70070a0f9f5a",
+    "seq": 117,
+    "attempt": 0,
+    "signed_body_sha256": "6dd908186065d4c337d071bfdc687b0b58cc49f47859aa9ba701009c969112e9",
+    "protocol_sha256": "85e9f51fb3d258a52aad4c467032223883c1ef715aee6498ae9a052cd2985842",
+    "expires_at": "2026-10-15T16:25:19.462772Z",
+    "signature_validation": "Ed25519签名已核验；envelope的signed_body_b64与已签名原件逐字节相同。"
+  },
+  "result_binding": {
+    "bytes": 15568,
+    "sha256": "44df13f216d9a8ee6b8113c9eab616a69e1e38fe8a30d5a5a6e22631ee8ce1b5",
+    "in_reply_to": "d3b69232-7c81-47d2-9c0c-6819b04388ea",
+    "delivery_status": "complete_exact_readback",
+    "domain_verdict": "FAIL_U1_NUMERICAL_ACCEPTANCE",
+    "receipt_status": "pending; API readback and queue acceptance do not prove original Main consumption or acceptance",
+    "native_receiver_adoption": {
+      "message_id": "7b37a362-a8f0-52f5-a710-2677ec0933a1",
+      "conversation_id": "01a118cf-9fad-76e2-99af-46a5f9a550fc",
+      "result_id_and_sha_bound": true,
+      "awaits_signed_main_receipt": true
+    }
+  },
+  "delivery_integrity": {
+    "status": "PASS",
+    "original_files": 595,
+    "original_bytes": 25231569,
+    "transport_carriers": 105,
+    "complete_archives": 2,
+    "all_reconstructed_files_match_manifest": true,
+    "png_count": 17,
+    "pngs": [
+      {
+        "path": "task117-originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/contact_shadow.png",
+        "bytes": 4835,
+        "sha256": "286e3745250bb778ed4df9ed8e8d0c6c34e454718bca0e2c3dc11f72e49fa718",
+        "width": 1280,
+        "height": 720,
+        "match_readback_manifest": true
+      },
+      {
+        "path": "task117-originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/exclusions.png",
+        "bytes": 4605,
+        "sha256": "335f61e448535baa18415dee14f94ba2e980abb96e2e4c88669d691038ae8959",
+        "width": 1280,
+        "height": 720,
+        "match_readback_manifest": true
+      },
+      {
+        "path": "task117-originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/grid.png",
+        "bytes": 19014,
+        "sha256": "cf4a78afa2352a825d1c44d4c2f8a5473f74c885b2ddf288d172b72925dcc8f7",
+        "width": 1280,
+        "height": 720,
+        "match_readback_manifest": true
+      },
+      {
+        "path": "task117-originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/ground.png",
+        "bytes": 2167055,
+        "sha256": "396ef2ec8880a0f3febdf503f15b8f5dc34e4d736efbd590ac8a7c468dd03f3b",
+        "width": 1280,
+        "height": 720,
+        "match_readback_manifest": true
+      },
+      {
+        "path": "task117-originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/ground_types.png",
+        "bytes": 8936,
+        "sha256": "b67f32f9e90b6e1ee7e343e00cda96080bf15065677e13145a9796d5bb839b30",
+        "width": 1280,
+        "height": 720,
+        "match_readback_manifest": true
+      },
+      {
+        "path": "task117-originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/ground_without_shadow.png",
+        "bytes": 2168281,
+        "sha256": "7be27272402bc5aef508e6502a22fca24ff95d94b2abe2c04bf8553fc16840bf",
+        "width": 1280,
+        "height": 720,
+        "match_readback_manifest": true
+      },
+      {
+        "path": "task117-originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/instance_ids.png",
+        "bytes": 32899,
+        "sha256": "6d541c0eb46eedb5c2f20647362b89095214387bd889df9e5d4fe8ac3756ff85",
+        "width": 1280,
+        "height": 720,
+        "match_readback_manifest": true
+      },
+      {
+        "path": "task117-originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/main.png",
+        "bytes": 2203332,
+        "sha256": "67e6a6fb4de0ef016f9016f0178118b6feb1936c1c0f54c01758a86e3b9c6ce4",
+        "width": 1280,
+        "height": 720,
+        "match_readback_manifest": true
+      },
+      {
+        "path": "task117-originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/part_ids.png",
+        "bytes": 32033,
+        "sha256": "cfa18cbc446f14c20718651adaff5de7c79ed2b347aae885e546d2686b907d20",
+        "width": 1280,
+        "height": 720,
+        "match_readback_manifest": true
+      },
+      {
+        "path": "task117-originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/portrait-hud.png",
+        "bytes": 2036214,
+        "sha256": "741ce915de8b341b8505cbfa89bc8dd27ffa5b208d15557b9934bd9eb412b04c",
+        "width": 1280,
+        "height": 720,
+        "match_readback_manifest": true
+      },
+      {
+        "path": "task117-originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/props.png",
+        "bytes": 95459,
+        "sha256": "a3826fc306959d48eddabe67143e4dae060a38e656a185e141426ea1ba7b6e87",
+        "width": 1280,
+        "height": 720,
+        "match_readback_manifest": true
+      },
+      {
+        "path": "task117-originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/reconstruction.png",
+        "bytes": 2203332,
+        "sha256": "67e6a6fb4de0ef016f9016f0178118b6feb1936c1c0f54c01758a86e3b9c6ce4",
+        "width": 1280,
+        "height": 720,
+        "match_readback_manifest": true
+      },
+      {
+        "path": "task117-originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/semantic_coverage.png",
+        "bytes": 28631,
+        "sha256": "3dda64cb7afde249954122ff2bf05c757f507a31f5f5800e9a9781dda1844277",
+        "width": 1280,
+        "height": 720,
+        "match_readback_manifest": true
+      },
+      {
+        "path": "task117-originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/semantic_pair.png",
+        "bytes": 16385,
+        "sha256": "6d2904425448db742ca057592ff24ef3fe2b9fb5a2697143a4301ef5352914b1",
+        "width": 1280,
+        "height": 720,
+        "match_readback_manifest": true
+      },
+      {
+        "path": "task117-originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/semantic_tree_region_map.png",
+        "bytes": 14824,
+        "sha256": "c83e5fb0a8baa5143067fd6bdb88723dd62ca18579dd362df86d9903d2390e7e",
+        "width": 964,
+        "height": 950,
+        "match_readback_manifest": true
+      },
+      {
+        "path": "task117-originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/semantic_write_probe.png",
+        "bytes": 199,
+        "sha256": "f41012b63fe146c7e1a550414148754c9baf66ca1e0e3296de5b504bef043d74",
+        "width": 128,
+        "height": 16,
+        "match_readback_manifest": true
+      },
+      {
+        "path": "task117-originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/tree_crown_union.png",
+        "bytes": 23367,
+        "sha256": "ca370a48a3dcc8730b1bbf5bd2d1c1879b491fdb30da64b580d819d586a25fbd",
+        "width": 1280,
+        "height": 720,
+        "match_readback_manifest": true
+      }
+    ],
+    "source_snapshots": {
+      "count": 11,
+      "files_each": 1487,
+      "all_exact": true,
+      "candidate_source_binding": "PASS",
+      "checkout_eol_conversions_declared": true
+    },
+    "remote_execution": {
+      "case": "calibration_courtyard / 10x10 / 1280x720",
+      "stages_once_each": 5,
+      "all_completed_exit_zero": true,
+      "stage_names": [
+        "recovery-mode editor",
+        "structure capture",
+        "native capture",
+        "frozen v3 validation",
+        "formal U1/C9 v2 validation"
+      ],
+      "reviewer_ran_godot": false
+    }
+  },
+  "formal_v2_reproduction": {
+    "status": "PASS_WITH_FLOAT_ROUNDING_ONLY",
+    "instances": 25,
+    "per_type_T1_T6_statuses": {
+      "wall": {
+        "T1": {
+          "PASS": 1,
+          "FAIL": 5,
+          "NOT_TESTED": 1
+        },
+        "T6": {
+          "PASS": 6,
+          "FAIL": 0,
+          "NOT_TESTED": 1
+        }
+      },
+      "pillar": {
+        "T1": {
+          "PASS": 0,
+          "FAIL": 3,
+          "NOT_TESTED": 0
+        },
+        "T6": {
+          "PASS": 0,
+          "FAIL": 3,
+          "NOT_TESTED": 0
+        }
+      },
+      "tree": {
+        "T1": {
+          "PASS": 1,
+          "FAIL": 11,
+          "NOT_TESTED": 0
+        },
+        "T6": {
+          "PASS": 1,
+          "FAIL": 11,
+          "NOT_TESTED": 0
+        }
+      },
+      "rubble": {
+        "T1": {
+          "PASS": 0,
+          "FAIL": 2,
+          "NOT_TESTED": 1
+        },
+        "T6": {
+          "PASS": 2,
+          "FAIL": 0,
+          "NOT_TESTED": 1
+        }
+      }
+    },
+    "C9_trees": 12,
+    "C9_gate": {
+      "status": "PASS",
+      "passed": 11,
+      "failed": 1,
+      "not_tested": 0,
+      "denominator_all_declared_trees": 12,
+      "passing_fraction": 0.9166666666666666,
+      "required_fraction": 0.8,
+      "required_delta_e00_each_mode": 10,
+      "requires_both_modes_per_tree": true
+    },
+    "C9_failed_tree": {
+      "id": "tree@9.00,0.00",
+      "protanopia_delta_e00": 11.518630423904378,
+      "protanopia_status": "PASS",
+      "deuteranopia_delta_e00": 9.561915245019168,
+      "deuteranopia_status": "FAIL"
+    },
+    "full_document_cloud_comparison": {
+      "float_leaf_differences": 186,
+      "within_measurements": 81,
+      "within_legacy_v1_baseline": 105,
+      "other_or_shape_differences": 0,
+      "max_abs_float_difference": 2.1316282072803006e-14,
+      "statuses_and_counts_equal": true
+    },
+    "frozen_v3_pilot": "PASS",
+    "C4": "PASS",
+    "C8": "PASS",
+    "official_domain_verdict": "FAIL_U1_NUMERICAL_ACCEPTANCE",
+    "art_acceptance": "NOT_TESTED",
+    "six_case_coverage": false,
+    "tree_numeric_gate": {
+      "status": "PASS",
+      "T3_all_declared_trees_pass": true,
+      "T1_T6_are_diagnostics": true,
+      "visual_approval": "SEPARATE_REQUIRED_REVIEW"
+    }
+  },
+  "measurement_interpretation_observation": {
+    "status": "CONFIRMED_INPUT_INTERPRETATION_DEFECT",
+    "scope": "诊断限制；保留全部正式状态，不把FAIL改为PASS。",
+    "examples": [
+      {
+        "instance": "pillar@1.00,4.00",
+        "pixel": [
+          445,
+          283
+        ],
+        "same_instance_opaque_polygon": true,
+        "coverage_r": 122,
+        "masked_visible": false
+      },
+      {
+        "instance": "wall@4.00,1.00",
+        "pixel": [
+          620,
+          274
+        ],
+        "same_instance_opaque_polygon": true,
+        "coverage_r": 107,
+        "masked_visible": false
+      }
+    ],
+    "note": "覆盖图R通道由最后绘制的半透明线条alpha覆盖，令同实例不透明像素被采样掩膜当成空洞；部分周长读数可能计入内部石缝。此项限制数值几何解释，不改变本轮交付复算结论。"
+  },
+  "checks": [
+    {
+      "name": "签名TASK117和RESULT身份绑定",
+      "status": "PASS"
+    },
+    {
+      "name": "595份原件字节数及SHA256逐项匹配",
+      "status": "PASS"
+    },
+    {
+      "name": "17张PNG原始字节、SHA256和实际尺寸",
+      "status": "PASS"
+    },
+    {
+      "name": "11份源快照和1487文件绑定",
+      "status": "PASS"
+    },
+    {
+      "name": "五个远端命令各一次且退出码为0",
+      "status": "PASS"
+    },
+    {
+      "name": "formal v2字段及C9分母/分类对照",
+      "status": "PASS"
+    },
+    {
+      "name": "FAIL、NOT_TESTED及六组未覆盖状态保留",
+      "status": "PASS"
+    },
+    {
+      "name": "T4/T5、盲看、视觉与最终验收",
+      "status": "NOT_REVIEWED_IN_THIS_SCOPE"
+    }
+  ],
+  "limitations": [
+    "本PASS只覆盖交付完整性与数值复现。RESULT原字段receipt_status仍为pending；原生YC采用记录确认精确RESULT已收到并等待签名RECEIPT，本报告不是该回执。",
+    "正式domain_verdict仍为FAIL_U1_NUMERICAL_ACCEPTANCE；C9=11/12并保留tree@9.00,0.00的deuteranopia FAIL；树T1/T6为诊断项。",
+    "美术可读性、盲看、T4/T5及最终任务验收不在范围内。"
+  ],
+  "evidence_files": [
+    {
+      "path": "task117-request/task117-body.json",
+      "bytes": 166727,
+      "sha256": "80f4b9eb0385d51d83c30e7e4b23dc6afd988186ab4442b3330c214e447475eb",
+      "role": "TASK117 request"
+    },
+    {
+      "path": "task117-request/task117-signed-body.original.json",
+      "bytes": 137618,
+      "sha256": "6dd908186065d4c337d071bfdc687b0b58cc49f47859aa9ba701009c969112e9",
+      "role": "signed request body"
+    },
+    {
+      "path": "task117-request/task117-envelope.json",
+      "bytes": 183642,
+      "sha256": "4c289cc4e900beb0f6788d2550da98539b1db1b1b7a3552839d4029a195acba6",
+      "role": "signed request envelope"
+    },
+    {
+      "path": "task117-request/task117-signing-binding.json",
+      "bytes": 1165,
+      "sha256": "5faf913bf16d7811b09db9f836c92407c62bce65f743a71581d8e35761a80a59",
+      "role": "signature binding"
+    },
+    {
+      "path": "task117-request/candidate-binding.json",
+      "bytes": 5074,
+      "sha256": "3019a1352e90cb854f627a5ad397a599aa8348da6decbaf9557ebb4b8a4351e0",
+      "role": "candidate binding"
+    },
+    {
+      "path": "task117-request/candidate-independent-review.json",
+      "bytes": 9002,
+      "sha256": "158e0e8f06b398ac9e66bfb76f23219dff0d1641a965eb8f4687527bab421245",
+      "role": "independent candidate review"
+    },
+    {
+      "path": "task117-request/source-package-index.json",
+      "bytes": 29991,
+      "sha256": "28cee969ed7c8099d9ed699d12f1fb445e6ffa4151b7dee72565819e439850fc",
+      "role": "source package index"
+    },
+    {
+      "path": "task117-request/source-api-readback-proof.json",
+      "bytes": 36344,
+      "sha256": "10313a7441de4fe34109fb4782b25e32d7582375e074061725ca622a4667a4d1",
+      "role": "source API exact readback"
+    },
+    {
+      "path": "task117-request/request-api-readback-proof.json",
+      "bytes": 2409,
+      "sha256": "006ab568ec6877868746f93bcd6b4adc672486ea72bf2c29abf747208b8ec673",
+      "role": "request API exact readback"
+    },
+    {
+      "path": "task117-request/upload-reference-index.json",
+      "bytes": 32611,
+      "sha256": "ce4e2d72535f0b22ed82cc63c7834b654d27860d77879a7b8f83a9fa0aced297",
+      "role": "upload reference index"
+    },
+    {
+      "path": "task117-request/full-source-raw-state.json",
+      "bytes": 316425,
+      "sha256": "2b2a2b76de7ecb15bf46bead011c11fc71f8692445de0ededaa0d1d162c7144f",
+      "role": "full raw source state"
+    },
+    {
+      "path": "task117-readback/result.original.json",
+      "bytes": 15568,
+      "sha256": "44df13f216d9a8ee6b8113c9eab616a69e1e38fe8a30d5a5a6e22631ee8ce1b5",
+      "role": "cloud RESULT original"
+    },
+    {
+      "path": "task117-readback/full-original-map.original.json",
+      "bytes": 187904,
+      "sha256": "4eb051a292003b238f7387f35153d743489faf86515f22a84d91e6e933ac9c4b",
+      "role": "complete original map"
+    },
+    {
+      "path": "task117-readback/original-readback-verification.json",
+      "bytes": 217655,
+      "sha256": "489df72fbeb741a66d37aab7f5e990d311a236b6f7140aa6ef71600800eede88",
+      "role": "595-file readback verification"
+    },
+    {
+      "path": "task117-readback/api-intake-index.json",
+      "bytes": 41485,
+      "sha256": "67c5db9f0a2cf594427ed696829e50563ed6fae89af49482f7763af0669bea3b",
+      "role": "API intake index"
+    },
+    {
+      "path": "task117-readback/task117-originals.tar.gz",
+      "bytes": 13610802,
+      "sha256": "27bd964b4b642de28cd07a88d9f2949299fb38d78330105a9bef7be0be62a885",
+      "role": "original archive"
+    },
+    {
+      "path": "task117-readback/task117-audit-metadata.tar.gz",
+      "bytes": 60006,
+      "sha256": "a525273039b96b093860d04975a971a550410f590b78699071eb1b66c4dfaae0",
+      "role": "metadata archive"
+    },
+    {
+      "path": "task117-readback/main-runtime-verification.json",
+      "bytes": 91004,
+      "sha256": "b585c145ab2640379b739fccdd48f7feb0d795e7da23fff5a9da5220078acd23",
+      "role": "11 source snapshots and five stages"
+    },
+    {
+      "path": "task117-readback/main-acceptance-v2.json",
+      "bytes": 314776,
+      "sha256": "1850814dcdae9da985d705ad78de3c91a9ac8e482a9811ba83a998ab5d022a24",
+      "role": "offline formal v2"
+    },
+    {
+      "path": "task117-readback/cloud-r6-acceptance-v2.json",
+      "bytes": 306709,
+      "sha256": "94467e2cefb736794ef2943b406af34235aa12b5f29b20f261517032ef284a47",
+      "role": "cloud formal v2 original"
+    },
+    {
+      "path": "task117-readback/main-pilot-readback.json",
+      "bytes": 184887,
+      "sha256": "be459ae1e09a6d6d3bcaa6fd1ad34ee83062ae12d1823eddd1dbe20505aac298",
+      "role": "frozen pilot readback"
+    },
+    {
+      "path": "task117-readback/main-frozen-c4-c8.json",
+      "bytes": 4390,
+      "sha256": "9b7ee0c70171511f52b7fffc00b26aaaf9ebfa1469e843e5e14fd9f221046576",
+      "role": "frozen C4/C8 record"
+    },
+    {
+      "path": "task117-readback/native-result-adoption.api-readback.json",
+      "bytes": 8913,
+      "sha256": "f3a40fe93a2e3c2fd9ab550e117cfdb874edeaa532d0c1f5646465de8ee70788",
+      "role": "fresh Page API result adoption"
+    },
+    {
+      "path": "task117-readback/internal-seam-proof.json",
+      "bytes": 3775,
+      "sha256": "10988d36afc25747d312da52f971e9ac9a02bf866f663a7e6ac8e5b69316ff85",
+      "role": "measurement interpretation diagnostic"
+    },
+    {
+      "path": "task117-readback/internal-edge-inspection.json",
+      "bytes": 23953,
+      "sha256": "54a5685973dc4393f1dbad910d74b7d15098da664307a8d6a556de1e85052f4b",
+      "role": "pixel evidence"
+    }
+  ]
+}

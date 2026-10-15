@@ -1,0 +1,100 @@
+{
+  "schema": "sot-record-independent-review/1",
+  "verdict": "pass",
+  "review_scope": {
+    "target_head": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+    "candidate_boundary": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/",
+    "repository_status": "该记录目录是唯一未跟踪路径",
+    "review_mode": "只读；未修改候选或运行游戏"
+  },
+  "manifest_binding": {
+    "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/evidence-file-manifest.json",
+    "bytes": 12422,
+    "sha256": "0bbea9c98cb20ec16d9a8fecf06527fb7a7c680e4a997997bbb3e3e86e49aa8d",
+    "declared_files": 67,
+    "verified_files": 67,
+    "mismatch_count": 0,
+    "unexpected_files": 0,
+    "verified_set": "清单列出的67个文件均在当前目录且字节数和SHA256相符；除清单自身及本审查报告外无未列文件。"
+  },
+  "byte_preservation": {
+    "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/.gitattributes",
+    "bytes": 74,
+    "sha256": "beabba741f6278f9acc058be3a014dc5d37f39fd345902b3cb7ce28e9bfefcc9",
+    "rule": "* -text",
+    "git_check_attr_samples": [
+      "receipt118-signature-binding.json: text unset",
+      "close-ack.original.json: text unset"
+    ],
+    "result": "目录内文本自动换行转换已关闭；两个带原始证据的样本确认未启用text转换。"
+  },
+  "task_receipt": {
+    "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/task-receipt.json",
+    "bytes": 12993,
+    "sha256": "458b1be1c5a82c75e69ad4d31a8cb38148cea6ba22ba3aca49de55e9f70faca3",
+    "status": "completed",
+    "declared_changed_files": 69,
+    "present_before_report": 68,
+    "expected_pending_file": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/record-independent-review.json",
+    "set_result": "其余68个当前文件均在回执清单中；待Main按约复制本报告后，69项路径齐备。"
+  },
+  "closure": {
+    "close_ack": {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/close-ack.original.json",
+      "bytes": 10250,
+      "sha256": "d61b2c20db0d982ed787824327eda1c2780bace691c732b033a346c1fe99a3d0",
+      "type": "CLOSE_ACK",
+      "request_id": "619bfad8-e36b-4eb7-8bad-e806f689ea3a",
+      "in_reply_to": "67947825-6173-46b4-84b8-453065ff734c",
+      "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391",
+      "result_request_id": "b789ea8b-f460-481f-8e18-70070a0f9f5a",
+      "receipt_canonical_sha256": "42b034825830c240a6108ad683b2d82099ebbd450fe6456e8968322b46d668a1"
+    },
+    "native_adoption": {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/native-close-adoption.api-readback.json",
+      "bytes": 13457,
+      "sha256": "471e64a19947b440b5d20502ba8ee19cf8b087d6e483ca846fe90ab9c08f046a",
+      "message_id": "c5b79667-207c-5eb9-b74e-5739042b5ef1",
+      "conversation_id": "01a118cf-9fad-76e2-99af-46a5f9a550fc"
+    },
+    "ledger": {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/ledger-closed.original.json",
+      "bytes": 970,
+      "sha256": "7f10085c7f070f38a94856b7e365cff2a769450014496aa5d8a9ec556cab094a",
+      "state": "closed",
+      "execution_start_count": 1,
+      "evidence_sha256": "42b034825830c240a6108ad683b2d82099ebbd450fe6456e8968322b46d668a1"
+    },
+    "verification": {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/closure-verification.json",
+      "bytes": 1572,
+      "sha256": "f24b8e5ce4359818d2c708a6a3835c6ab151fa43b57c11ba18d956a0513f4bac",
+      "status": "PASS",
+      "all_seven_binding_checks": true,
+      "new_execution": false,
+      "domain_verdict": "FAIL_U1_NUMERICAL_ACCEPTANCE"
+    }
+  },
+  "record_consistency": {
+    "readme_task_claude_request": "与已审证据一致，保留正式数值FAIL、盲看FAIL和内部接缝测量缺陷；T4方法审查及视觉审批仍待完成；六组覆盖仍为NOT_STARTED。",
+    "receipt_and_closure": "协议关闭只表示本次证据交付与消费记录关闭，不改写领域验收结果。"
+  },
+  "checks": [
+    "核对当前HEAD、工作区范围与唯一未跟踪目录。",
+    "逐一复算manifest列出的67个文件字节数和SHA256。",
+    "核对目录级.gitattributes规则及两个代表文件的Git text属性。",
+    "核对Task回执69项清单与现有文件；仅本审查报告待Main复制入库。",
+    "核对CLOSE_ACK、原生接收采用记录、关闭账本及closure-verification之间的请求、回执摘要、状态和次数绑定。",
+    "复核README、Task和Claude审查请求保留当前失败/未决状态。"
+  ],
+  "not_covered": [
+    "不重复TASK117的595原件及1487源码全量回放审查。",
+    "不重新审查T4方法或柱盲看，不判定视觉/美术验收。",
+    "未执行Git暂存或提交，提交对象中的原字节由Main后续验证。"
+  ],
+  "findings": [],
+  "residual_risk": [
+    "领域结果仍是FAIL_U1_NUMERICAL_ACCEPTANCE；六组覆盖未开始，T4和视觉审批未结。",
+    "精确字节的Git暂存及提交后验证尚未执行；本次确认的是当前工作区哈希和text转换属性。"
+  ]
+}

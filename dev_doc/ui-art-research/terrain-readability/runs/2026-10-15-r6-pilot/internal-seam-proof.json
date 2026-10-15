@@ -1,0 +1,128 @@
+{
+  "schema": "sot-semantic-internal-seam-diagnostic/1",
+  "candidate_commit": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+  "status": "CONFIRMED_INPUT_INTERPRETATION_DEFECT",
+  "diagnostic_only": true,
+  "original_verdict_unchanged": true,
+  "rows": [
+    {
+      "stable_id": "pillar@1.00,4.00",
+      "pixel_xy": [
+        445,
+        283
+      ],
+      "props_rgba": [
+        84,
+        79,
+        70,
+        255
+      ],
+      "pair_rgba": [
+        0,
+        0,
+        1,
+        255
+      ],
+      "coverage_rgba": [
+        122,
+        0,
+        0,
+        255
+      ],
+      "opaque_same_instance_polygons_at_pixel": [
+        {
+          "relative_path": "9",
+          "node_class": "Polygon2D",
+          "effective_alpha_min": 1.0,
+          "texture_alpha_min": 255,
+          "polygon_contains_pixel_center": true
+        }
+      ],
+      "frozen_alpha_sample_masks_visible": false
+    },
+    {
+      "stable_id": "wall@4.00,1.00",
+      "pixel_xy": [
+        620,
+        274
+      ],
+      "props_rgba": [
+        95,
+        90,
+        80,
+        255
+      ],
+      "pair_rgba": [
+        0,
+        0,
+        21,
+        6
+      ],
+      "coverage_rgba": [
+        107,
+        0,
+        0,
+        255
+      ],
+      "opaque_same_instance_polygons_at_pixel": [
+        {
+          "relative_path": "2",
+          "node_class": "Polygon2D",
+          "effective_alpha_min": 1.0,
+          "texture_alpha_min": 255,
+          "polygon_contains_pixel_center": true
+        }
+      ],
+      "frozen_alpha_sample_masks_visible": false
+    }
+  ],
+  "mechanism": {
+    "coverage_shader": "blend_disabled overwrites R with last draw effective_source_alpha; it does not compute same-instance composited opacity",
+    "sample_rule": "alpha_sample_masks uses coverage R>127 for instance occupancy",
+    "boundary_rule": "edge_weights counts each pixel neighbour outside group mask",
+    "consequence": "same-instance semi-transparent decorative lines over opaque polygons create false holes; hole edges and own stone line pixels enter exterior contrast measurement"
+  },
+  "remedy_requires_review": {
+    "preserve_source_alpha_and_part_codes": true,
+    "do_not_lower_threshold_or_fill_arbitrary_holes": true,
+    "proposed_separate_occupancy": "record or reconstruct justified same-instance composite occupancy with draw order and unknown/other-instance occlusion retained; source-alpha uncertainty stays separately recorded",
+    "keep_frozen_TASK117_outputs": true
+  },
+  "shader_original": {
+    "path": "tests/claude_review/terrain_semantic_sidecar.gdshader",
+    "bytes": 1467,
+    "sha256": "2045bc68e910d45bea0289745331ed573cf3d6b7fe6d94207128b57811b3babe"
+  },
+  "source_inputs": [
+    {
+      "path": "main.png",
+      "bytes": 2203332,
+      "sha256": "67e6a6fb4de0ef016f9016f0178118b6feb1936c1c0f54c01758a86e3b9c6ce4"
+    },
+    {
+      "path": "props.png",
+      "bytes": 95459,
+      "sha256": "a3826fc306959d48eddabe67143e4dae060a38e656a185e141426ea1ba7b6e87"
+    },
+    {
+      "path": "semantic_pair.png",
+      "bytes": 16385,
+      "sha256": "6d2904425448db742ca057592ff24ef3fe2b9fb5a2697143a4301ef5352914b1"
+    },
+    {
+      "path": "semantic_coverage.png",
+      "bytes": 28631,
+      "sha256": "3dda64cb7afde249954122ff2bf05c757f507a31f5f5800e9a9781dda1844277"
+    },
+    {
+      "path": "capture-manifest.json",
+      "bytes": 1088869,
+      "sha256": "e99d04c68e012c84f15857fd20f67d85accec662be07507340d951c99e47c264"
+    },
+    {
+      "path": "semantic-sidecar-manifest.json",
+      "bytes": 2160845,
+      "sha256": "73f1e1c47b21d7d4c00ede5fe85b1e3cef3d0db565103959abe78cbb63a36584"
+    }
+  ]
+}

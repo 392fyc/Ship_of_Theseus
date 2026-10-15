@@ -1,0 +1,61 @@
+{
+  "checked_at_utc": "2026-10-15 08:58:03 UTC",
+  "scope": "Read-only TASK117 notification diagnosis; API only",
+  "request_id": "d3b69232-7c81-47d2-9c0c-6819b04388ea",
+  "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391",
+  "outcome": "callback_delivery_confirmed_yc_processing_unverified",
+  "event": {
+    "seq": 134,
+    "event_id": "3f761ab4-9ba0-4aa8-bb51-2e3b4a9aee2b",
+    "status": "sent",
+    "attempts": 1,
+    "http_status": 200,
+    "published_at_utc": "2026-10-15T08:47:09Z",
+    "cursor_recorded_at_utc": "2026-10-15T08:47:09.889Z"
+  },
+  "subscription": {
+    "id": "sub_f15fda4416ae8b66ec3d69c9751c5edc",
+    "active": true,
+    "updated_at_utc": "2026-10-15T08:25:32.112Z",
+    "expires_at_utc": "2026-10-15T09:25:32.112Z",
+    "renewal_fault_exists": false
+  },
+  "source_adoption": {
+    "verified": true,
+    "published_before_event": true,
+    "message_id": "af613d24-20d2-5e17-9045-22b015a42b9d",
+    "conversation_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9",
+    "created_at_utc": "2026-10-15T08:45:11.982Z"
+  },
+  "task_ledger": {
+    "state": "admitted",
+    "execution_start_count": 0
+  },
+  "yc_processing": {
+    "native_comment_observed": false,
+    "native_read_thread_status": "active",
+    "native_read_thread_turns": 0,
+    "native_read_thread_updated_at_utc": "2026-10-15T08:38:32.000Z",
+    "processing_proven": false,
+    "idle_wakeup_proven": false,
+    "product_approval_required": "unknown"
+  },
+  "capability_boundary": "Exposed native thread reader provides metadata only for the paired YC root. No cloud event-monitor run detail or retry interface is exposed in the current tool inventory. Existing Page API shows only Source adoption. These observations cannot distinguish pending execution, product confirmation, or platform notification handling failure.",
+  "minimal_next_step": "Obtain the existing YC monitor run detail or current pending-action text through a supported read-only product surface. If the owner can see that surface, inspect it without sending a prompt or re-publishing. Only a concrete pending product action can justify requesting that specific human action. Keep the same task and existing subscription.",
+  "changes": {
+    "service": false,
+    "permissions": false,
+    "protocol": false,
+    "task_or_event": false,
+    "monitor": false,
+    "computer_use": false,
+    "godot_execution": false
+  },
+  "evidence": [
+    "subscription-20261015T085558Z.json",
+    "initial-queue.json",
+    "final-ledger.json",
+    "final-adoption-comments.json",
+    "native-yc-thread.json"
+  ]
+}

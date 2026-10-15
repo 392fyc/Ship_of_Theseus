@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "request_id": "67947825-6173-46b4-84b8-453065ff734c",
+  "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391",
+  "reviewed_input": {
+    "file": "receipt118-body.review-candidate.json",
+    "bytes": 11341,
+    "sha256": "3f4c8cc7eba58fded4267b21fc37323b3341bbdb7a94c4d600bb5fe3f5dd4592"
+  },
+  "independent_review": {
+    "file": "receipt118-independent-review.json",
+    "bytes": 4433,
+    "sha256": "a389a98c58f06e7a985ffe9158c308b729ec36901b7666e67a48ca75026ed061"
+  },
+  "transformation": {
+    "added_fields": {},
+    "removed_fields": [],
+    "changed_existing_fields": [],
+    "all_original_field_values_equal": true
+  },
+  "canonical_body": {
+    "bytes": 9273,
+    "sha256": "42b034825830c240a6108ad683b2d82099ebbd450fe6456e8968322b46d668a1"
+  },
+  "envelope": {
+    "bytes": 12514,
+    "sha256": "7886aebd9f4bbb873b83c7d70280b6ab30d29da1fa7ea72c15aa16130a4b350f"
+  },
+  "authorization_inferred_from_signature": false
+}

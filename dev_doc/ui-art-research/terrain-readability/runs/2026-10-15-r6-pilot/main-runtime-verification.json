@@ -1,0 +1,2617 @@
+{
+  "schema": "sot-task117-main-runtime-original-verification/1",
+  "candidate_commit": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+  "candidate_tree": "74fedd57ac90868f5ff2a921a57ccbfc6e73f3fa",
+  "source_count": 1487,
+  "source_snapshots": [
+    {
+      "file": "preflight.json",
+      "source_count": 1487,
+      "all_exact": true,
+      "at": "2026-10-15T09:01:25.228298+00:00"
+    },
+    {
+      "file": "stage-1-before.json",
+      "source_count": 1487,
+      "all_exact": true,
+      "at": "2026-10-15T09:01:25.984715+00:00"
+    },
+    {
+      "file": "stage-1-after.json",
+      "source_count": 1487,
+      "all_exact": true,
+      "at": "2026-10-15T09:01:57.924149+00:00"
+    },
+    {
+      "file": "stage-2-before.json",
+      "source_count": 1487,
+      "all_exact": true,
+      "at": "2026-10-15T09:01:58.905308+00:00"
+    },
+    {
+      "file": "stage-2-after.json",
+      "source_count": 1487,
+      "all_exact": true,
+      "at": "2026-10-15T09:02:12.220301+00:00"
+    },
+    {
+      "file": "stage-3-before.json",
+      "source_count": 1487,
+      "all_exact": true,
+      "at": "2026-10-15T09:02:13.094657+00:00"
+    },
+    {
+      "file": "stage-3-after.json",
+      "source_count": 1487,
+      "all_exact": true,
+      "at": "2026-10-15T09:02:35.227484+00:00"
+    },
+    {
+      "file": "stage-4-before.json",
+      "source_count": 1487,
+      "all_exact": true,
+      "at": "2026-10-15T09:02:36.076591+00:00"
+    },
+    {
+      "file": "stage-4-after.json",
+      "source_count": 1487,
+      "all_exact": true,
+      "at": "2026-10-15T09:02:43.834100+00:00"
+    },
+    {
+      "file": "stage-5-before.json",
+      "source_count": 1487,
+      "all_exact": true,
+      "at": "2026-10-15T09:02:44.639828+00:00"
+    },
+    {
+      "file": "stage-5-after.json",
+      "source_count": 1487,
+      "all_exact": true,
+      "at": "2026-10-15T09:02:56.708070+00:00"
+    }
+  ],
+  "declared_checkout_conversions": [
+    {
+      "snapshot": "preflight.json",
+      "path": "tests/test_tactical_inject_smoke.gd",
+      "policy": "existing text/eol=crlf; signed raw checkout bytes preserved",
+      "raw_blob": "8fc7edf63acb8cb2678f59a5972666d9ffacbb4c",
+      "clean_blob": "f33e3b0d6d1644a38d51ee813645b6b4c665525c"
+    },
+    {
+      "snapshot": "stage-1-before.json",
+      "path": "tests/test_tactical_inject_smoke.gd",
+      "policy": "existing text/eol=crlf; signed raw checkout bytes preserved",
+      "raw_blob": "8fc7edf63acb8cb2678f59a5972666d9ffacbb4c",
+      "clean_blob": "f33e3b0d6d1644a38d51ee813645b6b4c665525c"
+    },
+    {
+      "snapshot": "stage-1-after.json",
+      "path": "tests/test_tactical_inject_smoke.gd",
+      "policy": "existing text/eol=crlf; signed raw checkout bytes preserved",
+      "raw_blob": "8fc7edf63acb8cb2678f59a5972666d9ffacbb4c",
+      "clean_blob": "f33e3b0d6d1644a38d51ee813645b6b4c665525c"
+    },
+    {
+      "snapshot": "stage-2-before.json",
+      "path": "tests/test_tactical_inject_smoke.gd",
+      "policy": "existing text/eol=crlf; signed raw checkout bytes preserved",
+      "raw_blob": "8fc7edf63acb8cb2678f59a5972666d9ffacbb4c",
+      "clean_blob": "f33e3b0d6d1644a38d51ee813645b6b4c665525c"
+    },
+    {
+      "snapshot": "stage-2-after.json",
+      "path": "tests/test_tactical_inject_smoke.gd",
+      "policy": "existing text/eol=crlf; signed raw checkout bytes preserved",
+      "raw_blob": "8fc7edf63acb8cb2678f59a5972666d9ffacbb4c",
+      "clean_blob": "f33e3b0d6d1644a38d51ee813645b6b4c665525c"
+    },
+    {
+      "snapshot": "stage-3-before.json",
+      "path": "tests/test_tactical_inject_smoke.gd",
+      "policy": "existing text/eol=crlf; signed raw checkout bytes preserved",
+      "raw_blob": "8fc7edf63acb8cb2678f59a5972666d9ffacbb4c",
+      "clean_blob": "f33e3b0d6d1644a38d51ee813645b6b4c665525c"
+    },
+    {
+      "snapshot": "stage-3-after.json",
+      "path": "tests/test_tactical_inject_smoke.gd",
+      "policy": "existing text/eol=crlf; signed raw checkout bytes preserved",
+      "raw_blob": "8fc7edf63acb8cb2678f59a5972666d9ffacbb4c",
+      "clean_blob": "f33e3b0d6d1644a38d51ee813645b6b4c665525c"
+    },
+    {
+      "snapshot": "stage-4-before.json",
+      "path": "tests/test_tactical_inject_smoke.gd",
+      "policy": "existing text/eol=crlf; signed raw checkout bytes preserved",
+      "raw_blob": "8fc7edf63acb8cb2678f59a5972666d9ffacbb4c",
+      "clean_blob": "f33e3b0d6d1644a38d51ee813645b6b4c665525c"
+    },
+    {
+      "snapshot": "stage-4-after.json",
+      "path": "tests/test_tactical_inject_smoke.gd",
+      "policy": "existing text/eol=crlf; signed raw checkout bytes preserved",
+      "raw_blob": "8fc7edf63acb8cb2678f59a5972666d9ffacbb4c",
+      "clean_blob": "f33e3b0d6d1644a38d51ee813645b6b4c665525c"
+    },
+    {
+      "snapshot": "stage-5-before.json",
+      "path": "tests/test_tactical_inject_smoke.gd",
+      "policy": "existing text/eol=crlf; signed raw checkout bytes preserved",
+      "raw_blob": "8fc7edf63acb8cb2678f59a5972666d9ffacbb4c",
+      "clean_blob": "f33e3b0d6d1644a38d51ee813645b6b4c665525c"
+    },
+    {
+      "snapshot": "stage-5-after.json",
+      "path": "tests/test_tactical_inject_smoke.gd",
+      "policy": "existing text/eol=crlf; signed raw checkout bytes preserved",
+      "raw_blob": "8fc7edf63acb8cb2678f59a5972666d9ffacbb4c",
+      "clean_blob": "f33e3b0d6d1644a38d51ee813645b6b4c665525c"
+    }
+  ],
+  "stages": [
+    {
+      "stage": 1,
+      "argv": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--editor",
+        "--recovery-mode",
+        "--path",
+        ".",
+        "--quit"
+      ],
+      "started_at": "2026-10-15T09:01:26.807593+00:00",
+      "finished_at": "2026-10-15T09:01:57.828807+00:00",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "stage": 2,
+      "argv": [
+        "/usr/local/bin/godot",
+        "--headless",
+        "--path",
+        ".",
+        "--script",
+        "res://tests/claude_review/capture_terrain_readability_r6.gd",
+        "--",
+        "--headless-check",
+        "--map-sizes=10",
+        "--resolutions=1280x720",
+        "--v3-diagnostic=/workspace/scratch/15a914414848/task117_runner/outputs/structure-v3.json",
+        "--v5-diagnostic=/workspace/scratch/15a914414848/task117_runner/outputs/structure-v5.json"
+      ],
+      "started_at": "2026-10-15T09:01:59.898367+00:00",
+      "finished_at": "2026-10-15T09:02:12.169716+00:00",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "stage": 3,
+      "argv": [
+        "/usr/local/bin/godot",
+        "--path",
+        ".",
+        "--script",
+        "res://tests/claude_review/capture_terrain_readability_r6.gd",
+        "--",
+        "--out=/workspace/scratch/15a914414848/task117_runner/outputs/10x10_1280x720",
+        "--map-sizes=10",
+        "--resolutions=1280x720",
+        "--v5-diagnostic=/workspace/scratch/15a914414848/task117_runner/outputs/10x10_1280x720/v5-diagnostic.json"
+      ],
+      "started_at": "2026-10-15T09:02:13.965690+00:00",
+      "finished_at": "2026-10-15T09:02:35.148560+00:00",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "stage": 4,
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-X",
+        "utf8",
+        "-B",
+        "tests/claude_review/validate_terrain_semantic_sidecar.py",
+        "/workspace/scratch/15a914414848/task117_runner/outputs/10x10_1280x720/10x10_1280x720/capture-manifest.json",
+        "--phase=pilot",
+        "--measurement-version",
+        "v3",
+        "--source-root",
+        ".",
+        "--candidate",
+        "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+        "--out",
+        "/workspace/scratch/15a914414848/task117_runner/outputs/pilot-readback.json"
+      ],
+      "started_at": "2026-10-15T09:02:36.935864+00:00",
+      "finished_at": "2026-10-15T09:02:43.824639+00:00",
+      "returncode": 0,
+      "timed_out": false
+    },
+    {
+      "stage": 5,
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-X",
+        "utf8",
+        "-B",
+        "tests/claude_review/validate_terrain_acceptance_v2.py",
+        "/workspace/scratch/15a914414848/task117_runner/outputs/10x10_1280x720/10x10_1280x720/capture-manifest.json",
+        "--source-root",
+        ".",
+        "--candidate",
+        "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+        "--out",
+        "/workspace/scratch/15a914414848/task117_runner/outputs/r6-acceptance-v2.json"
+      ],
+      "started_at": "2026-10-15T09:02:45.496542+00:00",
+      "finished_at": "2026-10-15T09:02:56.604076+00:00",
+      "returncode": 0,
+      "timed_out": false
+    }
+  ],
+  "source_binding": "PASS",
+  "expanded_capture_sources": [
+    {
+      "path": "assets/prototype/battlefield_courtyard/coping-limestone-r6.png",
+      "bytes": 3553822,
+      "sha256": "65845274c1a691dad0eeaf61a26cbe4f1f953aa11e8956efbeac7a418183fdea"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/coping-limestone-r6.png.import",
+      "bytes": 1000,
+      "sha256": "4c416b4558bb76532c2bd1f0ae9b677f941dba688204e958dc12bfca974f6f08"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/masonry-wall-limestone-r6.png",
+      "bytes": 3095686,
+      "sha256": "7bf9492ada3bc008655fdbf4d2ae22716ce17aa02a2dc048e9dcda99f7420f30"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/masonry-wall-limestone-r6.png.import",
+      "bytes": 1018,
+      "sha256": "2cf473408038fa5d4c365f4c0e99df9570daa06b0c8aaa073d27473ec009ef89"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/visual_profile.json",
+      "bytes": 3710,
+      "sha256": "5bc0e05dd44fdff0cde8252cc50def1b86fc8d35ea2f23a4b98447ffe1a2607c"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/atlas-mask-sampling-fix.md",
+      "bytes": 3606,
+      "sha256": "d4bb8241656fbd894d289101824fadfd24dd7707a838ac60d2c1bf9aede00880"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/capture-v5-task.md",
+      "bytes": 5544,
+      "sha256": "86dc7e7e3b587c7618acd32a38b9b8d789eaf1df3dd75d7ff2172d005da2e2af"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/capture-v6-task.md",
+      "bytes": 3394,
+      "sha256": "afd7c684a6ed90f14f9aed98ca413718a6f7b57c94f4e5d34a76c79646e5c865"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/semantic-sidecar-task.md",
+      "bytes": 15262,
+      "sha256": "fb0043a515a9d3d0a736f6d7a524848b693b53efffba167e51c4fb6b1463d549"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/t3-semantic-input-task.md",
+      "bytes": 3781,
+      "sha256": "36d766343fe17882dcbf26b9a9852b210152713ebdfe086472d0e9fb2e7d9b5f"
+    },
+    {
+      "path": "scripts/ui/playground/courtyard_board_view.gd",
+      "bytes": 38421,
+      "sha256": "79f94246f33d276c0faec6a6aba1bcd13d3ae0e197e29117b9493b4c564b29a9"
+    },
+    {
+      "path": "tests/claude_review/capture_terrain_readability.gd",
+      "bytes": 94170,
+      "sha256": "db2da66848723d05caf6e1da5215afe75a524199e2dbf0e350ec663b20776266"
+    },
+    {
+      "path": "tests/claude_review/capture_terrain_readability_r6.gd",
+      "bytes": 9359,
+      "sha256": "7a92df98982ecd810d1bf66275db9cdca27df3a46a78b0be35d602961e907fb5"
+    },
+    {
+      "path": "tests/claude_review/capture_terrain_readability_v2.gd",
+      "bytes": 54877,
+      "sha256": "187d0cc3500a0243eac014c449a075325f46614a44e982b6541a9f2a8734b390"
+    },
+    {
+      "path": "tests/claude_review/capture_terrain_readability_v3.gd",
+      "bytes": 26050,
+      "sha256": "e109a5148871b0f31a57fc993d725126a9f51d0f36acb8baf0098dcb33cd7a0e"
+    },
+    {
+      "path": "tests/claude_review/capture_terrain_readability_v4.gd",
+      "bytes": 45994,
+      "sha256": "c5de3166dd13291c9145218deb702f89287d2cce6ced7580a5a632676feb10cb"
+    },
+    {
+      "path": "tests/claude_review/capture_terrain_readability_v5.gd",
+      "bytes": 32866,
+      "sha256": "a9e185345e9b3786fec6502efd21ef7a0df7dae2f481af5a1566d4292f4a0535"
+    },
+    {
+      "path": "tests/claude_review/capture_terrain_readability_v6.gd",
+      "bytes": 8338,
+      "sha256": "3566b8e29740f659ca6e36892e499ebdfad679b3f3d9100533611a372f6cebd2"
+    },
+    {
+      "path": "tests/claude_review/capture_terrain_readability_v6_atlas.gd",
+      "bytes": 7710,
+      "sha256": "53c79f1af07499848b49ddee385110d58bdfa247eb59f0d928c473408cc70e9b"
+    },
+    {
+      "path": "tests/claude_review/capture_terrain_readability_v6_regions.gd",
+      "bytes": 29982,
+      "sha256": "6ff92d56d68bf5d9053ba7fe7feb12aa044076d41db24e495ebdd42793531da6"
+    },
+    {
+      "path": "tests/claude_review/capture_terrain_readability_v6_regions_semantic_sidecar.gd",
+      "bytes": 64618,
+      "sha256": "c7fd360e603a3dc5bb0372f79020393632e4753683cdf910fe6b88f24d1d65ac"
+    },
+    {
+      "path": "tests/claude_review/terrain_mask_draw_layer.gd",
+      "bytes": 4933,
+      "sha256": "3400d8352c7269f21c1a5ca25adb7fdf7a5d9a76419e23ab37ff87aec679970f"
+    },
+    {
+      "path": "tests/claude_review/terrain_mask_draw_layer_r6.gd",
+      "bytes": 2665,
+      "sha256": "3ab02ef2f7fd9eb4d58b918e77fff3ed2061dd1f900de40ae32c3f014d8159e9"
+    },
+    {
+      "path": "tests/claude_review/terrain_readability_capture_v4_cases.json",
+      "bytes": 1568,
+      "sha256": "b5e753a17012eafb6290eb44402f1ba46a5ef629d252846179f63463fcf8e1fc"
+    },
+    {
+      "path": "tests/claude_review/terrain_readability_crown_regions.json",
+      "bytes": 12247,
+      "sha256": "f60950a76b9e4e664a1614a23a3c13ec8b6853a07e9a513f9a95b3cffa3c98ca"
+    },
+    {
+      "path": "tests/claude_review/terrain_readability_tree_semantics.json",
+      "bytes": 9588,
+      "sha256": "abf3d330a41ba4c26416fdbadc2570c6cad05cf0538c678deb455ef7bf512af8"
+    },
+    {
+      "path": "tests/claude_review/terrain_readability_tree_semantics_review.json",
+      "bytes": 2082,
+      "sha256": "f3096700c5bb0f28b9ff2d816b79191d058c8725d80369091f133def5656eb9c"
+    },
+    {
+      "path": "tests/claude_review/terrain_semantic_sidecar.gdshader",
+      "bytes": 1467,
+      "sha256": "2045bc68e910d45bea0289745331ed573cf3d6b7fe6d94207128b57811b3babe"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_capture_input_routing_v3.gd",
+      "bytes": 735,
+      "sha256": "b9ffa6720ffa0b60d01540baa145529f40dbe60368e34fcd2c975657032807a4"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_readability_atlas_mask_contract.py",
+      "bytes": 4118,
+      "sha256": "f555f02e525218e36e1bd94a765b31dd5286fe5327cd6e93d30eed8cb54cda50"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_readability_capture_v2.py",
+      "bytes": 24624,
+      "sha256": "1e8f542dbe95433bd2154ed3e0fbbfc756d361c882edf2e6c07beca37d0f6f6b"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_readability_capture_v3.py",
+      "bytes": 3347,
+      "sha256": "21253b05f6bafb6a8ad668d4b1792391c396c8f6d83ad604886ff35d871f4518"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_readability_capture_v4.py",
+      "bytes": 10135,
+      "sha256": "207ccdfa37c8f434cbf30d35c2a12978b9ca6d7126fa9573a577037bc32dbbf4"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_readability_capture_v5.py",
+      "bytes": 19177,
+      "sha256": "df76fafcfaf2e1345380e46439489434e497bc3d1e0151dc1da878a95f41e9c5"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_readability_capture_v6.py",
+      "bytes": 14147,
+      "sha256": "21adf0926a423fd76194ce0c046fa3fa72a6d9a767397915cb5578ef5fa44083"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_readability_tree_semantics.gd",
+      "bytes": 12714,
+      "sha256": "375930803e030cfb761d388c3dd48935bced26b26a79c320480838e56820fb38"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_semantic_sidecar.py",
+      "bytes": 68572,
+      "sha256": "74d48f7be55146d601b0162bb183f559ab7ff96bafa9322fe2475454eef85841"
+    },
+    {
+      "path": "tests/claude_review/validate_terrain_readability_capture_v2.py",
+      "bytes": 38349,
+      "sha256": "14c5f27fc595777953c2ab7b7f9ac2a87b0099112fd5f4f72927e34c4596b99a"
+    },
+    {
+      "path": "tests/claude_review/validate_terrain_readability_capture_v3.py",
+      "bytes": 9286,
+      "sha256": "81b92efaba60d2452e352e337a0347d0f92f86478b68e3a393fea5f1a68f3d17"
+    },
+    {
+      "path": "tests/claude_review/validate_terrain_readability_capture_v4.py",
+      "bytes": 20826,
+      "sha256": "f81bf008bcf8fc393395be731f0456638aa449e1e6dfc0d2f10ded78e5f863eb"
+    },
+    {
+      "path": "tests/claude_review/validate_terrain_readability_capture_v5.py",
+      "bytes": 31044,
+      "sha256": "aae546e3ac9e24ae6a62889061bfe63cd35fb150cc53da33a9b5634fe8fa0939"
+    },
+    {
+      "path": "tests/claude_review/validate_terrain_readability_capture_v6.py",
+      "bytes": 15145,
+      "sha256": "a1615a0c93daa7f90f934a676bdf6d3f5f71cec7f26571ecbc9b60ae757bacdc"
+    },
+    {
+      "path": "tests/claude_review/validate_terrain_semantic_sidecar.py",
+      "bytes": 120681,
+      "sha256": "416e83e250bc2c2d178ee1f319958c324ea0e421a1b61a9abb20a3a612518f96"
+    }
+  ],
+  "capture_preconditions": "PASS",
+  "capture_errors": [],
+  "C4": {
+    "capture": "portrait-hud.png",
+    "scale": 1.0,
+    "panel_colour_rows": {
+      "top": 0,
+      "bottom": 0,
+      "left": 0,
+      "right": 0
+    },
+    "brass_offset": {
+      "top": 1,
+      "bottom": 1,
+      "left": 1,
+      "right": 1
+    },
+    "pass": true,
+    "sha256": "741ce915de8b341b8505cbfa89bc8dd27ffa5b208d15557b9934bd9eb412b04c",
+    "source": "portrait_companion",
+    "frame_id": 17
+  },
+  "C8": {
+    "manifest": "capture-manifest.json",
+    "project_renderer": "gl_compatibility",
+    "renderer": "gl_compatibility",
+    "capture_count": 2,
+    "mismatches": [],
+    "pass": true
+  },
+  "offline_reproduction": {
+    "v3_cases_equal": true,
+    "v3_pilot_equal": true,
+    "formal_v2_measurements_equal": true,
+    "numeric_difference_count": 120,
+    "maximum_float_difference": 2.1316282072803006e-14
+  },
+  "main_reconstruction_rgba_equal": true,
+  "pngs": [
+    {
+      "path": "task117_runner/outputs/10x10_1280x720/10x10_1280x720/contact_shadow.png",
+      "bytes": 4835,
+      "sha256": "286e3745250bb778ed4df9ed8e8d0c6c34e454718bca0e2c3dc11f72e49fa718",
+      "size": [
+        1280,
+        720
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "task117_runner/outputs/10x10_1280x720/10x10_1280x720/exclusions.png",
+      "bytes": 4605,
+      "sha256": "335f61e448535baa18415dee14f94ba2e980abb96e2e4c88669d691038ae8959",
+      "size": [
+        1280,
+        720
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "task117_runner/outputs/10x10_1280x720/10x10_1280x720/grid.png",
+      "bytes": 19014,
+      "sha256": "cf4a78afa2352a825d1c44d4c2f8a5473f74c885b2ddf288d172b72925dcc8f7",
+      "size": [
+        1280,
+        720
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "task117_runner/outputs/10x10_1280x720/10x10_1280x720/ground.png",
+      "bytes": 2167055,
+      "sha256": "396ef2ec8880a0f3febdf503f15b8f5dc34e4d736efbd590ac8a7c468dd03f3b",
+      "size": [
+        1280,
+        720
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "task117_runner/outputs/10x10_1280x720/10x10_1280x720/ground_types.png",
+      "bytes": 8936,
+      "sha256": "b67f32f9e90b6e1ee7e343e00cda96080bf15065677e13145a9796d5bb839b30",
+      "size": [
+        1280,
+        720
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "task117_runner/outputs/10x10_1280x720/10x10_1280x720/ground_without_shadow.png",
+      "bytes": 2168281,
+      "sha256": "7be27272402bc5aef508e6502a22fca24ff95d94b2abe2c04bf8553fc16840bf",
+      "size": [
+        1280,
+        720
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "task117_runner/outputs/10x10_1280x720/10x10_1280x720/instance_ids.png",
+      "bytes": 32899,
+      "sha256": "6d541c0eb46eedb5c2f20647362b89095214387bd889df9e5d4fe8ac3756ff85",
+      "size": [
+        1280,
+        720
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "task117_runner/outputs/10x10_1280x720/10x10_1280x720/main.png",
+      "bytes": 2203332,
+      "sha256": "67e6a6fb4de0ef016f9016f0178118b6feb1936c1c0f54c01758a86e3b9c6ce4",
+      "size": [
+        1280,
+        720
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "task117_runner/outputs/10x10_1280x720/10x10_1280x720/part_ids.png",
+      "bytes": 32033,
+      "sha256": "cfa18cbc446f14c20718651adaff5de7c79ed2b347aae885e546d2686b907d20",
+      "size": [
+        1280,
+        720
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "task117_runner/outputs/10x10_1280x720/10x10_1280x720/portrait-hud.png",
+      "bytes": 2036214,
+      "sha256": "741ce915de8b341b8505cbfa89bc8dd27ffa5b208d15557b9934bd9eb412b04c",
+      "size": [
+        1280,
+        720
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "task117_runner/outputs/10x10_1280x720/10x10_1280x720/props.png",
+      "bytes": 95459,
+      "sha256": "a3826fc306959d48eddabe67143e4dae060a38e656a185e141426ea1ba7b6e87",
+      "size": [
+        1280,
+        720
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "task117_runner/outputs/10x10_1280x720/10x10_1280x720/reconstruction.png",
+      "bytes": 2203332,
+      "sha256": "67e6a6fb4de0ef016f9016f0178118b6feb1936c1c0f54c01758a86e3b9c6ce4",
+      "size": [
+        1280,
+        720
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "task117_runner/outputs/10x10_1280x720/10x10_1280x720/semantic_coverage.png",
+      "bytes": 28631,
+      "sha256": "3dda64cb7afde249954122ff2bf05c757f507a31f5f5800e9a9781dda1844277",
+      "size": [
+        1280,
+        720
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "task117_runner/outputs/10x10_1280x720/10x10_1280x720/semantic_pair.png",
+      "bytes": 16385,
+      "sha256": "6d2904425448db742ca057592ff24ef3fe2b9fb5a2697143a4301ef5352914b1",
+      "size": [
+        1280,
+        720
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "task117_runner/outputs/10x10_1280x720/10x10_1280x720/semantic_tree_region_map.png",
+      "bytes": 14824,
+      "sha256": "c83e5fb0a8baa5143067fd6bdb88723dd62ca18579dd362df86d9903d2390e7e",
+      "size": [
+        964,
+        950
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "task117_runner/outputs/10x10_1280x720/10x10_1280x720/semantic_write_probe.png",
+      "bytes": 199,
+      "sha256": "f41012b63fe146c7e1a550414148754c9baf66ca1e0e3296de5b504bef043d74",
+      "size": [
+        128,
+        16
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "path": "task117_runner/outputs/10x10_1280x720/10x10_1280x720/tree_crown_union.png",
+      "bytes": 23367,
+      "sha256": "ca370a48a3dcc8730b1bbf5bd2d1c1879b491fdb30da64b580d819d586a25fbd",
+      "size": [
+        1280,
+        720
+      ],
+      "mode": "RGBA"
+    }
+  ],
+  "png_count": 17,
+  "domain_measurements": {
+    "instances": [
+      {
+        "stable_id": "pillar@1.00,4.00",
+        "type": "pillar",
+        "group_id": "pillar@1.00,4.00",
+        "group_members": [
+          "pillar@1.00,4.00"
+        ],
+        "uncertain_pixels_retained": 58,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 15.980313038789383,
+          "inner_median_l": 36.59091170313778,
+          "group_outer_median_l": 20.610598664348394,
+          "perimeter_edges": 286,
+          "full_instance_perimeter_edges": 286,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 405,
+          "group_outer_sample_pixels": 484,
+          "covered_perimeter_edges": 285,
+          "passing_perimeter_edges": 172,
+          "measurable_share": 0.9965034965034965,
+          "passing_share": 0.6013986013986014,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "FAIL",
+          "median_delta_l": 8.73724732350162,
+          "inner_median_l": 35.35344710794624,
+          "group_outer_median_l": 26.616199784444618,
+          "perimeter_edges": 286,
+          "full_instance_perimeter_edges": 286,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 405,
+          "group_outer_sample_pixels": 484,
+          "covered_perimeter_edges": 285,
+          "passing_perimeter_edges": 16,
+          "measurable_share": 0.9965034965034965,
+          "passing_share": 0.055944055944055944,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": true,
+        "T6_required_for_acceptance": true
+      },
+      {
+        "stable_id": "pillar@1.00,7.00",
+        "type": "pillar",
+        "group_id": "pillar@1.00,7.00",
+        "group_members": [
+          "pillar@1.00,7.00"
+        ],
+        "uncertain_pixels_retained": 40,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 16.107470158929644,
+          "inner_median_l": 36.34460522541705,
+          "group_outer_median_l": 20.237135066487404,
+          "perimeter_edges": 284,
+          "full_instance_perimeter_edges": 284,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 383,
+          "group_outer_sample_pixels": 405,
+          "covered_perimeter_edges": 270,
+          "passing_perimeter_edges": 149,
+          "measurable_share": 0.9507042253521126,
+          "passing_share": 0.5246478873239436,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "FAIL",
+          "median_delta_l": 8.391056931485778,
+          "inner_median_l": 34.95669623435761,
+          "group_outer_median_l": 26.56563930287183,
+          "perimeter_edges": 284,
+          "full_instance_perimeter_edges": 284,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 383,
+          "group_outer_sample_pixels": 405,
+          "covered_perimeter_edges": 270,
+          "passing_perimeter_edges": 18,
+          "measurable_share": 0.9507042253521126,
+          "passing_share": 0.06338028169014084,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": true,
+        "T6_required_for_acceptance": true
+      },
+      {
+        "stable_id": "pillar@8.00,4.00",
+        "type": "pillar",
+        "group_id": "pillar@8.00,4.00",
+        "group_members": [
+          "pillar@8.00,4.00"
+        ],
+        "uncertain_pixels_retained": 62,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 17.975469673008035,
+          "inner_median_l": 36.32097369211098,
+          "group_outer_median_l": 18.345504019102947,
+          "perimeter_edges": 294,
+          "full_instance_perimeter_edges": 294,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 417,
+          "group_outer_sample_pixels": 512,
+          "covered_perimeter_edges": 294,
+          "passing_perimeter_edges": 202,
+          "measurable_share": 1.0,
+          "passing_share": 0.6870748299319728,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "FAIL",
+          "median_delta_l": 9.13946260312111,
+          "inner_median_l": 34.806307931315104,
+          "group_outer_median_l": 25.666845328193993,
+          "perimeter_edges": 294,
+          "full_instance_perimeter_edges": 294,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 417,
+          "group_outer_sample_pixels": 512,
+          "covered_perimeter_edges": 294,
+          "passing_perimeter_edges": 21,
+          "measurable_share": 1.0,
+          "passing_share": 0.07142857142857142,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": true,
+        "T6_required_for_acceptance": true
+      },
+      {
+        "stable_id": "rubble@3.12,2.08",
+        "type": "rubble",
+        "group_id": "rubble@3.12,2.08",
+        "group_members": [
+          "rubble@3.12,2.08"
+        ],
+        "uncertain_pixels_retained": 5,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 21.5860904882355,
+          "inner_median_l": 30.34319567570622,
+          "group_outer_median_l": 8.757105187470723,
+          "perimeter_edges": 64,
+          "full_instance_perimeter_edges": 64,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 72,
+          "group_outer_sample_pixels": 88,
+          "covered_perimeter_edges": 59,
+          "passing_perimeter_edges": 36,
+          "measurable_share": 0.921875,
+          "passing_share": 0.5625,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "PASS",
+          "median_delta_l": 14.1749128746395,
+          "inner_median_l": 33.083444680919115,
+          "group_outer_median_l": 18.908531806279615,
+          "perimeter_edges": 64,
+          "full_instance_perimeter_edges": 64,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 72,
+          "group_outer_sample_pixels": 88,
+          "covered_perimeter_edges": 59,
+          "passing_perimeter_edges": 9,
+          "measurable_share": 0.921875,
+          "passing_share": 0.140625,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": true,
+        "T6_required_for_acceptance": true
+      },
+      {
+        "stable_id": "rubble@6.12,2.08",
+        "type": "rubble",
+        "group_id": "rubble@6.12,2.08",
+        "group_members": [
+          "rubble@6.12,2.08"
+        ],
+        "uncertain_pixels_retained": 7,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 24.039403934665557,
+          "inner_median_l": 33.38968896064904,
+          "group_outer_median_l": 9.350285025983482,
+          "perimeter_edges": 62,
+          "full_instance_perimeter_edges": 62,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 72,
+          "group_outer_sample_pixels": 85,
+          "covered_perimeter_edges": 61,
+          "passing_perimeter_edges": 42,
+          "measurable_share": 0.9838709677419355,
+          "passing_share": 0.6774193548387096,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "PASS",
+          "median_delta_l": 13.323871687528069,
+          "inner_median_l": 32.79089542318546,
+          "group_outer_median_l": 19.467023735657392,
+          "perimeter_edges": 62,
+          "full_instance_perimeter_edges": 62,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 72,
+          "group_outer_sample_pixels": 85,
+          "covered_perimeter_edges": 61,
+          "passing_perimeter_edges": 13,
+          "measurable_share": 0.9838709677419355,
+          "passing_share": 0.20967741935483872,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": true,
+        "T6_required_for_acceptance": true
+      },
+      {
+        "stable_id": "rubble@8.12,7.08",
+        "type": "rubble",
+        "group_id": "rubble@8.12,7.08",
+        "group_members": [
+          "rubble@8.12,7.08"
+        ],
+        "uncertain_pixels_retained": 2,
+        "T1": {
+          "status": "NOT_TESTED",
+          "reason": "实例没有足够的2像素内核",
+          "reason_category": "no_interior_core",
+          "median_delta_l": 20.734896707853203,
+          "inner_median_l": 27.983982708252043,
+          "group_outer_median_l": 7.24908600039884,
+          "perimeter_edges": 34,
+          "full_instance_perimeter_edges": 34,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 19,
+          "group_outer_sample_pixels": 7,
+          "covered_perimeter_edges": null,
+          "passing_perimeter_edges": null,
+          "measurable_share": null,
+          "passing_share": null,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "NOT_TESTED",
+          "reason": "实例没有足够的2像素内核",
+          "reason_category": "no_interior_core",
+          "median_delta_l": 5.3052466633656294,
+          "inner_median_l": 29.148007711986466,
+          "group_outer_median_l": 23.842761048620837,
+          "perimeter_edges": 34,
+          "full_instance_perimeter_edges": 34,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 19,
+          "group_outer_sample_pixels": 7,
+          "covered_perimeter_edges": null,
+          "passing_perimeter_edges": null,
+          "measurable_share": null,
+          "passing_share": null,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": true,
+        "T6_required_for_acceptance": true
+      },
+      {
+        "stable_id": "tree@0.00,0.00",
+        "type": "tree",
+        "group_id": "tree-clump-01",
+        "group_members": [
+          "tree@0.00,0.00",
+          "tree@0.00,1.00",
+          "tree@1.00,0.00"
+        ],
+        "uncertain_pixels_retained": 171,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 9.96827202571113,
+          "inner_median_l": 30.024385676613676,
+          "group_outer_median_l": 20.056113650902546,
+          "perimeter_edges": 499,
+          "full_instance_perimeter_edges": 534,
+          "same_group_seam_edges_removed": 35,
+          "inner_pixels": 532,
+          "group_outer_sample_pixels": 2305,
+          "covered_perimeter_edges": 499,
+          "passing_perimeter_edges": 269,
+          "measurable_share": 1.0,
+          "passing_share": 0.5390781563126252,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "FAIL",
+          "median_delta_l": 4.897495534541903,
+          "inner_median_l": 29.33177945548924,
+          "group_outer_median_l": 24.434283920947337,
+          "perimeter_edges": 499,
+          "full_instance_perimeter_edges": 534,
+          "same_group_seam_edges_removed": 35,
+          "inner_pixels": 532,
+          "group_outer_sample_pixels": 2305,
+          "covered_perimeter_edges": 499,
+          "passing_perimeter_edges": 30,
+          "measurable_share": 1.0,
+          "passing_share": 0.06012024048096192,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": false,
+        "T6_required_for_acceptance": false
+      },
+      {
+        "stable_id": "tree@0.00,1.00",
+        "type": "tree",
+        "group_id": "tree-clump-01",
+        "group_members": [
+          "tree@0.00,0.00",
+          "tree@0.00,1.00",
+          "tree@1.00,0.00"
+        ],
+        "uncertain_pixels_retained": 358,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 9.823407004726207,
+          "inner_median_l": 29.879520655628752,
+          "group_outer_median_l": 20.056113650902546,
+          "perimeter_edges": 775,
+          "full_instance_perimeter_edges": 792,
+          "same_group_seam_edges_removed": 17,
+          "inner_pixels": 835,
+          "group_outer_sample_pixels": 2305,
+          "covered_perimeter_edges": 775,
+          "passing_perimeter_edges": 359,
+          "measurable_share": 1.0,
+          "passing_share": 0.4632258064516129,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "FAIL",
+          "median_delta_l": 4.201489260942303,
+          "inner_median_l": 28.63577318188964,
+          "group_outer_median_l": 24.434283920947337,
+          "perimeter_edges": 775,
+          "full_instance_perimeter_edges": 792,
+          "same_group_seam_edges_removed": 17,
+          "inner_pixels": 835,
+          "group_outer_sample_pixels": 2305,
+          "covered_perimeter_edges": 775,
+          "passing_perimeter_edges": 7,
+          "measurable_share": 1.0,
+          "passing_share": 0.00903225806451613,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": false,
+        "T6_required_for_acceptance": false
+      },
+      {
+        "stable_id": "tree@0.00,8.00",
+        "type": "tree",
+        "group_id": "tree-clump-03",
+        "group_members": [
+          "tree@0.00,8.00",
+          "tree@0.00,9.00",
+          "tree@1.00,9.00"
+        ],
+        "uncertain_pixels_retained": 292,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 11.312096005455828,
+          "inner_median_l": 31.303296812159175,
+          "group_outer_median_l": 19.991200806703347,
+          "perimeter_edges": 644,
+          "full_instance_perimeter_edges": 660,
+          "same_group_seam_edges_removed": 16,
+          "inner_pixels": 722,
+          "group_outer_sample_pixels": 2287,
+          "covered_perimeter_edges": 644,
+          "passing_perimeter_edges": 370,
+          "measurable_share": 1.0,
+          "passing_share": 0.5745341614906833,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "FAIL",
+          "median_delta_l": 5.180316674635684,
+          "inner_median_l": 30.564161726849974,
+          "group_outer_median_l": 25.38384505221429,
+          "perimeter_edges": 644,
+          "full_instance_perimeter_edges": 660,
+          "same_group_seam_edges_removed": 16,
+          "inner_pixels": 722,
+          "group_outer_sample_pixels": 2287,
+          "covered_perimeter_edges": 644,
+          "passing_perimeter_edges": 13,
+          "measurable_share": 1.0,
+          "passing_share": 0.020186335403726708,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": false,
+        "T6_required_for_acceptance": false
+      },
+      {
+        "stable_id": "tree@0.00,9.00",
+        "type": "tree",
+        "group_id": "tree-clump-03",
+        "group_members": [
+          "tree@0.00,8.00",
+          "tree@0.00,9.00",
+          "tree@1.00,9.00"
+        ],
+        "uncertain_pixels_retained": 266,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 10.31594967945314,
+          "inner_median_l": 30.307150486156488,
+          "group_outer_median_l": 19.991200806703347,
+          "perimeter_edges": 665,
+          "full_instance_perimeter_edges": 686,
+          "same_group_seam_edges_removed": 21,
+          "inner_pixels": 695,
+          "group_outer_sample_pixels": 2287,
+          "covered_perimeter_edges": 665,
+          "passing_perimeter_edges": 361,
+          "measurable_share": 1.0,
+          "passing_share": 0.5428571428571428,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "FAIL",
+          "median_delta_l": 3.830529896730397,
+          "inner_median_l": 29.214374948944688,
+          "group_outer_median_l": 25.38384505221429,
+          "perimeter_edges": 665,
+          "full_instance_perimeter_edges": 686,
+          "same_group_seam_edges_removed": 21,
+          "inner_pixels": 695,
+          "group_outer_sample_pixels": 2287,
+          "covered_perimeter_edges": 665,
+          "passing_perimeter_edges": 6,
+          "measurable_share": 1.0,
+          "passing_share": 0.009022556390977444,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": false,
+        "T6_required_for_acceptance": false
+      },
+      {
+        "stable_id": "tree@1.00,0.00",
+        "type": "tree",
+        "group_id": "tree-clump-01",
+        "group_members": [
+          "tree@0.00,0.00",
+          "tree@0.00,1.00",
+          "tree@1.00,0.00"
+        ],
+        "uncertain_pixels_retained": 314,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 10.117229566796176,
+          "inner_median_l": 30.173343217698722,
+          "group_outer_median_l": 20.056113650902546,
+          "perimeter_edges": 696,
+          "full_instance_perimeter_edges": 714,
+          "same_group_seam_edges_removed": 18,
+          "inner_pixels": 764,
+          "group_outer_sample_pixels": 2305,
+          "covered_perimeter_edges": 696,
+          "passing_perimeter_edges": 316,
+          "measurable_share": 1.0,
+          "passing_share": 0.4540229885057471,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "FAIL",
+          "median_delta_l": 4.6694223521413,
+          "inner_median_l": 29.103706273088637,
+          "group_outer_median_l": 24.434283920947337,
+          "perimeter_edges": 696,
+          "full_instance_perimeter_edges": 714,
+          "same_group_seam_edges_removed": 18,
+          "inner_pixels": 764,
+          "group_outer_sample_pixels": 2305,
+          "covered_perimeter_edges": 696,
+          "passing_perimeter_edges": 0,
+          "measurable_share": 1.0,
+          "passing_share": 0.0,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": false,
+        "T6_required_for_acceptance": false
+      },
+      {
+        "stable_id": "tree@1.00,9.00",
+        "type": "tree",
+        "group_id": "tree-clump-03",
+        "group_members": [
+          "tree@0.00,8.00",
+          "tree@0.00,9.00",
+          "tree@1.00,9.00"
+        ],
+        "uncertain_pixels_retained": 304,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 9.90712226445487,
+          "inner_median_l": 29.898323071158217,
+          "group_outer_median_l": 19.991200806703347,
+          "perimeter_edges": 675,
+          "full_instance_perimeter_edges": 698,
+          "same_group_seam_edges_removed": 23,
+          "inner_pixels": 771,
+          "group_outer_sample_pixels": 2287,
+          "covered_perimeter_edges": 675,
+          "passing_perimeter_edges": 528,
+          "measurable_share": 1.0,
+          "passing_share": 0.7822222222222223,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "FAIL",
+          "median_delta_l": 3.6275624329762337,
+          "inner_median_l": 29.011407485190524,
+          "group_outer_median_l": 25.38384505221429,
+          "perimeter_edges": 675,
+          "full_instance_perimeter_edges": 698,
+          "same_group_seam_edges_removed": 23,
+          "inner_pixels": 771,
+          "group_outer_sample_pixels": 2287,
+          "covered_perimeter_edges": 675,
+          "passing_perimeter_edges": 2,
+          "measurable_share": 1.0,
+          "passing_share": 0.002962962962962963,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": false,
+        "T6_required_for_acceptance": false
+      },
+      {
+        "stable_id": "tree@8.00,0.00",
+        "type": "tree",
+        "group_id": "tree-clump-02",
+        "group_members": [
+          "tree@8.00,0.00",
+          "tree@9.00,0.00",
+          "tree@9.00,1.00"
+        ],
+        "uncertain_pixels_retained": 39,
+        "T1": {
+          "status": "PASS",
+          "median_delta_l": 26.301606591680333,
+          "inner_median_l": 47.503495050084496,
+          "group_outer_median_l": 21.201888458404163,
+          "perimeter_edges": 132,
+          "full_instance_perimeter_edges": 132,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 136,
+          "group_outer_sample_pixels": 804,
+          "covered_perimeter_edges": 121,
+          "passing_perimeter_edges": 121,
+          "measurable_share": 0.9166666666666666,
+          "passing_share": 0.9166666666666666,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "PASS",
+          "median_delta_l": 10.403542022333049,
+          "inner_median_l": 35.863379073826145,
+          "group_outer_median_l": 25.459837051493096,
+          "perimeter_edges": 132,
+          "full_instance_perimeter_edges": 132,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 136,
+          "group_outer_sample_pixels": 804,
+          "covered_perimeter_edges": 121,
+          "passing_perimeter_edges": 40,
+          "measurable_share": 0.9166666666666666,
+          "passing_share": 0.30303030303030304,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": false,
+        "T6_required_for_acceptance": false
+      },
+      {
+        "stable_id": "tree@8.00,9.00",
+        "type": "tree",
+        "group_id": "tree-clump-04",
+        "group_members": [
+          "tree@8.00,9.00",
+          "tree@9.00,8.00",
+          "tree@9.00,9.00"
+        ],
+        "uncertain_pixels_retained": 266,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 11.338148917198122,
+          "inner_median_l": 29.970865263619412,
+          "group_outer_median_l": 18.63271634642129,
+          "perimeter_edges": 670,
+          "full_instance_perimeter_edges": 680,
+          "same_group_seam_edges_removed": 10,
+          "inner_pixels": 732,
+          "group_outer_sample_pixels": 2201,
+          "covered_perimeter_edges": 670,
+          "passing_perimeter_edges": 437,
+          "measurable_share": 1.0,
+          "passing_share": 0.6522388059701493,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "FAIL",
+          "median_delta_l": 4.379260518962674,
+          "inner_median_l": 28.847554652696758,
+          "group_outer_median_l": 24.468294133734084,
+          "perimeter_edges": 670,
+          "full_instance_perimeter_edges": 680,
+          "same_group_seam_edges_removed": 10,
+          "inner_pixels": 732,
+          "group_outer_sample_pixels": 2201,
+          "covered_perimeter_edges": 670,
+          "passing_perimeter_edges": 16,
+          "measurable_share": 1.0,
+          "passing_share": 0.023880597014925373,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": false,
+        "T6_required_for_acceptance": false
+      },
+      {
+        "stable_id": "tree@9.00,0.00",
+        "type": "tree",
+        "group_id": "tree-clump-02",
+        "group_members": [
+          "tree@8.00,0.00",
+          "tree@9.00,0.00",
+          "tree@9.00,1.00"
+        ],
+        "uncertain_pixels_retained": 162,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 7.684193671011915,
+          "inner_median_l": 28.886082129416078,
+          "group_outer_median_l": 21.201888458404163,
+          "perimeter_edges": 435,
+          "full_instance_perimeter_edges": 444,
+          "same_group_seam_edges_removed": 9,
+          "inner_pixels": 398,
+          "group_outer_sample_pixels": 804,
+          "covered_perimeter_edges": 435,
+          "passing_perimeter_edges": 193,
+          "measurable_share": 1.0,
+          "passing_share": 0.4436781609195402,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "FAIL",
+          "median_delta_l": 3.113308086795737,
+          "inner_median_l": 28.573145138288833,
+          "group_outer_median_l": 25.459837051493096,
+          "perimeter_edges": 435,
+          "full_instance_perimeter_edges": 444,
+          "same_group_seam_edges_removed": 9,
+          "inner_pixels": 398,
+          "group_outer_sample_pixels": 804,
+          "covered_perimeter_edges": 435,
+          "passing_perimeter_edges": 0,
+          "measurable_share": 1.0,
+          "passing_share": 0.0,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": false,
+        "T6_required_for_acceptance": false
+      },
+      {
+        "stable_id": "tree@9.00,1.00",
+        "type": "tree",
+        "group_id": "tree-clump-02",
+        "group_members": [
+          "tree@8.00,0.00",
+          "tree@9.00,0.00",
+          "tree@9.00,1.00"
+        ],
+        "uncertain_pixels_retained": 27,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 14.815348483738326,
+          "inner_median_l": 36.01723694214249,
+          "group_outer_median_l": 21.201888458404163,
+          "perimeter_edges": 61,
+          "full_instance_perimeter_edges": 70,
+          "same_group_seam_edges_removed": 9,
+          "inner_pixels": 61,
+          "group_outer_sample_pixels": 804,
+          "covered_perimeter_edges": 60,
+          "passing_perimeter_edges": 15,
+          "measurable_share": 0.9836065573770492,
+          "passing_share": 0.2459016393442623,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "FAIL",
+          "median_delta_l": 8.570473320851612,
+          "inner_median_l": 34.03031037234471,
+          "group_outer_median_l": 25.459837051493096,
+          "perimeter_edges": 61,
+          "full_instance_perimeter_edges": 70,
+          "same_group_seam_edges_removed": 9,
+          "inner_pixels": 61,
+          "group_outer_sample_pixels": 804,
+          "covered_perimeter_edges": 60,
+          "passing_perimeter_edges": 0,
+          "measurable_share": 0.9836065573770492,
+          "passing_share": 0.0,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": false,
+        "T6_required_for_acceptance": false
+      },
+      {
+        "stable_id": "tree@9.00,8.00",
+        "type": "tree",
+        "group_id": "tree-clump-04",
+        "group_members": [
+          "tree@8.00,9.00",
+          "tree@9.00,8.00",
+          "tree@9.00,9.00"
+        ],
+        "uncertain_pixels_retained": 301,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 12.101235202428448,
+          "inner_median_l": 30.73395154884974,
+          "group_outer_median_l": 18.63271634642129,
+          "perimeter_edges": 695,
+          "full_instance_perimeter_edges": 726,
+          "same_group_seam_edges_removed": 31,
+          "inner_pixels": 757,
+          "group_outer_sample_pixels": 2201,
+          "covered_perimeter_edges": 695,
+          "passing_perimeter_edges": 350,
+          "measurable_share": 1.0,
+          "passing_share": 0.5035971223021583,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "FAIL",
+          "median_delta_l": 7.474836168329411,
+          "inner_median_l": 31.943130302063494,
+          "group_outer_median_l": 24.468294133734084,
+          "perimeter_edges": 695,
+          "full_instance_perimeter_edges": 726,
+          "same_group_seam_edges_removed": 31,
+          "inner_pixels": 757,
+          "group_outer_sample_pixels": 2201,
+          "covered_perimeter_edges": 695,
+          "passing_perimeter_edges": 29,
+          "measurable_share": 1.0,
+          "passing_share": 0.041726618705035974,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": false,
+        "T6_required_for_acceptance": false
+      },
+      {
+        "stable_id": "tree@9.00,9.00",
+        "type": "tree",
+        "group_id": "tree-clump-04",
+        "group_members": [
+          "tree@8.00,9.00",
+          "tree@9.00,8.00",
+          "tree@9.00,9.00"
+        ],
+        "uncertain_pixels_retained": 309,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 11.27239487934353,
+          "inner_median_l": 29.90511122576482,
+          "group_outer_median_l": 18.63271634642129,
+          "perimeter_edges": 701,
+          "full_instance_perimeter_edges": 742,
+          "same_group_seam_edges_removed": 41,
+          "inner_pixels": 772,
+          "group_outer_sample_pixels": 2201,
+          "covered_perimeter_edges": 701,
+          "passing_perimeter_edges": 395,
+          "measurable_share": 1.0,
+          "passing_share": 0.5634807417974322,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "FAIL",
+          "median_delta_l": 4.4633418435775205,
+          "inner_median_l": 28.931635977311604,
+          "group_outer_median_l": 24.468294133734084,
+          "perimeter_edges": 701,
+          "full_instance_perimeter_edges": 742,
+          "same_group_seam_edges_removed": 41,
+          "inner_pixels": 772,
+          "group_outer_sample_pixels": 2201,
+          "covered_perimeter_edges": 701,
+          "passing_perimeter_edges": 0,
+          "measurable_share": 1.0,
+          "passing_share": 0.0,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": false,
+        "T6_required_for_acceptance": false
+      },
+      {
+        "stable_id": "wall@3.00,1.00",
+        "type": "wall",
+        "group_id": "wall-group-01",
+        "group_members": [
+          "wall@3.00,1.00",
+          "wall@3.00,2.00",
+          "wall@4.00,1.00",
+          "wall@5.00,1.00",
+          "wall@6.00,1.00",
+          "wall@6.00,2.00"
+        ],
+        "uncertain_pixels_retained": 24,
+        "T1": {
+          "status": "PASS",
+          "median_delta_l": 24.744958055431326,
+          "inner_median_l": 42.38269906390571,
+          "group_outer_median_l": 17.637741008474386,
+          "perimeter_edges": 103,
+          "full_instance_perimeter_edges": 188,
+          "same_group_seam_edges_removed": 85,
+          "inner_pixels": 262,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 96,
+          "passing_perimeter_edges": 89,
+          "measurable_share": 0.9320388349514563,
+          "passing_share": 0.8640776699029126,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "PASS",
+          "median_delta_l": 14.918667721435476,
+          "inner_median_l": 39.06975188297909,
+          "group_outer_median_l": 24.151084161543615,
+          "perimeter_edges": 103,
+          "full_instance_perimeter_edges": 188,
+          "same_group_seam_edges_removed": 85,
+          "inner_pixels": 262,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 96,
+          "passing_perimeter_edges": 55,
+          "measurable_share": 0.9320388349514563,
+          "passing_share": 0.5339805825242718,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": true,
+        "T6_required_for_acceptance": true
+      },
+      {
+        "stable_id": "wall@3.00,2.00",
+        "type": "wall",
+        "group_id": "wall-group-01",
+        "group_members": [
+          "wall@3.00,1.00",
+          "wall@3.00,2.00",
+          "wall@4.00,1.00",
+          "wall@5.00,1.00",
+          "wall@6.00,1.00",
+          "wall@6.00,2.00"
+        ],
+        "uncertain_pixels_retained": 32,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 21.680802424215898,
+          "inner_median_l": 39.318543432690284,
+          "group_outer_median_l": 17.637741008474386,
+          "perimeter_edges": 211,
+          "full_instance_perimeter_edges": 254,
+          "same_group_seam_edges_removed": 43,
+          "inner_pixels": 335,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 184,
+          "passing_perimeter_edges": 139,
+          "measurable_share": 0.8720379146919431,
+          "passing_share": 0.6587677725118484,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "PASS",
+          "median_delta_l": 13.549762003575466,
+          "inner_median_l": 37.70084616511908,
+          "group_outer_median_l": 24.151084161543615,
+          "perimeter_edges": 211,
+          "full_instance_perimeter_edges": 254,
+          "same_group_seam_edges_removed": 43,
+          "inner_pixels": 335,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 184,
+          "passing_perimeter_edges": 45,
+          "measurable_share": 0.8720379146919431,
+          "passing_share": 0.2132701421800948,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": true,
+        "T6_required_for_acceptance": true
+      },
+      {
+        "stable_id": "wall@4.00,1.00",
+        "type": "wall",
+        "group_id": "wall-group-01",
+        "group_members": [
+          "wall@3.00,1.00",
+          "wall@3.00,2.00",
+          "wall@4.00,1.00",
+          "wall@5.00,1.00",
+          "wall@6.00,1.00",
+          "wall@6.00,2.00"
+        ],
+        "uncertain_pixels_retained": 0,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 22.528104286341026,
+          "inner_median_l": 40.16584529481541,
+          "group_outer_median_l": 17.637741008474386,
+          "perimeter_edges": 147,
+          "full_instance_perimeter_edges": 232,
+          "same_group_seam_edges_removed": 85,
+          "inner_pixels": 351,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 147,
+          "passing_perimeter_edges": 90,
+          "measurable_share": 1.0,
+          "passing_share": 0.6122448979591837,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "PASS",
+          "median_delta_l": 14.57985712735374,
+          "inner_median_l": 38.730941288897355,
+          "group_outer_median_l": 24.151084161543615,
+          "perimeter_edges": 147,
+          "full_instance_perimeter_edges": 232,
+          "same_group_seam_edges_removed": 85,
+          "inner_pixels": 351,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 147,
+          "passing_perimeter_edges": 40,
+          "measurable_share": 1.0,
+          "passing_share": 0.272108843537415,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": true,
+        "T6_required_for_acceptance": true
+      },
+      {
+        "stable_id": "wall@5.00,1.00",
+        "type": "wall",
+        "group_id": "wall-group-01",
+        "group_members": [
+          "wall@3.00,1.00",
+          "wall@3.00,2.00",
+          "wall@4.00,1.00",
+          "wall@5.00,1.00",
+          "wall@6.00,1.00",
+          "wall@6.00,2.00"
+        ],
+        "uncertain_pixels_retained": 0,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 23.860867131092398,
+          "inner_median_l": 41.498608139566784,
+          "group_outer_median_l": 17.637741008474386,
+          "perimeter_edges": 128,
+          "full_instance_perimeter_edges": 220,
+          "same_group_seam_edges_removed": 92,
+          "inner_pixels": 324,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 114,
+          "passing_perimeter_edges": 72,
+          "measurable_share": 0.890625,
+          "passing_share": 0.5625,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "PASS",
+          "median_delta_l": 15.455154109299514,
+          "inner_median_l": 39.60623827084313,
+          "group_outer_median_l": 24.151084161543615,
+          "perimeter_edges": 128,
+          "full_instance_perimeter_edges": 220,
+          "same_group_seam_edges_removed": 92,
+          "inner_pixels": 324,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 114,
+          "passing_perimeter_edges": 34,
+          "measurable_share": 0.890625,
+          "passing_share": 0.265625,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": true,
+        "T6_required_for_acceptance": true
+      },
+      {
+        "stable_id": "wall@6.00,1.00",
+        "type": "wall",
+        "group_id": "wall-group-01",
+        "group_members": [
+          "wall@3.00,1.00",
+          "wall@3.00,2.00",
+          "wall@4.00,1.00",
+          "wall@5.00,1.00",
+          "wall@6.00,1.00",
+          "wall@6.00,2.00"
+        ],
+        "uncertain_pixels_retained": 13,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 24.898999728775557,
+          "inner_median_l": 42.53674073724994,
+          "group_outer_median_l": 17.637741008474386,
+          "perimeter_edges": 104,
+          "full_instance_perimeter_edges": 178,
+          "same_group_seam_edges_removed": 74,
+          "inner_pixels": 257,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 85,
+          "passing_perimeter_edges": 56,
+          "measurable_share": 0.8173076923076923,
+          "passing_share": 0.5384615384615384,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "PASS",
+          "median_delta_l": 16.64382244608681,
+          "inner_median_l": 40.79490660763042,
+          "group_outer_median_l": 24.151084161543615,
+          "perimeter_edges": 104,
+          "full_instance_perimeter_edges": 178,
+          "same_group_seam_edges_removed": 74,
+          "inner_pixels": 257,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 85,
+          "passing_perimeter_edges": 31,
+          "measurable_share": 0.8173076923076923,
+          "passing_share": 0.2980769230769231,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": true,
+        "T6_required_for_acceptance": true
+      },
+      {
+        "stable_id": "wall@6.00,2.00",
+        "type": "wall",
+        "group_id": "wall-group-01",
+        "group_members": [
+          "wall@3.00,1.00",
+          "wall@3.00,2.00",
+          "wall@4.00,1.00",
+          "wall@5.00,1.00",
+          "wall@6.00,1.00",
+          "wall@6.00,2.00"
+        ],
+        "uncertain_pixels_retained": 26,
+        "T1": {
+          "status": "FAIL",
+          "median_delta_l": 21.70194850683268,
+          "inner_median_l": 39.339689515307064,
+          "group_outer_median_l": 17.637741008474386,
+          "perimeter_edges": 199,
+          "full_instance_perimeter_edges": 260,
+          "same_group_seam_edges_removed": 61,
+          "inner_pixels": 348,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 171,
+          "passing_perimeter_edges": 113,
+          "measurable_share": 0.8592964824120602,
+          "passing_share": 0.5678391959798995,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "PASS",
+          "median_delta_l": 14.602800356758415,
+          "inner_median_l": 38.75388451830203,
+          "group_outer_median_l": 24.151084161543615,
+          "perimeter_edges": 199,
+          "full_instance_perimeter_edges": 260,
+          "same_group_seam_edges_removed": 61,
+          "inner_pixels": 348,
+          "group_outer_sample_pixels": 1307,
+          "covered_perimeter_edges": 171,
+          "passing_perimeter_edges": 20,
+          "measurable_share": 0.8592964824120602,
+          "passing_share": 0.10050251256281408,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": true,
+        "T6_required_for_acceptance": true
+      },
+      {
+        "stable_id": "wall@8.00,7.00",
+        "type": "wall",
+        "group_id": "wall-group-02",
+        "group_members": [
+          "wall@8.00,7.00"
+        ],
+        "uncertain_pixels_retained": 0,
+        "T1": {
+          "status": "NOT_TESTED",
+          "reason": "实例没有足够的2像素内核",
+          "reason_category": "no_interior_core",
+          "median_delta_l": 25.22977703546433,
+          "inner_median_l": 44.45264680900386,
+          "group_outer_median_l": 19.22286977353953,
+          "perimeter_edges": 100,
+          "full_instance_perimeter_edges": 100,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 67,
+          "group_outer_sample_pixels": 89,
+          "covered_perimeter_edges": null,
+          "passing_perimeter_edges": null,
+          "measurable_share": null,
+          "passing_share": null,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T1",
+          "sigma_px": null
+        },
+        "T6": {
+          "status": "NOT_TESTED",
+          "reason": "实例没有足够的2像素内核",
+          "reason_category": "no_interior_core",
+          "median_delta_l": 12.056510801299467,
+          "inner_median_l": 36.61230892634298,
+          "group_outer_median_l": 24.555798125043516,
+          "perimeter_edges": 100,
+          "full_instance_perimeter_edges": 100,
+          "same_group_seam_edges_removed": 0,
+          "inner_pixels": 67,
+          "group_outer_sample_pixels": 89,
+          "covered_perimeter_edges": null,
+          "passing_perimeter_edges": null,
+          "measurable_share": null,
+          "passing_share": null,
+          "perimeter_scope": "instance edges with neighbour outside captured group",
+          "unknown_excluded_edges_retained": true,
+          "inner_radius_px": 2,
+          "outer_radius_px": 4,
+          "metric": "T6",
+          "sigma_px": 2
+        },
+        "T1_required_for_acceptance": true,
+        "T6_required_for_acceptance": true
+      }
+    ],
+    "summary": {
+      "wall": {
+        "T1": {
+          "PASS": 1,
+          "FAIL": 5,
+          "NOT_TESTED": 1
+        },
+        "T6": {
+          "PASS": 6,
+          "FAIL": 0,
+          "NOT_TESTED": 1
+        }
+      },
+      "pillar": {
+        "T1": {
+          "PASS": 0,
+          "FAIL": 3,
+          "NOT_TESTED": 0
+        },
+        "T6": {
+          "PASS": 0,
+          "FAIL": 3,
+          "NOT_TESTED": 0
+        }
+      },
+      "tree": {
+        "T1": {
+          "PASS": 1,
+          "FAIL": 11,
+          "NOT_TESTED": 0
+        },
+        "T6": {
+          "PASS": 1,
+          "FAIL": 11,
+          "NOT_TESTED": 0
+        }
+      },
+      "rubble": {
+        "T1": {
+          "PASS": 0,
+          "FAIL": 2,
+          "NOT_TESTED": 1
+        },
+        "T6": {
+          "PASS": 2,
+          "FAIL": 0,
+          "NOT_TESTED": 1
+        }
+      }
+    },
+    "C9_trees": [
+      {
+        "stable_id": "tree@0.00,0.00",
+        "group_id": "tree-clump-01",
+        "crown_part_codes": [
+          7,
+          8,
+          9
+        ],
+        "crown_pixels": 421,
+        "reference_pixels": 813,
+        "reference_categories": [
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 65
+          },
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 748
+          }
+        ],
+        "water_pixels_excluded": 0,
+        "uncertain_crown_pixels_retained": 89,
+        "reference_scope": "frozen S3 crown union exterior with v3 S5 grass/environment reference",
+        "severity": 1.0,
+        "modes": {
+          "protanopia": {
+            "delta_e00": 14.5078407349437,
+            "status": "PASS"
+          },
+          "deuteranopia": {
+            "delta_e00": 11.9077212504846,
+            "status": "PASS"
+          }
+        },
+        "normal_delta_e00_diagnostic": 17.306805238827565,
+        "status": "PASS"
+      },
+      {
+        "stable_id": "tree@0.00,1.00",
+        "group_id": "tree-clump-01",
+        "crown_part_codes": [
+          7,
+          8,
+          9
+        ],
+        "crown_pixels": 824,
+        "reference_pixels": 813,
+        "reference_categories": [
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 65
+          },
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 748
+          }
+        ],
+        "water_pixels_excluded": 0,
+        "uncertain_crown_pixels_retained": 196,
+        "reference_scope": "frozen S3 crown union exterior with v3 S5 grass/environment reference",
+        "severity": 1.0,
+        "modes": {
+          "protanopia": {
+            "delta_e00": 13.228234564884001,
+            "status": "PASS"
+          },
+          "deuteranopia": {
+            "delta_e00": 10.75684826987359,
+            "status": "PASS"
+          }
+        },
+        "normal_delta_e00_diagnostic": 16.3852618305612,
+        "status": "PASS"
+      },
+      {
+        "stable_id": "tree@0.00,8.00",
+        "group_id": "tree-clump-03",
+        "crown_part_codes": [
+          7,
+          8,
+          9
+        ],
+        "crown_pixels": 848,
+        "reference_pixels": 894,
+        "reference_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 202
+          },
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 71
+          },
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 621
+          }
+        ],
+        "water_pixels_excluded": 0,
+        "uncertain_crown_pixels_retained": 184,
+        "reference_scope": "frozen S3 crown union exterior with v3 S5 grass/environment reference",
+        "severity": 1.0,
+        "modes": {
+          "protanopia": {
+            "delta_e00": 15.397737859774454,
+            "status": "PASS"
+          },
+          "deuteranopia": {
+            "delta_e00": 13.037516107787841,
+            "status": "PASS"
+          }
+        },
+        "normal_delta_e00_diagnostic": 18.003781061078417,
+        "status": "PASS"
+      },
+      {
+        "stable_id": "tree@0.00,9.00",
+        "group_id": "tree-clump-03",
+        "crown_part_codes": [
+          7,
+          8,
+          9
+        ],
+        "crown_pixels": 697,
+        "reference_pixels": 894,
+        "reference_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 202
+          },
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 71
+          },
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 621
+          }
+        ],
+        "water_pixels_excluded": 0,
+        "uncertain_crown_pixels_retained": 156,
+        "reference_scope": "frozen S3 crown union exterior with v3 S5 grass/environment reference",
+        "severity": 1.0,
+        "modes": {
+          "protanopia": {
+            "delta_e00": 14.277029088102932,
+            "status": "PASS"
+          },
+          "deuteranopia": {
+            "delta_e00": 11.823433644998588,
+            "status": "PASS"
+          }
+        },
+        "normal_delta_e00_diagnostic": 17.11830775172807,
+        "status": "PASS"
+      },
+      {
+        "stable_id": "tree@1.00,0.00",
+        "group_id": "tree-clump-01",
+        "crown_part_codes": [
+          7,
+          8,
+          9
+        ],
+        "crown_pixels": 712,
+        "reference_pixels": 813,
+        "reference_categories": [
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 65
+          },
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 748
+          }
+        ],
+        "water_pixels_excluded": 0,
+        "uncertain_crown_pixels_retained": 173,
+        "reference_scope": "frozen S3 crown union exterior with v3 S5 grass/environment reference",
+        "severity": 1.0,
+        "modes": {
+          "protanopia": {
+            "delta_e00": 14.522169439452174,
+            "status": "PASS"
+          },
+          "deuteranopia": {
+            "delta_e00": 11.893894839287936,
+            "status": "PASS"
+          }
+        },
+        "normal_delta_e00_diagnostic": 17.37527986416908,
+        "status": "PASS"
+      },
+      {
+        "stable_id": "tree@1.00,9.00",
+        "group_id": "tree-clump-03",
+        "crown_part_codes": [
+          7,
+          8,
+          9
+        ],
+        "crown_pixels": 635,
+        "reference_pixels": 894,
+        "reference_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 202
+          },
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 71
+          },
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 621
+          }
+        ],
+        "water_pixels_excluded": 0,
+        "uncertain_crown_pixels_retained": 149,
+        "reference_scope": "frozen S3 crown union exterior with v3 S5 grass/environment reference",
+        "severity": 1.0,
+        "modes": {
+          "protanopia": {
+            "delta_e00": 14.314448114383634,
+            "status": "PASS"
+          },
+          "deuteranopia": {
+            "delta_e00": 11.984465755379931,
+            "status": "PASS"
+          }
+        },
+        "normal_delta_e00_diagnostic": 17.126854058104144,
+        "status": "PASS"
+      },
+      {
+        "stable_id": "tree@8.00,0.00",
+        "group_id": "tree-clump-02",
+        "crown_part_codes": [
+          7,
+          8,
+          9
+        ],
+        "crown_pixels": 166,
+        "reference_pixels": 345,
+        "reference_categories": [
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 345
+          }
+        ],
+        "water_pixels_excluded": 0,
+        "uncertain_crown_pixels_retained": 30,
+        "reference_scope": "frozen S3 crown union exterior with v3 S5 grass/environment reference",
+        "severity": 1.0,
+        "modes": {
+          "protanopia": {
+            "delta_e00": 26.04008530461506,
+            "status": "PASS"
+          },
+          "deuteranopia": {
+            "delta_e00": 23.933916325231284,
+            "status": "PASS"
+          }
+        },
+        "normal_delta_e00_diagnostic": 27.152866044129492,
+        "status": "PASS"
+      },
+      {
+        "stable_id": "tree@8.00,9.00",
+        "group_id": "tree-clump-04",
+        "crown_part_codes": [
+          7,
+          8,
+          9
+        ],
+        "crown_pixels": 602,
+        "reference_pixels": 300,
+        "reference_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 230
+          },
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 70
+          }
+        ],
+        "water_pixels_excluded": 0,
+        "uncertain_crown_pixels_retained": 135,
+        "reference_scope": "frozen S3 crown union exterior with v3 S5 grass/environment reference",
+        "severity": 1.0,
+        "modes": {
+          "protanopia": {
+            "delta_e00": 15.165707469213153,
+            "status": "PASS"
+          },
+          "deuteranopia": {
+            "delta_e00": 12.687834645484324,
+            "status": "PASS"
+          }
+        },
+        "normal_delta_e00_diagnostic": 17.89702596670143,
+        "status": "PASS"
+      },
+      {
+        "stable_id": "tree@9.00,0.00",
+        "group_id": "tree-clump-02",
+        "crown_part_codes": [
+          7,
+          8,
+          9
+        ],
+        "crown_pixels": 245,
+        "reference_pixels": 345,
+        "reference_categories": [
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 345
+          }
+        ],
+        "water_pixels_excluded": 0,
+        "uncertain_crown_pixels_retained": 84,
+        "reference_scope": "frozen S3 crown union exterior with v3 S5 grass/environment reference",
+        "severity": 1.0,
+        "modes": {
+          "protanopia": {
+            "delta_e00": 11.518630423904378,
+            "status": "PASS"
+          },
+          "deuteranopia": {
+            "delta_e00": 9.561915245019168,
+            "status": "FAIL"
+          }
+        },
+        "normal_delta_e00_diagnostic": 15.410815946145501,
+        "status": "FAIL"
+      },
+      {
+        "stable_id": "tree@9.00,1.00",
+        "group_id": "tree-clump-02",
+        "crown_part_codes": [
+          7,
+          8,
+          9
+        ],
+        "crown_pixels": 46,
+        "reference_pixels": 345,
+        "reference_categories": [
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 345
+          }
+        ],
+        "water_pixels_excluded": 0,
+        "uncertain_crown_pixels_retained": 20,
+        "reference_scope": "frozen S3 crown union exterior with v3 S5 grass/environment reference",
+        "severity": 1.0,
+        "modes": {
+          "protanopia": {
+            "delta_e00": 16.212746257881747,
+            "status": "PASS"
+          },
+          "deuteranopia": {
+            "delta_e00": 13.95314301052724,
+            "status": "PASS"
+          }
+        },
+        "normal_delta_e00_diagnostic": 18.532723169695693,
+        "status": "PASS"
+      },
+      {
+        "stable_id": "tree@9.00,8.00",
+        "group_id": "tree-clump-04",
+        "crown_part_codes": [
+          7,
+          8,
+          9
+        ],
+        "crown_pixels": 592,
+        "reference_pixels": 300,
+        "reference_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 230
+          },
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 70
+          }
+        ],
+        "water_pixels_excluded": 0,
+        "uncertain_crown_pixels_retained": 143,
+        "reference_scope": "frozen S3 crown union exterior with v3 S5 grass/environment reference",
+        "severity": 1.0,
+        "modes": {
+          "protanopia": {
+            "delta_e00": 16.484773364038173,
+            "status": "PASS"
+          },
+          "deuteranopia": {
+            "delta_e00": 14.18801800990001,
+            "status": "PASS"
+          }
+        },
+        "normal_delta_e00_diagnostic": 19.068871269060764,
+        "status": "PASS"
+      },
+      {
+        "stable_id": "tree@9.00,9.00",
+        "group_id": "tree-clump-04",
+        "crown_part_codes": [
+          7,
+          8,
+          9
+        ],
+        "crown_pixels": 613,
+        "reference_pixels": 300,
+        "reference_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 230
+          },
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 70
+          }
+        ],
+        "water_pixels_excluded": 0,
+        "uncertain_crown_pixels_retained": 155,
+        "reference_scope": "frozen S3 crown union exterior with v3 S5 grass/environment reference",
+        "severity": 1.0,
+        "modes": {
+          "protanopia": {
+            "delta_e00": 16.099936634633675,
+            "status": "PASS"
+          },
+          "deuteranopia": {
+            "delta_e00": 13.469549121046255,
+            "status": "PASS"
+          }
+        },
+        "normal_delta_e00_diagnostic": 18.60159097663935,
+        "status": "PASS"
+      }
+    ],
+    "C9_gate": {
+      "status": "PASS",
+      "passed": 11,
+      "failed": 1,
+      "not_tested": 0,
+      "denominator_all_declared_trees": 12,
+      "passing_fraction": 0.9166666666666666,
+      "required_fraction": 0.8,
+      "required_delta_e00_each_mode": 10,
+      "requires_both_modes_per_tree": true
+    },
+    "tree_numeric_gate": {
+      "status": "PASS",
+      "T3_all_declared_trees_pass": true,
+      "T1_T6_are_diagnostics": true,
+      "visual_approval": "SEPARATE_REQUIRED_REVIEW"
+    }
+  },
+  "domain_verdict": "FAIL_U1_NUMERICAL_ACCEPTANCE",
+  "T4_T5": "separate analysis",
+  "visual_review": "separate blind and Claude review",
+  "six_case_coverage": false
+}

@@ -1,0 +1,262 @@
+{
+  "verdict": "pass",
+  "schema": "request-independent-review/v1",
+  "reviewed_at_utc": "2026-10-15T08:37:02Z",
+  "reviewed_request": {
+    "filename": "task117-body.json",
+    "bytes": 166727,
+    "sha256": "80f4b9eb0385d51d83c30e7e4b23dc6afd988186ab4442b3330c214e447475eb"
+  },
+  "bound_input_files": [
+    {
+      "filename": "source-package-index.json",
+      "bytes": 29991,
+      "sha256": "28cee969ed7c8099d9ed699d12f1fb445e6ffa4151b7dee72565819e439850fc"
+    },
+    {
+      "filename": "candidate-binding.json",
+      "bytes": 5074,
+      "sha256": "3019a1352e90cb854f627a5ad397a599aa8348da6decbaf9557ebb4b8a4351e0"
+    },
+    {
+      "filename": "candidate-independent-review.json",
+      "bytes": 9002,
+      "sha256": "158e0e8f06b398ac9e66bfb76f23219dff0d1641a965eb8f4687527bab421245"
+    },
+    {
+      "filename": "upload-reference-index.json",
+      "bytes": 32611,
+      "sha256": "ce4e2d72535f0b22ed82cc63c7834b654d27860d77879a7b8f83a9fa0aced297"
+    },
+    {
+      "filename": "source-api-readback-proof.json",
+      "bytes": 36344,
+      "sha256": "10313a7441de4fe34109fb4782b25e32d7582375e074061725ca622a4667a4d1"
+    }
+  ],
+  "target_candidate": {
+    "branch": "codex/ui-ux/terrain-material-r6",
+    "head": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+    "tree": "74fedd57ac90868f5ff2a921a57ccbfc6e73f3fa",
+    "parent": "e829b006953ecaa9aef5292a1ae4a5422d5401a3",
+    "bundle_base": "b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8",
+    "canonical_file_count": 1487,
+    "canonical_bytes": 316425,
+    "canonical_sha256": "2b2a2b76de7ecb15bf46bead011c11fc71f8692445de0ededaa0d1d162c7144f"
+  },
+  "findings": [],
+  "checks": [
+    {
+      "id": "request_identity_protocol_and_expiry",
+      "result": "pass",
+      "evidence": {
+        "request_id": "d3b69232-7c81-47d2-9c0c-6819b04388ea",
+        "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391",
+        "seq": 117,
+        "attempt": 0,
+        "issued_at": "2026-10-15T08:25:19.462772Z",
+        "expires_at": "2026-10-15T16:25:19.462772Z",
+        "validity_hours": 8.0,
+        "protocol_sha256": "85e9f51fb3d258a52aad4c467032223883c1ef715aee6498ae9a052cd2985842",
+        "generation": "469550a9-a0b6-4d55-af41-1287ce6556f7"
+      }
+    },
+    {
+      "id": "candidate_and_source_lineage",
+      "result": "pass",
+      "evidence": {
+        "candidate_commit": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+        "tree": "74fedd57ac90868f5ff2a921a57ccbfc6e73f3fa",
+        "bundle_base": "b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8",
+        "actual_parent": "e829b006953ecaa9aef5292a1ae4a5422d5401a3",
+        "intermediate_commits": [
+          "ae7bc0f6374261f823b43a51bb0c60a7979466ea",
+          "5639f3401e1a681aaae69d02e7f16def6b5c3cf3",
+          "e829b006953ecaa9aef5292a1ae4a5422d5401a3",
+          "6ec8a9ffe1ce56005737d1036904d88d1c08a54a"
+        ],
+        "canonical_files": 1487,
+        "canonical_bytes": 316425,
+        "canonical_sha256": "2b2a2b76de7ecb15bf46bead011c11fc71f8692445de0ededaa0d1d162c7144f",
+        "candidate_review_verdict": "pass",
+        "candidate_binding_review_sha_matches": true
+      }
+    },
+    {
+      "id": "candidate_review_manifest_binding",
+      "result": "pass",
+      "evidence": {
+        "binding_files": 17,
+        "review_files": 17,
+        "path_byte_sha256_pairs_match": true
+      }
+    },
+    {
+      "id": "single_case_and_five_commands",
+      "result": "pass",
+      "evidence": {
+        "case": [
+          {
+            "map_size": [
+              10,
+              10
+            ],
+            "resolution": [
+              1280,
+              720
+            ]
+          }
+        ],
+        "native_execution_count": 1,
+        "runtime_unique_count": 1,
+        "normal_command_count": 5,
+        "cloud_command_count": 5,
+        "command_roles": [
+          "recovery-mode import",
+          "structure check",
+          "native capture",
+          "frozen v3 readback",
+          "formal U1/C9 v2 readback"
+        ],
+        "command_lists_identical": true
+      }
+    },
+    {
+      "id": "editor_scope_and_no_expansion",
+      "result": "pass",
+      "evidence": {
+        "project_mcp": "recovery-mode继续抑制，日志出现项目MCP启动即停止。",
+        "normal_editor_support": "YC现有私有云端Godot编辑器导入一次、结构核对一次、原生采集一次；编辑器生命周期内仅回环的内置LSP/DAP/debugger支持通道。",
+        "permission_network_personal_computer_expansion": false,
+        "cloud_plan_steps": 12,
+        "explicit_stop_and_no_retry_instructions": true
+      }
+    },
+    {
+      "id": "approved_u1_tree_and_visual_rules",
+      "result": "pass",
+      "evidence": {
+        "approved_rules": "U1: each-instance group-exterior edges only; known internal seams removed, unknown/occluded exterior edges remain denominator; numeric thresholds unchanged. Trees keep T1/T6 diagnostic; gates T3, independent visual review and C9.",
+        "T1_T2_T6": "Report every wall/pillar row. T1 global>=15 L*, local>=10 at>=80% full exterior perimeter and measurable>=80%; native720p sigma2 T6 global>=10 and geometry/coverage unchanged. T2 top>=reference+10 and top>=side+8. Preserve numerical FAIL and NOT_TESTED.",
+        "C9": "Machado2009 severity1 protanopia AND deuteranopia; each tree crown codes7-9 vs S3/S5 group outer reference medianLab, both deltaE00>=10. At least80% ALL declared trees must pass; NOT_TESTED stays denominator. Use reviewed floating sRGB/linear adaptation without source image edits.",
+        "wall_pillar_art": "Actual side L*34–38, hue70–85,C*5–9; top/break L*44–50 and relative T2 differences. Dirt band side minus4–6 and >=ground+10. Top weathering IQR>=5, visible corner wear; material/column shape judged separately.",
+        "tree": "Frozen forest-tree-v3b.png, tree/environment_tree tint and all region/semantic annotations unchanged from TASK115.",
+        "pillar": "12-sided continuous-stone drum shaft, three curved drum seams, five break levels, deterministic sample heights30/24/33, wider partly buried plinth and ground-side contact shadow; cell/type unchanged."
+      }
+    },
+    {
+      "id": "fail_not_tested_and_future_native_status",
+      "result": "pass",
+      "evidence": {
+        "delivery_status": "request_prepared",
+        "domain_verdict": null,
+        "native_result_not_claimed": true,
+        "failure_rows_preserved": true
+      }
+    },
+    {
+      "id": "task115_archived_original_not_rerun",
+      "result": "pass",
+      "evidence": {
+        "state": "closed",
+        "execution_start_count": 1,
+        "original": {
+          "filename": "task115-envelope.json",
+          "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+          "reference": "library-file:fde1_bGliZmlsZV9LYU9SNGJEaklfZjVrNjh3SVUzZjF3_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+          "bytes": 200270,
+          "sha256": "48da80de1bc0d7b1e10fde01b21dcbeb6b9d72ec4a80dbd9a469d0097c050a5d",
+          "source_bytes_equal": true
+        }
+      }
+    },
+    {
+      "id": "artifact_and_source_readback_reconciliation",
+      "result": "pass",
+      "evidence": {
+        "current_upload_refs": 93,
+        "request_artifacts": 94,
+        "only_extra_artifact": "task115-envelope.json",
+        "all_uploads_referenced_in_order": true,
+        "old_TASK115_original_exact": true,
+        "all_artifact_references_unique": true,
+        "all_artifacts_on_fixed_page": true,
+        "proof_expected_verified_rows": [
+          92,
+          92,
+          92
+        ],
+        "proof_rows_match_upload_index_except_self": true,
+        "proof_self_in_current_upload_index": true
+      }
+    },
+    {
+      "id": "ancestor_sources_retained_in_payload",
+      "result": "pass",
+      "evidence": {
+        "ancestor_delta_count": 10,
+        "continuous_commit_chain": true,
+        "each_has_bundle_and_full_source_refs": true
+      }
+    },
+    {
+      "id": "fixed_page_delivery_and_adoption_workflow",
+      "result": "pass",
+      "evidence": {
+        "delivery": {
+          "API_only": true,
+          "encoding": "base64",
+          "json_pointer": "/data_b64",
+          "max_raw_block_bytes": 131072,
+          "preserve_original_png": true
+        },
+        "result_page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+        "native_adoption_page_id": "page_6e2084798c348191b9abbef150c2ea22",
+        "notification_return": {
+          "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+          "permanent_both_idle_return": "沿用已有active standing_notification与task100-readback-recovery-20261014；按实际通知和原会话续接记录，不新建监视器。",
+          "policy": "原YC结果事件只向固定原SoT返回；API读回，事件不授予权限，不用空轮询唤醒",
+          "recipient_queue": "mercury-local",
+          "reply_thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9",
+          "source_thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9"
+        }
+      }
+    },
+    {
+      "id": "portable_no_local_path_credential_or_signature",
+      "result": "pass",
+      "evidence": {
+        "absolute_local_path_hits": 0,
+        "credential_pattern_hits": 0,
+        "signature_key_hits": 0
+      }
+    },
+    {
+      "id": "target_commit_boundary_and_harness_ownership",
+      "result": "pass",
+      "evidence": {
+        "branch": "codex/ui-ux/terrain-material-r6",
+        "head": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+        "tree": "74fedd57ac90868f5ff2a921a57ccbfc6e73f3fa",
+        "parent": "e829b006953ecaa9aef5292a1ae4a5422d5401a3",
+        "worktree_clean": true,
+        "diff_check_clean": true,
+        "reserved_mercury_generated_paths_changed": false
+      }
+    }
+  ],
+  "checks_performed": [
+    "以目标 Git 仓直接读取 HEAD、父提交、树、分支、工作树状态与 diff --check；读取 Mercury Harness 所有权合同并检查保留生成路径。",
+    "程序化解析完整 TASK117 JSON 与五个绑定文件，复算全部六个输入的字节数和 SHA256。",
+    "核对请求身份、协议、有效期、候选树与实际父提交、候选包基线、中间提交链、1487 项规范源清单与候选审查绑定。",
+    "核对唯一 10×10/1280×720 案例、五项命令的顺序与单次限制、编辑器 MCP/回环支持范围、U1/T1/T6/C9、墙柱阈值、树冻结及 FAIL/NOT_TESTED 保留。",
+    "逐项对账 93 个当前上传引用、请求中 94 项附件、TASK115 原件引用和 92 行来源回读证明；检查 10 段祖先提交链及其载荷引用。",
+    "扫描绑定 JSON 中的本机绝对路径、常见凭据形态与签名字段；未发现命中。"
+  ],
+  "not_covered": [
+    "本次未再次查询远端 API；本地证明文件的 92 行逐项与上传索引一致。证明文件自身的 API 精确回读沿用 Main 已记录的核验，不在本轮重复。",
+    "未执行云端任务、Godot、任何命令计划中的采集或图片验收；正文处于 request_prepared 且 domain_verdict=null，未将未来云端结果记为通过。",
+    "不重复已批准的候选素材测试、未改的旧来源运输审计、既有运行权限证据及冻结测量层审计。"
+  ],
+  "residual_risk": "通过仅表示该未签名请求的身份、范围、候选绑定和交付结构经本地核对自洽；云端授权门、一次性执行、原生数值与视觉结果及最终回执仍需在任务执行时独立核验。"
+}

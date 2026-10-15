@@ -1,0 +1,114 @@
+{
+  "schema": "sot-task117-receipt118-independent-review/1",
+  "verdict": "PASS",
+  "reviewed_file": {
+    "name": "receipt118-body.review-candidate.json",
+    "bytes": 11341,
+    "sha256": "3f4c8cc7eba58fded4267b21fc37323b3341bbdb7a94c4d600bb5fe3f5dd4592"
+  },
+  "identity_and_route": {
+    "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391",
+    "request_id": "67947825-6173-46b4-84b8-453065ff734c",
+    "seq": 118,
+    "attempt": 0,
+    "in_reply_to_result": "b789ea8b-f460-481f-8e18-70070a0f9f5a",
+    "route_matches_task_and_current_pairing": true,
+    "pairing_client_key_identity_unchanged": true,
+    "cooperation_protocol_sha256_unchanged": true,
+    "generation_unchanged": true,
+    "expiry_hours": 4.0
+  },
+  "content_checks": {
+    "exact_RESULT_and_map_bindings": true,
+    "595_originals_105_carriers_17_png": true,
+    "1487_source_files_11_snapshots_five_commands_once": true,
+    "formal_FAIL_preserved": true,
+    "internal_seam_defect_preserved_without_fix_or_reclassification": true,
+    "column_blind_gate_FAIL_ambiguous_identity_preserved": true,
+    "single_native_case": true,
+    "six_case_coverage_NOT_STARTED": true,
+    "T4_T5_separate_statuses_accurate": true,
+    "close_status_pending_not_claimed_closed": true,
+    "single_native_case_evidence": "main-consumption.json: delivery.native_case_count=1; original TASK117 payload has one case/native_execution_count=1/runtime_unique_count=1; RESULT six_case_coverage=false."
+  },
+  "current_ledger_precondition": {
+    "api_response_file": "ledger-readback-verified.original.json",
+    "bytes": 981,
+    "sha256": "906b710e267b17aa8c5a1b06b1035f206e2cbae0abd15d21827c62e431a787a2",
+    "state": "readback_verified",
+    "execution_start_count": 1,
+    "evidence_sha256": "5a4b745bc4bc4a9ef235c0c4d2ddb34d1557f43fd1f8e6d1317b88557af944c0",
+    "matches_receipt_send_precondition": true
+  },
+  "exact_readback_artifacts": [
+    {
+      "name": "original-readback-verification.json",
+      "bytes": 217655,
+      "sha256": "489df72fbeb741a66d37aab7f5e990d311a236b6f7140aa6ef71600800eede88",
+      "local_bytes_match": true,
+      "page_api_exact_readback_sha_match": true
+    },
+    {
+      "name": "main-runtime-verification.json",
+      "bytes": 91004,
+      "sha256": "b585c145ab2640379b739fccdd48f7feb0d795e7da23fff5a9da5220078acd23",
+      "local_bytes_match": true,
+      "page_api_exact_readback_sha_match": true
+    },
+    {
+      "name": "material-analysis.json",
+      "bytes": 26443,
+      "sha256": "b0ef6ac51c47bef8129134202e69639d041375b8508ff2133b6ecc1c4b45003a",
+      "local_bytes_match": true,
+      "page_api_exact_readback_sha_match": true
+    },
+    {
+      "name": "internal-seam-proof.json",
+      "bytes": 3775,
+      "sha256": "10988d36afc25747d312da52f971e9ac9a02bf866f663a7e6ac8e5b69316ff85",
+      "local_bytes_match": true,
+      "page_api_exact_readback_sha_match": true
+    },
+    {
+      "name": "blind-reviews.portable.json",
+      "bytes": 5808,
+      "sha256": "d184d6c1e80b8864f1167f87121faf76e1291008d2ad1860d6ca9a40962e0cd1",
+      "local_bytes_match": true,
+      "page_api_exact_readback_sha_match": true
+    },
+    {
+      "name": "main-consumption.json",
+      "bytes": 4530,
+      "sha256": "5a4b745bc4bc4a9ef235c0c4d2ddb34d1557f43fd1f8e6d1317b88557af944c0",
+      "local_bytes_match": true,
+      "page_api_exact_readback_sha_match": true
+    }
+  ],
+  "additional_evidence": {
+    "main_consumption": {
+      "bytes": 4530,
+      "sha256": "5a4b745bc4bc4a9ef235c0c4d2ddb34d1557f43fd1f8e6d1317b88557af944c0"
+    },
+    "main_runtime_verification": {
+      "bytes": 91004,
+      "sha256": "b585c145ab2640379b739fccdd48f7feb0d795e7da23fff5a9da5220078acd23"
+    },
+    "native_result_adoption": {
+      "bytes": 8913,
+      "sha256": "f3a40fe93a2e3c2fd9ab550e117cfdb874edeaa532d0c1f5646465de8ee70788"
+    },
+    "result_original": {
+      "bytes": 15568,
+      "sha256": "44df13f216d9a8ee6b8113c9eab616a69e1e38fe8a30d5a5a6e22631ee8ce1b5"
+    },
+    "full_original_map": {
+      "bytes": 187904,
+      "sha256": "4eb051a292003b238f7387f35153d743489faf86515f22a84d91e6e933ac9c4b"
+    }
+  },
+  "limits": [
+    "本PASS只核对该RECEIPT候选与已记录证据；未签名、未登记、未发送。",
+    "云端close仍待YC收到后核对签名回执并执行；本审查不把当前候选视为已关闭。",
+    "视觉盲看门槛仍为FAIL，T4仍待Claude审查，T5地面原图一致；未批准美术。"
+  ]
+}

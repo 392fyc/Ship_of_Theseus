@@ -1,0 +1,37 @@
+{
+  "schema": "sot-reviewed-request-signing-binding/1",
+  "request_id": "d3b69232-7c81-47d2-9c0c-6819b04388ea",
+  "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391",
+  "candidate_commit": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+  "reviewed_body": {
+    "filename": "task117-body.json",
+    "bytes": 166727,
+    "sha256": "80f4b9eb0385d51d83c30e7e4b23dc6afd988186ab4442b3330c214e447475eb"
+  },
+  "independent_review": {
+    "filename": "request-independent-review.json",
+    "bytes": 11436,
+    "sha256": "a07b42dd85d36bf8b6cba727621a1f987e015ae4b545cd93cecec6ae47710c7f",
+    "verdict": "pass"
+  },
+  "all_reviewed_fields_deep_equal": true,
+  "removed_reviewed_fields": [],
+  "changed_reviewed_fields": [],
+  "added_identity_fields": [
+    "client_id",
+    "key_id",
+    "nonce",
+    "pairing_id",
+    "protocol"
+  ],
+  "signed_body": {
+    "filename": "task117-signed-body.original.json",
+    "bytes": 137618,
+    "sha256": "6dd908186065d4c337d071bfdc687b0b58cc49f47859aa9ba701009c969112e9"
+  },
+  "envelope": {
+    "filename": "task117-envelope.json",
+    "bytes": 183642,
+    "sha256": "4c289cc4e900beb0f6788d2550da98539b1db1b1b7a3552839d4029a195acba6"
+  }
+}

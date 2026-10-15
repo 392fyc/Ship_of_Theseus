@@ -1,0 +1,53 @@
+{
+  "request_id": "d3b69232-7c81-47d2-9c0c-6819b04388ea",
+  "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391",
+  "native_progress_message_id": "00d28ea6-7068-5309-8602-e34828fc6a41",
+  "native_source_thread_id": "01a118cf-9fad-76e2-99af-46a5f9a550fc",
+  "reported_execution": {
+    "start": "2026-10-15T09:01:26Z",
+    "end": "2026-10-15T09:02:56Z",
+    "five_commands_once": true,
+    "exit_codes": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "reported_measurements": {
+    "T2_wall": {
+      "PASS": 7
+    },
+    "T2_pillar": {
+      "PASS": 3
+    },
+    "T3_tree": {
+      "PASS": 12
+    },
+    "C9": {
+      "PASS": 11,
+      "total": 12,
+      "gate": "PASS"
+    },
+    "T1_wall": {
+      "PASS": 1,
+      "FAIL": 5,
+      "NOT_TESTED": 1
+    },
+    "T6_wall": {
+      "PASS": 6,
+      "NOT_TESTED": 1
+    },
+    "T1_pillar": {
+      "PASS": 0,
+      "FAIL": 3
+    },
+    "T6_pillar": {
+      "PASS": 0,
+      "FAIL": 3
+    }
+  },
+  "source_kind": "native YC progress comment; original measurements still pending intake",
+  "requires_original_readback": true
+}

@@ -1,0 +1,453 @@
+{
+  "protocol": "dot-cooperation/2",
+  "type": "RESULT",
+  "request_id": "b789ea8b-f460-481f-8e18-70070a0f9f5a",
+  "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391",
+  "in_reply_to": "d3b69232-7c81-47d2-9c0c-6819b04388ea",
+  "task_body_sha256": "6dd908186065d4c337d071bfdc687b0b58cc49f47859aa9ba701009c969112e9",
+  "source_thread_id": "01a118cf-9fad-76e2-99af-46a5f9a550fc",
+  "recipient_thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9",
+  "reply_thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9",
+  "generation": "469550a9-a0b6-4d55-af41-1287ce6556f7",
+  "protocol_sha256": "85e9f51fb3d258a52aad4c467032223883c1ef715aee6498ae9a052cd2985842",
+  "at": "2026-10-15T09:16:38.174236+00:00",
+  "identity_verification": "PASS full signature and pinned identity; native source matches original Main",
+  "human_source_readability": {
+    "status": "direct_original_user_read",
+    "source_message_id": "Sentinel_27e22fa56c1481919e10eba497f7d539"
+  },
+  "task_authorization": "Verified standing paired SoT own-cloud test and private evidence scope; normal product review permitted actual native terminal operation",
+  "execution": {
+    "task_start_grants": 1,
+    "commands": {
+      "at": "2026-10-15T09:02:57.552854+00:00",
+      "stages": [
+        {
+          "stage": 1,
+          "at": "2026-10-15T09:01:58.905160+00:00",
+          "wrapper_returncode": 0,
+          "status": {
+            "argv": [
+              "/usr/local/bin/godot",
+              "--headless",
+              "--editor",
+              "--recovery-mode",
+              "--path",
+              ".",
+              "--quit"
+            ],
+            "cwd": "/workspace/scratch/15a914414848/task117_materials/source",
+            "started_at": "2026-10-15T09:01:26.807593+00:00",
+            "pid": 67,
+            "state": "completed",
+            "returncode": 0,
+            "timed_out": false,
+            "exception_type": null,
+            "finished_at": "2026-10-15T09:01:57.828807+00:00",
+            "interrupted_signal": null
+          },
+          "stop_reason": null,
+          "wrapper_stderr": ""
+        },
+        {
+          "stage": 2,
+          "at": "2026-10-15T09:02:13.094548+00:00",
+          "wrapper_returncode": 0,
+          "status": {
+            "argv": [
+              "/usr/local/bin/godot",
+              "--headless",
+              "--path",
+              ".",
+              "--script",
+              "res://tests/claude_review/capture_terrain_readability_r6.gd",
+              "--",
+              "--headless-check",
+              "--map-sizes=10",
+              "--resolutions=1280x720",
+              "--v3-diagnostic=/workspace/scratch/15a914414848/task117_runner/outputs/structure-v3.json",
+              "--v5-diagnostic=/workspace/scratch/15a914414848/task117_runner/outputs/structure-v5.json"
+            ],
+            "cwd": "/workspace/scratch/15a914414848/task117_materials/source",
+            "started_at": "2026-10-15T09:01:59.898367+00:00",
+            "pid": 317,
+            "state": "completed",
+            "returncode": 0,
+            "timed_out": false,
+            "exception_type": null,
+            "finished_at": "2026-10-15T09:02:12.169716+00:00",
+            "interrupted_signal": null
+          },
+          "stop_reason": null,
+          "wrapper_stderr": ""
+        },
+        {
+          "stage": 3,
+          "at": "2026-10-15T09:02:36.074389+00:00",
+          "wrapper_returncode": 0,
+          "status": {
+            "argv": [
+              "/usr/local/bin/godot",
+              "--path",
+              ".",
+              "--script",
+              "res://tests/claude_review/capture_terrain_readability_r6.gd",
+              "--",
+              "--out=/workspace/scratch/15a914414848/task117_runner/outputs/10x10_1280x720",
+              "--map-sizes=10",
+              "--resolutions=1280x720",
+              "--v5-diagnostic=/workspace/scratch/15a914414848/task117_runner/outputs/10x10_1280x720/v5-diagnostic.json"
+            ],
+            "cwd": "/workspace/scratch/15a914414848/task117_materials/source",
+            "started_at": "2026-10-15T09:02:13.965690+00:00",
+            "pid": 364,
+            "state": "completed",
+            "returncode": 0,
+            "timed_out": false,
+            "exception_type": null,
+            "finished_at": "2026-10-15T09:02:35.148560+00:00",
+            "interrupted_signal": null
+          },
+          "stop_reason": null,
+          "wrapper_stderr": ""
+        },
+        {
+          "stage": 4,
+          "at": "2026-10-15T09:02:44.639720+00:00",
+          "wrapper_returncode": 0,
+          "status": {
+            "argv": [
+              "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+              "-X",
+              "utf8",
+              "-B",
+              "tests/claude_review/validate_terrain_semantic_sidecar.py",
+              "/workspace/scratch/15a914414848/task117_runner/outputs/10x10_1280x720/10x10_1280x720/capture-manifest.json",
+              "--phase=pilot",
+              "--measurement-version",
+              "v3",
+              "--source-root",
+              ".",
+              "--candidate",
+              "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+              "--out",
+              "/workspace/scratch/15a914414848/task117_runner/outputs/pilot-readback.json"
+            ],
+            "cwd": "/workspace/scratch/15a914414848/task117_materials/source",
+            "started_at": "2026-10-15T09:02:36.935864+00:00",
+            "pid": 485,
+            "state": "completed",
+            "returncode": 0,
+            "timed_out": false,
+            "exception_type": null,
+            "finished_at": "2026-10-15T09:02:43.824639+00:00",
+            "interrupted_signal": null
+          },
+          "stop_reason": null,
+          "wrapper_stderr": ""
+        },
+        {
+          "stage": 5,
+          "at": "2026-10-15T09:02:57.552739+00:00",
+          "wrapper_returncode": 0,
+          "status": {
+            "argv": [
+              "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+              "-X",
+              "utf8",
+              "-B",
+              "tests/claude_review/validate_terrain_acceptance_v2.py",
+              "/workspace/scratch/15a914414848/task117_runner/outputs/10x10_1280x720/10x10_1280x720/capture-manifest.json",
+              "--source-root",
+              ".",
+              "--candidate",
+              "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+              "--out",
+              "/workspace/scratch/15a914414848/task117_runner/outputs/r6-acceptance-v2.json"
+            ],
+            "cwd": "/workspace/scratch/15a914414848/task117_materials/source",
+            "started_at": "2026-10-15T09:02:45.496542+00:00",
+            "pid": 516,
+            "state": "completed",
+            "returncode": 0,
+            "timed_out": false,
+            "exception_type": null,
+            "finished_at": "2026-10-15T09:02:56.604076+00:00",
+            "interrupted_signal": null
+          },
+          "stop_reason": null,
+          "wrapper_stderr": ""
+        }
+      ],
+      "state": "five_stages_finished",
+      "acceptance_not_inferred": true
+    },
+    "native_case_count": 1,
+    "source_independent_check": {
+      "checked_files": 1487,
+      "mismatches": [],
+      "canonical_bytes": 316425,
+      "canonical_sha256": "2b2a2b76de7ecb15bf46bead011c11fc71f8692445de0ededaa0d1d162c7144f",
+      "head": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+      "tree": "74fedd57ac90868f5ff2a921a57ccbfc6e73f3fa",
+      "parent": "e829b006953ecaa9aef5292a1ae4a5422d5401a3",
+      "index_tree": "74fedd57ac90868f5ff2a921a57ccbfc6e73f3fa",
+      "status": "",
+      "untracked": "",
+      "remotes": "",
+      "count": "28"
+    },
+    "product_tool_history": "Initial CUA character-entry call timed out before Return; no execution marker then. Reconciled visible partial command, completed remaining characters and issued Return once. Actual gated runner started09:01:25UTC. No policy rejection, alternate execution route, retry, source modification or prior-task rerun."
+  },
+  "delivery_status": "complete_exact_readback",
+  "domain_verdict": "FAIL_U1_NUMERICAL_ACCEPTANCE",
+  "domain_summary": {
+    "formal_summary": {
+      "wall": {
+        "T1": {
+          "PASS": 1,
+          "FAIL": 5,
+          "NOT_TESTED": 1
+        },
+        "T6": {
+          "PASS": 6,
+          "FAIL": 0,
+          "NOT_TESTED": 1
+        }
+      },
+      "pillar": {
+        "T1": {
+          "PASS": 0,
+          "FAIL": 3,
+          "NOT_TESTED": 0
+        },
+        "T6": {
+          "PASS": 0,
+          "FAIL": 3,
+          "NOT_TESTED": 0
+        }
+      },
+      "tree": {
+        "T1": {
+          "PASS": 1,
+          "FAIL": 11,
+          "NOT_TESTED": 0
+        },
+        "T6": {
+          "PASS": 1,
+          "FAIL": 11,
+          "NOT_TESTED": 0
+        }
+      },
+      "rubble": {
+        "T1": {
+          "PASS": 0,
+          "FAIL": 2,
+          "NOT_TESTED": 1
+        },
+        "T6": {
+          "PASS": 2,
+          "FAIL": 0,
+          "NOT_TESTED": 1
+        }
+      }
+    },
+    "C9_gate": {
+      "status": "PASS",
+      "passed": 11,
+      "failed": 1,
+      "not_tested": 0,
+      "denominator_all_declared_trees": 12,
+      "passing_fraction": 0.9166666666666666,
+      "required_fraction": 0.8,
+      "required_delta_e00_each_mode": 10,
+      "requires_both_modes_per_tree": true
+    },
+    "tree_numeric_gate": {
+      "status": "PASS",
+      "T3_all_declared_trees_pass": true,
+      "T1_T6_are_diagnostics": true,
+      "visual_approval": "SEPARATE_REQUIRED_REVIEW"
+    },
+    "frozen_material_gate": "CLOSED",
+    "frozen_negative_controls": {
+      "old_wall_T2": {
+        "status": "NOT_ESTABLISHED",
+        "measured_failures": 0,
+        "measured_passes": 7,
+        "not_tested_rows": 0,
+        "rows_reported": 7,
+        "rows_with_numeric_metric_evidence": 7,
+        "requires_actual_numeric_metric_FAIL": true,
+        "reason": null
+      },
+      "old_pillar_T2": {
+        "status": "NOT_ESTABLISHED",
+        "measured_failures": 0,
+        "measured_passes": 3,
+        "not_tested_rows": 0,
+        "rows_reported": 3,
+        "rows_with_numeric_metric_evidence": 3,
+        "requires_actual_numeric_metric_FAIL": true,
+        "reason": null
+      },
+      "old_tree_complete_T3": {
+        "status": "NOT_ESTABLISHED",
+        "measured_failures": 0,
+        "measured_passes": 12,
+        "not_tested_rows": 0,
+        "rows_reported": 12,
+        "rows_with_numeric_metric_evidence": 12,
+        "requires_actual_numeric_metric_FAIL": true,
+        "reason": null
+      },
+      "scope": "This 10x10/1280x720 pilot only; rows are not combined across cases."
+    },
+    "frozen_T1_T4_T5_T6": "NOT_TESTED_BY_SEMANTIC_SIDECAR_VALIDATOR"
+  },
+  "source_integrity": {
+    "canonical_files": 1487,
+    "preflight_plus_before_after_snapshots": 11,
+    "all_match": true
+  },
+  "capture_integrity": {
+    "original_pngs": 17,
+    "native_1280x720": 15,
+    "classification_map": [
+      964,
+      950
+    ],
+    "write_probe": [
+      128,
+      16
+    ],
+    "main_reconstruction_pixels_equal": true,
+    "registration_and_crown_union_mismatches": 0,
+    "C4_C8": {
+      "status": "PASS_INCLUDED_IN_FROZEN_PRECONDITIONS",
+      "raw_numeric_C4_C8_report": "NOT_SEPARATELY_RETAINED_BY_FROZEN_SIDECAR_OUTPUT; no rerun performed",
+      "C4_image": "portrait-hud.png",
+      "portrait_frame": {
+        "callback": "RenderingServer.frame_post_draw",
+        "capture_group": "portrait-hud",
+        "frame_id": 17,
+        "frames_drawn_after": 17,
+        "frames_drawn_before": 17,
+        "image_count": 1,
+        "image_roles": [
+          "portrait_hud"
+        ],
+        "process_frames_after": 17,
+        "process_frames_before": 17,
+        "readback_awaits_between_images": false,
+        "same_callback": true
+      },
+      "C8_captures": [
+        {
+          "capture_group": "10x10_1280x720",
+          "capture_kind": "viewport",
+          "content_scale_mode": 1,
+          "content_scale_size": [
+            1280,
+            720
+          ],
+          "file": "main.png",
+          "image_size": [
+            1280,
+            720
+          ],
+          "project_stretch_mode": "canvas_items",
+          "renderer": "gl_compatibility",
+          "role": "main",
+          "sha256": "67e6a6fb4de0ef016f9016f0178118b6feb1936c1c0f54c01758a86e3b9c6ce4",
+          "visible_rect": [
+            0.0,
+            0.0,
+            1280.0,
+            720.0
+          ],
+          "window_size": [
+            1280,
+            720
+          ]
+        },
+        {
+          "capture_group": "portrait-hud",
+          "capture_kind": "viewport",
+          "content_scale_mode": 1,
+          "content_scale_size": [
+            1280,
+            720
+          ],
+          "file": "portrait-hud.png",
+          "frame_id": 17,
+          "image_size": [
+            1280,
+            720
+          ],
+          "project_stretch_mode": "canvas_items",
+          "renderer": "gl_compatibility",
+          "role": "portrait_hud",
+          "sha256": "741ce915de8b341b8505cbfa89bc8dd27ffa5b208d15557b9934bd9eb412b04c",
+          "visible_rect": [
+            0.0,
+            0.0,
+            1280.0,
+            720.0
+          ],
+          "window_size": [
+            1280,
+            720
+          ]
+        }
+      ],
+      "portrait_native_rect": [
+        44.0,
+        609.0,
+        72.0,
+        82.0
+      ]
+    }
+  },
+  "historical_raw_fields": {
+    "material_gate": "CLOSED",
+    "negative_controls": "NOT_ESTABLISHED",
+    "qualification": "Frozen validator fields unchanged. TASK92 prior negative baseline reused; repaired candidate is not required to reproduce negatives."
+  },
+  "remaining": "Main retains independent blind review, material/art judgment, frozen T4 contact-shadow measurement and T5 comparison to TASK115. Old negative baseline calibration remains TASK92; do not reinterpret current CLOSED/NOT_ESTABLISHED raw fields as repaired candidate reproducing old failures.",
+  "art_acceptance": "NOT_TESTED",
+  "six_case_coverage": false,
+  "originals": {
+    "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+    "manifest": {
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9ncmtKbTVPN2J3emJWUDNodHJuMWdR_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "bytes": 187904,
+      "sha256": "4eb051a292003b238f7387f35153d743489faf86515f22a84d91e6e933ac9c4b",
+      "exact_readback": true,
+      "originals": 595,
+      "carriers": 105,
+      "pngs": 17,
+      "all_originals_reconstructed": true
+    },
+    "original_count": 595,
+    "carrier_count": 105,
+    "encoding": "base64",
+    "json_pointer": "/data_b64",
+    "all_originals_reconstructed": true,
+    "root_independent_check": {
+      "root_independent_reconstruction": true,
+      "carrier_count": 105,
+      "originals": 595,
+      "png_count": 17,
+      "manifest_sha256": "4eb051a292003b238f7387f35153d743489faf86515f22a84d91e6e933ac9c4b"
+    },
+    "binary_godot_cache": "inventory_only; all UTF-8 metadata delivered",
+    "full_file_list_location": "manifest originals plus supplement.originals; each filename, exact byte count and SHA256; parts/supplement.carrier contain exact native references"
+  },
+  "native_adoption": {
+    "page_id": "page_6e2084798c348191b9abbef150c2ea22",
+    "thread_id": "7fe1a9c6-2f3a-5cb2-84cd-860f12e1a0c5"
+  },
+  "receipt_status": "pending; API readback and queue acceptance do not prove original Main consumption or acceptance"
+}

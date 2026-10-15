@@ -1,0 +1,209 @@
+{
+  "task_id": "TASK117-ORIGINAL-CONSUMPTION",
+  "status": "completed",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/ui-ux/terrain-r6-evidence",
+  "target_head_before": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+  "candidate_head": null,
+  "receipt_issued_before_evidence_commit": true,
+  "source_candidate_head": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+  "source_candidate_tree": "74fedd57ac90868f5ff2a921a57ccbfc6e73f3fa",
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "ui-ux only; separate delivery/review/visual approval; preserve protected state; no push/PR"
+    },
+    {
+      "contract": "dot-link receiver-protocol.md",
+      "sha256": "85e9f51fb3d258a52aad4c467032223883c1ef715aee6498ae9a052cd2985842",
+      "summary": "exact originals, signed RECEIPT, native receiver CLOSE_ACK and actual closed/count1"
+    },
+    {
+      "contract": ".agents/skills/sot-task-receipt/SKILL.md",
+      "summary": "report bounded consumption outcome, verifiable evidence, protected scope and residual work"
+    },
+    {
+      "contract": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/.gitattributes",
+      "summary": "scoped -text preserves exact original CRLF/LF bytes; no root attributes or Git configuration changed"
+    }
+  ],
+  "allowed_write_scope": [
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot"
+  ],
+  "changed_files": [
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/.gitattributes",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/README.md",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/ack-readback-verification.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/analysis/diagnostic-perimeter-overlay.png",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/analysis/internal-edge-inspection.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/analysis/local-edge-diagnostic.csv",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/analysis/processing.md",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/analysis/sample-1.png",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/analysis/sample-2.png",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/analysis/sample-3.png",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/blind-reviews.portable.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/blind-sample-provenance.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/capture-manifest.original.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/captures/main.png",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/claude-review-request.md",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/close-ack.original.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/closure-verification.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/event135-consumed.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/evidence-file-manifest.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/full-original-map.original.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/history/notification-diagnosis-20261015T085803.original.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/internal-seam-proof.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/ledger-after-claim.original.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/ledger-closed.original.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/ledger-delivered.original.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/ledger-readback-verified.original.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/main-acceptance-v2.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/main-consumption.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/main-frozen-c4-c8.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/main-pilot-readback.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/main-queue-seq135.original.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/main-runtime-verification.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/main-upload-reference-index.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/material-analysis.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/native-close-adoption.api-readback.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/native-execution-progress.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/native-result-adoption.api-readback.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/notification135-binding-diagnostic.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/offline-source-exact-verification.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/original-readback-verification.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/receipt118-api-references.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/receipt118-body.review-candidate.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/receipt118-canonical-body.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/receipt118-envelope.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/receipt118-independent-review.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/receipt118-native-adoption.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/receipt118-publish-event.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/receipt118-publish.response.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/receipt118-signature-binding.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/receipt118-transition.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/record-independent-review.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/request-api-readback-proof.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/request-independent-review.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/request-upload-reference-index.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/result.original.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/semantic-sidecar-manifest.original.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/task-receipt.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/task.md",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/task117-ack.original.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/task117-admission.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/task117-admit-response.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/task117-body.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/task117-created-event.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/task117-created-response.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/task117-delivery-independent-review.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/task117-envelope.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/task117-publication-locators.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/task117-signed-body.original.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-pilot/task117-signing-binding.json"
+  ],
+  "verification": [
+    {
+      "command": "existing raw-byte reconstruction and per-file SHA256 verification",
+      "result": "pass",
+      "evidence": "595 originals / 25231569 bytes / 105 carriers / 17 PNG; original-readback-verification.json"
+    },
+    {
+      "command": "frozen v3, approved v2, C4 and C8 offline readback",
+      "result": "pass",
+      "evidence": "statuses and non-float fields equal; max float last-bit difference 2.1316282072803006e-14; original FAIL retained"
+    },
+    {
+      "command": "11 source snapshots and five command envelopes",
+      "result": "pass",
+      "evidence": "1487 exact source files; five stages once each, exit0"
+    },
+    {
+      "command": "independent delivery and receipt review",
+      "result": "pass",
+      "evidence": "task117-delivery-independent-review.json PASS; receipt118-independent-review.json PASS"
+    },
+    {
+      "command": "installed dot-link sign/verify and Page API source-byte readback",
+      "result": "pass",
+      "evidence": "receipt118-signature-binding.json; canonical SHA42b034825830c240a6108ad683b2d82099ebbd450fe6456e8968322b46d668a1"
+    },
+    {
+      "command": "native YC close original and actual ledger status",
+      "result": "pass",
+      "evidence": "closure-verification.json; closed/count1, evidence bound to same canonical receipt"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "Exact original delivery with task/result/candidate identity binding",
+      "result": "pass",
+      "evidence": [
+        "original-readback-verification.json",
+        "main-runtime-verification.json",
+        "native-result-adoption.api-readback.json"
+      ]
+    },
+    {
+      "criterion": "Independent review before signing; authenticated receipt consumption and closure",
+      "result": "pass",
+      "evidence": [
+        "task117-delivery-independent-review.json",
+        "receipt118-independent-review.json",
+        "receipt118-signature-binding.json",
+        "closure-verification.json"
+      ]
+    },
+    {
+      "criterion": "Preserve every formal FAIL/NOT_TESTED and give concrete next review",
+      "result": "pass",
+      "evidence": [
+        "result.original.json",
+        "main-acceptance-v2.json",
+        "internal-seam-proof.json",
+        "blind-reviews.portable.json",
+        "claude-review-request.md"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "production code/materials/frozen measurement scripts",
+      "result": "unchanged",
+      "evidence": "only untracked files in declared run directory; source candidate remains6ec8a9f"
+    },
+    {
+      "subject": "primary project.godot existing user changes",
+      "result": "unchanged",
+      "evidence": "SHA2565dfdc2dae8e9fa147e1a5490a52055106a6b72411c18b3ac0347f3fa1c71d607"
+    },
+    {
+      "subject": "Claude review tail and other lanes",
+      "result": "unchanged",
+      "evidence": "shared records written by sot-memory.ps1 CAS; Claude tail SHA256d5422a48b0ea7a3cde06655164a96df2773ced710f949ae5ddf53f9cf0a9e494"
+    }
+  ],
+  "residual_risks": [
+    "R6-MASK-INTERNAL-SEAM-01 needs reviewed measurement repair; formal FAIL is frozen.",
+    "Column blind identity FAIL; constrained visual revision awaits Claude review.",
+    "T4 is an offline diagnostic awaiting method review; some coping IQR values are below5.",
+    "Single-case material gate not passed; six-case collection waits for this gate.",
+    "Notification135 used RESULT metadata instead of original TASK metadata; reported with evidence to Mercury."
+  ],
+  "escalation_reason": null,
+  "milestone_status": {
+    "stage": "R6 single-case revision",
+    "current_outcome": "source implementation and single cloud evidence-consumption cycle complete",
+    "next": "Claude review of mask occupancy repair, column identity and coping variance; implement bounded corrections before any six-case run"
+  },
+  "source_schema_version": {
+    "cooperation": "dot-cooperation/2",
+    "capture": "terrain-mask-capture/6",
+    "semantic": "terrain-semantic-sidecar/1"
+  },
+  "source_snapshot_or_commit": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+  "normalized_digest": "sha256:2b2a2b76de7ecb15bf46bead011c11fc71f8692445de0ededaa0d1d162c7144f",
+  "publication": {
+    "published": false,
+    "remote_ref": null
+  }
+}

@@ -1,0 +1,156 @@
+{
+  "schema": "sot-task117-main-consumption/1",
+  "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391",
+  "request_id": "d3b69232-7c81-47d2-9c0c-6819b04388ea",
+  "result_request_id": "b789ea8b-f460-481f-8e18-70070a0f9f5a",
+  "candidate_commit": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+  "candidate_tree": "74fedd57ac90868f5ff2a921a57ccbfc6e73f3fa",
+  "delivery": {
+    "status": "PASS",
+    "original_files": 595,
+    "original_bytes": 25231569,
+    "original_pngs": 17,
+    "transport_carriers": 105,
+    "source_files": 1487,
+    "source_snapshots": 11,
+    "commands_once_each": 5,
+    "all_exit_code": 0,
+    "native_case_count": 1,
+    "case": "calibration_courtyard 10x10 1280x720",
+    "renderer": "gl_compatibility",
+    "native_receiver_adoption": {
+      "page_id": "page_6e2084798c348191b9abbef150c2ea22",
+      "thread_id": "7fe1a9c6-2f3a-5cb2-84cd-860f12e1a0c5",
+      "message_id": "7b37a362-a8f0-52f5-a710-2677ec0933a1",
+      "conversation_id": "01a118cf-9fad-76e2-99af-46a5f9a550fc"
+    },
+    "readback_proof": "original-readback-verification.json",
+    "runtime_proof": "main-runtime-verification.json"
+  },
+  "offline_reproduction": {
+    "v3_cases_equal": true,
+    "v3_pilot_equal": true,
+    "formal_v2_measurements_equal": true,
+    "numeric_difference_count": 120,
+    "maximum_float_difference": 2.1316282072803006e-14
+  },
+  "C4": "PASS",
+  "C8": "PASS",
+  "formal_verdict_preserved": "FAIL_U1_NUMERICAL_ACCEPTANCE",
+  "formal_summary": {
+    "wall": {
+      "T1": {
+        "PASS": 1,
+        "FAIL": 5,
+        "NOT_TESTED": 1
+      },
+      "T6": {
+        "PASS": 6,
+        "FAIL": 0,
+        "NOT_TESTED": 1
+      }
+    },
+    "pillar": {
+      "T1": {
+        "PASS": 0,
+        "FAIL": 3,
+        "NOT_TESTED": 0
+      },
+      "T6": {
+        "PASS": 0,
+        "FAIL": 3,
+        "NOT_TESTED": 0
+      }
+    },
+    "tree": {
+      "T1": {
+        "PASS": 1,
+        "FAIL": 11,
+        "NOT_TESTED": 0
+      },
+      "T6": {
+        "PASS": 1,
+        "FAIL": 11,
+        "NOT_TESTED": 0
+      }
+    },
+    "rubble": {
+      "T1": {
+        "PASS": 0,
+        "FAIL": 2,
+        "NOT_TESTED": 1
+      },
+      "T6": {
+        "PASS": 2,
+        "FAIL": 0,
+        "NOT_TESTED": 1
+      }
+    }
+  },
+  "T2": {
+    "wall": "7/7 PASS",
+    "pillar": "3/3 PASS"
+  },
+  "trees": {
+    "T3": "12/12 PASS",
+    "C9": {
+      "status": "PASS",
+      "passed": 11,
+      "failed": 1,
+      "not_tested": 0,
+      "denominator_all_declared_trees": 12,
+      "passing_fraction": 0.9166666666666666,
+      "required_fraction": 0.8,
+      "required_delta_e00_each_mode": 10,
+      "requires_both_modes_per_tree": true
+    },
+    "T1_T6": "DIAGNOSTIC_ONLY",
+    "frozen_assets_unchanged": true
+  },
+  "new_measurement_finding": {
+    "id": "R6-MASK-INTERNAL-SEAM-01",
+    "status": "CONFIRMED",
+    "proof": "internal-seam-proof.json",
+    "scope": "last-primitive source alpha used as whole-instance occupancy creates internal holes over opaque faces",
+    "formal_statuses_unchanged": true,
+    "physical_exterior_failure_inference": "requires correction and review before material tuning",
+    "fix_not_applied": true
+  },
+  "additional_offline_diagnostics": {
+    "T4": {
+      "status": "PASS_DIAGNOSTIC_PENDING_REVIEW",
+      "rows": 10,
+      "darkness_L": [
+        8.18027409662231,
+        9.53822369485632
+      ],
+      "width_px": [
+        1.9051108268639483,
+        4.28317889950219
+      ],
+      "method": "frozen contact_shadow; actual captured base polygons and rendered props-alpha exclusions; report for Claude review"
+    },
+    "T5": {
+      "status": "PASS",
+      "ground_rgba_identical_pixels": 921600,
+      "ground_total_pixels": 921600,
+      "mean_shift": 0
+    },
+    "source": "material-analysis.json"
+  },
+  "blind_column_identity": {
+    "status": "FAIL",
+    "reviewers": 2,
+    "inputs": "all three same-frame native-scale crops; no expected identity in prompts",
+    "evidence": "blind-reviews.portable.json",
+    "reason": "stone post/pillar with medium confidence; markers/gravestones/block alternatives and unclear base remain"
+  },
+  "visual_approval": {
+    "status": "PENDING_CLAUDE_REVIEW",
+    "review_request": "claude-review-request.md"
+  },
+  "six_case_coverage": "NOT_STARTED",
+  "next_step": "review R6-MASK-INTERNAL-SEAM-01 and constrained column identity correction; retain tree art and all numeric thresholds",
+  "protocol_close": "PENDING_SIGNED_RECEIPT_AND_YC_CLOSE_ACK",
+  "independent_delivery_review": "task117-delivery-independent-review.json"
+}

@@ -1,0 +1,117 @@
+{
+  "candidate_commit": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+  "request_id": "d3b69232-7c81-47d2-9c0c-6819b04388ea",
+  "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391",
+  "seq": 117,
+  "attempt": 0,
+  "expires_at": "2026-10-15T16:25:19.462772Z",
+  "result_page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+  "native_adoption_page_id": "page_6e2084798c348191b9abbef150c2ea22",
+  "native_adoption_block_id": "ea63f814-0c54-49a3-baf5-e73712797760",
+  "native_adoption_thread_id": "7fe1a9c6-2f3a-5cb2-84cd-860f12e1a0c5",
+  "main_adoption_message_id": "af613d24-20d2-5e17-9045-22b015a42b9d",
+  "source_thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9",
+  "reply_thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9",
+  "recipient_thread_id": "01a118cf-9fad-76e2-99af-46a5f9a550fc",
+  "body_sha256": "6dd908186065d4c337d071bfdc687b0b58cc49f47859aa9ba701009c969112e9",
+  "envelope": {
+    "filename": "task117-envelope.json",
+    "bytes": 183642,
+    "sha256": "4c289cc4e900beb0f6788d2550da98539b1db1b1b7a3552839d4029a195acba6"
+  },
+  "request_files": [
+    {
+      "filename": "task117-body.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV82WmVkZHgtYVRQZmpPTlRudFprSHl3_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "bytes": 166727,
+      "sha256": "80f4b9eb0385d51d83c30e7e4b23dc6afd988186ab4442b3330c214e447475eb",
+      "source_bytes_equal": true
+    },
+    {
+      "filename": "request-independent-review.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9LcEhPdW1GN1NQUnlLbGxIWUhYcW1B_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "bytes": 11436,
+      "sha256": "a07b42dd85d36bf8b6cba727621a1f987e015ae4b545cd93cecec6ae47710c7f",
+      "source_bytes_equal": true
+    },
+    {
+      "filename": "task117-envelope.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9adG05YVVvTFNNYUNhdFVtbzRlcTdB_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "bytes": 183642,
+      "sha256": "4c289cc4e900beb0f6788d2550da98539b1db1b1b7a3552839d4029a195acba6",
+      "source_bytes_equal": true
+    },
+    {
+      "filename": "task117-signed-body.original.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9JVFVoNmpmY0cwMGhlR3A1Y01Qbkdn_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "bytes": 137618,
+      "sha256": "6dd908186065d4c337d071bfdc687b0b58cc49f47859aa9ba701009c969112e9",
+      "source_bytes_equal": true
+    },
+    {
+      "filename": "task117-signing-binding.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9rUGFiWWg4SkV3Vy1GSlRaVVlFNWp3_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "bytes": 1165,
+      "sha256": "5faf913bf16d7811b09db9f836c92407c62bce65f743a71581d8e35761a80a59",
+      "source_bytes_equal": true
+    },
+    {
+      "filename": "task117-admission.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9PdHJJdk9rYlIwRlFvOFVsY0Izd0Fn_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "bytes": 674,
+      "sha256": "cd0e89422789d0f1db31a5289ffefd5631bdedecf63cf27a640b0ab009cd0641",
+      "source_bytes_equal": true
+    }
+  ],
+  "event": {
+    "event_id": "3f761ab4-9ba0-4aa8-bb51-2e3b4a9aee2b",
+    "recipient": "dot-yc",
+    "kind": "created",
+    "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391",
+    "request_id": "d3b69232-7c81-47d2-9c0c-6819b04388ea",
+    "body_sha256": "6dd908186065d4c337d071bfdc687b0b58cc49f47859aa9ba701009c969112e9",
+    "result_page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+    "seq": 134,
+    "published_at": "2026-10-15T08:47:09Z",
+    "status": "pending"
+  },
+  "ledger": {
+    "state": "running",
+    "execution_start_count": 1
+  },
+  "native_adoption_verified": true,
+  "ack": {
+    "schema": "sot-native-ack-readback/1",
+    "status": "PASS",
+    "request_id": "d3b69232-7c81-47d2-9c0c-6819b04388ea",
+    "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391",
+    "ack_request_id": "5c0a24bb-04d7-4e83-a1b1-75379a17c520",
+    "ack_bytes": 3036,
+    "ack_sha256": "c56776c09276dcf7c5031b820c6045d5c3d97785e9bc1b3281b14616ecaefb72",
+    "reference": "library-file:fde1_bGliZmlsZV84STN1aHFVOE9Kcm9sNkVMMTBhWElB_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+    "source_bytes_verified": true,
+    "native_adoption": {
+      "page_id": "page_6e2084798c348191b9abbef150c2ea22",
+      "thread_id": "7fe1a9c6-2f3a-5cb2-84cd-860f12e1a0c5",
+      "message_id": "89e3ad49-9b0b-571c-a383-34da5eb52549",
+      "conversation_id": "01a118cf-9fad-76e2-99af-46a5f9a550fc",
+      "created_at": "2026-10-15T08:59:06.603Z"
+    },
+    "binding_checks": {
+      "request_task_route_protocol_generation": true,
+      "live_ledger_running_count1": true,
+      "candidate_and_manifest_summary": true
+    },
+    "execution_at_ack": {
+      "commands_started": 0,
+      "native_capture_started": false,
+      "pending": "normal product review and exact gated runner launch"
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "status": "FAIL",
+  "gate": "unambiguous recognition as ruined architectural pillar and visible ground connection",
+  "reason": "two readers identify a stone post or pillar with medium confidence, retain marker/gravestone/block alternatives and uncertain base; this does not meet unambiguous identity gate",
+  "reviews": [
+    {
+      "reviewer": "/root/r6_scene_read_a",
+      "received_at": "2026-10-15T09:28:51.550Z",
+      "message_id": "amsg_01a13ee4-9a5e-7071-a1b5-aed3abe43420",
+      "raw_result": {
+        "file": "blind-review-a.original.txt",
+        "bytes": 1952,
+        "sha256": "22de4188e937e02cda9ca289ddaf3eefa40ee7ed3616e52e85f90fb3df838a49"
+      },
+      "displayed_inputs": "three native-scale crops only; prompt did not identify expected object type",
+      "portable_transcription": {
+        "samples": [
+          {
+            "file": "sample-1.png",
+            "identity": "一根矮而粗的灰色石柱或方形石块，直立放置",
+            "certainty": "medium",
+            "visible_shape_evidence": "有一个较宽的直立主体，轮廓近似方形，侧面颜色较暗；顶部不完全平整，边角略有起伏。脚部看起来略宽，但与地面的边界不清楚。",
+            "ground_connection": "底端直接贴着格子地面，旁边有一圈较浅的方形边缘和阴影；看不清那是独立底座还是地面纹理。",
+            "alternative_interpretations": [
+              "短石柱",
+              "竖立的石制标记",
+              "残破的方形石块"
+            ]
+          },
+          {
+            "file": "sample-2.png",
+            "identity": "一根短的灰色石质立柱，柱身近似方形",
+            "certainty": "medium",
+            "visible_shape_evidence": "主体竖直，侧面较平，顶部有小块不平整的亮面；柱身右侧中下部似乎有一处凸起或缺口。",
+            "ground_connection": "底端接触铺格地面，脚下可见较浅的方形区域和投影，但无法确认它们是否属于单独的石座。",
+            "alternative_interpretations": [
+              "矮石柱",
+              "破损的石制标记",
+              "竖放的石块"
+            ]
+          },
+          {
+            "file": "sample-3.png",
+            "identity": "一块直立的灰色方形石柱状物",
+            "certainty": "medium",
+            "visible_shape_evidence": "轮廓窄高，柱身大致方正，表面有深浅不一的灰色块；顶部略不平，边缘不很规整。",
+            "ground_connection": "底部似乎直接立在格子地面上，周围有暗色投影；没有看清明显的连接结构。",
+            "alternative_interpretations": [
+              "短石柱",
+              "石制界标",
+              "残留的建筑石块"
+            ]
+          }
+        ],
+        "overall_observation": "三张图中心都是灰色、方形轮廓的直立石质物体，形状接近短柱或立起的石块。它们都贴着格子地面，脚下的浅色方形边缘是否为独立底座无法从画面确认；具体用途也无法仅凭可见形状判断。"
+      },
+      "transcription_change": "file field reduced to basename only; wording unchanged"
+    },
+    {
+      "reviewer": "/root/r6_scene_read_b",
+      "received_at": "2026-10-15T09:28:51.560Z",
+      "message_id": "amsg_01a13ee4-9a68-7902-b95b-42a45df6e1f4",
+      "raw_result": {
+        "file": "blind-review-b.original.txt",
+        "bytes": 1505,
+        "sha256": "591e5d80300bf935ee9728c1a9a664413cf088794ef6d41f76000c54ad841dbf"
+      },
+      "displayed_inputs": "three native-scale crops only; prompt did not identify expected object type",
+      "portable_transcription": {
+        "samples": [
+          {
+            "file": "sample-1.png",
+            "identity": "看起来像一根矮石柱或石质立桩。",
+            "certainty": "medium",
+            "visible_shape_evidence": "灰色物体直立，整体较矮而厚，侧边大致平直但不齐；顶部较平，底部显得稍宽，边缘有些参差。",
+            "ground_connection": "底部贴着地面上的方形石块或铺地格，旁边有深色阴影，看起来是立在地面上的。",
+            "alternative_interpretations": [
+              "石制墓碑",
+              "残缺的短柱"
+            ]
+          },
+          {
+            "file": "sample-2.png",
+            "identity": "看起来像一根石柱或石质立桩。",
+            "certainty": "medium",
+            "visible_shape_evidence": "物体较细长，竖直部分近似长方形，顶部平坦但轮廓不规则；下端略宽，像有较厚的底部。",
+            "ground_connection": "下端落在铺地格上，边缘有暗影；没有看到悬空的部分。",
+            "alternative_interpretations": [
+              "墓碑",
+              "断裂后留下的石柱"
+            ]
+          },
+          {
+            "file": "sample-3.png",
+            "identity": "看起来像一根表面粗糙的石柱或石质立桩。",
+            "certainty": "medium",
+            "visible_shape_evidence": "灰色物体直立，侧面大致平行，顶部和边角不规则，底部较宽；表面有深浅变化。",
+            "ground_connection": "底端与地面铺格相接，周围可见暗色边缘或阴影。",
+            "alternative_interpretations": [
+              "石制墓碑",
+              "矮石桩或残柱"
+            ]
+          }
+        ],
+        "overall_observation": "三张图中心都是灰色、直立、底部较宽的石质物体，轮廓各有些不规则。画面细节不足以确定它们的具体用途；它们都像是直接立在地面上。"
+      },
+      "transcription_change": "file field reduced to basename only; wording unchanged"
+    }
+  ]
+}

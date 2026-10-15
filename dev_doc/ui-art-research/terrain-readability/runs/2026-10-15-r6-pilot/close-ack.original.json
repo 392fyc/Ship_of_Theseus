@@ -1,0 +1,266 @@
+{
+  "type": "CLOSE_ACK",
+  "request_id": "619bfad8-e36b-4eb7-8bad-e806f689ea3a",
+  "in_reply_to": "67947825-6173-46b4-84b8-453065ff734c",
+  "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391",
+  "original_task_request_id": "d3b69232-7c81-47d2-9c0c-6819b04388ea",
+  "original_task_body_sha256": "6dd908186065d4c337d071bfdc687b0b58cc49f47859aa9ba701009c969112e9",
+  "result_request_id": "b789ea8b-f460-481f-8e18-70070a0f9f5a",
+  "receipt_body_sha256": "42b034825830c240a6108ad683b2d82099ebbd450fe6456e8968322b46d668a1",
+  "created_at": "2026-10-15T10:12:33.757863+00:00",
+  "source_thread_id": "01a118cf-9fad-76e2-99af-46a5f9a550fc",
+  "reply_thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9",
+  "recipient_thread_id": "01a0cf50-f294-7db3-8d8d-bc6268e670a9",
+  "generation": "469550a9-a0b6-4d55-af41-1287ce6556f7",
+  "cooperation_protocol": {
+    "bytes": 10105,
+    "page_id": "page_a66cc77252f88191847cb871a41805fe",
+    "reference": "library-file:fde1_bGliZmlsZV92c3BlMGNtSlNmR3BRX21SMjEyNDFR_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+    "sha256": "85e9f51fb3d258a52aad4c467032223883c1ef715aee6498ae9a052cd2985842",
+    "version": "dot-cooperation/2"
+  },
+  "identity_verification": {
+    "status": "PASS",
+    "checked_at": "2026-10-15T10:11:44.143355+00:00",
+    "request_id": "67947825-6173-46b4-84b8-453065ff734c",
+    "checks": {
+      "envelope_sha": true,
+      "body_sha": true,
+      "canonical_body": true,
+      "der_pin": true,
+      "signature": true,
+      "original_binding_pairing_id": true,
+      "original_binding_client_id": true,
+      "original_binding_key_id": true,
+      "original_binding_source_thread_id": true,
+      "original_binding_reply_thread_id": true,
+      "original_binding_recipient_thread_id": true,
+      "original_binding_task_id": true,
+      "original_binding_attempt": true,
+      "receipt_ids": true,
+      "generation": true,
+      "original_task_binding": true,
+      "nonce_new_vs_task": true,
+      "deadline": true,
+      "protocol": true,
+      "ledger_ready": true,
+      "595_inventory": true,
+      "bytes_total": true,
+      "105_carriers": true,
+      "native_source": true,
+      "original_fail_preserved": true
+    },
+    "artifact_hashes": [
+      {
+        "name": "original-readback-verification.json",
+        "bytes": 217655,
+        "sha256": "489df72fbeb741a66d37aab7f5e990d311a236b6f7140aa6ef71600800eede88"
+      },
+      {
+        "name": "main-runtime-verification.json",
+        "bytes": 91004,
+        "sha256": "b585c145ab2640379b739fccdd48f7feb0d795e7da23fff5a9da5220078acd23"
+      },
+      {
+        "name": "material-analysis.json",
+        "bytes": 26443,
+        "sha256": "b0ef6ac51c47bef8129134202e69639d041375b8508ff2133b6ecc1c4b45003a"
+      },
+      {
+        "name": "internal-seam-proof.json",
+        "bytes": 3775,
+        "sha256": "10988d36afc25747d312da52f971e9ac9a02bf866f663a7e6ac8e5b69316ff85"
+      },
+      {
+        "name": "blind-reviews.portable.json",
+        "bytes": 5808,
+        "sha256": "d184d6c1e80b8864f1167f87121faf76e1291008d2ad1860d6ca9a40962e0cd1"
+      },
+      {
+        "name": "main-consumption.json",
+        "bytes": 4530,
+        "sha256": "5a4b745bc4bc4a9ef235c0c4d2ddb34d1557f43fd1f8e6d1317b88557af944c0"
+      }
+    ],
+    "human_authorization": "Parent owns fresh direct human read. This worker only verifies read-only receipt evidence; sender human_source claims are not authority.",
+    "limits": "No ledger transitions, comments, event consumption, new tests or changes. Does not independently rerun main diagnostics or reread 105 already verified carriers. New diagnostics attributed to signed source. Nonce compared against original TASK; durable task ledger does not independently enumerate receipt nonces.",
+    "ledger_state": "readback_verified",
+    "execution_start_count": 1,
+    "new_findings": [
+      "R6-MASK-INTERNAL-SEAM-01 source-reported confirmed input interpretation defect; original FAIL retained.",
+      "Column blind identity FAIL ambiguous identity.",
+      "T4 offline diagnostic PASS pending method review; T5 ground equal; visual approval pending Claude."
+    ]
+  },
+  "human_source_readability": {
+    "direct_read": true,
+    "message_id": "Sentinel_27e22fa56c1481919e10eba497f7d539",
+    "author_id": "user-l4prEKhWwTsdVl1h3pbu6L4S"
+  },
+  "task_authorization": "Paired SoT private evidence delivery and receipt closure within directly readable standing scope. No new execution.",
+  "ledger": {
+    "archive_only": false,
+    "duplicate": false,
+    "evidence_sha256": "42b034825830c240a6108ad683b2d82099ebbd450fe6456e8968322b46d668a1",
+    "execution_start_count": 1,
+    "human_authorization_checked": false,
+    "metadata": {
+      "attempt": 0,
+      "body_sha256": "6dd908186065d4c337d071bfdc687b0b58cc49f47859aa9ba701009c969112e9",
+      "client_id": "mercury-local-7334946d-3de4-4fbe-be56-5815c673e99d",
+      "expires_at": "2026-10-15T16:25:19.462772Z",
+      "generation": "469550a9-a0b6-4d55-af41-1287ce6556f7",
+      "key_id": "sha256:9107e4d54138e02bd0663908278a65ba1c7681a38c2d97d22c564b2fd45fe20b",
+      "nonce": "FSkS1VZWZsgkffNnCeIQk2Ro3JBR788hYqjE3YW8uJo",
+      "pairing_id": "mercury-yc-20261004",
+      "protocol_sha256": "85e9f51fb3d258a52aad4c467032223883c1ef715aee6498ae9a052cd2985842",
+      "recipient_thread_id": "01a118cf-9fad-76e2-99af-46a5f9a550fc",
+      "request_id": "d3b69232-7c81-47d2-9c0c-6819b04388ea",
+      "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391"
+    },
+    "result_page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+    "start_granted": false,
+    "state": "closed"
+  },
+  "domain_verdict": {
+    "C4": "PASS",
+    "C8": "PASS",
+    "T2": {
+      "pillar": "3/3 PASS",
+      "wall": "7/7 PASS"
+    },
+    "T4": "offline diagnostic PASS; awaiting Claude method review",
+    "T5": "ground RGBA identical; mean shifts zero",
+    "column_blind_gate": "FAIL_AMBIGUOUS_IDENTITY",
+    "formal_original_unchanged": true,
+    "formal_summary": {
+      "pillar": {
+        "T1": {
+          "FAIL": 3,
+          "NOT_TESTED": 0,
+          "PASS": 0
+        },
+        "T6": {
+          "FAIL": 3,
+          "NOT_TESTED": 0,
+          "PASS": 0
+        }
+      },
+      "rubble": {
+        "T1": {
+          "FAIL": 2,
+          "NOT_TESTED": 1,
+          "PASS": 0
+        },
+        "T6": {
+          "FAIL": 0,
+          "NOT_TESTED": 1,
+          "PASS": 2
+        }
+      },
+      "tree": {
+        "T1": {
+          "FAIL": 11,
+          "NOT_TESTED": 0,
+          "PASS": 1
+        },
+        "T6": {
+          "FAIL": 11,
+          "NOT_TESTED": 0,
+          "PASS": 1
+        }
+      },
+      "wall": {
+        "T1": {
+          "FAIL": 5,
+          "NOT_TESTED": 1,
+          "PASS": 1
+        },
+        "T6": {
+          "FAIL": 0,
+          "NOT_TESTED": 1,
+          "PASS": 6
+        }
+      }
+    },
+    "measurement_defect": {
+      "acceptance_fix_not_applied": true,
+      "confirmed": true,
+      "id": "R6-MASK-INTERNAL-SEAM-01",
+      "original_FAIL_not_reclassified": true
+    },
+    "six_case_coverage": "NOT_STARTED",
+    "status": "FAIL_U1_NUMERICAL_ACCEPTANCE",
+    "tree_C9": {
+      "denominator_all_declared_trees": 12,
+      "failed": 1,
+      "not_tested": 0,
+      "passed": 11,
+      "passing_fraction": 0.9166666666666666,
+      "required_delta_e00_each_mode": 10,
+      "required_fraction": 0.8,
+      "requires_both_modes_per_tree": true,
+      "status": "PASS"
+    },
+    "tree_T3": "12/12 PASS",
+    "visual_approval": "PENDING_CLAUDE_REVIEW"
+  },
+  "new_execution": false,
+  "old_tasks_modified": false,
+  "receipt_artifacts": [
+    {
+      "bytes": 217655,
+      "filename": "original-readback-verification.json",
+      "name": "original-readback-verification.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9tZmViRktTM3hqMmJUVXdOZmtRTlln_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "sha256": "489df72fbeb741a66d37aab7f5e990d311a236b6f7140aa6ef71600800eede88"
+    },
+    {
+      "bytes": 91004,
+      "filename": "main-runtime-verification.json",
+      "name": "main-runtime-verification.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9kY3NKbWFQaUd3Q3RGbjIwVWxLMjdn_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "sha256": "b585c145ab2640379b739fccdd48f7feb0d795e7da23fff5a9da5220078acd23"
+    },
+    {
+      "bytes": 26443,
+      "filename": "material-analysis.json",
+      "name": "material-analysis.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9CYUNpeUU4Y3I5R2Q2dm9vSVk0X2hR_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "sha256": "b0ef6ac51c47bef8129134202e69639d041375b8508ff2133b6ecc1c4b45003a"
+    },
+    {
+      "bytes": 3775,
+      "filename": "internal-seam-proof.json",
+      "name": "internal-seam-proof.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9VMEpaYno5RVVGemJKTmd3RGQyajl3_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "sha256": "10988d36afc25747d312da52f971e9ac9a02bf866f663a7e6ac8e5b69316ff85"
+    },
+    {
+      "bytes": 5808,
+      "filename": "blind-reviews.portable.json",
+      "name": "blind-reviews.portable.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV9CNEV2MndFTXNENUJWdHltQl93eGV3_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "sha256": "d184d6c1e80b8864f1167f87121faf76e1291008d2ad1860d6ca9a40962e0cd1"
+    },
+    {
+      "bytes": 4530,
+      "filename": "main-consumption.json",
+      "name": "main-consumption.json",
+      "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+      "reference": "library-file:fde1_bGliZmlsZV81WmxRS21TZklhejFBY3MzTGliczNn_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+      "sha256": "5a4b745bc4bc4a9ef235c0c4d2ddb34d1557f43fd1f8e6d1317b88557af944c0"
+    }
+  ],
+  "native_source_adoption": {
+    "page_id": "page_6e2084798c348191b9abbef150c2ea22",
+    "thread_id": "7fe1a9c6-2f3a-5cb2-84cd-860f12e1a0c5",
+    "message_id": "fc87dd49-294c-58f9-b6d4-388fe795988c"
+  },
+  "identity_note": "YC has no pinned receiver signing key; authenticate through native YC adoption and exact bytes."
+}

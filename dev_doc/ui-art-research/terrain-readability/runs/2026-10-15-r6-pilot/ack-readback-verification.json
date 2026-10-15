@@ -1,0 +1,28 @@
+{
+  "schema": "sot-native-ack-readback/1",
+  "status": "PASS",
+  "request_id": "d3b69232-7c81-47d2-9c0c-6819b04388ea",
+  "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391",
+  "ack_request_id": "5c0a24bb-04d7-4e83-a1b1-75379a17c520",
+  "ack_bytes": 3036,
+  "ack_sha256": "c56776c09276dcf7c5031b820c6045d5c3d97785e9bc1b3281b14616ecaefb72",
+  "reference": "library-file:fde1_bGliZmlsZV84STN1aHFVOE9Kcm9sNkVMMTBhWElB_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+  "source_bytes_verified": true,
+  "native_adoption": {
+    "page_id": "page_6e2084798c348191b9abbef150c2ea22",
+    "thread_id": "7fe1a9c6-2f3a-5cb2-84cd-860f12e1a0c5",
+    "message_id": "89e3ad49-9b0b-571c-a383-34da5eb52549",
+    "conversation_id": "01a118cf-9fad-76e2-99af-46a5f9a550fc",
+    "created_at": "2026-10-15T08:59:06.603Z"
+  },
+  "binding_checks": {
+    "request_task_route_protocol_generation": true,
+    "live_ledger_running_count1": true,
+    "candidate_and_manifest_summary": true
+  },
+  "execution_at_ack": {
+    "commands_started": 0,
+    "native_capture_started": false,
+    "pending": "normal product review and exact gated runner launch"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "schema": "mercury-owner-event-receiver/1",
+  "runtime_build": "consumed-return-guard-20261015",
+  "lifecycle": "standing_polling",
+  "cursor": 135,
+  "standing_notification": {
+    "enabled": true,
+    "state": "active",
+    "notifications_only": true
+  },
+  "dispatch": {
+    "seq": 135,
+    "event_id": "yc-task117-result-b789ea8b-f460-481f-8e18-70070a0f9f5a",
+    "request_id": "b789ea8b-f460-481f-8e18-70070a0f9f5a",
+    "event_type": "completed",
+    "state": "pending_task_ledger",
+    "error_code": null,
+    "notification_phase": null,
+    "source_after_turn_id": null,
+    "native_send_request_id": null,
+    "native_status_request_ids": "[]",
+    "returned_thread_id": null,
+    "returned_turn_id": null
+  },
+  "observation": "Only existing TASK117 RESULT notice seq135; no test or identity mutation",
+  "event_contract": "dot-link native-thread-wakeup.md original TASK task_id/request_id/body_sha256/result_page_id"
+}

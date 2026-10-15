@@ -1,0 +1,4602 @@
+{
+  "schema_version": "terrain-semantic-sidecar-readback/1",
+  "phase": "pilot",
+  "candidate_head": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+  "six_case_coverage": false,
+  "batch_frozen_and_semantic_preconditions": "NOT_RUN_IN_PILOT_PHASE",
+  "batch_final_gate": "NOT_RUN_IN_PILOT_PHASE",
+  "cases": [
+    {
+      "manifest": "capture-manifest.json",
+      "case": {
+        "fixture": {
+          "derived_map_sha256": "600a0a61ab1d63bf020dcdd33ac9b4e85ba3ec9b13c61cd70409b740775406cc",
+          "expansion_rule": "Repeat the source 10x10 terrain and paving cells at x%10,y%10; repeat source variants modulo 10 after applying the declared calibration override.",
+          "map_variant_overrides": [
+            {
+              "cell_in_source_10x10": [
+                8,
+                7
+              ],
+              "from": "pillar",
+              "purpose": "Meet the minimum count for production-generated rubble while retaining at least three pillars.",
+              "repeated_case_cells": [
+                [
+                  8,
+                  7
+                ]
+              ],
+              "to": "ruined"
+            }
+          ],
+          "name": "calibration_courtyard",
+          "source_example": "assets/prototype/battlefield_courtyard/terrain_examples.json#courtyard",
+          "source_map_sha256": "640fe261ef68b013b79557f97fd0fa276d30bd08187f0cd7230bc695bb6d8755"
+        },
+        "initial_fit": {
+          "camera_global_transform": [
+            1.0,
+            0.0,
+            0.0,
+            1.0,
+            428.695648193359,
+            215.826080322266
+          ],
+          "camera_position": [
+            428.695648193359,
+            215.826080322266
+          ],
+          "camera_zoom": [
+            0.920000016689301,
+            0.920000016689301
+          ],
+          "fit_call": "TerrainBattleSession._resize -> fit_board",
+          "fit_zoom": 0.92,
+          "manual_camera_override": false,
+          "status": "captured"
+        },
+        "map_sha256": "600a0a61ab1d63bf020dcdd33ac9b4e85ba3ec9b13c61cd70409b740775406cc",
+        "map_size": [
+          10,
+          10
+        ],
+        "name": "10x10_1280x720",
+        "requested_resolution": [
+          1280,
+          720
+        ],
+        "scene": "TerrainBattleSession -> scenes/tactical/TacticalScene.tscn",
+        "window_size": [
+          1280,
+          720
+        ]
+      },
+      "frozen_capture_preconditions": "PASS",
+      "frozen_capture_errors": [],
+      "semantic_sidecar_preconditions": "PASS",
+      "semantic_sidecar_errors": [],
+      "pixel_alignment": {
+        "status": "PASS",
+        "errors": [],
+        "method": "exact opaque RGBA anchors, or exact RGB and identical observed alpha>127 inside independently recorded single-instance source bounds; no blended palette or nearest-color decoding",
+        "props_alpha_gt_0_5_pixels": 22720,
+        "props_alpha_missing_labels": 0,
+        "opaque_instance_matches": 7942,
+        "opaque_instance_mismatches": 0,
+        "opaque_instance_matches_by_kind": {
+          "pillar": 2323,
+          "wall": 5619
+        },
+        "isolated_source_instance_matches": 5423,
+        "isolated_source_instance_mismatches": 0,
+        "isolated_source_matches_by_kind": {
+          "pillar": 0,
+          "rubble": 0,
+          "tree": 5423,
+          "wall": 0
+        },
+        "opaque_part_matches": 7942,
+        "opaque_part_mismatches": 0
+      },
+      "visible_instances": {
+        "tree": {
+          "instances": 12,
+          "visible_instances": 12,
+          "required_visible_instances": 3,
+          "records": [
+            {
+              "stable_id": "tree@0.00,0.00",
+              "pixels": 744
+            },
+            {
+              "stable_id": "tree@0.00,1.00",
+              "pixels": 1349
+            },
+            {
+              "stable_id": "tree@0.00,8.00",
+              "pixels": 1208
+            },
+            {
+              "stable_id": "tree@0.00,9.00",
+              "pixels": 1118
+            },
+            {
+              "stable_id": "tree@1.00,0.00",
+              "pixels": 1188
+            },
+            {
+              "stable_id": "tree@1.00,9.00",
+              "pixels": 1087
+            },
+            {
+              "stable_id": "tree@8.00,0.00",
+              "pixels": 177
+            },
+            {
+              "stable_id": "tree@8.00,9.00",
+              "pixels": 1032
+            },
+            {
+              "stable_id": "tree@9.00,0.00",
+              "pixels": 486
+            },
+            {
+              "stable_id": "tree@9.00,1.00",
+              "pixels": 52
+            },
+            {
+              "stable_id": "tree@9.00,8.00",
+              "pixels": 1033
+            },
+            {
+              "stable_id": "tree@9.00,9.00",
+              "pixels": 1076
+            }
+          ],
+          "status": "PASS"
+        },
+        "wall": {
+          "instances": 7,
+          "visible_instances": 7,
+          "required_visible_instances": 3,
+          "records": [
+            {
+              "stable_id": "wall@3.00,1.00",
+              "pixels": 712
+            },
+            {
+              "stable_id": "wall@3.00,2.00",
+              "pixels": 742
+            },
+            {
+              "stable_id": "wall@4.00,1.00",
+              "pixels": 966
+            },
+            {
+              "stable_id": "wall@5.00,1.00",
+              "pixels": 896
+            },
+            {
+              "stable_id": "wall@6.00,1.00",
+              "pixels": 579
+            },
+            {
+              "stable_id": "wall@6.00,2.00",
+              "pixels": 746
+            },
+            {
+              "stable_id": "wall@8.00,7.00",
+              "pixels": 57
+            }
+          ],
+          "status": "PASS"
+        },
+        "pillar": {
+          "instances": 3,
+          "visible_instances": 3,
+          "required_visible_instances": 3,
+          "records": [
+            {
+              "stable_id": "pillar@1.00,4.00",
+              "pixels": 786
+            },
+            {
+              "stable_id": "pillar@1.00,7.00",
+              "pixels": 637
+            },
+            {
+              "stable_id": "pillar@8.00,4.00",
+              "pixels": 847
+            }
+          ],
+          "status": "PASS"
+        },
+        "rubble": {
+          "instances": 3,
+          "visible_instances": 3,
+          "required_visible_instances": 3,
+          "records": [
+            {
+              "stable_id": "rubble@3.12,2.08",
+              "pixels": 126
+            },
+            {
+              "stable_id": "rubble@6.12,2.08",
+              "pixels": 131
+            },
+            {
+              "stable_id": "rubble@8.12,7.08",
+              "pixels": 19
+            }
+          ],
+          "status": "PASS"
+        }
+      },
+      "T2_wall_instances": [
+        {
+          "status": "PASS",
+          "top_l": 47.39353789501999,
+          "side_l": 35.043422767041776,
+          "top_pixels": 407,
+          "side_pixels": 282,
+          "reference_surface_pixels": 820,
+          "reference_surface_categories": [
+            {
+              "name": "0",
+              "semantic": "plain",
+              "pixels": 412
+            },
+            {
+              "name": "4",
+              "semantic": "wall",
+              "pixels": 199
+            },
+            {
+              "name": "paving",
+              "semantic": "_is_paved_at cell flag",
+              "pixels": 209
+            }
+          ],
+          "water_pixels_excluded_from_reference": 0,
+          "alpha_uncertain_top_pixels": 0,
+          "alpha_uncertain_side_pixels": 0,
+          "alpha_uncertain_samples_included": true,
+          "alpha_threshold_for_samples": ">127/255",
+          "uncertain_if_alpha_below": 0.98,
+          "reference_scope": "group",
+          "reference_surface_l": 19.503277120377767,
+          "top_reference_surface_delta": 27.890260774642222,
+          "stable_id": "wall@3.00,1.00",
+          "type": "wall",
+          "token": 19,
+          "top_part_codes": [
+            1
+          ],
+          "side_part_codes": [
+            2
+          ],
+          "measurement_group": {
+            "group_id": "wall-group-01",
+            "members": [
+              "wall@3.00,1.00",
+              "wall@3.00,2.00",
+              "wall@4.00,1.00",
+              "wall@5.00,1.00",
+              "wall@6.00,1.00",
+              "wall@6.00,2.00"
+            ],
+            "member_cells_xy": {
+              "wall@3.00,1.00": [
+                3,
+                1
+              ],
+              "wall@3.00,2.00": [
+                3,
+                2
+              ],
+              "wall@4.00,1.00": [
+                4,
+                1
+              ],
+              "wall@5.00,1.00": [
+                5,
+                1
+              ],
+              "wall@6.00,1.00": [
+                6,
+                1
+              ],
+              "wall@6.00,2.00": [
+                6,
+                2
+              ]
+            },
+            "member_visible_mask_pixels": {
+              "wall@3.00,1.00": 794,
+              "wall@3.00,2.00": 874,
+              "wall@4.00,1.00": 1090,
+              "wall@5.00,1.00": 1013,
+              "wall@6.00,1.00": 984,
+              "wall@6.00,2.00": 892
+            },
+            "member_measurement_mask_pixels": {
+              "wall@3.00,1.00": 712,
+              "wall@3.00,2.00": 742,
+              "wall@4.00,1.00": 966,
+              "wall@5.00,1.00": 896,
+              "wall@6.00,1.00": 579,
+              "wall@6.00,2.00": 746
+            },
+            "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+            "status": "PASS",
+            "reason": null
+          }
+        },
+        {
+          "status": "PASS",
+          "top_l": 47.61243918967432,
+          "side_l": 36.79075485537727,
+          "top_pixels": 270,
+          "side_pixels": 442,
+          "reference_surface_pixels": 820,
+          "reference_surface_categories": [
+            {
+              "name": "0",
+              "semantic": "plain",
+              "pixels": 412
+            },
+            {
+              "name": "4",
+              "semantic": "wall",
+              "pixels": 199
+            },
+            {
+              "name": "paving",
+              "semantic": "_is_paved_at cell flag",
+              "pixels": 209
+            }
+          ],
+          "water_pixels_excluded_from_reference": 0,
+          "alpha_uncertain_top_pixels": 0,
+          "alpha_uncertain_side_pixels": 0,
+          "alpha_uncertain_samples_included": true,
+          "alpha_threshold_for_samples": ">127/255",
+          "uncertain_if_alpha_below": 0.98,
+          "reference_scope": "group",
+          "reference_surface_l": 19.503277120377767,
+          "top_reference_surface_delta": 28.109162069296552,
+          "stable_id": "wall@3.00,2.00",
+          "type": "wall",
+          "token": 20,
+          "top_part_codes": [
+            1
+          ],
+          "side_part_codes": [
+            2
+          ],
+          "measurement_group": {
+            "group_id": "wall-group-01",
+            "members": [
+              "wall@3.00,1.00",
+              "wall@3.00,2.00",
+              "wall@4.00,1.00",
+              "wall@5.00,1.00",
+              "wall@6.00,1.00",
+              "wall@6.00,2.00"
+            ],
+            "member_cells_xy": {
+              "wall@3.00,1.00": [
+                3,
+                1
+              ],
+              "wall@3.00,2.00": [
+                3,
+                2
+              ],
+              "wall@4.00,1.00": [
+                4,
+                1
+              ],
+              "wall@5.00,1.00": [
+                5,
+                1
+              ],
+              "wall@6.00,1.00": [
+                6,
+                1
+              ],
+              "wall@6.00,2.00": [
+                6,
+                2
+              ]
+            },
+            "member_visible_mask_pixels": {
+              "wall@3.00,1.00": 794,
+              "wall@3.00,2.00": 874,
+              "wall@4.00,1.00": 1090,
+              "wall@5.00,1.00": 1013,
+              "wall@6.00,1.00": 984,
+              "wall@6.00,2.00": 892
+            },
+            "member_measurement_mask_pixels": {
+              "wall@3.00,1.00": 712,
+              "wall@3.00,2.00": 742,
+              "wall@4.00,1.00": 966,
+              "wall@5.00,1.00": 896,
+              "wall@6.00,1.00": 579,
+              "wall@6.00,2.00": 746
+            },
+            "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+            "status": "PASS",
+            "reason": null
+          }
+        },
+        {
+          "status": "PASS",
+          "top_l": 48.09993456387767,
+          "side_l": 34.70827543978477,
+          "top_pixels": 389,
+          "side_pixels": 577,
+          "reference_surface_pixels": 820,
+          "reference_surface_categories": [
+            {
+              "name": "0",
+              "semantic": "plain",
+              "pixels": 412
+            },
+            {
+              "name": "4",
+              "semantic": "wall",
+              "pixels": 199
+            },
+            {
+              "name": "paving",
+              "semantic": "_is_paved_at cell flag",
+              "pixels": 209
+            }
+          ],
+          "water_pixels_excluded_from_reference": 0,
+          "alpha_uncertain_top_pixels": 0,
+          "alpha_uncertain_side_pixels": 0,
+          "alpha_uncertain_samples_included": true,
+          "alpha_threshold_for_samples": ">127/255",
+          "uncertain_if_alpha_below": 0.98,
+          "reference_scope": "group",
+          "reference_surface_l": 19.503277120377767,
+          "top_reference_surface_delta": 28.5966574434999,
+          "stable_id": "wall@4.00,1.00",
+          "type": "wall",
+          "token": 21,
+          "top_part_codes": [
+            1
+          ],
+          "side_part_codes": [
+            2
+          ],
+          "measurement_group": {
+            "group_id": "wall-group-01",
+            "members": [
+              "wall@3.00,1.00",
+              "wall@3.00,2.00",
+              "wall@4.00,1.00",
+              "wall@5.00,1.00",
+              "wall@6.00,1.00",
+              "wall@6.00,2.00"
+            ],
+            "member_cells_xy": {
+              "wall@3.00,1.00": [
+                3,
+                1
+              ],
+              "wall@3.00,2.00": [
+                3,
+                2
+              ],
+              "wall@4.00,1.00": [
+                4,
+                1
+              ],
+              "wall@5.00,1.00": [
+                5,
+                1
+              ],
+              "wall@6.00,1.00": [
+                6,
+                1
+              ],
+              "wall@6.00,2.00": [
+                6,
+                2
+              ]
+            },
+            "member_visible_mask_pixels": {
+              "wall@3.00,1.00": 794,
+              "wall@3.00,2.00": 874,
+              "wall@4.00,1.00": 1090,
+              "wall@5.00,1.00": 1013,
+              "wall@6.00,1.00": 984,
+              "wall@6.00,2.00": 892
+            },
+            "member_measurement_mask_pixels": {
+              "wall@3.00,1.00": 712,
+              "wall@3.00,2.00": 742,
+              "wall@4.00,1.00": 966,
+              "wall@5.00,1.00": 896,
+              "wall@6.00,1.00": 579,
+              "wall@6.00,2.00": 746
+            },
+            "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+            "status": "PASS",
+            "reason": null
+          }
+        },
+        {
+          "status": "PASS",
+          "top_l": 47.67283487496918,
+          "side_l": 34.892622468695635,
+          "top_pixels": 404,
+          "side_pixels": 492,
+          "reference_surface_pixels": 820,
+          "reference_surface_categories": [
+            {
+              "name": "0",
+              "semantic": "plain",
+              "pixels": 412
+            },
+            {
+              "name": "4",
+              "semantic": "wall",
+              "pixels": 199
+            },
+            {
+              "name": "paving",
+              "semantic": "_is_paved_at cell flag",
+              "pixels": 209
+            }
+          ],
+          "water_pixels_excluded_from_reference": 0,
+          "alpha_uncertain_top_pixels": 0,
+          "alpha_uncertain_side_pixels": 0,
+          "alpha_uncertain_samples_included": true,
+          "alpha_threshold_for_samples": ">127/255",
+          "uncertain_if_alpha_below": 0.98,
+          "reference_scope": "group",
+          "reference_surface_l": 19.503277120377767,
+          "top_reference_surface_delta": 28.169557754591416,
+          "stable_id": "wall@5.00,1.00",
+          "type": "wall",
+          "token": 22,
+          "top_part_codes": [
+            1
+          ],
+          "side_part_codes": [
+            2
+          ],
+          "measurement_group": {
+            "group_id": "wall-group-01",
+            "members": [
+              "wall@3.00,1.00",
+              "wall@3.00,2.00",
+              "wall@4.00,1.00",
+              "wall@5.00,1.00",
+              "wall@6.00,1.00",
+              "wall@6.00,2.00"
+            ],
+            "member_cells_xy": {
+              "wall@3.00,1.00": [
+                3,
+                1
+              ],
+              "wall@3.00,2.00": [
+                3,
+                2
+              ],
+              "wall@4.00,1.00": [
+                4,
+                1
+              ],
+              "wall@5.00,1.00": [
+                5,
+                1
+              ],
+              "wall@6.00,1.00": [
+                6,
+                1
+              ],
+              "wall@6.00,2.00": [
+                6,
+                2
+              ]
+            },
+            "member_visible_mask_pixels": {
+              "wall@3.00,1.00": 794,
+              "wall@3.00,2.00": 874,
+              "wall@4.00,1.00": 1090,
+              "wall@5.00,1.00": 1013,
+              "wall@6.00,1.00": 984,
+              "wall@6.00,2.00": 892
+            },
+            "member_measurement_mask_pixels": {
+              "wall@3.00,1.00": 712,
+              "wall@3.00,2.00": 742,
+              "wall@4.00,1.00": 966,
+              "wall@5.00,1.00": 896,
+              "wall@6.00,1.00": 579,
+              "wall@6.00,2.00": 746
+            },
+            "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+            "status": "PASS",
+            "reason": null
+          }
+        },
+        {
+          "status": "PASS",
+          "top_l": 47.81129984083207,
+          "side_l": 35.90027619282951,
+          "top_pixels": 347,
+          "side_pixels": 221,
+          "reference_surface_pixels": 820,
+          "reference_surface_categories": [
+            {
+              "name": "0",
+              "semantic": "plain",
+              "pixels": 412
+            },
+            {
+              "name": "4",
+              "semantic": "wall",
+              "pixels": 199
+            },
+            {
+              "name": "paving",
+              "semantic": "_is_paved_at cell flag",
+              "pixels": 209
+            }
+          ],
+          "water_pixels_excluded_from_reference": 0,
+          "alpha_uncertain_top_pixels": 0,
+          "alpha_uncertain_side_pixels": 0,
+          "alpha_uncertain_samples_included": true,
+          "alpha_threshold_for_samples": ">127/255",
+          "uncertain_if_alpha_below": 0.98,
+          "reference_scope": "group",
+          "reference_surface_l": 19.503277120377767,
+          "top_reference_surface_delta": 28.308022720454304,
+          "stable_id": "wall@6.00,1.00",
+          "type": "wall",
+          "token": 23,
+          "top_part_codes": [
+            1
+          ],
+          "side_part_codes": [
+            2
+          ],
+          "measurement_group": {
+            "group_id": "wall-group-01",
+            "members": [
+              "wall@3.00,1.00",
+              "wall@3.00,2.00",
+              "wall@4.00,1.00",
+              "wall@5.00,1.00",
+              "wall@6.00,1.00",
+              "wall@6.00,2.00"
+            ],
+            "member_cells_xy": {
+              "wall@3.00,1.00": [
+                3,
+                1
+              ],
+              "wall@3.00,2.00": [
+                3,
+                2
+              ],
+              "wall@4.00,1.00": [
+                4,
+                1
+              ],
+              "wall@5.00,1.00": [
+                5,
+                1
+              ],
+              "wall@6.00,1.00": [
+                6,
+                1
+              ],
+              "wall@6.00,2.00": [
+                6,
+                2
+              ]
+            },
+            "member_visible_mask_pixels": {
+              "wall@3.00,1.00": 794,
+              "wall@3.00,2.00": 874,
+              "wall@4.00,1.00": 1090,
+              "wall@5.00,1.00": 1013,
+              "wall@6.00,1.00": 984,
+              "wall@6.00,2.00": 892
+            },
+            "member_measurement_mask_pixels": {
+              "wall@3.00,1.00": 712,
+              "wall@3.00,2.00": 742,
+              "wall@4.00,1.00": 966,
+              "wall@5.00,1.00": 896,
+              "wall@6.00,1.00": 579,
+              "wall@6.00,2.00": 746
+            },
+            "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+            "status": "PASS",
+            "reason": null
+          }
+        },
+        {
+          "status": "PASS",
+          "top_l": 47.701986193965844,
+          "side_l": 36.29514485874093,
+          "top_pixels": 258,
+          "side_pixels": 465,
+          "reference_surface_pixels": 820,
+          "reference_surface_categories": [
+            {
+              "name": "0",
+              "semantic": "plain",
+              "pixels": 412
+            },
+            {
+              "name": "4",
+              "semantic": "wall",
+              "pixels": 199
+            },
+            {
+              "name": "paving",
+              "semantic": "_is_paved_at cell flag",
+              "pixels": 209
+            }
+          ],
+          "water_pixels_excluded_from_reference": 0,
+          "alpha_uncertain_top_pixels": 0,
+          "alpha_uncertain_side_pixels": 0,
+          "alpha_uncertain_samples_included": true,
+          "alpha_threshold_for_samples": ">127/255",
+          "uncertain_if_alpha_below": 0.98,
+          "reference_scope": "group",
+          "reference_surface_l": 19.503277120377767,
+          "top_reference_surface_delta": 28.198709073588077,
+          "stable_id": "wall@6.00,2.00",
+          "type": "wall",
+          "token": 24,
+          "top_part_codes": [
+            1
+          ],
+          "side_part_codes": [
+            2
+          ],
+          "measurement_group": {
+            "group_id": "wall-group-01",
+            "members": [
+              "wall@3.00,1.00",
+              "wall@3.00,2.00",
+              "wall@4.00,1.00",
+              "wall@5.00,1.00",
+              "wall@6.00,1.00",
+              "wall@6.00,2.00"
+            ],
+            "member_cells_xy": {
+              "wall@3.00,1.00": [
+                3,
+                1
+              ],
+              "wall@3.00,2.00": [
+                3,
+                2
+              ],
+              "wall@4.00,1.00": [
+                4,
+                1
+              ],
+              "wall@5.00,1.00": [
+                5,
+                1
+              ],
+              "wall@6.00,1.00": [
+                6,
+                1
+              ],
+              "wall@6.00,2.00": [
+                6,
+                2
+              ]
+            },
+            "member_visible_mask_pixels": {
+              "wall@3.00,1.00": 794,
+              "wall@3.00,2.00": 874,
+              "wall@4.00,1.00": 1090,
+              "wall@5.00,1.00": 1013,
+              "wall@6.00,1.00": 984,
+              "wall@6.00,2.00": 892
+            },
+            "member_measurement_mask_pixels": {
+              "wall@3.00,1.00": 712,
+              "wall@3.00,2.00": 742,
+              "wall@4.00,1.00": 966,
+              "wall@5.00,1.00": 896,
+              "wall@6.00,1.00": 579,
+              "wall@6.00,2.00": 746
+            },
+            "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+            "status": "PASS",
+            "reason": null
+          }
+        },
+        {
+          "status": "PASS",
+          "top_l": 49.0745266029749,
+          "side_l": 34.48163337342185,
+          "top_pixels": 28,
+          "side_pixels": 29,
+          "reference_surface_pixels": 77,
+          "reference_surface_categories": [
+            {
+              "name": "0",
+              "semantic": "plain",
+              "pixels": 30
+            },
+            {
+              "name": "paving",
+              "semantic": "_is_paved_at cell flag",
+              "pixels": 47
+            }
+          ],
+          "water_pixels_excluded_from_reference": 0,
+          "alpha_uncertain_top_pixels": 0,
+          "alpha_uncertain_side_pixels": 0,
+          "alpha_uncertain_samples_included": true,
+          "alpha_threshold_for_samples": ">127/255",
+          "uncertain_if_alpha_below": 0.98,
+          "reference_scope": "group",
+          "reference_surface_l": 19.22286977353953,
+          "top_reference_surface_delta": 29.85165682943537,
+          "stable_id": "wall@8.00,7.00",
+          "type": "wall",
+          "token": 25,
+          "top_part_codes": [
+            1
+          ],
+          "side_part_codes": [
+            2
+          ],
+          "measurement_group": {
+            "group_id": "wall-group-02",
+            "members": [
+              "wall@8.00,7.00"
+            ],
+            "member_cells_xy": {
+              "wall@8.00,7.00": [
+                8,
+                7
+              ]
+            },
+            "member_visible_mask_pixels": {
+              "wall@8.00,7.00": 67
+            },
+            "member_measurement_mask_pixels": {
+              "wall@8.00,7.00": 57
+            },
+            "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+            "status": "PASS",
+            "reason": null
+          }
+        }
+      ],
+      "T2_pillar_instances": [
+        {
+          "status": "PASS",
+          "top_l": 47.70737733508465,
+          "side_l": 36.394923313636276,
+          "top_pixels": 136,
+          "side_pixels": 469,
+          "reference_surface_pixels": 339,
+          "reference_surface_categories": [
+            {
+              "name": "0",
+              "semantic": "plain",
+              "pixels": 253
+            },
+            {
+              "name": "4",
+              "semantic": "wall",
+              "pixels": 86
+            }
+          ],
+          "water_pixels_excluded_from_reference": 0,
+          "alpha_uncertain_top_pixels": 0,
+          "alpha_uncertain_side_pixels": 0,
+          "alpha_uncertain_samples_included": true,
+          "alpha_threshold_for_samples": ">127/255",
+          "uncertain_if_alpha_below": 0.98,
+          "reference_scope": "instance",
+          "reference_surface_l": 21.50815011817255,
+          "top_reference_surface_delta": 26.1992272169121,
+          "stable_id": "pillar@1.00,4.00",
+          "type": "pillar",
+          "token": 1,
+          "top_part_codes": [
+            3
+          ],
+          "side_part_codes": [
+            4
+          ]
+        },
+        {
+          "status": "PASS",
+          "top_l": 48.03683582996243,
+          "side_l": 36.43442041610176,
+          "top_pixels": 127,
+          "side_pixels": 362,
+          "reference_surface_pixels": 301,
+          "reference_surface_categories": [
+            {
+              "name": "0",
+              "semantic": "plain",
+              "pixels": 206
+            },
+            {
+              "name": "4",
+              "semantic": "wall",
+              "pixels": 95
+            }
+          ],
+          "water_pixels_excluded_from_reference": 0,
+          "alpha_uncertain_top_pixels": 0,
+          "alpha_uncertain_side_pixels": 0,
+          "alpha_uncertain_samples_included": true,
+          "alpha_threshold_for_samples": ">127/255",
+          "uncertain_if_alpha_below": 0.98,
+          "reference_scope": "instance",
+          "reference_surface_l": 20.450541620340466,
+          "top_reference_surface_delta": 27.58629420962196,
+          "stable_id": "pillar@1.00,7.00",
+          "type": "pillar",
+          "token": 2,
+          "top_part_codes": [
+            3
+          ],
+          "side_part_codes": [
+            4
+          ]
+        },
+        {
+          "status": "PASS",
+          "top_l": 49.19533201773042,
+          "side_l": 36.12438426373462,
+          "top_pixels": 137,
+          "side_pixels": 524,
+          "reference_surface_pixels": 360,
+          "reference_surface_categories": [
+            {
+              "name": "0",
+              "semantic": "plain",
+              "pixels": 38
+            },
+            {
+              "name": "4",
+              "semantic": "wall",
+              "pixels": 88
+            },
+            {
+              "name": "paving",
+              "semantic": "_is_paved_at cell flag",
+              "pixels": 234
+            }
+          ],
+          "water_pixels_excluded_from_reference": 0,
+          "alpha_uncertain_top_pixels": 0,
+          "alpha_uncertain_side_pixels": 0,
+          "alpha_uncertain_samples_included": true,
+          "alpha_threshold_for_samples": ">127/255",
+          "uncertain_if_alpha_below": 0.98,
+          "reference_scope": "instance",
+          "reference_surface_l": 18.9866121386971,
+          "top_reference_surface_delta": 30.20871987903332,
+          "stable_id": "pillar@8.00,4.00",
+          "type": "pillar",
+          "token": 3,
+          "top_part_codes": [
+            3
+          ],
+          "side_part_codes": [
+            4
+          ]
+        }
+      ],
+      "T3_tree_instances": [
+        {
+          "stable_id": "tree@0.00,0.00",
+          "token": 7,
+          "outline_check": {
+            "status": "PASS",
+            "outline_pixels": 0,
+            "outline_present": false,
+            "crown_pixels": 421,
+            "dark_side_pixels": 65,
+            "outer_grass_pixels": 813,
+            "alpha_uncertain_crown_pixels": 89,
+            "alpha_uncertain_dark_side_pixels": 11,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 323,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 65
+              },
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 748
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2340,
+            "outer_ring_prop_covered_pixels": 1523,
+            "outer_ring_excluded_pixels": 0,
+            "outer_ring_grid_pixels": 91,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 2081,
+            "outer_ring_usable_ground_pixels": 813,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-01",
+              "members": [
+                "tree@0.00,0.00",
+                "tree@0.00,1.00",
+                "tree@1.00,0.00"
+              ],
+              "member_cells_xy": {
+                "tree@0.00,0.00": [
+                  0,
+                  0
+                ],
+                "tree@0.00,1.00": [
+                  0,
+                  1
+                ],
+                "tree@1.00,0.00": [
+                  1,
+                  0
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@0.00,0.00": 421,
+                "tree@0.00,1.00": 842,
+                "tree@1.00,0.00": 748
+              },
+              "member_measurement_mask_pixels": {
+                "tree@0.00,0.00": 421,
+                "tree@0.00,1.00": 824,
+                "tree@1.00,0.00": 712
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          },
+          "T3": {
+            "status": "PASS",
+            "delta_l": 12.38767299028521,
+            "delta_e00": 17.306805238827565,
+            "contrast_pass": true,
+            "outline_check": {
+              "status": "PASS",
+              "outline_pixels": 0,
+              "outline_present": false,
+              "crown_pixels": 421,
+              "dark_side_pixels": 65,
+              "outer_grass_pixels": 813,
+              "alpha_uncertain_crown_pixels": 89,
+              "alpha_uncertain_dark_side_pixels": 11,
+              "alpha_uncertain_samples_included": true,
+              "alpha_threshold_for_samples": ">127/255",
+              "uncertain_if_alpha_below": 0.98,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "legitimate_non_crown_pixels": 323,
+              "tree_crown_alignment": {
+                "status": "PASS",
+                "expected_visible_crown_pixels": 6401,
+                "sidecar_reviewed_crown_pixels": 6401,
+                "union_mismatch_pixels": 0,
+                "unclassified_tree_pixels_alpha_gt_0_5": 0,
+                "source_region_code_mismatch_pixels": 0,
+                "legitimate_non_crown_occluding_pixels": 4149,
+                "source_region_projection_errors": [],
+                "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+              },
+              "outline_status": "absent_authoritatively",
+              "outer_grass_categories": [
+                {
+                  "name": "1",
+                  "semantic": "forest",
+                  "pixels": 65
+                },
+                {
+                  "name": "environment_ground",
+                  "semantic": "environment_ground",
+                  "pixels": 748
+                }
+              ],
+              "water_pixels_excluded_from_reference": 0,
+              "reference_scope": "group",
+              "outer_ring_total_pixels": 2340,
+              "outer_ring_prop_covered_pixels": 1523,
+              "outer_ring_excluded_pixels": 0,
+              "outer_ring_grid_pixels": 91,
+              "outer_ring_contact_shadow_pixels": 0,
+              "outer_ring_ground_shadow_difference_pixels": 0,
+              "outer_ring_unclassified_pixels": 2081,
+              "outer_ring_usable_ground_pixels": 813,
+              "outer_ring_counts_overlap": true,
+              "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+              "measurement_group": {
+                "group_id": "tree-clump-01",
+                "members": [
+                  "tree@0.00,0.00",
+                  "tree@0.00,1.00",
+                  "tree@1.00,0.00"
+                ],
+                "member_cells_xy": {
+                  "tree@0.00,0.00": [
+                    0,
+                    0
+                  ],
+                  "tree@0.00,1.00": [
+                    0,
+                    1
+                  ],
+                  "tree@1.00,0.00": [
+                    1,
+                    0
+                  ]
+                },
+                "member_visible_mask_pixels": {
+                  "tree@0.00,0.00": 421,
+                  "tree@0.00,1.00": 842,
+                  "tree@1.00,0.00": 748
+                },
+                "member_measurement_mask_pixels": {
+                  "tree@0.00,0.00": 421,
+                  "tree@0.00,1.00": 824,
+                  "tree@1.00,0.00": 712
+                },
+                "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+                "status": "PASS",
+                "reason": null
+              },
+              "measurement_group_status": "PASS",
+              "not_tested_reason_categories": [],
+              "not_tested_reasons": []
+            },
+            "crown_pixels": 421,
+            "dark_side_pixels": 65,
+            "outline_pixels": 0,
+            "outer_grass_pixels": 813,
+            "alpha_uncertain_crown_pixels": 89,
+            "alpha_uncertain_dark_side_pixels": 11,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 323,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 65
+              },
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 748
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2340,
+            "outer_ring_prop_covered_pixels": 1523,
+            "outer_ring_excluded_pixels": 0,
+            "outer_ring_grid_pixels": 91,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 2081,
+            "outer_ring_usable_ground_pixels": 813,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-01",
+              "members": [
+                "tree@0.00,0.00",
+                "tree@0.00,1.00",
+                "tree@1.00,0.00"
+              ],
+              "member_cells_xy": {
+                "tree@0.00,0.00": [
+                  0,
+                  0
+                ],
+                "tree@0.00,1.00": [
+                  0,
+                  1
+                ],
+                "tree@1.00,0.00": [
+                  1,
+                  0
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@0.00,0.00": 421,
+                "tree@0.00,1.00": 842,
+                "tree@1.00,0.00": 748
+              },
+              "member_measurement_mask_pixels": {
+                "tree@0.00,0.00": 421,
+                "tree@0.00,1.00": 824,
+                "tree@1.00,0.00": 712
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          }
+        },
+        {
+          "stable_id": "tree@0.00,1.00",
+          "token": 8,
+          "outline_check": {
+            "status": "PASS",
+            "outline_pixels": 0,
+            "outline_present": false,
+            "crown_pixels": 824,
+            "dark_side_pixels": 116,
+            "outer_grass_pixels": 813,
+            "alpha_uncertain_crown_pixels": 196,
+            "alpha_uncertain_dark_side_pixels": 33,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 525,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 65
+              },
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 748
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2340,
+            "outer_ring_prop_covered_pixels": 1523,
+            "outer_ring_excluded_pixels": 0,
+            "outer_ring_grid_pixels": 91,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 2081,
+            "outer_ring_usable_ground_pixels": 813,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-01",
+              "members": [
+                "tree@0.00,0.00",
+                "tree@0.00,1.00",
+                "tree@1.00,0.00"
+              ],
+              "member_cells_xy": {
+                "tree@0.00,0.00": [
+                  0,
+                  0
+                ],
+                "tree@0.00,1.00": [
+                  0,
+                  1
+                ],
+                "tree@1.00,0.00": [
+                  1,
+                  0
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@0.00,0.00": 421,
+                "tree@0.00,1.00": 842,
+                "tree@1.00,0.00": 748
+              },
+              "member_measurement_mask_pixels": {
+                "tree@0.00,0.00": 421,
+                "tree@0.00,1.00": 824,
+                "tree@1.00,0.00": 712
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          },
+          "T3": {
+            "status": "PASS",
+            "delta_l": 10.746465653718175,
+            "delta_e00": 16.3852618305612,
+            "contrast_pass": true,
+            "outline_check": {
+              "status": "PASS",
+              "outline_pixels": 0,
+              "outline_present": false,
+              "crown_pixels": 824,
+              "dark_side_pixels": 116,
+              "outer_grass_pixels": 813,
+              "alpha_uncertain_crown_pixels": 196,
+              "alpha_uncertain_dark_side_pixels": 33,
+              "alpha_uncertain_samples_included": true,
+              "alpha_threshold_for_samples": ">127/255",
+              "uncertain_if_alpha_below": 0.98,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "legitimate_non_crown_pixels": 525,
+              "tree_crown_alignment": {
+                "status": "PASS",
+                "expected_visible_crown_pixels": 6401,
+                "sidecar_reviewed_crown_pixels": 6401,
+                "union_mismatch_pixels": 0,
+                "unclassified_tree_pixels_alpha_gt_0_5": 0,
+                "source_region_code_mismatch_pixels": 0,
+                "legitimate_non_crown_occluding_pixels": 4149,
+                "source_region_projection_errors": [],
+                "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+              },
+              "outline_status": "absent_authoritatively",
+              "outer_grass_categories": [
+                {
+                  "name": "1",
+                  "semantic": "forest",
+                  "pixels": 65
+                },
+                {
+                  "name": "environment_ground",
+                  "semantic": "environment_ground",
+                  "pixels": 748
+                }
+              ],
+              "water_pixels_excluded_from_reference": 0,
+              "reference_scope": "group",
+              "outer_ring_total_pixels": 2340,
+              "outer_ring_prop_covered_pixels": 1523,
+              "outer_ring_excluded_pixels": 0,
+              "outer_ring_grid_pixels": 91,
+              "outer_ring_contact_shadow_pixels": 0,
+              "outer_ring_ground_shadow_difference_pixels": 0,
+              "outer_ring_unclassified_pixels": 2081,
+              "outer_ring_usable_ground_pixels": 813,
+              "outer_ring_counts_overlap": true,
+              "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+              "measurement_group": {
+                "group_id": "tree-clump-01",
+                "members": [
+                  "tree@0.00,0.00",
+                  "tree@0.00,1.00",
+                  "tree@1.00,0.00"
+                ],
+                "member_cells_xy": {
+                  "tree@0.00,0.00": [
+                    0,
+                    0
+                  ],
+                  "tree@0.00,1.00": [
+                    0,
+                    1
+                  ],
+                  "tree@1.00,0.00": [
+                    1,
+                    0
+                  ]
+                },
+                "member_visible_mask_pixels": {
+                  "tree@0.00,0.00": 421,
+                  "tree@0.00,1.00": 842,
+                  "tree@1.00,0.00": 748
+                },
+                "member_measurement_mask_pixels": {
+                  "tree@0.00,0.00": 421,
+                  "tree@0.00,1.00": 824,
+                  "tree@1.00,0.00": 712
+                },
+                "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+                "status": "PASS",
+                "reason": null
+              },
+              "measurement_group_status": "PASS",
+              "not_tested_reason_categories": [],
+              "not_tested_reasons": []
+            },
+            "crown_pixels": 824,
+            "dark_side_pixels": 116,
+            "outline_pixels": 0,
+            "outer_grass_pixels": 813,
+            "alpha_uncertain_crown_pixels": 196,
+            "alpha_uncertain_dark_side_pixels": 33,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 525,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 65
+              },
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 748
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2340,
+            "outer_ring_prop_covered_pixels": 1523,
+            "outer_ring_excluded_pixels": 0,
+            "outer_ring_grid_pixels": 91,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 2081,
+            "outer_ring_usable_ground_pixels": 813,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-01",
+              "members": [
+                "tree@0.00,0.00",
+                "tree@0.00,1.00",
+                "tree@1.00,0.00"
+              ],
+              "member_cells_xy": {
+                "tree@0.00,0.00": [
+                  0,
+                  0
+                ],
+                "tree@0.00,1.00": [
+                  0,
+                  1
+                ],
+                "tree@1.00,0.00": [
+                  1,
+                  0
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@0.00,0.00": 421,
+                "tree@0.00,1.00": 842,
+                "tree@1.00,0.00": 748
+              },
+              "member_measurement_mask_pixels": {
+                "tree@0.00,0.00": 421,
+                "tree@0.00,1.00": 824,
+                "tree@1.00,0.00": 712
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          }
+        },
+        {
+          "stable_id": "tree@0.00,8.00",
+          "token": 9,
+          "outline_check": {
+            "status": "PASS",
+            "outline_pixels": 0,
+            "outline_present": false,
+            "crown_pixels": 848,
+            "dark_side_pixels": 100,
+            "outer_grass_pixels": 894,
+            "alpha_uncertain_crown_pixels": 184,
+            "alpha_uncertain_dark_side_pixels": 29,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 360,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "0",
+                "semantic": "plain",
+                "pixels": 202
+              },
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 71
+              },
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 621
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2680,
+            "outer_ring_prop_covered_pixels": 1756,
+            "outer_ring_excluded_pixels": 0,
+            "outer_ring_grid_pixels": 252,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 1684,
+            "outer_ring_usable_ground_pixels": 894,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-03",
+              "members": [
+                "tree@0.00,8.00",
+                "tree@0.00,9.00",
+                "tree@1.00,9.00"
+              ],
+              "member_cells_xy": {
+                "tree@0.00,8.00": [
+                  0,
+                  8
+                ],
+                "tree@0.00,9.00": [
+                  0,
+                  9
+                ],
+                "tree@1.00,9.00": [
+                  1,
+                  9
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@0.00,8.00": 888,
+                "tree@0.00,9.00": 706,
+                "tree@1.00,9.00": 752
+              },
+              "member_measurement_mask_pixels": {
+                "tree@0.00,8.00": 848,
+                "tree@0.00,9.00": 697,
+                "tree@1.00,9.00": 635
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          },
+          "T3": {
+            "status": "PASS",
+            "delta_l": 13.698039211283316,
+            "delta_e00": 18.003781061078417,
+            "contrast_pass": true,
+            "outline_check": {
+              "status": "PASS",
+              "outline_pixels": 0,
+              "outline_present": false,
+              "crown_pixels": 848,
+              "dark_side_pixels": 100,
+              "outer_grass_pixels": 894,
+              "alpha_uncertain_crown_pixels": 184,
+              "alpha_uncertain_dark_side_pixels": 29,
+              "alpha_uncertain_samples_included": true,
+              "alpha_threshold_for_samples": ">127/255",
+              "uncertain_if_alpha_below": 0.98,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "legitimate_non_crown_pixels": 360,
+              "tree_crown_alignment": {
+                "status": "PASS",
+                "expected_visible_crown_pixels": 6401,
+                "sidecar_reviewed_crown_pixels": 6401,
+                "union_mismatch_pixels": 0,
+                "unclassified_tree_pixels_alpha_gt_0_5": 0,
+                "source_region_code_mismatch_pixels": 0,
+                "legitimate_non_crown_occluding_pixels": 4149,
+                "source_region_projection_errors": [],
+                "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+              },
+              "outline_status": "absent_authoritatively",
+              "outer_grass_categories": [
+                {
+                  "name": "0",
+                  "semantic": "plain",
+                  "pixels": 202
+                },
+                {
+                  "name": "1",
+                  "semantic": "forest",
+                  "pixels": 71
+                },
+                {
+                  "name": "environment_ground",
+                  "semantic": "environment_ground",
+                  "pixels": 621
+                }
+              ],
+              "water_pixels_excluded_from_reference": 0,
+              "reference_scope": "group",
+              "outer_ring_total_pixels": 2680,
+              "outer_ring_prop_covered_pixels": 1756,
+              "outer_ring_excluded_pixels": 0,
+              "outer_ring_grid_pixels": 252,
+              "outer_ring_contact_shadow_pixels": 0,
+              "outer_ring_ground_shadow_difference_pixels": 0,
+              "outer_ring_unclassified_pixels": 1684,
+              "outer_ring_usable_ground_pixels": 894,
+              "outer_ring_counts_overlap": true,
+              "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+              "measurement_group": {
+                "group_id": "tree-clump-03",
+                "members": [
+                  "tree@0.00,8.00",
+                  "tree@0.00,9.00",
+                  "tree@1.00,9.00"
+                ],
+                "member_cells_xy": {
+                  "tree@0.00,8.00": [
+                    0,
+                    8
+                  ],
+                  "tree@0.00,9.00": [
+                    0,
+                    9
+                  ],
+                  "tree@1.00,9.00": [
+                    1,
+                    9
+                  ]
+                },
+                "member_visible_mask_pixels": {
+                  "tree@0.00,8.00": 888,
+                  "tree@0.00,9.00": 706,
+                  "tree@1.00,9.00": 752
+                },
+                "member_measurement_mask_pixels": {
+                  "tree@0.00,8.00": 848,
+                  "tree@0.00,9.00": 697,
+                  "tree@1.00,9.00": 635
+                },
+                "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+                "status": "PASS",
+                "reason": null
+              },
+              "measurement_group_status": "PASS",
+              "not_tested_reason_categories": [],
+              "not_tested_reasons": []
+            },
+            "crown_pixels": 848,
+            "dark_side_pixels": 100,
+            "outline_pixels": 0,
+            "outer_grass_pixels": 894,
+            "alpha_uncertain_crown_pixels": 184,
+            "alpha_uncertain_dark_side_pixels": 29,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 360,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "0",
+                "semantic": "plain",
+                "pixels": 202
+              },
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 71
+              },
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 621
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2680,
+            "outer_ring_prop_covered_pixels": 1756,
+            "outer_ring_excluded_pixels": 0,
+            "outer_ring_grid_pixels": 252,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 1684,
+            "outer_ring_usable_ground_pixels": 894,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-03",
+              "members": [
+                "tree@0.00,8.00",
+                "tree@0.00,9.00",
+                "tree@1.00,9.00"
+              ],
+              "member_cells_xy": {
+                "tree@0.00,8.00": [
+                  0,
+                  8
+                ],
+                "tree@0.00,9.00": [
+                  0,
+                  9
+                ],
+                "tree@1.00,9.00": [
+                  1,
+                  9
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@0.00,8.00": 888,
+                "tree@0.00,9.00": 706,
+                "tree@1.00,9.00": 752
+              },
+              "member_measurement_mask_pixels": {
+                "tree@0.00,8.00": 848,
+                "tree@0.00,9.00": 697,
+                "tree@1.00,9.00": 635
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          }
+        },
+        {
+          "stable_id": "tree@0.00,9.00",
+          "token": 10,
+          "outline_check": {
+            "status": "PASS",
+            "outline_pixels": 0,
+            "outline_present": false,
+            "crown_pixels": 697,
+            "dark_side_pixels": 91,
+            "outer_grass_pixels": 894,
+            "alpha_uncertain_crown_pixels": 156,
+            "alpha_uncertain_dark_side_pixels": 24,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 421,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "0",
+                "semantic": "plain",
+                "pixels": 202
+              },
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 71
+              },
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 621
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2680,
+            "outer_ring_prop_covered_pixels": 1756,
+            "outer_ring_excluded_pixels": 0,
+            "outer_ring_grid_pixels": 252,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 1684,
+            "outer_ring_usable_ground_pixels": 894,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-03",
+              "members": [
+                "tree@0.00,8.00",
+                "tree@0.00,9.00",
+                "tree@1.00,9.00"
+              ],
+              "member_cells_xy": {
+                "tree@0.00,8.00": [
+                  0,
+                  8
+                ],
+                "tree@0.00,9.00": [
+                  0,
+                  9
+                ],
+                "tree@1.00,9.00": [
+                  1,
+                  9
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@0.00,8.00": 888,
+                "tree@0.00,9.00": 706,
+                "tree@1.00,9.00": 752
+              },
+              "member_measurement_mask_pixels": {
+                "tree@0.00,8.00": 848,
+                "tree@0.00,9.00": 697,
+                "tree@1.00,9.00": 635
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          },
+          "T3": {
+            "status": "PASS",
+            "delta_l": 12.204009337723072,
+            "delta_e00": 17.11830775172807,
+            "contrast_pass": true,
+            "outline_check": {
+              "status": "PASS",
+              "outline_pixels": 0,
+              "outline_present": false,
+              "crown_pixels": 697,
+              "dark_side_pixels": 91,
+              "outer_grass_pixels": 894,
+              "alpha_uncertain_crown_pixels": 156,
+              "alpha_uncertain_dark_side_pixels": 24,
+              "alpha_uncertain_samples_included": true,
+              "alpha_threshold_for_samples": ">127/255",
+              "uncertain_if_alpha_below": 0.98,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "legitimate_non_crown_pixels": 421,
+              "tree_crown_alignment": {
+                "status": "PASS",
+                "expected_visible_crown_pixels": 6401,
+                "sidecar_reviewed_crown_pixels": 6401,
+                "union_mismatch_pixels": 0,
+                "unclassified_tree_pixels_alpha_gt_0_5": 0,
+                "source_region_code_mismatch_pixels": 0,
+                "legitimate_non_crown_occluding_pixels": 4149,
+                "source_region_projection_errors": [],
+                "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+              },
+              "outline_status": "absent_authoritatively",
+              "outer_grass_categories": [
+                {
+                  "name": "0",
+                  "semantic": "plain",
+                  "pixels": 202
+                },
+                {
+                  "name": "1",
+                  "semantic": "forest",
+                  "pixels": 71
+                },
+                {
+                  "name": "environment_ground",
+                  "semantic": "environment_ground",
+                  "pixels": 621
+                }
+              ],
+              "water_pixels_excluded_from_reference": 0,
+              "reference_scope": "group",
+              "outer_ring_total_pixels": 2680,
+              "outer_ring_prop_covered_pixels": 1756,
+              "outer_ring_excluded_pixels": 0,
+              "outer_ring_grid_pixels": 252,
+              "outer_ring_contact_shadow_pixels": 0,
+              "outer_ring_ground_shadow_difference_pixels": 0,
+              "outer_ring_unclassified_pixels": 1684,
+              "outer_ring_usable_ground_pixels": 894,
+              "outer_ring_counts_overlap": true,
+              "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+              "measurement_group": {
+                "group_id": "tree-clump-03",
+                "members": [
+                  "tree@0.00,8.00",
+                  "tree@0.00,9.00",
+                  "tree@1.00,9.00"
+                ],
+                "member_cells_xy": {
+                  "tree@0.00,8.00": [
+                    0,
+                    8
+                  ],
+                  "tree@0.00,9.00": [
+                    0,
+                    9
+                  ],
+                  "tree@1.00,9.00": [
+                    1,
+                    9
+                  ]
+                },
+                "member_visible_mask_pixels": {
+                  "tree@0.00,8.00": 888,
+                  "tree@0.00,9.00": 706,
+                  "tree@1.00,9.00": 752
+                },
+                "member_measurement_mask_pixels": {
+                  "tree@0.00,8.00": 848,
+                  "tree@0.00,9.00": 697,
+                  "tree@1.00,9.00": 635
+                },
+                "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+                "status": "PASS",
+                "reason": null
+              },
+              "measurement_group_status": "PASS",
+              "not_tested_reason_categories": [],
+              "not_tested_reasons": []
+            },
+            "crown_pixels": 697,
+            "dark_side_pixels": 91,
+            "outline_pixels": 0,
+            "outer_grass_pixels": 894,
+            "alpha_uncertain_crown_pixels": 156,
+            "alpha_uncertain_dark_side_pixels": 24,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 421,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "0",
+                "semantic": "plain",
+                "pixels": 202
+              },
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 71
+              },
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 621
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2680,
+            "outer_ring_prop_covered_pixels": 1756,
+            "outer_ring_excluded_pixels": 0,
+            "outer_ring_grid_pixels": 252,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 1684,
+            "outer_ring_usable_ground_pixels": 894,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-03",
+              "members": [
+                "tree@0.00,8.00",
+                "tree@0.00,9.00",
+                "tree@1.00,9.00"
+              ],
+              "member_cells_xy": {
+                "tree@0.00,8.00": [
+                  0,
+                  8
+                ],
+                "tree@0.00,9.00": [
+                  0,
+                  9
+                ],
+                "tree@1.00,9.00": [
+                  1,
+                  9
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@0.00,8.00": 888,
+                "tree@0.00,9.00": 706,
+                "tree@1.00,9.00": 752
+              },
+              "member_measurement_mask_pixels": {
+                "tree@0.00,8.00": 848,
+                "tree@0.00,9.00": 697,
+                "tree@1.00,9.00": 635
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          }
+        },
+        {
+          "stable_id": "tree@1.00,0.00",
+          "token": 11,
+          "outline_check": {
+            "status": "PASS",
+            "outline_pixels": 0,
+            "outline_present": false,
+            "crown_pixels": 712,
+            "dark_side_pixels": 104,
+            "outer_grass_pixels": 813,
+            "alpha_uncertain_crown_pixels": 173,
+            "alpha_uncertain_dark_side_pixels": 29,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 476,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 65
+              },
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 748
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2340,
+            "outer_ring_prop_covered_pixels": 1523,
+            "outer_ring_excluded_pixels": 0,
+            "outer_ring_grid_pixels": 91,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 2081,
+            "outer_ring_usable_ground_pixels": 813,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-01",
+              "members": [
+                "tree@0.00,0.00",
+                "tree@0.00,1.00",
+                "tree@1.00,0.00"
+              ],
+              "member_cells_xy": {
+                "tree@0.00,0.00": [
+                  0,
+                  0
+                ],
+                "tree@0.00,1.00": [
+                  0,
+                  1
+                ],
+                "tree@1.00,0.00": [
+                  1,
+                  0
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@0.00,0.00": 421,
+                "tree@0.00,1.00": 842,
+                "tree@1.00,0.00": 748
+              },
+              "member_measurement_mask_pixels": {
+                "tree@0.00,0.00": 421,
+                "tree@0.00,1.00": 824,
+                "tree@1.00,0.00": 712
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          },
+          "T3": {
+            "status": "PASS",
+            "delta_l": 12.396573089250644,
+            "delta_e00": 17.37527986416908,
+            "contrast_pass": true,
+            "outline_check": {
+              "status": "PASS",
+              "outline_pixels": 0,
+              "outline_present": false,
+              "crown_pixels": 712,
+              "dark_side_pixels": 104,
+              "outer_grass_pixels": 813,
+              "alpha_uncertain_crown_pixels": 173,
+              "alpha_uncertain_dark_side_pixels": 29,
+              "alpha_uncertain_samples_included": true,
+              "alpha_threshold_for_samples": ">127/255",
+              "uncertain_if_alpha_below": 0.98,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "legitimate_non_crown_pixels": 476,
+              "tree_crown_alignment": {
+                "status": "PASS",
+                "expected_visible_crown_pixels": 6401,
+                "sidecar_reviewed_crown_pixels": 6401,
+                "union_mismatch_pixels": 0,
+                "unclassified_tree_pixels_alpha_gt_0_5": 0,
+                "source_region_code_mismatch_pixels": 0,
+                "legitimate_non_crown_occluding_pixels": 4149,
+                "source_region_projection_errors": [],
+                "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+              },
+              "outline_status": "absent_authoritatively",
+              "outer_grass_categories": [
+                {
+                  "name": "1",
+                  "semantic": "forest",
+                  "pixels": 65
+                },
+                {
+                  "name": "environment_ground",
+                  "semantic": "environment_ground",
+                  "pixels": 748
+                }
+              ],
+              "water_pixels_excluded_from_reference": 0,
+              "reference_scope": "group",
+              "outer_ring_total_pixels": 2340,
+              "outer_ring_prop_covered_pixels": 1523,
+              "outer_ring_excluded_pixels": 0,
+              "outer_ring_grid_pixels": 91,
+              "outer_ring_contact_shadow_pixels": 0,
+              "outer_ring_ground_shadow_difference_pixels": 0,
+              "outer_ring_unclassified_pixels": 2081,
+              "outer_ring_usable_ground_pixels": 813,
+              "outer_ring_counts_overlap": true,
+              "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+              "measurement_group": {
+                "group_id": "tree-clump-01",
+                "members": [
+                  "tree@0.00,0.00",
+                  "tree@0.00,1.00",
+                  "tree@1.00,0.00"
+                ],
+                "member_cells_xy": {
+                  "tree@0.00,0.00": [
+                    0,
+                    0
+                  ],
+                  "tree@0.00,1.00": [
+                    0,
+                    1
+                  ],
+                  "tree@1.00,0.00": [
+                    1,
+                    0
+                  ]
+                },
+                "member_visible_mask_pixels": {
+                  "tree@0.00,0.00": 421,
+                  "tree@0.00,1.00": 842,
+                  "tree@1.00,0.00": 748
+                },
+                "member_measurement_mask_pixels": {
+                  "tree@0.00,0.00": 421,
+                  "tree@0.00,1.00": 824,
+                  "tree@1.00,0.00": 712
+                },
+                "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+                "status": "PASS",
+                "reason": null
+              },
+              "measurement_group_status": "PASS",
+              "not_tested_reason_categories": [],
+              "not_tested_reasons": []
+            },
+            "crown_pixels": 712,
+            "dark_side_pixels": 104,
+            "outline_pixels": 0,
+            "outer_grass_pixels": 813,
+            "alpha_uncertain_crown_pixels": 173,
+            "alpha_uncertain_dark_side_pixels": 29,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 476,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 65
+              },
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 748
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2340,
+            "outer_ring_prop_covered_pixels": 1523,
+            "outer_ring_excluded_pixels": 0,
+            "outer_ring_grid_pixels": 91,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 2081,
+            "outer_ring_usable_ground_pixels": 813,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-01",
+              "members": [
+                "tree@0.00,0.00",
+                "tree@0.00,1.00",
+                "tree@1.00,0.00"
+              ],
+              "member_cells_xy": {
+                "tree@0.00,0.00": [
+                  0,
+                  0
+                ],
+                "tree@0.00,1.00": [
+                  0,
+                  1
+                ],
+                "tree@1.00,0.00": [
+                  1,
+                  0
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@0.00,0.00": 421,
+                "tree@0.00,1.00": 842,
+                "tree@1.00,0.00": 748
+              },
+              "member_measurement_mask_pixels": {
+                "tree@0.00,0.00": 421,
+                "tree@0.00,1.00": 824,
+                "tree@1.00,0.00": 712
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          }
+        },
+        {
+          "stable_id": "tree@1.00,9.00",
+          "token": 12,
+          "outline_check": {
+            "status": "PASS",
+            "outline_pixels": 0,
+            "outline_present": false,
+            "crown_pixels": 635,
+            "dark_side_pixels": 98,
+            "outer_grass_pixels": 894,
+            "alpha_uncertain_crown_pixels": 149,
+            "alpha_uncertain_dark_side_pixels": 27,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 452,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "0",
+                "semantic": "plain",
+                "pixels": 202
+              },
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 71
+              },
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 621
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2680,
+            "outer_ring_prop_covered_pixels": 1756,
+            "outer_ring_excluded_pixels": 0,
+            "outer_ring_grid_pixels": 252,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 1684,
+            "outer_ring_usable_ground_pixels": 894,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-03",
+              "members": [
+                "tree@0.00,8.00",
+                "tree@0.00,9.00",
+                "tree@1.00,9.00"
+              ],
+              "member_cells_xy": {
+                "tree@0.00,8.00": [
+                  0,
+                  8
+                ],
+                "tree@0.00,9.00": [
+                  0,
+                  9
+                ],
+                "tree@1.00,9.00": [
+                  1,
+                  9
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@0.00,8.00": 888,
+                "tree@0.00,9.00": 706,
+                "tree@1.00,9.00": 752
+              },
+              "member_measurement_mask_pixels": {
+                "tree@0.00,8.00": 848,
+                "tree@0.00,9.00": 697,
+                "tree@1.00,9.00": 635
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          },
+          "T3": {
+            "status": "PASS",
+            "delta_l": 12.338079032998387,
+            "delta_e00": 17.126854058104144,
+            "contrast_pass": true,
+            "outline_check": {
+              "status": "PASS",
+              "outline_pixels": 0,
+              "outline_present": false,
+              "crown_pixels": 635,
+              "dark_side_pixels": 98,
+              "outer_grass_pixels": 894,
+              "alpha_uncertain_crown_pixels": 149,
+              "alpha_uncertain_dark_side_pixels": 27,
+              "alpha_uncertain_samples_included": true,
+              "alpha_threshold_for_samples": ">127/255",
+              "uncertain_if_alpha_below": 0.98,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "legitimate_non_crown_pixels": 452,
+              "tree_crown_alignment": {
+                "status": "PASS",
+                "expected_visible_crown_pixels": 6401,
+                "sidecar_reviewed_crown_pixels": 6401,
+                "union_mismatch_pixels": 0,
+                "unclassified_tree_pixels_alpha_gt_0_5": 0,
+                "source_region_code_mismatch_pixels": 0,
+                "legitimate_non_crown_occluding_pixels": 4149,
+                "source_region_projection_errors": [],
+                "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+              },
+              "outline_status": "absent_authoritatively",
+              "outer_grass_categories": [
+                {
+                  "name": "0",
+                  "semantic": "plain",
+                  "pixels": 202
+                },
+                {
+                  "name": "1",
+                  "semantic": "forest",
+                  "pixels": 71
+                },
+                {
+                  "name": "environment_ground",
+                  "semantic": "environment_ground",
+                  "pixels": 621
+                }
+              ],
+              "water_pixels_excluded_from_reference": 0,
+              "reference_scope": "group",
+              "outer_ring_total_pixels": 2680,
+              "outer_ring_prop_covered_pixels": 1756,
+              "outer_ring_excluded_pixels": 0,
+              "outer_ring_grid_pixels": 252,
+              "outer_ring_contact_shadow_pixels": 0,
+              "outer_ring_ground_shadow_difference_pixels": 0,
+              "outer_ring_unclassified_pixels": 1684,
+              "outer_ring_usable_ground_pixels": 894,
+              "outer_ring_counts_overlap": true,
+              "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+              "measurement_group": {
+                "group_id": "tree-clump-03",
+                "members": [
+                  "tree@0.00,8.00",
+                  "tree@0.00,9.00",
+                  "tree@1.00,9.00"
+                ],
+                "member_cells_xy": {
+                  "tree@0.00,8.00": [
+                    0,
+                    8
+                  ],
+                  "tree@0.00,9.00": [
+                    0,
+                    9
+                  ],
+                  "tree@1.00,9.00": [
+                    1,
+                    9
+                  ]
+                },
+                "member_visible_mask_pixels": {
+                  "tree@0.00,8.00": 888,
+                  "tree@0.00,9.00": 706,
+                  "tree@1.00,9.00": 752
+                },
+                "member_measurement_mask_pixels": {
+                  "tree@0.00,8.00": 848,
+                  "tree@0.00,9.00": 697,
+                  "tree@1.00,9.00": 635
+                },
+                "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+                "status": "PASS",
+                "reason": null
+              },
+              "measurement_group_status": "PASS",
+              "not_tested_reason_categories": [],
+              "not_tested_reasons": []
+            },
+            "crown_pixels": 635,
+            "dark_side_pixels": 98,
+            "outline_pixels": 0,
+            "outer_grass_pixels": 894,
+            "alpha_uncertain_crown_pixels": 149,
+            "alpha_uncertain_dark_side_pixels": 27,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 452,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "0",
+                "semantic": "plain",
+                "pixels": 202
+              },
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 71
+              },
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 621
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2680,
+            "outer_ring_prop_covered_pixels": 1756,
+            "outer_ring_excluded_pixels": 0,
+            "outer_ring_grid_pixels": 252,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 1684,
+            "outer_ring_usable_ground_pixels": 894,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-03",
+              "members": [
+                "tree@0.00,8.00",
+                "tree@0.00,9.00",
+                "tree@1.00,9.00"
+              ],
+              "member_cells_xy": {
+                "tree@0.00,8.00": [
+                  0,
+                  8
+                ],
+                "tree@0.00,9.00": [
+                  0,
+                  9
+                ],
+                "tree@1.00,9.00": [
+                  1,
+                  9
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@0.00,8.00": 888,
+                "tree@0.00,9.00": 706,
+                "tree@1.00,9.00": 752
+              },
+              "member_measurement_mask_pixels": {
+                "tree@0.00,8.00": 848,
+                "tree@0.00,9.00": 697,
+                "tree@1.00,9.00": 635
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          }
+        },
+        {
+          "stable_id": "tree@8.00,0.00",
+          "token": 13,
+          "outline_check": {
+            "status": "PASS",
+            "outline_pixels": 0,
+            "outline_present": false,
+            "crown_pixels": 166,
+            "dark_side_pixels": 16,
+            "outer_grass_pixels": 345,
+            "alpha_uncertain_crown_pixels": 30,
+            "alpha_uncertain_dark_side_pixels": 4,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 11,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 345
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 1069,
+            "outer_ring_prop_covered_pixels": 720,
+            "outer_ring_excluded_pixels": 306,
+            "outer_ring_grid_pixels": 33,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 972,
+            "outer_ring_usable_ground_pixels": 345,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-02",
+              "members": [
+                "tree@8.00,0.00",
+                "tree@9.00,0.00",
+                "tree@9.00,1.00"
+              ],
+              "member_cells_xy": {
+                "tree@8.00,0.00": [
+                  8,
+                  0
+                ],
+                "tree@9.00,0.00": [
+                  9,
+                  0
+                ],
+                "tree@9.00,1.00": [
+                  9,
+                  1
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@8.00,0.00": 477,
+                "tree@9.00,0.00": 464,
+                "tree@9.00,1.00": 841
+              },
+              "member_measurement_mask_pixels": {
+                "tree@8.00,0.00": 166,
+                "tree@9.00,0.00": 245,
+                "tree@9.00,1.00": 46
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          },
+          "T3": {
+            "status": "PASS",
+            "delta_l": 26.42888133756623,
+            "delta_e00": 27.152866044129492,
+            "contrast_pass": true,
+            "outline_check": {
+              "status": "PASS",
+              "outline_pixels": 0,
+              "outline_present": false,
+              "crown_pixels": 166,
+              "dark_side_pixels": 16,
+              "outer_grass_pixels": 345,
+              "alpha_uncertain_crown_pixels": 30,
+              "alpha_uncertain_dark_side_pixels": 4,
+              "alpha_uncertain_samples_included": true,
+              "alpha_threshold_for_samples": ">127/255",
+              "uncertain_if_alpha_below": 0.98,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "legitimate_non_crown_pixels": 11,
+              "tree_crown_alignment": {
+                "status": "PASS",
+                "expected_visible_crown_pixels": 6401,
+                "sidecar_reviewed_crown_pixels": 6401,
+                "union_mismatch_pixels": 0,
+                "unclassified_tree_pixels_alpha_gt_0_5": 0,
+                "source_region_code_mismatch_pixels": 0,
+                "legitimate_non_crown_occluding_pixels": 4149,
+                "source_region_projection_errors": [],
+                "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+              },
+              "outline_status": "absent_authoritatively",
+              "outer_grass_categories": [
+                {
+                  "name": "environment_ground",
+                  "semantic": "environment_ground",
+                  "pixels": 345
+                }
+              ],
+              "water_pixels_excluded_from_reference": 0,
+              "reference_scope": "group",
+              "outer_ring_total_pixels": 1069,
+              "outer_ring_prop_covered_pixels": 720,
+              "outer_ring_excluded_pixels": 306,
+              "outer_ring_grid_pixels": 33,
+              "outer_ring_contact_shadow_pixels": 0,
+              "outer_ring_ground_shadow_difference_pixels": 0,
+              "outer_ring_unclassified_pixels": 972,
+              "outer_ring_usable_ground_pixels": 345,
+              "outer_ring_counts_overlap": true,
+              "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+              "measurement_group": {
+                "group_id": "tree-clump-02",
+                "members": [
+                  "tree@8.00,0.00",
+                  "tree@9.00,0.00",
+                  "tree@9.00,1.00"
+                ],
+                "member_cells_xy": {
+                  "tree@8.00,0.00": [
+                    8,
+                    0
+                  ],
+                  "tree@9.00,0.00": [
+                    9,
+                    0
+                  ],
+                  "tree@9.00,1.00": [
+                    9,
+                    1
+                  ]
+                },
+                "member_visible_mask_pixels": {
+                  "tree@8.00,0.00": 477,
+                  "tree@9.00,0.00": 464,
+                  "tree@9.00,1.00": 841
+                },
+                "member_measurement_mask_pixels": {
+                  "tree@8.00,0.00": 166,
+                  "tree@9.00,0.00": 245,
+                  "tree@9.00,1.00": 46
+                },
+                "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+                "status": "PASS",
+                "reason": null
+              },
+              "measurement_group_status": "PASS",
+              "not_tested_reason_categories": [],
+              "not_tested_reasons": []
+            },
+            "crown_pixels": 166,
+            "dark_side_pixels": 16,
+            "outline_pixels": 0,
+            "outer_grass_pixels": 345,
+            "alpha_uncertain_crown_pixels": 30,
+            "alpha_uncertain_dark_side_pixels": 4,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 11,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 345
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 1069,
+            "outer_ring_prop_covered_pixels": 720,
+            "outer_ring_excluded_pixels": 306,
+            "outer_ring_grid_pixels": 33,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 972,
+            "outer_ring_usable_ground_pixels": 345,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-02",
+              "members": [
+                "tree@8.00,0.00",
+                "tree@9.00,0.00",
+                "tree@9.00,1.00"
+              ],
+              "member_cells_xy": {
+                "tree@8.00,0.00": [
+                  8,
+                  0
+                ],
+                "tree@9.00,0.00": [
+                  9,
+                  0
+                ],
+                "tree@9.00,1.00": [
+                  9,
+                  1
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@8.00,0.00": 477,
+                "tree@9.00,0.00": 464,
+                "tree@9.00,1.00": 841
+              },
+              "member_measurement_mask_pixels": {
+                "tree@8.00,0.00": 166,
+                "tree@9.00,0.00": 245,
+                "tree@9.00,1.00": 46
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          }
+        },
+        {
+          "stable_id": "tree@8.00,9.00",
+          "token": 14,
+          "outline_check": {
+            "status": "PASS",
+            "outline_pixels": 0,
+            "outline_present": false,
+            "crown_pixels": 602,
+            "dark_side_pixels": 70,
+            "outer_grass_pixels": 300,
+            "alpha_uncertain_crown_pixels": 135,
+            "alpha_uncertain_dark_side_pixels": 16,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 430,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "0",
+                "semantic": "plain",
+                "pixels": 230
+              },
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 70
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2744,
+            "outer_ring_prop_covered_pixels": 1973,
+            "outer_ring_excluded_pixels": 15,
+            "outer_ring_grid_pixels": 521,
+            "outer_ring_contact_shadow_pixels": 178,
+            "outer_ring_ground_shadow_difference_pixels": 178,
+            "outer_ring_unclassified_pixels": 0,
+            "outer_ring_usable_ground_pixels": 300,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-04",
+              "members": [
+                "tree@8.00,9.00",
+                "tree@9.00,8.00",
+                "tree@9.00,9.00"
+              ],
+              "member_cells_xy": {
+                "tree@8.00,9.00": [
+                  8,
+                  9
+                ],
+                "tree@9.00,8.00": [
+                  9,
+                  8
+                ],
+                "tree@9.00,9.00": [
+                  9,
+                  9
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@8.00,9.00": 697,
+                "tree@9.00,8.00": 694,
+                "tree@9.00,9.00": 739
+              },
+              "member_measurement_mask_pixels": {
+                "tree@8.00,9.00": 602,
+                "tree@9.00,8.00": 592,
+                "tree@9.00,9.00": 613
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          },
+          "T3": {
+            "status": "PASS",
+            "delta_l": 13.246395119577368,
+            "delta_e00": 17.89702596670143,
+            "contrast_pass": true,
+            "outline_check": {
+              "status": "PASS",
+              "outline_pixels": 0,
+              "outline_present": false,
+              "crown_pixels": 602,
+              "dark_side_pixels": 70,
+              "outer_grass_pixels": 300,
+              "alpha_uncertain_crown_pixels": 135,
+              "alpha_uncertain_dark_side_pixels": 16,
+              "alpha_uncertain_samples_included": true,
+              "alpha_threshold_for_samples": ">127/255",
+              "uncertain_if_alpha_below": 0.98,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "legitimate_non_crown_pixels": 430,
+              "tree_crown_alignment": {
+                "status": "PASS",
+                "expected_visible_crown_pixels": 6401,
+                "sidecar_reviewed_crown_pixels": 6401,
+                "union_mismatch_pixels": 0,
+                "unclassified_tree_pixels_alpha_gt_0_5": 0,
+                "source_region_code_mismatch_pixels": 0,
+                "legitimate_non_crown_occluding_pixels": 4149,
+                "source_region_projection_errors": [],
+                "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+              },
+              "outline_status": "absent_authoritatively",
+              "outer_grass_categories": [
+                {
+                  "name": "0",
+                  "semantic": "plain",
+                  "pixels": 230
+                },
+                {
+                  "name": "1",
+                  "semantic": "forest",
+                  "pixels": 70
+                }
+              ],
+              "water_pixels_excluded_from_reference": 0,
+              "reference_scope": "group",
+              "outer_ring_total_pixels": 2744,
+              "outer_ring_prop_covered_pixels": 1973,
+              "outer_ring_excluded_pixels": 15,
+              "outer_ring_grid_pixels": 521,
+              "outer_ring_contact_shadow_pixels": 178,
+              "outer_ring_ground_shadow_difference_pixels": 178,
+              "outer_ring_unclassified_pixels": 0,
+              "outer_ring_usable_ground_pixels": 300,
+              "outer_ring_counts_overlap": true,
+              "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+              "measurement_group": {
+                "group_id": "tree-clump-04",
+                "members": [
+                  "tree@8.00,9.00",
+                  "tree@9.00,8.00",
+                  "tree@9.00,9.00"
+                ],
+                "member_cells_xy": {
+                  "tree@8.00,9.00": [
+                    8,
+                    9
+                  ],
+                  "tree@9.00,8.00": [
+                    9,
+                    8
+                  ],
+                  "tree@9.00,9.00": [
+                    9,
+                    9
+                  ]
+                },
+                "member_visible_mask_pixels": {
+                  "tree@8.00,9.00": 697,
+                  "tree@9.00,8.00": 694,
+                  "tree@9.00,9.00": 739
+                },
+                "member_measurement_mask_pixels": {
+                  "tree@8.00,9.00": 602,
+                  "tree@9.00,8.00": 592,
+                  "tree@9.00,9.00": 613
+                },
+                "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+                "status": "PASS",
+                "reason": null
+              },
+              "measurement_group_status": "PASS",
+              "not_tested_reason_categories": [],
+              "not_tested_reasons": []
+            },
+            "crown_pixels": 602,
+            "dark_side_pixels": 70,
+            "outline_pixels": 0,
+            "outer_grass_pixels": 300,
+            "alpha_uncertain_crown_pixels": 135,
+            "alpha_uncertain_dark_side_pixels": 16,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 430,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "0",
+                "semantic": "plain",
+                "pixels": 230
+              },
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 70
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2744,
+            "outer_ring_prop_covered_pixels": 1973,
+            "outer_ring_excluded_pixels": 15,
+            "outer_ring_grid_pixels": 521,
+            "outer_ring_contact_shadow_pixels": 178,
+            "outer_ring_ground_shadow_difference_pixels": 178,
+            "outer_ring_unclassified_pixels": 0,
+            "outer_ring_usable_ground_pixels": 300,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-04",
+              "members": [
+                "tree@8.00,9.00",
+                "tree@9.00,8.00",
+                "tree@9.00,9.00"
+              ],
+              "member_cells_xy": {
+                "tree@8.00,9.00": [
+                  8,
+                  9
+                ],
+                "tree@9.00,8.00": [
+                  9,
+                  8
+                ],
+                "tree@9.00,9.00": [
+                  9,
+                  9
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@8.00,9.00": 697,
+                "tree@9.00,8.00": 694,
+                "tree@9.00,9.00": 739
+              },
+              "member_measurement_mask_pixels": {
+                "tree@8.00,9.00": 602,
+                "tree@9.00,8.00": 592,
+                "tree@9.00,9.00": 613
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          }
+        },
+        {
+          "stable_id": "tree@9.00,0.00",
+          "token": 15,
+          "outline_check": {
+            "status": "PASS",
+            "outline_pixels": 0,
+            "outline_present": false,
+            "crown_pixels": 245,
+            "dark_side_pixels": 62,
+            "outer_grass_pixels": 345,
+            "alpha_uncertain_crown_pixels": 84,
+            "alpha_uncertain_dark_side_pixels": 24,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 241,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 345
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 1069,
+            "outer_ring_prop_covered_pixels": 720,
+            "outer_ring_excluded_pixels": 306,
+            "outer_ring_grid_pixels": 33,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 972,
+            "outer_ring_usable_ground_pixels": 345,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-02",
+              "members": [
+                "tree@8.00,0.00",
+                "tree@9.00,0.00",
+                "tree@9.00,1.00"
+              ],
+              "member_cells_xy": {
+                "tree@8.00,0.00": [
+                  8,
+                  0
+                ],
+                "tree@9.00,0.00": [
+                  9,
+                  0
+                ],
+                "tree@9.00,1.00": [
+                  9,
+                  1
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@8.00,0.00": 477,
+                "tree@9.00,0.00": 464,
+                "tree@9.00,1.00": 841
+              },
+              "member_measurement_mask_pixels": {
+                "tree@8.00,0.00": 166,
+                "tree@9.00,0.00": 245,
+                "tree@9.00,1.00": 46
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          },
+          "T3": {
+            "status": "PASS",
+            "delta_l": 9.050197066457514,
+            "delta_e00": 15.410815946145501,
+            "contrast_pass": true,
+            "outline_check": {
+              "status": "PASS",
+              "outline_pixels": 0,
+              "outline_present": false,
+              "crown_pixels": 245,
+              "dark_side_pixels": 62,
+              "outer_grass_pixels": 345,
+              "alpha_uncertain_crown_pixels": 84,
+              "alpha_uncertain_dark_side_pixels": 24,
+              "alpha_uncertain_samples_included": true,
+              "alpha_threshold_for_samples": ">127/255",
+              "uncertain_if_alpha_below": 0.98,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "legitimate_non_crown_pixels": 241,
+              "tree_crown_alignment": {
+                "status": "PASS",
+                "expected_visible_crown_pixels": 6401,
+                "sidecar_reviewed_crown_pixels": 6401,
+                "union_mismatch_pixels": 0,
+                "unclassified_tree_pixels_alpha_gt_0_5": 0,
+                "source_region_code_mismatch_pixels": 0,
+                "legitimate_non_crown_occluding_pixels": 4149,
+                "source_region_projection_errors": [],
+                "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+              },
+              "outline_status": "absent_authoritatively",
+              "outer_grass_categories": [
+                {
+                  "name": "environment_ground",
+                  "semantic": "environment_ground",
+                  "pixels": 345
+                }
+              ],
+              "water_pixels_excluded_from_reference": 0,
+              "reference_scope": "group",
+              "outer_ring_total_pixels": 1069,
+              "outer_ring_prop_covered_pixels": 720,
+              "outer_ring_excluded_pixels": 306,
+              "outer_ring_grid_pixels": 33,
+              "outer_ring_contact_shadow_pixels": 0,
+              "outer_ring_ground_shadow_difference_pixels": 0,
+              "outer_ring_unclassified_pixels": 972,
+              "outer_ring_usable_ground_pixels": 345,
+              "outer_ring_counts_overlap": true,
+              "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+              "measurement_group": {
+                "group_id": "tree-clump-02",
+                "members": [
+                  "tree@8.00,0.00",
+                  "tree@9.00,0.00",
+                  "tree@9.00,1.00"
+                ],
+                "member_cells_xy": {
+                  "tree@8.00,0.00": [
+                    8,
+                    0
+                  ],
+                  "tree@9.00,0.00": [
+                    9,
+                    0
+                  ],
+                  "tree@9.00,1.00": [
+                    9,
+                    1
+                  ]
+                },
+                "member_visible_mask_pixels": {
+                  "tree@8.00,0.00": 477,
+                  "tree@9.00,0.00": 464,
+                  "tree@9.00,1.00": 841
+                },
+                "member_measurement_mask_pixels": {
+                  "tree@8.00,0.00": 166,
+                  "tree@9.00,0.00": 245,
+                  "tree@9.00,1.00": 46
+                },
+                "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+                "status": "PASS",
+                "reason": null
+              },
+              "measurement_group_status": "PASS",
+              "not_tested_reason_categories": [],
+              "not_tested_reasons": []
+            },
+            "crown_pixels": 245,
+            "dark_side_pixels": 62,
+            "outline_pixels": 0,
+            "outer_grass_pixels": 345,
+            "alpha_uncertain_crown_pixels": 84,
+            "alpha_uncertain_dark_side_pixels": 24,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 241,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 345
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 1069,
+            "outer_ring_prop_covered_pixels": 720,
+            "outer_ring_excluded_pixels": 306,
+            "outer_ring_grid_pixels": 33,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 972,
+            "outer_ring_usable_ground_pixels": 345,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-02",
+              "members": [
+                "tree@8.00,0.00",
+                "tree@9.00,0.00",
+                "tree@9.00,1.00"
+              ],
+              "member_cells_xy": {
+                "tree@8.00,0.00": [
+                  8,
+                  0
+                ],
+                "tree@9.00,0.00": [
+                  9,
+                  0
+                ],
+                "tree@9.00,1.00": [
+                  9,
+                  1
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@8.00,0.00": 477,
+                "tree@9.00,0.00": 464,
+                "tree@9.00,1.00": 841
+              },
+              "member_measurement_mask_pixels": {
+                "tree@8.00,0.00": 166,
+                "tree@9.00,0.00": 245,
+                "tree@9.00,1.00": 46
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          }
+        },
+        {
+          "stable_id": "tree@9.00,1.00",
+          "token": 16,
+          "outline_check": {
+            "status": "PASS",
+            "outline_pixels": 0,
+            "outline_present": false,
+            "crown_pixels": 46,
+            "dark_side_pixels": 16,
+            "outer_grass_pixels": 345,
+            "alpha_uncertain_crown_pixels": 20,
+            "alpha_uncertain_dark_side_pixels": 8,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 6,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 345
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 1069,
+            "outer_ring_prop_covered_pixels": 720,
+            "outer_ring_excluded_pixels": 306,
+            "outer_ring_grid_pixels": 33,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 972,
+            "outer_ring_usable_ground_pixels": 345,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-02",
+              "members": [
+                "tree@8.00,0.00",
+                "tree@9.00,0.00",
+                "tree@9.00,1.00"
+              ],
+              "member_cells_xy": {
+                "tree@8.00,0.00": [
+                  8,
+                  0
+                ],
+                "tree@9.00,0.00": [
+                  9,
+                  0
+                ],
+                "tree@9.00,1.00": [
+                  9,
+                  1
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@8.00,0.00": 477,
+                "tree@9.00,0.00": 464,
+                "tree@9.00,1.00": 841
+              },
+              "member_measurement_mask_pixels": {
+                "tree@8.00,0.00": 166,
+                "tree@9.00,0.00": 245,
+                "tree@9.00,1.00": 46
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          },
+          "T3": {
+            "status": "PASS",
+            "delta_l": 14.514862133635752,
+            "delta_e00": 18.532723169695693,
+            "contrast_pass": true,
+            "outline_check": {
+              "status": "PASS",
+              "outline_pixels": 0,
+              "outline_present": false,
+              "crown_pixels": 46,
+              "dark_side_pixels": 16,
+              "outer_grass_pixels": 345,
+              "alpha_uncertain_crown_pixels": 20,
+              "alpha_uncertain_dark_side_pixels": 8,
+              "alpha_uncertain_samples_included": true,
+              "alpha_threshold_for_samples": ">127/255",
+              "uncertain_if_alpha_below": 0.98,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "legitimate_non_crown_pixels": 6,
+              "tree_crown_alignment": {
+                "status": "PASS",
+                "expected_visible_crown_pixels": 6401,
+                "sidecar_reviewed_crown_pixels": 6401,
+                "union_mismatch_pixels": 0,
+                "unclassified_tree_pixels_alpha_gt_0_5": 0,
+                "source_region_code_mismatch_pixels": 0,
+                "legitimate_non_crown_occluding_pixels": 4149,
+                "source_region_projection_errors": [],
+                "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+              },
+              "outline_status": "absent_authoritatively",
+              "outer_grass_categories": [
+                {
+                  "name": "environment_ground",
+                  "semantic": "environment_ground",
+                  "pixels": 345
+                }
+              ],
+              "water_pixels_excluded_from_reference": 0,
+              "reference_scope": "group",
+              "outer_ring_total_pixels": 1069,
+              "outer_ring_prop_covered_pixels": 720,
+              "outer_ring_excluded_pixels": 306,
+              "outer_ring_grid_pixels": 33,
+              "outer_ring_contact_shadow_pixels": 0,
+              "outer_ring_ground_shadow_difference_pixels": 0,
+              "outer_ring_unclassified_pixels": 972,
+              "outer_ring_usable_ground_pixels": 345,
+              "outer_ring_counts_overlap": true,
+              "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+              "measurement_group": {
+                "group_id": "tree-clump-02",
+                "members": [
+                  "tree@8.00,0.00",
+                  "tree@9.00,0.00",
+                  "tree@9.00,1.00"
+                ],
+                "member_cells_xy": {
+                  "tree@8.00,0.00": [
+                    8,
+                    0
+                  ],
+                  "tree@9.00,0.00": [
+                    9,
+                    0
+                  ],
+                  "tree@9.00,1.00": [
+                    9,
+                    1
+                  ]
+                },
+                "member_visible_mask_pixels": {
+                  "tree@8.00,0.00": 477,
+                  "tree@9.00,0.00": 464,
+                  "tree@9.00,1.00": 841
+                },
+                "member_measurement_mask_pixels": {
+                  "tree@8.00,0.00": 166,
+                  "tree@9.00,0.00": 245,
+                  "tree@9.00,1.00": 46
+                },
+                "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+                "status": "PASS",
+                "reason": null
+              },
+              "measurement_group_status": "PASS",
+              "not_tested_reason_categories": [],
+              "not_tested_reasons": []
+            },
+            "crown_pixels": 46,
+            "dark_side_pixels": 16,
+            "outline_pixels": 0,
+            "outer_grass_pixels": 345,
+            "alpha_uncertain_crown_pixels": 20,
+            "alpha_uncertain_dark_side_pixels": 8,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 6,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "environment_ground",
+                "semantic": "environment_ground",
+                "pixels": 345
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 1069,
+            "outer_ring_prop_covered_pixels": 720,
+            "outer_ring_excluded_pixels": 306,
+            "outer_ring_grid_pixels": 33,
+            "outer_ring_contact_shadow_pixels": 0,
+            "outer_ring_ground_shadow_difference_pixels": 0,
+            "outer_ring_unclassified_pixels": 972,
+            "outer_ring_usable_ground_pixels": 345,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-02",
+              "members": [
+                "tree@8.00,0.00",
+                "tree@9.00,0.00",
+                "tree@9.00,1.00"
+              ],
+              "member_cells_xy": {
+                "tree@8.00,0.00": [
+                  8,
+                  0
+                ],
+                "tree@9.00,0.00": [
+                  9,
+                  0
+                ],
+                "tree@9.00,1.00": [
+                  9,
+                  1
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@8.00,0.00": 477,
+                "tree@9.00,0.00": 464,
+                "tree@9.00,1.00": 841
+              },
+              "member_measurement_mask_pixels": {
+                "tree@8.00,0.00": 166,
+                "tree@9.00,0.00": 245,
+                "tree@9.00,1.00": 46
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          }
+        },
+        {
+          "stable_id": "tree@9.00,8.00",
+          "token": 17,
+          "outline_check": {
+            "status": "PASS",
+            "outline_pixels": 0,
+            "outline_present": false,
+            "crown_pixels": 592,
+            "dark_side_pixels": 67,
+            "outer_grass_pixels": 300,
+            "alpha_uncertain_crown_pixels": 143,
+            "alpha_uncertain_dark_side_pixels": 17,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 441,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "0",
+                "semantic": "plain",
+                "pixels": 230
+              },
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 70
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2744,
+            "outer_ring_prop_covered_pixels": 1973,
+            "outer_ring_excluded_pixels": 15,
+            "outer_ring_grid_pixels": 521,
+            "outer_ring_contact_shadow_pixels": 178,
+            "outer_ring_ground_shadow_difference_pixels": 178,
+            "outer_ring_unclassified_pixels": 0,
+            "outer_ring_usable_ground_pixels": 300,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-04",
+              "members": [
+                "tree@8.00,9.00",
+                "tree@9.00,8.00",
+                "tree@9.00,9.00"
+              ],
+              "member_cells_xy": {
+                "tree@8.00,9.00": [
+                  8,
+                  9
+                ],
+                "tree@9.00,8.00": [
+                  9,
+                  8
+                ],
+                "tree@9.00,9.00": [
+                  9,
+                  9
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@8.00,9.00": 697,
+                "tree@9.00,8.00": 694,
+                "tree@9.00,9.00": 739
+              },
+              "member_measurement_mask_pixels": {
+                "tree@8.00,9.00": 602,
+                "tree@9.00,8.00": 592,
+                "tree@9.00,9.00": 613
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          },
+          "T3": {
+            "status": "PASS",
+            "delta_l": 15.35124818093831,
+            "delta_e00": 19.068871269060764,
+            "contrast_pass": true,
+            "outline_check": {
+              "status": "PASS",
+              "outline_pixels": 0,
+              "outline_present": false,
+              "crown_pixels": 592,
+              "dark_side_pixels": 67,
+              "outer_grass_pixels": 300,
+              "alpha_uncertain_crown_pixels": 143,
+              "alpha_uncertain_dark_side_pixels": 17,
+              "alpha_uncertain_samples_included": true,
+              "alpha_threshold_for_samples": ">127/255",
+              "uncertain_if_alpha_below": 0.98,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "legitimate_non_crown_pixels": 441,
+              "tree_crown_alignment": {
+                "status": "PASS",
+                "expected_visible_crown_pixels": 6401,
+                "sidecar_reviewed_crown_pixels": 6401,
+                "union_mismatch_pixels": 0,
+                "unclassified_tree_pixels_alpha_gt_0_5": 0,
+                "source_region_code_mismatch_pixels": 0,
+                "legitimate_non_crown_occluding_pixels": 4149,
+                "source_region_projection_errors": [],
+                "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+              },
+              "outline_status": "absent_authoritatively",
+              "outer_grass_categories": [
+                {
+                  "name": "0",
+                  "semantic": "plain",
+                  "pixels": 230
+                },
+                {
+                  "name": "1",
+                  "semantic": "forest",
+                  "pixels": 70
+                }
+              ],
+              "water_pixels_excluded_from_reference": 0,
+              "reference_scope": "group",
+              "outer_ring_total_pixels": 2744,
+              "outer_ring_prop_covered_pixels": 1973,
+              "outer_ring_excluded_pixels": 15,
+              "outer_ring_grid_pixels": 521,
+              "outer_ring_contact_shadow_pixels": 178,
+              "outer_ring_ground_shadow_difference_pixels": 178,
+              "outer_ring_unclassified_pixels": 0,
+              "outer_ring_usable_ground_pixels": 300,
+              "outer_ring_counts_overlap": true,
+              "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+              "measurement_group": {
+                "group_id": "tree-clump-04",
+                "members": [
+                  "tree@8.00,9.00",
+                  "tree@9.00,8.00",
+                  "tree@9.00,9.00"
+                ],
+                "member_cells_xy": {
+                  "tree@8.00,9.00": [
+                    8,
+                    9
+                  ],
+                  "tree@9.00,8.00": [
+                    9,
+                    8
+                  ],
+                  "tree@9.00,9.00": [
+                    9,
+                    9
+                  ]
+                },
+                "member_visible_mask_pixels": {
+                  "tree@8.00,9.00": 697,
+                  "tree@9.00,8.00": 694,
+                  "tree@9.00,9.00": 739
+                },
+                "member_measurement_mask_pixels": {
+                  "tree@8.00,9.00": 602,
+                  "tree@9.00,8.00": 592,
+                  "tree@9.00,9.00": 613
+                },
+                "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+                "status": "PASS",
+                "reason": null
+              },
+              "measurement_group_status": "PASS",
+              "not_tested_reason_categories": [],
+              "not_tested_reasons": []
+            },
+            "crown_pixels": 592,
+            "dark_side_pixels": 67,
+            "outline_pixels": 0,
+            "outer_grass_pixels": 300,
+            "alpha_uncertain_crown_pixels": 143,
+            "alpha_uncertain_dark_side_pixels": 17,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 441,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "0",
+                "semantic": "plain",
+                "pixels": 230
+              },
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 70
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2744,
+            "outer_ring_prop_covered_pixels": 1973,
+            "outer_ring_excluded_pixels": 15,
+            "outer_ring_grid_pixels": 521,
+            "outer_ring_contact_shadow_pixels": 178,
+            "outer_ring_ground_shadow_difference_pixels": 178,
+            "outer_ring_unclassified_pixels": 0,
+            "outer_ring_usable_ground_pixels": 300,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-04",
+              "members": [
+                "tree@8.00,9.00",
+                "tree@9.00,8.00",
+                "tree@9.00,9.00"
+              ],
+              "member_cells_xy": {
+                "tree@8.00,9.00": [
+                  8,
+                  9
+                ],
+                "tree@9.00,8.00": [
+                  9,
+                  8
+                ],
+                "tree@9.00,9.00": [
+                  9,
+                  9
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@8.00,9.00": 697,
+                "tree@9.00,8.00": 694,
+                "tree@9.00,9.00": 739
+              },
+              "member_measurement_mask_pixels": {
+                "tree@8.00,9.00": 602,
+                "tree@9.00,8.00": 592,
+                "tree@9.00,9.00": 613
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          }
+        },
+        {
+          "stable_id": "tree@9.00,9.00",
+          "token": 18,
+          "outline_check": {
+            "status": "PASS",
+            "outline_pixels": 0,
+            "outline_present": false,
+            "crown_pixels": 613,
+            "dark_side_pixels": 87,
+            "outer_grass_pixels": 300,
+            "alpha_uncertain_crown_pixels": 155,
+            "alpha_uncertain_dark_side_pixels": 24,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 463,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "0",
+                "semantic": "plain",
+                "pixels": 230
+              },
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 70
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2744,
+            "outer_ring_prop_covered_pixels": 1973,
+            "outer_ring_excluded_pixels": 15,
+            "outer_ring_grid_pixels": 521,
+            "outer_ring_contact_shadow_pixels": 178,
+            "outer_ring_ground_shadow_difference_pixels": 178,
+            "outer_ring_unclassified_pixels": 0,
+            "outer_ring_usable_ground_pixels": 300,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-04",
+              "members": [
+                "tree@8.00,9.00",
+                "tree@9.00,8.00",
+                "tree@9.00,9.00"
+              ],
+              "member_cells_xy": {
+                "tree@8.00,9.00": [
+                  8,
+                  9
+                ],
+                "tree@9.00,8.00": [
+                  9,
+                  8
+                ],
+                "tree@9.00,9.00": [
+                  9,
+                  9
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@8.00,9.00": 697,
+                "tree@9.00,8.00": 694,
+                "tree@9.00,9.00": 739
+              },
+              "member_measurement_mask_pixels": {
+                "tree@8.00,9.00": 602,
+                "tree@9.00,8.00": 592,
+                "tree@9.00,9.00": 613
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          },
+          "T3": {
+            "status": "PASS",
+            "delta_l": 14.40723465832713,
+            "delta_e00": 18.60159097663935,
+            "contrast_pass": true,
+            "outline_check": {
+              "status": "PASS",
+              "outline_pixels": 0,
+              "outline_present": false,
+              "crown_pixels": 613,
+              "dark_side_pixels": 87,
+              "outer_grass_pixels": 300,
+              "alpha_uncertain_crown_pixels": 155,
+              "alpha_uncertain_dark_side_pixels": 24,
+              "alpha_uncertain_samples_included": true,
+              "alpha_threshold_for_samples": ">127/255",
+              "uncertain_if_alpha_below": 0.98,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "legitimate_non_crown_pixels": 463,
+              "tree_crown_alignment": {
+                "status": "PASS",
+                "expected_visible_crown_pixels": 6401,
+                "sidecar_reviewed_crown_pixels": 6401,
+                "union_mismatch_pixels": 0,
+                "unclassified_tree_pixels_alpha_gt_0_5": 0,
+                "source_region_code_mismatch_pixels": 0,
+                "legitimate_non_crown_occluding_pixels": 4149,
+                "source_region_projection_errors": [],
+                "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+              },
+              "outline_status": "absent_authoritatively",
+              "outer_grass_categories": [
+                {
+                  "name": "0",
+                  "semantic": "plain",
+                  "pixels": 230
+                },
+                {
+                  "name": "1",
+                  "semantic": "forest",
+                  "pixels": 70
+                }
+              ],
+              "water_pixels_excluded_from_reference": 0,
+              "reference_scope": "group",
+              "outer_ring_total_pixels": 2744,
+              "outer_ring_prop_covered_pixels": 1973,
+              "outer_ring_excluded_pixels": 15,
+              "outer_ring_grid_pixels": 521,
+              "outer_ring_contact_shadow_pixels": 178,
+              "outer_ring_ground_shadow_difference_pixels": 178,
+              "outer_ring_unclassified_pixels": 0,
+              "outer_ring_usable_ground_pixels": 300,
+              "outer_ring_counts_overlap": true,
+              "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+              "measurement_group": {
+                "group_id": "tree-clump-04",
+                "members": [
+                  "tree@8.00,9.00",
+                  "tree@9.00,8.00",
+                  "tree@9.00,9.00"
+                ],
+                "member_cells_xy": {
+                  "tree@8.00,9.00": [
+                    8,
+                    9
+                  ],
+                  "tree@9.00,8.00": [
+                    9,
+                    8
+                  ],
+                  "tree@9.00,9.00": [
+                    9,
+                    9
+                  ]
+                },
+                "member_visible_mask_pixels": {
+                  "tree@8.00,9.00": 697,
+                  "tree@9.00,8.00": 694,
+                  "tree@9.00,9.00": 739
+                },
+                "member_measurement_mask_pixels": {
+                  "tree@8.00,9.00": 602,
+                  "tree@9.00,8.00": 592,
+                  "tree@9.00,9.00": 613
+                },
+                "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+                "status": "PASS",
+                "reason": null
+              },
+              "measurement_group_status": "PASS",
+              "not_tested_reason_categories": [],
+              "not_tested_reasons": []
+            },
+            "crown_pixels": 613,
+            "dark_side_pixels": 87,
+            "outline_pixels": 0,
+            "outer_grass_pixels": 300,
+            "alpha_uncertain_crown_pixels": 155,
+            "alpha_uncertain_dark_side_pixels": 24,
+            "alpha_uncertain_samples_included": true,
+            "alpha_threshold_for_samples": ">127/255",
+            "uncertain_if_alpha_below": 0.98,
+            "unclassified_tree_pixels_alpha_gt_0_5": 0,
+            "legitimate_non_crown_pixels": 463,
+            "tree_crown_alignment": {
+              "status": "PASS",
+              "expected_visible_crown_pixels": 6401,
+              "sidecar_reviewed_crown_pixels": 6401,
+              "union_mismatch_pixels": 0,
+              "unclassified_tree_pixels_alpha_gt_0_5": 0,
+              "source_region_code_mismatch_pixels": 0,
+              "legitimate_non_crown_occluding_pixels": 4149,
+              "source_region_projection_errors": [],
+              "basis": "exact bound source-region code projection plus same-coordinate frozen crown-union alpha comparison; legitimate non-crown tree source pixels retain occlusion"
+            },
+            "outline_status": "absent_authoritatively",
+            "outer_grass_categories": [
+              {
+                "name": "0",
+                "semantic": "plain",
+                "pixels": 230
+              },
+              {
+                "name": "1",
+                "semantic": "forest",
+                "pixels": 70
+              }
+            ],
+            "water_pixels_excluded_from_reference": 0,
+            "reference_scope": "group",
+            "outer_ring_total_pixels": 2744,
+            "outer_ring_prop_covered_pixels": 1973,
+            "outer_ring_excluded_pixels": 15,
+            "outer_ring_grid_pixels": 521,
+            "outer_ring_contact_shadow_pixels": 178,
+            "outer_ring_ground_shadow_difference_pixels": 178,
+            "outer_ring_unclassified_pixels": 0,
+            "outer_ring_usable_ground_pixels": 300,
+            "outer_ring_counts_overlap": true,
+            "outer_ring_counting_note": "各项分别与同一外环求交，可重叠；未分类计数包含 environment_ground。可用地面按 coverage 空白、排除、网格、接触阴影、地面阴影差分和版本地面白名单筛选。",
+            "measurement_group": {
+              "group_id": "tree-clump-04",
+              "members": [
+                "tree@8.00,9.00",
+                "tree@9.00,8.00",
+                "tree@9.00,9.00"
+              ],
+              "member_cells_xy": {
+                "tree@8.00,9.00": [
+                  8,
+                  9
+                ],
+                "tree@9.00,8.00": [
+                  9,
+                  8
+                ],
+                "tree@9.00,9.00": [
+                  9,
+                  9
+                ]
+              },
+              "member_visible_mask_pixels": {
+                "tree@8.00,9.00": 697,
+                "tree@9.00,8.00": 694,
+                "tree@9.00,9.00": 739
+              },
+              "member_measurement_mask_pixels": {
+                "tree@8.00,9.00": 602,
+                "tree@9.00,8.00": 592,
+                "tree@9.00,9.00": 613
+              },
+              "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+              "status": "PASS",
+              "reason": null
+            },
+            "measurement_group_status": "PASS",
+            "not_tested_reason_categories": [],
+            "not_tested_reasons": []
+          }
+        }
+      ],
+      "measurement_status": "MEASURED_WHERE_READY",
+      "art_acceptance": "NOT_TESTED",
+      "measurement_version": "v3",
+      "measurement_groups": {
+        "wall_groups": [
+          {
+            "group_id": "wall-group-01",
+            "members": [
+              "wall@3.00,1.00",
+              "wall@3.00,2.00",
+              "wall@4.00,1.00",
+              "wall@5.00,1.00",
+              "wall@6.00,1.00",
+              "wall@6.00,2.00"
+            ],
+            "member_cells_xy": {
+              "wall@3.00,1.00": [
+                3,
+                1
+              ],
+              "wall@3.00,2.00": [
+                3,
+                2
+              ],
+              "wall@4.00,1.00": [
+                4,
+                1
+              ],
+              "wall@5.00,1.00": [
+                5,
+                1
+              ],
+              "wall@6.00,1.00": [
+                6,
+                1
+              ],
+              "wall@6.00,2.00": [
+                6,
+                2
+              ]
+            },
+            "member_visible_mask_pixels": {
+              "wall@3.00,1.00": 794,
+              "wall@3.00,2.00": 874,
+              "wall@4.00,1.00": 1090,
+              "wall@5.00,1.00": 1013,
+              "wall@6.00,1.00": 984,
+              "wall@6.00,2.00": 892
+            },
+            "member_measurement_mask_pixels": {
+              "wall@3.00,1.00": 712,
+              "wall@3.00,2.00": 742,
+              "wall@4.00,1.00": 966,
+              "wall@5.00,1.00": 896,
+              "wall@6.00,1.00": 579,
+              "wall@6.00,2.00": 746
+            },
+            "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+            "status": "PASS",
+            "reason": null
+          },
+          {
+            "group_id": "wall-group-02",
+            "members": [
+              "wall@8.00,7.00"
+            ],
+            "member_cells_xy": {
+              "wall@8.00,7.00": [
+                8,
+                7
+              ]
+            },
+            "member_visible_mask_pixels": {
+              "wall@8.00,7.00": 67
+            },
+            "member_measurement_mask_pixels": {
+              "wall@8.00,7.00": 57
+            },
+            "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+            "status": "PASS",
+            "reason": null
+          }
+        ],
+        "tree_clumps": [
+          {
+            "group_id": "tree-clump-01",
+            "members": [
+              "tree@0.00,0.00",
+              "tree@0.00,1.00",
+              "tree@1.00,0.00"
+            ],
+            "member_cells_xy": {
+              "tree@0.00,0.00": [
+                0,
+                0
+              ],
+              "tree@0.00,1.00": [
+                0,
+                1
+              ],
+              "tree@1.00,0.00": [
+                1,
+                0
+              ]
+            },
+            "member_visible_mask_pixels": {
+              "tree@0.00,0.00": 421,
+              "tree@0.00,1.00": 842,
+              "tree@1.00,0.00": 748
+            },
+            "member_measurement_mask_pixels": {
+              "tree@0.00,0.00": 421,
+              "tree@0.00,1.00": 824,
+              "tree@1.00,0.00": 712
+            },
+            "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+            "status": "PASS",
+            "reason": null
+          },
+          {
+            "group_id": "tree-clump-02",
+            "members": [
+              "tree@8.00,0.00",
+              "tree@9.00,0.00",
+              "tree@9.00,1.00"
+            ],
+            "member_cells_xy": {
+              "tree@8.00,0.00": [
+                8,
+                0
+              ],
+              "tree@9.00,0.00": [
+                9,
+                0
+              ],
+              "tree@9.00,1.00": [
+                9,
+                1
+              ]
+            },
+            "member_visible_mask_pixels": {
+              "tree@8.00,0.00": 477,
+              "tree@9.00,0.00": 464,
+              "tree@9.00,1.00": 841
+            },
+            "member_measurement_mask_pixels": {
+              "tree@8.00,0.00": 166,
+              "tree@9.00,0.00": 245,
+              "tree@9.00,1.00": 46
+            },
+            "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+            "status": "PASS",
+            "reason": null
+          },
+          {
+            "group_id": "tree-clump-03",
+            "members": [
+              "tree@0.00,8.00",
+              "tree@0.00,9.00",
+              "tree@1.00,9.00"
+            ],
+            "member_cells_xy": {
+              "tree@0.00,8.00": [
+                0,
+                8
+              ],
+              "tree@0.00,9.00": [
+                0,
+                9
+              ],
+              "tree@1.00,9.00": [
+                1,
+                9
+              ]
+            },
+            "member_visible_mask_pixels": {
+              "tree@0.00,8.00": 888,
+              "tree@0.00,9.00": 706,
+              "tree@1.00,9.00": 752
+            },
+            "member_measurement_mask_pixels": {
+              "tree@0.00,8.00": 848,
+              "tree@0.00,9.00": 697,
+              "tree@1.00,9.00": 635
+            },
+            "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+            "status": "PASS",
+            "reason": null
+          },
+          {
+            "group_id": "tree-clump-04",
+            "members": [
+              "tree@8.00,9.00",
+              "tree@9.00,8.00",
+              "tree@9.00,9.00"
+            ],
+            "member_cells_xy": {
+              "tree@8.00,9.00": [
+                8,
+                9
+              ],
+              "tree@9.00,8.00": [
+                9,
+                8
+              ],
+              "tree@9.00,9.00": [
+                9,
+                9
+              ]
+            },
+            "member_visible_mask_pixels": {
+              "tree@8.00,9.00": 697,
+              "tree@9.00,8.00": 694,
+              "tree@9.00,9.00": 739
+            },
+            "member_measurement_mask_pixels": {
+              "tree@8.00,9.00": 602,
+              "tree@9.00,8.00": 592,
+              "tree@9.00,9.00": 613
+            },
+            "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+            "status": "PASS",
+            "reason": null
+          }
+        ],
+        "connectivity_rule": "4-neighbor captured cell adjacency AND overlap or 8-neighbor contact of the captured visible semantic masks; no sample-radius expansion"
+      }
+    }
+  ],
+  "pilot_10x10_720p": {
+    "preconditions": "PASS",
+    "precondition_components": {
+      "case_is_10x10_1280x720": true,
+      "frozen_capture": "PASS",
+      "semantic_sidecar": "PASS"
+    },
+    "precondition_reason": null,
+    "remaining_five_capture_action": "CONTINUE",
+    "negative_controls": {
+      "old_wall_T2": {
+        "status": "NOT_ESTABLISHED",
+        "measured_failures": 0,
+        "measured_passes": 7,
+        "not_tested_rows": 0,
+        "rows_reported": 7,
+        "rows_with_numeric_metric_evidence": 7,
+        "requires_actual_numeric_metric_FAIL": true,
+        "reason": null
+      },
+      "old_pillar_T2": {
+        "status": "NOT_ESTABLISHED",
+        "measured_failures": 0,
+        "measured_passes": 3,
+        "not_tested_rows": 0,
+        "rows_reported": 3,
+        "rows_with_numeric_metric_evidence": 3,
+        "requires_actual_numeric_metric_FAIL": true,
+        "reason": null
+      },
+      "old_tree_complete_T3": {
+        "status": "NOT_ESTABLISHED",
+        "measured_failures": 0,
+        "measured_passes": 12,
+        "not_tested_rows": 0,
+        "rows_reported": 12,
+        "rows_with_numeric_metric_evidence": 12,
+        "requires_actual_numeric_metric_FAIL": true,
+        "reason": null
+      },
+      "scope": "This 10x10/1280x720 pilot only; rows are not combined across cases."
+    },
+    "material_gate": "CLOSED"
+  },
+  "negative_controls": {
+    "old_wall_T2": {
+      "status": "NOT_ESTABLISHED",
+      "measured_failures": 0,
+      "measured_passes": 7,
+      "not_tested_rows": 0,
+      "rows_reported": 7,
+      "rows_with_numeric_metric_evidence": 7,
+      "requires_actual_numeric_metric_FAIL": true,
+      "reason": null
+    },
+    "old_pillar_T2": {
+      "status": "NOT_ESTABLISHED",
+      "measured_failures": 0,
+      "measured_passes": 3,
+      "not_tested_rows": 0,
+      "rows_reported": 3,
+      "rows_with_numeric_metric_evidence": 3,
+      "requires_actual_numeric_metric_FAIL": true,
+      "reason": null
+    },
+    "old_tree_complete_T3": {
+      "status": "NOT_ESTABLISHED",
+      "measured_failures": 0,
+      "measured_passes": 12,
+      "not_tested_rows": 0,
+      "rows_reported": 12,
+      "rows_with_numeric_metric_evidence": 12,
+      "requires_actual_numeric_metric_FAIL": true,
+      "reason": null
+    },
+    "scope": "This 10x10/1280x720 pilot only; rows are not combined across cases."
+  },
+  "material_gate": "CLOSED",
+  "pilot_validation_errors": [],
+  "T1_T4_T5_T6": "NOT_TESTED_BY_SEMANTIC_SIDECAR_VALIDATOR",
+  "measurement_status": "MEASURED_WHERE_READY",
+  "art_acceptance": "NOT_TESTED",
+  "note": "Pilot exit status is determined only by the single 10x10/1280x720 frozen and semantic prerequisites. A passing pilot continues even when either numeric negative control is missing or not FAIL; in that case material_gate remains CLOSED. No other capture or art acceptance is implied.",
+  "measurement_version": "v3"
+}

@@ -1,0 +1,38 @@
+{
+  "schema": "sot-task117-close-readback/1",
+  "status": "PASS",
+  "request_id": "d3b69232-7c81-47d2-9c0c-6819b04388ea",
+  "task_id": "2926b2b8-69d1-4c1f-87d5-27f34a258391",
+  "result_request_id": "b789ea8b-f460-481f-8e18-70070a0f9f5a",
+  "receipt_request_id": "67947825-6173-46b4-84b8-453065ff734c",
+  "receipt_canonical_sha256": "42b034825830c240a6108ad683b2d82099ebbd450fe6456e8968322b46d668a1",
+  "close_ack": {
+    "request_id": "619bfad8-e36b-4eb7-8bad-e806f689ea3a",
+    "bytes": 10250,
+    "sha256": "d61b2c20db0d982ed787824327eda1c2780bace691c732b033a346c1fe99a3d0",
+    "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+    "reference": "library-file:fde1_bGliZmlsZV8zREdnVExHeVJKYXRMc2JkcDBvWWl3_FileDrive_6af57ca9c23c819184d2e6b479d22dac"
+  },
+  "native_receiver_adoption": {
+    "page_id": "page_6e2084798c348191b9abbef150c2ea22",
+    "thread_id": "7fe1a9c6-2f3a-5cb2-84cd-860f12e1a0c5",
+    "message_id": "c5b79667-207c-5eb9-b74e-5739042b5ef1",
+    "conversation_id": "01a118cf-9fad-76e2-99af-46a5f9a550fc"
+  },
+  "live_ledger": {
+    "state": "closed",
+    "execution_start_count": 1,
+    "evidence_sha256": "42b034825830c240a6108ad683b2d82099ebbd450fe6456e8968322b46d668a1"
+  },
+  "checks": {
+    "exact_original_bytes": true,
+    "task_result_receipt_binding": true,
+    "route_protocol_generation": true,
+    "six_consumed_artifact_hashes_equal": true,
+    "domain_verdict_unchanged": true,
+    "native_receiver_source": true,
+    "actual_ledger_closed_count1": true
+  },
+  "domain_verdict": "FAIL_U1_NUMERICAL_ACCEPTANCE",
+  "new_execution": false
+}
