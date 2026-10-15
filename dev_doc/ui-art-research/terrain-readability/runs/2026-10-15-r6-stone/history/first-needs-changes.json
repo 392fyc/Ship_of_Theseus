@@ -1,0 +1,292 @@
+{
+  "schema": "sot-independent-review/v1",
+  "verdict": "needs_changes",
+  "review_scope": "R6 墙柱材质、柱造型与接地实现的静态独立审查；候选可进入后续 Dot 原生单组检查。",
+  "candidate": {
+    "branch": "codex/ui-ux/terrain-material-r6",
+    "head": "e829b006953ecaa9aef5292a1ae4a5422d5401a3",
+    "base": "e829b006953ecaa9aef5292a1ae4a5422d5401a3",
+    "manifest_file_count": 17,
+    "status_paths_exactly_match_manifest": true
+  },
+  "files": [
+    {
+      "path": "assets/prototype/battlefield_courtyard/coping-limestone-r6.png",
+      "bytes": 3553822,
+      "sha256": "65845274c1a691dad0eeaf61a26cbe4f1f953aa11e8956efbeac7a418183fdea",
+      "matches_manifest": true
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/coping-limestone-r6.png.import",
+      "bytes": 1000,
+      "sha256": "4c416b4558bb76532c2bd1f0ae9b677f941dba688204e958dc12bfca974f6f08",
+      "matches_manifest": true
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/masonry-wall-limestone-r6.png",
+      "bytes": 3095686,
+      "sha256": "7bf9492ada3bc008655fdbf4d2ae22716ce17aa02a2dc048e9dcda99f7420f30",
+      "matches_manifest": true
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/masonry-wall-limestone-r6.png.import",
+      "bytes": 1018,
+      "sha256": "2cf473408038fa5d4c365f4c0e99df9570daa06b0c8aaa073d27473ec009ef89",
+      "matches_manifest": true
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/visual_profile.json",
+      "bytes": 3710,
+      "sha256": "5bc0e05dd44fdff0cde8252cc50def1b86fc8d35ea2f23a4b98447ffe1a2607c",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/asset-provenance.json",
+      "bytes": 3006,
+      "sha256": "3e059847f1f7afdf2cbbe8dc4e65522587bfa4f0e3affcdf9c7dd109aadd3584",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/implementation-receipt.json",
+      "bytes": 4737,
+      "sha256": "e0f5c292ce31ff117180dc44c7ca1bc24d2d19b3ae4d1ae38be099cbf9a8f865",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/initial-tint-estimates.json",
+      "bytes": 3072,
+      "sha256": "2365eb007ab6a3f61fa65315706cd84257c92f17c47c1764ea97b740c0336b1b",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/prompt-coping-continuous.txt",
+      "bytes": 2391,
+      "sha256": "1576c7f311276682bfe7db835f16a2348bc989293b4934fb484ca6002818d258",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/prompt-wall-side.txt",
+      "bytes": 2212,
+      "sha256": "4ffe3ac9451dc30af1b0dd087854984177326ce0a1b6bd1e1479ca7426fa9e79",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/protected-state.json",
+      "bytes": 1367,
+      "sha256": "cbce7a754836f62411c6cc6aeaca8523407d1c8ecd256500f3852e3daf57f97e",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/raw-texture-metrics.json",
+      "bytes": 2861,
+      "sha256": "50c306c96f28b8c46e19580d0bb6cd14d52716ad454888ba07ab9233cc310e1f",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/report.md",
+      "bytes": 3109,
+      "sha256": "21bda81a6e20ada057551b70ee737cf77519a3e0459addd47ef655a764e860b6",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/task.md",
+      "bytes": 2261,
+      "sha256": "4808671caf49d93bc68df666c36e515aadf4b33c67dbd99afef1882ca21a78dd",
+      "matches_manifest": true
+    },
+    {
+      "path": "scripts/ui/playground/courtyard_board_view.gd",
+      "bytes": 38423,
+      "sha256": "608450d32625cbae3768144dd3dd5674a7290f59b5814803f9b35289a84e6798",
+      "matches_manifest": true
+    },
+    {
+      "path": "tests/claude_review/capture_terrain_readability_r6.gd",
+      "bytes": 9359,
+      "sha256": "7a92df98982ecd810d1bf66275db9cdca27df3a46a78b0be35d602961e907fb5",
+      "matches_manifest": true
+    },
+    {
+      "path": "tests/claude_review/terrain_mask_draw_layer_r6.gd",
+      "bytes": 2665,
+      "sha256": "3ab02ef2f7fd9eb4d58b918e77fff3ed2061dd1f900de40ae32c3f014d8159e9",
+      "matches_manifest": true
+    }
+  ],
+  "findings": [
+    {
+      "severity": "blocking",
+      "id": "polygon_repeat_setting_changed",
+      "location": "scripts/ui/playground/courtyard_board_view.gd:804,874",
+      "impact": "基线中的柱父节点和Polygon2D均使用TEXTURE_REPEAT_ENABLED；候选改为DISABLED，违反采样设置保持原规范的要求，并改变所有新墙柱多边形的纹理采样行为。",
+      "evidence": "基线e829b006953ecaa9aef5292a1ae4a5422d5401a3中对应设置为TEXTURE_REPEAT_ENABLED；当前两个设置为TEXTURE_REPEAT_DISABLED。候选UV被限制在0.04–0.96，因此避免非周期边缘循环不依赖关闭repeat。",
+      "correction": "恢复柱父节点和Polygon2D的TEXTURE_REPEAT_ENABLED，保留内部UV；更新候选清单哈希并重跑相关检查。"
+    }
+  ],
+  "checks": [
+    {
+      "id": "scope_and_protected_state",
+      "result": "pass",
+      "evidence": [
+        "assets/prototype/battlefield_courtyard/visual_profile.json",
+        "scripts/ui/playground/courtyard_board_view.gd",
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/protected-state.json"
+      ],
+      "summary": "17项状态与清单一致；配置差异限制于墙/柱材质及相关接地阴影；保护清单中的树图、冻结捕获/掩膜入口、地表脚本和着色器与基线字节一致。"
+    },
+    {
+      "id": "pillar_geometry",
+      "result": "pass",
+      "evidence": [
+        "scripts/ui/playground/courtyard_board_view.gd#799-858"
+      ],
+      "summary": "12点柱身与柱顶、三道鼓石接缝、断顶高度偏移含五个等级；代码高度公式对样例位置给出30/24/33，左右受光按面中心位置渐变；柱身使用连续coping石材。"
+    },
+    {
+      "id": "wall_and_footing_scope",
+      "result": "pass",
+      "evidence": [
+        "scripts/ui/playground/courtyard_board_view.gd#623-670",
+        "scripts/ui/playground/courtyard_board_view.gd#765-796"
+      ],
+      "summary": "墙侧添加下部泥污带并在墙顶外角绘制断面材质；共用接地API收集apron与shadow几何，生产绘制和新掩膜绘制都调用该API。墙/柱之外的地面、水、树、网格、镜头、占格和玩法范围没有进入17项候选。"
+    },
+    {
+      "id": "capture_entry_and_mask",
+      "result": "pass_static",
+      "evidence": [
+        "tests/claude_review/capture_terrain_readability_r6.gd#1-16",
+        "tests/claude_review/capture_terrain_readability_r6.gd#33-101",
+        "tests/claude_review/capture_terrain_readability_r6.gd#123-153",
+        "tests/claude_review/terrain_mask_draw_layer_r6.gd#1-63"
+      ],
+      "summary": "R6入口继承冻结atlas入口；ground、ground_without_shadow、contact_shadow沿用既有绘制层并替换原节点时校验父节点、顺序和变换；掩膜复用生产apron/shadow数据；8个新增来源路径纳入扩展来源映射及候选摘要。静态合成摘要通过v5/v6现有来源验证器，未生成Godot捕获。"
+    },
+    {
+      "id": "texture_bytes_import_and_sampling",
+      "result": "fail",
+      "summary": "两张PNG的清单字节与SHA匹配来源记录；均为RGB图，转RGBA后alpha全为255；新导入UID各唯一且导入参数与R5相同。但Polygon2D及柱父节点把基线TEXTURE_REPEAT_ENABLED改为DISABLED，与采样设置保持原规范的要求不符。UV限制在0.04–0.96已避开非周期边缘，不需要切换重复模式。"
+    },
+    {
+      "id": "required_python_tests",
+      "result": "pass",
+      "command": "python -B -m unittest discover -s tests/claude_review -p test_terrain_acceptance_v2.py -v",
+      "exit_code": 0,
+      "tests_run": 11,
+      "logs": {
+        "stdout": "unittest.stdout.bin",
+        "stderr": "unittest.stderr.bin"
+      }
+    },
+    {
+      "id": "source_validator_compatibility",
+      "result": "pass_static_fixture",
+      "summary": "合成v5/v6来源摘要含R6八个唯一且存在的路径，双向哈希映射和候选摘要绑定检查成立；v5、v6错误数组为空。这不是引擎生成捕获记录。",
+      "logs": {
+        "stdout": "source-compat.stdout.bin",
+        "stderr": "source-compat.stderr.bin"
+      }
+    },
+    {
+      "id": "report_claim_boundaries",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/report.md#7-25",
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/implementation-receipt.json#64-110"
+      ],
+      "summary": "报告把只读纹理估算说明为初始参数预测，T1/T2/T4/T5/T6及柱识别保留为Dot原生检查；实现回执的造型、同帧重建/掩膜仍列partial；未把云端检查或原生实测写成PASS。"
+    },
+    {
+      "id": "versioned_text_path_and_credential_scan",
+      "result": "pass",
+      "absolute_path_hit_files": [],
+      "credential_pattern_hit_files": [],
+      "summary": "使用排除res:// URI误报的路径扫描器检查候选文本文件；未发现本机绝对路径或明显凭据格式。"
+    },
+    {
+      "id": "whitespace",
+      "result": "pass",
+      "command": "git diff --check",
+      "exit_code": 0,
+      "captured_output_bytes": 0
+    }
+  ],
+  "test_logs": {
+    "unittest.stdout.bin": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "absolute_path_hits": false
+    },
+    "unittest.stderr.bin": {
+      "bytes": 1812,
+      "sha256": "52f8ab1ec504301cabe2b9b7ac73691bfd9e58be39e045a45903d77e0216d233",
+      "absolute_path_hits": false
+    },
+    "source-compat.stdout.bin": {
+      "bytes": 208,
+      "sha256": "1014cb70d3d01ab07adfdb4f265b81223b0547ac9de9c3b1e6ba71f991d62c6b",
+      "absolute_path_hits": false
+    },
+    "source-compat.stderr.bin": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "absolute_path_hits": false
+    }
+  },
+  "protected_blobs": [
+    {
+      "path": "assets/prototype/battlefield_courtyard/forest-tree-v3b.png",
+      "base_blob": "d192225bea2a5e681499ed5b222575f523fcc5ff",
+      "worktree_blob": "d192225bea2a5e681499ed5b222575f523fcc5ff",
+      "unchanged": true
+    },
+    {
+      "path": "tests/claude_review/capture_terrain_readability_v6_atlas.gd",
+      "base_blob": "5005994661da2bb7fa37f868ae455f7f3b3f3277",
+      "worktree_blob": "5005994661da2bb7fa37f868ae455f7f3b3f3277",
+      "unchanged": true
+    },
+    {
+      "path": "tests/claude_review/terrain_mask_draw_layer.gd",
+      "base_blob": "09464225d793fa57b4ee6746b771fd2b7ca15933",
+      "worktree_blob": "09464225d793fa57b4ee6746b771fd2b7ca15933",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/ui/terrain/terrain_surface.gd",
+      "base_blob": "e5713dc8d76141ecb729febb15ef51212637e243",
+      "worktree_blob": "e5713dc8d76141ecb729febb15ef51212637e243",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/ui/terrain/terrain_blend.gdshader",
+      "base_blob": "27537b804b7ea3b244bbaede91f150e22a45d41e",
+      "worktree_blob": "27537b804b7ea3b244bbaede91f150e22a45d41e",
+      "unchanged": true
+    }
+  ],
+  "not_covered": [
+    {
+      "item": "Godot引擎解析、资源导入与实际运行时类型检查",
+      "status": "未覆盖；任务禁止运行Godot，代码检查仅为静态阅读。"
+    },
+    {
+      "item": "Dot原生单组T1/T2/T4/T5/T6数值、同帧掩膜逐像素对应及720p双人盲测",
+      "status": "未覆盖且不计PASS；候选报告已将这些列为下一阶段实测。"
+    },
+    {
+      "item": "后续六组定稿与验收",
+      "status": "不属于当前实现审查范围。"
+    }
+  ],
+  "residual_risk": [
+    "纹理测量来自原图预测；引擎着色、栅格化和低分辨率采样仍待原生截图核对。",
+    "来源兼容检查使用合成摘要，只验证旧验证器接受新增来源，不证明已经生成原生捕获或图像逐像素对齐。",
+    "墙角以深色三角断面叠画在既有外轮廓上；实际可读性仍需原生视觉检查。"
+  ],
+  "portable_report": {
+    "encoding": "UTF-8",
+    "line_endings": "LF",
+    "absolute_local_path_hits": 0
+  }
+}

@@ -1,0 +1,13 @@
+Use case: stylized-concept
+Asset type: square tileable game diffuse texture for the side faces of a ruined courtyard limestone wall
+Input images: Image 1, the R5 wall limestone texture, is a material and scale reference only; Image 2, the R5 courtyard gameplay screenshot, is an overall in-game palette and material-scale reference only. Create a new texture.
+Primary request: A seamless square albedo/diffuse texture of weathered warm limestone masonry, with large and medium blocks whose sizes and outlines vary slightly, and modest plain aged lime-mortar joints. It should read as old stone in a ruined courtyard, with years of erosion rather than modern construction.
+Scene/backdrop: No scene or environment; only the flat material surface.
+Subject: Warm muted beige-gray limestone with a subtle restrained ochre warmth; worn rounded edges, small cracks, rubbed high points, shallow pits, and broad low-contrast mottling. Mortar is simple, muted gray-beige, a little darker than the stone.
+Style/medium: Stylized realistic hand-painted game material, consistent with the subdued, tactile terrain materials in the reference scene.
+Composition/framing: Front-facing orthographic material swatch, filling a 1:1 square; seamless repeating tile with all four edges matching; no focal point.
+Lighting/mood: Uniform neutral diffuse illumination, with no cast shadows, no directional highlights, and no baked-in lighting.
+Color palette: Medium-bright, restrained warm beige-gray source texture; keep the raw texture light enough for later engine modulation and do not pre-darken it to the final in-game value.
+Materials/textures: Clearly readable irregular block-stone surfaces and modest gray-beige mortar; age and surface relief should remain visible when the texture is reduced in game.
+Constraints: Opaque diffuse/albedo texture only; edge-to-edge seamless tiling; no text, no border, no perspective, no scene objects, no foliage, no ground, no grid, no column or wall object silhouette.
+Avoid: Cold gray modern cement, perfectly regular contemporary blockwork, ornate decoration, exaggerated bevels, extreme damage, dramatic directional light, hard baked shadows, and texture variation made only of tiny noise.

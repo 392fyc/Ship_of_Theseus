@@ -1,0 +1,56 @@
+{
+  "base_commit": "e829b006953ecaa9aef5292a1ae4a5422d5401a3",
+  "unchanged_profile_keys": [
+    "ground",
+    "moss",
+    "water",
+    "rubble",
+    "entry",
+    "shrub",
+    "water_surface",
+    "board_zoom",
+    "board_screen_center",
+    "grid_color",
+    "boundary_color",
+    "ground_tint",
+    "backdrop_color",
+    "meadow",
+    "tree",
+    "rock",
+    "prop_strokes"
+  ],
+  "unchanged_prop_tints": [
+    "tree",
+    "environment_tree",
+    "shrub",
+    "rubble",
+    "environment_rubble"
+  ],
+  "frozen": [
+    {
+      "path": "assets/prototype/battlefield_courtyard/forest-tree-v3b.png",
+      "git_blob": "d192225bea2a5e681499ed5b222575f523fcc5ff",
+      "status": "unchanged"
+    },
+    {
+      "path": "tests/claude_review/capture_terrain_readability_v6_atlas.gd",
+      "git_blob": "5005994661da2bb7fa37f868ae455f7f3b3f3277",
+      "status": "unchanged"
+    },
+    {
+      "path": "tests/claude_review/terrain_mask_draw_layer.gd",
+      "git_blob": "09464225d793fa57b4ee6746b771fd2b7ca15933",
+      "status": "unchanged"
+    },
+    {
+      "path": "scripts/ui/terrain/terrain_surface.gd",
+      "git_blob": "e5713dc8d76141ecb729febb15ef51212637e243",
+      "status": "unchanged"
+    },
+    {
+      "path": "scripts/ui/terrain/terrain_blend.gdshader",
+      "git_blob": "27537b804b7ea3b244bbaede91f150e22a45d41e",
+      "status": "unchanged"
+    }
+  ]
+}

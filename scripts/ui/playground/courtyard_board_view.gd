@@ -35,10 +35,12 @@ var _unit_positions: Array[Vector2] = []
 var _highlight_positions: Array[Vector2] = []
 var _time: float = 0.0
 var _actor_layer: Node2D
+var _footing_visual_cache: Dictionary = {}
 
 
 func configure(value: Grid, visual_profile: Dictionary, layout: Dictionary = {}) -> void:
 	grid = value
+	_footing_visual_cache.clear()
 	profile = visual_profile
 	layout_data = layout
 	_terrain_catalog = TerrainCatalog.catalog()
@@ -83,6 +85,7 @@ func _ready() -> void:
 
 
 func refresh_terrain_visuals() -> void:
+	_footing_visual_cache.clear()
 	for spec: Dictionary in _props:
 		var old_node: Node2D = spec["node"]
 		if is_instance_valid(old_node):
@@ -617,9 +620,11 @@ func wall_footprint(pos: Vector2i) -> PackedVector2Array:
 	return result
 
 
-func _draw_wall_footings(canvas: Node2D = null) -> void:
-	if canvas == null:
-		canvas = self
+func wall_footing_visuals() -> Dictionary:
+	if not _footing_visual_cache.is_empty():
+		return _footing_visual_cache
+	var aprons: Array[Dictionary] = []
+	var shadows: Array[PackedVector2Array] = []
 	for cell: Vector2i in _wall_render_cells():
 		var center: Vector2 = point(cell.x, cell.y)
 		var base: PackedVector2Array = wall_footprint(cell)
@@ -633,13 +638,36 @@ func _draw_wall_footings(canvas: Node2D = null) -> void:
 				texture = _moss
 				tint = Color("8c916c")
 		var apron := PackedVector2Array()
-		var shadow := PackedVector2Array()
 		for p: Vector2 in base:
 			apron.append(center + (p - center) * 1.18)
-			shadow.append(center + (p - center) * 1.28 + Vector2(1.5, 2.0))
-		canvas.draw_colored_polygon(shadow, Color("18201638"))
 		tint.a = 0.42
-		_textured_ground_polygon(apron, texture, tint, canvas)
+		aprons.append({"polygon": apron, "texture": texture, "tint": tint})
+		# 柱影贴着宽底座；墙影沿实际墙脚伸到地面一侧。
+		var shadow_base: PackedVector2Array = base
+		if visual_variant_at(cell) == "pillar":
+			shadow_base = PackedVector2Array([center + Vector2(0, -9),
+				center + Vector2(17, -1), center + Vector2(16, 4),
+				center + Vector2(0, 11), center + Vector2(-16, 4), center + Vector2(-17, -1)])
+		var shadow := PackedVector2Array()
+		for p: Vector2 in shadow_base:
+			shadow.append(center + (p - center) * 1.18 + Vector2(1.5, 2.0))
+		shadows.append(shadow)
+	_footing_visual_cache = {"aprons": aprons, "shadows": shadows,
+		"shadow_color": _prop_tint("contact_shadow", Color(0.024, 0.031, 0.024, 0.5))}
+	return _footing_visual_cache
+
+
+func draw_wall_footing_visuals(canvas: Node2D, include_shadow: bool) -> void:
+	var visuals: Dictionary = wall_footing_visuals()
+	for apron: Dictionary in visuals["aprons"]:
+		_textured_ground_polygon(apron["polygon"], apron["texture"], apron["tint"], canvas)
+	if include_shadow:
+		for shadow: PackedVector2Array in visuals["shadows"]:
+			canvas.draw_colored_polygon(shadow, visuals["shadow_color"])
+
+
+func _draw_wall_footings(canvas: Node2D = null) -> void:
+	draw_wall_footing_visuals(self if canvas == null else canvas, true)
 
 
 func _build_architecture_walls() -> void:
@@ -738,9 +766,24 @@ func _add_wall_shape(cell: Vector2i) -> void:
 		var next: int = (edge + 1) % base.size()
 		if base[next].x >= base[edge].x or _is_join_edge(base[edge], base[next], connection_mask):
 			continue
-		_polygon(root, PackedVector2Array([top[edge], top[next], base[next], base[edge]]),
-			_prop_tint("wall_lit_side", Color("aaa792")) if base[next].y > base[edge].y else _prop_tint("wall_dark_side", Color("7f8372")), true)
+		var side_tint: Color = _prop_tint("wall_lit_side", Color("aaa792")) if base[next].y > base[edge].y else _prop_tint("wall_dark_side", Color("7f8372"))
+		_polygon(root, PackedVector2Array([top[edge], top[next], base[next], base[edge]]), side_tint, true)
+		var dirt_a: Vector2 = base[edge].lerp(top[edge], 0.18)
+		var dirt_b: Vector2 = base[next].lerp(top[next], 0.18)
+		_polygon(root, PackedVector2Array([dirt_a, dirt_b, base[next], base[edge]]),
+			_prop_tint("wall_foot_dirt", side_tint * Color(0.9, 0.9, 0.9, 1.0)), true)
 	_polygon(root, top, _prop_tint("wall_top", Color("b6b29b")))
+	# 边角剥蚀沿用现有墙体外轮廓，只加一块较暗的断面材质。
+	var chip_index: int = 0
+	for i: int in top.size():
+		if top[i].y < top[chip_index].y:
+			chip_index = i
+	var previous: int = (chip_index + top.size() - 1) % top.size()
+	var following: int = (chip_index + 1) % top.size()
+	var chip := PackedVector2Array([top[chip_index],
+		top[chip_index].lerp(top[following], 0.24),
+		top[chip_index].lerp(top[previous], 0.22)])
+	_polygon(root, chip, _prop_tint("wall_chip", Color(0.52, 0.53, 0.54, 1.0)))
 	for edge: int in base.size():
 		var next: int = (edge + 1) % base.size()
 		if not _is_join_edge(base[edge], base[next], connection_mask):
@@ -759,29 +802,48 @@ func _add_pillar(cell: Vector2i) -> void:
 	root.position = point(cell.x, cell.y)
 	root.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	root.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
-	# 宽柱脚、收分柱身和残缺柱头共同表达庭院柱廊的遗迹。
-	# 保持柱脚为第一个多边形、柱顶为最后一个，沿用冻结采集器的部件分类。
-	var foot := PackedVector2Array([Vector2(0, -9), Vector2(16, -2), Vector2(16, 3), Vector2(0, 11), Vector2(-16, 3), Vector2(-16, -2)])
-	var shaft := PackedVector2Array([Vector2(0, -9), Vector2(8, -5), Vector2(10, -2), Vector2(8, 1), Vector2(0, 5), Vector2(-8, 1), Vector2(-10, -2), Vector2(-8, -5)])
+	var variant: int = posmod(cell.x * 3 + cell.y, 5)
+	var height: float = 24.0 + float(variant) * 3.0
+	root.set_meta("r6_height", height)
+	root.set_meta("r6_side_count", 12)
+	root.set_meta("r6_break_levels", 5)
+	# 宽底座首先绘制，断口最后绘制，保持冻结采集器的部件分类。
+	var foot := PackedVector2Array([Vector2(0, -9), Vector2(17, -1),
+		Vector2(16, 4), Vector2(0, 11), Vector2(-16, 4), Vector2(-17, -1)])
 	_polygon(root, foot, _prop_tint("pillar_foot", Color("777d69")))
-	var neck: PackedVector2Array = shaft.duplicate()
-	for i: int in neck.size():
-		neck[i] = Vector2(neck[i].x * 0.83, neck[i].y * 0.83 - 29.0)
-	for edge: int in range(2, 6):
+	var shaft := PackedVector2Array()
+	var top := PackedVector2Array()
+	var break_offsets: Array[float] = [0.0, 3.0, 1.0, 4.0, 2.0, 0.0, 3.0, 1.0, 4.0, 2.0, 0.0, 2.0]
+	for i: int in 12:
+		var angle: float = -PI * 0.5 + float(i) * TAU / 12.0
+		var point_at_base := Vector2(cos(angle) * 11.0, sin(angle) * 6.0)
+		shaft.append(point_at_base)
+		var broken_height: float = break_offsets[(i + variant) % break_offsets.size()]
+		top.append(point_at_base * 0.92 - Vector2(0.0, height + broken_height))
+	for edge: int in range(3, 9):
 		var next: int = (edge + 1) % shaft.size()
-		_polygon(root, PackedVector2Array([neck[edge], neck[next], shaft[next], shaft[edge]]),
-			_prop_tint("pillar_lit_side", Color("a5a691")) if edge < 4 else _prop_tint("pillar_dark_side", Color("7a806e")), true)
-	var top := PackedVector2Array([Vector2(0, -43), Vector2(10, -38), Vector2(13, -34), Vector2(10, -31), Vector2(0, -27), Vector2(-10, -31), Vector2(-13, -34), Vector2(-10, -38)])
-	# 两个相邻缺角打破完整柱头，保留左上受光方向。
-	top[0].y += 2.0 if cell.x % 2 == 0 else 0.0
-	top[1].y += 3.0 if cell.x % 2 == 0 else 1.0
-	for edge: int in range(2, 6):
-		var next: int = (edge + 1) % top.size()
-		_polygon(root, PackedVector2Array([top[edge], top[next], neck[next], neck[edge]]),
-			_prop_tint("pillar_lit_side", Color("a5a691")) if edge < 4 else _prop_tint("pillar_dark_side", Color("7a806e")), true)
+		var midpoint: Vector2 = (shaft[edge] + shaft[next]) * 0.5
+		var light_share: float = clampf(0.5 - midpoint.x / 22.0, 0.0, 1.0)
+		var side_tint: Color = _prop_tint("pillar_dark_side", Color("7a806e")).lerp(
+			_prop_tint("pillar_lit_side", Color("a5a691")), light_share)
+		# 连续石面绕柱身，不使用墙砖的错缝贴图。
+		_polygon(root, PackedVector2Array([top[edge], top[next], shaft[next], shaft[edge]]), side_tint)
+		_polygon(root, PackedVector2Array([shaft[edge].lerp(top[edge], 0.18),
+			shaft[next].lerp(top[next], 0.18), shaft[next], shaft[edge]]),
+			_prop_tint("pillar_foot_dirt", Color(0.45, 0.44, 0.44, 1.0)))
+	# 三道弧形鼓石接缝，随圆柱截面转向。
+	for seam_index: int in range(1, 4):
+		var seam := PackedVector2Array()
+		for i: int in range(3, 10):
+			var fraction: float = float(seam_index) / 4.0
+			seam.append(shaft[i].lerp(top[i], fraction))
+		_line(root, seam, _prop_tint("pillar_drum_joint", Color(0.28, 0.27, 0.24, 0.48)), 0.75)
+	# 下缘压入土中，底座仍比柱身宽；不改地面或占格。
+	_line(root, PackedVector2Array([foot[2], foot[3], foot[4]]),
+		_prop_tint("pillar_base_edge", Color("4b4e47")), 1.6)
 	_polygon(root, top, _prop_tint("pillar_top", Color("c0bca6")))
-	_line(root, PackedVector2Array([foot[2], foot[3], foot[4]]), _prop_tint("pillar_base_edge", Color("4b4e47")), 1.5)
-	_line(root, PackedVector2Array([top[6], top[7], top[0], top[1]]), _prop_tint("pillar_cap_edge", Color("92958b")), 0.8)
+	_line(root, PackedVector2Array([top[9], top[10], top[11], top[0], top[1]]),
+		_prop_tint("pillar_cap_edge", Color("92958b")), 0.75)
 	_actor_layer.add_child(root)
 	_props.append({"node": root, "wind": false, "bounds": Rect2(-18, -48, 36, 61)})
 
@@ -798,19 +860,16 @@ func _is_join_edge(a: Vector2, b: Vector2, mask: int) -> bool:
 func _polygon(parent: Node2D, points: PackedVector2Array, tint: Color, wall_face: bool = false) -> void:
 	var node := Polygon2D.new()
 	node.polygon = points
-	var top_uv := PackedVector2Array()
+	node.texture = _masonry if wall_face else _coping
+	var stone_uv := PackedVector2Array()
+	var texture_size: Vector2 = node.texture.get_size()
+	var offset_u: float = fposmod(parent.position.x * 0.017, 0.16)
 	for p: Vector2 in points:
-		var world: Vector2 = p + parent.position
-		top_uv.append(Vector2(world.x / 32.0 + world.y / 16.0,
-			world.y / 16.0 - world.x / 32.0) * 128.0 + Vector2(400, 400))
-	node.uv = top_uv
-	node.texture = _coping
-	if wall_face:
-		var u0: float = (parent.position.x + points[0].x) * 22.36068
-		var u1: float = (parent.position.x + points[1].x) * 22.36068
-		node.uv = PackedVector2Array([Vector2(u0, -(points[3].y - points[0].y) * 20.0),
-			Vector2(u1, -(points[2].y - points[1].y) * 20.0), Vector2(u1, 0), Vector2(u0, 0)])
-		node.texture = _masonry
+		# 每一面使用原图内部坐标，非周期的边缘不会重复到面内。
+		var u: float = clampf(0.08 + offset_u + (p.x + 34.0) / 68.0 * 0.62, 0.04, 0.96)
+		var v: float = clampf(0.82 + p.y * 0.0105, 0.04, 0.96)
+		stone_uv.append(Vector2(u, v) * texture_size)
+	node.uv = stone_uv
 	node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	node.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	# Polygon2D 的顶点颜色会压到 RGBA8；节点着色保留大于 1 的亮度系数。

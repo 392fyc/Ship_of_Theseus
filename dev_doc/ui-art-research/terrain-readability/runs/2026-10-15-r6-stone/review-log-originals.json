@@ -1,0 +1,49 @@
+{
+  "description": "Original native review logs retained as exact-byte carriers; decode data_b64 and verify each original digest.",
+  "originals": [
+    {
+      "schema": "sot-original-byte-carrier/1",
+      "original_name": "unittest.stdout.bin",
+      "original_bytes": 0,
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "offset": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "base64",
+      "data_b64": ""
+    },
+    {
+      "schema": "sot-original-byte-carrier/1",
+      "original_name": "unittest.stderr.bin",
+      "original_bytes": 1812,
+      "original_sha256": "52f8ab1ec504301cabe2b9b7ac73691bfd9e58be39e045a45903d77e0216d233",
+      "offset": 0,
+      "bytes": 1812,
+      "sha256": "52f8ab1ec504301cabe2b9b7ac73691bfd9e58be39e045a45903d77e0216d233",
+      "encoding": "base64",
+      "data_b64": "dGVzdF9jOV9jb3VudHNfYWxsX3RyZWVzX2FuZF9laWdodHlfcGVyY2VudCAodGVzdF90ZXJyYWluX2FjY2VwdGFuY2VfdjIuQXBwcm92ZWRSdWxlc1Rlc3RzLnRlc3RfYzlfY291bnRzX2FsbF90cmVlc19hbmRfZWlnaHR5X3BlcmNlbnQpIC4uLiBvaw0KdGVzdF9jOV9yZXF1aXJlc19ib3RoX21vZGVzX2FuZF9rZWVwc191bmNlcnRhaW5fY3Jvd25fc2FtcGxlcyAodGVzdF90ZXJyYWluX2FjY2VwdGFuY2VfdjIuQXBwcm92ZWRSdWxlc1Rlc3RzLnRlc3RfYzlfcmVxdWlyZXNfYm90aF9tb2Rlc19hbmRfa2VlcHNfdW5jZXJ0YWluX2Nyb3duX3NhbXBsZXMpIC4uLiBvaw0KdGVzdF9lbmNsb3NlZF9tZW1iZXJfaXNfbm90X2FfcGFzcyAodGVzdF90ZXJyYWluX2FjY2VwdGFuY2VfdjIuQXBwcm92ZWRSdWxlc1Rlc3RzLnRlc3RfZW5jbG9zZWRfbWVtYmVyX2lzX25vdF9hX3Bhc3MpIC4uLiBvaw0KdGVzdF9mYWlsZWRfZnJvemVuX3NvdXJjZV9uZXZlcl9ydW5zX25ld19tZWFzdXJlbWVudHMgKHRlc3RfdGVycmFpbl9hY2NlcHRhbmNlX3YyLkFwcHJvdmVkUnVsZXNUZXN0cy50ZXN0X2ZhaWxlZF9mcm96ZW5fc291cmNlX25ldmVyX3J1bnNfbmV3X21lYXN1cmVtZW50cykgLi4uIG9rDQp0ZXN0X2dlb21ldHJ5X2FuZF9lbXB0eV9yZWZlcmVuY2VfZmFpbF9jbG9zZWQgKHRlc3RfdGVycmFpbl9hY2NlcHRhbmNlX3YyLkFwcHJvdmVkUnVsZXNUZXN0cy50ZXN0X2dlb21ldHJ5X2FuZF9lbXB0eV9yZWZlcmVuY2VfZmFpbF9jbG9zZWQpIC4uLiBvaw0KdGVzdF9rbm93bl9ncm91cF9zZWFtX3JlbW92ZWRfYnV0X25vX291dHNpZGVfZWRnZV9yZW1vdmVkICh0ZXN0X3RlcnJhaW5fYWNjZXB0YW5jZV92Mi5BcHByb3ZlZFJ1bGVzVGVzdHMudGVzdF9rbm93bl9ncm91cF9zZWFtX3JlbW92ZWRfYnV0X25vX291dHNpZGVfZWRnZV9yZW1vdmVkKSAuLi4gb2sNCnRlc3RfbWF0cml4X29wZXJhdGVzX2luX2xpbmVhcl9ub3RfZW5jb2RlZF9yZ2IgKHRlc3RfdGVycmFpbl9hY2NlcHRhbmNlX3YyLkFwcHJvdmVkUnVsZXNUZXN0cy50ZXN0X21hdHJpeF9vcGVyYXRlc19pbl9saW5lYXJfbm90X2VuY29kZWRfcmdiKSAuLi4gb2sNCnRlc3RfbmV1dHJhbF9zcmdiX2lzX25ldXRyYWxfaW5fYm90aF9tb2RlbHMgKHRlc3RfdGVycmFpbl9hY2NlcHRhbmNlX3YyLkFwcHJvdmVkUnVsZXNUZXN0cy50ZXN0X25ldXRyYWxfc3JnYl9pc19uZXV0cmFsX2luX2JvdGhfbW9kZWxzKSAuLi4gb2sNCnRlc3Rfc2luZ2xldG9uX3ByZXNlcnZlc19wcmV2aW91c19udW1lcmljX3RocmVzaG9sZHMgKHRlc3RfdGVycmFpbl9hY2NlcHRhbmNlX3YyLkFwcHJvdmVkUnVsZXNUZXN0cy50ZXN0X3NpbmdsZXRvbl9wcmVzZXJ2ZXNfcHJldmlvdXNfbnVtZXJpY190aHJlc2hvbGRzKSAuLi4gb2sNCnRlc3RfdDZfcmV0YWluc19pdHNfb3duX2dsb2JhbF90ZW5fdGhyZXNob2xkICh0ZXN0X3RlcnJhaW5fYWNjZXB0YW5jZV92Mi5BcHByb3ZlZFJ1bGVzVGVzdHMudGVzdF90Nl9yZXRhaW5zX2l0c19vd25fZ2xvYmFsX3Rlbl90aHJlc2hvbGQpIC4uLiBvaw0KdGVzdF91bmtub3duX29jY2x1c2lvbl9rZWVwc19vdXRzaWRlX2VkZ2VzX2luX2Rlbm9taW5hdG9yICh0ZXN0X3RlcnJhaW5fYWNjZXB0YW5jZV92Mi5BcHByb3ZlZFJ1bGVzVGVzdHMudGVzdF91bmtub3duX29jY2x1c2lvbl9rZWVwc19vdXRzaWRlX2VkZ2VzX2luX2Rlbm9taW5hdG9yKSAuLi4gb2sNCg0KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KUmFuIDExIHRlc3RzIGluIDAuMTI1cw0KDQpPSw0K"
+    },
+    {
+      "schema": "sot-original-byte-carrier/1",
+      "original_name": "source-compat.stdout.bin",
+      "original_bytes": 208,
+      "original_sha256": "1014cb70d3d01ab07adfdb4f265b81223b0547ac9de9c3b1e6ba71f991d62c6b",
+      "offset": 0,
+      "bytes": 208,
+      "sha256": "1014cb70d3d01ab07adfdb4f265b81223b0547ac9de9c3b1e6ba71f991d62c6b",
+      "encoding": "base64",
+      "data_b64": "eyJyNl9jb3VudCI6IDgsICJyNl91bmlxdWUiOiB0cnVlLCAicjZfaGFzaGVzX2NvbXBsZXRlIjogdHJ1ZSwgImNhbmRpZGF0ZV9kaWdlc3RfYmluZHNfYWxsX2VudHJpZXMiOiB0cnVlLCAidjVfYWNjZXB0c19zdXBlcnNldCI6IHRydWUsICJ2Nl9hY2NlcHRzX3N1cGVyc2V0IjogdHJ1ZSwgInY1X2Vycm9yX2NvdW50IjogMCwgInY2X2Vycm9yX2NvdW50IjogMH0NCg=="
+    },
+    {
+      "schema": "sot-original-byte-carrier/1",
+      "original_name": "source-compat.stderr.bin",
+      "original_bytes": 0,
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "offset": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encoding": "base64",
+      "data_b64": ""
+    }
+  ]
+}

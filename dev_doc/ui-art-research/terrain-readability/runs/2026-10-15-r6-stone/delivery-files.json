@@ -1,0 +1,111 @@
+{
+  "implementation_review": "158e0e8f06b398ac9e66bfb76f23219dff0d1641a965eb8f4687527bab421245",
+  "files": [
+    {
+      "path": "assets/prototype/battlefield_courtyard/coping-limestone-r6.png",
+      "bytes": 3553822,
+      "sha256": "65845274c1a691dad0eeaf61a26cbe4f1f953aa11e8956efbeac7a418183fdea"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/coping-limestone-r6.png.import",
+      "bytes": 1000,
+      "sha256": "4c416b4558bb76532c2bd1f0ae9b677f941dba688204e958dc12bfca974f6f08"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/masonry-wall-limestone-r6.png",
+      "bytes": 3095686,
+      "sha256": "7bf9492ada3bc008655fdbf4d2ae22716ce17aa02a2dc048e9dcda99f7420f30"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/masonry-wall-limestone-r6.png.import",
+      "bytes": 1018,
+      "sha256": "2cf473408038fa5d4c365f4c0e99df9570daa06b0c8aaa073d27473ec009ef89"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/visual_profile.json",
+      "bytes": 3710,
+      "sha256": "5bc0e05dd44fdff0cde8252cc50def1b86fc8d35ea2f23a4b98447ffe1a2607c"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/asset-provenance.json",
+      "bytes": 3151,
+      "sha256": "cede5c1a79985bce98d3f45e390d86fc1f58c5c5df2e182669eecd444f0e141a"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/implementation-receipt.json",
+      "bytes": 4764,
+      "sha256": "5ccaea6a502d9985465e4b392371a7af14ae7b3b65d1cfc9294a9aeeb830d9ed"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/initial-tint-estimates.json",
+      "bytes": 3072,
+      "sha256": "2365eb007ab6a3f61fa65315706cd84257c92f17c47c1764ea97b740c0336b1b"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/prompt-coping-continuous.txt",
+      "bytes": 2391,
+      "sha256": "1576c7f311276682bfe7db835f16a2348bc989293b4934fb484ca6002818d258"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/prompt-wall-side.txt",
+      "bytes": 2212,
+      "sha256": "4ffe3ac9451dc30af1b0dd087854984177326ce0a1b6bd1e1479ca7426fa9e79"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/protected-state.json",
+      "bytes": 1367,
+      "sha256": "cbce7a754836f62411c6cc6aeaca8523407d1c8ecd256500f3852e3daf57f97e"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/raw-texture-metrics.json",
+      "bytes": 2861,
+      "sha256": "50c306c96f28b8c46e19580d0bb6cd14d52716ad454888ba07ab9233cc310e1f"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/report.md",
+      "bytes": 3124,
+      "sha256": "f28e00b0301030724e11ffd16ee5a27585f160a15ccb96c0ed0ec9d7068323cc"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/task.md",
+      "bytes": 2261,
+      "sha256": "4808671caf49d93bc68df666c36e515aadf4b33c67dbd99afef1882ca21a78dd"
+    },
+    {
+      "path": "scripts/ui/playground/courtyard_board_view.gd",
+      "bytes": 38421,
+      "sha256": "79f94246f33d276c0faec6a6aba1bcd13d3ae0e197e29117b9493b4c564b29a9"
+    },
+    {
+      "path": "tests/claude_review/capture_terrain_readability_r6.gd",
+      "bytes": 9359,
+      "sha256": "7a92df98982ecd810d1bf66275db9cdca27df3a46a78b0be35d602961e907fb5"
+    },
+    {
+      "path": "tests/claude_review/terrain_mask_draw_layer_r6.gd",
+      "bytes": 2665,
+      "sha256": "3ab02ef2f7fd9eb4d58b918e77fff3ed2061dd1f900de40ae32c3f014d8159e9"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/independent-review.json",
+      "bytes": 9002,
+      "sha256": "158e0e8f06b398ac9e66bfb76f23219dff0d1641a965eb8f4687527bab421245"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/candidate-review-manifest.json",
+      "bytes": 3804,
+      "sha256": "ab59a5409a0e14022b63a480a71dc5c06294a709615e6ff14d1e7ab609001c2a"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/history/first-needs-changes.json",
+      "bytes": 12788,
+      "sha256": "987ae1895bc9802f3d8ca84f1512145631db08e0e6c83c9d3666938d1767ba7c"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/review-log-originals.json",
+      "bytes": 4454,
+      "sha256": "9e4db9d66257069e15825b6505cb307fc1a61edf5270c030deb575fdf52d2ccf"
+    }
+  ],
+  "excluded": "this manifest"
+}

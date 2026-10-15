@@ -1,0 +1,69 @@
+{
+  "generated_on": "2026-10-15",
+  "method": "built-in image_gen",
+  "transparent_background": false,
+  "source_handling": "Candidate PNGs were copied without decoding or rewriting pixels. SHA256 matched each tool-produced original before cleanup of the external temporary source file.",
+  "lab_sampling": "Read-only CIELAB D65 sample at every 4th pixel in x and y; approximate raw source texture values before engine modulation.",
+  "candidates": [
+    {
+      "name": "wall-side-r6-candidate.png",
+      "dimensions": "1254x1254",
+      "bytes": 3095686,
+      "sha256": "7BF9492ADA3BC008655FDBF4D2AE22716CE17AA02A2DC048E9DCDA99F7420F30",
+      "lab_sample": {
+        "sample_count": 98596,
+        "alpha_min": 255,
+        "alpha_max": 255,
+        "mean_L": 60.245,
+        "L25": 55.69,
+        "L50": 61.27,
+        "L75": 66.243,
+        "L_IQR": 10.553,
+        "mean_hue_deg": 77.726,
+        "mean_chroma": 17.212
+      },
+      "visual_note": "Warm beige-gray slightly irregular large and medium masonry blocks, plain joints, visible worn edges and broad mottling.",
+      "tool_output_name": "exec-1255f104-d94b-4023-bbff-f409259761e8.png"
+    },
+    {
+      "name": "coping-continuous-r6-candidate.png",
+      "dimensions": "1254x1254",
+      "bytes": 3553822,
+      "sha256": "65845274C1A691DAD0EEAF61A26CBE4F1F953AA11E8956EFBEAC7A418183FDEA",
+      "lab_sample": {
+        "sample_count": 98596,
+        "alpha_min": 255,
+        "alpha_max": 255,
+        "mean_L": 69.757,
+        "L25": 65.884,
+        "L50": 69.71,
+        "L75": 73.876,
+        "L_IQR": 7.992,
+        "mean_hue_deg": 81.879,
+        "mean_chroma": 14.307
+      },
+      "visual_note": "Continuous warm gray-beige stone without joints, with broad worn patches, surface abrasion and shallow pits.",
+      "tool_output_name": "exec-e224eabf-be1d-4137-aebe-072058920a8a.png"
+    }
+  ],
+  "engine_targets": "The supplied L*, hue, chroma and top-face ranges are engine-modulated targets. Values above are raw source texture samples; no modulation or Godot validation was performed.",
+  "pixel_edits": "none",
+  "seam_check": {
+    "coping_continuous": {
+      "top_bottom_exact_pairs": 0,
+      "top_bottom_mean_rgb_difference": 11.5,
+      "left_right_exact_pairs": 1,
+      "left_right_mean_rgb_difference": 11.75,
+      "edge_length": 1254
+    },
+    "method": "Read-only comparison of matching coordinates on opposite image borders; average per-channel absolute RGB difference on 0-255 scale. This is not an in-engine repeat test.",
+    "result": "Exact periodic edge matching was not achieved by generation; no pixel repair was allowed in this task.",
+    "wall_side": {
+      "top_bottom_exact_pairs": 0,
+      "top_bottom_mean_rgb_difference": 36.9,
+      "left_right_exact_pairs": 1,
+      "left_right_mean_rgb_difference": 10.3,
+      "edge_length": 1254
+    }
+  }
+}

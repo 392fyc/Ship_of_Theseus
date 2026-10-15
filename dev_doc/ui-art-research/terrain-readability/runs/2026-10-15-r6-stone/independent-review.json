@@ -1,0 +1,211 @@
+{
+  "schema": "sot-independent-review/v1",
+  "verdict": "pass",
+  "review_scope": "仅复核上轮纹理重复采样阻断的修复和新候选字节绑定；上轮其余适用证据沿用。",
+  "candidate": {
+    "branch": "codex/ui-ux/terrain-material-r6",
+    "head": "e829b006953ecaa9aef5292a1ae4a5422d5401a3",
+    "base": "e829b006953ecaa9aef5292a1ae4a5422d5401a3",
+    "manifest_file_count": 17,
+    "status_paths_exactly_match_manifest": true,
+    "prior_review_sha256": "987ae1895bc9802f3d8ca84f1512145631db08e0e6c83c9d3666938d1767ba7c"
+  },
+  "files": [
+    {
+      "path": "assets/prototype/battlefield_courtyard/coping-limestone-r6.png",
+      "bytes": 3553822,
+      "sha256": "65845274c1a691dad0eeaf61a26cbe4f1f953aa11e8956efbeac7a418183fdea",
+      "matches_manifest": true
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/coping-limestone-r6.png.import",
+      "bytes": 1000,
+      "sha256": "4c416b4558bb76532c2bd1f0ae9b677f941dba688204e958dc12bfca974f6f08",
+      "matches_manifest": true
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/masonry-wall-limestone-r6.png",
+      "bytes": 3095686,
+      "sha256": "7bf9492ada3bc008655fdbf4d2ae22716ce17aa02a2dc048e9dcda99f7420f30",
+      "matches_manifest": true
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/masonry-wall-limestone-r6.png.import",
+      "bytes": 1018,
+      "sha256": "2cf473408038fa5d4c365f4c0e99df9570daa06b0c8aaa073d27473ec009ef89",
+      "matches_manifest": true
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/visual_profile.json",
+      "bytes": 3710,
+      "sha256": "5bc0e05dd44fdff0cde8252cc50def1b86fc8d35ea2f23a4b98447ffe1a2607c",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/asset-provenance.json",
+      "bytes": 3151,
+      "sha256": "cede5c1a79985bce98d3f45e390d86fc1f58c5c5df2e182669eecd444f0e141a",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/implementation-receipt.json",
+      "bytes": 4764,
+      "sha256": "5ccaea6a502d9985465e4b392371a7af14ae7b3b65d1cfc9294a9aeeb830d9ed",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/initial-tint-estimates.json",
+      "bytes": 3072,
+      "sha256": "2365eb007ab6a3f61fa65315706cd84257c92f17c47c1764ea97b740c0336b1b",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/prompt-coping-continuous.txt",
+      "bytes": 2391,
+      "sha256": "1576c7f311276682bfe7db835f16a2348bc989293b4934fb484ca6002818d258",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/prompt-wall-side.txt",
+      "bytes": 2212,
+      "sha256": "4ffe3ac9451dc30af1b0dd087854984177326ce0a1b6bd1e1479ca7426fa9e79",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/protected-state.json",
+      "bytes": 1367,
+      "sha256": "cbce7a754836f62411c6cc6aeaca8523407d1c8ecd256500f3852e3daf57f97e",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/raw-texture-metrics.json",
+      "bytes": 2861,
+      "sha256": "50c306c96f28b8c46e19580d0bb6cd14d52716ad454888ba07ab9233cc310e1f",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/report.md",
+      "bytes": 3124,
+      "sha256": "f28e00b0301030724e11ffd16ee5a27585f160a15ccb96c0ed0ec9d7068323cc",
+      "matches_manifest": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/task.md",
+      "bytes": 2261,
+      "sha256": "4808671caf49d93bc68df666c36e515aadf4b33c67dbd99afef1882ca21a78dd",
+      "matches_manifest": true
+    },
+    {
+      "path": "scripts/ui/playground/courtyard_board_view.gd",
+      "bytes": 38421,
+      "sha256": "79f94246f33d276c0faec6a6aba1bcd13d3ae0e197e29117b9493b4c564b29a9",
+      "matches_manifest": true
+    },
+    {
+      "path": "tests/claude_review/capture_terrain_readability_r6.gd",
+      "bytes": 9359,
+      "sha256": "7a92df98982ecd810d1bf66275db9cdca27df3a46a78b0be35d602961e907fb5",
+      "matches_manifest": true
+    },
+    {
+      "path": "tests/claude_review/terrain_mask_draw_layer_r6.gd",
+      "bytes": 2665,
+      "sha256": "3ab02ef2f7fd9eb4d58b918e77fff3ed2061dd1f900de40ae32c3f014d8159e9",
+      "matches_manifest": true
+    }
+  ],
+  "findings": [],
+  "resolved_findings": [
+    {
+      "id": "polygon_repeat_setting_changed",
+      "status": "resolved",
+      "evidence": "当前柱父节点与Polygon2D均恢复TEXTURE_REPEAT_ENABLED；与基线一致。仅把这两个设置回退为上轮候选的DISABLED后，重建字节SHA与上轮needs_changes报告内该脚本的SHA完全一致。0.04–0.96内部UV保持不变。",
+      "location": "scripts/ui/playground/courtyard_board_view.gd:804,874"
+    }
+  ],
+  "checks": [
+    {
+      "id": "new_manifest_binding",
+      "result": "pass",
+      "summary": "当前HEAD/分支及17项工作区状态匹配v2清单；17个当前文件字节数/SHA逐项相符。相对上轮绑定仅4文件变化：实现脚本、asset-provenance、report和implementation-receipt；其余13项字节未变。"
+    },
+    {
+      "id": "repeat_fix_and_baseline",
+      "result": "pass",
+      "evidence": [
+        "scripts/ui/playground/courtyard_board_view.gd:804,874",
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/asset-provenance.json:39,52,61",
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/report.md:10",
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/implementation-receipt.json:109"
+      ],
+      "summary": "柱父节点和Polygon2D的repeat设置均为ENABLED，NEAREST保持，UV两轴仍钳制于0.04–0.96；基线对应设置也是ENABLED。当前文档均如实说明设置保留和内部UV。"
+    },
+    {
+      "id": "prior_candidate_delta",
+      "result": "pass",
+      "summary": "将当前脚本指定两处ENABLED还原为DISABLED可逐字节重建上轮候选脚本SHA，证明代码本轮仅修正该阻断；清单差异只含预期的脚本及三份同步文本。"
+    },
+    {
+      "id": "source_validator_extension",
+      "result": "pass_static_fixture",
+      "summary": "基于当前候选源码字节重新生成合成来源摘要；8个R6路径唯一、存在、两份哈希映射完整，摘要绑定全部来源；冻结v5/v6错误数组为空。该检查不代表已生成Godot捕获。",
+      "logs": {
+        "source-compat.stdout.bin": {
+          "bytes": 208,
+          "sha256": "1014cb70d3d01ab07adfdb4f265b81223b0547ac9de9c3b1e6ba71f991d62c6b"
+        },
+        "source-compat.stderr.bin": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "python_tests_reused",
+      "result": "pass_reused",
+      "summary": "按复核范围沿用上一轮11项必要Python测试记录（exit 0）；本轮只变更采样枚举和同步文字，未重跑测试。日志内容与上轮记录哈希相符。",
+      "command": "python -B -m unittest discover -s tests/claude_review -p test_terrain_acceptance_v2.py -v",
+      "tests_run": 11,
+      "exit_code": 0,
+      "logs": {
+        "stdout": "unittest.stdout.bin",
+        "stderr": "unittest.stderr.bin"
+      }
+    },
+    {
+      "id": "assets_imports_protected_scope_reused",
+      "result": "pass_reused",
+      "summary": "纹理和导入文件SHA与上一轮已核实值一致；保护状态文件及13项其余候选SHA未变，上一轮PNG/导入/保护范围证据仍适用。"
+    },
+    {
+      "id": "diff_whitespace_and_portability",
+      "result": "pass",
+      "diff_check_exit": 0,
+      "candidate_text_absolute_path_files": [],
+      "candidate_text_credential_pattern_files": []
+    }
+  ],
+  "not_covered": [
+    {
+      "item": "Godot引擎解析、导入及运行时行为",
+      "status": "未覆盖；Godot运行被禁止。"
+    },
+    {
+      "item": "Dot原生单组T1/T2/T4/T5/T6数值、同帧掩膜像素对齐及720p双人盲测",
+      "status": "未覆盖且不计PASS，按任务流程留给下一阶段。"
+    },
+    {
+      "item": "后续六组定稿",
+      "status": "超出本次聚焦复核范围。"
+    }
+  ],
+  "residual_risk": [
+    "当前审查只确认源码采样枚举及文字同步；实际引擎采样外观仍需原生截图观察。",
+    "v5/v6兼容结果是使用当前哈希的合成摘要，不是Godot生成的捕获文件。"
+  ],
+  "portable_report": {
+    "encoding": "UTF-8",
+    "line_endings": "LF",
+    "absolute_local_path_hits": 0
+  }
+}

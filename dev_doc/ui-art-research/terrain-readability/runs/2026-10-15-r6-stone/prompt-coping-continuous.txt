@@ -1,0 +1,13 @@
+Use case: stylized-concept
+Asset type: square tileable game diffuse texture for limestone coping and the curved surface of drum columns
+Input images: Image 1, the R5 coping limestone texture, is a material reference; Image 2, the R5 wall limestone texture, is a related palette and game-scale reference; Image 3, the R5 courtyard gameplay screenshot, is an overall in-game palette reference only. Create a new continuous stone material.
+Primary request: A seamless square albedo/diffuse texture of continuous, old, weathered limestone. It must work as one unbroken surface on coping stones and when wrapped around cylindrical drum-column surfaces, with no brick courses, block layout, or mortar joints.
+Scene/backdrop: No scene or environment; only the flat material surface.
+Subject: Muted warm beige-gray old limestone with restrained ochre warmth, visible broad-scale cloudy patches of age and wear, uneven abrasion, worn spots, chipped micro-edges, shallow pits, and varied surface relief. Keep broad and medium-scale mottling clearly visible so it survives downscaling; do not rely on fine speckle alone.
+Style/medium: Stylized realistic hand-painted game material, tactile and weathered, in the same subdued material family as the courtyard reference.
+Composition/framing: Front-facing orthographic material swatch filling a 1:1 square; seamless repeating tile on all edges; non-directional pattern suitable for wrapping; no focal point and no object silhouette.
+Lighting/mood: Uniform neutral diffuse illumination only, without cast shadows, directional highlights, or baked-in lighting.
+Color palette: Medium-bright, restrained warm beige-gray source texture; keep the raw texture suitable for later engine modulation and do not pre-darken it to final in-game values.
+Materials/textures: A single continuous limestone surface with broad-scale variation and enough visible erosion, pitting, and worn texture to avoid the smooth appearance of new cement.
+Constraints: Opaque diffuse/albedo texture only; seamless tile; no text, no border, no perspective, no objects, no masonry joints, no brick or block pattern, no ground, no foliage, no icon.
+Avoid: Smooth new concrete, clean polished stone, cold modern gray, regular brickwork, mortar lines, a depicted capstone or column, directional streaks, dramatic directional light, hard baked shadows, and variation made only of tiny noise.

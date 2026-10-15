@@ -2,8 +2,8 @@
   "ground": "res://assets/prototype/battlefield_courtyard/stone-ground-v1.png",
   "moss": "res://assets/prototype/battlefield_courtyard/moss-ground-v1.png",
   "water": "res://assets/prototype/battlefield_courtyard/water-surface-v5.png",
-  "masonry": "res://assets/prototype/battlefield_courtyard/masonry-wall-limestone-r5.png",
-  "coping": "res://assets/prototype/battlefield_courtyard/coping-limestone-r5.png",
+  "masonry": "res://assets/prototype/battlefield_courtyard/masonry-wall-limestone-r6.png",
+  "coping": "res://assets/prototype/battlefield_courtyard/coping-limestone-r6.png",
   "rubble": {
     "texture": "res://assets/prototype/battlefield_courtyard/low-rubble-v1.png",
     "region": [
@@ -90,69 +90,69 @@
   "rock": "res://assets/prototype/battlefield_courtyard/natural-rock-v1.png",
   "prop_tints": {
     "wall_top": [
-      0.48,
-      0.5,
-      0.51,
+      0.65792,
+      0.669427,
+      0.705606,
       1
     ],
     "wall_lit_side": [
-      0.44,
-      0.46,
-      0.47,
+      0.58245,
+      0.610141,
+      0.662864,
       1
     ],
     "wall_dark_side": [
-      0.32,
-      0.34,
-      0.36,
+      0.553131,
+      0.577273,
+      0.623478,
       1
     ],
     "wall_lit_edge": [
-      0.45,
-      0.47,
-      0.46,
+      0.49,
+      0.48,
+      0.44,
       0.65
     ],
     "wall_other_edge": [
-      0.2,
-      0.22,
-      0.21,
+      0.36,
+      0.35,
+      0.32,
       0.42
     ],
     "pillar_top": [
-      0.5,
-      0.52,
-      0.53,
+      0.65792,
+      0.669427,
+      0.705606,
       1
     ],
     "pillar_lit_side": [
-      0.44,
-      0.46,
-      0.47,
+      0.522934,
+      0.52428,
+      0.540229,
       1
     ],
     "pillar_dark_side": [
-      0.32,
-      0.34,
-      0.36,
+      0.49555265,
+      0.49405614999999997,
+      0.504458875,
       1
     ],
     "pillar_foot": [
-      0.35,
-      0.37,
-      0.37,
+      0.444541,
+      0.440374,
+      0.44491,
       1
     ],
     "pillar_base_edge": [
-      0.21,
-      0.23,
-      0.22,
-      0.8
+      0.16,
+      0.15,
+      0.13,
+      0.6
     ],
     "pillar_cap_edge": [
-      0.42,
-      0.45,
-      0.44,
+      0.48,
+      0.47,
+      0.43,
       0.6
     ],
     "tree": [
@@ -184,6 +184,36 @@
       1.42,
       1.29,
       1
+    ],
+    "wall_foot_dirt": [
+      0.495235,
+      0.512453,
+      0.545882,
+      1
+    ],
+    "wall_chip": [
+      0.522934,
+      0.52428,
+      0.540229,
+      1
+    ],
+    "pillar_foot_dirt": [
+      0.444541,
+      0.440374,
+      0.44491,
+      1
+    ],
+    "pillar_drum_joint": [
+      0.28,
+      0.27,
+      0.24,
+      0.48
+    ],
+    "contact_shadow": [
+      0.024,
+      0.031,
+      0.024,
+      0.5
     ]
   },
   "prop_strokes": {

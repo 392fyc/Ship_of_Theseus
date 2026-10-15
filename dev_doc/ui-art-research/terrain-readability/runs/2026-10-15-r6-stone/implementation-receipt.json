@@ -1,0 +1,118 @@
+{
+  "task_id": "UIUX-R6-STONE-IMPLEMENTATION-20261015",
+  "status": "completed",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/ui-ux/terrain-material-r6",
+  "target_head_before": "e829b006953ecaa9aef5292a1ae4a5422d5401a3",
+  "candidate_head": null,
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md and lane ui-ux",
+      "summary": "独立任务树；只改墙柱材质/造型/接地及必要新采集入口；独审后本地提交"
+    },
+    {
+      "contract": "user U1 and tree option A",
+      "summary": "冻结树图和树着色；新口径与C9已由e829b00固定"
+    },
+    {
+      "contract": "Claude R6 latest numeric targets",
+      "summary": "侧34–38、顶44–50及相对差值；鼓石断柱与地面侧接触阴影"
+    }
+  ],
+  "changed_files": [
+    "assets/prototype/battlefield_courtyard/coping-limestone-r6.png",
+    "assets/prototype/battlefield_courtyard/coping-limestone-r6.png.import",
+    "assets/prototype/battlefield_courtyard/masonry-wall-limestone-r6.png",
+    "assets/prototype/battlefield_courtyard/masonry-wall-limestone-r6.png.import",
+    "assets/prototype/battlefield_courtyard/visual_profile.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/asset-provenance.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/implementation-receipt.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/initial-tint-estimates.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/prompt-coping-continuous.txt",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/prompt-wall-side.txt",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/protected-state.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/raw-texture-metrics.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/report.md",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/task.md",
+    "scripts/ui/playground/courtyard_board_view.gd",
+    "tests/claude_review/capture_terrain_readability_r6.gd",
+    "tests/claude_review/terrain_mask_draw_layer_r6.gd"
+  ],
+  "verification": [
+    {
+      "command": "python -B -m unittest discover -s tests/claude_review -p test_terrain_acceptance_v2.py -v",
+      "result": "pass",
+      "evidence": "11项通过"
+    },
+    {
+      "command": "Pillow full-image alpha and dimensions",
+      "result": "pass",
+      "evidence": "两张1254×1254 PNG，全图alpha=255；原始字节SHA与image_gen候选一致"
+    },
+    {
+      "command": "frozen source and profile semantic scope check",
+      "result": "pass",
+      "evidence": "protected-state.json；树/环境树/shrub/rubble tint及其他配置键不变"
+    },
+    {
+      "command": "v5/v6 expanded source digest check",
+      "result": "pass",
+      "evidence": "独立实现worker：额外8项R6来源纳入完整摘要，两项错误列表为空"
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass",
+      "evidence": "无空白错误"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "暖旧墙独立石材、分明侧顶与脚部材质",
+      "result": "partial",
+      "evidence": [
+        "courtyard_board_view.gd及visual_profile实现，原生颜色与材质由后续单组审查"
+      ]
+    },
+    {
+      "criterion": "鼓石残柱造型、高低、断顶、宽底座",
+      "result": "partial",
+      "evidence": [
+        "12边、3道缝、5级断顶、样例高度30/24/33；原生盲测待采集"
+      ]
+    },
+    {
+      "criterion": "生产与采集共用实际阴影几何",
+      "result": "partial",
+      "evidence": [
+        "新入口与新绘制层调用生产API；同帧重建/掩膜由Dot检查"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "树图和树着色",
+      "result": "unchanged",
+      "evidence": "protected-state.json"
+    },
+    {
+      "subject": "原采集链及测量口径",
+      "result": "unchanged",
+      "evidence": "只增新R6入口，不修改冻结文件"
+    },
+    {
+      "subject": "地表/接壤/水深/网格/镜头/占格/玩法",
+      "result": "unchanged",
+      "evidence": "当前diff仅墙柱及共享墙脚呈现"
+    }
+  ],
+  "residual_risks": [
+    "新PNG不是周期纹理，采样开关保持原值并使用内部UV避免重复边界；实际低分辨率纹理需看Dot原图",
+    "数值估算只设置初始参数，正式T1/T2/T4/T5/T6与柱识别需要原生图",
+    "当前任务是实现候选；原生单组与六组按既定顺序继续"
+  ],
+  "escalation_reason": null,
+  "publication": {
+    "published": false,
+    "pull_request_created": false
+  }
+}
