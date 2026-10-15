@@ -1,0 +1,8 @@
+{
+  "head": "6a7b0b57da770a954d0cf8bfab91c3fca3fc9817",
+  "parent": "9cc34236882c829a4008ef7f7e84e7524b74a68c",
+  "changes": "A\t02-Development/Decisions/adr-2026-10-15-ship-issue-48-t4-contact-guards.md",
+  "bytes": 2429,
+  "sha256": "15209f1a2b38d82f6fc3335201e4592bcaf2d74f3d08b122ee60af3605467c38",
+  "clean": true
+}

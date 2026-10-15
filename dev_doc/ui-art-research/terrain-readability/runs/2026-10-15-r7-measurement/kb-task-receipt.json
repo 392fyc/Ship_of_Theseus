@@ -1,0 +1,73 @@
+{
+  "task_id": "ISSUE-48-T4-USER-DECISION-20261015",
+  "status": "completed",
+  "target_repository": "ShipOfTheseus-KB",
+  "target_branch": "codex/ui-ux/issue-48-t4-contact-guards",
+  "target_head_before": "9cc34236882c829a4008ef7f7e84e7524b74a68c",
+  "candidate_head": "6a7b0b57da770a954d0cf8bfab91c3fca3fc9817",
+  "target_head": "6a7b0b57da770a954d0cf8bfab91c3fca3fc9817",
+  "contract_summary": [
+    {
+      "contract": "sot-kb-write",
+      "summary": "固定vault干净后任务分支，通过Obsidian MCP新建、完整回读；独立审查后仅提交指定ADR。"
+    },
+    {
+      "contract": "Ship AGENTS.md",
+      "summary": "KB保存用户裁决，Git保存实现与任务证据；保护其他lane与主仓。"
+    }
+  ],
+  "changed_files": [
+    "02-Development/Decisions/adr-2026-10-15-ship-issue-48-t4-contact-guards.md"
+  ],
+  "verification": [
+    {
+      "command": "MCP vault_write + vault_read",
+      "result": "pass",
+      "evidence": "新ADR完整回读2429字节与文件SHA一致。"
+    },
+    {
+      "command": "independent review",
+      "result": "pass",
+      "evidence": "r7_independent_review核对用户采纳、全部T4条件、唯一新增范围。"
+    },
+    {
+      "command": "git cat-file blob HEAD:<ADR>",
+      "result": "pass",
+      "evidence": {
+        "head": "6a7b0b57da770a954d0cf8bfab91c3fca3fc9817",
+        "parent": "9cc34236882c829a4008ef7f7e84e7524b74a68c",
+        "changes": "A\t02-Development/Decisions/adr-2026-10-15-ship-issue-48-t4-contact-guards.md",
+        "bytes": 2429,
+        "sha256": "15209f1a2b38d82f6fc3335201e4592bcaf2d74f3d08b122ee60af3605467c38",
+        "clean": true
+      }
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "采纳T4方法完整准确入库",
+      "result": "pass",
+      "evidence": [
+        "02-Development/Decisions/adr-2026-10-15-ship-issue-48-t4-contact-guards.md"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "其他KB文件与既有U1/tree ADR",
+      "result": "unchanged",
+      "evidence": "HEAD^..HEAD只有指定ADR一项A；工作区干净。"
+    }
+  ],
+  "residual_risks": [
+    "既有NAS同步hook因缺少SOT_NAS_SSH_KEY_PATH未同步；本Task未变更该配置。"
+  ],
+  "escalation_reason": null,
+  "source_schema_version": "unversioned",
+  "source_snapshot_or_commit": "Claude R6单组复核D段；用户2026-10-15直接采纳",
+  "normalized_digest": "sha256:15209f1a2b38d82f6fc3335201e4592bcaf2d74f3d08b122ee60af3605467c38",
+  "publication": {
+    "published": false,
+    "remote_ref": null
+  }
+}

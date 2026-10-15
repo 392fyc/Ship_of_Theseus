@@ -1,0 +1,941 @@
+{
+  "schema": "sot-t4-contact-shadow-diagnostic/2",
+  "evidence_scope": {
+    "kind": "single_capture_measurement",
+    "candidate_commit": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+    "case": "10x10_1280x720",
+    "fixture": "calibration_courtyard",
+    "frame_id": 45,
+    "scope_note": "单组测量仅适用于该捕获，不代表整体验收"
+  },
+  "generated_at_utc": "2026-10-15T13:34:26.743345+00:00",
+  "candidate": {
+    "commit": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+    "semantic_candidate_commit": "6ec8a9ffe1ce56005737d1036904d88d1c08a54a",
+    "source_sha256": {
+      "assets/prototype/battlefield_courtyard/coping-limestone-r6.png": "65845274c1a691dad0eeaf61a26cbe4f1f953aa11e8956efbeac7a418183fdea",
+      "assets/prototype/battlefield_courtyard/coping-limestone-r6.png.import": "4c416b4558bb76532c2bd1f0ae9b677f941dba688204e958dc12bfca974f6f08",
+      "assets/prototype/battlefield_courtyard/masonry-wall-limestone-r6.png": "7bf9492ada3bc008655fdbf4d2ae22716ce17aa02a2dc048e9dcda99f7420f30",
+      "assets/prototype/battlefield_courtyard/masonry-wall-limestone-r6.png.import": "2cf473408038fa5d4c365f4c0e99df9570daa06b0c8aaa073d27473ec009ef89",
+      "assets/prototype/battlefield_courtyard/visual_profile.json": "5bc0e05dd44fdff0cde8252cc50def1b86fc8d35ea2f23a4b98447ffe1a2607c",
+      "dev_doc/ui-art-research/terrain-readability/atlas-mask-sampling-fix.md": "d4bb8241656fbd894d289101824fadfd24dd7707a838ac60d2c1bf9aede00880",
+      "dev_doc/ui-art-research/terrain-readability/capture-v5-task.md": "86dc7e7e3b587c7618acd32a38b9b8d789eaf1df3dd75d7ff2172d005da2e2af",
+      "dev_doc/ui-art-research/terrain-readability/capture-v6-task.md": "afd7c684a6ed90f14f9aed98ca413718a6f7b57c94f4e5d34a76c79646e5c865",
+      "dev_doc/ui-art-research/terrain-readability/semantic-sidecar-task.md": "fb0043a515a9d3d0a736f6d7a524848b693b53efffba167e51c4fb6b1463d549",
+      "dev_doc/ui-art-research/terrain-readability/t3-semantic-input-task.md": "36d766343fe17882dcbf26b9a9852b210152713ebdfe086472d0e9fb2e7d9b5f",
+      "scripts/ui/playground/courtyard_board_view.gd": "79f94246f33d276c0faec6a6aba1bcd13d3ae0e197e29117b9493b4c564b29a9",
+      "tests/claude_review/capture_terrain_readability.gd": "db2da66848723d05caf6e1da5215afe75a524199e2dbf0e350ec663b20776266",
+      "tests/claude_review/capture_terrain_readability_r6.gd": "7a92df98982ecd810d1bf66275db9cdca27df3a46a78b0be35d602961e907fb5",
+      "tests/claude_review/capture_terrain_readability_v2.gd": "187d0cc3500a0243eac014c449a075325f46614a44e982b6541a9f2a8734b390",
+      "tests/claude_review/capture_terrain_readability_v3.gd": "e109a5148871b0f31a57fc993d725126a9f51d0f36acb8baf0098dcb33cd7a0e",
+      "tests/claude_review/capture_terrain_readability_v4.gd": "c5de3166dd13291c9145218deb702f89287d2cce6ced7580a5a632676feb10cb",
+      "tests/claude_review/capture_terrain_readability_v5.gd": "a9e185345e9b3786fec6502efd21ef7a0df7dae2f481af5a1566d4292f4a0535",
+      "tests/claude_review/capture_terrain_readability_v6.gd": "3566b8e29740f659ca6e36892e499ebdfad679b3f3d9100533611a372f6cebd2",
+      "tests/claude_review/capture_terrain_readability_v6_atlas.gd": "53c79f1af07499848b49ddee385110d58bdfa247eb59f0d928c473408cc70e9b",
+      "tests/claude_review/capture_terrain_readability_v6_regions.gd": "6ff92d56d68bf5d9053ba7fe7feb12aa044076d41db24e495ebdd42793531da6",
+      "tests/claude_review/capture_terrain_readability_v6_regions_semantic_sidecar.gd": "c7fd360e603a3dc5bb0372f79020393632e4753683cdf910fe6b88f24d1d65ac",
+      "tests/claude_review/terrain_mask_draw_layer.gd": "3400d8352c7269f21c1a5ca25adb7fdf7a5d9a76419e23ab37ff87aec679970f",
+      "tests/claude_review/terrain_mask_draw_layer_r6.gd": "3ab02ef2f7fd9eb4d58b918e77fff3ed2061dd1f900de40ae32c3f014d8159e9",
+      "tests/claude_review/terrain_readability_capture_v4_cases.json": "b5e753a17012eafb6290eb44402f1ba46a5ef629d252846179f63463fcf8e1fc",
+      "tests/claude_review/terrain_readability_crown_regions.json": "f60950a76b9e4e664a1614a23a3c13ec8b6853a07e9a513f9a95b3cffa3c98ca",
+      "tests/claude_review/terrain_readability_tree_semantics.json": "abf3d330a41ba4c26416fdbadc2570c6cad05cf0538c678deb455ef7bf512af8",
+      "tests/claude_review/terrain_readability_tree_semantics_review.json": "f3096700c5bb0f28b9ff2d816b79191d058c8725d80369091f133def5656eb9c",
+      "tests/claude_review/terrain_semantic_sidecar.gdshader": "2045bc68e910d45bea0289745331ed573cf3d6b7fe6d94207128b57811b3babe",
+      "tests/claude_review/test_terrain_capture_input_routing_v3.gd": "b9ffa6720ffa0b60d01540baa145529f40dbe60368e34fcd2c975657032807a4",
+      "tests/claude_review/test_terrain_readability_atlas_mask_contract.py": "f555f02e525218e36e1bd94a765b31dd5286fe5327cd6e93d30eed8cb54cda50",
+      "tests/claude_review/test_terrain_readability_capture_v2.py": "1e8f542dbe95433bd2154ed3e0fbbfc756d361c882edf2e6c07beca37d0f6f6b",
+      "tests/claude_review/test_terrain_readability_capture_v3.py": "21253b05f6bafb6a8ad668d4b1792391c396c8f6d83ad604886ff35d871f4518",
+      "tests/claude_review/test_terrain_readability_capture_v4.py": "207ccdfa37c8f434cbf30d35c2a12978b9ca6d7126fa9573a577037bc32dbbf4",
+      "tests/claude_review/test_terrain_readability_capture_v5.py": "df76fafcfaf2e1345380e46439489434e497bc3d1e0151dc1da878a95f41e9c5",
+      "tests/claude_review/test_terrain_readability_capture_v6.py": "21adf0926a423fd76194ce0c046fa3fa72a6d9a767397915cb5578ef5fa44083",
+      "tests/claude_review/test_terrain_readability_tree_semantics.gd": "375930803e030cfb761d388c3dd48935bced26b26a79c320480838e56820fb38",
+      "tests/claude_review/test_terrain_semantic_sidecar.py": "74d48f7be55146d601b0162bb183f559ab7ff96bafa9322fe2475454eef85841",
+      "tests/claude_review/validate_terrain_readability_capture_v2.py": "14c5f27fc595777953c2ab7b7f9ac2a87b0099112fd5f4f72927e34c4596b99a",
+      "tests/claude_review/validate_terrain_readability_capture_v3.py": "81b92efaba60d2452e352e337a0347d0f92f86478b68e3a393fea5f1a68f3d17",
+      "tests/claude_review/validate_terrain_readability_capture_v4.py": "f81bf008bcf8fc393395be731f0456638aa449e1e6dfc0d2f10ded78e5f863eb",
+      "tests/claude_review/validate_terrain_readability_capture_v5.py": "aae546e3ac9e24ae6a62889061bfe63cd35fb150cc53da33a9b5634fe8fa0939",
+      "tests/claude_review/validate_terrain_readability_capture_v6.py": "a1615a0c93daa7f90f934a676bdf6d3f5f71cec7f26571ecbc9b60ae757bacdc",
+      "tests/claude_review/validate_terrain_semantic_sidecar.py": "416e83e250bc2c2d178ee1f319958c324ea0e421a1b61a9abb20a3a612518f96"
+    }
+  },
+  "capture": {
+    "case": {
+      "fixture": {
+        "derived_map_sha256": "600a0a61ab1d63bf020dcdd33ac9b4e85ba3ec9b13c61cd70409b740775406cc",
+        "expansion_rule": "Repeat the source 10x10 terrain and paving cells at x%10,y%10; repeat source variants modulo 10 after applying the declared calibration override.",
+        "map_variant_overrides": [
+          {
+            "cell_in_source_10x10": [
+              8,
+              7
+            ],
+            "from": "pillar",
+            "purpose": "Meet the minimum count for production-generated rubble while retaining at least three pillars.",
+            "repeated_case_cells": [
+              [
+                8,
+                7
+              ]
+            ],
+            "to": "ruined"
+          }
+        ],
+        "name": "calibration_courtyard",
+        "source_example": "assets/prototype/battlefield_courtyard/terrain_examples.json#courtyard",
+        "source_map_sha256": "640fe261ef68b013b79557f97fd0fa276d30bd08187f0cd7230bc695bb6d8755"
+      },
+      "initial_fit": {
+        "camera_global_transform": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          428.695648193359,
+          215.826080322266
+        ],
+        "camera_position": [
+          428.695648193359,
+          215.826080322266
+        ],
+        "camera_zoom": [
+          0.920000016689301,
+          0.920000016689301
+        ],
+        "fit_call": "TerrainBattleSession._resize -> fit_board",
+        "fit_zoom": 0.92,
+        "manual_camera_override": false,
+        "status": "captured"
+      },
+      "map_sha256": "600a0a61ab1d63bf020dcdd33ac9b4e85ba3ec9b13c61cd70409b740775406cc",
+      "map_size": [
+        10,
+        10
+      ],
+      "name": "10x10_1280x720",
+      "requested_resolution": [
+        1280,
+        720
+      ],
+      "scene": "TerrainBattleSession -> scenes/tactical/TacticalScene.tscn",
+      "window_size": [
+        1280,
+        720
+      ]
+    },
+    "semantic_case": {
+      "fixture": {
+        "derived_map_sha256": "600a0a61ab1d63bf020dcdd33ac9b4e85ba3ec9b13c61cd70409b740775406cc",
+        "expansion_rule": "Repeat the source 10x10 terrain and paving cells at x%10,y%10; repeat source variants modulo 10 after applying the declared calibration override.",
+        "map_variant_overrides": [
+          {
+            "cell_in_source_10x10": [
+              8,
+              7
+            ],
+            "from": "pillar",
+            "purpose": "Meet the minimum count for production-generated rubble while retaining at least three pillars.",
+            "repeated_case_cells": [
+              [
+                8,
+                7
+              ]
+            ],
+            "to": "ruined"
+          }
+        ],
+        "name": "calibration_courtyard",
+        "source_example": "assets/prototype/battlefield_courtyard/terrain_examples.json#courtyard",
+        "source_map_sha256": "640fe261ef68b013b79557f97fd0fa276d30bd08187f0cd7230bc695bb6d8755"
+      },
+      "initial_fit": {
+        "camera_global_transform": [
+          1.0,
+          0.0,
+          0.0,
+          1.0,
+          428.695648193359,
+          215.826080322266
+        ],
+        "camera_position": [
+          428.695648193359,
+          215.826080322266
+        ],
+        "camera_zoom": [
+          0.920000016689301,
+          0.920000016689301
+        ],
+        "fit_call": "TerrainBattleSession._resize -> fit_board",
+        "fit_zoom": 0.92,
+        "manual_camera_override": false,
+        "status": "captured"
+      },
+      "map_sha256": "600a0a61ab1d63bf020dcdd33ac9b4e85ba3ec9b13c61cd70409b740775406cc",
+      "map_size": [
+        10,
+        10
+      ],
+      "name": "10x10_1280x720",
+      "requested_resolution": [
+        1280,
+        720
+      ],
+      "scene": "TerrainBattleSession -> scenes/tactical/TacticalScene.tscn",
+      "window_size": [
+        1280,
+        720
+      ]
+    },
+    "frame_id": 45,
+    "size_px": [
+      1280,
+      720
+    ],
+    "renderer": "gl_compatibility",
+    "same_frame_ground_pair": true
+  },
+  "input_hashes": {
+    "capture_manifest": {
+      "file": "capture-manifest.json",
+      "bytes_sha256": "e99d04c68e012c84f15857fd20f67d85accec662be07507340d951c99e47c264"
+    },
+    "semantic_manifest": {
+      "file": "semantic-sidecar-manifest.json",
+      "bytes_sha256": "73f1e1c47b21d7d4c00ede5fe85b1e3cef3d0db565103959abe78cbb63a36584",
+      "bound_capture_manifest_sha256": "e99d04c68e012c84f15857fd20f67d85accec662be07507340d951c99e47c264",
+      "semantic_input_sha256": {
+        "assets/prototype/battlefield_courtyard/forest-tree-v3b.png": "4139562f7d0e6adafb18d0f7b73750dae480f4f20abce179f1540ae4bd53d856",
+        "tests/claude_review/terrain_readability_crown_regions.json": "f60950a76b9e4e664a1614a23a3c13ec8b6853a07e9a513f9a95b3cffa3c98ca",
+        "tests/claude_review/terrain_readability_tree_semantics.json": "abf3d330a41ba4c26416fdbadc2570c6cad05cf0538c678deb455ef7bf512af8",
+        "tests/claude_review/terrain_readability_tree_semantics_review.json": "f3096700c5bb0f28b9ff2d816b79191d058c8725d80369091f133def5656eb9c"
+      }
+    },
+    "png_files": {
+      "main": {
+        "file": "main.png",
+        "bytes_sha256": "67e6a6fb4de0ef016f9016f0178118b6feb1936c1c0f54c01758a86e3b9c6ce4",
+        "manifest_sha256": "67e6a6fb4de0ef016f9016f0178118b6feb1936c1c0f54c01758a86e3b9c6ce4"
+      },
+      "contact_shadow": {
+        "file": "contact_shadow.png",
+        "bytes_sha256": "286e3745250bb778ed4df9ed8e8d0c6c34e454718bca0e2c3dc11f72e49fa718",
+        "manifest_sha256": "286e3745250bb778ed4df9ed8e8d0c6c34e454718bca0e2c3dc11f72e49fa718"
+      },
+      "exclusions": {
+        "file": "exclusions.png",
+        "bytes_sha256": "335f61e448535baa18415dee14f94ba2e980abb96e2e4c88669d691038ae8959",
+        "manifest_sha256": "335f61e448535baa18415dee14f94ba2e980abb96e2e4c88669d691038ae8959"
+      },
+      "grid": {
+        "file": "grid.png",
+        "bytes_sha256": "cf4a78afa2352a825d1c44d4c2f8a5473f74c885b2ddf288d172b72925dcc8f7",
+        "manifest_sha256": "cf4a78afa2352a825d1c44d4c2f8a5473f74c885b2ddf288d172b72925dcc8f7"
+      },
+      "ground": {
+        "file": "ground.png",
+        "bytes_sha256": "396ef2ec8880a0f3febdf503f15b8f5dc34e4d736efbd590ac8a7c468dd03f3b",
+        "manifest_sha256": "396ef2ec8880a0f3febdf503f15b8f5dc34e4d736efbd590ac8a7c468dd03f3b"
+      },
+      "ground_without_shadow": {
+        "file": "ground_without_shadow.png",
+        "bytes_sha256": "7be27272402bc5aef508e6502a22fca24ff95d94b2abe2c04bf8553fc16840bf",
+        "manifest_sha256": "7be27272402bc5aef508e6502a22fca24ff95d94b2abe2c04bf8553fc16840bf"
+      },
+      "instance_ids": {
+        "file": "instance_ids.png",
+        "bytes_sha256": "6d541c0eb46eedb5c2f20647362b89095214387bd889df9e5d4fe8ac3756ff85",
+        "manifest_sha256": "6d541c0eb46eedb5c2f20647362b89095214387bd889df9e5d4fe8ac3756ff85"
+      },
+      "props": {
+        "file": "props.png",
+        "bytes_sha256": "a3826fc306959d48eddabe67143e4dae060a38e656a185e141426ea1ba7b6e87",
+        "manifest_sha256": "a3826fc306959d48eddabe67143e4dae060a38e656a185e141426ea1ba7b6e87"
+      }
+    },
+    "measurement_sources": {
+      "tool": {
+        "file": "terrain_contact_shadow_v2.py",
+        "bytes_sha256": "1e385a0368b981f65faccd8ba64be000d825ec026c0e827ab505e84954d2221b"
+      },
+      "frozen_metric": {
+        "file": "terrain_readability_metrics.py",
+        "bytes_sha256": "5fd1e4594ef9c9388c6013fb61bc6315f83cfa7c59e4a5dec812ca289f65dabd"
+      },
+      "srgb_to_lab": {
+        "file": "claude_review_checks.py",
+        "bytes_sha256": "be32bf35c7d51d50242e0dcfa11fe79f4d2b931fa4101483fee58686dd651165"
+      }
+    }
+  },
+  "method": {
+    "frozen_formula": "terrain_readability_metrics.contact_shadow",
+    "darkness_rule_lstar": [
+      8,
+      12
+    ],
+    "width_rule": "p90 Euclidean distance to captured bottom geometry <= half captured cell width; maximum is also reported",
+    "touch_rule": "minimum eligible shadow-pixel-centre distance to bottom geometry <= 1px",
+    "coverage_rule": "at least 0.60 of independently measured visible bottom-edge arc has an eligible shadow sample within 2px",
+    "sample_rule": "fewer than 20 eligible same-frame shadow pixels is NOT_TESTED",
+    "shadow_samples": "contact_shadow alpha>127, ground and ground_without_shadow alpha>250, props alpha<=127, grid alpha<=127, exclusions alpha<=127",
+    "edge_denominator": "captured geometry sampled every <=0.5px by equal arc length; visible ground-facing side is tested 1px outboard against same-frame props, grid, exclusions, ground and ground_without_shadow; contact_shadow is never used to create denominator",
+    "geometry": "pillar: Polygon2D matched by captured pillar_base part role; wall: unique captured wall_side bottom polygon edges (vertices 2 to 3)",
+    "coordinate_scale": "original capture pixels; captured Polygon2D global transform followed by captured main canvas transform; no image resize",
+    "ui_exclusion_source": "capture exclusions PNG; manifest purpose records unit silhouettes and conservative drawable UI bounds",
+    "props_occlusion_source": "same-frame props PNG alpha>0.5; instance_ids PNG attributes opaque owner/other tokens"
+  },
+  "geometry_audit": {
+    "cell_width_px": 58.88000106811542,
+    "cell_affine_fit_max_error_world_px": 5.684341886080801e-13,
+    "edge_sample_spacing_px": 0.5,
+    "outboard_probe_px": 1.0,
+    "duplicate_wall_edges_removed": 19,
+    "perimeter_not_derived_from_shadow_samples": true
+  },
+  "summary": {
+    "PASS": 10,
+    "FAIL": 0,
+    "NOT_TESTED": 0
+  },
+  "rows": [
+    {
+      "status": "PASS",
+      "sample_count": 95,
+      "sample_minimum": 20,
+      "width_p90_px": 2.657524368863402,
+      "width_max_px": 4.000770250949308,
+      "minimum_shadow_to_edge_distance_px": 0.03921369780272999,
+      "visible_bottom_edge_length_px": 46.57374040960225,
+      "shadow_covered_visible_edge_length_px": 40.153511751205826,
+      "visible_edge_coverage_ratio": 0.8621491724320955,
+      "cell_width_px": 58.88000106811542,
+      "frozen_metric": {
+        "status": "PASS",
+        "darkness_l": 9.53822369485632,
+        "width_px": 2.657524368863402,
+        "cell_width_px": 58.88000106811542
+      },
+      "checks": {
+        "frozen_darkness_and_p90_width": "PASS",
+        "touches_bottom_edge_within_1px": true,
+        "covers_at_least_60_percent_of_visible_bottom_edge": true
+      },
+      "stable_id": "pillar@1.00,4.00",
+      "type": "pillar",
+      "geometry": "captured pillar_base Polygon2D perimeter",
+      "geometry_segment_count": 6,
+      "edge_sampling_spacing_px": 0.5,
+      "outboard_ground_probe_px": 1.0,
+      "shadow_neighbourhood_radius_px": 2.0,
+      "visible_edge_occlusion_evidence": {
+        "visible_ground_edge": {
+          "sample_count": 96,
+          "arc_length_px": 46.57374040960225
+        },
+        "owner_opaque_prop": {
+          "sample_count": 60,
+          "arc_length_px": 29.51313677698311
+        },
+        "other_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "unattributed_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "ui_or_unit_exclusion": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "grid": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "missing_ground_pair": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "outside_capture": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "sample_count": 64,
+      "sample_minimum": 20,
+      "width_p90_px": 2.7710569998210492,
+      "width_max_px": 4.283178899502179,
+      "minimum_shadow_to_edge_distance_px": 0.011731186098944113,
+      "visible_bottom_edge_length_px": 36.349216149039215,
+      "shadow_covered_visible_edge_length_px": 30.422851233596376,
+      "visible_edge_coverage_ratio": 0.8369603104742745,
+      "cell_width_px": 58.88000106811542,
+      "frozen_metric": {
+        "status": "PASS",
+        "darkness_l": 8.716251450136387,
+        "width_px": 2.7710569998210492,
+        "cell_width_px": 58.88000106811542
+      },
+      "checks": {
+        "frozen_darkness_and_p90_width": "PASS",
+        "touches_bottom_edge_within_1px": true,
+        "covers_at_least_60_percent_of_visible_bottom_edge": true
+      },
+      "stable_id": "pillar@1.00,7.00",
+      "type": "pillar",
+      "geometry": "captured pillar_base Polygon2D perimeter",
+      "geometry_segment_count": 6,
+      "edge_sampling_spacing_px": 0.5,
+      "outboard_ground_probe_px": 1.0,
+      "shadow_neighbourhood_radius_px": 2.0,
+      "visible_edge_occlusion_evidence": {
+        "visible_ground_edge": {
+          "sample_count": 75,
+          "arc_length_px": 36.349216149039215
+        },
+        "owner_opaque_prop": {
+          "sample_count": 43,
+          "arc_length_px": 21.236140947003516
+        },
+        "other_opaque_prop": {
+          "sample_count": 16,
+          "arc_length_px": 7.790113722333694
+        },
+        "unattributed_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "ui_or_unit_exclusion": {
+          "sample_count": 22,
+          "arc_length_px": 10.71140636820883
+        },
+        "grid": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "missing_ground_pair": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "outside_capture": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "sample_count": 100,
+      "sample_minimum": 20,
+      "width_p90_px": 2.787158815297255,
+      "width_max_px": 4.11095772790878,
+      "minimum_shadow_to_edge_distance_px": 0.10540522654055469,
+      "visible_bottom_edge_length_px": 47.54750462489401,
+      "shadow_covered_visible_edge_length_px": 41.127275966497585,
+      "visible_edge_coverage_ratio": 0.8649723322170929,
+      "cell_width_px": 58.88000106811542,
+      "frozen_metric": {
+        "status": "PASS",
+        "darkness_l": 9.128254914548233,
+        "width_px": 2.787158815297255,
+        "cell_width_px": 58.88000106811542
+      },
+      "checks": {
+        "frozen_darkness_and_p90_width": "PASS",
+        "touches_bottom_edge_within_1px": true,
+        "covers_at_least_60_percent_of_visible_bottom_edge": true
+      },
+      "stable_id": "pillar@8.00,4.00",
+      "type": "pillar",
+      "geometry": "captured pillar_base Polygon2D perimeter",
+      "geometry_segment_count": 6,
+      "edge_sampling_spacing_px": 0.5,
+      "outboard_ground_probe_px": 1.0,
+      "shadow_neighbourhood_radius_px": 2.0,
+      "visible_edge_occlusion_evidence": {
+        "visible_ground_edge": {
+          "sample_count": 98,
+          "arc_length_px": 47.54750462489401
+        },
+        "owner_opaque_prop": {
+          "sample_count": 43,
+          "arc_length_px": 21.23614094700357
+        },
+        "other_opaque_prop": {
+          "sample_count": 15,
+          "arc_length_px": 7.303231614687863
+        },
+        "unattributed_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "ui_or_unit_exclusion": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "grid": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "missing_ground_pair": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "outside_capture": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "sample_count": 27,
+      "sample_minimum": 20,
+      "width_p90_px": 2.4596581419010386,
+      "width_max_px": 3.3540853329009543,
+      "minimum_shadow_to_edge_distance_px": 0.11625644486411651,
+      "visible_bottom_edge_length_px": 11.617031020902875,
+      "shadow_covered_visible_edge_length_px": 11.617031020902875,
+      "visible_edge_coverage_ratio": 1.0,
+      "cell_width_px": 58.88000106811542,
+      "frozen_metric": {
+        "status": "PASS",
+        "darkness_l": 8.77495329821068,
+        "width_px": 2.4596581419010386,
+        "cell_width_px": 58.88000106811542
+      },
+      "checks": {
+        "frozen_darkness_and_p90_width": "PASS",
+        "touches_bottom_edge_within_1px": true,
+        "covers_at_least_60_percent_of_visible_bottom_edge": true
+      },
+      "stable_id": "wall@3.00,1.00",
+      "type": "wall",
+      "geometry": "unique captured wall_side bottom edges",
+      "geometry_segment_count": 2,
+      "edge_sampling_spacing_px": 0.5,
+      "outboard_ground_probe_px": 1.0,
+      "shadow_neighbourhood_radius_px": 2.0,
+      "visible_edge_occlusion_evidence": {
+        "visible_ground_edge": {
+          "sample_count": 24,
+          "arc_length_px": 11.617031020902875
+        },
+        "owner_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "other_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "unattributed_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "ui_or_unit_exclusion": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "grid": {
+          "sample_count": 10,
+          "arc_length_px": 4.840429592042864
+        },
+        "missing_ground_pair": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "outside_capture": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "sample_count": 124,
+      "sample_minimum": 20,
+      "width_p90_px": 2.906871737400997,
+      "width_max_px": 3.3540853329009543,
+      "minimum_shadow_to_edge_distance_px": 0.1699215986484571,
+      "visible_bottom_edge_length_px": 41.14365153236434,
+      "shadow_covered_visible_edge_length_px": 41.14365153236434,
+      "visible_edge_coverage_ratio": 1.0,
+      "cell_width_px": 58.88000106811542,
+      "frozen_metric": {
+        "status": "PASS",
+        "darkness_l": 8.70683245041523,
+        "width_px": 2.906871737400997,
+        "cell_width_px": 58.88000106811542
+      },
+      "checks": {
+        "frozen_darkness_and_p90_width": "PASS",
+        "touches_bottom_edge_within_1px": true,
+        "covers_at_least_60_percent_of_visible_bottom_edge": true
+      },
+      "stable_id": "wall@3.00,2.00",
+      "type": "wall",
+      "geometry": "unique captured wall_side bottom edges",
+      "geometry_segment_count": 3,
+      "edge_sampling_spacing_px": 0.5,
+      "outboard_ground_probe_px": 1.0,
+      "shadow_neighbourhood_radius_px": 2.0,
+      "visible_edge_occlusion_evidence": {
+        "visible_ground_edge": {
+          "sample_count": 83,
+          "arc_length_px": 41.14365153236434
+        },
+        "owner_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "other_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "unattributed_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "ui_or_unit_exclusion": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "grid": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "missing_ground_pair": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "outside_capture": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "sample_count": 67,
+      "sample_minimum": 20,
+      "width_p90_px": 1.9051108268639483,
+      "width_max_px": 1.9051108268639483,
+      "minimum_shadow_to_edge_distance_px": 0.11625644486411651,
+      "visible_bottom_edge_length_px": 30.01066347066576,
+      "shadow_covered_visible_edge_length_px": 30.01066347066576,
+      "visible_edge_coverage_ratio": 1.0,
+      "cell_width_px": 58.88000106811542,
+      "frozen_metric": {
+        "status": "PASS",
+        "darkness_l": 9.047376919854145,
+        "width_px": 1.9051108268639483,
+        "cell_width_px": 58.88000106811542
+      },
+      "checks": {
+        "frozen_darkness_and_p90_width": "PASS",
+        "touches_bottom_edge_within_1px": true,
+        "covers_at_least_60_percent_of_visible_bottom_edge": true
+      },
+      "stable_id": "wall@4.00,1.00",
+      "type": "wall",
+      "geometry": "unique captured wall_side bottom edges",
+      "geometry_segment_count": 3,
+      "edge_sampling_spacing_px": 0.5,
+      "outboard_ground_probe_px": 1.0,
+      "shadow_neighbourhood_radius_px": 2.0,
+      "visible_edge_occlusion_evidence": {
+        "visible_ground_edge": {
+          "sample_count": 61,
+          "arc_length_px": 30.01066347066576
+        },
+        "owner_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "other_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "unattributed_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "ui_or_unit_exclusion": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "grid": {
+          "sample_count": 6,
+          "arc_length_px": 2.9042577552257183
+        },
+        "missing_ground_pair": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "outside_capture": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "sample_count": 45,
+      "sample_minimum": 20,
+      "width_p90_px": 1.9051108268639483,
+      "width_max_px": 1.9051108268639483,
+      "minimum_shadow_to_edge_distance_px": 0.11625644486411651,
+      "visible_bottom_edge_length_px": 19.72841757968993,
+      "shadow_covered_visible_edge_length_px": 19.72841757968993,
+      "visible_edge_coverage_ratio": 1.0,
+      "cell_width_px": 58.88000106811542,
+      "frozen_metric": {
+        "status": "PASS",
+        "darkness_l": 8.304487919639723,
+        "width_px": 1.9051108268639483,
+        "cell_width_px": 58.88000106811542
+      },
+      "checks": {
+        "frozen_darkness_and_p90_width": "PASS",
+        "touches_bottom_edge_within_1px": true,
+        "covers_at_least_60_percent_of_visible_bottom_edge": true
+      },
+      "stable_id": "wall@5.00,1.00",
+      "type": "wall",
+      "geometry": "unique captured wall_side bottom edges",
+      "geometry_segment_count": 3,
+      "edge_sampling_spacing_px": 0.5,
+      "outboard_ground_probe_px": 1.0,
+      "shadow_neighbourhood_radius_px": 2.0,
+      "visible_edge_occlusion_evidence": {
+        "visible_ground_edge": {
+          "sample_count": 40,
+          "arc_length_px": 19.72841757968993
+        },
+        "owner_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "other_opaque_prop": {
+          "sample_count": 25,
+          "arc_length_px": 12.218417727793073
+        },
+        "unattributed_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "ui_or_unit_exclusion": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "grid": {
+          "sample_count": 2,
+          "arc_length_px": 0.9680859184085728
+        },
+        "missing_ground_pair": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "outside_capture": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "sample_count": 22,
+      "sample_minimum": 20,
+      "width_p90_px": 2.6206536032540098,
+      "width_max_px": 3.0678671987539676,
+      "minimum_shadow_to_edge_distance_px": 0.38458562575421995,
+      "visible_bottom_edge_length_px": 7.818027189572263,
+      "shadow_covered_visible_edge_length_px": 7.818027189572263,
+      "visible_edge_coverage_ratio": 1.0,
+      "cell_width_px": 58.88000106811542,
+      "frozen_metric": {
+        "status": "PASS",
+        "darkness_l": 9.165842527044726,
+        "width_px": 2.6206536032540098,
+        "cell_width_px": 58.88000106811542
+      },
+      "checks": {
+        "frozen_darkness_and_p90_width": "PASS",
+        "touches_bottom_edge_within_1px": true,
+        "covers_at_least_60_percent_of_visible_bottom_edge": true
+      },
+      "stable_id": "wall@6.00,1.00",
+      "type": "wall",
+      "geometry": "unique captured wall_side bottom edges",
+      "geometry_segment_count": 3,
+      "edge_sampling_spacing_px": 0.5,
+      "outboard_ground_probe_px": 1.0,
+      "shadow_neighbourhood_radius_px": 2.0,
+      "visible_edge_occlusion_evidence": {
+        "visible_ground_edge": {
+          "sample_count": 16,
+          "arc_length_px": 7.818027189572263
+        },
+        "owner_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "other_opaque_prop": {
+          "sample_count": 17,
+          "arc_length_px": 8.228730306472869
+        },
+        "unattributed_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "ui_or_unit_exclusion": {
+          "sample_count": 28,
+          "arc_length_px": 13.963905974620628
+        },
+        "grid": {
+          "sample_count": 6,
+          "arc_length_px": 2.9042577552257183
+        },
+        "missing_ground_pair": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "outside_capture": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "sample_count": 114,
+      "sample_minimum": 20,
+      "width_p90_px": 2.6206536032540098,
+      "width_max_px": 3.0678671987539676,
+      "minimum_shadow_to_edge_distance_px": 0.16992159864850795,
+      "visible_bottom_edge_length_px": 40.659608573160156,
+      "shadow_covered_visible_edge_length_px": 40.659608573160156,
+      "visible_edge_coverage_ratio": 1.0,
+      "cell_width_px": 58.88000106811542,
+      "frozen_metric": {
+        "status": "PASS",
+        "darkness_l": 9.344965226594836,
+        "width_px": 2.6206536032540098,
+        "cell_width_px": 58.88000106811542
+      },
+      "checks": {
+        "frozen_darkness_and_p90_width": "PASS",
+        "touches_bottom_edge_within_1px": true,
+        "covers_at_least_60_percent_of_visible_bottom_edge": true
+      },
+      "stable_id": "wall@6.00,2.00",
+      "type": "wall",
+      "geometry": "unique captured wall_side bottom edges",
+      "geometry_segment_count": 3,
+      "edge_sampling_spacing_px": 0.5,
+      "outboard_ground_probe_px": 1.0,
+      "shadow_neighbourhood_radius_px": 2.0,
+      "visible_edge_occlusion_evidence": {
+        "visible_ground_edge": {
+          "sample_count": 82,
+          "arc_length_px": 40.659608573160156
+        },
+        "owner_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "other_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "unattributed_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "ui_or_unit_exclusion": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "grid": {
+          "sample_count": 1,
+          "arc_length_px": 0.4840429592042864
+        },
+        "missing_ground_pair": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "outside_capture": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "sample_count": 26,
+      "sample_minimum": 20,
+      "width_p90_px": 2.7279839108227417,
+      "width_max_px": 3.1751975063226996,
+      "minimum_shadow_to_edge_distance_px": 0.04470233782299402,
+      "visible_bottom_edge_length_px": 8.976796697970403,
+      "shadow_covered_visible_edge_length_px": 8.976796697970403,
+      "visible_edge_coverage_ratio": 1.0,
+      "cell_width_px": 58.88000106811542,
+      "frozen_metric": {
+        "status": "PASS",
+        "darkness_l": 8.18027409662231,
+        "width_px": 2.7279839108227417,
+        "cell_width_px": 58.88000106811542
+      },
+      "checks": {
+        "frozen_darkness_and_p90_width": "PASS",
+        "touches_bottom_edge_within_1px": true,
+        "covers_at_least_60_percent_of_visible_bottom_edge": true
+      },
+      "stable_id": "wall@8.00,7.00",
+      "type": "wall",
+      "geometry": "unique captured wall_side bottom edges",
+      "geometry_segment_count": 2,
+      "edge_sampling_spacing_px": 0.5,
+      "outboard_ground_probe_px": 1.0,
+      "shadow_neighbourhood_radius_px": 2.0,
+      "visible_edge_occlusion_evidence": {
+        "visible_ground_edge": {
+          "sample_count": 18,
+          "arc_length_px": 8.976796697970403
+        },
+        "owner_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "other_opaque_prop": {
+          "sample_count": 48,
+          "arc_length_px": 23.93812452792107
+        },
+        "unattributed_opaque_prop": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "ui_or_unit_exclusion": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "grid": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "missing_ground_pair": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        },
+        "outside_capture": {
+          "sample_count": 0,
+          "arc_length_px": 0.0
+        }
+      }
+    }
+  ]
+}

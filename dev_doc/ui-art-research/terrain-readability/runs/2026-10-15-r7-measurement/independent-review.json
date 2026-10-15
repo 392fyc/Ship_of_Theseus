@@ -1,0 +1,140 @@
+{
+  "verdict": "pass",
+  "reviewer": {
+    "agent": "/root/r7_independent_review",
+    "role": "mercury-reviewer",
+    "independent_of_implementation": true
+  },
+  "head": "61c48b37a40a6c75c81321fc66850428f155fede",
+  "branch": "codex/ui-ux/terrain-occupancy-r7",
+  "record_kind": "Main 转录原生独立审查结论与绑定文件清单",
+  "checks": [
+    {
+      "id": "scope",
+      "result": "pass",
+      "evidence": "17 个新增文件，无既有文件修改；冻结入口保持原样。"
+    },
+    {
+      "id": "native_occupancy",
+      "result": "pass",
+      "evidence": "capture_terrain_readability_r7.gd:188–254 同帧读取；shader 丢弃有效 alpha<=0.5；原生 N1–N5 等待 Dot。"
+    },
+    {
+      "id": "N1_N5_edge_denominator",
+      "result": "pass",
+      "evidence": "12/12 新测试通过；terrain_contour_v3.py:80,106,123–139,179 保留遮挡边分母，排除污染取样。"
+    },
+    {
+      "id": "T4",
+      "result": "pass",
+      "evidence": "8/8 测试通过；独立复算旧 TASK117 为10 PASS；p90、max、贴合、可见覆盖和最小样本要求成立。"
+    },
+    {
+      "id": "N6_offline",
+      "result": "pass",
+      "evidence": "独立复算921600像素；7个末绘制边界差异、6个未污染占据边界差异，无非边界差异；两个指定点恢复，518树遮墙和798树隙保留。"
+    },
+    {
+      "id": "dynamic_scope",
+      "result": "pass",
+      "evidence": "T4 evidence_scope 按实际候选/case/fixture/frame记录。"
+    },
+    {
+      "id": "portable_records",
+      "result": "pass",
+      "evidence": "17文件无本机绝对路径或凭据；KB边界清楚。"
+    }
+  ],
+  "findings": [],
+  "limits": [
+    "R7 原生控制图与新素材运行由 Dot 单组负责。旧 TASK117 诊断不替代新素材验收。"
+  ],
+  "reference": "https://docs.godotengine.org/en/4.6/tutorials/shaders/shader_reference/canvas_item_shader.html",
+  "files": [
+    {
+      "path": "tests/claude_review/capture_terrain_readability_r7.gd",
+      "bytes": 18223,
+      "sha256": "74b371fa578f34d96bbc52c51d2a6f47488224462610088db4a576682c1391ac"
+    },
+    {
+      "path": "tests/claude_review/terrain_composite_occupancy.gdshader",
+      "bytes": 434,
+      "sha256": "5e6b6c1d302b89413dff823ef74b17c91b607619915057fe8e8774265b799e01"
+    },
+    {
+      "path": "tests/claude_review/terrain_contour_v3.py",
+      "bytes": 10384,
+      "sha256": "312592fdb7cf81fa8f0a803820c12f8abb59d9a6fe00aafe9493aa41f41c7bf8"
+    },
+    {
+      "path": "tests/claude_review/validate_terrain_acceptance_v3.py",
+      "bytes": 29898,
+      "sha256": "b8a22f80052020bdcb9c156ff4849827a05363363a2a091cb05a5fe078f27504"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_acceptance_v3.py",
+      "bytes": 17475,
+      "sha256": "f8666fdb5319c72fb5f1d30d205b692397bc0746b163ac150ce8abf797391541"
+    },
+    {
+      "path": "tests/claude_review/diagnose_terrain_occupancy_task117.py",
+      "bytes": 14491,
+      "sha256": "5cc4d2421889c329809ca46abb2192df5465cbd2bc8091c48f3f6733475b9ae3"
+    },
+    {
+      "path": "tests/claude_review/terrain_contact_shadow_v2.py",
+      "bytes": 32253,
+      "sha256": "1e385a0368b981f65faccd8ba64be000d825ec026c0e827ab505e84954d2221b"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_contact_shadow_v2.py",
+      "bytes": 6819,
+      "sha256": "01998fc49fc589ee68fb23336f1fb8fe3811e7ae3ca79b58645ad3b6739bc599"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/claude-review-source.md",
+      "bytes": 7929,
+      "sha256": "9988bd28c87c3e0b6981226b21f41cf441039f3e54e11d660bd240321cbae15f"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/kb-decision-independent-review.json",
+      "bytes": 864,
+      "sha256": "acc3e5830901f87d32e5cf228d94d057c8b3af25887800d1abcabbe024f49076"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/kb-decision-postcommit.json",
+      "bytes": 321,
+      "sha256": "067e75d41e83a6a8b7d3ffcc27d14549384b7c9ffbfee18e9692b7ca7eaa280e"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/kb-task-receipt.json",
+      "bytes": 2554,
+      "sha256": "cf62ee0ebce421999e22206309ad09983502ee70faf6577a11b5d34e2e6f0c19"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/offline-reconstruction.md",
+      "bytes": 1668,
+      "sha256": "e632f0c34075c8af2e487ad83828f2b3742a74c87d7de5e4ecdf08882f35d0c2"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/t4-method.md",
+      "bytes": 8881,
+      "sha256": "009330559bb6368effe92eadddcffa283008323c1599716a74edff36c961d5f1"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/t4-task117-diagnostic.json",
+      "bytes": 36176,
+      "sha256": "d4152119470676f91de38ad61673094a4067621701883eedb99c2b33ad31333c"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/task.md",
+      "bytes": 1853,
+      "sha256": "35de4afdc57a395433aa7c0922d22877497f8af7f4ebe97059cb2ddf97f9b9f5"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/task117-occupancy-diagnostic.json",
+      "bytes": 62130,
+      "sha256": "1ab8a1f36c9f9d75547ce8a23f73124cb3463fb79ec338de564277e0eba49d21"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "verdict": "pass",
+  "head": "9cc34236882c829a4008ef7f7e84e7524b74a68c",
+  "branch": "codex/ui-ux/issue-48-t4-contact-guards",
+  "reviewer": "r7_independent_review",
+  "files": [
+    {
+      "path": "02-Development/Decisions/adr-2026-10-15-ship-issue-48-t4-contact-guards.md",
+      "bytes": 2429,
+      "sha256": "15209f1a2b38d82f6fc3335201e4592bcaf2d74f3d08b122ee60af3605467c38"
+    }
+  ],
+  "checks": [
+    "工作区状态只有指定候选未跟踪；文件bytes和SHA256一致。",
+    "候选准确记录p90、max、1px贴合、2px内至少60%覆盖、20个最小样本；8–12 L*与半格不变。",
+    "旧PASS不转为新判据PASS；用户裁决与实现、任务、玩法权威边界清楚。",
+    "已读目标合同及AGENTS；KB无AGENTS.md。"
+  ],
+  "findings": [],
+  "limits": [
+    "只审查KB裁决；运行测量另行核对。"
+  ]
+}
