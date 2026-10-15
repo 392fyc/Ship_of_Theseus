@@ -748,6 +748,7 @@ func _add_wall_shape(cell: Vector2i) -> void:
 	var base_world: PackedVector2Array = wall_footprint(cell)
 	var connection_mask: int = wall_connection_mask(cell)
 	var height: float = _wall_height_at(cell)
+	var wall_variant: String = visual_variant_at(cell)
 	var root := Node2D.new()
 	root.name = "CourtyardWall"
 	root.set_meta("terrain_wall", true)
@@ -760,38 +761,77 @@ func _add_wall_shape(cell: Vector2i) -> void:
 	var top: PackedVector2Array = base.duplicate()
 	for i: int in top.size():
 		# 相接端点使用同一个世界坐标采样，墙顶也随连接连续。
-		var wear: float = sin(base_world[i].x * 0.075 + base_world[i].y * 0.11) * (2.5 if visual_variant_at(cell) == "ruined" else 0.35)
+		var wear: float = sin(base_world[i].x * 0.075 + base_world[i].y * 0.11) * (2.5 if wall_variant == "ruined" else 0.35)
 		top[i].y -= _wall_vertex_height(cell, base_world[i]) - wear
+	# 只在外轮廓的角点压低顶线，接壤顶点保持共享高度。
+	var chip_requested: bool = wall_variant == "ruined" or (wall_variant == "dressed" and posmod(cell.x * 3 + cell.y, 4) in [1, 3])
+	var chip_vertex: int = -1
+	if chip_requested:
+		for i: int in base.size():
+			var previous: int = (i + base.size() - 1) % base.size()
+			var following: int = (i + 1) % base.size()
+			if _is_join_edge(base[previous], base[i], connection_mask) or _is_join_edge(base[i], base[following], connection_mask):
+				continue
+			if chip_vertex < 0 or top[i].y < top[chip_vertex].y:
+				chip_vertex = i
+	if chip_vertex >= 0:
+		var chipped_top: Vector2 = top[chip_vertex]
+		chipped_top.y += 2.5
+		top[chip_vertex] = chipped_top
 	for edge: int in base.size():
 		var next: int = (edge + 1) % base.size()
 		if base[next].x >= base[edge].x or _is_join_edge(base[edge], base[next], connection_mask):
 			continue
-		var side_tint: Color = _prop_tint("wall_lit_side", Color("aaa792")) if base[next].y > base[edge].y else _prop_tint("wall_dark_side", Color("7f8372"))
-		_polygon(root, PackedVector2Array([top[edge], top[next], base[next], base[edge]]), side_tint, true)
+		var side_is_lit: bool = base[next].y > base[edge].y
+		var side_tint: Color = _prop_tint("wall_lit_side", Color("aaa792")) if side_is_lit else _prop_tint("wall_dark_side", Color("7f8372"))
+		_polygon(root, PackedVector2Array([top[edge], top[next], base[next], base[edge]]), side_tint, true, "wall_side")
 		var dirt_a: Vector2 = base[edge].lerp(top[edge], 0.18)
 		var dirt_b: Vector2 = base[next].lerp(top[next], 0.18)
 		_polygon(root, PackedVector2Array([dirt_a, dirt_b, base[next], base[edge]]),
-			_prop_tint("wall_foot_dirt", side_tint * Color(0.9, 0.9, 0.9, 1.0)), true)
-	_polygon(root, top, _prop_tint("wall_top", Color("b6b29b")))
-	# 边角剥蚀沿用现有墙体外轮廓，只加一块较暗的断面材质。
-	var chip_index: int = 0
-	for i: int in top.size():
-		if top[i].y < top[chip_index].y:
-			chip_index = i
-	var previous: int = (chip_index + top.size() - 1) % top.size()
-	var following: int = (chip_index + 1) % top.size()
-	var chip := PackedVector2Array([top[chip_index],
-		top[chip_index].lerp(top[following], 0.24),
-		top[chip_index].lerp(top[previous], 0.22)])
-	_polygon(root, chip, _prop_tint("wall_chip", Color(0.52, 0.53, 0.54, 1.0)))
+			_prop_tint("wall_foot_dirt", side_tint * Color(0.9, 0.9, 0.9, 1.0)), true, "wall_side")
+		_add_wall_masonry_courses(root, edge, next, base, top, side_is_lit)
+	_polygon(root, top, _prop_tint("wall_top", Color("b6b29b")), false, "wall_top")
+	# 压顶上铺小块深浅风化斑；它们仍使用 R6 压顶纹理，不改墙体整体明度。
+	var top_center := Vector2.ZERO
+	for p: Vector2 in top:
+		top_center += p
+	top_center /= float(top.size())
+	var weather_seed: int = absi(cell.x * 17 + cell.y * 29)
+	for stain_index: int in 4:
+		var stain_edge: int = posmod(weather_seed + stain_index * 3, top.size())
+		var stain_next: int = (stain_edge + 1) % top.size()
+		var outer_a: Vector2 = top[stain_edge].lerp(top_center, 0.08)
+		var outer_b: Vector2 = top[stain_next].lerp(top_center, 0.08)
+		var inner_a: Vector2 = top[stain_edge].lerp(top_center, 0.72)
+		var inner_b: Vector2 = top[stain_next].lerp(top_center, 0.72)
+		var stain_tint: Color = _prop_tint("wall_weather_dark", Color(0.48, 0.48, 0.49, 1.0)) if stain_index % 2 == 0 else _prop_tint("wall_weather_light", Color(0.77, 0.79, 0.84, 1.0))
+		_polygon(root, PackedVector2Array([outer_a, outer_b, inner_b, inner_a]), stain_tint, false, "wall_top")
+	# 两道窄暗流痕从压顶外缘向内收，位置随单元变化而稳定。
+	for streak_index: int in 2:
+		var streak_edge: int = posmod(weather_seed + 2 + streak_index * 5, top.size())
+		var streak_next: int = (streak_edge + 1) % top.size()
+		var streak_outer: Vector2 = top[streak_edge].lerp(top_center, 0.18)
+		var streak_outer_side: Vector2 = top[streak_next].lerp(top_center, 0.28)
+		var streak_inner: Vector2 = top[streak_edge].lerp(top_center, 0.82)
+		var streak_inner_side: Vector2 = top[streak_next].lerp(top_center, 0.70)
+		_polygon(root, PackedVector2Array([streak_outer, streak_outer_side, streak_inner_side, streak_inner]),
+			_prop_tint("wall_weather_dark", Color(0.48, 0.48, 0.49, 1.0)), false, "wall_top")
+	if chip_vertex >= 0:
+		var chip_previous: int = (chip_vertex + top.size() - 1) % top.size()
+		var chip_following: int = (chip_vertex + 1) % top.size()
+		var chip_face := PackedVector2Array([top[chip_vertex],
+			top[chip_vertex].lerp(top[chip_following], 0.24),
+			top[chip_vertex].lerp(top[chip_previous], 0.22)])
+		_polygon(root, chip_face, _prop_tint("wall_chip", Color(0.71, 0.73, 0.77, 1.0)), false, "wall_top")
 	for edge: int in base.size():
 		var next: int = (edge + 1) % base.size()
-		if not _is_join_edge(base[edge], base[next], connection_mask):
-			var lit_edge: bool = top[next].x > top[edge].x and top[next].y < top[edge].y
-			var edge_tint: Color = _prop_tint("wall_lit_edge", Color("777e6738")) if lit_edge else _prop_tint("wall_other_edge", Color("777e6738"))
+		if _is_join_edge(base[edge], base[next], connection_mask):
+			continue
+		var lit_edge: bool = top[next].x > top[edge].x and top[next].y < top[edge].y
+		if lit_edge:
 			var strokes: Dictionary = profile.get("prop_strokes", {})
-			var edge_width: float = float(strokes.get("wall_lit_edge" if lit_edge else "wall_other_edge", 0.45))
-			_line(root, PackedVector2Array([top[edge], top[next]]), edge_tint, edge_width)
+			var edge_width: float = float(strokes.get("wall_lit_edge", 1.0))
+			_line(root, PackedVector2Array([top[edge], top[next]]), _prop_tint("wall_lit_edge", Color("777e67")), edge_width, "wall_outline")
 	_actor_layer.add_child(root)
 	_props.append({"node": root, "wind": false, "bounds": Rect2(-34, -height - 17, 68, height + 34)})
 
@@ -802,24 +842,57 @@ func _add_pillar(cell: Vector2i) -> void:
 	root.position = point(cell.x, cell.y)
 	root.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	root.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
-	var variant: int = posmod(cell.x * 3 + cell.y, 5)
-	var height: float = 24.0 + float(variant) * 3.0
-	root.set_meta("r6_height", height)
-	root.set_meta("r6_side_count", 12)
-	root.set_meta("r6_break_levels", 5)
-	# 宽底座首先绘制，断口最后绘制，保持冻结采集器的部件分类。
+	var cell_variant: int = posmod(cell.x * 3 + cell.y, 5)
+	var height_level: int = 2 - absi(cell_variant - 2)
+	var height: float = 33.0 * (0.6 + 0.2 * float(height_level))
+	var has_abacus: bool = cell_variant == 0
+	var has_fallen_drum: bool = cell_variant == 3
+	root.set_meta("r7_height", height)
+	root.set_meta("r7_height_level", height_level)
+	# 六点柱础的几何保持 R6 原样，只更新石材着色。
 	var foot := PackedVector2Array([Vector2(0, -9), Vector2(17, -1),
 		Vector2(16, 4), Vector2(0, 11), Vector2(-16, 4), Vector2(-17, -1)])
-	_polygon(root, foot, _prop_tint("pillar_foot", Color("777d69")))
+	_polygon(root, foot, _prop_tint("pillar_foot", Color("777d69")), false, "pillar_base")
 	var shaft := PackedVector2Array()
 	var top := PackedVector2Array()
-	var break_offsets: Array[float] = [0.0, 3.0, 1.0, 4.0, 2.0, 0.0, 3.0, 1.0, 4.0, 2.0, 0.0, 2.0]
+	var diagonal_cut: bool = not has_abacus
+	var cut_direction: float = 1.0 if cell_variant % 2 == 0 else -1.0
 	for i: int in 12:
 		var angle: float = -PI * 0.5 + float(i) * TAU / 12.0
 		var point_at_base := Vector2(cos(angle) * 11.0, sin(angle) * 6.0)
 		shaft.append(point_at_base)
-		var broken_height: float = break_offsets[(i + variant) % break_offsets.size()]
-		top.append(point_at_base * 0.92 - Vector2(0.0, height + broken_height))
+		var across: float = clampf((point_at_base.x / 11.0 + 1.0) * 0.5, 0.0, 1.0)
+		var cut_drop: float = 0.0
+		if diagonal_cut:
+			cut_drop = height * 0.20 * across if cut_direction > 0.0 else height * 0.20 * (1.0 - across)
+		top.append(Vector2(point_at_base.x * 0.92, point_at_base.y * 0.92 - height + cut_drop))
+	# 横倒鼓石在右侧露出椭圆断面；其顶点都落在当前格的菱形范围内。
+	if has_fallen_drum:
+		var drum_lit: Color = _prop_tint("pillar_lit_side", Color("a5a691"))
+		var drum_mid: Color = drum_lit.lerp(_prop_tint("pillar_dark_side", Color("7a806e")), 0.42)
+		var drum_dark: Color = _prop_tint("pillar_dark_side", Color("7a806e"))
+		# 筒身横跨 x=13.2..23；立柱从前方压住最左端，不遮挡右侧筒身。
+		_polygon(root, PackedVector2Array([Vector2(13.2, -1.7), Vector2(14.4, -2.5),
+			Vector2(22.4, -2.6), Vector2(23.0, -1.7), Vector2(22.0, -0.7), Vector2(14.0, -0.6)]),
+			drum_lit, false, "pillar_side")
+		_polygon(root, PackedVector2Array([Vector2(14.0, -0.6), Vector2(22.0, -0.7),
+			Vector2(23.0, 0.0), Vector2(22.0, 1.0), Vector2(14.2, 0.9)]),
+			drum_mid, false, "pillar_side")
+		_polygon(root, PackedVector2Array([Vector2(14.2, 0.9), Vector2(22.0, 1.0),
+			Vector2(22.5, 2.2), Vector2(15.0, 2.6), Vector2(13.5, 1.8)]),
+			drum_dark, false, "pillar_side")
+		# 正面断口为 12 点椭圆；内层石面和短裂缝让它读作鼓石端面。
+		var drum_end := PackedVector2Array([Vector2(23.0, -3.0), Vector2(24.0, -2.7),
+			Vector2(24.7, -1.7), Vector2(25.0, 0.0), Vector2(24.7, 1.7), Vector2(24.0, 2.7),
+			Vector2(23.0, 3.0), Vector2(22.0, 2.7), Vector2(21.3, 1.7), Vector2(21.0, 0.0),
+			Vector2(21.3, -1.7), Vector2(22.0, -2.7)])
+		_polygon(root, drum_end, drum_lit, false, "pillar_side")
+		_polygon(root, PackedVector2Array([Vector2(23.0, -1.8), Vector2(23.9, -1.5),
+			Vector2(24.3, 0.0), Vector2(23.9, 1.5), Vector2(23.0, 1.8),
+			Vector2(22.1, 1.5), Vector2(21.7, 0.0), Vector2(22.1, -1.5)]),
+			_prop_tint("pillar_foot", Color("777d69")), false, "pillar_side")
+		_line(root, PackedVector2Array([Vector2(22.3, -0.7), Vector2(22.8, 0.0), Vector2(22.4, 0.7)]),
+			_prop_tint("pillar_groove_dark", Color(0.257316, 0.228295, 0.192539, 1.0)), 0.8, "pillar_side", false)
 	for edge: int in range(3, 9):
 		var next: int = (edge + 1) % shaft.size()
 		var midpoint: Vector2 = (shaft[edge] + shaft[next]) * 0.5
@@ -827,25 +900,54 @@ func _add_pillar(cell: Vector2i) -> void:
 		var side_tint: Color = _prop_tint("pillar_dark_side", Color("7a806e")).lerp(
 			_prop_tint("pillar_lit_side", Color("a5a691")), light_share)
 		# 连续石面绕柱身，不使用墙砖的错缝贴图。
-		_polygon(root, PackedVector2Array([top[edge], top[next], shaft[next], shaft[edge]]), side_tint)
-		_polygon(root, PackedVector2Array([shaft[edge].lerp(top[edge], 0.18),
-			shaft[next].lerp(top[next], 0.18), shaft[next], shaft[edge]]),
-			_prop_tint("pillar_foot_dirt", Color(0.45, 0.44, 0.44, 1.0)))
-	# 三道弧形鼓石接缝，随圆柱截面转向。
-	for seam_index: int in range(1, 4):
-		var seam := PackedVector2Array()
-		for i: int in range(3, 10):
-			var fraction: float = float(seam_index) / 4.0
-			seam.append(shaft[i].lerp(top[i], fraction))
-		_line(root, seam, _prop_tint("pillar_drum_joint", Color(0.28, 0.27, 0.24, 0.48)), 0.75)
-	# 下缘压入土中，底座仍比柱身宽；不改地面或占格。
-	_line(root, PackedVector2Array([foot[2], foot[3], foot[4]]),
-		_prop_tint("pillar_base_edge", Color("4b4e47")), 1.6)
-	_polygon(root, top, _prop_tint("pillar_top", Color("c0bca6")))
-	_line(root, PackedVector2Array([top[9], top[10], top[11], top[0], top[1]]),
-		_prop_tint("pillar_cap_edge", Color("92958b")), 0.75)
+		_polygon(root, PackedVector2Array([top[edge], top[next], shaft[next], shaft[edge]]), side_tint, false, "pillar_side")
+		var mud_fraction: float = minf(2.0 / height, 0.12)
+		_polygon(root, PackedVector2Array([shaft[edge].lerp(top[edge], mud_fraction),
+			shaft[next].lerp(top[next], mud_fraction), shaft[next], shaft[edge]]),
+			_prop_tint("pillar_foot_dirt", Color(0.42, 0.41, 0.41, 1.0)), false, "pillar_side")
+	# 柱础环外缘比柱身每侧扩约 2 px，环带自身按受光方向提亮。
+	var ring_upper := PackedVector2Array()
+	var ring_lower := PackedVector2Array()
+	for i: int in shaft.size():
+		var outer: Vector2 = shaft[i] * Vector2(13.0 / 11.0, 8.0 / 6.0) + Vector2(0.0, -1.0)
+		ring_upper.append(outer)
+		ring_lower.append(outer + Vector2(0.0, 2.0))
+	for edge: int in range(3, 9):
+		var next: int = (edge + 1) % ring_upper.size()
+		var midpoint_x: float = (ring_upper[edge].x + ring_upper[next].x) * 0.5
+		var light_share: float = clampf(0.5 - midpoint_x / 22.0, 0.0, 1.0)
+		var ring_tint: Color = _prop_tint("pillar_torus_dark", Color(0.523, 0.524, 0.540, 1.0)).lerp(
+			_prop_tint("pillar_torus_lit", Color(0.686, 0.699, 0.740, 1.0)), light_share)
+		_polygon(root, PackedVector2Array([ring_upper[edge], ring_upper[next], ring_lower[next], ring_lower[edge]]),
+			ring_tint, false, "pillar_side")
+	# 三道完全不透明的 1 px 竖槽，按各自所处柱面亮度保留 6–8 L* 落差。
+	var groove_width: float = float(profile.get("prop_strokes", {}).get("pillar_groove", 1.0))
+	for groove_index: int in 3:
+		var groove_x: float = float(groove_index - 1) * 3.0
+		var groove_y: float = _pillar_front_top_y(top, groove_x) + 1.0
+		var groove_end := Vector2(groove_x, 5.0)
+		var groove_start := Vector2(groove_x, groove_y)
+		var groove_light_share: float = clampf(0.5 - groove_x / 22.0, 0.0, 1.0)
+		var groove_tint: Color = _prop_tint("pillar_groove_dark", Color(0.356, 0.346, 0.338, 1.0)).lerp(
+			_prop_tint("pillar_groove_lit", Color(0.510, 0.510, 0.524, 1.0)), groove_light_share)
+		_line(root, PackedVector2Array([groove_start, groove_end]), groove_tint, groove_width, "pillar_side", false)
+	_polygon(root, top, _prop_tint("pillar_top", Color("c0bca6")), false, "pillar_top")
+	if has_abacus:
+		var crown_top := PackedVector2Array([Vector2(-13, -height + 1), Vector2(0, -height - 3),
+			Vector2(13, -height + 1), Vector2(0, -height + 5)])
+		var crown_left: Vector2 = crown_top[0]
+		var crown_front: Vector2 = crown_top[3]
+		var crown_right: Vector2 = crown_top[2]
+		var crown_drop := Vector2(0.0, 4.0)
+		_polygon(root, crown_top, _prop_tint("pillar_top", Color("c0bca6")), false, "pillar_top")
+		_polygon(root, PackedVector2Array([crown_left, crown_front,
+			crown_front + crown_drop, crown_left + crown_drop]),
+			_prop_tint("pillar_lit_side", Color("a5a691")), false, "pillar_side")
+		_polygon(root, PackedVector2Array([crown_front, crown_right,
+			crown_right + crown_drop, crown_front + crown_drop]),
+			_prop_tint("pillar_dark_side", Color("7a806e")), false, "pillar_side")
 	_actor_layer.add_child(root)
-	_props.append({"node": root, "wind": false, "bounds": Rect2(-18, -48, 36, 61)})
+	_props.append({"node": root, "wind": false, "bounds": Rect2(-18, -48, 43, 61)})
 
 
 func _is_join_edge(a: Vector2, b: Vector2, mask: int) -> bool:
@@ -857,7 +959,58 @@ func _is_join_edge(a: Vector2, b: Vector2, mask: int) -> bool:
 		or (mask & 8 and is_equal_approx(a_grid.x, -0.5) and is_equal_approx(b_grid.x, -0.5))
 
 
-func _polygon(parent: Node2D, points: PackedVector2Array, tint: Color, wall_face: bool = false) -> void:
+func _add_wall_masonry_courses(parent: Node2D, edge: int, next: int, base: PackedVector2Array,
+		top: PackedVector2Array, side_is_lit: bool) -> void:
+	var mortar_key: String = "wall_joint_lit" if side_is_lit else "wall_joint_dark"
+	# Line2D 没有石材纹理可供乘色，fallback 与 profile 都是纯色 sRGB。
+	var mortar_fallback: Color = Color(0.293637, 0.263669, 0.227090, 1.0)
+	var mortar_tint: Color = _prop_tint(mortar_key, mortar_fallback)
+	var mortar_width: float = float(profile.get("prop_strokes", {}).get("wall_mortar", 1.0))
+	# 两道横缝把侧面分成三层；每层竖缝交替偏左、偏右。
+	for course_index: int in range(1, 3):
+		var course_height: float = float(course_index) / 3.0
+		_add_wall_mortar_line(parent,
+			_wall_face_point(base[edge], base[next], top[edge], top[next], course_height, 0.0),
+			_wall_face_point(base[edge], base[next], top[edge], top[next], course_height, 1.0),
+			mortar_tint, mortar_width)
+	for course_index: int in 3:
+		var lower_height: float = float(course_index) / 3.0
+		var upper_height: float = float(course_index + 1) / 3.0
+		var across: float = 0.36 if (edge + course_index) % 2 == 0 else 0.64
+		_add_wall_mortar_line(parent,
+			_wall_face_point(base[edge], base[next], top[edge], top[next], lower_height, across),
+			_wall_face_point(base[edge], base[next], top[edge], top[next], upper_height, across),
+			mortar_tint, mortar_width)
+
+
+func _wall_face_point(base_a: Vector2, base_b: Vector2, top_a: Vector2, top_b: Vector2,
+		height_fraction: float, across_fraction: float) -> Vector2:
+	var left: Vector2 = base_a.lerp(top_a, height_fraction)
+	var right: Vector2 = base_b.lerp(top_b, height_fraction)
+	return left.lerp(right, across_fraction)
+
+
+func _add_wall_mortar_line(parent: Node2D, a: Vector2, b: Vector2, tint: Color, width: float) -> void:
+	if a.distance_squared_to(b) <= 0.0001:
+		return
+	_line(parent, PackedVector2Array([a, b]), tint, width, "wall_side", false)
+
+
+func _pillar_front_top_y(top: PackedVector2Array, x: float) -> float:
+	for edge: int in range(3, 9):
+		var next: int = edge + 1
+		var a: Vector2 = top[edge]
+		var b: Vector2 = top[next]
+		var low_x: float = minf(a.x, b.x)
+		var high_x: float = maxf(a.x, b.x)
+		if x < low_x or x > high_x or is_equal_approx(a.x, b.x):
+			continue
+		return lerpf(a.y, b.y, (x - a.x) / (b.x - a.x))
+	return top[6].y
+
+
+func _polygon(parent: Node2D, points: PackedVector2Array, tint: Color, wall_face: bool = false,
+		terrain_part: String = "") -> Polygon2D:
 	var node := Polygon2D.new()
 	node.polygon = points
 	node.texture = _masonry if wall_face else _coping
@@ -875,16 +1028,23 @@ func _polygon(parent: Node2D, points: PackedVector2Array, tint: Color, wall_face
 	# Polygon2D 的顶点颜色会压到 RGBA8；节点着色保留大于 1 的亮度系数。
 	node.color = Color(1.0, 1.0, 1.0, tint.a)
 	node.self_modulate = Color(tint.r, tint.g, tint.b, 1.0)
+	if not terrain_part.is_empty():
+		node.set_meta("terrain_part", terrain_part)
 	parent.add_child(node)
+	return node
 
 
-func _line(parent: Node2D, points: PackedVector2Array, color: Color, width: float) -> void:
+func _line(parent: Node2D, points: PackedVector2Array, color: Color, width: float,
+		terrain_part: String = "", antialiased: bool = true) -> Line2D:
 	var node := Line2D.new()
 	node.points = points
 	node.default_color = color
 	node.width = width
-	node.antialiased = true
+	node.antialiased = antialiased
+	if not terrain_part.is_empty():
+		node.set_meta("terrain_part", terrain_part)
 	parent.add_child(node)
+	return node
 
 
 func _draw_blocked_corners(cell: Vector2i, canvas: Node2D = null) -> void:

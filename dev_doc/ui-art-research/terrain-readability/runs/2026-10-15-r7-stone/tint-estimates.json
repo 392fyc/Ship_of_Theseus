@@ -1,0 +1,106 @@
+{
+  "format": "terrain-stone-tint-estimates/v1",
+  "status": "source-texture estimates; not Godot capture measurements",
+  "method": {
+    "source_fit_script": "<external-r6-material-workspace>/fit-tint.py",
+    "source_fit_script_sha256": "BB683AE255E7BA473EBB27E6FD6B64EB78EB9857A0D300CB2EDECAA9833DB6A1",
+    "reference_record": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-stone/initial-tint-estimates.json",
+    "reference_record_sha256": "1723B82F6B4B6320DD331FA88715DB78881158C24EA247269F424F2C72AB92B3",
+    "texture_fit": "Numeric-only sampling of source PNG pixels at a 5-pixel step, fitted to a warm-neutral Lab target with hue about 78 degrees and chroma 7. No source raster was changed.",
+    "solid_line_fit": "Direct solid-color conversion from CIE Lab D65 through XYZ to normalized sRGB, then read back with the repository's claude_review_checks.lab helper. These colors are used by untextured Line2D nodes.",
+    "limits": [
+      "Texture modulation values estimate source texture color distributions only.",
+      "Godot filtering, canvas blending, display capture, and overlap with neighboring objects were not measured here.",
+      "Final L* values, wall-cap IQR, visual recognition, and acceptance thresholds require the frozen-candidate native capture."
+    ]
+  },
+  "sources": {
+    "wall_masonry": {
+      "path": "assets/prototype/battlefield_courtyard/masonry-wall-limestone-r6.png",
+      "sha256": "7BF9492ADA3BC008655FDBF4D2AE22716CE17AA02A2DC048E9DCDA99F7420F30",
+      "used_for": "Four-point wall_side polygons; the shader/source texture is multiplied by wall side and dirt tint values."
+    },
+    "coping": {
+      "path": "assets/prototype/battlefield_courtyard/coping-limestone-r6.png",
+      "sha256": "65845274C1A691DAD0EEAF61A26CBE4F1F953AA11E8956EFBEAC7A418183FDEA",
+      "used_for": "wall_top details, pillar sides and top, base, torus, drum, and pillar dirt; their profile RGB values are texture multipliers."
+    },
+    "accepted_review": {
+      "path": "<external-r7-review-evidence>/claude-r6-review.original.md",
+      "sha256": "9988BD28C87C3E0B6981226B21F41CF441039F3E54E11D660BD240321CBAE15F",
+      "used_for": "Accepted B/C criteria, including the R6 wall-side native L* range of 35.2–36.7."
+    },
+    "visual_reference": {
+      "path": "<external-task117-readback>/originals/task117_runner/outputs/10x10_1280x720/10x10_1280x720/main.png",
+      "sha256": "67E6A6FB4DE0EF016F9016F0178118B6FEB1936C1C0F54C01758A86E3B9C6CE4",
+      "use": "Direct inspection of the R6 720p image to identify the pillar silhouette and wall-seam readability problems."
+    }
+  },
+  "texture_multiplier_estimates": {
+    "wall_masonry": {
+      "wall_side_L28": {"rgb": [0.43843, 0.449056, 0.470201], "source_iqr_L": 5.397},
+      "wall_side_L30": {"rgb": [0.46669, 0.480581, 0.50782], "source_iqr_L": 5.709},
+      "wall_side_L32": {"rgb": [0.495235, 0.512453, 0.545882], "source_iqr_L": 6.022},
+      "wall_side_L34": {"rgb": [0.524079, 0.544722, 0.584471], "source_iqr_L": 6.331},
+      "wall_side_L36": {"rgb": [0.553131, 0.577273, 0.623478], "source_iqr_L": 6.64},
+      "wall_side_L38": {"rgb": [0.58245, 0.610141, 0.662864], "source_iqr_L": 6.948}
+    },
+    "coping": {
+      "L25": {"rgb": [0.355986, 0.345838, 0.337839], "source_iqr_L": 3.298},
+      "L30": {"rgb": [0.418898, 0.412971, 0.413821], "source_iqr_L": 3.817},
+      "L32": {"rgb": [0.444541, 0.440374, 0.44491], "source_iqr_L": 4.025},
+      "L34": {"rgb": [0.470434, 0.468058, 0.476308], "source_iqr_L": 4.233},
+      "L35": {"rgb": [0.483466, 0.482006, 0.492155], "source_iqr_L": 4.337},
+      "L37": {"rgb": [0.50972, 0.510119, 0.524125], "source_iqr_L": 4.545},
+      "L38": {"rgb": [0.522934, 0.52428, 0.540229], "source_iqr_L": 4.649},
+      "L40": {"rgb": [0.549522, 0.552802, 0.572688], "source_iqr_L": 4.856},
+      "L42": {"rgb": [0.576321, 0.581585, 0.605464], "source_iqr_L": 5.064},
+      "L44": {"rgb": [0.603311, 0.610625, 0.638593], "source_iqr_L": 5.271},
+      "L48": {"rgb": [0.65792, 0.669427, 0.705606], "source_iqr_L": 5.683},
+      "L50": {"rgb": [0.685506, 0.699162, 0.739536], "source_iqr_L": 5.886},
+      "L52": {"rgb": [0.713271, 0.729127, 0.77379], "source_iqr_L": 6.092},
+      "L54": {"rgb": [0.741247, 0.759314, 0.808239], "source_iqr_L": 6.298},
+      "L56": {"rgb": [0.7694, 0.789719, 0.842998], "source_iqr_L": 6.503}
+    }
+  },
+  "solid_line_srgb": {
+    "wall_joint_lit": {
+      "target_Lab_D65": [29.0, 1.455, 6.847],
+      "rgb": [0.293637, 0.263669, 0.22709],
+      "readback_Lab_D65_8bit": [28.943, 1.677, 6.709],
+      "alpha": 1.0,
+      "observed_underlying_face_L_range": [35.2, 36.7],
+      "intended_delta_L_range": [-7.7, -6.2]
+    },
+    "wall_joint_dark": {
+      "target_Lab_D65": [29.0, 1.455, 6.847],
+      "rgb": [0.293637, 0.263669, 0.22709],
+      "readback_Lab_D65_8bit": [28.943, 1.677, 6.709],
+      "alpha": 1.0,
+      "observed_underlying_face_L_range": [35.2, 36.7],
+      "intended_delta_L_range": [-7.7, -6.2]
+    },
+    "pillar_groove_dark": {
+      "target_Lab_D65": [25.0, 1.455, 6.847],
+      "rgb": [0.257316, 0.228295, 0.192539],
+      "readback_Lab_D65_8bit": [24.864, 1.702, 6.762],
+      "alpha": 1.0,
+      "intended_underlying_face_L": 32.0,
+      "intended_delta_L": -7.0
+    },
+    "pillar_groove_lit": {
+      "target_Lab_D65": [37.0, 1.455, 6.847],
+      "rgb": [0.368446, 0.336782, 0.298704],
+      "readback_Lab_D65_8bit": [36.642, 1.661, 6.675],
+      "alpha": 1.0,
+      "intended_underlying_face_L": 44.0,
+      "intended_delta_L": -7.0
+    }
+  },
+  "profile_use": {
+    "wall_side": "wall_lit_side=L38; wall_dark_side=L36; wall_foot_dirt=L32",
+    "wall_top": "wall_top=L48; wall_weather_dark=L35; wall_weather_light=L56; wall_chip=L52",
+    "pillar": "pillar_lit_side=L44; pillar_dark_side=L32; pillar_top=L52; pillar_foot=L40; pillar_foot_dirt=L30; pillar_torus_dark=L38; pillar_torus_lit=L50",
+    "untextured_lines": "wall_joint_lit, wall_joint_dark, pillar_groove_dark, and pillar_groove_lit are direct opaque colors; wall_mortar and pillar_groove widths are 1 px."
+  }
+}

@@ -305,6 +305,7 @@ func _build_manifest_skeleton(map_data: Dictionary, resolution: Vector2i, case_n
 	capture_config["capture_script_inheritance"] = R7_CAPTURE_SCRIPT_CHAIN.duplicate()
 	capture_config["composite_occupancy_shader"] = R7_OCCUPANCY_SHADER_PATH
 	capture_config["composite_occupancy_rule"] = "last draw item with effective COLOR.a > 0.5 owns the pixel; blend_disabled"
+	capture_config["r7_board_geometry_metadata"] = _r7_board_geometry_record()
 	manifest["capture_config"] = capture_config
 	return manifest
 
@@ -358,3 +359,92 @@ func _close_sessions_and_passes() -> void:
 	_r7_controls_record.clear()
 	_r7_occupancy_material_bindings.clear()
 	super._close_sessions_and_passes()
+
+
+## R7 stone geometry labels bind the authored part to the captured draw leaf.
+## The inherited legacy part_ids pass keeps its original Line2D policy.
+func _r7_stone_part(leaf: CanvasItem, kind: String) -> String:
+	if kind not in ["wall", "pillar"] or not leaf.has_meta("terrain_part"):
+		return ""
+	var part_name := str(leaf.get_meta("terrain_part"))
+	var allowed: Array[String] = ["wall_side", "wall_top", "wall_outline"] if kind == "wall" else ["pillar_base", "pillar_side", "pillar_top", "wall_outline"]
+	if part_name not in allowed or not SEMANTIC_PART_CODES.has(part_name):
+		_abort("R7 stone draw has an invalid terrain_part: " + part_name)
+		return ""
+	return part_name
+
+
+func _classify_wall_child(parent: Node2D, polygon: Polygon2D, kind: String) -> String:
+	var part_name := _r7_stone_part(polygon, kind)
+	if not part_name.is_empty():
+		return part_name
+	return super._classify_wall_child(parent, polygon, kind)
+
+
+func _semantic_part_for_leaf(leaf: CanvasItem, prop_root: Node2D, kind: String) -> Dictionary:
+	var part_name := _r7_stone_part(leaf, kind)
+	if not part_name.is_empty():
+		return {"name": part_name, "code": int(SEMANTIC_PART_CODES[part_name]),
+			"source": "actual production terrain_part metadata on the captured draw leaf"}
+	return super._semantic_part_for_leaf(leaf, prop_root, kind)
+
+
+func _parts_for_instance(node: Node2D, kind: String) -> Dictionary:
+	var result: Dictionary = super._parts_for_instance(node, kind)
+	if kind not in ["wall", "pillar"]:
+		return result
+	var parts: Array = result.get("parts", [])
+	var index := 0
+	for child: Node in node.get_children():
+		if child is not Polygon2D and child is not Line2D:
+			continue
+		if index >= parts.size():
+			_abort("R7 stone part inventory is shorter than its draw leaves")
+			return result
+		var canvas := child as CanvasItem
+		var part_name := _r7_stone_part(canvas, kind)
+		if part_name.is_empty():
+			_abort("R7 stone draw is missing its production terrain_part metadata")
+			return result
+		var part: Dictionary = parts[index]
+		part["production_structural_role"] = part_name
+		part["classification_source"] = "actual production terrain_part metadata on the captured draw leaf"
+		if child is Line2D:
+			part["legacy_part_ids_line_policy"] = "inherited outline color; semantic_pair uses production_structural_role"
+		parts[index] = part
+		index += 1
+	result["parts"] = parts
+	result["structural_classification"] = "R7 production terrain_part metadata"
+	return result
+
+
+func _r7_board_geometry_record() -> Dictionary:
+	var result := {"status": "captured", "prop_roots": []}
+	if not is_instance_valid(_main_board):
+		_abort("R7 geometry metadata has no live production board")
+		return {"status": "UNAVAILABLE", "prop_roots": []}
+	var props_value: Variant = _main_board.get("_props")
+	if not props_value is Array:
+		_abort("R7 geometry metadata has no production prop list")
+		return {"status": "PROP_LIST_UNAVAILABLE", "prop_roots": []}
+	var records: Array[Dictionary] = []
+	for prop_value: Variant in props_value:
+		if not prop_value is Dictionary:
+			continue
+		var prop: Dictionary = prop_value
+		var prop_node := prop.get("node") as Node2D
+		if not is_instance_valid(prop_node) or not prop_node.has_meta("r7_height"):
+			continue
+		var logical_position := _logical_position(prop_node.global_position)
+		var draw_leaf_count := 0
+		for child: Node in prop_node.get_children():
+			if child is Polygon2D or child is Line2D:
+				draw_leaf_count += 1
+		records.append({"node_name": str(prop_node.name),
+			"logical_position": [logical_position.x, logical_position.y],
+			"global_transform": _transform_array(prop_node.global_transform),
+			"r7_height": float(prop_node.get_meta("r7_height")),
+			"r7_height_level": int(prop_node.get_meta("r7_height_level")),
+			"draw_leaf_count": draw_leaf_count})
+	result["prop_roots"] = records
+	return result

@@ -1,0 +1,126 @@
+{
+  "task_id": "TERRAIN-READABILITY-01/R7-MEASUREMENT",
+  "status": "completed",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/ui-ux/terrain-occupancy-r7",
+  "target_head_before": "61c48b37a40a6c75c81321fc66850428f155fede",
+  "candidate_head": "72ea405a8f9100e7b837d2005f967112aeb6df90",
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md; task.md; Claude R6 A-D user adoption",
+      "summary": "新测量版本、冻结旧入口、独立审查、Git原件核验、Dot原生单组"
+    }
+  ],
+  "changed_files": [
+    "tests/claude_review/capture_terrain_readability_r7.gd",
+    "tests/claude_review/terrain_composite_occupancy.gdshader",
+    "tests/claude_review/terrain_contour_v3.py",
+    "tests/claude_review/validate_terrain_acceptance_v3.py",
+    "tests/claude_review/test_terrain_acceptance_v3.py",
+    "tests/claude_review/diagnose_terrain_occupancy_task117.py",
+    "tests/claude_review/terrain_contact_shadow_v2.py",
+    "tests/claude_review/test_terrain_contact_shadow_v2.py",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/claude-review-source.md",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/kb-decision-independent-review.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/kb-decision-postcommit.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/kb-task-receipt.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/offline-reconstruction.md",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/t4-method.md",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/t4-task117-diagnostic.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/task.md",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/task117-occupancy-diagnostic.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/independent-review.json"
+  ],
+  "verification": [
+    {
+      "command": "python -B -m unittest discover -s tests/claude_review -p test_terrain_acceptance_v3.py",
+      "result": "pass",
+      "evidence": "12/12；独审复跑。"
+    },
+    {
+      "command": "python -B tests/claude_review/test_terrain_contact_shadow_v2.py -v",
+      "result": "pass",
+      "evidence": "8/8；独审复跑。"
+    },
+    {
+      "command": "TASK117 occupancy and T4 offline diagnosis",
+      "result": "pass",
+      "evidence": "独审重算一致；N6两点、518遮挡、798孔洞；T4 10 PASS。"
+    },
+    {
+      "command": "git cat-file blob + independent postcommit review",
+      "result": "pass",
+      "evidence": "16文件精确相同；诊断JSON仅CRLF→LF，所有值相同；18 A。"
+    },
+    {
+      "command": "git diff --cached --check",
+      "result": "fail",
+      "evidence": "3处已审EOF空行；无代码/数据差异，保留精确来源文本。"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "合成占据、N1–N6、遮挡分母、T4工具与离线基线",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/independent-review.json",
+        "postcommit independent review pass"
+      ]
+    },
+    {
+      "criterion": "R7原生控制与素材结果",
+      "result": "partial",
+      "evidence": [
+        "该运行属于后续Dot单组Task，工具已就绪。"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "冻结旧采集/旧测量/TASK117/生产素材",
+      "result": "unchanged",
+      "evidence": "提交只有18个新增文件。"
+    }
+  ],
+  "residual_risks": [
+    "原生控制图和R7新素材结论等待后续同候选单组。"
+  ],
+  "escalation_reason": null,
+  "publication": {
+    "published": false,
+    "remote_ref": null
+  },
+  "integration": {
+    "branch": "codex/ui-ux/terrain-material-r7",
+    "head": "9412effed2b9a7ff6dc62b921f358d2ae3b4dc76",
+    "tree": "49dc8390feeed7989342c61b087967493af02a0e",
+    "source_tree": "49dc8390feeed7989342c61b087967493af02a0e",
+    "trees_equal": true
+  },
+  "independent_postcommit_review": {
+    "verdict": "pass",
+    "reviewer": "/root/r7_independent_review",
+    "head": "72ea405a8f9100e7b837d2005f967112aeb6df90",
+    "parent": "61c48b37a40a6c75c81321fc66850428f155fede",
+    "findings": [],
+    "checks": [
+      {
+        "id": "scope",
+        "result": "pass",
+        "evidence": "18 A，无既有文件修改，工作树干净。"
+      },
+      {
+        "id": "git_newline_conversion",
+        "result": "pass",
+        "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-measurement/task117-occupancy-diagnostic.json",
+        "reviewed_bytes": 62130,
+        "reviewed_sha256": "1ab8a1f36c9f9d75547ce8a23f73124cb3463fb79ec338de564277e0eba49d21",
+        "head_bytes": 60440,
+        "head_sha256": "427d7c9ae86f18ab532c3f23e4dbd2b628b7de1e0eadf694d2b524e4833cd9cd",
+        "evidence": "1690 个CRLF转LF，转换后字节相等；解析后的全部JSON值相等。其余16文件HEAD原字节与独审一致。"
+      }
+    ],
+    "allow_head_as_followup_measurement_baseline": true,
+    "measurement_tests_rerun": false
+  }
+}

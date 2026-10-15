@@ -1,0 +1,66 @@
+{
+  "verdict": "pass",
+  "reviewed_parent": "9412effed2b9a7ff6dc62b921f358d2ae3b4dc76",
+  "reviewed_head": "9412effed2b9a7ff6dc62b921f358d2ae3b4dc76",
+  "reviewer": "native independent mercury-reviewer /root/r7_independent_review",
+  "findings": [],
+  "checks": [
+    "工作树范围与任务一致：恰好三个已跟踪修改和四个 R7-stone 新记录。",
+    "墙柱绘制与材质符合已采纳的 B/C 源码要求：柱体有三档高度、斜断口、方柱头、竖槽、柱础环和同格倒伏鼓石；墙侧增加规则错缝、压顶风化细节与轮廓缺角，并移除随机深色斜折线。",
+    "柱础 Polygon2D 的六个几何点与基线相同，只新增部件元数据与颜色参数；每根柱仅此多边形标记为 pillar_base。",
+    "R7 采集器用生产 terrain_part 元数据填充新 structural role；旧 capture role 保持 Line2D 为 outline。T4 按 capture role 过滤 wall_side 多边形边，因此墙砌缝和柱槽线不会进入接地几何分母。",
+    "visual_profile、tint-estimates 和 measurement-dependency-receipt 均可解析；profile 重复键扫描为零，wall_chip 现在保留 L52 对应值。",
+    "对七个候选文件扫描本机绝对路径及凭据模式，没有匹配。",
+    "未运行 Godot，未修改或提交文件。"
+  ],
+  "not_covered": [
+    "实际渲染后的像素指标、材质混合结果、两位新读者的识别结果，以及原生 GDScript 执行；这些按任务安排由 Dot 单组证据核验。"
+  ],
+  "residual_risk": "本结论仅确认源码适合冻结并交 Dot 单组验证，不代表视觉数值、读者识别或运行验收已通过。",
+  "reviewed_files": [
+    {
+      "path": "scripts/ui/playground/courtyard_board_view.gd",
+      "bytes": 47637,
+      "sha256": "1cba2b4e9552258599a828cc83a4fb20037ef4ff0d792c342696b6916568988f"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/visual_profile.json",
+      "bytes": 4268,
+      "sha256": "54fe8edf03509528f67920cf3aba16ac9ce5a5533a745204a36ea208eea56316"
+    },
+    {
+      "path": "tests/claude_review/capture_terrain_readability_r7.gd",
+      "bytes": 22133,
+      "sha256": "d7b70262aa559cce3a731f672e7dae251c49051dd1305ed8e9100ecb640cd571"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-stone/task.md",
+      "bytes": 1461,
+      "sha256": "80eaffdd36660c7cb3040dc485e218925a500ec9858f244a305b5473542d8ec0"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-stone/implementation.md",
+      "bytes": 4267,
+      "sha256": "e51d8106ed346a79e1b045dc68f7429be33aea8a275ab8fa6a36bc75dc8f325a"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-stone/tint-estimates.json",
+      "bytes": 6091,
+      "sha256": "985cb2894500ec39d928c514a1d9af408bde9e1ceb8a30778f9aedd28b938f55"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r7-stone/measurement-dependency-receipt.json",
+      "bytes": 5318,
+      "sha256": "15f009716843cc678c6d80a5e167bad475df692a11ec472f7bbf9339599348ae"
+    }
+  ],
+  "evidence_refs": [
+    "courtyard_board_view.gd:845-868, 869-948 — 柱体高度、断口、鼓石、柱头、柱槽与柱础环。",
+    "courtyard_board_view.gd:962-996 — 墙体错缝与砌缝 Line2D 部件标记。",
+    "capture_terrain_readability_r7.gd:364-417 — 生产部件元数据及独立 structural role；旧 role 未被覆盖。",
+    "capture_terrain_readability.gd:548-570 — 基础 capture 将 Line2D 的 role 记录为 outline。",
+    "terrain_contact_shadow_v2.py:229-240 — T4 只将 capture role 为 wall_side 的四顶点多边形底边用于接地测量。",
+    "courtyard_board_view.gd:853-855 — 唯一 pillar_base 多边形及其保持不变的六点几何。",
+    "visual_profile.json:140-144 — 修正后的唯一 wall_chip 条目；tint-estimates.json:100-102 记录其 L52 目标。"
+  ]
+}
