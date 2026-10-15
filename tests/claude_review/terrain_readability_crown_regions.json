@@ -1,7 +1,7 @@
 {
   "schema_version": "terrain-readability-regions/1",
-  "texture_path": "res://assets/prototype/battlefield_courtyard/forest-tree-v3.png",
-  "texture_sha256": "616f54a6816f026d0154c390460ea4b90fdf3ddcbc8b782dcf295feffbf0be52",
+  "texture_path": "res://assets/prototype/battlefield_courtyard/forest-tree-v3b.png",
+  "texture_sha256": "4139562f7d0e6adafb18d0f7b73750dae480f4f20abce179f1540ae4bd53d856",
   "atlas_region": [
     286,
     33,
@@ -9,7 +9,7 @@
     950
   ],
   "coordinate_space": "atlas_region_local_pixels",
-  "annotation_method": "在forest-tree-v3.png的原始1536x1024图上逐簇目视核对既有冠区包络；坐标为AtlasTexture区域局部像素，含冠内细枝、排除主干与树根，并与v3实际alpha相交。不按颜色、亮度或测量结果挑选像素。与v2并排复核后，C1-C7顶点均仍贴合可见簇边/冠内枝条，未发现需要移动顶点的明确空间错位，因此只更新源绑定，不改几何。",
+  "annotation_method": "沿用v3已审查的C1-C7几何。v3b仅派生RGB，画布、atlas与alpha不变；本次只更新纹理来源绑定，不按颜色、亮度或测量结果重新选择坐标。crown_geometry批准沿用既有几何，新的来源绑定与RGB派生交独立审查后使用。",
   "review_status": "approved",
   "regions": {
     "crown": [
@@ -614,5 +614,11 @@
       "批准仅涵盖展平PNG上的crown_geometry分类。",
       "不代表Godot投影、Dot原生测量或最终美术批准。"
     ]
+  },
+  "derivation": {
+    "parent_annotation_sha256": "3d7248450069c3cb04ce101453073cce1a7c180c4ce55b63c93a04dcb305aa92",
+    "parent_texture_sha256": "616f54a6816f026d0154c390460ea4b90fdf3ddcbc8b782dcf295feffbf0be52",
+    "changed_scope": "RGB only; atlas and alpha unchanged",
+    "geometry_unchanged": true
   }
 }

@@ -1,7 +1,7 @@
 {
   "schema_version": "terrain-readability-tree-semantics/1",
-  "texture_path": "res://assets/prototype/battlefield_courtyard/forest-tree-v3.png",
-  "texture_sha256": "616f54a6816f026d0154c390460ea4b90fdf3ddcbc8b782dcf295feffbf0be52",
+  "texture_path": "res://assets/prototype/battlefield_courtyard/forest-tree-v3b.png",
+  "texture_sha256": "4139562f7d0e6adafb18d0f7b73750dae480f4f20abce179f1540ae4bd53d856",
   "atlas_region": [
     286,
     33,
@@ -10,10 +10,10 @@
   ],
   "coordinate_space": "atlas_region_local_pixels",
   "base_crown_annotation_path": "res://tests/claude_review/terrain_readability_crown_regions.json",
-  "base_crown_annotation_sha256": "d344c1a5c5e0560295588341e0cddf35a3c1840bd64772a45da146824dd7668c",
+  "base_crown_annotation_sha256": "f60950a76b9e4e664a1614a23a3c13ec8b6853a07e9a513f9a95b3cffa3c98ca",
   "author": "Codex ui-ux 主代理；对现有展平素材作人工语义分类，不追溯生成模型的内部意图。",
   "review_status": "pending_author_review",
-  "annotation_method": "在forest-tree-v3.png原始1536x1024图上按上左受光方向逐区核对C1-C6叶簇的下缘/侧面暗部。与v3实际alpha及新绑定的C1-C7几何相交；不按亮度、颜色阈值或待测数值选像素。与v2逐区对照后D1-D9仍贴合对应暗侧叶片区域，未发现需移动顶点的明确边界错位，因此保留多边形顶点；暗面亮度已经变化，不能据此推断T3达标。C7裸枝不标成叶片暗侧。",
+  "annotation_method": "沿用v3已独立审查的D1-D9暗侧叶片几何和outline缺席分类。v3b仅作RGB分区调色，画布、atlas与alpha不变，全部顶点原样保留；此次重新绑定纹理和crown来源，独立审查以RGB派生边界和几何同一性为依据。",
   "light_direction": "upper_left",
   "regions": {
     "dark_side": [
@@ -483,5 +483,10 @@
     "reference_texture_sha256": "0db7cb1e145af28443d6eed31ad38c84cdcf48cd6d8cff4b2ded224a44799203",
     "changed_alpha_pixels": 444887,
     "decision": "D1-D9的坐标经v3原图叠加及局部放大对照后保留；不得称alpha或阴影强度与v2相同。"
+  },
+  "derivation": {
+    "parent_annotation_sha256": "926d70464e6210552d308e51aba4bc1ca42525508f0068c1658cfcd66210093e",
+    "parent_texture_sha256": "616f54a6816f026d0154c390460ea4b90fdf3ddcbc8b782dcf295feffbf0be52",
+    "geometry_unchanged": true
   }
 }

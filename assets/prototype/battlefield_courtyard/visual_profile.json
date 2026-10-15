@@ -2,7 +2,8 @@
   "ground": "res://assets/prototype/battlefield_courtyard/stone-ground-v1.png",
   "moss": "res://assets/prototype/battlefield_courtyard/moss-ground-v1.png",
   "water": "res://assets/prototype/battlefield_courtyard/water-surface-v5.png",
-  "masonry": "res://assets/prototype/battlefield_courtyard/masonry-wall-v2.png",
+  "masonry": "res://assets/prototype/battlefield_courtyard/masonry-wall-limestone-r5.png",
+  "coping": "res://assets/prototype/battlefield_courtyard/coping-limestone-r5.png",
   "rubble": {
     "texture": "res://assets/prototype/battlefield_courtyard/low-rubble-v1.png",
     "region": [
@@ -70,7 +71,7 @@
   "backdrop_color": "13171dff",
   "meadow": "res://assets/prototype/battlefield_courtyard/meadow-ground-v2.png",
   "tree": {
-    "texture": "res://assets/prototype/battlefield_courtyard/forest-tree-v3.png",
+    "texture": "res://assets/prototype/battlefield_courtyard/forest-tree-v3b.png",
     "region": [
       286,
       33,
@@ -88,20 +89,102 @@
   },
   "rock": "res://assets/prototype/battlefield_courtyard/natural-rock-v1.png",
   "prop_tints": {
-    "wall_top": [1.397929,1.413462,1.273669,1],
-    "wall_lit_side": [1,1,1,1],
-    "wall_dark_side": [0.7,0.73,0.68,1],
-    "wall_lit_edge": [0.58,0.60,0.51,0.65],
-    "wall_other_edge": [0.4666666666666667,0.49411764705882355,0.403921568627451,0.2196078431372549],
-    "pillar_top": [1.27612,1.298639,1.171027,1],
-    "pillar_lit_side": [1.26,1.28,1.2,1],
-    "pillar_dark_side": [0.72,0.75,0.69,1],
-    "pillar_foot": [0.95,0.98,0.89,1],
-    "tree": [1.088777,1.281212,0.602625,1],
-    "environment_tree": [1.4,1.5,0.98,1],
-    "shrub": [1.45,1.6,0.95,1],
-    "rubble": [1.55,1.59,1.44,1],
-    "environment_rubble": [1.38,1.42,1.29,1]
+    "wall_top": [
+      0.48,
+      0.5,
+      0.51,
+      1
+    ],
+    "wall_lit_side": [
+      0.44,
+      0.46,
+      0.47,
+      1
+    ],
+    "wall_dark_side": [
+      0.32,
+      0.34,
+      0.36,
+      1
+    ],
+    "wall_lit_edge": [
+      0.45,
+      0.47,
+      0.46,
+      0.65
+    ],
+    "wall_other_edge": [
+      0.2,
+      0.22,
+      0.21,
+      0.42
+    ],
+    "pillar_top": [
+      0.5,
+      0.52,
+      0.53,
+      1
+    ],
+    "pillar_lit_side": [
+      0.44,
+      0.46,
+      0.47,
+      1
+    ],
+    "pillar_dark_side": [
+      0.32,
+      0.34,
+      0.36,
+      1
+    ],
+    "pillar_foot": [
+      0.35,
+      0.37,
+      0.37,
+      1
+    ],
+    "pillar_base_edge": [
+      0.21,
+      0.23,
+      0.22,
+      0.8
+    ],
+    "pillar_cap_edge": [
+      0.42,
+      0.45,
+      0.44,
+      0.6
+    ],
+    "tree": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "environment_tree": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "shrub": [
+      1.45,
+      1.6,
+      0.95,
+      1
+    ],
+    "rubble": [
+      1.55,
+      1.59,
+      1.44,
+      1
+    ],
+    "environment_rubble": [
+      1.38,
+      1.42,
+      1.29,
+      1
+    ]
   },
   "prop_strokes": {
     "wall_lit_edge": 1.25,

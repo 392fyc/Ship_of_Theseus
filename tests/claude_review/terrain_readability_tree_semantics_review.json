@@ -1,138 +1,35 @@
 {
   "schema_version": "terrain-readability-tree-semantics-review/1",
   "verdict": "PASS",
-  "annotation_sha256": "19629f720a67c42cdd18d8ab69b388e9e696ec58e3676321820f5912015281a3",
-  "texture_sha256": "616f54a6816f026d0154c390460ea4b90fdf3ddcbc8b782dcf295feffbf0be52",
-  "base_crown_annotation_sha256": "d344c1a5c5e0560295588341e0cddf35a3c1840bd64772a45da146824dd7668c",
+  "annotation_sha256": "abf3d330a41ba4c26416fdbadc2570c6cad05cf0538c678deb455ef7bf512af8",
+  "texture_sha256": "4139562f7d0e6adafb18d0f7b73750dae480f4f20abce179f1540ae4bd53d856",
+  "base_crown_annotation_sha256": "f60950a76b9e4e664a1614a23a3c13ec8b6853a07e9a513f9a95b3cffa3c98ca",
   "approved_scope": [
     "dark_side_geometry",
     "outline_absence"
   ],
+  "pending_scope": [],
   "criteriaResults": [
+    {
+      "criterion": "exact_source_binding",
+      "verdict": "PASS",
+      "evidence": "作者标注、树PNG与树冠基准文件的实际SHA256分别为abf3d330a41ba4c26416fdbadc2570c6cad05cf0538c678deb455ef7bf512af8、4139562f7d0e6adafb18d0f7b73750dae480f4f20abce179f1540ae4bd53d856、f60950a76b9e4e664a1614a23a3c13ec8b6853a07e9a513f9a95b3cffa3c98ca，与本记录绑定值相同。"
+    },
+    {
+      "criterion": "alpha_and_atlas_geometry",
+      "verdict": "PASS",
+      "evidence": "v3b为1536×1024 RGBA；逐像素alpha与v3完全相同，alpha字节SHA256为cd88a9d9d8d1ffda4e45ef01de55e0366bd0213966642d000d4433a944ea34ee；atlas区间[286,33,964,950]之外RGBA逐像素相同。冠区及暗侧顶点数组均与父提交91457ab460565d20e61a8c609e5eb7cf46112895一致。"
+    },
     {
       "criterion": "dark_side_geometry",
       "verdict": "PASS",
-      "evidence": "v3原图、C1-C7叠加、D1-D9暗侧叠加及局部v2/v3放大对照：D1-D9分别落在C1-C6叶簇的下缘或侧面阴影叶面，边界跟随成片叶面。区域内保留了纹理自然起伏，没有按亮度筛掉局部亮叶点；C7裸枝、主干和树根没有被标成叶片暗侧。九个闭合多边形均对应可见叶片区域。"
+      "evidence": "D1-D9共9个区域未移动；将其叠加到最终v3b树图后，区域对应冠内叶团的背光下缘/侧面，没有包入主干或树根，也未切出树冠alpha轮廓。"
     },
     {
       "criterion": "outline_absence",
       "verdict": "PASS",
-      "evidence": "v3原PNG及叠加图可见叶缘、叶簇间隙和枝干局部暗边；其宽度与走向随叶片重叠和枝干体积变化，没有围绕叶簇或整冠独立连续、均匀的强描边带。空outline数组与可见图像相符，批准的是这项狭义缺席分类。"
+      "evidence": "最终展平树图中没有独立、连续的外轮廓对象；可见暗色像素属于叶片边缘明暗和枝干纹理。作者声明outline_semantics.present=false且regions.outline为空数组，与图像观察一致。"
     }
   ],
-  "image_evidence": [
-    {
-      "item": "forest-tree-v3.png原始RGBA",
-      "observation": "新图中叶面整体色相变绿、明暗层次有变化；叶簇位置和总体构图与v2对应。主干、分枝与根系保持为木质区域。透明边缘可见低alpha柔和过渡。"
-    },
-    {
-      "item": "tree-r3-review-crown-overlay.png",
-      "observation": "C1-C6分别沿着六个可见叶簇，C7沿C1与C3之间冠内裸枝。所有冠区均避开主干根部；枝条和叶簇间空隙按几何边界区分。"
-    },
-    {
-      "item": "tree-r3-review-dark-side-overlay.png",
-      "observation": "D1-D9位于各自叶簇的下缘或侧面；没有把C7裸枝、主干或树根圈作暗侧叶面。红色区域是语义区域覆盖显示，不是通过亮度阈值筛选的像素集。"
-    },
-    {
-      "item": "tree-r3-review-dark-side-zoom.png",
-      "observation": "九个区域的v2/v3并排局部图中，叶片暗侧关系在颜色改变后仍能辨认；所见的叶片纹理起伏不改变区域按叶面几何分类。"
-    },
-    {
-      "item": "forest-tree-v2.png参考原图",
-      "observation": "旧图也有低alpha柔边；与v3并看没有发现新增的外扩实质性光晕或连续描边。"
-    }
-  ],
-  "alpha_edge_comparison": {
-    "v2": {
-      "alpha_ge_4_pixels": 421983,
-      "alpha_ge_4_bbox_xyxy": [
-        291,
-        36,
-        1242,
-        981
-      ],
-      "outer_280px_max_alpha": 1,
-      "outer_280px_nonzero_count": 402
-    },
-    "v3": {
-      "alpha_ge_4_pixels": 416678,
-      "alpha_ge_4_bbox_xyxy": [
-        290,
-        36,
-        1244,
-        981
-      ],
-      "outer_280px_max_alpha": 1,
-      "outer_280px_nonzero_count": 565
-    },
-    "changed_alpha_pixels": 444887
-  },
-  "limitations": [
-    "仅批准新纹理绑定下的dark_side_geometry与outline_absence语义分类，不批准T3数值或色彩可读性阈值。",
-    "作者标注terrain_readability_tree_semantics.json的review_status保持pending_author_review。",
-    "新材质仍需Dot原生测量；本审查不构成最终美术批准、Godot运行验收或Milestone批准。"
-  ],
-  "reviewed_inputs": [
-    {
-      "path": "tests/claude_review/terrain_readability_tree_semantics.json",
-      "bytes": 9519,
-      "sha256": "19629f720a67c42cdd18d8ab69b388e9e696ec58e3676321820f5912015281a3"
-    },
-    {
-      "path": "assets/prototype/battlefield_courtyard/forest-tree-v3.png",
-      "bytes": 1734825,
-      "sha256": "616f54a6816f026d0154c390460ea4b90fdf3ddcbc8b782dcf295feffbf0be52"
-    },
-    {
-      "path": "tests/claude_review/terrain_readability_crown_regions.json",
-      "bytes": 12075,
-      "sha256": "d344c1a5c5e0560295588341e0cddf35a3c1840bd64772a45da146824dd7668c"
-    },
-    {
-      "path": "assets/prototype/battlefield_courtyard/visual_profile.json",
-      "bytes": 2690,
-      "sha256": "9f0e9308577c78d0cd83d9523459f2d161b87f053270c2eec600907b0578e053"
-    },
-    {
-      "path": "assets/prototype/battlefield_courtyard/source-manifest.json",
-      "bytes": 30060,
-      "sha256": "994ed475c8e3c63382a2a93335085f07d650d0ac79cdc5540ce4e61406232015"
-    },
-    {
-      "path": "dev_doc/ui-art-research/terrain-readability/material-r3-generation.json",
-      "bytes": 3584,
-      "sha256": "d3c96f43c420c33014a24867db843f4f498b1206a197d5ec0dd7e6c0c033e4d8"
-    },
-    {
-      "path": "<仓库外证据根>/tree-r3-review-crown-overlay.png",
-      "bytes": 1044489,
-      "sha256": "1952311eab137723205af00069fc4aa7d1693e09428c6b2c10aa4325432e70b8"
-    },
-    {
-      "path": "<仓库外证据根>/tree-r3-review-dark-side-overlay.png",
-      "bytes": 1055649,
-      "sha256": "581fc739e5218e84b64971d60916e21b55e12faca74dbe0ce7a8dbd646e22770"
-    },
-    {
-      "path": "<仓库外证据根>/tree-r3-review-dark-side-zoom.png",
-      "bytes": 390081,
-      "sha256": "fa74fd3f85dc861ee05eb15c9ebecaf1abc23dd4b53389c478fb8ddae2b2bd4b"
-    },
-    {
-      "path": "assets/prototype/battlefield_courtyard/forest-tree-v2.png",
-      "bytes": 1733266,
-      "sha256": "0db7cb1e145af28443d6eed31ad38c84cdcf48cd6d8cff4b2ded224a44799203"
-    }
-  ],
-  "candidate_status": "candidate_pending_native_measurement",
-  "review_context": {
-    "baseline_head": "f047ce757051f366678a74f2739f9d94399d9a61",
-    "prior_TASK98_tree_counts": {
-      "PASS": 1,
-      "FAIL": 11,
-      "NOT_TESTED": 0
-    },
-    "godot_run": "not_performed",
-    "dot_native_measurement": "pending"
-  }
+  "note": "本次是RGB派生下的几何与alpha绑定复核，仅批准dark_side_geometry和outline_absence。它不构成RGB美术验收、Godot运行验收或云端实际采集验收。"
 }

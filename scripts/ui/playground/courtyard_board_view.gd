@@ -14,6 +14,7 @@ var _meadow: Texture2D
 var _moss: Texture2D
 var _water: Texture2D
 var _masonry: Texture2D
+var _coping: Texture2D
 var _rock: Texture2D
 var _surface_layer: Polygon2D
 var _detail_layer: Node2D
@@ -49,6 +50,7 @@ func configure(value: Grid, visual_profile: Dictionary, layout: Dictionary = {})
 	_moss = load(str(profile["moss"])) as Texture2D
 	_water = load(str(profile["water"])) as Texture2D
 	_masonry = load(str(profile["masonry"])) as Texture2D
+	_coping = load(str(profile.get("coping", profile["ground"]))) as Texture2D
 	_rock = load(str(profile.get("rock", profile["ground"]))) as Texture2D
 	_rubble = _atlas(profile["rubble"])
 	_entry = _atlas(profile["entry"])
@@ -667,6 +669,7 @@ func _add_sprite(texture: Texture2D, spec: Dictionary, foot: Vector2, size_scale
 	root.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	var sprite := Sprite2D.new()
 	sprite.texture = texture
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	sprite.centered = false
 	var dims: Array = spec["display_size"]
 	var anchor: Array = spec["foot_offset"]
@@ -754,16 +757,31 @@ func _add_pillar(cell: Vector2i) -> void:
 	var root := Node2D.new()
 	root.name = "WeatheredStonePillar"
 	root.position = point(cell.x, cell.y)
+	root.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	root.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	# 宽柱脚、收分柱身和残缺柱头共同表达庭院柱廊的遗迹。
+	# 保持柱脚为第一个多边形、柱顶为最后一个，沿用冻结采集器的部件分类。
 	var foot := PackedVector2Array([Vector2(0, -9), Vector2(16, -2), Vector2(16, 3), Vector2(0, 11), Vector2(-16, 3), Vector2(-16, -2)])
-	var shaft := PackedVector2Array([Vector2(0, -6), Vector2(10, -1), Vector2(10, 2), Vector2(0, 7), Vector2(-10, 2), Vector2(-10, -1)])
+	var shaft := PackedVector2Array([Vector2(0, -9), Vector2(8, -5), Vector2(10, -2), Vector2(8, 1), Vector2(0, 5), Vector2(-8, 1), Vector2(-10, -2), Vector2(-8, -5)])
 	_polygon(root, foot, _prop_tint("pillar_foot", Color("777d69")))
-	var top: PackedVector2Array = shaft.duplicate()
-	for i: int in top.size():
-		top[i].y -= 38.0 + sin(float(i) * 1.5 + float(cell.x)) * 2.0
-	for edge: int in range(2, 5):
+	var neck: PackedVector2Array = shaft.duplicate()
+	for i: int in neck.size():
+		neck[i] = Vector2(neck[i].x * 0.83, neck[i].y * 0.83 - 29.0)
+	for edge: int in range(2, 6):
 		var next: int = (edge + 1) % shaft.size()
-		_polygon(root, PackedVector2Array([top[edge], top[next], shaft[next], shaft[edge]]), _prop_tint("pillar_lit_side", Color("a5a691")) if edge < 3 else _prop_tint("pillar_dark_side", Color("7a806e")), true)
+		_polygon(root, PackedVector2Array([neck[edge], neck[next], shaft[next], shaft[edge]]),
+			_prop_tint("pillar_lit_side", Color("a5a691")) if edge < 4 else _prop_tint("pillar_dark_side", Color("7a806e")), true)
+	var top := PackedVector2Array([Vector2(0, -43), Vector2(10, -38), Vector2(13, -34), Vector2(10, -31), Vector2(0, -27), Vector2(-10, -31), Vector2(-13, -34), Vector2(-10, -38)])
+	# 两个相邻缺角打破完整柱头，保留左上受光方向。
+	top[0].y += 2.0 if cell.x % 2 == 0 else 0.0
+	top[1].y += 3.0 if cell.x % 2 == 0 else 1.0
+	for edge: int in range(2, 6):
+		var next: int = (edge + 1) % top.size()
+		_polygon(root, PackedVector2Array([top[edge], top[next], neck[next], neck[edge]]),
+			_prop_tint("pillar_lit_side", Color("a5a691")) if edge < 4 else _prop_tint("pillar_dark_side", Color("7a806e")), true)
 	_polygon(root, top, _prop_tint("pillar_top", Color("c0bca6")))
+	_line(root, PackedVector2Array([foot[2], foot[3], foot[4]]), _prop_tint("pillar_base_edge", Color("4b4e47")), 1.5)
+	_line(root, PackedVector2Array([top[6], top[7], top[0], top[1]]), _prop_tint("pillar_cap_edge", Color("92958b")), 0.8)
 	_actor_layer.add_child(root)
 	_props.append({"node": root, "wind": false, "bounds": Rect2(-18, -48, 36, 61)})
 
@@ -782,15 +800,19 @@ func _polygon(parent: Node2D, points: PackedVector2Array, tint: Color, wall_face
 	node.polygon = points
 	var top_uv := PackedVector2Array()
 	for p: Vector2 in points:
-		top_uv.append((p + parent.position) * 10.0 + Vector2(400, 400))
+		var world: Vector2 = p + parent.position
+		top_uv.append(Vector2(world.x / 32.0 + world.y / 16.0,
+			world.y / 16.0 - world.x / 32.0) * 128.0 + Vector2(400, 400))
 	node.uv = top_uv
-	node.texture = _ground
+	node.texture = _coping
 	if wall_face:
 		var u0: float = (parent.position.x + points[0].x) * 22.36068
 		var u1: float = (parent.position.x + points[1].x) * 22.36068
 		node.uv = PackedVector2Array([Vector2(u0, -(points[3].y - points[0].y) * 20.0),
 			Vector2(u1, -(points[2].y - points[1].y) * 20.0), Vector2(u1, 0), Vector2(u0, 0)])
 		node.texture = _masonry
+	node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	node.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	# Polygon2D 的顶点颜色会压到 RGBA8；节点着色保留大于 1 的亮度系数。
 	node.color = Color(1.0, 1.0, 1.0, tint.a)
 	node.self_modulate = Color(tint.r, tint.g, tint.b, 1.0)
