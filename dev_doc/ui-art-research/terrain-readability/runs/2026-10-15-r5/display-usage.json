@@ -1,0 +1,452 @@
+{
+  "schema": "sot-r5-display-usage/1",
+  "candidate": "b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8",
+  "resolution": [
+    1280,
+    720
+  ],
+  "case": "calibration_courtyard 10x10",
+  "definition": "Visible instance bounding boxes from exact semantic_pair RGB token and frozen coverage.A=255/R>127; not full source-image or texture-UV extents. Unknown semantic parts remain included.",
+  "filter": "CanvasItem.TEXTURE_FILTER_NEAREST set on using Sprite2D and Polygon2D nodes",
+  "mipmap": false,
+  "materials": {
+    "forest-tree-v3b.png": {
+      "image_size": [
+        1536,
+        1024
+      ],
+      "atlas_region": [
+        286,
+        33,
+        964,
+        950
+      ]
+    },
+    "masonry-wall-limestone-r5.png": {
+      "image_size": [
+        1254,
+        1254
+      ],
+      "usage": "side faces of walls and pillars; geometry-mapped texture, no fixed rectangular UI display size"
+    },
+    "coping-limestone-r5.png": {
+      "image_size": [
+        1254,
+        1254
+      ],
+      "usage": "tops and plinths of walls and pillars; geometry-mapped texture, no fixed rectangular UI display size"
+    }
+  },
+  "instances": [
+    {
+      "stable_id": "pillar@1.00,4.00",
+      "type": "pillar",
+      "visible_pixels_alpha_gt_0_5": 904,
+      "bbox_pixels": [
+        437,
+        254,
+        29,
+        51
+      ]
+    },
+    {
+      "stable_id": "pillar@1.00,7.00",
+      "type": "pillar",
+      "visible_pixels_alpha_gt_0_5": 910,
+      "bbox_pixels": [
+        348,
+        298,
+        30,
+        51
+      ]
+    },
+    {
+      "stable_id": "pillar@8.00,4.00",
+      "type": "pillar",
+      "visible_pixels_alpha_gt_0_5": 881,
+      "bbox_pixels": [
+        643,
+        359,
+        29,
+        49
+      ]
+    },
+    {
+      "stable_id": "tree@0.00,0.00",
+      "type": "tree",
+      "visible_pixels_alpha_gt_0_5": 753,
+      "bbox_pixels": [
+        519,
+        169,
+        47,
+        54
+      ],
+      "source_atlas_region": [
+        286.0,
+        33.0,
+        964.0,
+        950.0
+      ],
+      "source_sprite_transform": [
+        0.0623029060661793,
+        0.0,
+        0.0,
+        0.0623014755547047,
+        -34.125,
+        -55.9650001525879
+      ]
+    },
+    {
+      "stable_id": "tree@0.00,1.00",
+      "type": "tree",
+      "visible_pixels_alpha_gt_0_5": 1402,
+      "bbox_pixels": [
+        478,
+        181,
+        57,
+        57
+      ],
+      "source_atlas_region": [
+        286.0,
+        33.0,
+        964.0,
+        950.0
+      ],
+      "source_sprite_transform": [
+        0.0660684630274773,
+        0.0,
+        0.0,
+        0.0660669431090355,
+        -36.1875,
+        -59.3474998474121
+      ]
+    },
+    {
+      "stable_id": "tree@0.00,8.00",
+      "type": "tree",
+      "visible_pixels_alpha_gt_0_5": 1249,
+      "bbox_pixels": [
+        279,
+        281,
+        60,
+        58
+      ],
+      "source_atlas_region": [
+        286.0,
+        33.0,
+        964.0,
+        950.0
+      ],
+      "source_sprite_transform": [
+        0.0698340237140656,
+        0.0,
+        0.0,
+        0.0698324218392372,
+        -38.25,
+        -62.7299995422363
+      ]
+    },
+    {
+      "stable_id": "tree@0.00,9.00",
+      "type": "tree",
+      "visible_pixels_alpha_gt_0_5": 1155,
+      "bbox_pixels": [
+        244,
+        302,
+        52,
+        53
+      ],
+      "source_atlas_region": [
+        286.0,
+        33.0,
+        964.0,
+        950.0
+      ],
+      "source_sprite_transform": [
+        0.0623029060661793,
+        0.0,
+        0.0,
+        0.0623014755547047,
+        -34.125,
+        -55.9650001525879
+      ]
+    },
+    {
+      "stable_id": "tree@1.00,0.00",
+      "type": "tree",
+      "visible_pixels_alpha_gt_0_5": 1245,
+      "bbox_pixels": [
+        539,
+        184,
+        54,
+        54
+      ],
+      "source_atlas_region": [
+        286.0,
+        33.0,
+        964.0,
+        950.0
+      ],
+      "source_sprite_transform": [
+        0.0623029060661793,
+        0.0,
+        0.0,
+        0.0623014755547047,
+        -34.125,
+        -55.9650001525879
+      ]
+    },
+    {
+      "stable_id": "tree@1.00,9.00",
+      "type": "tree",
+      "visible_pixels_alpha_gt_0_5": 1239,
+      "bbox_pixels": [
+        281,
+        317,
+        54,
+        53
+      ],
+      "source_atlas_region": [
+        286.0,
+        33.0,
+        964.0,
+        950.0
+      ],
+      "source_sprite_transform": [
+        0.0623029060661793,
+        0.0,
+        0.0,
+        0.0623014755547047,
+        -34.125,
+        -55.9650001525879
+      ]
+    },
+    {
+      "stable_id": "tree@8.00,0.00",
+      "type": "tree",
+      "visible_pixels_alpha_gt_0_5": 683,
+      "bbox_pixels": [
+        752,
+        287,
+        50,
+        50
+      ],
+      "source_atlas_region": [
+        286.0,
+        33.0,
+        964.0,
+        950.0
+      ],
+      "source_sprite_transform": [
+        0.0623029060661793,
+        0.0,
+        0.0,
+        0.0623014755547047,
+        -34.125,
+        -55.9650001525879
+      ]
+    },
+    {
+      "stable_id": "tree@8.00,9.00",
+      "type": "tree",
+      "visible_pixels_alpha_gt_0_5": 1159,
+      "bbox_pixels": [
+        480,
+        420,
+        51,
+        53
+      ],
+      "source_atlas_region": [
+        286.0,
+        33.0,
+        964.0,
+        950.0
+      ],
+      "source_sprite_transform": [
+        0.0623029060661793,
+        0.0,
+        0.0,
+        0.0623014755547047,
+        -34.125,
+        -55.9650001525879
+      ]
+    },
+    {
+      "stable_id": "tree@9.00,0.00",
+      "type": "tree",
+      "visible_pixels_alpha_gt_0_5": 737,
+      "bbox_pixels": [
+        780,
+        302,
+        48,
+        53
+      ],
+      "source_atlas_region": [
+        286.0,
+        33.0,
+        964.0,
+        950.0
+      ],
+      "source_sprite_transform": [
+        0.0623029060661793,
+        0.0,
+        0.0,
+        0.0623014755547047,
+        -34.125,
+        -55.9650001525879
+      ]
+    },
+    {
+      "stable_id": "tree@9.00,1.00",
+      "type": "tree",
+      "visible_pixels_alpha_gt_0_5": 1382,
+      "bbox_pixels": [
+        751,
+        314,
+        57,
+        56
+      ],
+      "source_atlas_region": [
+        286.0,
+        33.0,
+        964.0,
+        950.0
+      ],
+      "source_sprite_transform": [
+        0.0660684630274773,
+        0.0,
+        0.0,
+        0.0660669431090355,
+        -36.1875,
+        -59.3474998474121
+      ]
+    },
+    {
+      "stable_id": "tree@9.00,8.00",
+      "type": "tree",
+      "visible_pixels_alpha_gt_0_5": 1175,
+      "bbox_pixels": [
+        535,
+        414,
+        61,
+        60
+      ],
+      "source_atlas_region": [
+        286.0,
+        33.0,
+        964.0,
+        950.0
+      ],
+      "source_sprite_transform": [
+        0.0698340237140656,
+        0.0,
+        0.0,
+        0.0698324218392372,
+        -38.25,
+        -62.7299995422363
+      ]
+    },
+    {
+      "stable_id": "tree@9.00,9.00",
+      "type": "tree",
+      "visible_pixels_alpha_gt_0_5": 1233,
+      "bbox_pixels": [
+        517,
+        434,
+        54,
+        54
+      ],
+      "source_atlas_region": [
+        286.0,
+        33.0,
+        964.0,
+        950.0
+      ],
+      "source_sprite_transform": [
+        0.0623029060661793,
+        0.0,
+        0.0,
+        0.0623014755547047,
+        -34.125,
+        -55.9650001525879
+      ]
+    },
+    {
+      "stable_id": "wall@3.00,1.00",
+      "type": "wall",
+      "visible_pixels_alpha_gt_0_5": 794,
+      "bbox_pixels": [
+        577,
+        248,
+        43,
+        42
+      ]
+    },
+    {
+      "stable_id": "wall@3.00,2.00",
+      "type": "wall",
+      "visible_pixels_alpha_gt_0_5": 874,
+      "bbox_pixels": [
+        554,
+        262,
+        38,
+        39
+      ]
+    },
+    {
+      "stable_id": "wall@4.00,1.00",
+      "type": "wall",
+      "visible_pixels_alpha_gt_0_5": 1090,
+      "bbox_pixels": [
+        606,
+        260,
+        44,
+        45
+      ]
+    },
+    {
+      "stable_id": "wall@5.00,1.00",
+      "type": "wall",
+      "visible_pixels_alpha_gt_0_5": 1013,
+      "bbox_pixels": [
+        636,
+        275,
+        43,
+        39
+      ]
+    },
+    {
+      "stable_id": "wall@6.00,1.00",
+      "type": "wall",
+      "visible_pixels_alpha_gt_0_5": 984,
+      "bbox_pixels": [
+        665,
+        289,
+        37,
+        45
+      ]
+    },
+    {
+      "stable_id": "wall@6.00,2.00",
+      "type": "wall",
+      "visible_pixels_alpha_gt_0_5": 892,
+      "bbox_pixels": [
+        643,
+        306,
+        37,
+        39
+      ]
+    },
+    {
+      "stable_id": "wall@8.00,7.00",
+      "type": "wall",
+      "visible_pixels_alpha_gt_0_5": 67,
+      "bbox_pixels": [
+        570,
+        418,
+        14,
+        28
+      ]
+    }
+  ]
+}

@@ -1,0 +1,195 @@
+{
+  "schema_version": "sot-r5-final-record-independent-review/1",
+  "verdict": "PASS",
+  "reviewed_at_utc": "2026-10-15T05:28:10Z",
+  "verdict_scope": "批准当前 R5 证据记录包进入记录分支提交准备。该结论核验了候选绑定、原图副本、记录内容与 TASK115 关闭证据；不代表整体美术批准、六组复测完成或里程碑完成。Main 仍需按计划逐字节复制本审查至记录目录的 independent-review.json，生成不含自身的 evidence-manifest.json，并在提交后逐个核对 Git blob。",
+  "binding": {
+    "candidate": {
+      "commit": "b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8",
+      "tree": "45bc1389051f614f6f1c5389a9bdacdbf0aef7a6",
+      "parent": "91457ab460565d20e61a8c609e5eb7cf46112895",
+      "branch": "codex/ui-ux/terrain-material-r5",
+      "production_file_count": 14
+    },
+    "task115": {
+      "request_id": "22eb9c77-5c3f-4e05-b95d-17d121a43c01",
+      "task_id": "bb3714bb-6107-4e22-9c4e-bc3486e091c9",
+      "signed_body_sha256": "8c146c0f236313798028e4a08df78940859d55d1c32f834d0bfb1cac34f13f26",
+      "result_id": "1d0adc2e-82a1-49bf-84b7-5d931c22eece",
+      "result_sha256": "3852308bfc029910875a1ef4694fb430c9a68ba36a4dbd9e3fb8d00b48735fc1"
+    },
+    "evidence_record": {
+      "branch": "codex/ui-ux/terrain-r5-evidence",
+      "directory": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5",
+      "reviewed_file_count": 15
+    },
+    "receipt_and_close": {
+      "receipt_request_id": "db8bc77a-46de-42ef-9af5-c3b5d36f35f3",
+      "receipt_seq": 116,
+      "receipt_canonical_body_sha256": "442f3ded634ef614bc869d7fd697fd29d2f07ab1e98da8641eaa60a242ad3884",
+      "receipt_envelope_sha256": "3aa7da92098c9e6eac8453eba1245ae4e863f89fd8fd50ddf5a8c9ef2bf65df2",
+      "close_ack_request_id": "b1d3b0f8-5b4f-4afc-ad86-d7be69ade846",
+      "close_ack_sha256": "7da1e3fd6dfb9615bf7b5460ab431dd110d01cbb76fb8169441a7cae58a2d24b",
+      "native_adoption_message_id": "3a0acd71-08c0-5461-8623-a0eafdd12782",
+      "actual_ledger_state": "closed",
+      "execution_start_count": 1,
+      "ledger_evidence_sha256": "442f3ded634ef614bc869d7fd697fd29d2f07ab1e98da8641eaa60a242ad3884",
+      "close_notification_seq132": "consumed"
+    }
+  },
+  "findings": [
+    {
+      "id": "candidate_and_task_receipt_binding",
+      "verdict": "PASS",
+      "evidence": "candidate-files.json 的 14 条路径、字节数和 SHA256 与已批准候选独审的 14 条记录逐项一致；候选提交、父提交、分支及树身份吻合。task-receipt.json 的 14 个 changed_files 与候选清单路径集合完全相同，并把证据目录定位到本记录分支。Task 标为完成只覆盖 R5 候选和单组云端证据交付；其 milestone.next_task 仍是 Claude 原图复核及按结论决定后续六组复测。",
+      "evidence_files": [
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/candidate-files.json",
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/task-receipt.json",
+        "<仓库外证据根>/candidate-independent-review.json"
+      ]
+    },
+    {
+      "id": "original_images_and_display_usage",
+      "verdict": "PASS_WITH_VISUAL_REVIEW_PENDING",
+      "evidence": "三张版本化图像与 TASK115 原始输出同名 PNG 逐字节相同，且均为 1280×720 RGBA。display-usage.json 对应 12 棵树、7 段墙、3 根柱和本次 10×10/1280×720 画面；材质过滤为 Nearest、mipmap=false，未排除 unknown 部件。直接看图可辨灰色石墙与褐色地面分层；柱子仍小，底座与柱头可见，接地阴影偏弱，用途判断按 review-request.md 留给 Claude。该观察不构成整体美术批准。",
+      "captures": [
+        {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/captures/main.png", "bytes": 2201203, "sha256": "1d8790a2857613e8d71d0756f23b0644d08e2b0bf438a1e4fa61aaa630c5410b"},
+        {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/captures/portrait-hud.png", "bytes": 2033551, "sha256": "6a887751e9e221d0cac2f45b23de3e3a69cbad31d4f20f720160070736d35afb"},
+        {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/captures/props.png", "bytes": 94416, "sha256": "e46420958f4fc5b910700add6464f4cbe8ad79486260edb57bf267bf29ae3ac9"}
+      ],
+      "display_usage": {
+        "resolution": [1280, 720],
+        "case": "calibration_courtyard 10x10",
+        "instance_counts": {"tree": 12, "wall": 7, "pillar": 3},
+        "filter": "CanvasItem.TEXTURE_FILTER_NEAREST",
+        "mipmap": false,
+        "unknown_semantic_parts_included": true,
+        "tree_atlas_region": [286, 33, 964, 950]
+      }
+    },
+    {
+      "id": "frozen_measurement_record_and_limits",
+      "verdict": "PASS_WITH_SCOPE_LIMIT",
+      "evidence": "沿用已核验的冻结 v3/C4/C8 结果，不重跑游戏或指标：12 棵树 T3、7 面墙 T2、3 根柱 T2 均 PASS；C4/C8、同帧配准和云端/离线比较记录为 PASS。树冠五项目标采用已由 R4 原图复现并经独审确认的单帧合并可见掩膜：L 中位数 33.554563、L p95 58.766671、L 最大值 64.431556、C p95 49.825357、亮且艳比例 4.507677%，7099 像素，1592 个不确定像素保留。全部 code7 的中位数与最大值 FAIL、逐树补充色彩诊断 FAIL 仍完整保留。旧独审对 RESULT 原始字段 UNRESOLVED_SCOPE 的说明已隔离为审计原件；当前统计作用范围已经 R4 复现和独立核对确认，不作为当前未决。material_gate=CLOSED、negative=NOT_ESTABLISHED、T1/T4/T5/T6=NOT_TESTED 和整体美术待 Claude 复核均按原值保留。",
+      "evidence_files": [
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/main-verification.json",
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/main-canopy-statistics.json",
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/main-frozen-c4-c8.json",
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/audit/receipt116-independent-review.original.json",
+        "<仓库外证据根>/r4-canopy-sampling-comparison.json",
+        "<仓库外证据根>/task115-sampling-clarification.json"
+      ]
+    },
+    {
+      "id": "task_creation_and_native_adoption_timeline",
+      "verdict": "PASS",
+      "evidence": "已按原事件时间核对报告的修订：TASK115 created 通知于 2026-10-15 03:50:49 UTC 发布；来源会话原生采用于 03:58:46.677 UTC；随后 03:59:42 UTC 发布 updated 通知。report.md 准确记录了本轮实际顺序，并另述下轮新任务将先完成来源采用，再发 created 通知。",
+      "timeline": [
+        {"event": "TASK115 created", "utc": "2026-10-15T03:50:49Z", "path": "<仓库外证据根>/task115-published.json", "bytes": 454, "sha256": "b51cf7634cdb69b0b16f79d1a20bfb9e5bd85d27f1bf944df688e19edfedf96a"},
+        {"event": "source session native adoption", "utc": "2026-10-15T03:58:46.677Z", "path": "<仓库外证据根>/task115-native-adoption.json", "bytes": 3368, "sha256": "f5bbcacaaeda7651887a51e61ad23f4ec31fbe1177134c93088202e79fe1a766"},
+        {"event": "adoption updated notification", "utc": "2026-10-15T03:59:42Z", "path": "<仓库外证据根>/task115-source-adopted-published.json", "bytes": 454, "sha256": "4e4745b7d47abe0be64947d1a3d23a43c8a7738f1a8ed38ee4e49bd2f290801b"}
+      ],
+      "other_event_files": [
+        {"path": "<仓库外证据根>/task115-created-event.json", "bytes": 358, "sha256": "9a50479496e98b20b261353a1c2139f7e9de7e2d53b9a96c0dbfdbf52f43099a"},
+        {"path": "<仓库外证据根>/task115-source-adopted-event.json", "bytes": 358, "sha256": "059cb9fab75a636f714d1edb0d9c1ec438ca51f476917283cd58c76270f88743"}
+      ]
+    },
+    {
+      "id": "receipt_and_close_binding",
+      "verdict": "PASS",
+      "evidence": "最终签收正文、规范正文和信封的字节数/SHA 与签名绑定清单相符；关闭 ACK 的 task、原任务 request_id、in_reply_to、回执正文 SHA 与本记录一致。YC 原生关闭采用消息绑定同一 ACK；close-ack-main-verification.json 与 closure.json 内容 SHA 完全相同。独立服务实读为 closed/count1，evidence_sha256 精确等于已签收回执正文 SHA；start_granted=false、duplicate=false，关闭通知 seq132 已消费。状态字段 human_authorization_checked=false 保持原值，本审查不将签名或服务状态解释为新的授权。",
+      "evidence_files": [
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/closure.json",
+        "<仓库外证据根>/receipt116-body.review-candidate.json",
+        "<仓库外证据根>/receipt116-canonical-body.json",
+        "<仓库外证据根>/receipt116-envelope.json",
+        "<仓库外证据根>/receipt116-signature-binding.json",
+        "<仓库外证据根>/close-ack.original.json",
+        "<仓库外证据根>/close-native-adoption.json",
+        "<仓库外证据根>/ledger-after-receipt.json",
+        "<仓库外证据根>/close-ack-main-verification.json",
+        "<仓库外证据根>/event132-consumed.json"
+      ]
+    },
+    {
+      "id": "historic_audit_and_current_conclusion",
+      "verdict": "PASS",
+      "evidence": "audit/receipt116-independent-review.original.json 与签收前独审原件字节完全相同（19948 字节，SHA256 4ab3f06c5b5c95b489d83a862646201c9f3d51732d6cd64166da7fcf99f1e709）；该文件保留当时针对原始 RESULT 字段的说明。report.md 与 original-consumption-index.json 已把它标为历史审计材料，并将当前 R4 复现后的统计口径作为现行结论。二者作用时间与记录位置清楚，不互相覆盖。",
+      "evidence_files": [
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/audit/receipt116-independent-review.original.json",
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/original-consumption-index.json",
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/report.md",
+        "<仓库外证据根>/delivery-independent-review.json"
+      ]
+    },
+    {
+      "id": "record_portability_and_integrity",
+      "verdict": "PASS",
+      "evidence": "当前目录 15 个文件均已登记字节数和 SHA256；9 个 JSON 全部可解析。对版本化 JSON/Markdown 扫描没有发现本机绝对路径或凭据值模式。原图副本与 TASK115 原始输出逐字节相等。云端缓存仅保留 145 项逐文件清单，69,205,659 字节缓存原件不计入核心交付；报告没有声称 907 项超集已全部交付。"
+    }
+  ],
+  "reviewed_files": [
+    {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/audit/receipt116-independent-review.original.json", "bytes": 19948, "sha256": "4ab3f06c5b5c95b489d83a862646201c9f3d51732d6cd64166da7fcf99f1e709"},
+    {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/candidate-files.json", "bytes": 3362, "sha256": "4c533f06469f76c82b445e12d15b16377a532c548594b0b5df26a2106377c891"},
+    {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/captures/main.png", "bytes": 2201203, "sha256": "1d8790a2857613e8d71d0756f23b0644d08e2b0bf438a1e4fa61aaa630c5410b"},
+    {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/captures/portrait-hud.png", "bytes": 2033551, "sha256": "6a887751e9e221d0cac2f45b23de3e3a69cbad31d4f20f720160070736d35afb"},
+    {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/captures/props.png", "bytes": 94416, "sha256": "e46420958f4fc5b910700add6464f4cbe8ad79486260edb57bf267bf29ae3ac9"},
+    {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/closure.json", "bytes": 1483, "sha256": "916e84c3e1015b6d8dfdfa10708f95c27fe10fa4c4fa5b9f4b8c65d5f29e7b3c"},
+    {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/display-usage.json", "bytes": 9092, "sha256": "0c0afcf6fcbefc7d821f01cbd1d551ae1faa280f43bc76a268927e56a39b7fc1"},
+    {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/main-canopy-statistics.json", "bytes": 1298, "sha256": "a109c8e38383f8cd8bbe9725108c622021e1f569209bc0e77a11f02d72d1856f"},
+    {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/main-frozen-c4-c8.json", "bytes": 4390, "sha256": "4054c3aeb5d1fba6d8f9d6b59c5a6c86cc2fda6b40cf74b5b0b66e52d59c59d2"},
+    {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/main-verification.json", "bytes": 40667, "sha256": "289f21af7f6ada6ae0ee0b2033ed5c3618bcc32b7333db55f5c7e1566249589d"},
+    {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/original-consumption-index.json", "bytes": 5553, "sha256": "c51b2e618a0e437f479cd7209c3d602d6132f4ffaa87de1014f59e3119c07cd8"},
+    {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/report.md", "bytes": 5677, "sha256": "0c84cfd92bf6eb3ff41a2cd96ff8d5b99d9955659df6a25dbcebeb8de7b78b46"},
+    {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/review-request.md", "bytes": 1852, "sha256": "40d2ac8f589f06f9964be992f6262fca575d8bcb33df6d7d62f2a8786dd33ead"},
+    {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/task-receipt.json", "bytes": 5590, "sha256": "0bfde73acc0fde15675c2872147efa5c80b18cc2ff9e6c698b34b089196e2698"},
+    {"path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/task.md", "bytes": 1981, "sha256": "51ada15bc96892a97bdbbdb39ad5008c5693ea8cb0fbfb59586e69cad1016ccc"}
+  ],
+  "external_evidence_files": [
+    {"path": "<仓库外证据根>/candidate-independent-review.json", "bytes": 6318, "sha256": "6ea6c64092d35e4674cf6399704d282313be72c429e5cdedff082691a8c26d85"},
+    {"path": "<仓库外证据根>/task115-signed-body.original.json", "bytes": 150088, "sha256": "8c146c0f236313798028e4a08df78940859d55d1c32f834d0bfb1cac34f13f26"},
+    {"path": "<仓库外证据根>/task115-created-event.json", "bytes": 358, "sha256": "9a50479496e98b20b261353a1c2139f7e9de7e2d53b9a96c0dbfdbf52f43099a"},
+    {"path": "<仓库外证据根>/task115-published.json", "bytes": 454, "sha256": "b51cf7634cdb69b0b16f79d1a20bfb9e5bd85d27f1bf944df688e19edfedf96a"},
+    {"path": "<仓库外证据根>/task115-native-adoption.json", "bytes": 3368, "sha256": "f5bbcacaaeda7651887a51e61ad23f4ec31fbe1177134c93088202e79fe1a766"},
+    {"path": "<仓库外证据根>/task115-source-adopted-event.json", "bytes": 358, "sha256": "059cb9fab75a636f714d1edb0d9c1ec438ca51f476917283cd58c76270f88743"},
+    {"path": "<仓库外证据根>/task115-source-adopted-published.json", "bytes": 454, "sha256": "4e4745b7d47abe0be64947d1a3d23a43c8a7738f1a8ed38ee4e49bd2f290801b"},
+    {"path": "<仓库外证据根>/task115-sampling-clarification.json", "bytes": 8200, "sha256": "e3c435e62ba33cb208a8ef1ed5093e680174e8ca84de9d5c8206c3321b38e57e"},
+    {"path": "<仓库外证据根>/r4-canopy-sampling-comparison.json", "bytes": 1539, "sha256": "8cb2cfbc3a3b8e92a9c6e6ad7d1fcc02c6b7ece04e81fb3e92e3844475b827aa"},
+    {"path": "<仓库外证据根>/result.original.json", "bytes": 25328, "sha256": "3852308bfc029910875a1ef4694fb430c9a68ba36a4dbd9e3fb8d00b48735fc1"},
+    {"path": "<仓库外证据根>/original-readback-verification.json", "bytes": 323138, "sha256": "a5bb403a5d73f712a23d143d430e81c13b30201a5b662fa41b573517bb385ffe"},
+    {"path": "<仓库外证据根>/originals/task115_runner/output/10x10_1280x720/10x10_1280x720/main.png", "bytes": 2201203, "sha256": "1d8790a2857613e8d71d0756f23b0644d08e2b0bf438a1e4fa61aaa630c5410b"},
+    {"path": "<仓库外证据根>/originals/task115_runner/output/10x10_1280x720/10x10_1280x720/portrait-hud.png", "bytes": 2033551, "sha256": "6a887751e9e221d0cac2f45b23de3e3a69cbad31d4f20f720160070736d35afb"},
+    {"path": "<仓库外证据根>/originals/task115_runner/output/10x10_1280x720/10x10_1280x720/props.png", "bytes": 94416, "sha256": "e46420958f4fc5b910700add6464f4cbe8ad79486260edb57bf267bf29ae3ac9"},
+    {"path": "<仓库外证据根>/receipt116-body.review-candidate.json", "bytes": 11942, "sha256": "41bc26fb08574cc3b9d63bf1cf5d4b19cef9871df44740c19dd638005c220377"},
+    {"path": "<仓库外证据根>/receipt116-canonical-body.json", "bytes": 10101, "sha256": "442f3ded634ef614bc869d7fd697fd29d2f07ab1e98da8641eaa60a242ad3884"},
+    {"path": "<仓库外证据根>/receipt116-envelope.json", "bytes": 13618, "sha256": "3aa7da92098c9e6eac8453eba1245ae4e863f89fd8fd50ddf5a8c9ef2bf65df2"},
+    {"path": "<仓库外证据根>/receipt116-signature-binding.json", "bytes": 979, "sha256": "57a61e42f4ab81d727c2c13b492f0bfef1bff60f426626bfbf0c0b6721335968"},
+    {"path": "<仓库外证据根>/close-ack.original.json", "bytes": 97801, "sha256": "7da1e3fd6dfb9615bf7b5460ab431dd110d01cbb76fb8169441a7cae58a2d24b"},
+    {"path": "<仓库外证据根>/close-native-adoption.json", "bytes": 1394, "sha256": "842a3dc5c1d8ab441b6ef0404b3a1984dff312ff2ee92f06374c6baec5724858"},
+    {"path": "<仓库外证据根>/ledger-after-receipt.json", "bytes": 970, "sha256": "a0e8a524392ed7d7177e3a994fe346c60ef43cd424f2f438e07e681f9726e346"},
+    {"path": "<仓库外证据根>/close-ack-main-verification.json", "bytes": 1483, "sha256": "916e84c3e1015b6d8dfdfa10708f95c27fe10fa4c4fa5b9f4b8c65d5f29e7b3c"},
+    {"path": "<仓库外证据根>/event132-consumed.json", "bytes": 90, "sha256": "d4b0b96f5d3a99568f8c0725070f3bded1ce98054320ca6f4c4e8b2e5417d581"},
+    {"path": "<仓库外证据根>/delivery-independent-review.json", "bytes": 19948, "sha256": "4ab3f06c5b5c95b489d83a862646201c9f3d51732d6cd64166da7fcf99f1e709"}
+  ],
+  "checks_performed": [
+    "重新列出记录目录文件并计算每项原始字节数、SHA256；校验 9 个 JSON 的语法。",
+    "逐项比较 candidate-files.json 的 14 个生产文件与已审候选清单；比较 task-receipt.json 的 changed_files 路径集合。",
+    "对三张 captures PNG 与 TASK115 原始输出同名文件比较字节数和 SHA256，并查看原尺寸图像；核对显示实例数、nearest 过滤、mipmap 与树图 atlas 区域。",
+    "读取 report.md、review-request.md、task.md、task-receipt.json、closure.json 和 original-consumption-index.json，检查数值范围、视觉审查边界、缓存范围、任务状态及历史审计定位。",
+    "读取 TASK115 创建事件、原生来源采用记录与 adopted 更新事件，独立重建事件时间顺序并与 report.md 对照。",
+    "比较 RECEIPT 规范正文、信封、签名绑定、关闭 ACK、原生关闭采用、Main 关闭核验和持久账本；核实 closed/count1、同一回执摘要及 seq132 消费状态。",
+    "使用本地绝对路径/凭据值模式扫描版本化 JSON 与 Markdown；所有被检文件未命中。"
+  ],
+  "scope_limits": [
+    "已关闭的是 TASK115 必需核心证据交付；145 项可选 Godot 缓存二进制不在消费范围，907 项超集未被描述为完整交付。",
+    "Claude 原图视觉复核仍需判断树木是否抢占信息、墙地协调及柱子的庭院遗迹用途与接地；本审查不批准整体美术。",
+    "T1/T4/T5/T6 和同候选六组复测仍未完成；milestone 继续保持开放。"
+  ],
+  "next_delivery_gate": {
+    "review_copy_target": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/independent-review.json",
+    "copy_requirement": "与本审查原件逐字节相同；由 Main 另行核验字节数和 SHA256。",
+    "manifest_target": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5/evidence-manifest.json",
+    "manifest_scope": "列出该目录内除 manifest 自身外的全部文件。",
+    "post_commit": "按清单逐文件对比已提交 Git blob 的字节数与 SHA256。"
+  }
+}

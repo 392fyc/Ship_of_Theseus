@@ -1,0 +1,391 @@
+{
+  "schema_version": "sot-task115-delivery-independent-review/1",
+  "reviewed_file": {
+    "path": "<仓库外证据根>/receipt116-body.review-candidate.json",
+    "bytes": 11942,
+    "sha256": "41bc26fb08574cc3b9d63bf1cf5d4b19cef9871df44740c19dd638005c220377"
+  },
+  "verdict": "PASS",
+  "verdict_scope": "只批准此待签正文用于确认 TASK115 必需原件交付已完成读回、再由原 YC 按既有权限执行一次关闭回执。PASS 不表示素材或整体美术验收通过，不表示可选归档已完整交付，也不启动新测试。",
+  "reviewed_at_utc": "2026-10-15T05:10:44Z",
+  "binding": {
+    "receipt": {
+      "request_id": "db8bc77a-46de-42ef-9af5-c3b5d36f35f3",
+      "task_id": "bb3714bb-6107-4e22-9c4e-bc3486e091c9",
+      "seq": 116,
+      "attempt": 0,
+      "in_reply_to_result_id": "1d0adc2e-82a1-49bf-84b7-5d931c22eece",
+      "expires_at": "2026-10-15T09:03:44.049Z",
+      "valid_at_review_time": true
+    },
+    "task115": {
+      "request_id": "22eb9c77-5c3f-4e05-b95d-17d121a43c01",
+      "task_id": "bb3714bb-6107-4e22-9c4e-bc3486e091c9",
+      "signed_body": {
+        "path": "<仓库外证据根>/task115-signed-body.original.json",
+        "bytes": 150088,
+        "sha256": "8c146c0f236313798028e4a08df78940859d55d1c32f834d0bfb1cac34f13f26"
+      },
+      "candidate_commit": "b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8",
+      "candidate_tree": "45bc1389051f614f6f1c5389a9bdacdbf0aef7a6",
+      "generation": "469550a9-a0b6-4d55-af41-1287ce6556f7"
+    },
+    "result": {
+      "request_id": "1d0adc2e-82a1-49bf-84b7-5d931c22eece",
+      "path": "<仓库外证据根>/result.original.json",
+      "bytes": 25328,
+      "sha256": "3852308bfc029910875a1ef4694fb430c9a68ba36a4dbd9e3fb8d00b48735fc1",
+      "in_reply_to_task_request_id": "22eb9c77-5c3f-4e05-b95d-17d121a43c01",
+      "task_body_sha256": "8c146c0f236313798028e4a08df78940859d55d1c32f834d0bfb1cac34f13f26",
+      "candidate_commit": "b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8",
+      "candidate_tree": "45bc1389051f614f6f1c5389a9bdacdbf0aef7a6",
+      "execution_start_count": 1,
+      "delivery_status": "required_evidence_readback_verified_optional_archive_in_progress"
+    },
+    "native_adoption": {
+      "path": "<仓库外证据根>/result-native-adoption.json",
+      "bytes": 1823,
+      "sha256": "d6f257c272c74750b77bd156dd01f04ccc3e74c394682aea0e7c9e686f790806",
+      "message_id": "538aedf4-bf06-5aa0-b64b-5d931c22eece",
+      "conversation_id": "01a118cf-9fad-76e2-99af-46a5f9a550fc",
+      "thread_id": "fff192d9-08c7-5d16-8bf0-9db397ba88de",
+      "result_id_and_sha256_present_in_message": true
+    }
+  },
+  "findings": [
+    {
+      "id": "receipt_scope_and_identity",
+      "verdict": "PASS",
+      "evidence": "待签正文的 request_id、seq、attempt、in_reply_to、TASK115 request/task、签名正文摘要、候选提交/树及 generation 与原任务、正式 RESULT、Main 报告和原生 RESULT 采用记录一致。回执尚未过期。",
+      "sources": [
+        "<仓库外证据根>/receipt116-body.review-candidate.json",
+        "<仓库外证据根>/task115-signed-body.original.json",
+        "<仓库外证据根>/result.original.json",
+        "<仓库外证据根>/result-native-adoption.json"
+      ]
+    },
+    {
+      "id": "close_only_no_execution",
+      "verdict": "PASS",
+      "evidence": "正文只允许原 YC 在核验现有 readback_verified 后把状态改为 closed、保留 execution_start_count=1 并保存关闭 ACK。正文排除了新测试、重跑、重传、六组定稿、素材/玩法/权限/协议改动和整体美术批准；正文不授权领取或启动执行。当前 transition.response 为 readback_verified、start_granted=false、duplicate=false、execution_start_count=1。",
+      "sources": [
+        "<仓库外证据根>/receipt116-body.review-candidate.json",
+        "<仓库外证据根>/receipt116-transition.response.json"
+      ]
+    },
+    {
+      "id": "main_report_and_five_api_artifacts",
+      "verdict": "PASS",
+      "evidence": "Main 报告为 40667 字节、SHA256 289f21af7f6ada6ae0ee0b2033ed5c3618bcc32b7333db55f5c7e1566249589d，绑定候选、TASK115、RESULT 与原生采用。回执所列五个文件逐项与 API 引用清单对应；本地 API 原字节读回副本的字节数和 SHA256 均与上传前原件相同。引用虽未插入 Page 正文，但文件访问确认及原字节读回标志均为 true，回执直接携带了对应 library-file 引用。",
+      "evidence_file": {
+        "path": "<仓库外证据根>/main-verification.json",
+        "bytes": 40667,
+        "sha256": "289f21af7f6ada6ae0ee0b2033ed5c3618bcc32b7333db55f5c7e1566249589d"
+      },
+      "reference_manifest": {
+        "path": "<仓库外证据根>/main-evidence-api-references.json",
+        "bytes": 4231,
+        "sha256": "e3a550d7ebc19a08c7698d920542ebfec1e41bb9731bb2b9d9d4e1269732e12a"
+      },
+      "five_artifacts": [
+        {
+          "name": "main-verification.json",
+          "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+          "reference": "library-file:fde1_bGliZmlsZV9SOEVXOHNRenllV1ZZNGFaQmJQc0Z3_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+          "bytes": 40667,
+          "sha256": "289f21af7f6ada6ae0ee0b2033ed5c3618bcc32b7333db55f5c7e1566249589d",
+          "readback_exact": true
+        },
+        {
+          "name": "original-readback-proof.gzip-base64.json",
+          "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+          "reference": "library-file:fde1_bGliZmlsZV8tSE9laW9IR0ZkRGZ0R24wVms3M1pB_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+          "bytes": 76777,
+          "sha256": "e19a91da9732e881fd73c0a0aced18b295a39c3b55a4ae388dc7bdf57911a6dd",
+          "readback_exact": true
+        },
+        {
+          "name": "main-pilot-readback.json",
+          "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+          "reference": "library-file:fde1_bGliZmlsZV8tWXhwM1BwVzhGUUpKWGJNYnNLR3dR_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+          "bytes": 184893,
+          "sha256": "0d83f9726a2a4565eef0c4c6c658df7915495559e1c3d0f7b2e4ceeafd2368f8",
+          "readback_exact": true
+        },
+        {
+          "name": "main-frozen-c4-c8.json",
+          "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+          "reference": "library-file:fde1_bGliZmlsZV84S2dGZ3RtbUxfT3FrYlFtWEtWUkJ3_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+          "bytes": 4390,
+          "sha256": "4054c3aeb5d1fba6d8f9d6b59c5a6c86cc2fda6b40cf74b5b0b66e52d59c59d2",
+          "readback_exact": true
+        },
+        {
+          "name": "main-canopy-statistics.json",
+          "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+          "reference": "library-file:fde1_bGliZmlsZV93ajdtbERTdzBHLWdfa0lhajd6Y01R_FileDrive_6af57ca9c23c819184d2e6b479d22dac",
+          "bytes": 1298,
+          "sha256": "a109c8e38383f8cd8bbe9725108c622021e1f569209bc0e77a11f02d72d1856f",
+          "readback_exact": true
+        }
+      ]
+    },
+    {
+      "id": "required_originals_and_carriers",
+      "verdict": "PASS",
+      "evidence": "原件 proof 记录 762 份必需文件/22860126 字节、另 6 份审计文件、17 张 PNG、116 份空文件及 220 个所选载体；其中 216 个既有前缀载体加 4 个补充载体。逐文件重算 768 项 SHA256/字节数无差异，总计 23057054 字节。API 读回的 323138 字节 proof 外层 gzip+base64 解压后与 proof 原文件逐字节相等。",
+      "proof": {
+        "path": "<仓库外证据根>/original-readback-verification.json",
+        "bytes": 323138,
+        "sha256": "a5bb403a5d73f712a23d143d430e81c13b30201a5b662fa41b573517bb385ffe",
+        "verified_records": 768,
+        "mismatches": 0
+      },
+      "api_transport_wrapper": {
+        "path": "<仓库外证据根>/main-api-readbacks/original-readback-proof.gzip-base64.json",
+        "bytes": 76777,
+        "sha256": "e19a91da9732e881fd73c0a0aced18b295a39c3b55a4ae388dc7bdf57911a6dd",
+        "decompressed_original_bytes": 323138,
+        "decompressed_sha256": "a5bb403a5d73f712a23d143d430e81c13b30201a5b662fa41b573517bb385ffe",
+        "exact": true
+      },
+      "carrier_summary": {
+        "selected_total": 220,
+        "existing_prefix": 216,
+        "supplement": 4,
+        "selected_member_hashes_match": true
+      }
+    },
+    {
+      "id": "disclosed_transport_deviation_and_optional_archive",
+      "verdict": "PASS_WITH_DISCLOSED_LIMITATION",
+      "evidence": "签名任务约定 /data_b64；复用的 216 个既有前缀载体使用 /base64，4 个新增载体使用 /data_b64。回执明示差异，并报告原始 JSON 与解码原件均逐字节验证。145 项可选 Godot 缓存只有逐文件清单，未消费其二进制原件；正文明确不得声称 907 项超集完整交付，未把它算入核心签收。",
+      "prefix_map": {
+        "path": "<仓库外证据根>/prefix-map.original.json",
+        "bytes": 151724,
+        "sha256": "1ab894f6dc4ffc1ed1587feb58208bfa9986c4c521002e55378e034a185ad046"
+      },
+      "supplement_map": {
+        "path": "<仓库外证据根>/supplement-map.original.json",
+        "bytes": 97513,
+        "sha256": "c126682a8743989fb7e79efe52dbbacfda4b3749ec36af78649b91bff502b785"
+      },
+      "optional_inventory": {
+        "path": "<仓库外证据根>/optional-inventory.original.json",
+        "bytes": 38045,
+        "sha256": "22c59270642ffabf301733c912686da92490dfca641a762062605a985f7fb74e",
+        "file_count": 145,
+        "binary_bytes_readback": false
+      }
+    },
+    {
+      "id": "source_and_single_run_integrity",
+      "verdict": "PASS",
+      "evidence": "Main 报告绑定 1416 项源文件，逐字节匹配，并报告八个导入/结构/原生采集/校验前后门禁均通过。四个阶段各运行一次且 rc=0；执行启动计数为 1。TASK115、RESULT、Main 报告候选提交与树一致。",
+      "source_state": {
+        "path": "<仓库外证据根>/full-source-raw-state.json",
+        "bytes": 300394,
+        "sha256": "f8bd140796409827daf1de6bd2c3d9d1a39c9de9649d3b40e18f4382a05514a1"
+      },
+      "stage_count": 4,
+      "each_stage_once": true,
+      "each_returncode": 0,
+      "source_file_count": 1416,
+      "source_gates": 8
+    },
+    {
+      "id": "numeric_results_and_scope_limits",
+      "verdict": "PASS_WITH_SCOPE_LIMIT",
+      "evidence": "实际单帧 10×10/1280×720 的 C4、C8、12 棵树 T3、7 面墙 T2、3 根柱 T2 均 PASS；Main 离线冻结 v3 复算与云端相符，最大浮点差 2.1316282072803006e-14。五项树冠阈值按 R4 原审查可复现的合并可见掩膜复算；原 RESULT 的全 code7 及逐树失败同时保留，因此此处是有明确口径的单帧数值检查，不是整体艺术验收。",
+      "canopy_primary": {
+        "mask": "semantic_pair.A == 7 且 alpha_sample_masks(semantic_coverage).visible；不剔除 uncertain",
+        "scope": "一帧树冠合并掩膜；12 棵 T3 另按实例检查",
+        "pixels": 7099,
+        "uncertain_pixels_retained": 1592,
+        "L_median": 33.554563377150565,
+        "L_p95": 58.76667096395441,
+        "L_max": 64.43155573764575,
+        "C_p95": 49.82535733771994,
+        "bright_vivid_fraction": 0.04507677137625018,
+        "threshold_result": "5/5 PASS"
+      },
+      "all_code7_diagnostic": {
+        "pixels": 8297,
+        "L_median": 31.026257915853094,
+        "L_p95": 58.39555719888608,
+        "L_max": 84.73882745046322,
+        "C_p95": 49.64445567497964,
+        "bright_vivid_fraction": 0.03917078462094733,
+        "threshold_result": "FAIL: L_median 与 L_max"
+      },
+      "per_tree_visible_alpha_diagnostics": [
+        {
+          "stable_id": "tree@0.00,1.00",
+          "failed_metric": "L_median",
+          "value": 32.21353412609911,
+          "limit": ">=33"
+        },
+        {
+          "stable_id": "tree@0.00,9.00",
+          "failed_metric": "L_median",
+          "value": 32.57398651994311,
+          "limit": ">=33"
+        },
+        {
+          "stable_id": "tree@9.00,1.00",
+          "failed_metric": "L_p95",
+          "value": 60.3503919,
+          "limit": "<=60"
+        }
+      ],
+      "all_code7_per_tree_failures": {
+        "count": 12,
+        "all_fail_L_median_min33": true,
+        "additional_failures": {
+          "tree@9.00,1.00": [
+            "L_p95_max60",
+            "L_max72"
+          ],
+          "tree@9.00,8.00": [
+            "L_max72"
+          ]
+        },
+        "diagnostic_source": "result.original.json supplemental_highlight.per_tree",
+        "failed_tree_ids": [
+          "tree@0.00,0.00",
+          "tree@0.00,1.00",
+          "tree@0.00,8.00",
+          "tree@0.00,9.00",
+          "tree@1.00,0.00",
+          "tree@1.00,9.00",
+          "tree@8.00,0.00",
+          "tree@8.00,9.00",
+          "tree@9.00,0.00",
+          "tree@9.00,1.00",
+          "tree@9.00,8.00",
+          "tree@9.00,9.00"
+        ]
+      },
+      "r4_mask_basis": {
+        "path": "<仓库外证据根>/r4-canopy-sampling-comparison.json",
+        "bytes": 1539,
+        "sha256": "8cb2cfbc3a3b8e92a9c6e6ad7d1fcc02c6b7ece04e81fb3e92e3844475b827aa",
+        "observed_result": "R4 的 code7 与冻结 visible alpha 合并结果精确复现原 Claude 四舍五入指标；全部 code7 不匹配。"
+      },
+      "original_result_scope_state": "原始 RESULT 明确保留 primary_selection=UNRESOLVED_SCOPE、scope_dependent 与 ART_NOT_ACCEPTED；Main 当前记录的可见掩膜是基于原 R4 数值复现和后续原生说明采用的单帧指标口径，不扩大成美术批准。",
+      "not_tested_or_not_approved": [
+        "T1、T4、T5、T6 为 NOT_TESTED；六组覆盖为 false",
+        "原始 negative calibration 为 NOT_ESTABLISHED",
+        "art_acceptance 为 NOT_TESTED / PENDING_CLAUDE_ORIGINAL_IMAGE_REVIEW"
+      ]
+    },
+    {
+      "id": "visual_readback_boundary",
+      "verdict": "PASS_WITH_VISUAL_REVIEW_PENDING",
+      "evidence": "直接查看精确原尺寸 PNG：灰色石墙与粗糙棕土地表可分；柱子可辨为小型残柱，但接地支撑与阴影仍需原图视觉复核。图像通过逐字节取回，不由预览截图替代。此观察不批准整体美术。",
+      "main_png": {
+        "path": "<仓库外证据根>/preview-originals/main.png",
+        "bytes": 2201203,
+        "sha256": "1d8790a2857613e8d71d0756f23b0644d08e2b0bf438a1e4fa61aaa630c5410b"
+      },
+      "props_png": {
+        "path": "<仓库外证据根>/preview-originals/props.png",
+        "bytes": 94416,
+        "sha256": "e46420958f4fc5b910700add6464f4cbe8ad79486260edb57bf267bf29ae3ac9"
+      }
+    }
+  ],
+  "ledger_and_service": {
+    "service_status": {
+      "path": "<仓库外证据根>/dispatch-service-status.json",
+      "bytes": 477,
+      "sha256": "31d36bbf4b08ec8c801e7b0da74f3a1ff135d7a00e54baaccc1d8b9454f29b3d",
+      "activated": true,
+      "generation": "469550a9-a0b6-4d55-af41-1287ce6556f7"
+    },
+    "result_ledger_snapshot": {
+      "path": "<仓库外证据根>/ledger-after-result.json",
+      "bytes": 973,
+      "sha256": "f09175b6329ced5c16920751b4ec71ebb3971791d2cbdae4779ea174bb6d4df6",
+      "state": "delivered",
+      "execution_start_count": 1,
+      "result_sha256": "3852308bfc029910875a1ef4694fb430c9a68ba36a4dbd9e3fb8d00b48735fc1"
+    },
+    "main_readback_transition": {
+      "path": "<仓库外证据根>/receipt116-transition.response.json",
+      "bytes": 981,
+      "sha256": "bfbe93d3b275250bf11884db9b4b0e16e9cfc221237e20783f3c7507d441e27c",
+      "state": "readback_verified",
+      "evidence_sha256": "289f21af7f6ada6ae0ee0b2033ed5c3618bcc32b7333db55f5c7e1566249589d",
+      "execution_start_count": 1,
+      "start_granted": false,
+      "duplicate": false
+    },
+    "human_authorization_boundary": "状态服务记录 human_authorization_checked=false；本次审查不把该服务字段或签名当成人类授权。回执文本也要求接收端按原有直接授权独立核实；本审查不代替该核实、不发送回执。"
+  },
+  "reviewed_files": [
+    {
+      "path": "<仓库外证据根>/main-evidence-api-references.json",
+      "bytes": 4231,
+      "sha256": "e3a550d7ebc19a08c7698d920542ebfec1e41bb9731bb2b9d9d4e1269732e12a"
+    },
+    {
+      "path": "<仓库外证据根>/original-readback-verification.json",
+      "bytes": 323138,
+      "sha256": "a5bb403a5d73f712a23d143d430e81c13b30201a5b662fa41b573517bb385ffe"
+    },
+    {
+      "path": "<仓库外证据根>/core-entry.original.json",
+      "bytes": 1681,
+      "sha256": "f1e4084d7117570ad8c5ae96202d81c4f10c86f6736e35a291ca2ec97b1c74e7"
+    },
+    {
+      "path": "<仓库外证据根>/prefix-map.original.json",
+      "bytes": 151724,
+      "sha256": "1ab894f6dc4ffc1ed1587feb58208bfa9986c4c521002e55378e034a185ad046"
+    },
+    {
+      "path": "<仓库外证据根>/supplement-map.original.json",
+      "bytes": 97513,
+      "sha256": "c126682a8743989fb7e79efe52dbbacfda4b3749ec36af78649b91bff502b785"
+    },
+    {
+      "path": "<仓库外证据根>/optional-inventory.original.json",
+      "bytes": 38045,
+      "sha256": "22c59270642ffabf301733c912686da92490dfca641a762062605a985f7fb74e"
+    },
+    {
+      "path": "<仓库外证据根>/task115-sampling-clarification.json",
+      "bytes": 8200,
+      "sha256": "e3c435e62ba33cb208a8ef1ed5093e680174e8ca84de9d5c8206c3321b38e57e"
+    },
+    {
+      "path": "<仓库外证据根>/r4-canopy-sampling-comparison.json",
+      "bytes": 1539,
+      "sha256": "8cb2cfbc3a3b8e92a9c6e6ad7d1fcc02c6b7ece04e81fb3e92e3844475b827aa"
+    },
+    {
+      "path": "<仓库外证据根>/full-source-raw-state.json",
+      "bytes": 300394,
+      "sha256": "f8bd140796409827daf1de6bd2c3d9d1a39c9de9649d3b40e18f4382a05514a1"
+    },
+    {
+      "path": "<仓库外证据根>/preview-originals-verification.json",
+      "bytes": 1377,
+      "sha256": "943c7c8ec44ce6ecf07beba06694e69e6c8a1a6010173e3edfc629c4468a2d2d"
+    }
+  ],
+  "checks_performed": [
+    "重新计算待签正文、Main 报告、正式 RESULT、原生 RESULT 采用、API 引用清单、原件 proof、账本状态和 transition 响应的字节数/SHA256；检查 request/task、候选、generation 与消息关系。",
+    "逐项对照五个回执文件引用与 API 引用清单，并比较五份 API 原字节读回副本与本地原件，全部字节数及 SHA256 一致。",
+    "解压外层 gzip+base64 proof，结果与 323138 字节原件逐字节相等；对 proof 列出的 768 个重建原件重新核对字节数和 SHA256，零差异。",
+    "复核正式 RESULT、Main 报告、原始 R4 取样对照、C4/C8 与 T3/T2 边界，保留所有全 code7 与逐树失败状态和未测试项。",
+    "直接查看 Main 与 props 精确原 PNG；未运行 Godot、未申请或执行新云端任务、未改账本、未签名或发送回执。"
+  ],
+  "open_limits": [
+    "R5 五项树冠阈值的合并可见掩膜口径可以精确复现 R4 原审查数值，但正式 RESULT 自身保留 primary_selection=UNRESOLVED_SCOPE 与 scope_dependent；因此本回执只关闭必需原件交付，不能把可见掩膜五项 PASS 扩大为整体美术验收。",
+    "保留全 code7 聚合 FAIL、12 棵逐树全 code7 诊断 FAIL，以及合并可见 alpha 下 3 项逐树附加指标失败；12 棵冻结 T3 均 PASS。",
+    "T1/T4/T5/T6 未测、六组覆盖未完成、可选 145 项缓存二进制未交付；这几项均不在本次核心交付关闭范围。",
+    "原 YC 仍须按直接读取的既有站立授权独立核验后签署并发送本回执；此独立审查不代签，不操作账本。"
+  ]
+}

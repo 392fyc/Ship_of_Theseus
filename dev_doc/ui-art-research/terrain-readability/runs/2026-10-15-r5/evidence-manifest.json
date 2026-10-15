@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "scope": "R5 material candidate and TASK115 single-case cloud evidence",
+  "candidate_commit": "b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8",
+  "self_excluded": true,
+  "files": [
+    {
+      "path": "audit/receipt116-independent-review.original.json",
+      "bytes": 19948,
+      "sha256": "4ab3f06c5b5c95b489d83a862646201c9f3d51732d6cd64166da7fcf99f1e709"
+    },
+    {
+      "path": "candidate-files.json",
+      "bytes": 3362,
+      "sha256": "4c533f06469f76c82b445e12d15b16377a532c548594b0b5df26a2106377c891"
+    },
+    {
+      "path": "captures/main.png",
+      "bytes": 2201203,
+      "sha256": "1d8790a2857613e8d71d0756f23b0644d08e2b0bf438a1e4fa61aaa630c5410b"
+    },
+    {
+      "path": "captures/portrait-hud.png",
+      "bytes": 2033551,
+      "sha256": "6a887751e9e221d0cac2f45b23de3e3a69cbad31d4f20f720160070736d35afb"
+    },
+    {
+      "path": "captures/props.png",
+      "bytes": 94416,
+      "sha256": "e46420958f4fc5b910700add6464f4cbe8ad79486260edb57bf267bf29ae3ac9"
+    },
+    {
+      "path": "closure.json",
+      "bytes": 1483,
+      "sha256": "916e84c3e1015b6d8dfdfa10708f95c27fe10fa4c4fa5b9f4b8c65d5f29e7b3c"
+    },
+    {
+      "path": "display-usage.json",
+      "bytes": 9092,
+      "sha256": "0c0afcf6fcbefc7d821f01cbd1d551ae1faa280f43bc76a268927e56a39b7fc1"
+    },
+    {
+      "path": "independent-review.json",
+      "bytes": 19728,
+      "sha256": "0a06fe43214ee8cfa1f92e180a0194ce061267f9bf50f6c4e72f967760ada39d"
+    },
+    {
+      "path": "main-canopy-statistics.json",
+      "bytes": 1298,
+      "sha256": "a109c8e38383f8cd8bbe9725108c622021e1f569209bc0e77a11f02d72d1856f"
+    },
+    {
+      "path": "main-frozen-c4-c8.json",
+      "bytes": 4390,
+      "sha256": "4054c3aeb5d1fba6d8f9d6b59c5a6c86cc2fda6b40cf74b5b0b66e52d59c59d2"
+    },
+    {
+      "path": "main-verification.json",
+      "bytes": 40667,
+      "sha256": "289f21af7f6ada6ae0ee0b2033ed5c3618bcc32b7333db55f5c7e1566249589d"
+    },
+    {
+      "path": "original-consumption-index.json",
+      "bytes": 5553,
+      "sha256": "c51b2e618a0e437f479cd7209c3d602d6132f4ffaa87de1014f59e3119c07cd8"
+    },
+    {
+      "path": "report.md",
+      "bytes": 5677,
+      "sha256": "0c84cfd92bf6eb3ff41a2cd96ff8d5b99d9955659df6a25dbcebeb8de7b78b46"
+    },
+    {
+      "path": "review-request.md",
+      "bytes": 1852,
+      "sha256": "40d2ac8f589f06f9964be992f6262fca575d8bcb33df6d7d62f2a8786dd33ead"
+    },
+    {
+      "path": "task-receipt.json",
+      "bytes": 5590,
+      "sha256": "0bfde73acc0fde15675c2872147efa5c80b18cc2ff9e6c698b34b089196e2698"
+    },
+    {
+      "path": "task.md",
+      "bytes": 1981,
+      "sha256": "51ada15bc96892a97bdbbdb39ad5008c5693ea8cb0fbfb59586e69cad1016ccc"
+    }
+  ]
+}

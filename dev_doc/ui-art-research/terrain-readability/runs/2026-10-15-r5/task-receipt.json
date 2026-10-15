@@ -1,0 +1,151 @@
+{
+  "task_id": "UIUX-R5-MATERIALS-AND-CLOUD-PILOT-20261015",
+  "status": "completed",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/ui-ux/terrain-material-r5",
+  "target_head_before": "91457ab460565d20e61a8c609e5eb7cf46112895",
+  "candidate_head": "b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8",
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "R5候选和单组采集分范围实施；实现者经独立审查，保护主仓已有改动"
+    },
+    {
+      "contract": "docs/worktree-lifecycle.md",
+      "summary": "使用受控任务工作树，保留冻结源候选与独立证据分支"
+    },
+    {
+      "contract": "dot-link receiver-protocol.md",
+      "summary": "API原件消费、固定身份和请求绑定、签名RECEIPT与接收端closed/count1"
+    },
+    {
+      "contract": "sot-task-receipt",
+      "summary": "明确本Task完成范围、实际核验、受保护状态与下一步"
+    }
+  ],
+  "changed_files": [
+    "assets/prototype/battlefield_courtyard/coping-limestone-r5.png",
+    "assets/prototype/battlefield_courtyard/coping-limestone-r5.png.import",
+    "assets/prototype/battlefield_courtyard/forest-tree-v3b.png",
+    "assets/prototype/battlefield_courtyard/forest-tree-v3b.png.import",
+    "assets/prototype/battlefield_courtyard/masonry-wall-limestone-r5.png",
+    "assets/prototype/battlefield_courtyard/masonry-wall-limestone-r5.png.import",
+    "assets/prototype/battlefield_courtyard/visual_profile.json",
+    "dev_doc/ui-art-research/terrain-readability/material-iteration-r5.md",
+    "dev_doc/ui-art-research/terrain-readability/tree-r5-derivation.md",
+    "scripts/art/build_forest_tree_v3b.py",
+    "scripts/ui/playground/courtyard_board_view.gd",
+    "tests/claude_review/terrain_readability_crown_regions.json",
+    "tests/claude_review/terrain_readability_tree_semantics.json",
+    "tests/claude_review/terrain_readability_tree_semantics_review.json"
+  ],
+  "evidence_record_branch": "codex/ui-ux/terrain-r5-evidence",
+  "evidence_record_directory": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r5",
+  "verification": [
+    {
+      "command": "candidate-independent-review",
+      "result": "pass",
+      "evidence": "14文件固定字节与候选源审查通过"
+    },
+    {
+      "command": "reconstruct_core.py",
+      "result": "pass",
+      "evidence": "762业务原件、6审计原件、17PNG、116空文件；220载体和逐文件摘要全部匹配"
+    },
+    {
+      "command": "frozen v3 validate_pilot and C4/C8 offline readback",
+      "result": "pass",
+      "evidence": "12树T3、7墙T2、3柱T2及树冠五项通过；本云最大浮差2.1316282072803006e-14"
+    },
+    {
+      "command": "delivery-independent-review + receipt116 signature binding",
+      "result": "pass",
+      "evidence": "待签正文11942字节SHA41bc26fb08574cc3b9d63bf1cf5d4b19cef9871df44740c19dd638005c220377；签名保留全部原字段"
+    },
+    {
+      "command": "close ACK and actual service readback",
+      "result": "pass",
+      "evidence": "关闭ACK97801字节SHA7da1e3fd6dfb9615bf7b5460ab431dd110d01cbb76fb8169441a7cae58a2d24b；closed/count1，证据绑定RECEIPT正文"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "候选冻结与来源可追溯",
+      "result": "pass",
+      "evidence": [
+        "candidate-files.json",
+        "main-verification.json"
+      ]
+    },
+    {
+      "criterion": "完整必需原件与日志消费",
+      "result": "pass",
+      "evidence": [
+        "original-consumption-index.json",
+        "closure.json"
+      ]
+    },
+    {
+      "criterion": "冻结指标复算与诊断保留",
+      "result": "pass",
+      "evidence": [
+        "main-canopy-statistics.json",
+        "main-frozen-c4-c8.json",
+        "main-verification.json"
+      ]
+    },
+    {
+      "criterion": "独立交付审查和签收关闭",
+      "result": "pass",
+      "evidence": [
+        "audit/receipt116-independent-review.original.json",
+        "closure.json"
+      ]
+    },
+    {
+      "criterion": "Claude视觉复核材料",
+      "result": "pass",
+      "evidence": [
+        "review-request.md",
+        "captures/main.png",
+        "captures/props.png",
+        "captures/portrait-hud.png"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "main worktree project.godot",
+      "result": "unchanged",
+      "evidence": "sha256:5dfdc2dae8e9fa147e1a5490a52055106a6b72411c18b3ac0347f3fa1c71d607"
+    },
+    {
+      "subject": "frozen capture and measurement entrypoints",
+      "result": "unchanged",
+      "evidence": "1416源文件与八次门禁匹配；冻结入口只被调用"
+    },
+    {
+      "subject": "ground, shoreline, water depth, camera, grid and gameplay",
+      "result": "unchanged",
+      "evidence": "源候选14文件边界与独审记录"
+    }
+  ],
+  "residual_risks": [
+    "柱体的庭院遗迹用途与接地需Claude原图视觉判断",
+    "全code7及逐树额外色彩诊断中的FAIL保留在审计原件"
+  ],
+  "escalation_reason": null,
+  "target_head": "b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8",
+  "source_schema_version": "unversioned",
+  "source_snapshot_or_commit": "b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8",
+  "normalized_digest": "不涉及结构化设计库事实读取或改写",
+  "publication": {
+    "published": false,
+    "remote_ref": null
+  },
+  "milestone": {
+    "name": "TERRAIN-READABILITY-01",
+    "current_task": "R5候选与单组云端原件交付完成",
+    "next_task": "Claude视觉复核；按结论决定修订或同一素材六组定稿复测"
+  }
+}

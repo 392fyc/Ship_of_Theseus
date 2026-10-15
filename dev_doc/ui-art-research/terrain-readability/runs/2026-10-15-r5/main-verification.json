@@ -1,0 +1,1420 @@
+{
+  "schema": "sot-task115-main-original-verification/1",
+  "status": "PASS",
+  "candidate_commit": "b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8",
+  "candidate_tree": "45bc1389051f614f6f1c5389a9bdacdbf0aef7a6",
+  "task_request_id": "22eb9c77-5c3f-4e05-b95d-17d121a43c01",
+  "task_id": "bb3714bb-6107-4e22-9c4e-bc3486e091c9",
+  "task_body_sha256": "8c146c0f236313798028e4a08df78940859d55d1c32f834d0bfb1cac34f13f26",
+  "result_original": {
+    "request_id": "1d0adc2e-82a1-49bf-84b7-5d931c22eece",
+    "bytes": 25328,
+    "sha256": "3852308bfc029910875a1ef4694fb430c9a68ba36a4dbd9e3fb8d00b48735fc1",
+    "page_id": "page_f09313a7cd488191be077e3a0bbff4e6",
+    "reference": "library-file:fde1_bGliZmlsZV9NWm5NdjliSHl6MDZ0aFpyMjQ5MGpB_FileDrive_6af57ca9c23c819184d2e6b479d22dac"
+  },
+  "native_adoption": {
+    "page_id": "page_6e2084798c348191b9abbef150c2ea22",
+    "thread_id": "fff192d9-08c7-5d16-8bf0-9db397ba88de",
+    "message_id": "538aedf4-bf06-5aa0-b64a-7b918b38e790",
+    "conversation_id": "01a118cf-9fad-76e2-99af-46a5f9a550fc"
+  },
+  "request_result_native_binding": "PASS",
+  "required_originals": {
+    "count": 762,
+    "bytes": 22860126,
+    "audit_count": 6,
+    "png_count": 17,
+    "empty_count": 116,
+    "selected_carriers": 220,
+    "all_original_sizes_sha256_verified": true,
+    "proof": {
+      "name": "original-readback-verification.json",
+      "bytes": 323138,
+      "sha256": "a5bb403a5d73f712a23d143d430e81c13b30201a5b662fa41b573517bb385ffe"
+    }
+  },
+  "optional_archive": {
+    "count": 145,
+    "bytes": 69205659,
+    "per_file_inventory_verified": true,
+    "all_binary_bytes_readback": false,
+    "superset_delivery_complete": false
+  },
+  "transport_deviation": {
+    "signed_json_pointer": "/data_b64",
+    "prefix_actual_json_pointer": "/base64",
+    "supplement_actual_json_pointer": "/data_b64",
+    "original_json_bytes_preserved": true,
+    "decoded_original_bytes_verified": true
+  },
+  "frozen_source": {
+    "source_count": 1416,
+    "all_raw_bytes_match": true,
+    "eight_source_gates": [
+      "import-after",
+      "import-before",
+      "native-after",
+      "native-before",
+      "structure-after",
+      "structure-before",
+      "validator-after",
+      "validator-before"
+    ],
+    "candidate_clean_HEAD_tree_verified": true
+  },
+  "native_execution": {
+    "stage_count": 4,
+    "each_stage_once": true,
+    "execution_start_count": 1,
+    "stages": [
+      {
+        "stage": "import",
+        "pid": 55,
+        "returncode": 0,
+        "started_at": "2026-10-15T04:04:17.043031+00:00",
+        "finished_at": "2026-10-15T04:04:46.042162+00:00",
+        "process_group_present": false
+      },
+      {
+        "stage": "structure",
+        "pid": 309,
+        "returncode": 0,
+        "started_at": "2026-10-15T04:04:47.176681+00:00",
+        "finished_at": "2026-10-15T04:04:58.879239+00:00",
+        "process_group_present": false
+      },
+      {
+        "stage": "native",
+        "pid": 360,
+        "returncode": 0,
+        "started_at": "2026-10-15T04:04:59.932662+00:00",
+        "finished_at": "2026-10-15T04:05:19.684698+00:00",
+        "process_group_present": false
+      },
+      {
+        "stage": "validator",
+        "pid": 484,
+        "returncode": 0,
+        "started_at": "2026-10-15T04:05:20.825566+00:00",
+        "finished_at": "2026-10-15T04:05:27.711260+00:00",
+        "process_group_present": false
+      }
+    ]
+  },
+  "offline_frozen_verifiers": {
+    "semantic_sidecar_v3": true,
+    "cases_match_cloud": true,
+    "pilot_matches_cloud": true,
+    "float_difference_count": 34,
+    "maximum_float_difference": 2.1316282072803006e-14,
+    "thresholds_unchanged": true
+  },
+  "domain": {
+    "capture_preconditions": "PASS",
+    "capture_errors": [],
+    "C4": {
+      "capture": "portrait-hud.png",
+      "scale": 1,
+      "panel_colour_rows": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0
+      },
+      "brass_offset": {
+        "top": 1,
+        "bottom": 1,
+        "left": 1,
+        "right": 1
+      },
+      "pass": true,
+      "sha256": "6a887751e9e221d0cac2f45b23de3e3a69cbad31d4f20f720160070736d35afb",
+      "source": "portrait_companion",
+      "frame_id": 17
+    },
+    "C8": {
+      "manifest": "capture-manifest.json",
+      "project_renderer": "gl_compatibility",
+      "renderer": "gl_compatibility",
+      "capture_count": 2,
+      "mismatches": [],
+      "pass": true
+    },
+    "pixel_alignment": {
+      "status": "PASS",
+      "errors": [],
+      "method": "exact opaque RGBA anchors, or exact RGB and identical observed alpha>127 inside independently recorded single-instance source bounds; no blended palette or nearest-color decoding",
+      "props_alpha_gt_0_5_pixels": 22768,
+      "props_alpha_missing_labels": 0,
+      "opaque_instance_matches": 8123,
+      "opaque_instance_mismatches": 0,
+      "opaque_instance_matches_by_kind": {
+        "pillar": 2504,
+        "wall": 5619
+      },
+      "isolated_source_instance_matches": 5422,
+      "isolated_source_instance_mismatches": 0,
+      "isolated_source_matches_by_kind": {
+        "pillar": 0,
+        "rubble": 0,
+        "tree": 5422,
+        "wall": 0
+      },
+      "opaque_part_matches": 8123,
+      "opaque_part_mismatches": 0
+    },
+    "tree_counts": {
+      "PASS": 12,
+      "FAIL": 0,
+      "NOT_TESTED": 0
+    },
+    "tree_rows": [
+      {
+        "id": "tree@0.00,0.00",
+        "status": "PASS",
+        "delta_l": 12.41861418348449,
+        "delta_e00": 17.313908525324994,
+        "usable_ground_pixels": 810,
+        "ground_categories": [
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 65
+          },
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 745
+          }
+        ],
+        "not_tested_reasons": []
+      },
+      {
+        "id": "tree@0.00,1.00",
+        "status": "PASS",
+        "delta_l": 10.67934760230644,
+        "delta_e00": 16.355855509912402,
+        "usable_ground_pixels": 810,
+        "ground_categories": [
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 65
+          },
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 745
+          }
+        ],
+        "not_tested_reasons": []
+      },
+      {
+        "id": "tree@0.00,8.00",
+        "status": "PASS",
+        "delta_l": 13.817904405771252,
+        "delta_e00": 18.070723547462208,
+        "usable_ground_pixels": 894,
+        "ground_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 202
+          },
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 71
+          },
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 621
+          }
+        ],
+        "not_tested_reasons": []
+      },
+      {
+        "id": "tree@0.00,9.00",
+        "status": "PASS",
+        "delta_l": 12.359852117878276,
+        "delta_e00": 17.177305040800103,
+        "usable_ground_pixels": 894,
+        "ground_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 202
+          },
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 71
+          },
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 621
+          }
+        ],
+        "not_tested_reasons": []
+      },
+      {
+        "id": "tree@1.00,0.00",
+        "status": "PASS",
+        "delta_l": 12.338529007376497,
+        "delta_e00": 17.33781998715683,
+        "usable_ground_pixels": 810,
+        "ground_categories": [
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 65
+          },
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 745
+          }
+        ],
+        "not_tested_reasons": []
+      },
+      {
+        "id": "tree@1.00,9.00",
+        "status": "PASS",
+        "delta_l": 12.392417903488692,
+        "delta_e00": 17.165180230188277,
+        "usable_ground_pixels": 894,
+        "ground_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 202
+          },
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 71
+          },
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 621
+          }
+        ],
+        "not_tested_reasons": []
+      },
+      {
+        "id": "tree@8.00,0.00",
+        "status": "PASS",
+        "delta_l": 26.42888133756623,
+        "delta_e00": 27.152866044129492,
+        "usable_ground_pixels": 345,
+        "ground_categories": [
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 345
+          }
+        ],
+        "not_tested_reasons": []
+      },
+      {
+        "id": "tree@8.00,9.00",
+        "status": "PASS",
+        "delta_l": 13.246395119577368,
+        "delta_e00": 17.89702596670143,
+        "usable_ground_pixels": 300,
+        "ground_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 230
+          },
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 70
+          }
+        ],
+        "not_tested_reasons": []
+      },
+      {
+        "id": "tree@9.00,0.00",
+        "status": "PASS",
+        "delta_l": 9.050197066457514,
+        "delta_e00": 15.410815946145501,
+        "usable_ground_pixels": 345,
+        "ground_categories": [
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 345
+          }
+        ],
+        "not_tested_reasons": []
+      },
+      {
+        "id": "tree@9.00,1.00",
+        "status": "PASS",
+        "delta_l": 14.514862133635752,
+        "delta_e00": 18.508742215555806,
+        "usable_ground_pixels": 345,
+        "ground_categories": [
+          {
+            "name": "environment_ground",
+            "semantic": "environment_ground",
+            "pixels": 345
+          }
+        ],
+        "not_tested_reasons": []
+      },
+      {
+        "id": "tree@9.00,8.00",
+        "status": "PASS",
+        "delta_l": 14.789514525915887,
+        "delta_e00": 18.824871074478267,
+        "usable_ground_pixels": 300,
+        "ground_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 230
+          },
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 70
+          }
+        ],
+        "not_tested_reasons": []
+      },
+      {
+        "id": "tree@9.00,9.00",
+        "status": "PASS",
+        "delta_l": 14.379115248542607,
+        "delta_e00": 18.54046665234501,
+        "usable_ground_pixels": 300,
+        "ground_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 230
+          },
+          {
+            "name": "1",
+            "semantic": "forest",
+            "pixels": 70
+          }
+        ],
+        "not_tested_reasons": []
+      }
+    ],
+    "walls": [
+      {
+        "status": "PASS",
+        "top_l": 34.34094117696123,
+        "side_l": 19.287683192879424,
+        "top_pixels": 407,
+        "side_pixels": 282,
+        "reference_surface_pixels": 720,
+        "reference_surface_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 412
+          },
+          {
+            "name": "4",
+            "semantic": "wall",
+            "pixels": 99
+          },
+          {
+            "name": "paving",
+            "semantic": "_is_paved_at cell flag",
+            "pixels": 209
+          }
+        ],
+        "water_pixels_excluded_from_reference": 0,
+        "alpha_uncertain_top_pixels": 0,
+        "alpha_uncertain_side_pixels": 0,
+        "alpha_uncertain_samples_included": true,
+        "alpha_threshold_for_samples": ">127/255",
+        "uncertain_if_alpha_below": 0.98,
+        "reference_scope": "group",
+        "reference_surface_l": 19.51569594927479,
+        "top_reference_surface_delta": 14.825245227686441,
+        "stable_id": "wall@3.00,1.00",
+        "type": "wall",
+        "token": 19,
+        "top_part_codes": [
+          1
+        ],
+        "side_part_codes": [
+          2
+        ],
+        "measurement_group": {
+          "group_id": "wall-group-01",
+          "members": [
+            "wall@3.00,1.00",
+            "wall@3.00,2.00",
+            "wall@4.00,1.00",
+            "wall@5.00,1.00",
+            "wall@6.00,1.00",
+            "wall@6.00,2.00"
+          ],
+          "member_cells_xy": {
+            "wall@3.00,1.00": [
+              3,
+              1
+            ],
+            "wall@3.00,2.00": [
+              3,
+              2
+            ],
+            "wall@4.00,1.00": [
+              4,
+              1
+            ],
+            "wall@5.00,1.00": [
+              5,
+              1
+            ],
+            "wall@6.00,1.00": [
+              6,
+              1
+            ],
+            "wall@6.00,2.00": [
+              6,
+              2
+            ]
+          },
+          "member_visible_mask_pixels": {
+            "wall@3.00,1.00": 794,
+            "wall@3.00,2.00": 874,
+            "wall@4.00,1.00": 1090,
+            "wall@5.00,1.00": 1013,
+            "wall@6.00,1.00": 984,
+            "wall@6.00,2.00": 892
+          },
+          "member_measurement_mask_pixels": {
+            "wall@3.00,1.00": 712,
+            "wall@3.00,2.00": 742,
+            "wall@4.00,1.00": 966,
+            "wall@5.00,1.00": 896,
+            "wall@6.00,1.00": 579,
+            "wall@6.00,2.00": 746
+          },
+          "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+          "status": "PASS",
+          "reason": null
+        }
+      },
+      {
+        "status": "PASS",
+        "top_l": 33.66072357125934,
+        "side_l": 21.673144672848647,
+        "top_pixels": 270,
+        "side_pixels": 442,
+        "reference_surface_pixels": 720,
+        "reference_surface_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 412
+          },
+          {
+            "name": "4",
+            "semantic": "wall",
+            "pixels": 99
+          },
+          {
+            "name": "paving",
+            "semantic": "_is_paved_at cell flag",
+            "pixels": 209
+          }
+        ],
+        "water_pixels_excluded_from_reference": 0,
+        "alpha_uncertain_top_pixels": 0,
+        "alpha_uncertain_side_pixels": 0,
+        "alpha_uncertain_samples_included": true,
+        "alpha_threshold_for_samples": ">127/255",
+        "uncertain_if_alpha_below": 0.98,
+        "reference_scope": "group",
+        "reference_surface_l": 19.51569594927479,
+        "top_reference_surface_delta": 14.14502762198455,
+        "stable_id": "wall@3.00,2.00",
+        "type": "wall",
+        "token": 20,
+        "top_part_codes": [
+          1
+        ],
+        "side_part_codes": [
+          2
+        ],
+        "measurement_group": {
+          "group_id": "wall-group-01",
+          "members": [
+            "wall@3.00,1.00",
+            "wall@3.00,2.00",
+            "wall@4.00,1.00",
+            "wall@5.00,1.00",
+            "wall@6.00,1.00",
+            "wall@6.00,2.00"
+          ],
+          "member_cells_xy": {
+            "wall@3.00,1.00": [
+              3,
+              1
+            ],
+            "wall@3.00,2.00": [
+              3,
+              2
+            ],
+            "wall@4.00,1.00": [
+              4,
+              1
+            ],
+            "wall@5.00,1.00": [
+              5,
+              1
+            ],
+            "wall@6.00,1.00": [
+              6,
+              1
+            ],
+            "wall@6.00,2.00": [
+              6,
+              2
+            ]
+          },
+          "member_visible_mask_pixels": {
+            "wall@3.00,1.00": 794,
+            "wall@3.00,2.00": 874,
+            "wall@4.00,1.00": 1090,
+            "wall@5.00,1.00": 1013,
+            "wall@6.00,1.00": 984,
+            "wall@6.00,2.00": 892
+          },
+          "member_measurement_mask_pixels": {
+            "wall@3.00,1.00": 712,
+            "wall@3.00,2.00": 742,
+            "wall@4.00,1.00": 966,
+            "wall@5.00,1.00": 896,
+            "wall@6.00,1.00": 579,
+            "wall@6.00,2.00": 746
+          },
+          "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+          "status": "PASS",
+          "reason": null
+        }
+      },
+      {
+        "status": "PASS",
+        "top_l": 34.52240268596458,
+        "side_l": 17.400399442134756,
+        "top_pixels": 389,
+        "side_pixels": 577,
+        "reference_surface_pixels": 720,
+        "reference_surface_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 412
+          },
+          {
+            "name": "4",
+            "semantic": "wall",
+            "pixels": 99
+          },
+          {
+            "name": "paving",
+            "semantic": "_is_paved_at cell flag",
+            "pixels": 209
+          }
+        ],
+        "water_pixels_excluded_from_reference": 0,
+        "alpha_uncertain_top_pixels": 0,
+        "alpha_uncertain_side_pixels": 0,
+        "alpha_uncertain_samples_included": true,
+        "alpha_threshold_for_samples": ">127/255",
+        "uncertain_if_alpha_below": 0.98,
+        "reference_scope": "group",
+        "reference_surface_l": 19.51569594927479,
+        "top_reference_surface_delta": 15.00670673668979,
+        "stable_id": "wall@4.00,1.00",
+        "type": "wall",
+        "token": 21,
+        "top_part_codes": [
+          1
+        ],
+        "side_part_codes": [
+          2
+        ],
+        "measurement_group": {
+          "group_id": "wall-group-01",
+          "members": [
+            "wall@3.00,1.00",
+            "wall@3.00,2.00",
+            "wall@4.00,1.00",
+            "wall@5.00,1.00",
+            "wall@6.00,1.00",
+            "wall@6.00,2.00"
+          ],
+          "member_cells_xy": {
+            "wall@3.00,1.00": [
+              3,
+              1
+            ],
+            "wall@3.00,2.00": [
+              3,
+              2
+            ],
+            "wall@4.00,1.00": [
+              4,
+              1
+            ],
+            "wall@5.00,1.00": [
+              5,
+              1
+            ],
+            "wall@6.00,1.00": [
+              6,
+              1
+            ],
+            "wall@6.00,2.00": [
+              6,
+              2
+            ]
+          },
+          "member_visible_mask_pixels": {
+            "wall@3.00,1.00": 794,
+            "wall@3.00,2.00": 874,
+            "wall@4.00,1.00": 1090,
+            "wall@5.00,1.00": 1013,
+            "wall@6.00,1.00": 984,
+            "wall@6.00,2.00": 892
+          },
+          "member_measurement_mask_pixels": {
+            "wall@3.00,1.00": 712,
+            "wall@3.00,2.00": 742,
+            "wall@4.00,1.00": 966,
+            "wall@5.00,1.00": 896,
+            "wall@6.00,1.00": 579,
+            "wall@6.00,2.00": 746
+          },
+          "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+          "status": "PASS",
+          "reason": null
+        }
+      },
+      {
+        "status": "PASS",
+        "top_l": 33.88025151236082,
+        "side_l": 17.352163358716297,
+        "top_pixels": 404,
+        "side_pixels": 492,
+        "reference_surface_pixels": 720,
+        "reference_surface_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 412
+          },
+          {
+            "name": "4",
+            "semantic": "wall",
+            "pixels": 99
+          },
+          {
+            "name": "paving",
+            "semantic": "_is_paved_at cell flag",
+            "pixels": 209
+          }
+        ],
+        "water_pixels_excluded_from_reference": 0,
+        "alpha_uncertain_top_pixels": 0,
+        "alpha_uncertain_side_pixels": 0,
+        "alpha_uncertain_samples_included": true,
+        "alpha_threshold_for_samples": ">127/255",
+        "uncertain_if_alpha_below": 0.98,
+        "reference_scope": "group",
+        "reference_surface_l": 19.51569594927479,
+        "top_reference_surface_delta": 14.364555563086032,
+        "stable_id": "wall@5.00,1.00",
+        "type": "wall",
+        "token": 22,
+        "top_part_codes": [
+          1
+        ],
+        "side_part_codes": [
+          2
+        ],
+        "measurement_group": {
+          "group_id": "wall-group-01",
+          "members": [
+            "wall@3.00,1.00",
+            "wall@3.00,2.00",
+            "wall@4.00,1.00",
+            "wall@5.00,1.00",
+            "wall@6.00,1.00",
+            "wall@6.00,2.00"
+          ],
+          "member_cells_xy": {
+            "wall@3.00,1.00": [
+              3,
+              1
+            ],
+            "wall@3.00,2.00": [
+              3,
+              2
+            ],
+            "wall@4.00,1.00": [
+              4,
+              1
+            ],
+            "wall@5.00,1.00": [
+              5,
+              1
+            ],
+            "wall@6.00,1.00": [
+              6,
+              1
+            ],
+            "wall@6.00,2.00": [
+              6,
+              2
+            ]
+          },
+          "member_visible_mask_pixels": {
+            "wall@3.00,1.00": 794,
+            "wall@3.00,2.00": 874,
+            "wall@4.00,1.00": 1090,
+            "wall@5.00,1.00": 1013,
+            "wall@6.00,1.00": 984,
+            "wall@6.00,2.00": 892
+          },
+          "member_measurement_mask_pixels": {
+            "wall@3.00,1.00": 712,
+            "wall@3.00,2.00": 742,
+            "wall@4.00,1.00": 966,
+            "wall@5.00,1.00": 896,
+            "wall@6.00,1.00": 579,
+            "wall@6.00,2.00": 746
+          },
+          "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+          "status": "PASS",
+          "reason": null
+        }
+      },
+      {
+        "status": "PASS",
+        "top_l": 34.5836304720415,
+        "side_l": 23.78139107085368,
+        "top_pixels": 347,
+        "side_pixels": 221,
+        "reference_surface_pixels": 720,
+        "reference_surface_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 412
+          },
+          {
+            "name": "4",
+            "semantic": "wall",
+            "pixels": 99
+          },
+          {
+            "name": "paving",
+            "semantic": "_is_paved_at cell flag",
+            "pixels": 209
+          }
+        ],
+        "water_pixels_excluded_from_reference": 0,
+        "alpha_uncertain_top_pixels": 0,
+        "alpha_uncertain_side_pixels": 0,
+        "alpha_uncertain_samples_included": true,
+        "alpha_threshold_for_samples": ">127/255",
+        "uncertain_if_alpha_below": 0.98,
+        "reference_scope": "group",
+        "reference_surface_l": 19.51569594927479,
+        "top_reference_surface_delta": 15.06793452276671,
+        "stable_id": "wall@6.00,1.00",
+        "type": "wall",
+        "token": 23,
+        "top_part_codes": [
+          1
+        ],
+        "side_part_codes": [
+          2
+        ],
+        "measurement_group": {
+          "group_id": "wall-group-01",
+          "members": [
+            "wall@3.00,1.00",
+            "wall@3.00,2.00",
+            "wall@4.00,1.00",
+            "wall@5.00,1.00",
+            "wall@6.00,1.00",
+            "wall@6.00,2.00"
+          ],
+          "member_cells_xy": {
+            "wall@3.00,1.00": [
+              3,
+              1
+            ],
+            "wall@3.00,2.00": [
+              3,
+              2
+            ],
+            "wall@4.00,1.00": [
+              4,
+              1
+            ],
+            "wall@5.00,1.00": [
+              5,
+              1
+            ],
+            "wall@6.00,1.00": [
+              6,
+              1
+            ],
+            "wall@6.00,2.00": [
+              6,
+              2
+            ]
+          },
+          "member_visible_mask_pixels": {
+            "wall@3.00,1.00": 794,
+            "wall@3.00,2.00": 874,
+            "wall@4.00,1.00": 1090,
+            "wall@5.00,1.00": 1013,
+            "wall@6.00,1.00": 984,
+            "wall@6.00,2.00": 892
+          },
+          "member_measurement_mask_pixels": {
+            "wall@3.00,1.00": 712,
+            "wall@3.00,2.00": 742,
+            "wall@4.00,1.00": 966,
+            "wall@5.00,1.00": 896,
+            "wall@6.00,1.00": 579,
+            "wall@6.00,2.00": 746
+          },
+          "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+          "status": "PASS",
+          "reason": null
+        }
+      },
+      {
+        "status": "PASS",
+        "top_l": 34.77929818665589,
+        "side_l": 22.12787872865607,
+        "top_pixels": 258,
+        "side_pixels": 465,
+        "reference_surface_pixels": 720,
+        "reference_surface_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 412
+          },
+          {
+            "name": "4",
+            "semantic": "wall",
+            "pixels": 99
+          },
+          {
+            "name": "paving",
+            "semantic": "_is_paved_at cell flag",
+            "pixels": 209
+          }
+        ],
+        "water_pixels_excluded_from_reference": 0,
+        "alpha_uncertain_top_pixels": 0,
+        "alpha_uncertain_side_pixels": 0,
+        "alpha_uncertain_samples_included": true,
+        "alpha_threshold_for_samples": ">127/255",
+        "uncertain_if_alpha_below": 0.98,
+        "reference_scope": "group",
+        "reference_surface_l": 19.51569594927479,
+        "top_reference_surface_delta": 15.263602237381104,
+        "stable_id": "wall@6.00,2.00",
+        "type": "wall",
+        "token": 24,
+        "top_part_codes": [
+          1
+        ],
+        "side_part_codes": [
+          2
+        ],
+        "measurement_group": {
+          "group_id": "wall-group-01",
+          "members": [
+            "wall@3.00,1.00",
+            "wall@3.00,2.00",
+            "wall@4.00,1.00",
+            "wall@5.00,1.00",
+            "wall@6.00,1.00",
+            "wall@6.00,2.00"
+          ],
+          "member_cells_xy": {
+            "wall@3.00,1.00": [
+              3,
+              1
+            ],
+            "wall@3.00,2.00": [
+              3,
+              2
+            ],
+            "wall@4.00,1.00": [
+              4,
+              1
+            ],
+            "wall@5.00,1.00": [
+              5,
+              1
+            ],
+            "wall@6.00,1.00": [
+              6,
+              1
+            ],
+            "wall@6.00,2.00": [
+              6,
+              2
+            ]
+          },
+          "member_visible_mask_pixels": {
+            "wall@3.00,1.00": 794,
+            "wall@3.00,2.00": 874,
+            "wall@4.00,1.00": 1090,
+            "wall@5.00,1.00": 1013,
+            "wall@6.00,1.00": 984,
+            "wall@6.00,2.00": 892
+          },
+          "member_measurement_mask_pixels": {
+            "wall@3.00,1.00": 712,
+            "wall@3.00,2.00": 742,
+            "wall@4.00,1.00": 966,
+            "wall@5.00,1.00": 896,
+            "wall@6.00,1.00": 579,
+            "wall@6.00,2.00": 746
+          },
+          "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+          "status": "PASS",
+          "reason": null
+        }
+      },
+      {
+        "status": "PASS",
+        "top_l": 33.866041245869766,
+        "side_l": 24.811821473302956,
+        "top_pixels": 28,
+        "side_pixels": 29,
+        "reference_surface_pixels": 78,
+        "reference_surface_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 30
+          },
+          {
+            "name": "paving",
+            "semantic": "_is_paved_at cell flag",
+            "pixels": 48
+          }
+        ],
+        "water_pixels_excluded_from_reference": 0,
+        "alpha_uncertain_top_pixels": 0,
+        "alpha_uncertain_side_pixels": 0,
+        "alpha_uncertain_samples_included": true,
+        "alpha_threshold_for_samples": ">127/255",
+        "uncertain_if_alpha_below": 0.98,
+        "reference_scope": "group",
+        "reference_surface_l": 19.22286977353953,
+        "top_reference_surface_delta": 14.643171472330238,
+        "stable_id": "wall@8.00,7.00",
+        "type": "wall",
+        "token": 25,
+        "top_part_codes": [
+          1
+        ],
+        "side_part_codes": [
+          2
+        ],
+        "measurement_group": {
+          "group_id": "wall-group-02",
+          "members": [
+            "wall@8.00,7.00"
+          ],
+          "member_cells_xy": {
+            "wall@8.00,7.00": [
+              8,
+              7
+            ]
+          },
+          "member_visible_mask_pixels": {
+            "wall@8.00,7.00": 67
+          },
+          "member_measurement_mask_pixels": {
+            "wall@8.00,7.00": 57
+          },
+          "connectivity": "captured cell Manhattan distance = 1 and visible semantic instance masks overlap or are 8-neighbors (Chebyshev pixel distance <= 1); no sample-radius expansion",
+          "status": "PASS",
+          "reason": null
+        }
+      }
+    ],
+    "pillars": [
+      {
+        "status": "PASS",
+        "top_l": 36.02996612441929,
+        "side_l": 19.336956675505284,
+        "top_pixels": 198,
+        "side_pixels": 424,
+        "reference_surface_pixels": 451,
+        "reference_surface_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 278
+          },
+          {
+            "name": "4",
+            "semantic": "wall",
+            "pixels": 173
+          }
+        ],
+        "water_pixels_excluded_from_reference": 0,
+        "alpha_uncertain_top_pixels": 0,
+        "alpha_uncertain_side_pixels": 0,
+        "alpha_uncertain_samples_included": true,
+        "alpha_threshold_for_samples": ">127/255",
+        "uncertain_if_alpha_below": 0.98,
+        "reference_scope": "instance",
+        "reference_surface_l": 20.624366660230308,
+        "top_reference_surface_delta": 15.405599464188981,
+        "stable_id": "pillar@1.00,4.00",
+        "type": "pillar",
+        "token": 1,
+        "top_part_codes": [
+          3
+        ],
+        "side_part_codes": [
+          4
+        ]
+      },
+      {
+        "status": "PASS",
+        "top_l": 36.78413675019661,
+        "side_l": 19.32047631490893,
+        "top_pixels": 199,
+        "side_pixels": 426,
+        "reference_surface_pixels": 429,
+        "reference_surface_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 282
+          },
+          {
+            "name": "4",
+            "semantic": "wall",
+            "pixels": 147
+          }
+        ],
+        "water_pixels_excluded_from_reference": 0,
+        "alpha_uncertain_top_pixels": 0,
+        "alpha_uncertain_side_pixels": 0,
+        "alpha_uncertain_samples_included": true,
+        "alpha_threshold_for_samples": ">127/255",
+        "uncertain_if_alpha_below": 0.98,
+        "reference_scope": "instance",
+        "reference_surface_l": 21.178614640364245,
+        "top_reference_surface_delta": 15.605522109832364,
+        "stable_id": "pillar@1.00,7.00",
+        "type": "pillar",
+        "token": 2,
+        "top_part_codes": [
+          3
+        ],
+        "side_part_codes": [
+          4
+        ]
+      },
+      {
+        "status": "PASS",
+        "top_l": 35.52063894916198,
+        "side_l": 19.468787327756658,
+        "top_pixels": 168,
+        "side_pixels": 429,
+        "reference_surface_pixels": 451,
+        "reference_surface_categories": [
+          {
+            "name": "0",
+            "semantic": "plain",
+            "pixels": 34
+          },
+          {
+            "name": "4",
+            "semantic": "wall",
+            "pixels": 169
+          },
+          {
+            "name": "paving",
+            "semantic": "_is_paved_at cell flag",
+            "pixels": 248
+          }
+        ],
+        "water_pixels_excluded_from_reference": 0,
+        "alpha_uncertain_top_pixels": 0,
+        "alpha_uncertain_side_pixels": 0,
+        "alpha_uncertain_samples_included": true,
+        "alpha_threshold_for_samples": ">127/255",
+        "uncertain_if_alpha_below": 0.98,
+        "reference_scope": "instance",
+        "reference_surface_l": 19.000143566680975,
+        "top_reference_surface_delta": 16.520495382481002,
+        "stable_id": "pillar@8.00,4.00",
+        "type": "pillar",
+        "token": 3,
+        "top_part_codes": [
+          3
+        ],
+        "side_part_codes": [
+          4
+        ]
+      }
+    ],
+    "canopy": {
+      "acceptance_mask": "(semantic_pair.A == 7) & alpha_sample_masks(semantic_coverage).visible; uncertain retained",
+      "scope": "single-frame union of canopy pixels; per-tree T3 remains separate",
+      "evidence_for_scope": "r4-canopy-sampling-comparison.json exactly reproduces all original Claude R4 rounded statistics",
+      "frozen_visible": {
+        "pixels": 7099,
+        "L_median": 33.554563377150565,
+        "L_p95": 58.76667096395441,
+        "L_max": 64.43155573764575,
+        "C_p95": 49.82535733771994,
+        "bright_vivid_fraction": 0.04507677137625018,
+        "uncertain_pixels_retained": 1592,
+        "criteria": {
+          "L_median_ge33": true,
+          "L_p95_le60": true,
+          "L_max_le72": true,
+          "C_p95_le52": true,
+          "bright_vivid_fraction_le_0_08": true
+        },
+        "status": "PASS"
+      },
+      "all_code7_diagnostic": {
+        "pixels": 8297,
+        "L_median": 31.026257915853087,
+        "L_p95": 58.39555719888608,
+        "L_max": 84.73882745046322,
+        "C_p95": 49.64445567497968,
+        "bright_vivid_fraction": 0.03917078462094733,
+        "uncertain_pixels_retained": 1592,
+        "criteria": {
+          "L_median_ge33": false,
+          "L_p95_le60": true,
+          "L_max_le72": false,
+          "C_p95_le52": true,
+          "bright_vivid_fraction_le_0_08": true
+        },
+        "status": "FAIL"
+      }
+    },
+    "original_material_gate": "CLOSED",
+    "T1_T4_T5_T6": "NOT_TESTED_BY_SEMANTIC_SIDECAR_VALIDATOR",
+    "six_case_coverage": false
+  },
+  "pngs": [
+    {
+      "path": "task115_runner/output/10x10_1280x720/10x10_1280x720/contact_shadow.png",
+      "bytes": 4790,
+      "sha256": "73df3f2b0a857a0ad56486295f7928f11ff56c29cfe203e53416a18557be7476",
+      "mode": "RGBA",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "path": "task115_runner/output/10x10_1280x720/10x10_1280x720/exclusions.png",
+      "bytes": 4605,
+      "sha256": "335f61e448535baa18415dee14f94ba2e980abb96e2e4c88669d691038ae8959",
+      "mode": "RGBA",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "path": "task115_runner/output/10x10_1280x720/10x10_1280x720/grid.png",
+      "bytes": 19014,
+      "sha256": "cf4a78afa2352a825d1c44d4c2f8a5473f74c885b2ddf288d172b72925dcc8f7",
+      "mode": "RGBA",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "path": "task115_runner/output/10x10_1280x720/10x10_1280x720/ground.png",
+      "bytes": 2168035,
+      "sha256": "4fbb6b2ac708e893e4df5500b38e87d60526b75509f897a60ad1f583c360c5b0",
+      "mode": "RGBA",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "path": "task115_runner/output/10x10_1280x720/10x10_1280x720/ground_types.png",
+      "bytes": 8936,
+      "sha256": "b67f32f9e90b6e1ee7e343e00cda96080bf15065677e13145a9796d5bb839b30",
+      "mode": "RGBA",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "path": "task115_runner/output/10x10_1280x720/10x10_1280x720/ground_without_shadow.png",
+      "bytes": 2168281,
+      "sha256": "7be27272402bc5aef508e6502a22fca24ff95d94b2abe2c04bf8553fc16840bf",
+      "mode": "RGBA",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "path": "task115_runner/output/10x10_1280x720/10x10_1280x720/instance_ids.png",
+      "bytes": 32893,
+      "sha256": "7efb488c24209d3e90698f7a404b1448614f1e3448a1358b7e373ef9c1b175c8",
+      "mode": "RGBA",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "path": "task115_runner/output/10x10_1280x720/10x10_1280x720/main.png",
+      "bytes": 2201203,
+      "sha256": "1d8790a2857613e8d71d0756f23b0644d08e2b0bf438a1e4fa61aaa630c5410b",
+      "mode": "RGBA",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "path": "task115_runner/output/10x10_1280x720/10x10_1280x720/part_ids.png",
+      "bytes": 31653,
+      "sha256": "1a890c179281afd88ebada3b2a8b819cdda592823554fbc80cc93512cec0ffa9",
+      "mode": "RGBA",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "path": "task115_runner/output/10x10_1280x720/10x10_1280x720/portrait-hud.png",
+      "bytes": 2033551,
+      "sha256": "6a887751e9e221d0cac2f45b23de3e3a69cbad31d4f20f720160070736d35afb",
+      "mode": "RGBA",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "path": "task115_runner/output/10x10_1280x720/10x10_1280x720/props.png",
+      "bytes": 94416,
+      "sha256": "e46420958f4fc5b910700add6464f4cbe8ad79486260edb57bf267bf29ae3ac9",
+      "mode": "RGBA",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "path": "task115_runner/output/10x10_1280x720/10x10_1280x720/reconstruction.png",
+      "bytes": 2201203,
+      "sha256": "1d8790a2857613e8d71d0756f23b0644d08e2b0bf438a1e4fa61aaa630c5410b",
+      "mode": "RGBA",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "path": "task115_runner/output/10x10_1280x720/10x10_1280x720/semantic_coverage.png",
+      "bytes": 28364,
+      "sha256": "aacd8a45d549c9842e03de9c6469ed99fdcfe6a1b37ecfebfeaeb812b7d192e4",
+      "mode": "RGBA",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "path": "task115_runner/output/10x10_1280x720/10x10_1280x720/semantic_pair.png",
+      "bytes": 16074,
+      "sha256": "aadd0323ce3d23c8f8eac82ee52c6dd38313144747e04eaf7abb24e6a5fa2b65",
+      "mode": "RGBA",
+      "size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "path": "task115_runner/output/10x10_1280x720/10x10_1280x720/semantic_tree_region_map.png",
+      "bytes": 14824,
+      "sha256": "c83e5fb0a8baa5143067fd6bdb88723dd62ca18579dd362df86d9903d2390e7e",
+      "mode": "RGBA",
+      "size": [
+        964,
+        950
+      ]
+    },
+    {
+      "path": "task115_runner/output/10x10_1280x720/10x10_1280x720/semantic_write_probe.png",
+      "bytes": 199,
+      "sha256": "f41012b63fe146c7e1a550414148754c9baf66ca1e0e3296de5b504bef043d74",
+      "mode": "RGBA",
+      "size": [
+        128,
+        16
+      ]
+    },
+    {
+      "path": "task115_runner/output/10x10_1280x720/10x10_1280x720/tree_crown_union.png",
+      "bytes": 23371,
+      "sha256": "a04d0d7fac99920561b088caee470391a11991c0d7e03f39851b88fb93d2a6ad",
+      "mode": "RGBA",
+      "size": [
+        1280,
+        720
+      ]
+    }
+  ],
+  "ledger_at_result": {
+    "state": "delivered",
+    "execution_start_count": 1,
+    "evidence_sha256": "3852308bfc029910875a1ef4694fb430c9a68ba36a4dbd9e3fb8d00b48735fc1"
+  },
+  "visual_review": {
+    "wall_ground_material_separation": "Main and independent reviewer see architectural gray stone distinct from rough brown ground",
+    "pillar_role": "Short column structure visible; courtyard ruin role remains a focused Claude visual question",
+    "art_acceptance": "PENDING_CLAUDE_ORIGINAL_IMAGE_REVIEW"
+  },
+  "local_adapter_history": {
+    "initial_attempt": "incorrect older-batch directory; no frozen checker executed",
+    "second_attempt": "NUL string delimiter adaptation fixed",
+    "successful_attempt": "main-runtime-v3-stdout.log; frozen checker files and originals unchanged"
+  }
+}

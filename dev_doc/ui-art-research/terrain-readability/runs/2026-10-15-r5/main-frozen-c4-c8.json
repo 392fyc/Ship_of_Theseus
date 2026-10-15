@@ -1,0 +1,149 @@
+{
+  "manifest": "capture-manifest.json",
+  "case": {
+    "fixture": {
+      "derived_map_sha256": "600a0a61ab1d63bf020dcdd33ac9b4e85ba3ec9b13c61cd70409b740775406cc",
+      "expansion_rule": "Repeat the source 10x10 terrain and paving cells at x%10,y%10; repeat source variants modulo 10 after applying the declared calibration override.",
+      "map_variant_overrides": [
+        {
+          "cell_in_source_10x10": [
+            8,
+            7
+          ],
+          "from": "pillar",
+          "purpose": "Meet the minimum count for production-generated rubble while retaining at least three pillars.",
+          "repeated_case_cells": [
+            [
+              8,
+              7
+            ]
+          ],
+          "to": "ruined"
+        }
+      ],
+      "name": "calibration_courtyard",
+      "source_example": "assets/prototype/battlefield_courtyard/terrain_examples.json#courtyard",
+      "source_map_sha256": "640fe261ef68b013b79557f97fd0fa276d30bd08187f0cd7230bc695bb6d8755"
+    },
+    "initial_fit": {
+      "camera_global_transform": [
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        428.695648193359,
+        215.826080322266
+      ],
+      "camera_position": [
+        428.695648193359,
+        215.826080322266
+      ],
+      "camera_zoom": [
+        0.920000016689301,
+        0.920000016689301
+      ],
+      "fit_call": "TerrainBattleSession._resize -> fit_board",
+      "fit_zoom": 0.92,
+      "manual_camera_override": false,
+      "status": "captured"
+    },
+    "map_sha256": "600a0a61ab1d63bf020dcdd33ac9b4e85ba3ec9b13c61cd70409b740775406cc",
+    "map_size": [
+      10,
+      10
+    ],
+    "name": "10x10_1280x720",
+    "requested_resolution": [
+      1280,
+      720
+    ],
+    "scene": "TerrainBattleSession -> scenes/tactical/TacticalScene.tscn",
+    "window_size": [
+      1280,
+      720
+    ]
+  },
+  "capture_preconditions": "PASS",
+  "errors": [],
+  "instance_counts": {
+    "tree": 12,
+    "wall": 7,
+    "pillar": 3,
+    "rubble": 3
+  },
+  "visible_instance_counts": {
+    "tree": 12,
+    "wall": 7,
+    "pillar": 3,
+    "rubble": 3
+  },
+  "reconstruction": {
+    "status": "PASS",
+    "scope": "完整正式画面与独立重建原件的 RGBA 逐像素相等",
+    "pixels": 921600,
+    "mismatch_pixels": 0,
+    "prop_pixels": 22768,
+    "prop_mismatch_pixels": 0
+  },
+  "segmentation": {
+    "status": "PASS",
+    "alpha_threshold": "> 0.5",
+    "silhouette_pixels": 22768,
+    "alpha_mask_mismatch_pixels": 0,
+    "unknown_mixed_color_pixels": 0,
+    "note": "未知颜色不可分配给最近 ID；测量时排除，边界覆盖按原周长保留。"
+  },
+  "C4": {
+    "capture": "portrait-hud.png",
+    "scale": 1.0,
+    "panel_colour_rows": {
+      "top": 0,
+      "bottom": 0,
+      "left": 0,
+      "right": 0
+    },
+    "brass_offset": {
+      "top": 1,
+      "bottom": 1,
+      "left": 1,
+      "right": 1
+    },
+    "pass": true,
+    "sha256": "6a887751e9e221d0cac2f45b23de3e3a69cbad31d4f20f720160070736d35afb",
+    "source": "portrait_companion",
+    "frame_id": 17
+  },
+  "C8": {
+    "manifest": "capture-manifest.json",
+    "project_renderer": "gl_compatibility",
+    "renderer": "gl_compatibility",
+    "capture_count": 2,
+    "mismatches": [],
+    "pass": true
+  },
+  "C8_source_v1": {
+    "unconditional_disable_lines": [],
+    "conditional_disable_lines": [],
+    "declared_not_runtime": false,
+    "pass": true,
+    "script": "tests/claude_review/capture_terrain_readability.gd"
+  },
+  "C8_source_v2": {
+    "unconditional_disable_lines": [],
+    "conditional_disable_lines": [],
+    "declared_not_runtime": false,
+    "pass": true,
+    "script": "tests/claude_review/capture_terrain_readability_v2.gd"
+  },
+  "measurement_status": "NOT_TESTED",
+  "art_acceptance": "NOT_TESTED",
+  "note": "v6 保留全部 v5/v4 像素与时序前置，仅为 exclusions overlay 记录并校验按冻结像素中心规则量化后的绘制边界；实际像素结果仍须由原生图像和冻结门槛验证。",
+  "schema_version": "terrain-mask-capture/6",
+  "C8_source_v3": {
+    "unconditional_disable_lines": [],
+    "conditional_disable_lines": [],
+    "declared_not_runtime": false,
+    "pass": true,
+    "script": "tests/claude_review/capture_terrain_readability_v3.gd"
+  }
+}

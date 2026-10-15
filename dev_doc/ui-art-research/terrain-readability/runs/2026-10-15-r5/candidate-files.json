@@ -1,0 +1,85 @@
+{
+  "candidate_commit": "b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8",
+  "candidate_tree": "45bc1389051f614f6f1c5389a9bdacdbf0aef7a6",
+  "parent_commit": "91457ab460565d20e61a8c609e5eb7cf46112895",
+  "branch": "codex/ui-ux/terrain-material-r5",
+  "files": [
+    {
+      "path": "assets/prototype/battlefield_courtyard/coping-limestone-r5.png",
+      "bytes": 2867856,
+      "sha256": "3e99d2766d104e5f480f8a8f320ff8183cb6d57ded352607ee7879e0a00e6bd9"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/coping-limestone-r5.png.import",
+      "bytes": 1000,
+      "sha256": "ec745d9aa6c3414bf0b2aa9bc79c5a66d296734de1b2d969c7c320923720b82a"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/forest-tree-v3b.png",
+      "bytes": 1573612,
+      "sha256": "4139562f7d0e6adafb18d0f7b73750dae480f4f20abce179f1540ae4bd53d856"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/forest-tree-v3b.png.import",
+      "bytes": 987,
+      "sha256": "84c175fb5fdaf0c33356ff1e043f7bf96abe1a6767bab6ff98321c0b8d16e52f"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/masonry-wall-limestone-r5.png",
+      "bytes": 2734178,
+      "sha256": "cddddb6299c2f947ece89db5af4485f1414657967593389c142c3633bdcfb4cb"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/masonry-wall-limestone-r5.png.import",
+      "bytes": 1018,
+      "sha256": "0880d307f59a24be7f3c98c89bb5f10ff1e9eec01bbe0af240a63df77ac74971"
+    },
+    {
+      "path": "assets/prototype/battlefield_courtyard/visual_profile.json",
+      "bytes": 3195,
+      "sha256": "04e975c055894313c0bb16a8f6fcd89bd97e626bfa7c0e9e9ef471eb22ef9834"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/material-iteration-r5.md",
+      "bytes": 6161,
+      "sha256": "34ee318f3651465af66fd69f5c6f83e9a9f4730e2c696e1de9935d9b63010a37"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/tree-r5-derivation.md",
+      "bytes": 9629,
+      "sha256": "e25c1a6ce72d23cc61d30251100b886ae994f6f78fbfdbd51f56feb6118344dc"
+    },
+    {
+      "path": "scripts/art/build_forest_tree_v3b.py",
+      "bytes": 20374,
+      "sha256": "58d3699b2fb9d3da4d97f26ffe948f7da9fceae1cd3ced8170820cbb11d5ea36"
+    },
+    {
+      "path": "scripts/ui/playground/courtyard_board_view.gd",
+      "bytes": 35853,
+      "sha256": "e2ccbd89e2ccaf7790293f032c6685e8ec8280934a84626beafb82f233eb2268"
+    },
+    {
+      "path": "tests/claude_review/terrain_readability_crown_regions.json",
+      "bytes": 12247,
+      "sha256": "f60950a76b9e4e664a1614a23a3c13ec8b6853a07e9a513f9a95b3cffa3c98ca"
+    },
+    {
+      "path": "tests/claude_review/terrain_readability_tree_semantics.json",
+      "bytes": 9588,
+      "sha256": "abf3d330a41ba4c26416fdbadc2570c6cad05cf0538c678deb455ef7bf512af8"
+    },
+    {
+      "path": "tests/claude_review/terrain_readability_tree_semantics_review.json",
+      "bytes": 2082,
+      "sha256": "f3096700c5bb0f28b9ff2d816b79191d058c8725d80369091f133def5656eb9c"
+    }
+  ],
+  "asset_display_and_filter": "display-usage.json",
+  "generation_and_processing": [
+    "dev_doc/ui-art-research/terrain-readability/material-iteration-r5.md",
+    "dev_doc/ui-art-research/terrain-readability/tree-r5-derivation.md",
+    "scripts/art/build_forest_tree_v3b.py"
+  ],
+  "Penpot": "No new artboard; formal Godot TacticalScene capture"
+}

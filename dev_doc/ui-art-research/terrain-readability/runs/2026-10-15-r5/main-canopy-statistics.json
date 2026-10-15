@@ -1,0 +1,39 @@
+{
+  "acceptance_mask": "(semantic_pair.A == 7) & alpha_sample_masks(semantic_coverage).visible; uncertain retained",
+  "scope": "single-frame union of canopy pixels; per-tree T3 remains separate",
+  "evidence_for_scope": "r4-canopy-sampling-comparison.json exactly reproduces all original Claude R4 rounded statistics",
+  "frozen_visible": {
+    "pixels": 7099,
+    "L_median": 33.554563377150565,
+    "L_p95": 58.76667096395441,
+    "L_max": 64.43155573764575,
+    "C_p95": 49.82535733771994,
+    "bright_vivid_fraction": 0.04507677137625018,
+    "uncertain_pixels_retained": 1592,
+    "criteria": {
+      "L_median_ge33": true,
+      "L_p95_le60": true,
+      "L_max_le72": true,
+      "C_p95_le52": true,
+      "bright_vivid_fraction_le_0_08": true
+    },
+    "status": "PASS"
+  },
+  "all_code7_diagnostic": {
+    "pixels": 8297,
+    "L_median": 31.026257915853087,
+    "L_p95": 58.39555719888608,
+    "L_max": 84.73882745046322,
+    "C_p95": 49.64445567497968,
+    "bright_vivid_fraction": 0.03917078462094733,
+    "uncertain_pixels_retained": 1592,
+    "criteria": {
+      "L_median_ge33": false,
+      "L_p95_le60": true,
+      "L_max_le72": false,
+      "C_p95_le52": true,
+      "bright_vivid_fraction_le_0_08": true
+    },
+    "status": "FAIL"
+  }
+}
