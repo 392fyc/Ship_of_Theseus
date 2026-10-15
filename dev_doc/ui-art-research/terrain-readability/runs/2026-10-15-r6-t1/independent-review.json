@@ -1,0 +1,191 @@
+{
+  "schema": "sot-independent-review/1",
+  "verdict": "pass",
+  "target": {
+    "repository": "Ship_of_Theseus",
+    "branch": "codex/ui-ux/terrain-r6-t1",
+    "base_head": "ae7bc0f6374261f823b43a51bb0c60a7979466ea",
+    "reviewed_head": "ae7bc0f6374261f823b43a51bb0c60a7979466ea",
+    "candidate_head": null,
+    "candidate_files_count": 8,
+    "manifest_matches_current_files": true,
+    "tracked_diff_paths": []
+  },
+  "checklist": [
+    {
+      "criterion": "在新入口正式实现T1并逐实例运行",
+      "result": "pass",
+      "evidence": [
+        "tests/claude_review/validate_terrain_contour_v1.py:25",
+        "tests/claude_review/validate_terrain_contour_v1.py:87",
+        "tests/claude_review/validate_terrain_contour_v1.py:147",
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/task115-t1-baseline.json"
+      ],
+      "detail": "使用TASK115已核验原件，全25实例均有独立状态记录。"
+    },
+    {
+      "criterion": "复用S2/S3成员关系；完整token与alpha>127外环几何；树冠分类不得截断整树几何",
+      "result": "pass",
+      "evidence": [
+        "tests/claude_review/validate_terrain_contour_v1.py:91",
+        "tests/claude_review/validate_terrain_contour_v1.py:97",
+        "tests/claude_review/validate_terrain_contour_v1.py:107",
+        "tests/claude_review/validate_terrain_contour_v1.py:117",
+        "tests/claude_review/test_terrain_contour_v1.py:116"
+      ],
+      "detail": "独立复算确认树可见token共11342像素，其中非树冠4381像素；25实例与12组诊断逐字段相同。"
+    },
+    {
+      "criterion": "每实例半径2/4、完整四邻接周长分母、阈值15/10/80%不变；组诊断不替代个体",
+      "result": "pass",
+      "evidence": [
+        "tests/claude_review/validate_terrain_contour_v1.py:33",
+        "tests/claude_review/validate_terrain_contour_v1.py:39",
+        "tests/claude_review/validate_terrain_contour_v1.py:48",
+        "tests/claude_review/validate_terrain_contour_v1.py:61",
+        "tests/claude_review/validate_terrain_contour_v1.py:134",
+        "tests/claude_review/validate_terrain_contour_v1.py:191"
+      ],
+      "detail": "每实例按完整四邻接周长求覆盖份额；全局组差与局部实例份额各自输出；组级记录标为diagnostic_only。"
+    },
+    {
+      "criterion": "先通过原件SHA、来源、同帧、对齐、C4/C8既有门禁；不将NOT_TESTED当PASS",
+      "result": "pass",
+      "evidence": [
+        "tests/claude_review/validate_terrain_contour_v1.py:147",
+        "tests/claude_review/validate_terrain_contour_v1.py:155",
+        "tests/claude_review/validate_terrain_contour_v1.py:158",
+        "tests/claude_review/validate_terrain_contour_v1.py:163",
+        "candidate-rerun.json",
+        "tamper-negative-check.json"
+      ],
+      "detail": "原件SHA与C4/C8前置通过。复制件中有效PNG的哈希被篡改后，入口退出码1、所有25项NOT_TESTED且无PASS/FAIL；原件哈希未变。"
+    },
+    {
+      "criterion": "TASK115基线逐字段独立复算、候选重放和报告表格吻合",
+      "result": "pass",
+      "evidence": [
+        "independent-t1-recalc.json",
+        "candidate-rerun.json",
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/report.md:21"
+      ],
+      "detail": "25实例字段差异0、12组诊断差异0、报告表格差异0，入口重放与冻结baseline深度相等。"
+    },
+    {
+      "criterion": "原metrics、sidecar v1-v3、树图与生产代码不修改；冻结T3对照保留原状态",
+      "result": "pass",
+      "evidence": [
+        "target.tracked_diff_paths",
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/frozen-v3-comparison.json",
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/task-receipt.json"
+      ],
+      "detail": "工作树只有候选清单内8项未跟踪新增文件，无跟踪文件差异；冻结v3 case与先前核验case逐字段相同；art_acceptance仍为NOT_TESTED且six_case_coverage=false。"
+    },
+    {
+      "criterion": "10项新单测通过",
+      "result": "pass",
+      "evidence": [
+        "unittest.stdout.txt",
+        "unittest.stderr.txt"
+      ],
+      "detail": "退出码0，Ran 10 tests，OK。"
+    },
+    {
+      "criterion": "报告、回执准确；版本化文本不含本机绝对路径或凭据",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/report.md:7",
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/task-receipt.json",
+        "candidate-review-manifest.json"
+      ],
+      "detail": "原件字节数未声明的记录保留null并在报告说明；回执project.godot SHA与主仓文件一致。8项文本的绝对路径与凭据模式计数均为0。"
+    }
+  ],
+  "findings": [],
+  "resolved_review_observation": {
+    "file": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/report.md",
+    "line": 7,
+    "status": "resolved",
+    "detail": "报告现说明只列原清单已声明字节数，未声明的保留null。更新后清单与当前8文件全部一致；与初审清单相比仅report.md发生变化。"
+  },
+  "candidate_files": [
+    {
+      "path": "tests/claude_review/validate_terrain_contour_v1.py",
+      "bytes": 12863,
+      "sha256": "1ce44b9a0d4e0ccec56b54d50fa50e0cdd5b71f48f20cbd07612a42da72e588a"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_contour_v1.py",
+      "bytes": 6846,
+      "sha256": "ea1a069c60fe08fc6c20956acf5be6dbbb35c1dc04d1e1f5a739bf0b637de690"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/frozen-v3-comparison.json",
+      "bytes": 275,
+      "sha256": "37cc4d17f0b94705d8df11935bbed2f55cc5e8f7e36cd889eaf726512484734c"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/report.md",
+      "bytes": 6541,
+      "sha256": "c57df13e8076734356d7e55217771e7b9e21673192cf28b8db2bcec6104cba95"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/review-request.md",
+      "bytes": 1197,
+      "sha256": "c23d9a04666e5db1e46e79ea68b288dc7abe24b6e868c2bc5887fb9d2d2f48ae"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/task-receipt.json",
+      "bytes": 4209,
+      "sha256": "69adb02b23dfa20deabcfe4df80b8d2ca34ed5a6a1bbd8a30f9d733a17c210e2"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/task.md",
+      "bytes": 1784,
+      "sha256": "f66a5ffaf6d97480752c058bcde9ab2f2a9a5833fa73f2e6fa3a1fb6328737f6"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/task115-t1-baseline.json",
+      "bytes": 232033,
+      "sha256": "bd23a5990ec1de02755f5751b0026a79a766d3472b7e82c8407ec9dcde191adc"
+    }
+  ],
+  "commands": [
+    {
+      "command": "python -B -m unittest discover -s tests/claude_review -p test_terrain_contour_v1.py -v",
+      "exit_code": 0,
+      "stdout_log": "unittest.stdout.txt",
+      "stderr_log": "unittest.stderr.txt",
+      "result": "10 tests passed"
+    },
+    {
+      "command": "python -B tests/claude_review/validate_terrain_contour_v1.py <TASK115原件>/capture-manifest.json --source-root <TASK115源码> --candidate b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8 --out <审查Temp>/candidate-rerun.json",
+      "exit_code": 0,
+      "stdout_log": "validator.stdout.txt",
+      "stderr_log": "validator.stderr.txt",
+      "result": "capture_preconditions PASS; valid measured baseline; numerical FAIL/NOT_TESTED retained"
+    },
+    {
+      "command": "independent T1 recalculation (see independent-t1-recalc.json)",
+      "result": "25 instance rows and 12 group diagnostics fieldwise equal; all original-input SHA checks match"
+    },
+    {
+      "command": "valid-PNG hash-mismatch negative test on a copied input",
+      "exit_code": 1,
+      "stdout_log": "tamper-hash-mismatch.stdout.txt",
+      "stderr_log": "tamper-hash-mismatch.stderr.txt",
+      "result": "all 25 instances NOT_TESTED; original bytes unchanged"
+    }
+  ],
+  "not_covered": [
+    "Godot运行、视觉美术接受及六组最终覆盖未执行；本任务为离线Python基线，Godot受明确禁止，报告也保留NOT_TESTED/six_case_coverage=false。"
+  ],
+  "residual_risk": [
+    "墙7项因覆盖不足或内核不足为NOT_TESTED；应保留这一限制。",
+    "美术接受和六组最终验证仍未完成，不能由本次T1基线代替。",
+    "18条原件输入记录中12条无清单声明bytes；SHA全有且本次均核对通过。"
+  ],
+  "output_adjustments": [
+    "复算JSON中的project.godot回执辅助字段已按task-receipt.json的protected_state重新核对并校正为true；这只是修正审查脚本字段定位，不重跑或改写T1复算结果。"
+  ]
+}

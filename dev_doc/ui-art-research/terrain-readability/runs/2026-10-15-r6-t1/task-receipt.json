@@ -1,0 +1,106 @@
+{
+  "task_id": "UIUX-R6-0-T1-BASELINE-20261015",
+  "status": "completed",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/ui-ux/terrain-r6-t1",
+  "target_head_before": "ae7bc0f6374261f823b43a51bb0c60a7979466ea",
+  "candidate_head": null,
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "新任务工作树；不改冻结树图和生产代码；独立审查后仅本地提交。"
+    },
+    {
+      "contract": "R5 Claude visual review / R6-0",
+      "summary": "正式T1先用TASK115原件离线取基线；墙树组并集外环，阈值、半径、实例周长分母不变。"
+    },
+    {
+      "contract": "sot-task-receipt",
+      "summary": "逐项数据、保护状态和真实未测原因。"
+    }
+  ],
+  "changed_files": [
+    "tests/claude_review/validate_terrain_contour_v1.py",
+    "tests/claude_review/test_terrain_contour_v1.py",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/task.md",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/task115-t1-baseline.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/frozen-v3-comparison.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/report.md",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/review-request.md",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/task-receipt.json"
+  ],
+  "verification": [
+    {
+      "command": "python -B -m unittest discover -s tests/claude_review -p test_terrain_contour_v1.py -v",
+      "result": "pass",
+      "evidence": "10个必要用例通过。"
+    },
+    {
+      "command": "python -B tests/claude_review/validate_terrain_contour_v1.py <TASK115原件>/capture-manifest.json --source-root <TASK115源码> --candidate b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8 --out <输出>",
+      "result": "pass",
+      "evidence": "前置PASS，25实例；树1PASS/11FAIL、柱3FAIL、墙7NOT_TESTED、碎石2FAIL/1NOT_TESTED。"
+    },
+    {
+      "command": "compare embedded frozen_v3_case with verified TASK115 case",
+      "result": "pass",
+      "evidence": "逐字段相同，最大数值差0。"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "正式T1、组外环与原实例周长分母",
+      "result": "pass",
+      "evidence": [
+        "validate_terrain_contour_v1.py",
+        "test_terrain_contour_v1.py"
+      ]
+    },
+    {
+      "criterion": "TASK115逐实例基线和覆盖率",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/task115-t1-baseline.json",
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/report.md"
+      ]
+    },
+    {
+      "criterion": "旧阈值与T2/T3口径保持",
+      "result": "pass",
+      "evidence": [
+        "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-t1/frozen-v3-comparison.json",
+        "冻结metrics和sidecar文件没有改动"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "R5树图、prop_tints.tree、生产素材和呈现代码",
+      "result": "unchanged",
+      "evidence": "本任务只新增T1入口、测试和本轮文档；树图与R5候选相同。"
+    },
+    {
+      "subject": "TASK115原件、捕获器、metrics.py和sidecar v1-v3",
+      "result": "unchanged",
+      "evidence": "复用原读取器与函数，未写入输入路径或既有文件。"
+    },
+    {
+      "subject": "主仓project.godot",
+      "result": "unchanged",
+      "evidence": "SHA256 5dfdc2dae8e9fa147e1a5490a52055106a6b72411c18b3ac0347f3fa1c71d607。"
+    }
+  ],
+  "residual_risks": [
+    "已视觉冻结的树在现T1下11项数值FAIL；墙个体7项缺测，组级诊断另报，不替代个体。",
+    "分类阈值或测量单位的变更由Claude提出、用户裁决；本任务保持阈值。"
+  ],
+  "escalation_reason": null,
+  "publication": {
+    "published": false,
+    "pull_request_created": false
+  },
+  "milestone": {
+    "name": "TERRAIN-READABILITY-01",
+    "current_task": "R6-0正式T1基线",
+    "next_task": "Claude复核T1口径与分类方案；R6墙柱按现有视觉要求修订。"
+  }
+}

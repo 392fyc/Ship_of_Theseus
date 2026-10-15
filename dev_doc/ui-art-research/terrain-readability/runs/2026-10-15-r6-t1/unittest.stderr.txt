@@ -1,0 +1,15 @@
+test_blocked_preconditions_do_not_run_measurement (test_terrain_contour_v1.ContourTests.test_blocked_preconditions_do_not_run_measurement) ... ok
+test_clipped_group_cannot_supply_complete_global_reference (test_terrain_contour_v1.ContourTests.test_clipped_group_cannot_supply_complete_global_reference) ... ok
+test_empty_thin_and_clipped_geometry_do_not_pass (test_terrain_contour_v1.ContourTests.test_empty_thin_and_clipped_geometry_do_not_pass) ... ok
+test_excluded_edges_are_not_removed_to_buy_pass (test_terrain_contour_v1.ContourTests.test_excluded_edges_are_not_removed_to_buy_pass) ... ok
+test_group_median_is_complete_exterior_not_instance_local_ring (test_terrain_contour_v1.ContourTests.test_group_median_is_complete_exterior_not_instance_local_ring) ... ok
+test_internal_seam_has_no_reference_but_keeps_instance_denominator (test_terrain_contour_v1.ContourTests.test_internal_seam_has_no_reference_but_keeps_instance_denominator) ... ok
+test_invalid_group_cannot_omit_own_geometry (test_terrain_contour_v1.ContourTests.test_invalid_group_cannot_omit_own_geometry) ... ok
+test_no_reference_still_reports_zero_coverage_and_full_perimeter (test_terrain_contour_v1.ContourTests.test_no_reference_still_reports_zero_coverage_and_full_perimeter) ... ok
+test_singleton_reuses_frozen_math_and_thresholds (test_terrain_contour_v1.ContourTests.test_singleton_reuses_frozen_math_and_thresholds) ... ok
+test_tree_group_includes_whole_token_not_only_crown (test_terrain_contour_v1.ContourTests.test_tree_group_includes_whole_token_not_only_crown) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.057s
+
+OK

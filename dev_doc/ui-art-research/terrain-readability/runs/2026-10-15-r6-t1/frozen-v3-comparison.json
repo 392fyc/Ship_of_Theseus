@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "comparison": "embedded frozen v3 case equals previously verified TASK115 case",
+  "maximum_float_difference": 0,
+  "tolerance": 1e-12,
+  "candidate_head": "b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8",
+  "production_and_frozen_sources_changed": false
+}
