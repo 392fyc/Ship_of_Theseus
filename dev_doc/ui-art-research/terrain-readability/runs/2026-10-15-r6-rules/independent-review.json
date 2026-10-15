@@ -1,0 +1,244 @@
+{
+  "verdict": "pass",
+  "findings": [],
+  "candidate": {
+    "branch": "codex/ui-ux/terrain-r6-rules",
+    "head": "5639f3401e1a681aaae69d02e7f16def6b5c3cf3",
+    "base": "5639f3401e1a681aaae69d02e7f16def6b5c3cf3",
+    "capture_candidate": "b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8",
+    "scope": "12 manifest-listed new files; no tracked diff"
+  },
+  "files": [
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/approved-rules.json",
+      "bytes": 1513,
+      "sha256": "7d1b003d421e853b4879cd1e16559e53b3d868f44b36a8690d03944533d9a123",
+      "manifest_matches": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/cvd-sources.json",
+      "bytes": 1688,
+      "sha256": "e1a8828cc637eb666f01aa683d2250c29692a714391e9eca0a8aea987cf41b9b",
+      "manifest_matches": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/kb-decision-receipt.json",
+      "bytes": 2457,
+      "sha256": "cda4a3b5c362e870470ed46142ea2369d05228117597cfd2275171c5f84ea901",
+      "manifest_matches": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/legacy-comparison.json",
+      "bytes": 622,
+      "sha256": "70ab91053f8563c6c49606d0eb5893c7d6e28c7323a9aaa089a44ca10e7bb4db",
+      "manifest_matches": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/report.md",
+      "bytes": 3587,
+      "sha256": "84c754f358a82c942c3d0c661cc4e2dab0d98a5d4eb20b4b4435f4e8569e55a9",
+      "manifest_matches": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/task-receipt.json",
+      "bytes": 4629,
+      "sha256": "f5a8ee3f9de27d93203bcf4b0ca21e171e78ff4ecf9023eaf530ce0733c3f328",
+      "manifest_matches": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/task.md",
+      "bytes": 1693,
+      "sha256": "dd0647443411a31494704f43026134619c9013c39ab69f83964b6b749093b9c9",
+      "manifest_matches": true
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/task115-u1-c9-baseline.json",
+      "bytes": 314618,
+      "sha256": "5d07842e7af7e14975111880a3f3179862a24866f24ee5ffd01766ad7f453c9f",
+      "manifest_matches": true
+    },
+    {
+      "path": "tests/claude_review/terrain_contour_v2.py",
+      "bytes": 4377,
+      "sha256": "0b240ae68585decd24f0888a29d55c1b6a4df360aa534480c535d6f86101abd1",
+      "manifest_matches": true
+    },
+    {
+      "path": "tests/claude_review/terrain_cvd_machado.py",
+      "bytes": 1745,
+      "sha256": "88534737ee66e02e33efb68d6c5ba7ecdd25cb0a3c09867572f853a9ff6e9e2a",
+      "manifest_matches": true
+    },
+    {
+      "path": "tests/claude_review/test_terrain_acceptance_v2.py",
+      "bytes": 7664,
+      "sha256": "72093bc4d5e198fa61e8f67eb697a76c6cd1bf5e52555c75ed54f96a01eb376b",
+      "manifest_matches": true
+    },
+    {
+      "path": "tests/claude_review/validate_terrain_acceptance_v2.py",
+      "bytes": 12263,
+      "sha256": "03ad4e1e0eeecc7808f7b4a151eeaa428ce7dc643cd38ebf3207210f91601ad0",
+      "manifest_matches": true
+    }
+  ],
+  "checks": [
+    {
+      "name": "candidate binding and scope",
+      "result": "PASS",
+      "evidence": {
+        "branch": "codex/ui-ux/terrain-r6-rules",
+        "head": "5639f3401e1a681aaae69d02e7f16def6b5c3cf3",
+        "base": "5639f3401e1a681aaae69d02e7f16def6b5c3cf3",
+        "status_count": 12,
+        "status_exactly_manifest_untracked": true,
+        "tracked_diff_count": 0,
+        "manifest_mismatches": 0,
+        "protected_blobs_equal_base": true,
+        "mercury_owned_path_overlap": false
+      }
+    },
+    {
+      "name": "required unit tests",
+      "result": "PASS",
+      "command": "python -B -m unittest discover -s tests/claude_review -p test_terrain_acceptance_v2.py -v",
+      "exit_code": 0,
+      "summary": "11 tests passed",
+      "raw_stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "raw_stderr": {
+        "bytes": 1812,
+        "sha256": "73c5c1f5e1703a6df7c2684395b87feedf3724974cec355720defc979bdc4a80"
+      }
+    },
+    {
+      "name": "TASK115 v2 baseline recalculation",
+      "result": "PASS",
+      "command": "validate_terrain_acceptance_v2.py using <TASK115 original> and <TASK115 source>, candidate b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8",
+      "exit_code": 0,
+      "fresh_output_fieldwise_equals_baseline": true,
+      "baseline_field_differences": 0,
+      "raw_stdout": {
+        "bytes": 718,
+        "sha256": "342d488f42e0c1484ab297c40a6a094169aecb5b78712f61bca067b0b503cb2e"
+      },
+      "raw_stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "independent U1 recalculation",
+      "result": "PASS",
+      "instances_checked": 25,
+      "mismatch_count": 0,
+      "verified": "Per-instance outer perimeter and measurable share match across 25 instances. Same-group seams are removed from the per-instance denominator; unknown/occluded exterior edges remain. Group reference values and local per-instance shares remain distinct.",
+      "raw_stdout": {
+        "bytes": 773,
+        "sha256": "eca5ca141dc850de4e40c2aa8f02bb7da93112538a348d582417fc6a3649b0cc"
+      },
+      "raw_stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "independent C9 recalculation and all-tree denominator",
+      "result": "PASS",
+      "trees_declared": 12,
+      "mismatch_count": 0,
+      "passed": 11,
+      "failed": 1,
+      "not_tested": 0,
+      "gate_fraction": 0.9166666666666666,
+      "gate_threshold": 0.8,
+      "gate_status": "PASS",
+      "critical_tree": {
+        "id": "tree@9.00,0.00",
+        "protanopia_delta_e00": 11.518630423904378,
+        "protanopia_status": "PASS",
+        "deuteranopia_delta_e00": 9.561915245019168,
+        "deuteranopia_status": "FAIL",
+        "group_pixels": 457,
+        "own_crown_sample_pixels": 245
+      },
+      "interpretation": "The numeric group gate passes at 11/12; the individual FAIL for tree@9.00,0.00 remains visible. This sample has zero NOT_TESTED trees; the unit tests verify that NOT_TESTED stays in the declared-tree denominator.",
+      "raw_stdout": {
+        "bytes": 773,
+        "sha256": "eca5ca141dc850de4e40c2aa8f02bb7da93112538a348d582417fc6a3649b0cc"
+      },
+      "raw_stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "geometry_check": "C9 neighborhood geometry uses the complete frozen S3 connected tree-group mask; parts 7-9 select canopy color samples only. Trunk/root occluders remain in the scene mask and are not reclassified as canopy."
+    },
+    {
+      "name": "rules, report, and receipt",
+      "result": "PASS",
+      "verified": "U1 uses per-instance group-exterior four-neighbor edges; thresholds are unchanged. T6 remains 720p, sigma 2, global delta-L >=10 and measurable coverage >=80%. Tree T1/T6 are diagnostic; the tree gate is T3 plus visual review plus C9. C9 requires each declared tree to meet delta-E00 >=10 in both Machado modes, with >=80% of all declared trees passing. Approved material targets are not described as implemented or scene-passing.",
+      "art_acceptance": "NOT_TESTED",
+      "six_case_coverage": false
+    },
+    {
+      "name": "KB ruling receipt and boundary",
+      "result": "PASS",
+      "evidence": {
+        "branch": "codex/ui-ux/issue-48-u1-tree-c9",
+        "head": "9cc34236882c829a4008ef7f7e84e7524b74a68c",
+        "parent_matches_declared_target": true,
+        "master_ref_unchanged": true,
+        "adr_path": "02-Development/Decisions/adr-2026-10-15-ship-issue-48-terrain-u1-tree-c9.md",
+        "adr_bytes": 2283,
+        "adr_sha256": "2bfbce73895a14134766426f53c14aec8b0c1ed1150c9a5f505fe4ca42dadde4",
+        "receipt_report_matches": true
+      }
+    },
+    {
+      "name": "protected scope, sensitive data, and portability",
+      "result": "PASS",
+      "evidence": {
+        "candidate_absolute_path_hits": 0,
+        "credential_hits": 0,
+        "protected_files_unchanged": 5,
+        "review_json_uses_relative_paths_and_logical_placeholders": true
+      }
+    }
+  ],
+  "not_covered": [
+    "Godot was not run, as prohibited.",
+    "Unchanged 1416-source transport audit, complete old-v3 review, and optional cache review were not rerun; excluded by this review scope."
+  ],
+  "residual_risk": [
+    "The author supplementary matrix page could not be fetched in this run; coefficients match the accessible first-party publication table to its published three-decimal precision, and the independent numerical recalculation matches all candidate C9 rows.",
+    "This is offline numerical acceptance evidence. Art/scene review and six-case coverage remain NOT_TESTED / incomplete, not passed."
+  ],
+  "evidence_logs": {
+    "review-v2-unittest.stdout.bin": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "review-v2-unittest.stderr.bin": {
+      "bytes": 1812,
+      "sha256": "73c5c1f5e1703a6df7c2684395b87feedf3724974cec355720defc979bdc4a80"
+    },
+    "review-v2-recalc.stdout.bin": {
+      "bytes": 718,
+      "sha256": "342d488f42e0c1484ab297c40a6a094169aecb5b78712f61bca067b0b503cb2e"
+    },
+    "review-v2-recalc.stderr.bin": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "review-independent-recalc.stdout.bin": {
+      "bytes": 773,
+      "sha256": "eca5ca141dc850de4e40c2aa8f02bb7da93112538a348d582417fc6a3649b0cc"
+    },
+    "review-independent-recalc.stderr.bin": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

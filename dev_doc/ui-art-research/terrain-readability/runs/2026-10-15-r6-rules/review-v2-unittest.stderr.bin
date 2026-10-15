@@ -1,0 +1,16 @@
+test_c9_counts_all_trees_and_eighty_percent (test_terrain_acceptance_v2.ApprovedRulesTests.test_c9_counts_all_trees_and_eighty_percent) ... ok
+test_c9_requires_both_modes_and_keeps_uncertain_crown_samples (test_terrain_acceptance_v2.ApprovedRulesTests.test_c9_requires_both_modes_and_keeps_uncertain_crown_samples) ... ok
+test_enclosed_member_is_not_a_pass (test_terrain_acceptance_v2.ApprovedRulesTests.test_enclosed_member_is_not_a_pass) ... ok
+test_failed_frozen_source_never_runs_new_measurements (test_terrain_acceptance_v2.ApprovedRulesTests.test_failed_frozen_source_never_runs_new_measurements) ... ok
+test_geometry_and_empty_reference_fail_closed (test_terrain_acceptance_v2.ApprovedRulesTests.test_geometry_and_empty_reference_fail_closed) ... ok
+test_known_group_seam_removed_but_no_outside_edge_removed (test_terrain_acceptance_v2.ApprovedRulesTests.test_known_group_seam_removed_but_no_outside_edge_removed) ... ok
+test_matrix_operates_in_linear_not_encoded_rgb (test_terrain_acceptance_v2.ApprovedRulesTests.test_matrix_operates_in_linear_not_encoded_rgb) ... ok
+test_neutral_srgb_is_neutral_in_both_models (test_terrain_acceptance_v2.ApprovedRulesTests.test_neutral_srgb_is_neutral_in_both_models) ... ok
+test_singleton_preserves_previous_numeric_thresholds (test_terrain_acceptance_v2.ApprovedRulesTests.test_singleton_preserves_previous_numeric_thresholds) ... ok
+test_t6_retains_its_own_global_ten_threshold (test_terrain_acceptance_v2.ApprovedRulesTests.test_t6_retains_its_own_global_ten_threshold) ... ok
+test_unknown_occlusion_keeps_outside_edges_in_denominator (test_terrain_acceptance_v2.ApprovedRulesTests.test_unknown_occlusion_keeps_outside_edges_in_denominator) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.107s
+
+OK

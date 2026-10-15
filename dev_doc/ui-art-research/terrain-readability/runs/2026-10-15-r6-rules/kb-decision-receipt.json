@@ -1,0 +1,68 @@
+{
+  "task_id": "UIUX-R6-RULES-20261015-KB",
+  "status": "completed",
+  "target_repository": "ShipOfTheseus-KB",
+  "target_branch": "codex/ui-ux/issue-48-u1-tree-c9",
+  "target_head_before": "a6ceb5fda4375810119bcab0d3ee1eb772a28559",
+  "candidate_head": "9cc34236882c829a4008ef7f7e84e7524b74a68c",
+  "target_head": "9cc34236882c829a4008ef7f7e84e7524b74a68c",
+  "contract_summary": [
+    {
+      "contract": "sot-kb-write",
+      "summary": "固定vault任务分支MCP新建并回读；独立审查后本地提交；不推送或建PR。"
+    }
+  ],
+  "changed_files": [
+    "02-Development/Decisions/adr-2026-10-15-ship-issue-48-terrain-u1-tree-c9.md"
+  ],
+  "verification": [
+    {
+      "command": "Obsidian MCP vault_write / vault_read and local content comparison",
+      "result": "pass",
+      "evidence": "实施worker记录已回读相同内容；固定vault与MCP映射一致。"
+    },
+    {
+      "command": "independent KB document review",
+      "result": "pass",
+      "evidence": "4088字节报告，SHA256 0a5aae560ddcdea178f4fa1b1466a8b75da896295ddf2771d54aad1f2093353c。"
+    },
+    {
+      "command": "git show HEAD:<ADR> / status / master ref",
+      "result": "pass",
+      "evidence": "ADR blob为受审2283原字节，SHA256 2bfbce73895a14134766426f53c14aec8b0c1ed1150c9a5f505fe4ca42dadde4；工作区干净，master引用未改。"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "记录用户U1与树A裁决及理由",
+      "result": "pass",
+      "evidence": [
+        "02-Development/Decisions/adr-2026-10-15-ship-issue-48-terrain-u1-tree-c9.md"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "KB master",
+      "result": "unchanged",
+      "evidence": "a6ceb5fda4375810119bcab0d3ee1eb772a28559"
+    }
+  ],
+  "residual_risks": [
+    "尚未发布；固定vault保留干净任务分支，等待用户安排集成。"
+  ],
+  "escalation_reason": null,
+  "source_schema_version": "unversioned",
+  "source_snapshot_or_commit": "Ship issue48; ui-ux用户2026-10-15明确回复U1与树A",
+  "normalized_digest": "not_applicable: user ruling, no structured gameplay import",
+  "publication": {
+    "published": false,
+    "pull_request_created": false,
+    "post_commit_hook": {
+      "git_auto_push": "skipped_no_upstream",
+      "nas_design_book_sync": "failed_missing_local_key_path_configuration",
+      "task_commit_exit_code": 0,
+      "followup": "out_of_scope_no_configuration_change"
+    }
+  }
+}

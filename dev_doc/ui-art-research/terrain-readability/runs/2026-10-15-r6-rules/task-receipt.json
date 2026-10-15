@@ -1,0 +1,123 @@
+{
+  "task_id": "UIUX-R6-RULES-20261015",
+  "status": "completed",
+  "target_repository": "Ship_of_Theseus",
+  "target_branch": "codex/ui-ux/terrain-r6-rules",
+  "target_head_before": "5639f3401e1a681aaae69d02e7f16def6b5c3cf3",
+  "candidate_head": null,
+  "contract_summary": [
+    {
+      "contract": "AGENTS.md",
+      "summary": "仅声明范围新版本工具、记录；不动冻结树和生产素材；独立审查后本地提交。"
+    },
+    {
+      "contract": "user approved U1 and tree option A",
+      "summary": "按组外边界分母，树T1/T6诊断，T3+视觉+C9；门槛按批准值执行。"
+    },
+    {
+      "contract": "sot-kb-write",
+      "summary": "固定KB记录用户裁决并独审后本地提交；不发布。"
+    }
+  ],
+  "changed_files": [
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/approved-rules.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/cvd-sources.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/kb-decision-receipt.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/legacy-comparison.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/report.md",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/task-receipt.json",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/task.md",
+    "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/task115-u1-c9-baseline.json",
+    "tests/claude_review/terrain_contour_v2.py",
+    "tests/claude_review/terrain_cvd_machado.py",
+    "tests/claude_review/test_terrain_acceptance_v2.py",
+    "tests/claude_review/validate_terrain_acceptance_v2.py"
+  ],
+  "verification": [
+    {
+      "command": "python -B -m unittest discover -s tests/claude_review -p test_terrain_acceptance_v2.py -v",
+      "result": "pass",
+      "evidence": "11必要测试通过。"
+    },
+    {
+      "command": "python -B tests/claude_review/validate_terrain_acceptance_v2.py <TASK115原件>/capture-manifest.json --source-root <TASK115源码> --candidate b3efd77b7ac4dba2d060f0f59901a0da6d7a40e8 --out <输出>",
+      "result": "pass",
+      "evidence": "前置PASS；U1墙6数值FAIL/1无内核NOT_TESTED；C9为11/12通过，唯一失败完整保留。"
+    },
+    {
+      "command": "compare legacy T1 and frozen v3",
+      "result": "pass",
+      "evidence": "旧T1与v3 case最大数值差0，冻结Git blob不变。"
+    }
+  ],
+  "criteria_evidence": [
+    {
+      "criterion": "U1仅剔除已知同组接缝，未知外边仍在分母",
+      "result": "pass",
+      "evidence": [
+        "terrain_contour_v2.py",
+        "11项单测",
+        "task115-u1-c9-baseline.json"
+      ]
+    },
+    {
+      "criterion": "树A保留诊断、T3+视觉+C9门槛",
+      "result": "pass",
+      "evidence": [
+        "approved-rules.json",
+        "validate_terrain_acceptance_v2.py"
+      ]
+    },
+    {
+      "criterion": "C9作者矩阵、sRGB适配和双模式80%分母",
+      "result": "pass",
+      "evidence": [
+        "cvd-sources.json",
+        "terrain_cvd_machado.py",
+        "11项单测"
+      ]
+    },
+    {
+      "criterion": "KB用户裁决记录",
+      "result": "pass",
+      "evidence": [
+        "kb-decision-receipt.json"
+      ]
+    }
+  ],
+  "protected_state": [
+    {
+      "subject": "旧T1 v1、metrics、sidecar v1-v3、树图与生产代码",
+      "result": "unchanged",
+      "evidence": "legacy-comparison.json；本任务仅新文件。"
+    },
+    {
+      "subject": "TASK115全部原图",
+      "result": "unchanged",
+      "evidence": "仅读取原PNG并在内存进行模拟/模糊；无像素写回。"
+    },
+    {
+      "subject": "KB master",
+      "result": "unchanged",
+      "evidence": "a6ceb5fda4375810119bcab0d3ee1eb772a28559"
+    }
+  ],
+  "residual_risks": [
+    "原R5墙柱在新规则下真实FAIL；修订素材的实际结果须后续Dot单组。",
+    "C9只有数字门槛，独立视觉验收单独保留。"
+  ],
+  "escalation_reason": null,
+  "target_head": "9cc34236882c829a4008ef7f7e84e7524b74a68c",
+  "source_schema_version": "unversioned",
+  "source_snapshot_or_commit": "user2026-10-15 U1+A;KB ADR@9cc34236882c829a4008ef7f7e84e7524b74a68c",
+  "normalized_digest": "not_applicable: user ruling, no gameplay data import",
+  "publication": {
+    "published": false,
+    "pull_request_created": false
+  },
+  "milestone": {
+    "name": "TERRAIN-READABILITY-01 R6",
+    "current_task": "U1与C9工具及原件校准",
+    "next_task": "R6墙柱材质、造型与接地候选及Dot单组"
+  }
+}

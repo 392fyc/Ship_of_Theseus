@@ -1,0 +1,36 @@
+{
+  "checked_date": "2026-10-15",
+  "primary_sources": [
+    {
+      "title": "Machado author supplementary matrices, corrected model",
+      "url": "https://www.inf.ufrgs.br/~oliveira/pubs_files/CVD_Simulation/CVD_Simulation.html",
+      "supports": "severity1.0 matrix coefficients; numerical data used with attribution"
+    },
+    {
+      "title": "Author-hosted corrected paper",
+      "url": "https://profs.ic.uff.br/~laffernandes/content/publications/journal/2009_tvcg_15(6)/machado_oliveira_fernandes-tvcg-15(6)-2009-corrected.pdf",
+      "supports": "linear spectral RGB transformation; paper does not prescribe the full sRGB file pipeline"
+    },
+    {
+      "title": "W3C CSS Color 4",
+      "url": "https://www.w3.org/TR/css-color/",
+      "supports": "sRGB decode and encode transfer functions; display gamut mapping"
+    }
+  ],
+  "project_adaptation": {
+    "input": "actual native main.png encoded sRGB RGB values",
+    "sequence": [
+      "decode encoded sRGB to linear-light RGB",
+      "multiply row RGB vectors by transposed Machado matrix",
+      "clip linear channels to0..1",
+      "encode floating sRGB without8bit quantization",
+      "convert every sample toLab D65",
+      "take component medians of regionLab",
+      "CIEDE2000 between crown and reference medians"
+    ],
+    "gamut_policy": "deterministic per-channel clipping in linear RGB; not claimed as the only gamut policy of Machado paper",
+    "reference_mask": "reuse frozen S3 and v3 S5 grass/environment group reference",
+    "source_images": "read-only; simulations remain arrays, no edited screenshot produced"
+  },
+  "threshold_authority": "SoT user approved10and80%; not paper recommendations"
+}

@@ -1,0 +1,110 @@
+{
+  "scope": "reviewed implementation and original review evidence; excludes this manifest",
+  "files": [
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/approved-rules.json",
+      "bytes": 1513,
+      "sha256": "7d1b003d421e853b4879cd1e16559e53b3d868f44b36a8690d03944533d9a123"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/cvd-sources.json",
+      "bytes": 1688,
+      "sha256": "e1a8828cc637eb666f01aa683d2250c29692a714391e9eca0a8aea987cf41b9b"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/kb-decision-receipt.json",
+      "bytes": 2457,
+      "sha256": "cda4a3b5c362e870470ed46142ea2369d05228117597cfd2275171c5f84ea901"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/legacy-comparison.json",
+      "bytes": 622,
+      "sha256": "70ab91053f8563c6c49606d0eb5893c7d6e28c7323a9aaa089a44ca10e7bb4db"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/report.md",
+      "bytes": 3587,
+      "sha256": "84c754f358a82c942c3d0c661cc4e2dab0d98a5d4eb20b4b4435f4e8569e55a9"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/task-receipt.json",
+      "bytes": 4629,
+      "sha256": "f5a8ee3f9de27d93203bcf4b0ca21e171e78ff4ecf9023eaf530ce0733c3f328"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/task.md",
+      "bytes": 1693,
+      "sha256": "dd0647443411a31494704f43026134619c9013c39ab69f83964b6b749093b9c9"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/task115-u1-c9-baseline.json",
+      "bytes": 314618,
+      "sha256": "5d07842e7af7e14975111880a3f3179862a24866f24ee5ffd01766ad7f453c9f"
+    },
+    {
+      "path": "tests/claude_review/terrain_contour_v2.py",
+      "bytes": 4377,
+      "sha256": "0b240ae68585decd24f0888a29d55c1b6a4df360aa534480c535d6f86101abd1"
+    },
+    {
+      "path": "tests/claude_review/terrain_cvd_machado.py",
+      "bytes": 1745,
+      "sha256": "88534737ee66e02e33efb68d6c5ba7ecdd25cb0a3c09867572f853a9ff6e9e2a"
+    },
+    {
+      "path": "tests/claude_review/test_terrain_acceptance_v2.py",
+      "bytes": 7664,
+      "sha256": "72093bc4d5e198fa61e8f67eb697a76c6cd1bf5e52555c75ed54f96a01eb376b"
+    },
+    {
+      "path": "tests/claude_review/validate_terrain_acceptance_v2.py",
+      "bytes": 12263,
+      "sha256": "03ad4e1e0eeecc7808f7b4a151eeaa428ce7dc643cd38ebf3207210f91601ad0"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/independent-review.json",
+      "bytes": 10286,
+      "sha256": "e83377ce1d1395c1d5ebcea216847070d0f294a88b333e843036fa5fc7a71d8f"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/candidate-review-manifest.json",
+      "bytes": 2579,
+      "sha256": "b3880cdbbc2b7d6ceb4fcc97b10b2c23bbfd3f0836af92b380457e4e02fbacb7"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/independent-v2-recalc.json",
+      "bytes": 26980,
+      "sha256": "d6f9c7f2b5a97df0cf500349359eba5bdc82c35700668cc8e17af209b8259b73"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/review-v2-unittest.stdout.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/review-v2-unittest.stderr.bin",
+      "bytes": 1812,
+      "sha256": "73c5c1f5e1703a6df7c2684395b87feedf3724974cec355720defc979bdc4a80"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/review-v2-recalc.stdout.bin",
+      "bytes": 718,
+      "sha256": "342d488f42e0c1484ab297c40a6a094169aecb5b78712f61bca067b0b503cb2e"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/review-v2-recalc.stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/review-independent-recalc.stdout.bin",
+      "bytes": 773,
+      "sha256": "eca5ca141dc850de4e40c2aa8f02bb7da93112538a348d582417fc6a3649b0cc"
+    },
+    {
+      "path": "dev_doc/ui-art-research/terrain-readability/runs/2026-10-15-r6-rules/review-independent-recalc.stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

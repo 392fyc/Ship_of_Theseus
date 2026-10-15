@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "legacy_T1_instances_and_groups_equal": true,
+  "frozen_v3_case_equal": true,
+  "maximum_numeric_difference": 0,
+  "frozen_git_blobs_unchanged": [
+    "tests/claude_review/validate_terrain_contour_v1.py",
+    "tests/claude_review/terrain_readability_metrics.py",
+    "tests/claude_review/validate_terrain_semantic_sidecar.py",
+    "assets/prototype/battlefield_courtyard/forest-tree-v3b.png",
+    "assets/prototype/battlefield_courtyard/visual_profile.json"
+  ],
+  "source_text_worktree_line_endings": "measurement code hashes record actual execution bytes; canonical Git blobs remain unchanged"
+}

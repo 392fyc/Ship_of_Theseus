@@ -1,0 +1,74 @@
+{
+  "task_id": "UIUX-R6-RULES-20261015",
+  "issue": "https://github.com/392fyc/Ship_of_Theseus/issues/48",
+  "human_decision_date": "2026-10-15",
+  "U1": {
+    "approved": true,
+    "perimeter_unit": "only four-neighbour edges whose outside pixel is outside the captured group",
+    "same_group_seams": "excluded from numerator and denominator",
+    "occluded_or_excluded_outside_edges": "retained in denominator",
+    "numeric_thresholds": "unchanged"
+  },
+  "tree_option": "A",
+  "tree_assets": "frozen",
+  "tree_T1_T6": "diagnostic_only",
+  "tree_gates": [
+    "frozen T3",
+    "independent visual review",
+    "C9"
+  ],
+  "C9": {
+    "model": "Machado/Oliveira/Fernandes 2009",
+    "severity": 1,
+    "modes": [
+      "protanopia",
+      "deuteranopia"
+    ],
+    "parts": [
+      7,
+      8,
+      9
+    ],
+    "delta_e00_each_mode_min": 10,
+    "tree_fraction_min": 0.8,
+    "denominator": "all declared trees, NOT_TESTED does not count as PASS"
+  },
+  "R6_stone_targets": {
+    "side": {
+      "L": [
+        34,
+        38
+      ],
+      "hue": [
+        70,
+        85
+      ],
+      "C": [
+        5,
+        9
+      ]
+    },
+    "top_and_break": {
+      "L": [
+        44,
+        50
+      ],
+      "minimum_above_side": 8,
+      "minimum_above_ground": 10
+    },
+    "dirty_foot": {
+      "below_side": [
+        4,
+        6
+      ],
+      "minimum_above_ground": 10
+    },
+    "contact_shadow": {
+      "below_ground": [
+        8,
+        12
+      ],
+      "maximum_width": "half cell"
+    }
+  }
+}
