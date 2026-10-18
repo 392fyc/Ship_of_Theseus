@@ -3,6 +3,7 @@ extends "res://tests/claude_review/capture_terrain_readability_r6.gd"
 
 const R7_ENTRY_SCRIPT := "res://tests/claude_review/capture_terrain_readability_r7.gd"
 const R7_OCCUPANCY_SHADER_PATH := "res://tests/claude_review/terrain_composite_occupancy.gdshader"
+const R7_PART_PALETTE_POLICY := "production-terrain-part/2"
 const R7_SOURCE_PATHS: PackedStringArray = [
 	R7_ENTRY_SCRIPT,
 	R7_OCCUPANCY_SHADER_PATH,
@@ -331,6 +332,7 @@ func _candidate_record() -> Dictionary:
 	candidate["capture_entry_script"] = R7_ENTRY_SCRIPT
 	candidate["capture_script_inheritance"] = R7_CAPTURE_SCRIPT_CHAIN.duplicate()
 	candidate["occupancy_shader"] = R7_OCCUPANCY_SHADER_PATH
+	candidate["part_palette_policy"] = R7_PART_PALETTE_POLICY
 	candidate["source_sha256"] = source_hashes
 	candidate["candidate_digest_sha256"] = _sha256_text(JSON.stringify(source_hashes))
 	return candidate
@@ -362,7 +364,7 @@ func _close_sessions_and_passes() -> void:
 
 
 ## R7 stone geometry labels bind the authored part to the captured draw leaf.
-## The inherited legacy part_ids pass keeps its original Line2D policy.
+## Both part-ID and semantic passes use the live leaf's structural role.
 func _r7_stone_part(leaf: CanvasItem, kind: String) -> String:
 	if kind not in ["wall", "pillar"] or not leaf.has_meta("terrain_part"):
 		return ""
@@ -389,6 +391,32 @@ func _semantic_part_for_leaf(leaf: CanvasItem, prop_root: Node2D, kind: String) 
 	return super._semantic_part_for_leaf(leaf, prop_root, kind)
 
 
+func _apply_part_colors(source: Node2D, copy: Node2D) -> Dictionary:
+	var kind := _classify_prop(source)
+	if kind not in ["wall", "pillar"]:
+		return super._apply_part_colors(source, copy)
+	if source.get_child_count() != copy.get_child_count():
+		return {"status": "FAIL", "reason": "stone source/copy topology differs"}
+	var expected_colors: Dictionary = {}
+	var hidden_paths: Dictionary = {}
+	for index: int in source.get_child_count():
+		var source_child := source.get_child(index) as CanvasItem
+		var copy_child := copy.get_child(index) as CanvasItem
+		if source_child == null or copy_child == null:
+			continue
+		if source_child is Polygon2D or source_child is Line2D:
+			var part_name := _r7_stone_part(source_child, kind)
+			if part_name.is_empty():
+				return {"status": "FAIL", "reason": "stone part-ID draw lacks terrain_part", "path": str(index)}
+			var color: Color = PART_COLORS[part_name]
+			_set_flat_mask_material(copy_child, color)
+			expected_colors[str(index)] = color
+		else:
+			copy_child.visible = false
+			hidden_paths[str(index)] = true
+	return _validate_flat_mask_clone(source, copy, expected_colors, hidden_paths, "part_ids")
+
+
 func _parts_for_instance(node: Node2D, kind: String) -> Dictionary:
 	var result: Dictionary = super._parts_for_instance(node, kind)
 	if kind not in ["wall", "pillar"]:
@@ -410,11 +438,14 @@ func _parts_for_instance(node: Node2D, kind: String) -> Dictionary:
 		part["production_structural_role"] = part_name
 		part["classification_source"] = "actual production terrain_part metadata on the captured draw leaf"
 		if child is Line2D:
-			part["legacy_part_ids_line_policy"] = "inherited outline color; semantic_pair uses production_structural_role"
+			part["role"] = part_name
+			part["color"] = _hex_color(PART_COLORS[part_name])
+			part["part_ids_line_policy"] = R7_PART_PALETTE_POLICY
 		parts[index] = part
 		index += 1
 	result["parts"] = parts
 	result["structural_classification"] = "R7 production terrain_part metadata"
+	result["part_palette_policy"] = R7_PART_PALETTE_POLICY
 	return result
 
 
