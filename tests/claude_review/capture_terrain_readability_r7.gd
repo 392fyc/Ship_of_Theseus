@@ -284,8 +284,8 @@ func _r7_native_control_samples(image: Image) -> Dictionary:
 		var y := int(point[1])
 		var offset := (y * image.get_width() + x) * 4
 		var rgba := [int(bytes[offset]), int(bytes[offset + 1]), int(bytes[offset + 2]), int(bytes[offset + 3])]
-		var token := (rgba[0] << 16) | (rgba[1] << 8) | rgba[2] if rgba[3] == 255 else 0
-		var matched := token == int(expected["token"])
+		var token: int = (rgba[0] << 16) | (rgba[1] << 8) | rgba[2] if rgba[3] == 255 else 0
+		var matched: bool = token == int(expected["token"])
 		if not matched:
 			errors.append("%s sample %s expected token %d, got %d" % [expected["case"], str(point), int(expected["token"]), token])
 		samples.append({"case": expected["case"], "xy": point.duplicate(),
