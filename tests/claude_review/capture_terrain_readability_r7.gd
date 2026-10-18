@@ -367,7 +367,7 @@ func _r7_stone_part(leaf: CanvasItem, kind: String) -> String:
 	if kind not in ["wall", "pillar"] or not leaf.has_meta("terrain_part"):
 		return ""
 	var part_name := str(leaf.get_meta("terrain_part"))
-	var allowed: Array[String] = ["wall_side", "wall_top", "wall_outline"] if kind == "wall" else ["pillar_base", "pillar_side", "pillar_top", "wall_outline"]
+	var allowed: Array = ["wall_side", "wall_top", "wall_outline"] if kind == "wall" else ["pillar_base", "pillar_side", "pillar_top", "wall_outline"]
 	if part_name not in allowed or not SEMANTIC_PART_CODES.has(part_name):
 		_abort("R7 stone draw has an invalid terrain_part: " + part_name)
 		return ""
