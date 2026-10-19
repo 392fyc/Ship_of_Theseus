@@ -847,6 +847,10 @@ func _add_pillar(cell: Vector2i) -> void:
 	var height: float = 33.0 * (0.6 + 0.2 * float(height_level))
 	var has_abacus: bool = cell_variant == 0
 	var has_fallen_drum: bool = cell_variant == 3
+	# 720p 下保留柱身的体积，柱础和占格仍使用原来的六点底面。
+	var shaft_radius: float = 14.0
+	var shaft_depth: float = 6.0
+	var light_direction := Vector2(-0.3420201433, 0.9396926208)
 	root.set_meta("r7_height", height)
 	root.set_meta("r7_height_level", height_level)
 	# 六点柱础的几何保持 R6 原样，只更新石材着色。
@@ -859,9 +863,9 @@ func _add_pillar(cell: Vector2i) -> void:
 	var cut_direction: float = 1.0 if cell_variant % 2 == 0 else -1.0
 	for i: int in 12:
 		var angle: float = -PI * 0.5 + float(i) * TAU / 12.0
-		var point_at_base := Vector2(cos(angle) * 11.0, sin(angle) * 6.0)
+		var point_at_base := Vector2(cos(angle) * shaft_radius, sin(angle) * shaft_depth)
 		shaft.append(point_at_base)
-		var across: float = clampf((point_at_base.x / 11.0 + 1.0) * 0.5, 0.0, 1.0)
+		var across: float = clampf((point_at_base.x / shaft_radius + 1.0) * 0.5, 0.0, 1.0)
 		var cut_drop: float = 0.0
 		if diagonal_cut:
 			cut_drop = height * 0.20 * across if cut_direction > 0.0 else height * 0.20 * (1.0 - across)
@@ -896,7 +900,9 @@ func _add_pillar(cell: Vector2i) -> void:
 	for edge: int in range(3, 9):
 		var next: int = (edge + 1) % shaft.size()
 		var midpoint: Vector2 = (shaft[edge] + shaft[next]) * 0.5
-		var light_share: float = clampf(0.5 - midpoint.x / 22.0, 0.0, 1.0)
+		# 按柱面的朝向受光，正面形成宽亮面，右缘保留背光侧。
+		var surface_normal := Vector2(midpoint.x / shaft_radius, midpoint.y / shaft_depth).normalized()
+		var light_share: float = clampf(surface_normal.dot(light_direction), 0.0, 1.0)
 		var side_tint: Color = _prop_tint("pillar_dark_side", Color("7a806e")).lerp(
 			_prop_tint("pillar_lit_side", Color("a5a691")), light_share)
 		# 连续石面绕柱身，不使用墙砖的错缝贴图。
@@ -909,13 +915,15 @@ func _add_pillar(cell: Vector2i) -> void:
 	var ring_upper := PackedVector2Array()
 	var ring_lower := PackedVector2Array()
 	for i: int in shaft.size():
-		var outer: Vector2 = shaft[i] * Vector2(13.0 / 11.0, 8.0 / 6.0) + Vector2(0.0, -1.0)
+		var outer: Vector2 = shaft[i] * Vector2((shaft_radius + 2.0) / shaft_radius,
+			(shaft_depth + 2.0) / shaft_depth) + Vector2(0.0, -1.0)
 		ring_upper.append(outer)
 		ring_lower.append(outer + Vector2(0.0, 2.0))
 	for edge: int in range(3, 9):
 		var next: int = (edge + 1) % ring_upper.size()
-		var midpoint_x: float = (ring_upper[edge].x + ring_upper[next].x) * 0.5
-		var light_share: float = clampf(0.5 - midpoint_x / 22.0, 0.0, 1.0)
+		var midpoint: Vector2 = (shaft[edge] + shaft[next]) * 0.5
+		var surface_normal := Vector2(midpoint.x / shaft_radius, midpoint.y / shaft_depth).normalized()
+		var light_share: float = clampf(surface_normal.dot(light_direction), 0.0, 1.0)
 		var ring_tint: Color = _prop_tint("pillar_torus_dark", Color(0.523, 0.524, 0.540, 1.0)).lerp(
 			_prop_tint("pillar_torus_lit", Color(0.686, 0.699, 0.740, 1.0)), light_share)
 		_polygon(root, PackedVector2Array([ring_upper[edge], ring_upper[next], ring_lower[next], ring_lower[edge]]),
@@ -927,14 +935,16 @@ func _add_pillar(cell: Vector2i) -> void:
 		var groove_y: float = _pillar_front_top_y(top, groove_x) + 1.0
 		var groove_end := Vector2(groove_x, 5.0)
 		var groove_start := Vector2(groove_x, groove_y)
-		var groove_light_share: float = clampf(0.5 - groove_x / 22.0, 0.0, 1.0)
+		var groove_normal_x: float = groove_x / shaft_radius
+		var groove_normal := Vector2(groove_normal_x, sqrt(maxf(0.0, 1.0 - groove_normal_x * groove_normal_x)))
+		var groove_light_share: float = clampf(groove_normal.dot(light_direction), 0.0, 1.0)
 		var groove_tint: Color = _prop_tint("pillar_groove_dark", Color(0.356, 0.346, 0.338, 1.0)).lerp(
 			_prop_tint("pillar_groove_lit", Color(0.510, 0.510, 0.524, 1.0)), groove_light_share)
 		_line(root, PackedVector2Array([groove_start, groove_end]), groove_tint, groove_width, "pillar_side", false)
 	_polygon(root, top, _prop_tint("pillar_top", Color("c0bca6")), false, "pillar_top")
 	if has_abacus:
-		var crown_top := PackedVector2Array([Vector2(-13, -height + 1), Vector2(0, -height - 3),
-			Vector2(13, -height + 1), Vector2(0, -height + 5)])
+		var crown_top := PackedVector2Array([Vector2(-16, -height + 1), Vector2(0, -height - 3),
+			Vector2(16, -height + 1), Vector2(0, -height + 5)])
 		var crown_left: Vector2 = crown_top[0]
 		var crown_front: Vector2 = crown_top[3]
 		var crown_right: Vector2 = crown_top[2]
