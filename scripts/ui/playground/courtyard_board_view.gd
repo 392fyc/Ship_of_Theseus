@@ -844,19 +844,92 @@ func _add_pillar(cell: Vector2i) -> void:
 	root.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	var cell_variant: int = posmod(cell.x * 3 + cell.y, 5)
 	var height_level: int = 2 - absi(cell_variant - 2)
-	var height: float = 33.0 * (0.6 + 0.2 * float(height_level))
+	var height: float = 34.0 + 8.0 * float(height_level)
 	var has_abacus: bool = cell_variant == 0
 	var has_fallen_drum: bool = cell_variant == 3
-	# 720p 下保留柱身的体积，柱础和占格仍使用原来的六点底面。
-	var shaft_radius: float = 14.0
+	# 六点柱础维持约 32 px 宽；柱身收窄后保留清楚的三级台阶。
+	var shaft_radius: float = 12.0
 	var shaft_depth: float = 6.0
+	var side_rim_width: float = 5.0
+	var core_band_min_x: float = shaft_radius * 0.20
+	var core_band_max_x: float = shaft_radius * 0.50
 	var light_direction := Vector2(-0.3420201433, 0.9396926208)
 	root.set_meta("r7_height", height)
 	root.set_meta("r7_height_level", height_level)
-	# 六点柱础的几何保持 R6 原样，只更新石材着色。
 	var foot := PackedVector2Array([Vector2(0, -9), Vector2(17, -1),
 		Vector2(16, 4), Vector2(0, 11), Vector2(-16, 4), Vector2(-17, -1)])
-	_polygon(root, foot, _prop_tint("pillar_foot", Color("777d69")), false, "pillar_base")
+	var foot_tint: Color = _prop_tint("pillar_foot", Color("777d69"))
+	var foot_node: Polygon2D = _polygon(root, foot, foot_tint, false, "pillar_base")
+	# 污渍在唯一底板的石材纹理上按局部坐标乘色，不新增地形节点。
+	var foot_stain: Color = _prop_tint("pillar_foot_dirt", Color(0.42, 0.41, 0.41, 1.0))
+	var stain_rgb_ratio := Color(foot_stain.r / maxf(foot_tint.r, 0.0001),
+		foot_stain.g / maxf(foot_tint.g, 0.0001),
+		foot_stain.b / maxf(foot_tint.b, 0.0001), 1.0)
+	var foot_stain_shader := Shader.new()
+	foot_stain_shader.code = """
+shader_type canvas_item;
+
+varying vec2 pillar_local_position;
+uniform vec4 stain_rgb_ratio = vec4(1.0);
+
+float cross2(vec2 a, vec2 b) {
+	return a.x * b.y - a.y * b.x;
+}
+
+float segment_distance(vec2 point, vec2 start, vec2 end) {
+	vec2 edge = end - start;
+	float amount = clamp(dot(point - start, edge) / dot(edge, edge), 0.0, 1.0);
+	return length(point - (start + edge * amount));
+}
+
+float left_stain_mask(vec2 point) {
+	vec2 p0 = vec2(-14.0, -1.8);
+	vec2 p1 = vec2(-12.5, -2.5);
+	vec2 p2 = vec2(-11.3, -1.6);
+	vec2 p3 = vec2(-12.1, 0.0);
+	vec2 p4 = vec2(-13.8, 0.7);
+	float inside = step(0.0, cross2(p1 - p0, point - p0));
+	inside *= step(0.0, cross2(p2 - p1, point - p1));
+	inside *= step(0.0, cross2(p3 - p2, point - p2));
+	inside *= step(0.0, cross2(p4 - p3, point - p3));
+	inside *= step(0.0, cross2(p0 - p4, point - p4));
+	float edge_distance = min(segment_distance(point, p0, p1), segment_distance(point, p1, p2));
+	edge_distance = min(edge_distance, segment_distance(point, p2, p3));
+	edge_distance = min(edge_distance, segment_distance(point, p3, p4));
+	edge_distance = min(edge_distance, segment_distance(point, p4, p0));
+	return inside * smoothstep(0.0, 0.55, edge_distance);
+}
+
+float foot_inset_mask(vec2 point) {
+	vec2 p0 = vec2(0.0, -9.0);
+	vec2 p1 = vec2(17.0, -1.0);
+	vec2 p2 = vec2(16.0, 4.0);
+	vec2 p3 = vec2(0.0, 11.0);
+	vec2 p4 = vec2(-16.0, 4.0);
+	vec2 p5 = vec2(-17.0, -1.0);
+	float edge_distance = min(segment_distance(point, p0, p1), segment_distance(point, p1, p2));
+	edge_distance = min(edge_distance, segment_distance(point, p2, p3));
+	edge_distance = min(edge_distance, segment_distance(point, p3, p4));
+	edge_distance = min(edge_distance, segment_distance(point, p4, p5));
+	edge_distance = min(edge_distance, segment_distance(point, p5, p0));
+	return smoothstep(1.0, 1.8, edge_distance);
+}
+
+void vertex() {
+	pillar_local_position = VERTEX;
+}
+
+void fragment() {
+	vec2 mirrored_position = vec2(-pillar_local_position.x, pillar_local_position.y);
+	float stain = max(left_stain_mask(pillar_local_position), left_stain_mask(mirrored_position));
+	stain *= foot_inset_mask(pillar_local_position);
+	COLOR.rgb *= mix(vec3(1.0), stain_rgb_ratio.rgb, stain);
+}
+"""
+	var foot_material := ShaderMaterial.new()
+	foot_material.shader = foot_stain_shader
+	foot_material.set_shader_parameter("stain_rgb_ratio", stain_rgb_ratio)
+	foot_node.material = foot_material
 	var shaft := PackedVector2Array()
 	var top := PackedVector2Array()
 	var diagonal_cut: bool = not has_abacus
@@ -870,12 +943,11 @@ func _add_pillar(cell: Vector2i) -> void:
 		if diagonal_cut:
 			cut_drop = height * 0.20 * across if cut_direction > 0.0 else height * 0.20 * (1.0 - across)
 		top.append(Vector2(point_at_base.x * 0.92, point_at_base.y * 0.92 - height + cut_drop))
-	# 横倒鼓石在右侧露出椭圆断面；其顶点都落在当前格的菱形范围内。
+	# 横倒鼓石继续压在柱身右侧，保留原断面形状和占地。
 	if has_fallen_drum:
 		var drum_lit: Color = _prop_tint("pillar_lit_side", Color("a5a691"))
 		var drum_mid: Color = drum_lit.lerp(_prop_tint("pillar_dark_side", Color("7a806e")), 0.42)
 		var drum_dark: Color = _prop_tint("pillar_dark_side", Color("7a806e"))
-		# 筒身横跨 x=13.2..23；立柱从前方压住最左端，不遮挡右侧筒身。
 		_polygon(root, PackedVector2Array([Vector2(13.2, -1.7), Vector2(14.4, -2.5),
 			Vector2(22.4, -2.6), Vector2(23.0, -1.7), Vector2(22.0, -0.7), Vector2(14.0, -0.6)]),
 			drum_lit, false, "pillar_side")
@@ -885,7 +957,6 @@ func _add_pillar(cell: Vector2i) -> void:
 		_polygon(root, PackedVector2Array([Vector2(14.2, 0.9), Vector2(22.0, 1.0),
 			Vector2(22.5, 2.2), Vector2(15.0, 2.6), Vector2(13.5, 1.8)]),
 			drum_dark, false, "pillar_side")
-		# 正面断口为 12 点椭圆；内层石面和短裂缝让它读作鼓石端面。
 		var drum_end := PackedVector2Array([Vector2(23.0, -3.0), Vector2(24.0, -2.7),
 			Vector2(24.7, -1.7), Vector2(25.0, 0.0), Vector2(24.7, 1.7), Vector2(24.0, 2.7),
 			Vector2(23.0, 3.0), Vector2(22.0, 2.7), Vector2(21.3, 1.7), Vector2(21.0, 0.0),
@@ -897,38 +968,78 @@ func _add_pillar(cell: Vector2i) -> void:
 			_prop_tint("pillar_foot", Color("777d69")), false, "pillar_side")
 		_line(root, PackedVector2Array([Vector2(22.3, -0.7), Vector2(22.8, 0.0), Vector2(22.4, 0.7)]),
 			_prop_tint("pillar_groove_dark", Color(0.257316, 0.228295, 0.192539, 1.0)), 0.8, "pillar_side", false)
+	var lit_rim_tint: Color = _prop_tint("pillar_lit_rim", Color(0.7246, 0.7334, 0.7670, 1.0))
+	var backlit_rim_tint: Color = _prop_tint("pillar_backlit_rim", Color(0.6811, 0.6747, 0.6816, 1.0))
+	var core_tint: Color = _prop_tint("pillar_core_dark", Color(0.4562, 0.4519, 0.4565, 1.0))
 	for edge: int in range(3, 9):
 		var next: int = (edge + 1) % shaft.size()
 		var midpoint: Vector2 = (shaft[edge] + shaft[next]) * 0.5
-		# 按柱面的朝向受光，正面形成宽亮面，右缘保留背光侧。
+		# 主体石面保留轻微受光差，窄暗带负责刻出柱身核心。
 		var surface_normal := Vector2(midpoint.x / shaft_radius, midpoint.y / shaft_depth).normalized()
 		var light_share: float = clampf(surface_normal.dot(light_direction), 0.0, 1.0)
 		var side_tint: Color = _prop_tint("pillar_dark_side", Color("7a806e")).lerp(
 			_prop_tint("pillar_lit_side", Color("a5a691")), light_share)
-		# 连续石面绕柱身，不使用墙砖的错缝贴图。
-		_polygon(root, PackedVector2Array([top[edge], top[next], shaft[next], shaft[edge]]), side_tint, false, "pillar_side")
-		var mud_fraction: float = minf(2.0 / height, 0.12)
-		_polygon(root, PackedVector2Array([shaft[edge].lerp(top[edge], mud_fraction),
-			shaft[next].lerp(top[next], mud_fraction), shaft[next], shaft[edge]]),
-			_prop_tint("pillar_foot_dirt", Color(0.42, 0.41, 0.41, 1.0)), false, "pillar_side")
-	# 柱础环外缘比柱身每侧扩约 2 px，环带自身按受光方向提亮。
+		var side_face := PackedVector2Array([top[edge], top[next], shaft[next], shaft[edge]])
+		_polygon(root, side_face, side_tint, false, "pillar_side")
+		# 受光带、核心暗带和反射光带都裁在既有石面内，继续使用同一石材纹理。
+		for band_index: int in 3:
+			var band_min_x: float
+			var band_max_x: float
+			var band_tint: Color
+			if band_index == 0:
+				band_min_x = -shaft_radius
+				band_max_x = -shaft_radius + side_rim_width
+				band_tint = lit_rim_tint
+			elif band_index == 1:
+				band_min_x = core_band_min_x
+				band_max_x = core_band_max_x
+				band_tint = core_tint
+			else:
+				band_min_x = shaft_radius - side_rim_width
+				band_max_x = shaft_radius
+				band_tint = backlit_rim_tint
+			var clipped_points: PackedVector2Array = side_face
+			for boundary_index: int in 2:
+				if clipped_points.size() < 3:
+					break
+				var boundary_x: float = band_min_x if boundary_index == 0 else band_max_x
+				var keep_greater: bool = boundary_index == 0
+				var clipped_result := PackedVector2Array()
+				var previous: Vector2 = clipped_points[clipped_points.size() - 1]
+				var previous_inside: bool = previous.x >= boundary_x if keep_greater else previous.x <= boundary_x
+				for vertex_index: int in clipped_points.size():
+					var current: Vector2 = clipped_points[vertex_index]
+					var current_inside: bool = current.x >= boundary_x if keep_greater else current.x <= boundary_x
+					if current_inside != previous_inside:
+						var delta_x: float = current.x - previous.x
+						if not is_zero_approx(delta_x):
+							var fraction: float = (boundary_x - previous.x) / delta_x
+							clipped_result.append(previous.lerp(current, fraction))
+					if current_inside:
+						clipped_result.append(current)
+					previous = current
+					previous_inside = current_inside
+				clipped_points = clipped_result
+			if clipped_points.size() >= 3:
+				_polygon(root, clipped_points, band_tint, false, "pillar_side")
+	# 柱础环每侧外扩约 2 px，厚度为 3 px。
 	var ring_upper := PackedVector2Array()
 	var ring_lower := PackedVector2Array()
 	for i: int in shaft.size():
 		var outer: Vector2 = shaft[i] * Vector2((shaft_radius + 2.0) / shaft_radius,
 			(shaft_depth + 2.0) / shaft_depth) + Vector2(0.0, -1.0)
 		ring_upper.append(outer)
-		ring_lower.append(outer + Vector2(0.0, 2.0))
+		ring_lower.append(outer + Vector2(0.0, 3.0))
 	for edge: int in range(3, 9):
 		var next: int = (edge + 1) % ring_upper.size()
 		var midpoint: Vector2 = (shaft[edge] + shaft[next]) * 0.5
 		var surface_normal := Vector2(midpoint.x / shaft_radius, midpoint.y / shaft_depth).normalized()
 		var light_share: float = clampf(surface_normal.dot(light_direction), 0.0, 1.0)
-		var ring_tint: Color = _prop_tint("pillar_torus_dark", Color(0.523, 0.524, 0.540, 1.0)).lerp(
-			_prop_tint("pillar_torus_lit", Color(0.686, 0.699, 0.740, 1.0)), light_share)
+		var ring_tint: Color = _prop_tint("pillar_torus_dark", Color(0.6524, 0.6541, 0.6740, 1.0)).lerp(
+			_prop_tint("pillar_torus_lit", Color(0.6996, 0.7136, 0.7548, 1.0)), light_share)
 		_polygon(root, PackedVector2Array([ring_upper[edge], ring_upper[next], ring_lower[next], ring_lower[edge]]),
 			ring_tint, false, "pillar_side")
-	# 三道完全不透明的 1 px 竖槽，按各自所处柱面亮度保留 6–8 L* 落差。
+	# 三道不透明竖槽距柱身两侧均不少于 5 px。
 	var groove_width: float = float(profile.get("prop_strokes", {}).get("pillar_groove", 1.0))
 	for groove_index: int in 3:
 		var groove_x: float = float(groove_index - 1) * 3.0
@@ -943,8 +1054,8 @@ func _add_pillar(cell: Vector2i) -> void:
 		_line(root, PackedVector2Array([groove_start, groove_end]), groove_tint, groove_width, "pillar_side", false)
 	_polygon(root, top, _prop_tint("pillar_top", Color("c0bca6")), false, "pillar_top")
 	if has_abacus:
-		var crown_top := PackedVector2Array([Vector2(-16, -height + 1), Vector2(0, -height - 3),
-			Vector2(16, -height + 1), Vector2(0, -height + 5)])
+		var crown_top := PackedVector2Array([Vector2(-15, -height + 1), Vector2(0, -height - 3),
+			Vector2(15, -height + 1), Vector2(0, -height + 5)])
 		var crown_left: Vector2 = crown_top[0]
 		var crown_front: Vector2 = crown_top[3]
 		var crown_right: Vector2 = crown_top[2]
@@ -957,8 +1068,9 @@ func _add_pillar(cell: Vector2i) -> void:
 			crown_right + crown_drop, crown_front + crown_drop]),
 			_prop_tint("pillar_dark_side", Color("7a806e")), false, "pillar_side")
 	_actor_layer.add_child(root)
-	_props.append({"node": root, "wind": false, "bounds": Rect2(-18, -48, 43, 61)})
-
+	# 最高实例的淡化 bounds 上缘为 -56 px；下缘覆盖原底板与鼓石位置。
+	_props.append({"node": root, "wind": false,
+		"bounds": Rect2(-18.0, -height - 6.0, 44.0, height + 19.0)})
 
 func _is_join_edge(a: Vector2, b: Vector2, mask: int) -> bool:
 	var a_grid := Vector2((a.x / 32.0 + a.y / 16.0) * 0.5, (a.y / 16.0 - a.x / 32.0) * 0.5)
