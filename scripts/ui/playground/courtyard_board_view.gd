@@ -860,76 +860,102 @@ func _add_pillar(cell: Vector2i) -> void:
 		Vector2(16, 4), Vector2(0, 11), Vector2(-16, 4), Vector2(-17, -1)])
 	var foot_tint: Color = _prop_tint("pillar_foot", Color("777d69"))
 	var foot_node: Polygon2D = _polygon(root, foot, foot_tint, false, "pillar_base")
-	# 污渍在唯一底板的石材纹理上按局部坐标乘色，不新增地形节点。
+	# 污渍写入底板自己的纹理副本，保留唯一六点底板与原始 alpha。
 	var foot_stain: Color = _prop_tint("pillar_foot_dirt", Color(0.42, 0.41, 0.41, 1.0))
 	var stain_rgb_ratio := Color(foot_stain.r / maxf(foot_tint.r, 0.0001),
 		foot_stain.g / maxf(foot_tint.g, 0.0001),
 		foot_stain.b / maxf(foot_tint.b, 0.0001), 1.0)
-	var foot_stain_shader := Shader.new()
-	foot_stain_shader.code = """
-shader_type canvas_item;
-
-varying vec2 pillar_local_position;
-uniform vec4 stain_rgb_ratio = vec4(1.0);
-
-float cross2(vec2 a, vec2 b) {
-	return a.x * b.y - a.y * b.x;
-}
-
-float segment_distance(vec2 point, vec2 start, vec2 end) {
-	vec2 edge = end - start;
-	float amount = clamp(dot(point - start, edge) / dot(edge, edge), 0.0, 1.0);
-	return length(point - (start + edge * amount));
-}
-
-float left_stain_mask(vec2 point) {
-	vec2 p0 = vec2(-14.0, -1.8);
-	vec2 p1 = vec2(-12.5, -2.5);
-	vec2 p2 = vec2(-11.3, -1.6);
-	vec2 p3 = vec2(-12.1, 0.0);
-	vec2 p4 = vec2(-13.8, 0.7);
-	float inside = step(0.0, cross2(p1 - p0, point - p0));
-	inside *= step(0.0, cross2(p2 - p1, point - p1));
-	inside *= step(0.0, cross2(p3 - p2, point - p2));
-	inside *= step(0.0, cross2(p4 - p3, point - p3));
-	inside *= step(0.0, cross2(p0 - p4, point - p4));
-	float edge_distance = min(segment_distance(point, p0, p1), segment_distance(point, p1, p2));
-	edge_distance = min(edge_distance, segment_distance(point, p2, p3));
-	edge_distance = min(edge_distance, segment_distance(point, p3, p4));
-	edge_distance = min(edge_distance, segment_distance(point, p4, p0));
-	return inside * smoothstep(0.0, 0.55, edge_distance);
-}
-
-float foot_inset_mask(vec2 point) {
-	vec2 p0 = vec2(0.0, -9.0);
-	vec2 p1 = vec2(17.0, -1.0);
-	vec2 p2 = vec2(16.0, 4.0);
-	vec2 p3 = vec2(0.0, 11.0);
-	vec2 p4 = vec2(-16.0, 4.0);
-	vec2 p5 = vec2(-17.0, -1.0);
-	float edge_distance = min(segment_distance(point, p0, p1), segment_distance(point, p1, p2));
-	edge_distance = min(edge_distance, segment_distance(point, p2, p3));
-	edge_distance = min(edge_distance, segment_distance(point, p3, p4));
-	edge_distance = min(edge_distance, segment_distance(point, p4, p5));
-	edge_distance = min(edge_distance, segment_distance(point, p5, p0));
-	return smoothstep(1.0, 1.8, edge_distance);
-}
-
-void vertex() {
-	pillar_local_position = VERTEX;
-}
-
-void fragment() {
-	vec2 mirrored_position = vec2(-pillar_local_position.x, pillar_local_position.y);
-	float stain = max(left_stain_mask(pillar_local_position), left_stain_mask(mirrored_position));
-	stain *= foot_inset_mask(pillar_local_position);
-	COLOR.rgb *= mix(vec3(1.0), stain_rgb_ratio.rgb, stain);
-}
-"""
-	var foot_material := ShaderMaterial.new()
-	foot_material.shader = foot_stain_shader
-	foot_material.set_shader_parameter("stain_rgb_ratio", stain_rgb_ratio)
-	foot_node.material = foot_material
+	var coping_source_path: String = str(profile.get("coping", profile.get("ground", "")))
+	var foot_source_image: Image
+	if FileAccess.file_exists(coping_source_path):
+		foot_source_image = Image.load_from_file(coping_source_path)
+	if foot_source_image == null or foot_source_image.is_empty():
+		# 导出包可不包含源 PNG；此时从正常渲染器的导入纹理读取同一份无损像素。
+		foot_source_image = _coping.get_image()
+	if foot_source_image == null or foot_source_image.is_empty():
+		push_error("无法读取柱础纹理源图，不能生成柱础污渍：" + coping_source_path)
+		return
+	if foot_source_image.is_compressed():
+		foot_source_image = foot_source_image.duplicate()
+		if foot_source_image.decompress() != OK:
+			push_error("无法解压柱础纹理源图：" + coping_source_path)
+			return
+	var source_size: Vector2i = foot_source_image.get_size()
+	if source_size != Vector2i(_coping.get_width(), _coping.get_height()) or foot_source_image.has_mipmaps():
+		push_error("柱础纹理源图尺寸或 mipmap 与导入纹理不一致：" + coping_source_path)
+		return
+	if foot_source_image.get_format() not in [Image.FORMAT_RGB8, Image.FORMAT_RGBA8]:
+		push_error("柱础纹理源图不是 RGB8/RGBA8：" + coping_source_path)
+		return
+	var uv_min := Vector2(1e20, 1e20)
+	var uv_max := Vector2(-1e20, -1e20)
+	for uv: Vector2 in foot_node.uv:
+		uv_min = uv_min.min(uv)
+		uv_max = uv_max.max(uv)
+	# UV 以原纹理像素为单位。裁剪边界落在整数像素线上，之后仅减去整数原点。
+	var crop_origin := Vector2i(floori(uv_min.x) - 1, floori(uv_min.y) - 1)
+	var crop_end := Vector2i(ceili(uv_max.x) + 2, ceili(uv_max.y) + 2)
+	var crop_rect := Rect2i(crop_origin, crop_end - crop_origin)
+	if crop_origin.x < 0 or crop_origin.y < 0 or crop_end.x > source_size.x or crop_end.y > source_size.y:
+		push_error("柱础纹理裁剪区超出原图像素范围：" + coping_source_path)
+		return
+	var foot_texture_image: Image = foot_source_image.get_region(crop_rect)
+	var stain_polygon := PackedVector2Array([Vector2(-14.0, -1.8), Vector2(-12.5, -2.5),
+		Vector2(-11.3, -1.6), Vector2(-12.1, 0.0), Vector2(-13.8, 0.7)])
+	var offset_u: float = fposmod(root.position.x * 0.017, 0.16)
+	for image_y: int in foot_texture_image.get_height():
+		for image_x: int in foot_texture_image.get_width():
+			var source_x: float = float(crop_origin.x + image_x) + 0.5
+			var source_y: float = float(crop_origin.y + image_y) + 0.5
+			# 与 _polygon 的仿射 UV 公式互逆，点取原图 texel 中心。
+			var local_point := Vector2((source_x / float(source_size.x) - 0.08 - offset_u) * (68.0 / 0.62) - 34.0,
+				(source_y / float(source_size.y) - 0.82) / 0.0105)
+			var stain_mask: float = 0.0
+			for stain_x: float in [local_point.x, -local_point.x]:
+				var stain_point := Vector2(stain_x, local_point.y)
+				if not Geometry2D.is_point_in_polygon(stain_point, stain_polygon):
+					continue
+				var stain_edge_distance: float = INF
+				for edge_index: int in range(stain_polygon.size()):
+					var edge_start: Vector2 = stain_polygon[edge_index]
+					var edge_end: Vector2 = stain_polygon[(edge_index + 1) % stain_polygon.size()]
+					var edge: Vector2 = edge_end - edge_start
+					var edge_t: float = clampf((stain_point - edge_start).dot(edge) / edge.length_squared(), 0.0, 1.0)
+					stain_edge_distance = minf(stain_edge_distance, stain_point.distance_to(edge_start + edge * edge_t))
+				var stain_t: float = clampf(stain_edge_distance / 0.55, 0.0, 1.0)
+				var polygon_edge_mask: float = stain_t * stain_t * (3.0 - 2.0 * stain_t)
+				stain_mask = maxf(stain_mask, polygon_edge_mask)
+			if stain_mask <= 0.0 or not Geometry2D.is_point_in_polygon(local_point, foot):
+				continue
+			var foot_edge_distance: float = INF
+			for edge_index: int in range(foot.size()):
+				var edge_start: Vector2 = foot[edge_index]
+				var edge_end: Vector2 = foot[(edge_index + 1) % foot.size()]
+				var edge: Vector2 = edge_end - edge_start
+				var edge_t: float = clampf((local_point - edge_start).dot(edge) / edge.length_squared(), 0.0, 1.0)
+				foot_edge_distance = minf(foot_edge_distance, local_point.distance_to(edge_start + edge * edge_t))
+			var inset_t: float = clampf((foot_edge_distance - 1.0) / 0.8, 0.0, 1.0)
+			var stain_amount: float = stain_mask * inset_t * inset_t * (3.0 - 2.0 * inset_t)
+			if stain_amount <= 0.0:
+				continue
+			var original_srgb: Color = foot_texture_image.get_pixel(image_x, image_y)
+			var original_linear: Color = original_srgb.srgb_to_linear()
+			var stained_linear := Color(
+				original_linear.r * lerpf(1.0, stain_rgb_ratio.r, stain_amount),
+				original_linear.g * lerpf(1.0, stain_rgb_ratio.g, stain_amount),
+				original_linear.b * lerpf(1.0, stain_rgb_ratio.b, stain_amount), original_srgb.a)
+			var stained_srgb: Color = stained_linear.linear_to_srgb()
+			stained_srgb.a = original_srgb.a
+			foot_texture_image.set_pixel(image_x, image_y, stained_srgb)
+	var foot_texture := ImageTexture.create_from_image(foot_texture_image)
+	if foot_texture == null:
+		push_error("无法创建柱础纹理副本：" + coping_source_path)
+		return
+	foot_node.texture = foot_texture
+	var remapped_uv := PackedVector2Array()
+	for uv: Vector2 in foot_node.uv:
+		remapped_uv.append(uv - Vector2(crop_origin))
+	foot_node.uv = remapped_uv
 	var shaft := PackedVector2Array()
 	var top := PackedVector2Array()
 	var diagonal_cut: bool = not has_abacus
