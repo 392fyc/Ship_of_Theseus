@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import unittest
 import hashlib
+import re
 import tempfile
 from pathlib import Path
 
@@ -106,6 +107,12 @@ class CompositeOccupancyNegativeTests(unittest.TestCase):
         self.assertEqual(arrays, {})
 
     def test_v3_metadata_gate_binds_occupancy_sources_and_frame_to_capture(self):
+        capture_source = (ROOT / acceptance.R7_SOURCE_PATHS[0]).read_text(encoding="utf-8")
+        controls_record = re.search(r'_r7_controls_record = \{(.*?)\n\t\}',
+                                    capture_source, re.S)
+        self.assertIsNotNone(controls_record)
+        controls_role = re.search(r'"role": "([^"]+)"', controls_record.group(1))
+        self.assertIsNotNone(controls_role)
         sources = {relative: hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()
                    for relative in acceptance.R7_SOURCE_PATHS}
         common = {"frame_id": 8, "frames_drawn_before": 8, "frames_drawn_after": 8,
@@ -152,11 +159,15 @@ class CompositeOccupancyNegativeTests(unittest.TestCase):
                         "material_bindings": [material_binding]},
                     "native_occupancy_controls": {
                         **base_record, "schema_version": acceptance.CONTROL_SCHEMA,
-                        "role": "native_occupancy_controls", "pass": True,
+                        "role": controls_role.group(1), "pass": True,
                         "samples": sample_records,
                         "image": {**base_record["image"], "role": "native_occupancy_controls"}}}
         semantic["frame"]["instance_tokens"] = [token_record]
         self.assertEqual(acceptance.occupancy_metadata_errors(capture, semantic), [])
+        semantic["native_occupancy_controls"]["role"] = "composite_occupancy_controls"
+        self.assertIn("native_occupancy_controls schema 或 role 无效",
+                      acceptance.occupancy_metadata_errors(capture, semantic))
+        semantic["native_occupancy_controls"]["role"] = controls_role.group(1)
         semantic["native_occupancy_controls"]["frame_id"] = 9
         self.assertTrue(any("native_occupancy_controls frame_id" in error
                             for error in acceptance.occupancy_metadata_errors(capture, semantic)))

@@ -247,7 +247,7 @@ func _save_frame_images(images: Dictionary, case_directory: String, frame_id: in
 	}
 	_r7_controls_record = {
 		"schema_version": "terrain-composite-occupancy-controls/1",
-		"role": "composite_occupancy_controls",
+		"role": "native_occupancy_controls",
 		"image": _semantic_image_record("native_occupancy_controls", controls_image, controls_path, frame_id),
 		"viewport": _viewport_record(_r7_controls_viewport, controls_image),
 		"candidate_source_sha256": candidate.get("source_sha256", {}).duplicate(true),
