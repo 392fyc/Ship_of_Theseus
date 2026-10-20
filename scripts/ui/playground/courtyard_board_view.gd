@@ -850,9 +850,6 @@ func _add_pillar(cell: Vector2i) -> void:
 	# 六点柱础维持约 32 px 宽；柱身收窄后保留清楚的三级台阶。
 	var shaft_radius: float = 12.0
 	var shaft_depth: float = 6.0
-	var side_rim_width: float = 5.0
-	var core_band_min_x: float = shaft_radius * 0.20
-	var core_band_max_x: float = shaft_radius * 0.50
 	var light_direction := Vector2(-0.3420201433, 0.9396926208)
 	root.set_meta("r7_height", height)
 	root.set_meta("r7_height_level", height_level)
@@ -967,7 +964,15 @@ func _add_pillar(cell: Vector2i) -> void:
 		var across: float = clampf((point_at_base.x / shaft_radius + 1.0) * 0.5, 0.0, 1.0)
 		var cut_drop: float = 0.0
 		if diagonal_cut:
-			cut_drop = height * 0.20 * across if cut_direction > 0.0 else height * 0.20 * (1.0 - across)
+			if cell_variant == 3:
+				# 中档柱的两道错落斜断面各相差 3.5 px；最高柱沿用原斜断口。
+				cut_drop = height * 0.05 * across
+				if across >= 0.36:
+					cut_drop += 3.5
+				if across >= 0.68:
+					cut_drop += 3.5
+			else:
+				cut_drop = height * 0.20 * across if cut_direction > 0.0 else height * 0.20 * (1.0 - across)
 		top.append(Vector2(point_at_base.x * 0.92, point_at_base.y * 0.92 - height + cut_drop))
 	# 横倒鼓石继续压在柱身右侧，保留原断面形状和占地。
 	if has_fallen_drum:
@@ -997,33 +1002,133 @@ func _add_pillar(cell: Vector2i) -> void:
 	var lit_rim_tint: Color = _prop_tint("pillar_lit_rim", Color(0.7246, 0.7334, 0.7670, 1.0))
 	var backlit_rim_tint: Color = _prop_tint("pillar_backlit_rim", Color(0.6811, 0.6747, 0.6816, 1.0))
 	var core_tint: Color = _prop_tint("pillar_core_dark", Color(0.4562, 0.4519, 0.4565, 1.0))
-	for edge: int in range(3, 9):
-		var next: int = (edge + 1) % shaft.size()
-		var midpoint: Vector2 = (shaft[edge] + shaft[next]) * 0.5
-		# 主体石面保留轻微受光差，窄暗带负责刻出柱身核心。
-		var surface_normal := Vector2(midpoint.x / shaft_radius, midpoint.y / shaft_depth).normalized()
+	var linear_luminance: Callable = func(color: Color) -> float:
+		return 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b
+	var lstar_luminance: Callable = func(lightness: float) -> float:
+		var fy: float = (lightness + 16.0) / 116.0
+		return fy * fy * fy if lightness > 8.0 else lightness / 903.2962962963
+	var tint_at_lstar: Callable = func(base_tint: Color, target_lstar: float) -> Color:
+		var base_linear: Color = base_tint.srgb_to_linear()
+		var base_y: float = float(linear_luminance.call(base_linear))
+		var scale: float = float(lstar_luminance.call(target_lstar)) / maxf(base_y, 0.000001)
+		var scaled_linear := Color(base_linear.r * scale, base_linear.g * scale,
+			base_linear.b * scale, base_tint.a)
+		var scaled_srgb: Color = scaled_linear.linear_to_srgb()
+		scaled_srgb.a = base_tint.a
+		return scaled_srgb
+	var texture_tint_at_lstar: Callable = func(points: PackedVector2Array, base_tint: Color,
+			target_lstar: float) -> Color:
+		if points.size() < 3:
+			var small_polygon_tint: Color = tint_at_lstar.call(base_tint, target_lstar)
+			return small_polygon_tint
+		var min_x: float = INF
+		var max_x: float = -INF
+		var min_y: float = INF
+		var max_y: float = -INF
+		for sample_point: Vector2 in points:
+			min_x = minf(min_x, sample_point.x)
+			max_x = maxf(max_x, sample_point.x)
+			min_y = minf(min_y, sample_point.y)
+			max_y = maxf(max_y, sample_point.y)
+		var base_linear: Color = base_tint.srgb_to_linear()
+		var total_y: float = 0.0
+		var sample_count: int = 0
+		for sample_y_index: int in 12:
+			for sample_x_index: int in 12:
+				var sample_point := Vector2(
+					lerpf(min_x, max_x, (float(sample_x_index) + 0.5) / 12.0),
+					lerpf(min_y, max_y, (float(sample_y_index) + 0.5) / 12.0))
+				if not Geometry2D.is_point_in_polygon(sample_point, points):
+					continue
+				var sample_u: float = clampf(0.08 + offset_u + (sample_point.x + 34.0) / 68.0 * 0.62, 0.04, 0.96)
+				var sample_v: float = clampf(0.82 + sample_point.y * 0.0105, 0.04, 0.96)
+				var sample_x: int = clampi(floori(sample_u * float(source_size.x)), 0, source_size.x - 1)
+				var sample_y: int = clampi(floori(sample_v * float(source_size.y)), 0, source_size.y - 1)
+				var texture_linear: Color = foot_source_image.get_pixel(sample_x, sample_y).srgb_to_linear()
+				if texture_linear.a <= 0.5:
+					continue
+				var combined_linear := Color(texture_linear.r * base_linear.r,
+					texture_linear.g * base_linear.g, texture_linear.b * base_linear.b, 1.0)
+				total_y += float(linear_luminance.call(combined_linear))
+				sample_count += 1
+		if sample_count == 0:
+			var empty_polygon_tint: Color = tint_at_lstar.call(base_tint, target_lstar)
+			return empty_polygon_tint
+		var average_y: float = total_y / float(sample_count)
+		var scale: float = float(lstar_luminance.call(target_lstar)) / maxf(average_y, 0.000001)
+		var scaled_linear := Color(base_linear.r * scale, base_linear.g * scale,
+			base_linear.b * scale, base_tint.a)
+		var scaled_srgb: Color = scaled_linear.linear_to_srgb()
+		scaled_srgb.a = base_tint.a
+		return scaled_srgb
+	var pillar_light_profile := PackedVector2Array([
+		Vector2(0.00, 51.5), Vector2(0.12, 51.5), Vector2(0.30, 47.0),
+		Vector2(0.48, 42.0), Vector2(0.52, 40.0), Vector2(0.60, 34.0),
+		Vector2(0.70, 36.0), Vector2(0.80, 46.5), Vector2(1.00, 46.5)])
+	var pillar_lstar_at_u: Callable = func(u: float) -> float:
+		var value: float = clampf(u, 0.0, 1.0)
+		for profile_index: int in range(1, pillar_light_profile.size()):
+			var a: Vector2 = pillar_light_profile[profile_index - 1]
+			var b: Vector2 = pillar_light_profile[profile_index]
+			if value <= b.x:
+				return lerpf(a.y, b.y, (value - a.x) / maxf(b.x - a.x, 0.0001))
+		return pillar_light_profile[pillar_light_profile.size() - 1].y
+	var pillar_column_tint: Callable = func(x: float, target_lstar: float,
+			top_points: PackedVector2Array) -> Color:
+		var normalized_x: float = clampf(x / shaft_radius, -1.0, 1.0)
+		var u: float = (normalized_x + 1.0) * 0.5
+		var surface_normal := Vector2(normalized_x, sqrt(maxf(0.0, 1.0 - normalized_x * normalized_x))).normalized()
 		var light_share: float = clampf(surface_normal.dot(light_direction), 0.0, 1.0)
-		var side_tint: Color = _prop_tint("pillar_dark_side", Color("7a806e")).lerp(
+		var base_tint: Color = _prop_tint("pillar_dark_side", Color("7a806e")).lerp(
 			_prop_tint("pillar_lit_side", Color("a5a691")), light_share)
-		var side_face := PackedVector2Array([top[edge], top[next], shaft[next], shaft[edge]])
-		_polygon(root, side_face, side_tint, false, "pillar_side")
-		# 受光带、核心暗带和反射光带都裁在既有石面内，继续使用同一石材纹理。
-		for band_index: int in 3:
-			var band_min_x: float
-			var band_max_x: float
-			var band_tint: Color
-			if band_index == 0:
-				band_min_x = -shaft_radius
-				band_max_x = -shaft_radius + side_rim_width
-				band_tint = lit_rim_tint
-			elif band_index == 1:
-				band_min_x = core_band_min_x
-				band_max_x = core_band_max_x
-				band_tint = core_tint
-			else:
-				band_min_x = shaft_radius - side_rim_width
-				band_max_x = shaft_radius
-				band_tint = backlit_rim_tint
+		if u <= 0.12:
+			base_tint = lit_rim_tint
+		elif u >= 0.80:
+			# 0.80–1.00 保留完整 4.8 px 的右缘反射光带。
+			base_tint = backlit_rim_tint
+		elif u >= 0.52 and u <= 0.70:
+			base_tint = core_tint
+		var base_linear: Color = base_tint.srgb_to_linear()
+		var top_y: float = _pillar_front_top_y(top_points, x)
+		var lower_y: float = shaft_depth * sqrt(maxf(0.0, 1.0 - normalized_x * normalized_x))
+		var total_y: float = 0.0
+		var sample_count: int = 0
+		var sample_u: float = clampf(0.08 + offset_u + (x + 34.0) / 68.0 * 0.62, 0.04, 0.96)
+		var sample_x: int = clampi(floori(sample_u * float(source_size.x)), 0, source_size.x - 1)
+		for sample_index: int in 16:
+			var sample_local_y: float = lerpf(top_y, lower_y, (float(sample_index) + 0.5) / 16.0)
+			var sample_v: float = clampf(0.82 + sample_local_y * 0.0105, 0.04, 0.96)
+			var sample_y: int = clampi(floori(sample_v * float(source_size.y)), 0, source_size.y - 1)
+			var texture_linear: Color = foot_source_image.get_pixel(sample_x, sample_y).srgb_to_linear()
+			if texture_linear.a <= 0.5:
+				continue
+			var combined_linear := Color(texture_linear.r * base_linear.r,
+				texture_linear.g * base_linear.g, texture_linear.b * base_linear.b, 1.0)
+			total_y += float(linear_luminance.call(combined_linear))
+			sample_count += 1
+		if sample_count == 0:
+			var empty_column_tint: Color = tint_at_lstar.call(base_tint, target_lstar)
+			return empty_column_tint
+		var average_y: float = total_y / float(sample_count)
+		var scale: float = float(lstar_luminance.call(target_lstar)) / maxf(average_y, 0.000001)
+		var scaled_linear := Color(base_linear.r * scale, base_linear.g * scale,
+			base_linear.b * scale, base_tint.a)
+		var scaled_srgb: Color = scaled_linear.linear_to_srgb()
+		scaled_srgb.a = base_tint.a
+		return scaled_srgb
+	var pillar_strip_width: float = 0.5
+	var pillar_strip_count: int = ceili(shaft_radius * 2.0 / pillar_strip_width)
+	for strip_index: int in pillar_strip_count:
+		var band_min_x: float = -shaft_radius + float(strip_index) * pillar_strip_width
+		var band_max_x: float = minf(shaft_radius, band_min_x + pillar_strip_width)
+		var band_mid_x: float = (band_min_x + band_max_x) * 0.5
+		var band_u: float = (band_mid_x / shaft_radius + 1.0) * 0.5
+		var target_lstar: float = float(pillar_lstar_at_u.call(band_u))
+		var band_tint: Color = pillar_column_tint.call(band_mid_x, target_lstar, top)
+		# 每条 0.5 px 窄带用 Polygon2D 均匀乘色，继续采样原石纹理与 UV。
+		for edge: int in range(3, 9):
+			var next: int = (edge + 1) % shaft.size()
+			var side_face := PackedVector2Array([top[edge], top[next], shaft[next], shaft[edge]])
 			var clipped_points: PackedVector2Array = side_face
 			for boundary_index: int in 2:
 				if clipped_points.size() < 3:
@@ -1054,6 +1159,11 @@ func _add_pillar(cell: Vector2i) -> void:
 	for i: int in shaft.size():
 		var outer: Vector2 = shaft[i] * Vector2((shaft_radius + 2.0) / shaft_radius,
 			(shaft_depth + 2.0) / shaft_depth) + Vector2(0.0, -1.0)
+		if i in range(3, 10):
+			# 柱础环前沿中央仅比两端低 2.5 px，形成浅椭圆弧。
+			var normalized_x: float = outer.x / (shaft_radius + 2.0)
+			var arc_height: float = sqrt(maxf(0.0, 1.0 - normalized_x * normalized_x))
+			outer.y = -1.0 + 2.5 * arc_height
 		ring_upper.append(outer)
 		ring_lower.append(outer + Vector2(0.0, 3.0))
 	for edge: int in range(3, 9):
@@ -1063,36 +1173,70 @@ func _add_pillar(cell: Vector2i) -> void:
 		var light_share: float = clampf(surface_normal.dot(light_direction), 0.0, 1.0)
 		var ring_tint: Color = _prop_tint("pillar_torus_dark", Color(0.6524, 0.6541, 0.6740, 1.0)).lerp(
 			_prop_tint("pillar_torus_lit", Color(0.6996, 0.7136, 0.7548, 1.0)), light_share)
-		_polygon(root, PackedVector2Array([ring_upper[edge], ring_upper[next], ring_lower[next], ring_lower[edge]]),
-			ring_tint, false, "pillar_side")
-	# 三道不透明竖槽距柱身两侧均不少于 5 px。
-	var groove_width: float = float(profile.get("prop_strokes", {}).get("pillar_groove", 1.0))
-	for groove_index: int in 3:
-		var groove_x: float = float(groove_index - 1) * 3.0
+		var ring_piece := PackedVector2Array([ring_upper[edge], ring_upper[next], ring_lower[next], ring_lower[edge]])
+		var textured_ring_tint: Color = texture_tint_at_lstar.call(ring_piece, ring_tint, 50.0)
+		_polygon(root, ring_piece, textured_ring_tint, false, "pillar_side")
+	var ring_upper_arc := PackedVector2Array()
+	var ring_lower_arc := PackedVector2Array()
+	for arc_index: int in range(3, 10):
+		ring_upper_arc.append(ring_upper[arc_index])
+		ring_lower_arc.append(ring_lower[arc_index])
+	var ring_upper_color: Color = tint_at_lstar.call(lit_rim_tint, 52.0)
+	var ring_lower_color: Color = tint_at_lstar.call(core_tint, 44.0)
+	_line(root, ring_upper_arc, ring_upper_color, 1.0, "pillar_side", false)
+	_line(root, ring_lower_arc, ring_lower_color, 1.0, "pillar_side", false)
+	# 四道 1 px 竖槽按柱面透视压缩，核心带内保留至少 4 L* 的槽面差。
+	var groove_positions := PackedFloat32Array([0.26, 0.46, 0.62, 0.74])
+	var groove_width: float = 1.0
+	for groove_index: int in groove_positions.size():
+		var groove_u: float = groove_positions[groove_index]
+		var groove_x: float = (groove_u * 2.0 - 1.0) * shaft_radius
 		var groove_y: float = _pillar_front_top_y(top, groove_x) + 1.0
 		var groove_end := Vector2(groove_x, 5.0)
 		var groove_start := Vector2(groove_x, groove_y)
 		var groove_normal_x: float = groove_x / shaft_radius
 		var groove_normal := Vector2(groove_normal_x, sqrt(maxf(0.0, 1.0 - groove_normal_x * groove_normal_x)))
 		var groove_light_share: float = clampf(groove_normal.dot(light_direction), 0.0, 1.0)
-		var groove_tint: Color = _prop_tint("pillar_groove_dark", Color(0.356, 0.346, 0.338, 1.0)).lerp(
+		var groove_base_tint: Color = _prop_tint("pillar_groove_dark", Color(0.356, 0.346, 0.338, 1.0)).lerp(
 			_prop_tint("pillar_groove_lit", Color(0.510, 0.510, 0.524, 1.0)), groove_light_share)
+		var groove_body_lstar: float = float(pillar_lstar_at_u.call(groove_u))
+		var groove_delta: float = 4.0 if groove_u >= 0.52 and groove_u <= 0.70 else 7.0
+		var groove_tint: Color = tint_at_lstar.call(groove_base_tint, groove_body_lstar - groove_delta)
 		_line(root, PackedVector2Array([groove_start, groove_end]), groove_tint, groove_width, "pillar_side", false)
-	_polygon(root, top, _prop_tint("pillar_top", Color("c0bca6")), false, "pillar_top")
+		var groove_line: Line2D = root.get_child(root.get_child_count() - 1) as Line2D
+		groove_line.name = "R9Groove%d" % (groove_index + 1)
+		groove_line.set_meta("r9_groove_index", groove_index + 1)
+		groove_line.set_meta("r9_groove_u", groove_u)
+	var top_base_tint: Color = _prop_tint("pillar_top", Color("c0bca6"))
+	var top_tint: Color = texture_tint_at_lstar.call(top, top_base_tint, 56.0)
+	_polygon(root, top, top_tint, false, "pillar_top")
+	var top_front_arc := PackedVector2Array()
 	if has_abacus:
-		var crown_top := PackedVector2Array([Vector2(-15, -height + 1), Vector2(0, -height - 3),
+		# 最矮柱头保留原占地，以高、低错落的两面断开原完整菱形顶。
+		var crown_left_top := PackedVector2Array([Vector2(-15, -height + 1), Vector2(-6, -height - 3),
+			Vector2(0, -height + 1), Vector2(0, -height + 5)])
+		var crown_right_top := PackedVector2Array([Vector2(0, -height + 1), Vector2(7, -height),
 			Vector2(15, -height + 1), Vector2(0, -height + 5)])
-		var crown_left: Vector2 = crown_top[0]
-		var crown_front: Vector2 = crown_top[3]
-		var crown_right: Vector2 = crown_top[2]
+		var crown_left: Vector2 = crown_left_top[0]
+		var crown_front: Vector2 = crown_left_top[3]
+		var crown_right: Vector2 = crown_right_top[2]
 		var crown_drop := Vector2(0.0, 4.0)
-		_polygon(root, crown_top, _prop_tint("pillar_top", Color("c0bca6")), false, "pillar_top")
+		var crown_left_tint: Color = texture_tint_at_lstar.call(crown_left_top, top_base_tint, 56.0)
+		var crown_right_tint: Color = texture_tint_at_lstar.call(crown_right_top, top_base_tint, 56.0)
+		_polygon(root, crown_left_top, crown_left_tint, false, "pillar_top")
+		_polygon(root, crown_right_top, crown_right_tint, false, "pillar_top")
 		_polygon(root, PackedVector2Array([crown_left, crown_front,
 			crown_front + crown_drop, crown_left + crown_drop]),
 			_prop_tint("pillar_lit_side", Color("a5a691")), false, "pillar_side")
 		_polygon(root, PackedVector2Array([crown_front, crown_right,
 			crown_right + crown_drop, crown_front + crown_drop]),
 			_prop_tint("pillar_dark_side", Color("7a806e")), false, "pillar_side")
+		top_front_arc.append_array(PackedVector2Array([crown_right, crown_front, crown_left]))
+	else:
+		for arc_index: int in range(3, 10):
+			top_front_arc.append(top[arc_index])
+	var top_front_color: Color = tint_at_lstar.call(lit_rim_tint, 56.0)
+	_line(root, top_front_arc, top_front_color, 1.0, "pillar_top", false)
 	_actor_layer.add_child(root)
 	# 最高实例的淡化 bounds 上缘为 -56 px；下缘覆盖原底板与鼓石位置。
 	_props.append({"node": root, "wind": false,
