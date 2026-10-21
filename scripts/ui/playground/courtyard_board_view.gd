@@ -850,7 +850,6 @@ func _add_pillar(cell: Vector2i) -> void:
 	var cell_variant: int = posmod(cell.x * 3 + cell.y, 5)
 	var height_level: int = 2 - absi(cell_variant - 2)
 	var height: float = 34.0 + 8.0 * float(height_level)
-	var has_abacus: bool = cell_variant == 0
 	var has_fallen_drum: bool = cell_variant == 3
 	# 六点柱础维持约 32 px 宽；柱身收窄后保留清楚的三级台阶。
 	var shaft_radius: float = 12.0
@@ -960,27 +959,12 @@ func _add_pillar(cell: Vector2i) -> void:
 	foot_node.uv = remapped_uv
 	var shaft := PackedVector2Array()
 	var top_base := PackedVector2Array()
-	var top := PackedVector2Array()
-	var diagonal_cut: bool = not has_abacus
-	var cut_direction: float = 1.0 if cell_variant % 2 == 0 else -1.0
 	var cut_profile: Dictionary = {
-		"slope_fraction": 0.0,
-		"slope_direction": cut_direction,
-		"steps": PackedVector2Array(),
+		"curve": PackedVector2Array([
+			Vector2(0.00, 0.0), Vector2(0.40, 0.0), Vector2(0.55, 9.0),
+			Vector2(0.70, 4.0), Vector2(0.85, 13.0), Vector2(1.00, 12.0),
+		]),
 	}
-	if diagonal_cut:
-		if cell_variant == 3:
-			cut_profile["slope_direction"] = 1.0
-			cut_profile["slope_fraction"] = 0.05
-			cut_profile["steps"] = PackedVector2Array([Vector2(0.36, 3.5), Vector2(0.68, 3.5)])
-		else:
-			cut_profile["slope_fraction"] = 0.20
-	if cell == Vector2i(1, 4):
-		# 保留原断面方向与最高点，新增一道主阶差和较小缺口。
-		cut_profile["steps"] = PackedVector2Array([Vector2(0.36, 3.5), Vector2(0.68, 2.0)])
-	elif cell == Vector2i(8, 4):
-		# 两级各下落 4 个局部单位；阶差由几何面片显式表达。
-		cut_profile["steps"] = PackedVector2Array([Vector2(0.36, 4.0), Vector2(0.68, 4.0)])
 	for i: int in 12:
 		var angle: float = -PI * 0.5 + float(i) * TAU / 12.0
 		var point_at_base := Vector2(cos(angle) * shaft_radius, sin(angle) * shaft_depth)
@@ -988,11 +972,8 @@ func _add_pillar(cell: Vector2i) -> void:
 		var base_top_point := Vector2(point_at_base.x * 0.92,
 			point_at_base.y * 0.92 - height)
 		top_base.append(base_top_point)
-		var across: float = clampf((point_at_base.x / shaft_radius + 1.0) * 0.5, 0.0, 1.0)
-		var cut_drop: float = _r10_pillar_cut_drop(across, height, cut_profile)
-		top.append(Vector2(base_top_point.x, base_top_point.y + cut_drop))
-	var top_surface: PackedVector2Array = _r10_expand_pillar_top_surface(
-		top_base, shaft_radius, height, cut_profile)
+	var top_surface: PackedVector2Array = _r13_expand_pillar_top_surface(
+		top_base, shaft_radius, cut_profile["curve"])
 	# 横倒鼓石继续压在柱身右侧，保留原断面形状和占地。
 	if has_fallen_drum:
 		var drum_lit: Color = _prop_tint("pillar_lit_side", Color("a5a691"))
@@ -1170,12 +1151,12 @@ func _add_pillar(cell: Vector2i) -> void:
 		var target_lstar: float = float(pillar_lstar_at_u.call(band_u))
 		var band_tint: Color = pillar_column_tint.call(band_mid_x, target_lstar, top_base)
 		pillar_band_tints.append(band_tint)
-		# 每条 0.5 局部单位窄带用 Polygon2D 乘色，边界阶差按分段几何保留。
+		# 每条 0.5 局部单位窄带用 Polygon2D 乘色，边界折点按曲线精确保留。
 		for edge: int in range(3, 9):
 			var next: int = (edge + 1) % shaft.size()
-			var side_face: PackedVector2Array = _r10_pillar_front_side_face(
+			var side_face: PackedVector2Array = _r13_pillar_front_side_face(
 				top_base[edge], top_base[next], shaft[edge], shaft[next],
-				shaft_radius, height, cut_profile)
+				shaft_radius, cut_profile["curve"])
 			var clipped_points: PackedVector2Array = side_face
 			for boundary_index: int in 2:
 				if clipped_points.size() < 3:
@@ -1269,88 +1250,50 @@ func _add_pillar(cell: Vector2i) -> void:
 	var top_base_tint: Color = _prop_tint("pillar_top", Color("c0bca6"))
 	var top_tint: Color = texture_tint_at_lstar.call(top_surface, top_base_tint, 56.0)
 	_polygon(root, top_surface, top_tint, false, "pillar_top")
-	# 投影只给原顶面着色；交集裁剪与相同局部 UV 保留实体轮廓和石材纹理。
-	var add_fracture_shadow: Callable = func(shadow_x: float) -> void:
-		var shadow_band := PackedVector2Array([
-			Vector2(shadow_x, -height - shaft_depth - 8.0),
-			Vector2(shadow_x + 1.6, -height - shaft_depth - 8.0),
-			Vector2(shadow_x + 1.6, 0.0), Vector2(shadow_x, 0.0),
-		])
-		var shadow_patches: Array[PackedVector2Array] = Geometry2D.intersect_polygons(top_surface, shadow_band)
-		for shadow_patch: PackedVector2Array in shadow_patches:
-			var shadow_tint: Color = texture_tint_at_lstar.call(shadow_patch, top_base_tint, 44.0)
-			_polygon(root, shadow_patch, shadow_tint, false, "pillar_top")
+	var pillar_curve: PackedVector2Array = cut_profile["curve"]
+	# 沿用原 1.0 局部单位轮廓宽度，把断面颜色画进顶面而不扩展实体。
+	var fracture_face_depth: float = 1.0
+	var fracture_shadow_width: float = 1.6
+	var add_clipped_top_patch: Callable = func(polygon: PackedVector2Array,
+			target_lstar: float) -> void:
+		if polygon.size() < 3:
+			return
+		var patches: Array[PackedVector2Array] = Geometry2D.intersect_polygons(top_surface, polygon)
+		for patch: PackedVector2Array in patches:
+			if patch.size() < 3 or _r13_pillar_polygon_area(patch) <= 0.0001:
+				continue
+			var patch_tint: Color = texture_tint_at_lstar.call(patch, top_base_tint, target_lstar)
+			_polygon(root, patch, patch_tint, false, "pillar_top")
+	# 先画背光断面脚下的投影：沿断面落向一侧偏移 1.6 局部单位，并裁入新顶面。
+	for curve_index: int in range(2, pillar_curve.size()):
+		var curve_start: Vector2 = pillar_curve[curve_index - 1]
+		var curve_end: Vector2 = pillar_curve[curve_index]
+		var cut_delta: float = curve_end.y - curve_start.y
+		if cut_delta <= 0.0:
+			continue
+		var face_boundary: PackedVector2Array = _r13_pillar_front_boundary_between(
+			top_base, shaft_radius, pillar_curve, curve_start.x, curve_end.x)
+		var shadow_direction_x: float = -signf(light_direction.x)
+		var shadow_band: PackedVector2Array = _r13_pillar_offset_band(
+			face_boundary, Vector2.ZERO, Vector2(shadow_direction_x * fracture_shadow_width, 0.0))
+		add_clipped_top_patch.call(shadow_band, 44.0)
+	# 各斜面本体依其真实曲线朝向着色；向右下落面背光，回升面受光。
+	for curve_index: int in range(2, pillar_curve.size()):
+		var curve_start: Vector2 = pillar_curve[curve_index - 1]
+		var curve_end: Vector2 = pillar_curve[curve_index]
+		var cut_delta: float = curve_end.y - curve_start.y
+		if is_zero_approx(cut_delta):
+			continue
+		var face_boundary: PackedVector2Array = _r13_pillar_front_boundary_between(
+			top_base, shaft_radius, pillar_curve, curve_start.x, curve_end.x)
+		var face_band: PackedVector2Array = _r13_pillar_offset_band(
+			face_boundary, Vector2.ZERO, Vector2(0.0, -fracture_face_depth))
+		var face_normal := Vector2(signf(cut_delta), 0.0)
+		var face_lstar: float = 50.0 if face_normal.dot(light_direction) > 0.0 else 36.0
+		add_clipped_top_patch.call(face_band, face_lstar)
 	var r10_step_lines: Array[Line2D] = []
-	var cut_steps: PackedVector2Array = cut_profile["steps"]
-	for step_index: int in cut_steps.size():
-		var step_across: float = cut_steps[step_index].x
-		var step_x: float = (step_across * 2.0 - 1.0) * shaft_radius * 0.92
-		var base_y: float = _pillar_front_top_y(top_base, step_x)
-		var lower_across: float = maxf(0.0, step_across - 0.0001)
-		var upper_across: float = minf(1.0, step_across + 0.0001)
-		var lower_drop: float = _r10_pillar_cut_drop(lower_across, height, cut_profile)
-		var upper_drop: float = _r10_pillar_cut_drop(upper_across, height, cut_profile)
-		var step_low_y: float = base_y + minf(lower_drop, upper_drop)
-		var step_high_y: float = base_y + maxf(lower_drop, upper_drop)
-		var step_normal := Vector2(signf(upper_drop - lower_drop), 0.0)
-		var step_lstar: float = 50.0 if step_normal.dot(light_direction) > 0.0 else 36.0
-		# 断面较低一侧承接投影；朝向由实际阶差决定，不按实例补偿。
-		add_fracture_shadow.call(step_x if upper_drop > lower_drop else step_x - 1.6)
-		var step_color: Color = tint_at_lstar.call(lit_rim_tint, step_lstar)
-		_line(root, PackedVector2Array([Vector2(step_x, step_low_y), Vector2(step_x, step_high_y)]),
-			step_color, 1.0, "pillar_side", false)
-		var step_line: Line2D = root.get_child(root.get_child_count() - 1) as Line2D
-		r10_step_lines.append(step_line)
-	var top_front_arc := PackedVector2Array()
-	var r10_chipped_crown: bool = cell == Vector2i(1, 7)
-	if has_abacus and r10_chipped_crown:
-		# 右侧约 35% 缺失；保留部分顶面并用不规则断面结束，左高右低约 6 度。
-		var chipped_crown_top := PackedVector2Array([
-			Vector2(-15.0, -height + 1.0), Vector2(-9.0, -height - 3.0),
-			Vector2(-3.0, -height - 2.3), Vector2(4.5, -height - 1.0),
-			Vector2(3.7, -height + 0.6), Vector2(2.5, -height - 0.1),
-			Vector2(1.0, -height + 1.5), Vector2(-0.4, -height + 0.3),
-			Vector2(-2.2, -height + 1.8), Vector2(-4.0, -height + 0.4),
-			Vector2(-8.0, -height + 1.1), Vector2(-15.0, -height + 2.0),
-		])
-		var chipped_top_tint: Color = texture_tint_at_lstar.call(chipped_crown_top, top_base_tint, 56.0)
-		_polygon(root, chipped_crown_top, chipped_top_tint, false, "pillar_top")
-		add_fracture_shadow.call(4.5)
-		var fracture_face := PackedVector2Array([
-			Vector2(3.4, -height - 0.7), Vector2(4.7, -height - 1.0),
-			Vector2(5.4, -height + 0.5), Vector2(4.8, -height + 2.4),
-			Vector2(3.5, -height + 1.1),
-		])
-		var fracture_tint: Color = texture_tint_at_lstar.call(fracture_face, top_base_tint, 38.0)
-		_polygon(root, fracture_face, fracture_tint, false, "pillar_side")
-		top_front_arc = _r10_pillar_arc_segment(top_base, shaft_radius, 5.5, 10.5)
-	elif has_abacus:
-		# 其他短柱继续使用原柱头几何。
-		var crown_left_top := PackedVector2Array([Vector2(-15, -height + 1), Vector2(-6, -height - 3),
-			Vector2(0, -height + 1), Vector2(0, -height + 5)])
-		var crown_right_top := PackedVector2Array([Vector2(0, -height + 1), Vector2(7, -height),
-			Vector2(15, -height + 1), Vector2(0, -height + 5)])
-		var crown_left: Vector2 = crown_left_top[0]
-		var crown_front: Vector2 = crown_left_top[3]
-		var crown_right: Vector2 = crown_right_top[2]
-		var crown_drop := Vector2(0.0, 4.0)
-		var crown_left_tint: Color = texture_tint_at_lstar.call(crown_left_top, top_base_tint, 56.0)
-		var crown_right_tint: Color = texture_tint_at_lstar.call(crown_right_top, top_base_tint, 56.0)
-		_polygon(root, crown_left_top, crown_left_tint, false, "pillar_top")
-		_polygon(root, crown_right_top, crown_right_tint, false, "pillar_top")
-		_polygon(root, PackedVector2Array([crown_left, crown_front,
-			crown_front + crown_drop, crown_left + crown_drop]),
-			_prop_tint("pillar_lit_side", Color("a5a691")), false, "pillar_side")
-		_polygon(root, PackedVector2Array([crown_front, crown_right,
-			crown_right + crown_drop, crown_front + crown_drop]),
-			_prop_tint("pillar_dark_side", Color("7a806e")), false, "pillar_side")
-		top_front_arc.append_array(PackedVector2Array([crown_right, crown_front, crown_left]))
-	elif cut_steps.size() > 0:
-		# 破裂区不再横跨整条顶面的亮弧，只保留首个阶差以外的完整一段。
-		top_front_arc = _r10_pillar_intact_front_arc(top_base, shaft_radius, height, cut_profile)
-	else:
-		for arc_index: int in range(3, 10):
-			top_front_arc.append(top[arc_index])
+	var top_front_arc: PackedVector2Array = _r13_pillar_front_boundary_between(
+		top_base, shaft_radius, pillar_curve, 0.0, 0.40)
 	var top_front_color: Color = tint_at_lstar.call(lit_rim_tint, 56.0)
 	_line(root, top_front_arc, top_front_color, 1.0, "pillar_top", false)
 	_actor_layer.add_child(root)
@@ -1379,6 +1322,9 @@ func _add_pillar(cell: Vector2i) -> void:
 
 func _r10_pillar_cut_drop(across: float, pillar_height: float, cut_profile: Dictionary) -> float:
 	var clamped_across: float = clampf(across, 0.0, 1.0)
+	if cut_profile.has("curve"):
+		var curve: PackedVector2Array = cut_profile["curve"]
+		return _r13_pillar_cut_drop(clamped_across, curve)
 	var slope_fraction: float = float(cut_profile.get("slope_fraction", 0.0))
 	var slope_direction: float = float(cut_profile.get("slope_direction", 1.0))
 	var slope_across: float = clamped_across if slope_direction >= 0.0 else 1.0 - clamped_across
@@ -1388,6 +1334,110 @@ func _r10_pillar_cut_drop(across: float, pillar_height: float, cut_profile: Dict
 		if clamped_across >= step.x:
 			drop += step.y
 	return drop
+
+
+func _r13_pillar_cut_drop(across: float, curve: PackedVector2Array) -> float:
+	if curve.is_empty():
+		return 0.0
+	var value: float = clampf(across, 0.0, 1.0)
+	for curve_index: int in range(1, curve.size()):
+		var a: Vector2 = curve[curve_index - 1]
+		var b: Vector2 = curve[curve_index]
+		if value <= b.x:
+			return lerpf(a.y, b.y, (value - a.x) / maxf(b.x - a.x, 0.0001))
+	return curve[curve.size() - 1].y
+
+
+func _r13_pillar_cut_edge_points(a: Vector2, b: Vector2, shaft_radius: float,
+		curve: PackedVector2Array) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	var across_a: float = _r10_pillar_across_at_x(a.x, shaft_radius)
+	var across_b: float = _r10_pillar_across_at_x(b.x, shaft_radius)
+	points.append(Vector2(a.x, a.y + _r13_pillar_cut_drop(across_a, curve)))
+	if not is_equal_approx(across_a, across_b):
+		var crossings: Array[Vector2] = []
+		for curve_index: int in range(1, curve.size() - 1):
+			var knot_across: float = curve[curve_index].x
+			var t: float = (knot_across - across_a) / (across_b - across_a)
+			if t > 0.00001 and t < 0.99999:
+				crossings.append(Vector2(t, knot_across))
+		crossings.sort_custom(func(left: Vector2, right: Vector2) -> bool: return left.x < right.x)
+		for crossing: Vector2 in crossings:
+			var base_point: Vector2 = a.lerp(b, crossing.x)
+			points.append(Vector2(base_point.x,
+				base_point.y + _r13_pillar_cut_drop(crossing.y, curve)))
+	points.append(Vector2(b.x, b.y + _r13_pillar_cut_drop(across_b, curve)))
+	return points
+
+
+func _r13_expand_pillar_top_surface(base_top: PackedVector2Array, shaft_radius: float,
+		curve: PackedVector2Array) -> PackedVector2Array:
+	var result := PackedVector2Array()
+	for edge: int in base_top.size():
+		var next: int = (edge + 1) % base_top.size()
+		var edge_points: PackedVector2Array = _r13_pillar_cut_edge_points(
+			base_top[edge], base_top[next], shaft_radius, curve)
+		for point_index: int in range(edge_points.size() - 1):
+			result.append(edge_points[point_index])
+	return result
+
+
+func _r13_pillar_front_side_face(top_a: Vector2, top_b: Vector2, shaft_a: Vector2,
+		shaft_b: Vector2, shaft_radius: float, curve: PackedVector2Array) -> PackedVector2Array:
+	var face: PackedVector2Array = _r13_pillar_cut_edge_points(top_a, top_b, shaft_radius, curve)
+	face.append(shaft_b)
+	face.append(shaft_a)
+	return face
+
+
+func _r13_pillar_front_boundary_between(top_base: PackedVector2Array, shaft_radius: float,
+		curve: PackedVector2Array, across_start: float, across_end: float) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	var start_value: float = clampf(minf(across_start, across_end), 0.0, 1.0)
+	var end_value: float = clampf(maxf(across_start, across_end), 0.0, 1.0)
+	var across_values: Array[float] = [start_value, end_value]
+	for curve_index: int in range(1, curve.size() - 1):
+		var knot_across: float = curve[curve_index].x
+		if knot_across > start_value + 0.00001 and knot_across < end_value - 0.00001:
+			across_values.append(knot_across)
+	for front_index: int in range(3, 10):
+		var front_across: float = _r10_pillar_across_at_x(top_base[front_index].x, shaft_radius)
+		if front_across > start_value + 0.00001 and front_across < end_value - 0.00001:
+			across_values.append(front_across)
+	across_values.sort()
+	var unique_values: Array[float] = []
+	for value: float in across_values:
+		if not unique_values.is_empty() and is_equal_approx(value, unique_values[unique_values.size() - 1]):
+			continue
+		unique_values.append(value)
+	for across: float in unique_values:
+		var x: float = (across * 2.0 - 1.0) * shaft_radius * 0.92
+		var y: float = _pillar_front_top_y(top_base, x) + _r13_pillar_cut_drop(across, curve)
+		points.append(Vector2(x, y))
+	return points
+
+
+func _r13_pillar_offset_band(boundary: PackedVector2Array, offset_a: Vector2,
+		offset_b: Vector2) -> PackedVector2Array:
+	var band := PackedVector2Array()
+	if boundary.size() < 2:
+		return band
+	for point: Vector2 in boundary:
+		band.append(point + offset_a)
+	for point_index: int in range(boundary.size() - 1, -1, -1):
+		band.append(boundary[point_index] + offset_b)
+	return band
+
+
+func _r13_pillar_polygon_area(points: PackedVector2Array) -> float:
+	if points.size() < 3:
+		return 0.0
+	var twice_area: float = 0.0
+	for point_index: int in points.size():
+		var current: Vector2 = points[point_index]
+		var next: Vector2 = points[(point_index + 1) % points.size()]
+		twice_area += current.x * next.y - next.x * current.y
+	return absf(twice_area) * 0.5
 
 
 func _r10_pillar_across_at_x(x: float, shaft_radius: float) -> float:
