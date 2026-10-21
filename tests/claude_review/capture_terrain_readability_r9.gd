@@ -369,7 +369,16 @@ func _r9_prepare_o1_state(role: String, state: Dictionary) -> bool:
 	if not bool(state.get("unit_visible", true)):
 		target.hide()
 	var forecast: Dictionary = manager.get("_combat_forecast") as Dictionary
-	var attack_state: bool = manager.get("input_state") == TacticalManager.InputState.ATTACK_TARGETING
+	# --script 在 autoload 注册前编译；从运行中的 manager 读取枚举，避免提前解析全局类。
+	var manager_script: Script = manager.get_script() as Script
+	if manager_script == null:
+		push_error("[R9 O1] formal manager has no script for InputState lookup")
+		return false
+	var input_states: Dictionary = manager_script.get_script_constant_map().get("InputState", {}) as Dictionary
+	if not input_states.has("ATTACK_TARGETING"):
+		push_error("[R9 O1] formal manager script has no InputState.ATTACK_TARGETING")
+		return false
+	var attack_state: bool = manager.get("input_state") == input_states["ATTACK_TARGETING"]
 	var targets_value: Variant = forecast.get("targets", [])
 	var has_forecast_targets: bool = targets_value is Array and not (targets_value as Array).is_empty()
 	return target.grid_position == R9_UNIT_CELL and attacker.grid_position == R9_ATTACKER_CELL \
