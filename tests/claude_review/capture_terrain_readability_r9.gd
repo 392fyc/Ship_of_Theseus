@@ -19,7 +19,7 @@ const R9_CAPTURE_SCRIPT_CHAIN: PackedStringArray = [
 	"res://tests/claude_review/capture_terrain_readability.gd",
 ]
 const R9_O1_SCHEMA := "terrain-pillar-occlusion/1"
-const R9_O1_DRAW_SYNC_VERSION := "terrain-o1-controlled-draw/3"
+const R9_O1_DRAW_SYNC_VERSION := "terrain-o1-controlled-draw/4"
 const R9_UNIT_CELL := Vector2i(0, 3)
 const R9_ATTACKER_CELL := Vector2i(0, 2)
 const R9_PILLAR_ID := "pillar@1.00,4.00"
@@ -329,7 +329,7 @@ func _r9_sync_o1_draw_state(sessions: Dictionary) -> Dictionary:
 	if animation_sync.get("status") != "PASS":
 		return {"status": "NOT_TESTED", "reason": str(animation_sync.get("reason", "O1 target Unit animation could not be aligned")),
 			"version": R9_O1_DRAW_SYNC_VERSION, "unit_animation_sync": animation_sync}
-	var snapshots: Dictionary = {}
+	var before_snapshots: Dictionary = {}
 	for role: String in ["A", "B", "C", "D"]:
 		var state: Dictionary = sessions[role]
 		var session: Node2D = state["session"] as Node2D
@@ -347,7 +347,15 @@ func _r9_sync_o1_draw_state(sessions: Dictionary) -> Dictionary:
 				if spec is Dictionary and (spec as Dictionary).get("node") == pillar:
 					props.remove_at(index)
 			board.set("_props", props)
-		snapshots[role] = _r9_o1_board_state(state)
+		before_snapshots[role] = _r9_o1_board_state(state)
+	var prop_transform_sync: Dictionary = _r9_sync_o1_prop_transforms(sessions, before_snapshots)
+	if prop_transform_sync.get("status") != "PASS":
+		return {"status": "NOT_TESTED", "reason": str(prop_transform_sync.get("reason", "O1 prop Transform2D state could not be aligned")),
+			"version": R9_O1_DRAW_SYNC_VERSION, "unit_animation_sync": animation_sync,
+			"prop_transform_sync": prop_transform_sync, "states": before_snapshots}
+	var snapshots: Dictionary = {}
+	for role: String in ["A", "B", "C", "D"]:
+		snapshots[role] = _r9_o1_board_state(sessions[role])
 	var source_snapshot: Dictionary = snapshots["A"]
 	for role: String in ["A", "B", "C", "D"]:
 		var observed: Dictionary = snapshots[role]
@@ -357,8 +365,10 @@ func _r9_sync_o1_draw_state(sessions: Dictionary) -> Dictionary:
 				or float(observed.get("board_time", INF)) != phase:
 			return {"status": "NOT_TESTED", "reason": "O1 board phase/freeze mismatch in " + role,
 				"version": R9_O1_DRAW_SYNC_VERSION, "states": snapshots}
-		if observed.get("common_props") != source_snapshot.get("common_props"):
-			return {"status": "NOT_TESTED", "reason": "O1 non-target prop state differs in " + role,
+		if not _r9_o1_common_prop_draw_states_equal(
+				observed.get("common_props", {}) as Dictionary,
+				source_snapshot.get("common_props", {}) as Dictionary):
+			return {"status": "NOT_TESTED", "reason": "O1 non-target prop global matrix/visibility/color differs in " + role,
 				"version": R9_O1_DRAW_SYNC_VERSION, "states": snapshots}
 		var observed_pillar: Dictionary = (observed.get("target_pillar", {}) as Dictionary).duplicate(true)
 		var source_pillar: Dictionary = (source_snapshot.get("target_pillar", {}) as Dictionary).duplicate(true)
@@ -376,9 +386,10 @@ func _r9_sync_o1_draw_state(sessions: Dictionary) -> Dictionary:
 				"version": R9_O1_DRAW_SYNC_VERSION, "states": snapshots}
 	return {"status": "PASS", "version": R9_O1_DRAW_SYNC_VERSION,
 		"canonical_phase_source": "actual A BoardView._time after all formal O1 setup",
-		"canonical_phase": phase, "unit_animation_sync": animation_sync, "states": snapshots,
+		"canonical_phase": phase, "unit_animation_sync": animation_sync,
+		"prop_transform_sync": prop_transform_sync, "states": snapshots,
 		"allowed_differences": ["target Unit visibility", "target pillar visibility"],
-		"scope": "scene phase, common props, target pillar draw transform/colors and stable target Unit draw/animation state; original-frame control pixels remain mandatory"}
+		"scope": "scene phase, common prop actual local/global transforms and draw state, target pillar and stable target Unit controls; original-frame control pixels remain mandatory"}
 
 
 func _r9_sync_o1_unit_animation(sessions: Dictionary) -> Dictionary:
@@ -432,6 +443,159 @@ func _r9_sync_o1_unit_animation(sessions: Dictionary) -> Dictionary:
 		"method": "copy A animation/frame/frame_progress/speed_scale to same stable target Unit before tree freeze; preserve each Unit visibility"}
 
 
+func _r9_sync_o1_prop_transforms(sessions: Dictionary, before_states: Dictionary) -> Dictionary:
+	var inventories: Dictionary = {}
+	var stable_ids_by_role: Dictionary = {}
+	var before_matrices: Dictionary = {}
+	for role: String in ["A", "B", "C", "D"]:
+		var inventory_result: Dictionary = _r9_o1_common_prop_inventory(sessions[role])
+		if not bool(inventory_result.get("ok", false)):
+			return {"status": "NOT_TESTED", "reason": "O1 %s common prop inventory is missing or invalid: %s" % [role, str(inventory_result.get("reason", ""))],
+				"stable_ids_by_role": stable_ids_by_role, "before_matrices": before_matrices, "after_matrices": {}}
+		var inventory: Dictionary = inventory_result["inventory"] as Dictionary
+		var ids: Array = inventory.keys()
+		ids.sort()
+		inventories[role] = inventory
+		stable_ids_by_role[role] = ids
+		var state_before: Dictionary = before_states.get(role, {}) as Dictionary
+		if not bool(state_before.get("common_inventory_unique", false)) \
+				or int(state_before.get("common_prop_count", -1)) != ids.size():
+			return {"status": "NOT_TESTED", "reason": "O1 %s pre-sync prop inventory snapshot is incomplete" % role,
+				"stable_ids_by_role": stable_ids_by_role, "before_matrices": before_matrices, "after_matrices": {}}
+		var props_before: Dictionary = state_before.get("common_props", {}) as Dictionary
+		var matrices_for_role: Dictionary = {}
+		for stable_id: String in ids:
+			if not props_before.has(stable_id):
+				return {"status": "NOT_TESTED", "reason": "O1 %s pre-sync matrix snapshot lacks stable prop %s" % [role, stable_id],
+					"stable_ids_by_role": stable_ids_by_role, "before_matrices": before_matrices, "after_matrices": {}}
+			var prop_state: Dictionary = props_before[stable_id] as Dictionary
+			var local_matrix: Array = prop_state.get("transform", []) as Array
+			var global_matrix: Array = prop_state.get("global_transform", []) as Array
+			if not _r9_matrix_values_are_finite(local_matrix) or not _r9_matrix_values_are_finite(global_matrix):
+				return {"status": "NOT_TESTED", "reason": "O1 %s pre-sync local/global matrix is unavailable or non-finite for %s" % [role, stable_id],
+					"stable_ids_by_role": stable_ids_by_role, "before_matrices": before_matrices, "after_matrices": {}}
+			matrices_for_role[stable_id] = {
+				"local": local_matrix.duplicate(), "global": global_matrix.duplicate(),
+			}
+		before_matrices[role] = matrices_for_role
+	var source_ids: Array = stable_ids_by_role["A"]
+	if source_ids.is_empty():
+		return {"status": "NOT_TESTED", "reason": "O1 non-target prop inventory is empty",
+			"source_ids": source_ids, "stable_ids_by_role": stable_ids_by_role,
+			"before_matrices": before_matrices, "after_matrices": {}}
+	for role: String in ["B", "C", "D"]:
+		if stable_ids_by_role[role] != source_ids:
+			return {"status": "NOT_TESTED", "reason": "O1 stable non-target prop inventory differs between A and " + role,
+				"source_ids": source_ids, "stable_ids_by_role": stable_ids_by_role,
+				"before_matrices": before_matrices, "after_matrices": {}}
+	var source_inventory: Dictionary = inventories["A"] as Dictionary
+	for role: String in ["B", "C", "D"]:
+		var target_inventory: Dictionary = inventories[role] as Dictionary
+		for stable_id: String in source_ids:
+			var source_node: Node2D = (source_inventory[stable_id] as Dictionary).get("node") as Node2D
+			var target_node: Node2D = (target_inventory[stable_id] as Dictionary).get("node") as Node2D
+			if not is_instance_valid(source_node) or not is_instance_valid(target_node):
+				return {"status": "NOT_TESTED", "reason": "O1 prop disappeared before Transform2D synchronization: " + stable_id,
+					"source_ids": source_ids, "stable_ids_by_role": stable_ids_by_role,
+					"before_matrices": before_matrices, "after_matrices": {}}
+			var source_transform: Transform2D = source_node.transform
+			if not _r9_matrix_values_are_finite(_transform_array(source_transform)):
+				return {"status": "NOT_TESTED", "reason": "O1 A local Transform2D is unavailable or non-finite for " + stable_id,
+					"source_ids": source_ids, "stable_ids_by_role": stable_ids_by_role,
+					"before_matrices": before_matrices, "after_matrices": {}}
+			target_node.transform = source_transform
+	for role: String in ["B", "C", "D"]:
+		var target_inventory: Dictionary = inventories[role] as Dictionary
+		for stable_id: String in source_ids:
+			var source_node: Node2D = (source_inventory[stable_id] as Dictionary).get("node") as Node2D
+			var target_node: Node2D = (target_inventory[stable_id] as Dictionary).get("node") as Node2D
+			if not is_instance_valid(source_node) or not is_instance_valid(target_node):
+				return {"status": "NOT_TESTED", "reason": "O1 prop disappeared before global Transform2D alignment: " + stable_id,
+					"source_ids": source_ids, "stable_ids_by_role": stable_ids_by_role,
+					"before_matrices": before_matrices, "after_matrices": {}}
+			var source_global: Array[float] = _transform_array(source_node.global_transform)
+			var target_global: Array[float] = _transform_array(target_node.global_transform)
+			if not _r9_matrix_values_are_finite(source_global) or not _r9_matrix_values_are_finite(target_global):
+				return {"status": "NOT_TESTED", "reason": "O1 pre-alignment global matrix is unavailable or non-finite for " + stable_id,
+					"source_ids": source_ids, "stable_ids_by_role": stable_ids_by_role,
+					"before_matrices": before_matrices, "after_matrices": {}}
+			if target_global != source_global:
+				target_node.global_transform = source_node.global_transform
+	var after_matrices: Dictionary = {}
+	for role: String in ["A", "B", "C", "D"]:
+		var inventory: Dictionary = inventories[role] as Dictionary
+		var matrices_for_role: Dictionary = {}
+		for stable_id: String in source_ids:
+			var node: Node2D = (inventory[stable_id] as Dictionary).get("node") as Node2D
+			if not is_instance_valid(node):
+				return {"status": "NOT_TESTED", "reason": "O1 prop disappeared after Transform2D synchronization: " + stable_id,
+					"source_ids": source_ids, "stable_ids_by_role": stable_ids_by_role,
+					"before_matrices": before_matrices, "after_matrices": after_matrices}
+			var local_matrix: Array[float] = _transform_array(node.transform)
+			var global_matrix: Array[float] = _transform_array(node.global_transform)
+			if not _r9_matrix_values_are_finite(local_matrix) or not _r9_matrix_values_are_finite(global_matrix):
+				return {"status": "NOT_TESTED", "reason": "O1 post-sync local/global matrix is unavailable or non-finite for %s in %s" % [stable_id, role],
+					"source_ids": source_ids, "stable_ids_by_role": stable_ids_by_role,
+					"before_matrices": before_matrices, "after_matrices": after_matrices}
+			matrices_for_role[stable_id] = {"local": local_matrix, "global": global_matrix}
+		after_matrices[role] = matrices_for_role
+	var source_after: Dictionary = after_matrices["A"] as Dictionary
+	var local_mismatches_by_role: Dictionary = {}
+	for role: String in ["B", "C", "D"]:
+		var role_after: Dictionary = after_matrices[role] as Dictionary
+		var local_mismatches: Array[String] = []
+		for stable_id: String in source_ids:
+			var source_matrix_record: Dictionary = source_after[stable_id] as Dictionary
+			var observed_matrix_record: Dictionary = role_after[stable_id] as Dictionary
+			if observed_matrix_record.get("global") != source_matrix_record.get("global"):
+				return {"status": "NOT_TESTED", "reason": "O1 final actual global prop matrix differs from A in %s: %s" % [role, stable_id],
+					"source_ids": source_ids, "stable_ids_by_role": stable_ids_by_role,
+					"before_matrices": before_matrices, "after_matrices": after_matrices}
+			if observed_matrix_record.get("local") != source_matrix_record.get("local"):
+				local_mismatches.append(stable_id)
+		local_mismatches_by_role[role] = local_mismatches
+	return {"status": "PASS", "source_role": "A", "property": "Node2D.transform (local Transform2D)",
+		"global_fallback_property": "Node2D.global_transform",
+		"matrix_fields": ["local", "global"], "final_matrix_authority": "global",
+		"prop_count": source_ids.size(), "local_mismatches_by_role": local_mismatches_by_role,
+		"source_ids": source_ids, "stable_ids_by_role": stable_ids_by_role,
+		"before_matrices": before_matrices, "after_matrices": after_matrices}
+
+
+func _r9_o1_common_prop_inventory(state: Dictionary) -> Dictionary:
+	var board: Node2D = state.get("board") as Node2D
+	var pillar: Node2D = state.get("pillar_node") as Node2D
+	if not is_instance_valid(board) or not is_instance_valid(pillar):
+		return {"ok": false, "reason": "O1 board or target pillar is missing"}
+	var prop_values: Variant = board.get("_props")
+	if not prop_values is Array:
+		return {"ok": false, "reason": "O1 board prop list is missing"}
+	var common_specs: Array = []
+	for value: Variant in prop_values:
+		if not value is Dictionary:
+			return {"ok": false, "reason": "O1 board prop list contains a non-dictionary entry"}
+		var spec: Dictionary = value
+		var node: Node2D = spec.get("node") as Node2D
+		if node == pillar:
+			continue
+		if not is_instance_valid(node):
+			return {"ok": false, "reason": "O1 non-target prop list contains a missing/non-Node2D node"}
+		common_specs.append(spec)
+	var inventory: Dictionary = _prop_inventory(common_specs)
+	return {"ok": inventory.size() == common_specs.size(),
+		"reason": "O1 non-target prop inventory has duplicate or unresolvable identities" if inventory.size() != common_specs.size() else "",
+		"count": common_specs.size(), "inventory": inventory}
+
+
+func _r9_matrix_values_are_finite(values: Array) -> bool:
+	if values.size() != 6:
+		return false
+	for value: Variant in values:
+		if not (value is float or value is int) or not is_finite(float(value)):
+			return false
+	return true
+
+
 func _r9_o1_board_state(state: Dictionary) -> Dictionary:
 	var board: Node2D = state["board"] as Node2D
 	var session: Node2D = state["session"] as Node2D
@@ -440,32 +604,49 @@ func _r9_o1_board_state(state: Dictionary) -> Dictionary:
 	var target_unit_state: Dictionary = {"ok": false, "reason": str(units.get("reason", "target Unit missing"))}
 	if bool(units.get("ok", false)):
 		target_unit_state = _r9_target_unit_draw_state(units["target"] as Unit)
-	var common_specs: Array = []
-	for value: Variant in (board.get("_props") as Array):
-		if not value is Dictionary:
-			continue
-		var spec: Dictionary = value
-		if spec.get("node") != pillar:
-			common_specs.append(spec)
-	var inventory: Dictionary = _prop_inventory(common_specs)
+	var inventory_result: Dictionary = _r9_o1_common_prop_inventory(state)
+	var inventory: Dictionary = inventory_result.get("inventory", {}) as Dictionary
 	var props: Dictionary = {}
 	for stable_id: String in inventory:
 		var node: Node2D = (inventory[stable_id] as Dictionary)["node"] as Node2D
 		props[stable_id] = {
-			"position": [node.position.x, node.position.y], "rotation": node.rotation,
-			"scale": [node.scale.x, node.scale.y], "visible": node.visible,
+			"transform": _transform_array(node.transform),
+			"global_transform": _transform_array(node.global_transform),
+			"visible": node.visible,
 			"modulate": _color_array(node.modulate), "self_modulate": _color_array(node.self_modulate),
 		}
 	return {"board_time": float(board.get("_time")),
 		"frozen": session.process_mode == Node.PROCESS_MODE_DISABLED \
 			and board.process_mode == Node.PROCESS_MODE_DISABLED \
 			and not session.is_processing() and not board.is_processing(),
-		"common_prop_count": common_specs.size(), "common_inventory_unique": inventory.size() == common_specs.size(),
+		"common_prop_count": int(inventory_result.get("count", 0)),
+		"common_inventory_unique": bool(inventory_result.get("ok", false)),
+		"common_inventory_reason": str(inventory_result.get("reason", "")),
 		"common_props": props,
 		"target_pillar": {"visible": pillar.visible, "transform": _transform_array(pillar.transform),
 			"global_transform": _transform_array(pillar.global_transform),
 			"modulate": _color_array(pillar.modulate), "self_modulate": _color_array(pillar.self_modulate)},
 		"target_unit": target_unit_state}
+
+
+func _r9_o1_common_prop_draw_states_equal(left: Dictionary, right: Dictionary) -> bool:
+	if left.size() != right.size():
+		return false
+	var left_ids: Array = left.keys()
+	var right_ids: Array = right.keys()
+	left_ids.sort()
+	right_ids.sort()
+	if left_ids != right_ids:
+		return false
+	for stable_id: String in left_ids:
+		var left_state: Dictionary = left[stable_id] as Dictionary
+		var right_state: Dictionary = right[stable_id] as Dictionary
+		if left_state.get("global_transform") != right_state.get("global_transform") \
+				or left_state.get("visible") != right_state.get("visible") \
+				or left_state.get("modulate") != right_state.get("modulate") \
+				or left_state.get("self_modulate") != right_state.get("self_modulate"):
+			return false
+	return true
 
 
 func _r9_target_unit_draw_state(unit: Unit) -> Dictionary:
