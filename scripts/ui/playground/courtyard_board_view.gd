@@ -1269,6 +1269,17 @@ func _add_pillar(cell: Vector2i) -> void:
 	var top_base_tint: Color = _prop_tint("pillar_top", Color("c0bca6"))
 	var top_tint: Color = texture_tint_at_lstar.call(top_surface, top_base_tint, 56.0)
 	_polygon(root, top_surface, top_tint, false, "pillar_top")
+	# 投影只给原顶面着色；交集裁剪与相同局部 UV 保留实体轮廓和石材纹理。
+	var add_fracture_shadow: Callable = func(shadow_x: float) -> void:
+		var shadow_band := PackedVector2Array([
+			Vector2(shadow_x, -height - shaft_depth - 8.0),
+			Vector2(shadow_x + 1.6, -height - shaft_depth - 8.0),
+			Vector2(shadow_x + 1.6, 0.0), Vector2(shadow_x, 0.0),
+		])
+		var shadow_patches: Array[PackedVector2Array] = Geometry2D.intersect_polygons(top_surface, shadow_band)
+		for shadow_patch: PackedVector2Array in shadow_patches:
+			var shadow_tint: Color = texture_tint_at_lstar.call(shadow_patch, top_base_tint, 44.0)
+			_polygon(root, shadow_patch, shadow_tint, false, "pillar_top")
 	var r10_step_lines: Array[Line2D] = []
 	var cut_steps: PackedVector2Array = cut_profile["steps"]
 	for step_index: int in cut_steps.size():
@@ -1281,7 +1292,10 @@ func _add_pillar(cell: Vector2i) -> void:
 		var upper_drop: float = _r10_pillar_cut_drop(upper_across, height, cut_profile)
 		var step_low_y: float = base_y + minf(lower_drop, upper_drop)
 		var step_high_y: float = base_y + maxf(lower_drop, upper_drop)
-		var step_lstar: float = 54.0 if step_index % 2 == 0 else 56.0
+		var step_normal := Vector2(signf(upper_drop - lower_drop), 0.0)
+		var step_lstar: float = 50.0 if step_normal.dot(light_direction) > 0.0 else 36.0
+		# 断面较低一侧承接投影；朝向由实际阶差决定，不按实例补偿。
+		add_fracture_shadow.call(step_x if upper_drop > lower_drop else step_x - 1.6)
 		var step_color: Color = tint_at_lstar.call(lit_rim_tint, step_lstar)
 		_line(root, PackedVector2Array([Vector2(step_x, step_low_y), Vector2(step_x, step_high_y)]),
 			step_color, 1.0, "pillar_side", false)
@@ -1301,12 +1315,13 @@ func _add_pillar(cell: Vector2i) -> void:
 		])
 		var chipped_top_tint: Color = texture_tint_at_lstar.call(chipped_crown_top, top_base_tint, 56.0)
 		_polygon(root, chipped_crown_top, chipped_top_tint, false, "pillar_top")
+		add_fracture_shadow.call(4.5)
 		var fracture_face := PackedVector2Array([
 			Vector2(3.4, -height - 0.7), Vector2(4.7, -height - 1.0),
 			Vector2(5.4, -height + 0.5), Vector2(4.8, -height + 2.4),
 			Vector2(3.5, -height + 1.1),
 		])
-		var fracture_tint: Color = texture_tint_at_lstar.call(fracture_face, top_base_tint, 55.0)
+		var fracture_tint: Color = texture_tint_at_lstar.call(fracture_face, top_base_tint, 38.0)
 		_polygon(root, fracture_face, fracture_tint, false, "pillar_side")
 		top_front_arc = _r10_pillar_arc_segment(top_base, shaft_radius, 5.5, 10.5)
 	elif has_abacus:
