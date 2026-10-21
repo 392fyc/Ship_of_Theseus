@@ -137,6 +137,11 @@ func _process(delta: float) -> void:
 		var node: Node2D = spec["node"]
 		if not is_instance_valid(node):
 			continue
+		var r10_grooves: Array = spec.get("r10_grooves", [])
+		if not r10_grooves.is_empty():
+			var r10_context: Dictionary = spec["r10_context"]
+			var r10_cache: Dictionary = spec["r10_cache"]
+			_update_r10_pillar_grooves(node, r10_grooves, r10_context, r10_cache)
 		node.visible = not graybox
 		var covered: bool = false
 		var bounds: Rect2 = spec["bounds"]
@@ -954,26 +959,40 @@ func _add_pillar(cell: Vector2i) -> void:
 		remapped_uv.append(uv - Vector2(crop_origin))
 	foot_node.uv = remapped_uv
 	var shaft := PackedVector2Array()
+	var top_base := PackedVector2Array()
 	var top := PackedVector2Array()
 	var diagonal_cut: bool = not has_abacus
 	var cut_direction: float = 1.0 if cell_variant % 2 == 0 else -1.0
+	var cut_profile: Dictionary = {
+		"slope_fraction": 0.0,
+		"slope_direction": cut_direction,
+		"steps": PackedVector2Array(),
+	}
+	if diagonal_cut:
+		if cell_variant == 3:
+			cut_profile["slope_direction"] = 1.0
+			cut_profile["slope_fraction"] = 0.05
+			cut_profile["steps"] = PackedVector2Array([Vector2(0.36, 3.5), Vector2(0.68, 3.5)])
+		else:
+			cut_profile["slope_fraction"] = 0.20
+	if cell == Vector2i(1, 4):
+		# 保留原断面方向与最高点，新增一道主阶差和较小缺口。
+		cut_profile["steps"] = PackedVector2Array([Vector2(0.36, 3.5), Vector2(0.68, 2.0)])
+	elif cell == Vector2i(8, 4):
+		# 两级各下落 4 个局部单位；阶差由几何面片显式表达。
+		cut_profile["steps"] = PackedVector2Array([Vector2(0.36, 4.0), Vector2(0.68, 4.0)])
 	for i: int in 12:
 		var angle: float = -PI * 0.5 + float(i) * TAU / 12.0
 		var point_at_base := Vector2(cos(angle) * shaft_radius, sin(angle) * shaft_depth)
 		shaft.append(point_at_base)
+		var base_top_point := Vector2(point_at_base.x * 0.92,
+			point_at_base.y * 0.92 - height)
+		top_base.append(base_top_point)
 		var across: float = clampf((point_at_base.x / shaft_radius + 1.0) * 0.5, 0.0, 1.0)
-		var cut_drop: float = 0.0
-		if diagonal_cut:
-			if cell_variant == 3:
-				# 中档柱的两道错落斜断面各相差 3.5 px；最高柱沿用原斜断口。
-				cut_drop = height * 0.05 * across
-				if across >= 0.36:
-					cut_drop += 3.5
-				if across >= 0.68:
-					cut_drop += 3.5
-			else:
-				cut_drop = height * 0.20 * across if cut_direction > 0.0 else height * 0.20 * (1.0 - across)
-		top.append(Vector2(point_at_base.x * 0.92, point_at_base.y * 0.92 - height + cut_drop))
+		var cut_drop: float = _r10_pillar_cut_drop(across, height, cut_profile)
+		top.append(Vector2(base_top_point.x, base_top_point.y + cut_drop))
+	var top_surface: PackedVector2Array = _r10_expand_pillar_top_surface(
+		top_base, shaft_radius, height, cut_profile)
 	# 横倒鼓石继续压在柱身右侧，保留原断面形状和占地。
 	if has_fallen_drum:
 		var drum_lit: Color = _prop_tint("pillar_lit_side", Color("a5a691"))
@@ -1079,17 +1098,41 @@ func _add_pillar(cell: Vector2i) -> void:
 		var u: float = (normalized_x + 1.0) * 0.5
 		var surface_normal := Vector2(normalized_x, sqrt(maxf(0.0, 1.0 - normalized_x * normalized_x))).normalized()
 		var light_share: float = clampf(surface_normal.dot(light_direction), 0.0, 1.0)
-		var base_tint: Color = _prop_tint("pillar_dark_side", Color("7a806e")).lerp(
+		var normal_tint: Color = _prop_tint("pillar_dark_side", Color("7a806e")).lerp(
 			_prop_tint("pillar_lit_side", Color("a5a691")), light_share)
-		if u <= 0.12:
+		var base_tint: Color = normal_tint
+		# 只混合色相基色；下面仍按原 pillar_lstar_at_u 目标重新缩放明度。
+		if u >= 0.08 and u <= 0.16:
+			var t: float = clampf((u - 0.08) / 0.08, 0.0, 1.0)
+			t = t * t * (3.0 - 2.0 * t)
+			base_tint = lit_rim_tint.lerp(normal_tint, t)
+		elif u < 0.08:
 			base_tint = lit_rim_tint
-		elif u >= 0.80:
-			# 0.80–1.00 保留完整 4.8 px 的右缘反射光带。
-			base_tint = backlit_rim_tint
-		elif u >= 0.52 and u <= 0.70:
+		if u >= 0.48 and u <= 0.56:
+			var t: float = clampf((u - 0.48) / 0.08, 0.0, 1.0)
+			t = t * t * (3.0 - 2.0 * t)
+			base_tint = normal_tint.lerp(core_tint, t)
+		elif u > 0.56 and u < 0.66:
 			base_tint = core_tint
+		elif u >= 0.66 and u <= 0.74:
+			var t: float = clampf((u - 0.66) / 0.08, 0.0, 1.0)
+			t = t * t * (3.0 - 2.0 * t)
+			base_tint = core_tint.lerp(normal_tint, t)
+		if u >= 0.76 and u <= 0.84:
+			var t: float = clampf((u - 0.76) / 0.08, 0.0, 1.0)
+			t = t * t * (3.0 - 2.0 * t)
+			base_tint = normal_tint.lerp(backlit_rim_tint, t)
+		elif u > 0.84:
+			# 0.80–1.00 的反射带仍完整存在，过渡只改变色相，不移动明度节点。
+			base_tint = backlit_rim_tint
 		var base_linear: Color = base_tint.srgb_to_linear()
-		var top_y: float = _pillar_front_top_y(top_points, x)
+		var top_query_x: float = x
+		if x > top_points[3].x or x < top_points[9].x:
+			# 与原窄条算法相同，超出顶面投影时使用最前顶点的行。
+			top_query_x = top_points[6].x
+		var top_y: float = _pillar_front_top_y(top_points, top_query_x)
+		var top_across: float = _r10_pillar_across_at_x(top_query_x, shaft_radius)
+		top_y += _r10_pillar_cut_drop(top_across, height, cut_profile)
 		var lower_y: float = shaft_depth * sqrt(maxf(0.0, 1.0 - normalized_x * normalized_x))
 		var total_y: float = 0.0
 		var sample_count: int = 0
@@ -1118,17 +1161,21 @@ func _add_pillar(cell: Vector2i) -> void:
 		return scaled_srgb
 	var pillar_strip_width: float = 0.5
 	var pillar_strip_count: int = ceili(shaft_radius * 2.0 / pillar_strip_width)
+	var pillar_band_tints: Array[Color] = []
 	for strip_index: int in pillar_strip_count:
 		var band_min_x: float = -shaft_radius + float(strip_index) * pillar_strip_width
 		var band_max_x: float = minf(shaft_radius, band_min_x + pillar_strip_width)
 		var band_mid_x: float = (band_min_x + band_max_x) * 0.5
 		var band_u: float = (band_mid_x / shaft_radius + 1.0) * 0.5
 		var target_lstar: float = float(pillar_lstar_at_u.call(band_u))
-		var band_tint: Color = pillar_column_tint.call(band_mid_x, target_lstar, top)
-		# 每条 0.5 px 窄带用 Polygon2D 均匀乘色，继续采样原石纹理与 UV。
+		var band_tint: Color = pillar_column_tint.call(band_mid_x, target_lstar, top_base)
+		pillar_band_tints.append(band_tint)
+		# 每条 0.5 局部单位窄带用 Polygon2D 乘色，边界阶差按分段几何保留。
 		for edge: int in range(3, 9):
 			var next: int = (edge + 1) % shaft.size()
-			var side_face := PackedVector2Array([top[edge], top[next], shaft[next], shaft[edge]])
+			var side_face: PackedVector2Array = _r10_pillar_front_side_face(
+				top_base[edge], top_base[next], shaft[edge], shaft[next],
+				shaft_radius, height, cut_profile)
 			var clipped_points: PackedVector2Array = side_face
 			for boundary_index: int in 2:
 				if clipped_points.size() < 3:
@@ -1193,12 +1240,15 @@ func _add_pillar(cell: Vector2i) -> void:
 	_line(root, ring_upper_arc, ring_upper_color, 1.0, "pillar_side", false)
 	_line(root, ring_lower_arc, ring_lower_color, 1.0, "pillar_side", false)
 	# 四道 1 px 竖槽按柱面透视压缩，核心带内保留至少 4 L* 的槽面差。
-	var groove_positions := PackedFloat32Array([0.26, 0.46, 0.62, 0.74])
-	var groove_width: float = 1.0
+	var groove_positions := PackedFloat32Array([0.25, 0.44, 0.61, 0.76])
+	var groove_base_tints: Array[Color] = []
+	var groove_nodes: Array[Line2D] = []
 	for groove_index: int in groove_positions.size():
 		var groove_u: float = groove_positions[groove_index]
 		var groove_x: float = (groove_u * 2.0 - 1.0) * shaft_radius
-		var groove_y: float = _pillar_front_top_y(top, groove_x) + 1.0
+		var groove_across: float = clampf((groove_x / (shaft_radius * 0.92) + 1.0) * 0.5, 0.0, 1.0)
+		var groove_y: float = _pillar_front_top_y(top_base, groove_x) \
+			+ _r10_pillar_cut_drop(groove_across, height, cut_profile) + 1.0
 		var groove_end := Vector2(groove_x, 5.0)
 		var groove_start := Vector2(groove_x, groove_y)
 		var groove_normal_x: float = groove_x / shaft_radius
@@ -1206,20 +1256,61 @@ func _add_pillar(cell: Vector2i) -> void:
 		var groove_light_share: float = clampf(groove_normal.dot(light_direction), 0.0, 1.0)
 		var groove_base_tint: Color = _prop_tint("pillar_groove_dark", Color(0.356, 0.346, 0.338, 1.0)).lerp(
 			_prop_tint("pillar_groove_lit", Color(0.510, 0.510, 0.524, 1.0)), groove_light_share)
+		groove_base_tints.append(groove_base_tint)
 		var groove_body_lstar: float = float(pillar_lstar_at_u.call(groove_u))
-		var groove_delta: float = 4.0 if groove_u >= 0.52 and groove_u <= 0.70 else 7.0
+		var groove_delta: float = 5.0 if groove_index == 2 else 7.0
 		var groove_tint: Color = tint_at_lstar.call(groove_base_tint, groove_body_lstar - groove_delta)
-		_line(root, PackedVector2Array([groove_start, groove_end]), groove_tint, groove_width, "pillar_side", false)
+		_line(root, PackedVector2Array([groove_start, groove_end]), groove_tint, 1.0, "pillar_side", false)
 		var groove_line: Line2D = root.get_child(root.get_child_count() - 1) as Line2D
 		groove_line.name = "R9Groove%d" % (groove_index + 1)
 		groove_line.set_meta("r9_groove_index", groove_index + 1)
 		groove_line.set_meta("r9_groove_u", groove_u)
+		groove_nodes.append(groove_line)
 	var top_base_tint: Color = _prop_tint("pillar_top", Color("c0bca6"))
-	var top_tint: Color = texture_tint_at_lstar.call(top, top_base_tint, 56.0)
-	_polygon(root, top, top_tint, false, "pillar_top")
+	var top_tint: Color = texture_tint_at_lstar.call(top_surface, top_base_tint, 56.0)
+	_polygon(root, top_surface, top_tint, false, "pillar_top")
+	var r10_step_lines: Array[Line2D] = []
+	var cut_steps: PackedVector2Array = cut_profile["steps"]
+	for step_index: int in cut_steps.size():
+		var step_across: float = cut_steps[step_index].x
+		var step_x: float = (step_across * 2.0 - 1.0) * shaft_radius * 0.92
+		var base_y: float = _pillar_front_top_y(top_base, step_x)
+		var lower_across: float = maxf(0.0, step_across - 0.0001)
+		var upper_across: float = minf(1.0, step_across + 0.0001)
+		var lower_drop: float = _r10_pillar_cut_drop(lower_across, height, cut_profile)
+		var upper_drop: float = _r10_pillar_cut_drop(upper_across, height, cut_profile)
+		var step_low_y: float = base_y + minf(lower_drop, upper_drop)
+		var step_high_y: float = base_y + maxf(lower_drop, upper_drop)
+		var step_lstar: float = 54.0 if step_index % 2 == 0 else 56.0
+		var step_color: Color = tint_at_lstar.call(lit_rim_tint, step_lstar)
+		_line(root, PackedVector2Array([Vector2(step_x, step_low_y), Vector2(step_x, step_high_y)]),
+			step_color, 1.0, "pillar_side", false)
+		var step_line: Line2D = root.get_child(root.get_child_count() - 1) as Line2D
+		r10_step_lines.append(step_line)
 	var top_front_arc := PackedVector2Array()
-	if has_abacus:
-		# 最矮柱头保留原占地，以高、低错落的两面断开原完整菱形顶。
+	var r10_chipped_crown: bool = cell == Vector2i(1, 7)
+	if has_abacus and r10_chipped_crown:
+		# 右侧约 35% 缺失；保留部分顶面并用不规则断面结束，左高右低约 6 度。
+		var chipped_crown_top := PackedVector2Array([
+			Vector2(-15.0, -height + 1.0), Vector2(-9.0, -height - 3.0),
+			Vector2(-3.0, -height - 2.3), Vector2(4.5, -height - 1.0),
+			Vector2(3.7, -height + 0.6), Vector2(2.5, -height - 0.1),
+			Vector2(1.0, -height + 1.5), Vector2(-0.4, -height + 0.3),
+			Vector2(-2.2, -height + 1.8), Vector2(-4.0, -height + 0.4),
+			Vector2(-8.0, -height + 1.1), Vector2(-15.0, -height + 2.0),
+		])
+		var chipped_top_tint: Color = texture_tint_at_lstar.call(chipped_crown_top, top_base_tint, 56.0)
+		_polygon(root, chipped_crown_top, chipped_top_tint, false, "pillar_top")
+		var fracture_face := PackedVector2Array([
+			Vector2(3.4, -height - 0.7), Vector2(4.7, -height - 1.0),
+			Vector2(5.4, -height + 0.5), Vector2(4.8, -height + 2.4),
+			Vector2(3.5, -height + 1.1),
+		])
+		var fracture_tint: Color = texture_tint_at_lstar.call(fracture_face, top_base_tint, 55.0)
+		_polygon(root, fracture_face, fracture_tint, false, "pillar_side")
+		top_front_arc = _r10_pillar_arc_segment(top_base, shaft_radius, 5.5, 10.5)
+	elif has_abacus:
+		# 其他短柱继续使用原柱头几何。
 		var crown_left_top := PackedVector2Array([Vector2(-15, -height + 1), Vector2(-6, -height - 3),
 			Vector2(0, -height + 1), Vector2(0, -height + 5)])
 		var crown_right_top := PackedVector2Array([Vector2(0, -height + 1), Vector2(7, -height),
@@ -1239,15 +1330,324 @@ func _add_pillar(cell: Vector2i) -> void:
 			crown_right + crown_drop, crown_front + crown_drop]),
 			_prop_tint("pillar_dark_side", Color("7a806e")), false, "pillar_side")
 		top_front_arc.append_array(PackedVector2Array([crown_right, crown_front, crown_left]))
+	elif cut_steps.size() > 0:
+		# 破裂区不再横跨整条顶面的亮弧，只保留首个阶差以外的完整一段。
+		top_front_arc = _r10_pillar_intact_front_arc(top_base, shaft_radius, height, cut_profile)
 	else:
 		for arc_index: int in range(3, 10):
 			top_front_arc.append(top[arc_index])
 	var top_front_color: Color = tint_at_lstar.call(lit_rim_tint, 56.0)
 	_line(root, top_front_arc, top_front_color, 1.0, "pillar_top", false)
 	_actor_layer.add_child(root)
+	var r10_context: Dictionary = {
+		"texture_image": foot_source_image,
+		"source_size": source_size,
+		"offset_u": offset_u,
+		"shaft_radius": shaft_radius,
+		"shaft_depth": shaft_depth,
+		"pillar_height": height,
+		"top_base": top_base,
+		"cut_profile": cut_profile,
+		"strip_width": pillar_strip_width,
+		"band_tints": pillar_band_tints,
+		"groove_base_tints": groove_base_tints,
+		"step_lines": r10_step_lines,
+		"tint_at_lstar": tint_at_lstar,
+	}
+	var r10_cache: Dictionary = {}
+	_update_r10_pillar_grooves(root, groove_nodes, r10_context, r10_cache)
 	# 最高实例的淡化 bounds 上缘为 -56 px；下缘覆盖原底板与鼓石位置。
 	_props.append({"node": root, "wind": false,
-		"bounds": Rect2(-18.0, -height - 6.0, 44.0, height + 19.0)})
+		"bounds": Rect2(-18.0, -height - 6.0, 44.0, height + 19.0),
+		"r10_grooves": groove_nodes, "r10_step_lines": r10_step_lines,
+		"r10_context": r10_context, "r10_cache": r10_cache})
+
+func _r10_pillar_cut_drop(across: float, pillar_height: float, cut_profile: Dictionary) -> float:
+	var clamped_across: float = clampf(across, 0.0, 1.0)
+	var slope_fraction: float = float(cut_profile.get("slope_fraction", 0.0))
+	var slope_direction: float = float(cut_profile.get("slope_direction", 1.0))
+	var slope_across: float = clamped_across if slope_direction >= 0.0 else 1.0 - clamped_across
+	var drop: float = pillar_height * slope_fraction * slope_across
+	var steps: PackedVector2Array = cut_profile.get("steps", PackedVector2Array())
+	for step: Vector2 in steps:
+		if clamped_across >= step.x:
+			drop += step.y
+	return drop
+
+
+func _r10_pillar_across_at_x(x: float, shaft_radius: float) -> float:
+	return clampf((x / (shaft_radius * 0.92) + 1.0) * 0.5, 0.0, 1.0)
+
+
+func _r10_expand_pillar_top_surface(base_top: PackedVector2Array, shaft_radius: float,
+		pillar_height: float, cut_profile: Dictionary) -> PackedVector2Array:
+	var result := PackedVector2Array()
+	var steps: PackedVector2Array = cut_profile.get("steps", PackedVector2Array())
+	for edge: int in base_top.size():
+		var next: int = (edge + 1) % base_top.size()
+		var a: Vector2 = base_top[edge]
+		var b: Vector2 = base_top[next]
+		var across_a: float = _r10_pillar_across_at_x(a.x, shaft_radius)
+		var across_b: float = _r10_pillar_across_at_x(b.x, shaft_radius)
+		result.append(Vector2(a.x, a.y + _r10_pillar_cut_drop(across_a, pillar_height, cut_profile)))
+		var crossings: Array[Vector2] = []
+		if not is_equal_approx(across_a, across_b):
+			for step: Vector2 in steps:
+				var t: float = (step.x - across_a) / (across_b - across_a)
+				if t > 0.00001 and t < 0.99999:
+					crossings.append(Vector2(t, step.x))
+		crossings.sort_custom(func(left: Vector2, right: Vector2) -> bool: return left.x < right.x)
+		for crossing: Vector2 in crossings:
+			var base_point: Vector2 = a.lerp(b, crossing.x)
+			var lower_across: float = maxf(0.0, crossing.y - 0.0001)
+			var upper_across: float = minf(1.0, crossing.y + 0.0001)
+			var lower_drop: float = _r10_pillar_cut_drop(lower_across, pillar_height, cut_profile)
+			var upper_drop: float = _r10_pillar_cut_drop(upper_across, pillar_height, cut_profile)
+			if across_b > across_a:
+				result.append(Vector2(base_point.x, base_point.y + lower_drop))
+				result.append(Vector2(base_point.x, base_point.y + upper_drop))
+			else:
+				result.append(Vector2(base_point.x, base_point.y + upper_drop))
+				result.append(Vector2(base_point.x, base_point.y + lower_drop))
+	return result
+
+
+func _r10_pillar_front_side_face(top_a: Vector2, top_b: Vector2, shaft_a: Vector2,
+		shaft_b: Vector2, shaft_radius: float, pillar_height: float,
+		cut_profile: Dictionary) -> PackedVector2Array:
+	var face := PackedVector2Array()
+	var across_a: float = _r10_pillar_across_at_x(top_a.x, shaft_radius)
+	var across_b: float = _r10_pillar_across_at_x(top_b.x, shaft_radius)
+	face.append(Vector2(top_a.x, top_a.y + _r10_pillar_cut_drop(across_a, pillar_height, cut_profile)))
+	var crossings: Array[Vector2] = []
+	var steps: PackedVector2Array = cut_profile.get("steps", PackedVector2Array())
+	if not is_equal_approx(across_a, across_b):
+		for step: Vector2 in steps:
+			var t: float = (step.x - across_a) / (across_b - across_a)
+			if t > 0.00001 and t < 0.99999:
+				crossings.append(Vector2(t, step.x))
+	crossings.sort_custom(func(left: Vector2, right: Vector2) -> bool: return left.x < right.x)
+	for crossing: Vector2 in crossings:
+		var base_point: Vector2 = top_a.lerp(top_b, crossing.x)
+		var lower_across: float = maxf(0.0, crossing.y - 0.0001)
+		var upper_across: float = minf(1.0, crossing.y + 0.0001)
+		var lower_drop: float = _r10_pillar_cut_drop(lower_across, pillar_height, cut_profile)
+		var upper_drop: float = _r10_pillar_cut_drop(upper_across, pillar_height, cut_profile)
+		if across_b > across_a:
+			face.append(Vector2(base_point.x, base_point.y + lower_drop))
+			face.append(Vector2(base_point.x, base_point.y + upper_drop))
+		else:
+			face.append(Vector2(base_point.x, base_point.y + upper_drop))
+			face.append(Vector2(base_point.x, base_point.y + lower_drop))
+	face.append(Vector2(top_b.x, top_b.y + _r10_pillar_cut_drop(across_b, pillar_height, cut_profile)))
+	face.append(shaft_b)
+	face.append(shaft_a)
+	return face
+
+
+func _r10_pillar_intact_front_arc(base_top: PackedVector2Array, shaft_radius: float,
+		pillar_height: float, cut_profile: Dictionary) -> PackedVector2Array:
+	var arc := PackedVector2Array()
+	var steps: PackedVector2Array = cut_profile.get("steps", PackedVector2Array())
+	if steps.is_empty():
+		for index: int in range(3, 10):
+			arc.append(base_top[index])
+		return arc
+	var boundary_across: float = steps[0].x
+	var boundary_x: float = (boundary_across * 2.0 - 1.0) * shaft_radius * 0.92
+	var boundary_y: float = _pillar_front_top_y(base_top, boundary_x) + _r10_pillar_cut_drop(
+		maxf(0.0, boundary_across - 0.0001), pillar_height, cut_profile)
+	arc.append(Vector2(boundary_x, boundary_y))
+	for index: int in range(3, 10):
+		var point: Vector2 = base_top[index]
+		var across: float = _r10_pillar_across_at_x(point.x, shaft_radius)
+		if across <= boundary_across:
+			arc.append(Vector2(point.x, point.y + _r10_pillar_cut_drop(across, pillar_height, cut_profile)))
+	return arc
+
+
+func _r10_pillar_arc_segment(base_top: PackedVector2Array, shaft_radius: float,
+		min_x: float, max_x: float) -> PackedVector2Array:
+	var arc := PackedVector2Array()
+	var start_x: float = max_x
+	var end_x: float = min_x
+	arc.append(Vector2(start_x, _pillar_front_top_y(base_top, start_x)))
+	for index: int in range(3, 10):
+		var point: Vector2 = base_top[index]
+		if point.x < start_x and point.x > end_x:
+			arc.append(point)
+	arc.append(Vector2(end_x, _pillar_front_top_y(base_top, end_x)))
+	return arc
+
+
+func _r10_median(values: Array[float]) -> float:
+	values.sort()
+	var middle: int = values.size() / 2
+	return values[middle] if values.size() % 2 == 1 else (values[middle - 1] + values[middle]) * 0.5
+
+
+func _r10_lstar_from_linear_rgb(color: Color) -> float:
+	var luminance: float = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b
+	return 116.0 * pow(luminance, 1.0 / 3.0) - 16.0 if luminance > 0.008856 else 903.3 * luminance
+
+
+func _r10_pillar_pixel_lstar(screen_transform: Transform2D, screen_x: int, screen_y: int,
+		context: Dictionary) -> float:
+	var image: Image = context["texture_image"]
+	var source_size: Vector2i = context["source_size"]
+	var radius: float = float(context["shaft_radius"])
+	var strip_width: float = float(context["strip_width"])
+	var local_point: Vector2 = screen_transform.affine_inverse() * Vector2(
+		float(screen_x) + 0.5, float(screen_y) + 0.5)
+	var shaft_depth: float = float(context["shaft_depth"])
+	if absf(local_point.x) > radius * 0.92:
+		return -1.0
+	var top_base: PackedVector2Array = context["top_base"]
+	var across: float = _r10_pillar_across_at_x(local_point.x, radius)
+	var top_y: float = _pillar_front_top_y(top_base, local_point.x) + _r10_pillar_cut_drop(
+		across, float(context["pillar_height"]), context["cut_profile"])
+	var normalized_x: float = clampf(local_point.x / radius, -1.0, 1.0)
+	var lower_y: float = shaft_depth * sqrt(maxf(0.0, 1.0 - normalized_x * normalized_x))
+	if local_point.y < top_y or local_point.y > lower_y:
+		return -1.0
+	var band_tints: Array[Color] = context["band_tints"]
+	var band_index: int = clampi(floori((local_point.x + radius) / strip_width), 0, band_tints.size() - 1)
+	var tint_linear: Color = band_tints[band_index].srgb_to_linear()
+	var offset_u: float = float(context["offset_u"])
+	var sample_u: float = clampf(0.08 + offset_u + (local_point.x + 34.0) / 68.0 * 0.62, 0.04, 0.96)
+	var sample_v: float = clampf(0.82 + local_point.y * 0.0105, 0.04, 0.96)
+	var sample_x: int = clampi(floori(sample_u * float(source_size.x)), 0, source_size.x - 1)
+	var sample_y: int = clampi(floori(sample_v * float(source_size.y)), 0, source_size.y - 1)
+	var texel: Color = image.get_pixel(sample_x, sample_y)
+	var texel_linear: Color = texel.srgb_to_linear()
+	var combined_linear := Color(texel_linear.r * tint_linear.r,
+		texel_linear.g * tint_linear.g, texel_linear.b * tint_linear.b, 1.0)
+	return _r10_lstar_from_linear_rgb(combined_linear)
+
+
+func _r10_point_segment_distance(point: Vector2, first: Vector2, last: Vector2) -> float:
+	var segment: Vector2 = last - first
+	var length_squared: float = segment.length_squared()
+	if length_squared <= 0.000001:
+		return point.distance_to(first)
+	var t: float = clampf((point - first).dot(segment) / length_squared, 0.0, 1.0)
+	return point.distance_to(first + segment * t)
+
+
+func _r10_pillar_neighbor_reference(line: Line2D, all_grooves: Array,
+		screen_transform: Transform2D, context: Dictionary) -> float:
+	var points: PackedVector2Array = line.points
+	if points.size() < 2:
+		return -1.0
+	var first: Vector2 = screen_transform * points[0]
+	var last: Vector2 = screen_transform * points[points.size() - 1]
+	var delta: Vector2 = last - first
+	if absf(delta.y) < 0.001:
+		return -1.0
+	var start_y: int = ceili(minf(first.y, last.y) - 0.5)
+	var end_y: int = floori(maxf(first.y, last.y) - 0.5)
+	var other_lines: Array[Dictionary] = []
+	var stroke_scale: float = screen_transform.x.length()
+	for other_value: Variant in all_grooves:
+		var other_line: Line2D = other_value as Line2D
+		if not is_instance_valid(other_line) or other_line == line:
+			continue
+		var other_points: PackedVector2Array = other_line.points
+		if other_points.size() < 2:
+			continue
+		other_lines.append({
+			"first": screen_transform * other_points[0],
+			"last": screen_transform * other_points[other_points.size() - 1],
+			"half_width": other_line.width * stroke_scale * 0.5,
+		})
+	var row_medians: Array[float] = []
+	for screen_y: int in range(start_y, end_y + 1):
+		var t: float = (float(screen_y) + 0.5 - first.y) / delta.y
+		if t < 0.0 or t > 1.0:
+			continue
+		var center_x: float = first.x + delta.x * t
+		var center_pixel_x: int = floori(center_x)
+		if center_pixel_x < 2:
+			continue
+		var sample_x: Array[int] = [center_pixel_x - 2, center_pixel_x - 1,
+			center_pixel_x + 1, center_pixel_x + 2]
+		var all_sample_x: Array[int] = [center_pixel_x]
+		all_sample_x.append_array(sample_x)
+		var contaminated: bool = false
+		for other: Dictionary in other_lines:
+			var other_first: Vector2 = other["first"]
+			var other_last: Vector2 = other["last"]
+			var half_width: float = float(other["half_width"])
+			for candidate_x: int in all_sample_x:
+				if _r10_point_segment_distance(Vector2(float(candidate_x) + 0.5,
+						float(screen_y) + 0.5), other_first, other_last) <= half_width:
+					contaminated = true
+					break
+			if contaminated:
+				break
+		if contaminated:
+			continue
+		var neighbor_lstar: Array[float] = []
+		for screen_x: int in sample_x:
+			var value: float = _r10_pillar_pixel_lstar(screen_transform, screen_x, screen_y, context)
+			if value < 0.0:
+				neighbor_lstar.clear()
+				break
+			neighbor_lstar.append(value)
+		if neighbor_lstar.size() == 4:
+			row_medians.append(_r10_median(neighbor_lstar))
+	if row_medians.is_empty():
+		return -1.0
+	return _r10_median(row_medians)
+
+
+func _update_r10_pillar_grooves(root: Node2D, grooves: Array, context: Dictionary,
+		cache: Dictionary) -> void:
+	if not is_instance_valid(root) or not root.is_inside_tree():
+		return
+	var viewport: Viewport = root.get_viewport()
+	var screen_transform: Transform2D = viewport.get_final_transform() * root.get_global_transform_with_canvas()
+	var context_key := PackedFloat64Array([
+		screen_transform.x.x, screen_transform.x.y,
+		screen_transform.y.x, screen_transform.y.y,
+		screen_transform.origin.x, screen_transform.origin.y,
+		float(context["offset_u"]),
+	])
+	var previous_key: PackedFloat64Array = cache.get("context_key", PackedFloat64Array())
+	if context_key == previous_key:
+		return
+	var pixel_scale: float = screen_transform.x.length()
+	if pixel_scale <= 0.000001:
+		return
+	var groove_base_tints: Array[Color] = context["groove_base_tints"]
+	var tint_at_lstar: Callable = context["tint_at_lstar"]
+	for groove_value: Variant in grooves:
+		var groove: Line2D = groove_value as Line2D
+		if is_instance_valid(groove):
+			groove.width = 1.0 / pixel_scale
+	for groove_value: Variant in grooves:
+		var groove: Line2D = groove_value as Line2D
+		if not is_instance_valid(groove):
+			continue
+		var groove_index: int = int(groove.get_meta("r9_groove_index", 0))
+		if groove_index < 1 or groove_index > groove_base_tints.size():
+			continue
+		var reference_lstar: float = _r10_pillar_neighbor_reference(
+			groove, grooves, screen_transform, context)
+		if reference_lstar < 0.0:
+			push_warning("R10 凹槽缺少有效的同帧纹理邻像素，保留上次颜色：%s / %d" % [
+				root.name, groove_index])
+			continue
+		var groove_delta: float = 5.0 if groove_index == 3 else 7.0
+		groove.default_color = tint_at_lstar.call(groove_base_tints[groove_index - 1],
+			reference_lstar - groove_delta)
+	var step_lines: Array = context.get("step_lines", [])
+	for line_value: Variant in step_lines:
+		var step_line: Line2D = line_value as Line2D
+		if is_instance_valid(step_line):
+			step_line.width = 1.0 / pixel_scale
+	cache["context_key"] = context_key
+
 
 func _is_join_edge(a: Vector2, b: Vector2, mask: int) -> bool:
 	var a_grid := Vector2((a.x / 32.0 + a.y / 16.0) * 0.5, (a.y / 16.0 - a.x / 32.0) * 0.5)

@@ -19,6 +19,7 @@ const R9_CAPTURE_SCRIPT_CHAIN: PackedStringArray = [
 	"res://tests/claude_review/capture_terrain_readability.gd",
 ]
 const R9_O1_SCHEMA := "terrain-pillar-occlusion/1"
+const R9_O1_DRAW_SYNC_VERSION := "terrain-o1-controlled-draw/3"
 const R9_UNIT_CELL := Vector2i(0, 3)
 const R9_ATTACKER_CELL := Vector2i(0, 2)
 const R9_PILLAR_ID := "pillar@1.00,4.00"
@@ -75,6 +76,7 @@ func _build_manifest_skeleton(map_data: Dictionary, resolution: Vector2i,
 	config["capture_entry_script"] = R9_ENTRY_SCRIPT
 	config["capture_script_inheritance"] = R9_CAPTURE_SCRIPT_CHAIN.duplicate()
 	config["r9_supplemental_capture"] = "separate pixel samples and O1 four-state group; not appended to frozen image list"
+	config["r9_o1_draw_sync_version"] = R9_O1_DRAW_SYNC_VERSION
 	manifest["capture_config"] = config
 	return manifest
 
@@ -130,6 +132,7 @@ func _capture_r9_o1(resolution: Vector2i) -> Dictionary:
 		"body_rect": [],
 		"overlays": {},
 		"states": {},
+		"draw_sync": {},
 		"setup_status": "NOT_TESTED",
 		"setup_reason": "O1 setup has not completed",
 	}
@@ -171,6 +174,11 @@ func _capture_r9_o1(resolution: Vector2i) -> Dictionary:
 		if not await _r9_prepare_o1_state(role, state):
 			record["setup_reason"] = "formal O1 state %s could not place the actual target/attacker or activate the official forecast path" % role
 			return record
+	var draw_sync: Dictionary = _r9_sync_o1_draw_state(sessions)
+	record["draw_sync"] = draw_sync
+	if draw_sync.get("status") != "PASS":
+		record["setup_reason"] = str(draw_sync.get("reason", "O1 scene draw state is not aligned"))
+		return record
 	var transforms: Dictionary = {}
 	for role: String in ["A", "B", "C", "D"]:
 		var viewport: Viewport = sessions[role]["viewport"] as Viewport
@@ -254,6 +262,7 @@ func _capture_r9_o1(resolution: Vector2i) -> Dictionary:
 			"target_unit_id": unit.unit_id,
 			"body_rect": actual_body_rect,
 			"pillar_alpha": pillar.modulate.a,
+			"draw_sync_state": _r9_o1_board_state(state),
 			"viewport": viewport_record,
 			"image": {"path": image_name, "sha256": _sha256_bytes(raw), "bytes": raw.size(),
 				"image_size": [image.get_width(), image.get_height()], "mime_type": "image/png"},
@@ -268,6 +277,13 @@ func _capture_r9_o1(resolution: Vector2i) -> Dictionary:
 	var process_after: int = Engine.get_process_frames()
 	var same_frame: bool = draw_before == frame_id and frame_id == draw_after \
 		and process_before == process_after
+	var draw_states_stable: bool = true
+	var changed_draw_states: Array[String] = []
+	for role: String in states:
+		var final_sync: Dictionary = states[role]["draw_sync_state"]
+		if final_sync != (draw_sync["states"] as Dictionary)[role]:
+			draw_states_stable = false
+			changed_draw_states.append(role)
 	for role: String in states:
 		var state_record: Dictionary = states[role]
 		state_record["frames_drawn_after"] = draw_after
@@ -280,6 +296,8 @@ func _capture_r9_o1(resolution: Vector2i) -> Dictionary:
 	record["process_frames_before"] = process_before
 	record["process_frames_after"] = process_after
 	record["same_frame"] = same_frame
+	record["draw_state_stable"] = draw_states_stable
+	record["draw_state_changes_after_readback"] = changed_draw_states
 	record["states"] = states
 	record["body_rect"] = body_rect
 	record["body_rect_source"] = "actual target Unit.get_overhead_body_rect_screen transformed by root final_transform into native main-image pixels"
@@ -288,9 +306,199 @@ func _capture_r9_o1(resolution: Vector2i) -> Dictionary:
 	record["pillar_alpha_by_state"] = alpha_by_role
 	record["pillar_canvas_layer"] = _r9_canvas_layer(_r9_find_pillar(_main_board, _main_manager.get("grid") as Object))
 	record["pillar_canvas_layer_source"] = "actual nearest CanvasLayer ancestor; world draw order is layer 0"
-	record["setup_status"] = "PASS" if same_frame and image_by_role.size() == 4 else "NOT_TESTED"
-	record["setup_reason"] = "" if same_frame else "O1 four-state image readback crossed a draw/process frame boundary"
+	record["setup_status"] = "PASS" if same_frame and draw_states_stable \
+		and image_by_role.size() == 4 else "NOT_TESTED"
+	if not same_frame:
+		record["setup_reason"] = "O1 four-state image readback crossed a draw/process frame boundary"
+	elif not draw_states_stable:
+		record["setup_reason"] = "O1 controlled unit/pillar draw state changed after image readback: %s" % changed_draw_states
+	else:
+		record["setup_reason"] = ""
 	return record
+
+
+## 同帧读回前先统一四场景的动态相位，随后保持冻结；不改变正式战斗调用。
+func _r9_sync_o1_draw_state(sessions: Dictionary) -> Dictionary:
+	var source_state: Dictionary = sessions["A"]
+	var source_board: Node2D = source_state["board"] as Node2D
+	var phase_value: Variant = source_board.get("_time")
+	if not (phase_value is float or phase_value is int) or not is_finite(float(phase_value)):
+		return {"status": "NOT_TESTED", "reason": "O1 source board phase is missing or non-finite"}
+	var phase: float = float(phase_value)
+	var animation_sync: Dictionary = _r9_sync_o1_unit_animation(sessions)
+	if animation_sync.get("status") != "PASS":
+		return {"status": "NOT_TESTED", "reason": str(animation_sync.get("reason", "O1 target Unit animation could not be aligned")),
+			"version": R9_O1_DRAW_SYNC_VERSION, "unit_animation_sync": animation_sync}
+	var snapshots: Dictionary = {}
+	for role: String in ["A", "B", "C", "D"]:
+		var state: Dictionary = sessions[role]
+		var session: Node2D = state["session"] as Node2D
+		var board: Node2D = state["board"] as Node2D
+		_freeze_tree(session)
+		board.set("_time", phase)
+		# delta=0 只重算依赖共同相位的旋转与绘制，不推进时间或透明度插值。
+		board.call("_process", 0.0)
+		if not bool(state.get("pillar_visible", true)):
+			var pillar: Node2D = state.get("pillar_node") as Node2D
+			pillar.hide()
+			var props: Array = board.get("_props") as Array
+			for index: int in range(props.size() - 1, -1, -1):
+				var spec: Variant = props[index]
+				if spec is Dictionary and (spec as Dictionary).get("node") == pillar:
+					props.remove_at(index)
+			board.set("_props", props)
+		snapshots[role] = _r9_o1_board_state(state)
+	var source_snapshot: Dictionary = snapshots["A"]
+	for role: String in ["A", "B", "C", "D"]:
+		var observed: Dictionary = snapshots[role]
+		if not bool(observed.get("frozen", false)) \
+				or not bool(observed.get("common_inventory_unique", false)) \
+				or int(observed.get("common_prop_count", 0)) == 0 \
+				or float(observed.get("board_time", INF)) != phase:
+			return {"status": "NOT_TESTED", "reason": "O1 board phase/freeze mismatch in " + role,
+				"version": R9_O1_DRAW_SYNC_VERSION, "states": snapshots}
+		if observed.get("common_props") != source_snapshot.get("common_props"):
+			return {"status": "NOT_TESTED", "reason": "O1 non-target prop state differs in " + role,
+				"version": R9_O1_DRAW_SYNC_VERSION, "states": snapshots}
+		var observed_pillar: Dictionary = (observed.get("target_pillar", {}) as Dictionary).duplicate(true)
+		var source_pillar: Dictionary = (source_snapshot.get("target_pillar", {}) as Dictionary).duplicate(true)
+		observed_pillar.erase("visible")
+		source_pillar.erase("visible")
+		if observed_pillar.is_empty() or observed_pillar != source_pillar:
+			return {"status": "NOT_TESTED", "reason": "O1 target pillar transform/modulate/self_modulate differs or is missing in " + role,
+				"version": R9_O1_DRAW_SYNC_VERSION, "states": snapshots}
+		var observed_unit: Dictionary = (observed.get("target_unit", {}) as Dictionary).duplicate(true)
+		var source_unit: Dictionary = (source_snapshot.get("target_unit", {}) as Dictionary).duplicate(true)
+		observed_unit.erase("visible")
+		source_unit.erase("visible")
+		if not bool(observed_unit.get("ok", false)) or observed_unit != source_unit:
+			return {"status": "NOT_TESTED", "reason": "O1 stable target Unit draw/animation state differs or is missing in " + role,
+				"version": R9_O1_DRAW_SYNC_VERSION, "states": snapshots}
+	return {"status": "PASS", "version": R9_O1_DRAW_SYNC_VERSION,
+		"canonical_phase_source": "actual A BoardView._time after all formal O1 setup",
+		"canonical_phase": phase, "unit_animation_sync": animation_sync, "states": snapshots,
+		"allowed_differences": ["target Unit visibility", "target pillar visibility"],
+		"scope": "scene phase, common props, target pillar draw transform/colors and stable target Unit draw/animation state; original-frame control pixels remain mandatory"}
+
+
+func _r9_sync_o1_unit_animation(sessions: Dictionary) -> Dictionary:
+	var source_units: Dictionary = _r9_units_for_state(sessions["A"])
+	if not bool(source_units.get("ok", false)):
+		return {"status": "NOT_TESTED", "reason": str(source_units.get("reason", "O1 A target Unit is missing"))}
+	var source_unit: Unit = source_units["target"] as Unit
+	var source_sprite: AnimatedSprite2D = source_unit.get_node_or_null("Sprite") as AnimatedSprite2D
+	if not is_instance_valid(source_sprite) or source_sprite.sprite_frames == null:
+		return {"status": "NOT_TESTED", "reason": "O1 A stable target Unit has no AnimatedSprite2D/SpriteFrames"}
+	var animation: StringName = source_sprite.animation
+	var frames: SpriteFrames = source_sprite.sprite_frames
+	if not frames.has_animation(animation):
+		return {"status": "NOT_TESTED", "reason": "O1 A target Unit animation is absent from SpriteFrames"}
+	var frame: int = source_sprite.frame
+	var frame_count: int = frames.get_frame_count(animation)
+	var frame_progress: float = source_sprite.frame_progress
+	if frame < 0 or frame >= frame_count or not is_finite(frame_progress):
+		return {"status": "NOT_TESTED", "reason": "O1 A target Unit animation frame/progress is invalid"}
+	var source_speed_scale: float = source_sprite.speed_scale
+	var source_animation_speed: float = frames.get_animation_speed(animation)
+	var source_playing: bool = source_sprite.is_playing()
+	var applied: Dictionary = {}
+	for role: String in ["A", "B", "C", "D"]:
+		var units: Dictionary = _r9_units_for_state(sessions[role])
+		if not bool(units.get("ok", false)):
+			return {"status": "NOT_TESTED", "reason": "O1 %s target/attacker topology is missing: %s" % [role, str(units.get("reason", ""))]}
+		var unit: Unit = units["target"] as Unit
+		if unit.unit_id != source_unit.unit_id or unit.grid_position != R9_UNIT_CELL:
+			return {"status": "NOT_TESTED", "reason": "O1 %s does not contain the same stable target unit_id at the approved cell" % role}
+		var sprite: AnimatedSprite2D = unit.get_node_or_null("Sprite") as AnimatedSprite2D
+		if not is_instance_valid(sprite) or sprite.sprite_frames == null \
+				or not sprite.sprite_frames.has_animation(animation) \
+				or sprite.sprite_frames.get_frame_count(animation) != frame_count \
+				or sprite.sprite_frames.get_animation_names() != frames.get_animation_names() \
+				or not is_equal_approx(sprite.sprite_frames.get_animation_speed(animation), source_animation_speed):
+			return {"status": "NOT_TESTED", "reason": "O1 %s target Unit SpriteFrames topology/speed differs from A" % role}
+		if role != "A":
+			sprite.speed_scale = source_speed_scale
+			sprite.play(animation)
+			sprite.frame = frame
+			sprite.frame_progress = frame_progress
+			if not source_playing:
+				sprite.pause()
+		applied[role] = {"unit_id": unit.unit_id, "animation": String(animation),
+			"frame": frame, "frame_progress": frame_progress,
+			"speed_scale": source_speed_scale, "animation_speed": source_animation_speed,
+			"source_playing_before_freeze": source_playing}
+	return {"status": "PASS", "source_role": "A", "source_unit_id": source_unit.unit_id,
+		"source_actual": applied["A"], "applied_to_roles": applied,
+		"method": "copy A animation/frame/frame_progress/speed_scale to same stable target Unit before tree freeze; preserve each Unit visibility"}
+
+
+func _r9_o1_board_state(state: Dictionary) -> Dictionary:
+	var board: Node2D = state["board"] as Node2D
+	var session: Node2D = state["session"] as Node2D
+	var pillar: Node2D = state["pillar_node"] as Node2D
+	var units: Dictionary = _r9_units_for_state(state)
+	var target_unit_state: Dictionary = {"ok": false, "reason": str(units.get("reason", "target Unit missing"))}
+	if bool(units.get("ok", false)):
+		target_unit_state = _r9_target_unit_draw_state(units["target"] as Unit)
+	var common_specs: Array = []
+	for value: Variant in (board.get("_props") as Array):
+		if not value is Dictionary:
+			continue
+		var spec: Dictionary = value
+		if spec.get("node") != pillar:
+			common_specs.append(spec)
+	var inventory: Dictionary = _prop_inventory(common_specs)
+	var props: Dictionary = {}
+	for stable_id: String in inventory:
+		var node: Node2D = (inventory[stable_id] as Dictionary)["node"] as Node2D
+		props[stable_id] = {
+			"position": [node.position.x, node.position.y], "rotation": node.rotation,
+			"scale": [node.scale.x, node.scale.y], "visible": node.visible,
+			"modulate": _color_array(node.modulate), "self_modulate": _color_array(node.self_modulate),
+		}
+	return {"board_time": float(board.get("_time")),
+		"frozen": session.process_mode == Node.PROCESS_MODE_DISABLED \
+			and board.process_mode == Node.PROCESS_MODE_DISABLED \
+			and not session.is_processing() and not board.is_processing(),
+		"common_prop_count": common_specs.size(), "common_inventory_unique": inventory.size() == common_specs.size(),
+		"common_props": props,
+		"target_pillar": {"visible": pillar.visible, "transform": _transform_array(pillar.transform),
+			"global_transform": _transform_array(pillar.global_transform),
+			"modulate": _color_array(pillar.modulate), "self_modulate": _color_array(pillar.self_modulate)},
+		"target_unit": target_unit_state}
+
+
+func _r9_target_unit_draw_state(unit: Unit) -> Dictionary:
+	if not is_instance_valid(unit) or unit.unit_id.is_empty():
+		return {"ok": false, "reason": "stable target Unit is missing or has an empty unit_id"}
+	var sprite: AnimatedSprite2D = unit.get_node_or_null("Sprite") as AnimatedSprite2D
+	if not is_instance_valid(sprite) or sprite.sprite_frames == null:
+		return {"ok": false, "reason": "stable target Unit AnimatedSprite2D/SpriteFrames is missing"}
+	var frames: SpriteFrames = sprite.sprite_frames
+	var animation: StringName = sprite.animation
+	if not frames.has_animation(animation):
+		return {"ok": false, "reason": "stable target Unit animation is absent from SpriteFrames"}
+	var frame: int = sprite.frame
+	var frame_count: int = frames.get_frame_count(animation)
+	if frame < 0 or frame >= frame_count:
+		return {"ok": false, "reason": "stable target Unit frame is outside its animation topology"}
+	var texture: Texture2D = frames.get_frame_texture(animation, frame)
+	if texture == null:
+		return {"ok": false, "reason": "stable target Unit current frame texture is missing"}
+	return {"ok": true, "unit_id": unit.unit_id, "grid_position": [unit.grid_position.x, unit.grid_position.y],
+		"visible": unit.visible, "transform": _transform_array(unit.transform),
+		"global_transform": _transform_array(unit.global_transform),
+		"modulate": _color_array(unit.modulate), "self_modulate": _color_array(unit.self_modulate),
+		"sprite_class": sprite.get_class(), "sprite_visible": sprite.visible,
+		"sprite_transform": _transform_array(sprite.transform),
+		"sprite_global_transform": _transform_array(sprite.global_transform),
+		"sprite_modulate": _color_array(sprite.modulate),
+		"sprite_self_modulate": _color_array(sprite.self_modulate),
+		"animation_names": Array(frames.get_animation_names()), "animation": String(animation),
+		"frame": frame, "frame_count": frame_count, "frame_progress": sprite.frame_progress,
+		"speed_scale": sprite.speed_scale, "animation_speed": frames.get_animation_speed(animation),
+		"playing": sprite.is_playing(), "texture_path": texture.resource_path,
+		"texture_size": [texture.get_width(), texture.get_height()]}
 
 
 func _r9_make_o1_session(role: String, map_data: Dictionary,
@@ -336,16 +544,8 @@ func _r9_prepare_o1_state(role: String, state: Dictionary) -> bool:
 		return false
 	var target: Unit = unit_rows["target"] as Unit
 	var attacker: Unit = unit_rows["attacker"] as Unit
-	if bool(state.get("pillar_visible", true)):
-		pillar.show()
-	else:
-		pillar.hide()
-		var props: Array = board.get("_props") as Array
-		for index: int in range(props.size() - 1, -1, -1):
-			var spec: Variant = props[index]
-			if spec is Dictionary and (spec as Dictionary).get("node") == pillar:
-				props.remove_at(index)
-		board.set("_props", props)
+	# 先让四个角色用同一真实单位上下文计算柱体颜色，再应用目标柱显隐差异。
+	pillar.show()
 	if bool(state.get("unit_visible", true)):
 		target.show()
 	else:
@@ -362,6 +562,8 @@ func _r9_prepare_o1_state(role: String, state: Dictionary) -> bool:
 	if session.has_method("_update_board_visibility_context"):
 		session.call("_update_board_visibility_context", R9_UNIT_CELL)
 	board.call("_process", 0.25)
+	if not bool(state.get("pillar_visible", true)):
+		pillar.hide()
 	var layout: Variant = battle.get("_unit_overhead_layout")
 	if is_instance_valid(layout) and layout.has_method("sync_units"):
 		layout.call("sync_units", manager.get("units"))
