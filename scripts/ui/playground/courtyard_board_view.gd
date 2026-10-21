@@ -1258,7 +1258,7 @@ func _add_pillar(cell: Vector2i) -> void:
 			_prop_tint("pillar_groove_lit", Color(0.510, 0.510, 0.524, 1.0)), groove_light_share)
 		groove_base_tints.append(groove_base_tint)
 		var groove_body_lstar: float = float(pillar_lstar_at_u.call(groove_u))
-		var groove_delta: float = 5.0 if groove_index == 2 else 7.0
+		var groove_delta: float = 5.0 if groove_index == 2 else 6.3
 		var groove_tint: Color = tint_at_lstar.call(groove_base_tint, groove_body_lstar - groove_delta)
 		_line(root, PackedVector2Array([groove_start, groove_end]), groove_tint, 1.0, "pillar_side", false)
 		var groove_line: Line2D = root.get_child(root.get_child_count() - 1) as Line2D
@@ -1512,17 +1512,17 @@ func _r10_pillar_pixel_lstar(screen_transform: Transform2D, screen_x: int, scree
 		return -1.0
 	var band_tints: Array[Color] = context["band_tints"]
 	var band_index: int = clampi(floori((local_point.x + radius) / strip_width), 0, band_tints.size() - 1)
-	var tint_linear: Color = band_tints[band_index].srgb_to_linear()
+	var tint_srgb: Color = band_tints[band_index]
 	var offset_u: float = float(context["offset_u"])
 	var sample_u: float = clampf(0.08 + offset_u + (local_point.x + 34.0) / 68.0 * 0.62, 0.04, 0.96)
 	var sample_v: float = clampf(0.82 + local_point.y * 0.0105, 0.04, 0.96)
 	var sample_x: int = clampi(floori(sample_u * float(source_size.x)), 0, source_size.x - 1)
 	var sample_y: int = clampi(floori(sample_v * float(source_size.y)), 0, source_size.y - 1)
 	var texel: Color = image.get_pixel(sample_x, sample_y)
-	var texel_linear: Color = texel.srgb_to_linear()
-	var combined_linear := Color(texel_linear.r * tint_linear.r,
-		texel_linear.g * tint_linear.g, texel_linear.b * tint_linear.b, 1.0)
-	return _r10_lstar_from_linear_rgb(combined_linear)
+	# 按本项目 Compatibility 原图匹配的 sRGB 乘色预测，再转线性求 L*。
+	var combined_srgb := Color(texel.r * tint_srgb.r,
+		texel.g * tint_srgb.g, texel.b * tint_srgb.b, 1.0)
+	return _r10_lstar_from_linear_rgb(combined_srgb.srgb_to_linear())
 
 
 func _r10_point_segment_distance(point: Vector2, first: Vector2, last: Vector2) -> float:
@@ -1638,7 +1638,7 @@ func _update_r10_pillar_grooves(root: Node2D, grooves: Array, context: Dictionar
 			push_warning("R10 凹槽缺少有效的同帧纹理邻像素，保留上次颜色：%s / %d" % [
 				root.name, groove_index])
 			continue
-		var groove_delta: float = 5.0 if groove_index == 3 else 7.0
+		var groove_delta: float = 5.0 if groove_index == 3 else 6.3
 		groove.default_color = tint_at_lstar.call(groove_base_tints[groove_index - 1],
 			reference_lstar - groove_delta)
 	var step_lines: Array = context.get("step_lines", [])
