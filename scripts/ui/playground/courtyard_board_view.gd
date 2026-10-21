@@ -1152,7 +1152,14 @@ func _add_pillar(cell: Vector2i) -> void:
 					previous_inside = current_inside
 				clipped_points = clipped_result
 			if clipped_points.size() >= 3:
-				_polygon(root, clipped_points, band_tint, false, "pillar_side")
+				# 仅剔除有限的同一点；非有限几何仍保留给原有校验拒收。
+				var is_finite_point: bool = clipped_points[0].is_finite()
+				for clipped_point: Vector2 in clipped_points:
+					if clipped_point != clipped_points[0]:
+						is_finite_point = false
+						break
+				if not is_finite_point:
+					_polygon(root, clipped_points, band_tint, false, "pillar_side")
 	# 柱础环每侧外扩约 2 px，厚度为 3 px。
 	var ring_upper := PackedVector2Array()
 	var ring_lower := PackedVector2Array()
