@@ -30,7 +30,7 @@ SoT 与 Mercury agents 和 skills 安装在 Claude 用户级目录，可从不�
 
 ## 配置来源
 
-.codex/agents/*.toml 仍是 Codex 的源配置。用户级 Mercury 代理是从三个 TOML 角色说明只读派生的独立 Claude 文件，不由 Mercury 的 TOML 同步器生成；原 TOML 与同步锁保持原样。SoT 代理和五个技能依据当前 Ship 源文件派生，旧 Claude 技能不作为来源。代理与技能安装在 Claude 用户级目录，Ship 根 CLAUDE.md 保持项目级。本配置不包含 MCP endpoint、密钥或其他凭据。
+.codex/agents/*.toml 仍是 Codex 的源配置。用户级 Mercury 代理是从三个 TOML 角色说明只读派生的独立 Claude 文件，不由 Mercury 的 TOML 同步器生成；原 TOML 与同步锁保持原样。SoT 代理和六个技能依据当前 Ship 源文件派生，旧 Claude 技能不作为来源。代理与技能安装在 Claude 用户级目录，Ship 根 CLAUDE.md 保持项目级。本配置不包含 MCP endpoint、密钥或其他凭据。
 
 ## 领域经验与查证指针
 
