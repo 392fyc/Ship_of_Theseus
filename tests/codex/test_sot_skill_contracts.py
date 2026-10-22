@@ -14,6 +14,7 @@ SKILL_PATHS = {
     "sot-session-start": SKILL_DIR / "sot-session-start" / "SKILL.md",
     "sot-session-end": SKILL_DIR / "sot-session-end" / "SKILL.md",
     "sot-task-receipt": SKILL_DIR / "sot-task-receipt" / "SKILL.md",
+    "sot-design-present": SKILL_DIR / "sot-design-present" / "SKILL.md",
 }
 
 
