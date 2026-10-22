@@ -110,7 +110,7 @@ def test_codex_project_layer_is_discoverable_and_keeps_ownership_boundaries() ->
         "mercury-git-safety.rules",
         "sot-protected-branches.rules",
     ]
-    assert len(skill_paths) == 5
+    assert len(skill_paths) == 6
 
     for path in agent_paths:
         parsed = tomllib.loads(read_text(path))
