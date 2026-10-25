@@ -211,6 +211,8 @@ def test_create_dry_run_writes_nothing_and_reports_the_plan(sandbox, trio) -> No
     )
     assert json.loads(real.stdout)
     assert (ship / ".worktrees" / "planned" / ".codex" / "project" / "sot-roots.local.toml").is_file()
+    # Not a Godot project, so no .gdignore is written.
+    assert not (ship / ".worktrees" / ".gdignore").exists()
 
 
 def test_create_dry_run_still_validates(sandbox, trio) -> None:
@@ -264,6 +266,18 @@ def test_create_keeps_task_trees_out_of_a_godot_project(sandbox, trio) -> None:
     assert (ship / ".worktrees" / ".gdignore").is_file()
     assert (ship / ".worktrees" / "godot" / "project.godot").is_file()
     assert git(ship, "status", "--porcelain") == ""
+
+
+def test_create_dry_run_writes_no_gdignore(sandbox, trio) -> None:
+    ship, designlib, kb = trio
+    commit_file(ship, "project.godot", "config_version=5\n", "godot project")
+    roots = full_roots_file(sandbox, ship, designlib, kb)
+    ps(
+        script_of(ship, "sot-worktree.ps1"), ship, "-Action", "Create", "-Repository", "ship",
+        "-Task", "godot", "-Branch", "task/godot", "-BaseRef", "HEAD",
+        "-RootsFile", roots, "-IgnoreEnvironment", "-DryRun",
+    )
+    assert not (ship / ".worktrees").exists()
 
 
 # --------------------------------------------------------------------------- sot-sync

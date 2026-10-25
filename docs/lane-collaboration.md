@@ -87,6 +87,7 @@
 | 把基准分支同步进任务分支、解决冲突 | 裸 `git merge`、`git rebase` | `scripts/codex/sot-sync.ps1`（`-DryRun` 预测冲突，`-Abort` 退出合并） |
 | 创建、检查任务工作树 | 裸 `git worktree add` | `scripts/codex/sot-worktree.ps1` |
 | 写共享记忆文件 | 直接覆盖 | `scripts/codex/sot-memory.ps1 -Action Write`（带读取时的 sha256） |
+| 删除用户已确认废弃的远端分支 | 裸 `git push --delete` | 回读 SHA 后 `gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<分支>`（见 [工作树生命周期](worktree-lifecycle.md)） |
 | 改写历史、丢弃改动、强推 | `reset --hard`、`stash`、`push --force` | 无替代；需要时由用户决定 |
 
 叠加 PR：分支基于另一个开放 PR 时，`sot-publish.ps1` 默认拒绝；确认依赖后加 `-StackedOn <分支>` 发布，并在 PR 描述中写明依赖与合并顺序。上游合并后，先用 `sot-sync.ps1` 同步受保护基准分支，再合并下游 PR。

@@ -35,7 +35,8 @@ def parse_name(frontmatter: str) -> str:
 
 
 def test_sot_skill_contracts_static():
-    discovered = sorted(ROOT.glob("**/sot-*/SKILL.md"))
+    # Task trees under .worktrees/ are full checkouts of this repository; skip them.
+    discovered = sorted(p for p in ROOT.glob("**/sot-*/SKILL.md") if ".worktrees" not in p.relative_to(ROOT).parts)
     assert discovered == sorted(SKILL_PATHS.values()), (
         "sot-* skill procedures must have exactly one canonical body under .agents/skills"
     )

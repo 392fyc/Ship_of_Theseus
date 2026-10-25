@@ -60,19 +60,21 @@ PowerShell 7 中，从当前游戏工作区调用以下入口，或使用已解�
 
 本节适用于 Codex 与 Claude 的本地和云端工作。任务结束时记录 HEAD、实际分支、PR/任务状态、未提交内容和下一步；工作树继续承载未完成任务时保留。
 
+`main`、`master`、`develop` 和 origin 的默认分支（`gh repo view --json defaultBranchRef`）在本地和远端都永不删除。GitHub 上这些分支不一定配置了分支保护，不能依赖远端拒绝。
+
 ### PR 合并后：立即清理，无需再询问
 
 逐项核对后，删除 worktree 与本地分支：
 
-1. 当前 HEAD 已进入基准分支（`git merge-base --is-ancestor <HEAD> origin/<基准>`），或包含在已合并 PR 的头提交中（squash/rebase 合并时核对 PR head），且合并后没有新的本地提交。
+1. 存在已合并的 PR，且本地分支末端等于该 PR 的头提交（`headRefOid`）或是它的祖先；或者分支有自己的提交，并已全部进入基准分支。没有自己提交、也没有已合并 PR 的分支（例如刚从 develop 切出的分支）不算已合并，按下一节处理。
 2. staged、unstaged、untracked 都没有需要保留的内容；检查 assume-unchanged/skip-worktree，不能只看普通状态。
-3. ignored 文件逐项分类：Godot 导入缓存（`.godot/`、`*.import`、`*.uid`）、`__pycache__`、本地 roots 文件、可重新生成的测试日志可以随树删除；图像原料、数据库、审查证据等需保留的内容先移入项目内的保留位置。
+3. ignored 文件逐项分类：Godot 导入缓存（`.godot/`、`*.import`、`*.uid`）、`__pycache__`、本地 roots 文件、可重新生成的测试日志可以随树删除；图像原料、数据库、审查证据等需保留的内容先复制到主 checkout 的 `.tmp/<任务>/`，逐文件比对哈希一致后再删除工作树。非 force 的 `git worktree remove` 会连同 ignored 文件一起删除，这一步是它们唯一的保护。
 4. 无锁定或其他会话占用，路径属于正确仓库，主工作树不在清单内。
 
-执行：非 force 的 `git worktree remove <path>`，再 `git branch -d <分支>`；squash 合并使 `-d` 认不出时，确认第 1 项后用 `-D`。远端分支由 GitHub 的合并后自动删除处理，用 `git fetch --prune origin` 回读确认，仍存在时报告。出现保护属性、链接、占用或新改动时停止。
+执行：非 force 的 `git worktree remove <path>`，再 `git branch -d <分支>`。只有在第 1 项核实了 PR 头提交、而 squash 合并使 `-d` 认不出时，才用 `-D`。远端分支由 GitHub 的合并后自动删除处理，用 `git fetch --prune origin` 回读确认，仍存在时报告。出现保护属性、链接、占用或新改动时停止。
 
 ### 未合入就废弃：先列清单，经用户确认后删除
 
-列出分支名、末端提交、相对基准的未合入提交数、远端分支与 PR 状态，等用户确认。确认后删除 worktree、本地分支和远端分支；远端删除用 `gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<分支>`，不用裸 `git push`，受保护分支由 GitHub 分支保护拒绝。
+列出分支名、末端提交、相对基准的未合入提交数、远端分支与 PR 状态，等用户确认。确认后删除 worktree 与本地分支；远端删除前先用 `gh api repos/<owner>/<repo>/git/ref/heads/<分支>` 回读 SHA，与清单里的末端提交一致才执行 `gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<分支>`，不一致就停止。不用裸 `git push --delete`。
 
 工作树年龄、分支名字或没有开放 PR 单独都不是合并或废弃的依据。完成后回读目录与 `git worktree list`，未完成的项不能报告为已清理。本脚本不提供删除入口；按上述清单执行。发布仍使用 `sot-publish.ps1`。

@@ -6,7 +6,7 @@
 
 日常 Codex 从游戏主仓 `Ship_of_Theseus` 进入。三个主仓平级，任务工作树只建在所属仓库根的 `.worktrees/<task>/`（被 Git 忽略），不在仓库外另建目录组。任务工作树不得用父目录猜测设计库、KB 或游戏主仓；先用环境变量，再回退到被忽略的本地 roots 配置，缺少配置时停止猜测。
 
-游戏主仓由 `SOT_SHIP_ROOT` / `[roots].ship_root` 解析；任务组由 `[worktrees].ship_root`、`designlib_root`、`kb_root` 或对应 `SOT_*_WORKTREE_ROOT` 解析。使用 `scripts/codex/sot-worktree.ps1` 列出、检查和创建游戏/设计库任务树。KB 继续使用固定 vault 的任务分支，不能另开任务 vault。PR 合并后立即删除 worktree 与本地分支（远端分支由 GitHub 合并后自动删除）；未合入就废弃的分支列出清单，经用户确认后连同远端一并删除。删除前核对 dirty、untracked、ignored 与实际合入证据，不按年龄或关闭 PR 单独判定。详见 [工作树生命周期](docs/worktree-lifecycle.md)。
+游戏主仓由 `SOT_SHIP_ROOT` / `[roots].ship_root` 解析；任务组由 `[worktrees].ship_root`、`designlib_root`、`kb_root` 或对应 `SOT_*_WORKTREE_ROOT` 解析。使用 `scripts/codex/sot-worktree.ps1` 列出、检查和创建游戏/设计库任务树。KB 继续使用固定 vault 的任务分支，不能另开任务 vault。PR 合并后立即删除 worktree 与本地分支（远端分支由 GitHub 合并后自动删除）；未合入就废弃的分支列出清单，经用户确认后连同远端一并删除；`main`、`master`、`develop` 与默认分支永不删除。删除前核对 dirty、untracked、ignored 与实际合入证据，不按年龄或关闭 PR 单独判定。详见 [工作树生命周期](docs/worktree-lifecycle.md)。
 
 ## Language
 
