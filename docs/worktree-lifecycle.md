@@ -1,17 +1,17 @@
 # SoT 工作区与工作树
 
-日常 Codex 入口是游戏主仓 `Ship_of_Theseus`。三个主仓平级，任务工作树按所属仓库分组；这是目录关系，实际根路径由本机配置提供：
+日常 Codex 入口是游戏主仓 `Ship_of_Theseus`。三个主仓平级；任务工作树只建在所属仓库根的 `.worktrees/<task>/`，不在仓库外另建目录组。这是目录关系，实际根路径由本机配置提供：
 
 ```text
 <project-root>/
   Ship_of_Theseus/             游戏主仓，日常入口
-  ShipOfTheseus-KB/            固定 Obsidian vault
+    .worktrees/<task>/         游戏任务树；目录内有 .gdignore，避免 Godot 把任务树导入主项目
   SoT-fyc-space/               设计库主仓
-  worktrees/
-    Ship_of_Theseus/<task>/
-    SoT-fyc-space/<task>/
-    ShipOfTheseus-KB/<task>/   历史/显式只读隔离用途；不是第二个 vault
+    .worktrees/<task>/         设计库任务树
+  ShipOfTheseus-KB/            固定 Obsidian vault；日常不建任务树
 ```
+
+`.worktrees/` 必须被所在仓库的 Git 忽略（`/.worktrees/`），否则 `Create` 拒绝创建。Obsidian 不索引以点开头的目录，KB 的 `.worktrees/` 只用于历史或显式只读隔离，不是第二个 vault。
 
 任务工作树不能用父目录或 `../<另一个仓库>` 猜测跨仓位置。先解析环境变量，再回退到当前游戏工作区被忽略的 `.codex/project/sot-roots.local.toml`。若环境仍指向旧位置，应修正进程环境或重启客户端，不能因旧路径不存在而猜另一个位置。
 
@@ -58,16 +58,21 @@ PowerShell 7 中，从当前游戏工作区调用以下入口，或使用已解�
 
 ## 收尾与退役
 
-任务完成与工作树可以删除应分别判断。收尾记录 HEAD、实际分支、PR/任务状态、未提交内容和下一步。工作树继续承载任务或存在需保留成果时保留，不因会话结束自动清理。
+本节适用于 Codex 与 Claude 的本地和云端工作。任务结束时记录 HEAD、实际分支、PR/任务状态、未提交内容和下一步；工作树继续承载未完成任务时保留。
 
-确定要退役的精确清单后，至少核对：
+### PR 合并后：立即清理，无需再询问
 
-1. 无活跃使用、锁定或其他任务占用，路径属于正确仓库，主工作树不在清理清单。
-2. staged/unstaged/untracked 均无需保留内容；检查 assume-unchanged/skip-worktree，不能只看普通状态。
-3. ignored 文件逐项分类。图像原料、数据库、UID、审查记录等不能按目录名当缓存；需保留的内容先归档，逐文件核验哈希。
-4. 当前 HEAD 已进入实际集成分支；squash/rebase 场景核对 PR head、合并提交及内容等价，检查 PR 合并后有无新增本地提交。工作树年龄、分支名字、没有开放 PR、PR 关闭或合并单独都不是足够依据。
-5. 保留所有分支/迁移 refs，并记录原值；归档必要内容及 Git bundle 后验证可恢复性。工作树退役不自动授权删除分支。
-6. 获准执行具体清单后，删除前重检状态，逐树使用非 force 的 `git worktree remove`；出现保护属性、链接、占用或新改动时停止。只允许核实身份的 Git 管理元数据由 Git 正常处理，不把例外扩展到普通隐藏文件。
-7. 回读目录和 Git 登记，核对 refs、保留工作树、dirty 与归档哈希。未完成的项不能报告为已清理。
+逐项核对后，删除 worktree 与本地分支：
 
-本脚本不提供删除、force、prune 或按年龄自动清理入口；退役按上述人工可审查清单执行。现有发布仍使用 `sot-publish.ps1`，不要绕过受控入口直接推送。
+1. 当前 HEAD 已进入基准分支（`git merge-base --is-ancestor <HEAD> origin/<基准>`），或包含在已合并 PR 的头提交中（squash/rebase 合并时核对 PR head），且合并后没有新的本地提交。
+2. staged、unstaged、untracked 都没有需要保留的内容；检查 assume-unchanged/skip-worktree，不能只看普通状态。
+3. ignored 文件逐项分类：Godot 导入缓存（`.godot/`、`*.import`、`*.uid`）、`__pycache__`、本地 roots 文件、可重新生成的测试日志可以随树删除；图像原料、数据库、审查证据等需保留的内容先移入项目内的保留位置。
+4. 无锁定或其他会话占用，路径属于正确仓库，主工作树不在清单内。
+
+执行：非 force 的 `git worktree remove <path>`，再 `git branch -d <分支>`；squash 合并使 `-d` 认不出时，确认第 1 项后用 `-D`。远端分支由 GitHub 的合并后自动删除处理，用 `git fetch --prune origin` 回读确认，仍存在时报告。出现保护属性、链接、占用或新改动时停止。
+
+### 未合入就废弃：先列清单，经用户确认后删除
+
+列出分支名、末端提交、相对基准的未合入提交数、远端分支与 PR 状态，等用户确认。确认后删除 worktree、本地分支和远端分支；远端删除用 `gh api -X DELETE repos/<owner>/<repo>/git/refs/heads/<分支>`，不用裸 `git push`，受保护分支由 GitHub 分支保护拒绝。
+
+工作树年龄、分支名字或没有开放 PR 单独都不是合并或废弃的依据。完成后回读目录与 `git worktree list`，未完成的项不能报告为已清理。本脚本不提供删除入口；按上述清单执行。发布仍使用 `sot-publish.ps1`。

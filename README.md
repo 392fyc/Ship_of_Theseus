@@ -2,7 +2,7 @@
 
 ## 本地工作区入口
 
-日常 Codex 入口为游戏主仓 `Ship_of_Theseus`。主仓平级，任务工作树按 `worktrees/<repository>/<task>` 分组；不能从任务目录的父目录猜跨仓根。实际位置使用环境变量优先、本地 roots 配置回退，见 [工作树生命周期](docs/worktree-lifecycle.md)。
+日常 Codex 入口为游戏主仓 `Ship_of_Theseus`。主仓平级，任务工作树建在所属仓库根的 `.worktrees/<task>/`；不能从任务目录的父目录猜跨仓根。实际位置使用环境变量优先、本地 roots 配置回退，见 [工作树生命周期](docs/worktree-lifecycle.md)。
 
 
 > **本仓库不放设计文档。** 设计**正本（canonical）**统一在 Obsidian KB Vault：`SOT_KB_ROOT（或本地 [roots].kb_root）`

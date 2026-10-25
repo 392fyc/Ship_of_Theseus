@@ -4,9 +4,9 @@
 
 ## 工作区位置与生命周期
 
-日常 Codex 从游戏主仓 `Ship_of_Theseus` 进入。三个主仓平级，任务目录按 `worktrees/<repository>/<task>` 分组。任务工作树不得用父目录猜测设计库、KB 或游戏主仓；先用环境变量，再回退到被忽略的本地 roots 配置，缺少配置时停止猜测。
+日常 Codex 从游戏主仓 `Ship_of_Theseus` 进入。三个主仓平级，任务工作树只建在所属仓库根的 `.worktrees/<task>/`（被 Git 忽略），不在仓库外另建目录组。任务工作树不得用父目录猜测设计库、KB 或游戏主仓；先用环境变量，再回退到被忽略的本地 roots 配置，缺少配置时停止猜测。
 
-游戏主仓由 `SOT_SHIP_ROOT` / `[roots].ship_root` 解析；任务组由 `[worktrees].ship_root`、`designlib_root`、`kb_root` 或对应 `SOT_*_WORKTREE_ROOT` 解析。使用 `scripts/codex/sot-worktree.ps1` 列出、检查和创建游戏/设计库任务树。KB 继续使用固定 vault 的任务分支，不能另开任务 vault。退役须核对 dirty、untracked、ignored、实际合入/PR 证据及 refs 保全，不按年龄或关闭 PR 单独判定。详见 [工作树生命周期](docs/worktree-lifecycle.md)。
+游戏主仓由 `SOT_SHIP_ROOT` / `[roots].ship_root` 解析；任务组由 `[worktrees].ship_root`、`designlib_root`、`kb_root` 或对应 `SOT_*_WORKTREE_ROOT` 解析。使用 `scripts/codex/sot-worktree.ps1` 列出、检查和创建游戏/设计库任务树。KB 继续使用固定 vault 的任务分支，不能另开任务 vault。PR 合并后立即删除 worktree 与本地分支（远端分支由 GitHub 合并后自动删除）；未合入就废弃的分支列出清单，经用户确认后连同远端一并删除。删除前核对 dirty、untracked、ignored 与实际合入证据，不按年龄或关闭 PR 单独判定。详见 [工作树生命周期](docs/worktree-lifecycle.md)。
 
 ## Language
 
@@ -61,7 +61,7 @@
 
 - 读取或修改设计库、KB、Mercury 前，使用项目本地 roots 配置或环境变量解析目标，不在版本控制文件中写本机绝对路径。
 - KB 只有一个固定的 Obsidian vault 入口，由 `SOT_KB_ROOT` 或项目本地 roots 中的 `kb_root` 解析；不得把任务 worktree 另开为第二个 vault，也不得为任务临时切换 MCP endpoint。KB 的任务隔离由固定 vault 内检出的 Git 分支提供。
-- 写入 KB 前，必须确认固定 vault 的 Git 工作区干净，并把固定 vault 切换到目标任务分支。若该分支已被其他 worktree 占用，只能在确认对方干净且无人使用后，将其置于 detached HEAD 解除占用；不得为释放分支而自动移除 worktree。否则停止并协调，不得用 `--ignore-other-worktrees`、第二 vault、stash、reset 或丢弃改动绕过。合并完成后，将固定 vault 切回并快进到受保护的默认分支。
+- 写入 KB 前，必须确认固定 vault 的 Git 工作区干净，并把固定 vault 切换到目标任务分支。若该分支已被其他 worktree 占用，只能在确认对方干净且无人使用后，将其置于 detached HEAD 解除占用；不得为释放分支而自动移除 worktree。否则停止并协调，不得用 `--ignore-other-worktrees`、第二 vault、stash、reset 或丢弃改动绕过。合并完成后，将固定 vault 切回并快进到受保护的默认分支，再删除已合入的本地任务分支。
 - 跨仓写入前必须读取目标仓 `AGENTS.md`（若存在）与目标 canonical 合同，并在交付回执中记录目标 HEAD 和合同摘要。
 - 不覆盖目标主工作树的受保护改动；代码与结构化设计库变更只在目标仓独立 worktree 中完成，KB 按上述固定 vault 分支流程执行。
 - 设计库与 KB 的具体安全读写流程分别由 `sot-designlib` 和 `sot-kb-write` 技能定义。

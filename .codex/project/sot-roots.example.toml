@@ -7,7 +7,8 @@ kb_root = "<path-to-kb-repository>"
 # Optional active-memory root; defaults to the game's primary Git worktree/.sot/memory.
 memory_root = "<path-to-active-memory>"
 
+# Task trees live inside each repository at <repository root>/.worktrees (git-ignored there).
 [worktrees]
-ship_root = "<project-root>/worktrees/Ship_of_Theseus"
-designlib_root = "<project-root>/worktrees/SoT-fyc-space"
-kb_root = "<project-root>/worktrees/ShipOfTheseus-KB"
+ship_root = "<path-to-game-main-checkout>/.worktrees"
+designlib_root = "<path-to-design-library>/.worktrees"
+kb_root = "<path-to-kb-repository>/.worktrees"

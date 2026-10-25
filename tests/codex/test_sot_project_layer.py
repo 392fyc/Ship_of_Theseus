@@ -206,9 +206,9 @@ def test_routing_and_root_configuration_keep_authorities_distinct() -> None:
         },
         # Task-tree groups read by scripts/codex/sot-worktree.ps1.
         "worktrees": {
-            "ship_root": "<project-root>/worktrees/Ship_of_Theseus",
-            "designlib_root": "<project-root>/worktrees/SoT-fyc-space",
-            "kb_root": "<project-root>/worktrees/ShipOfTheseus-KB",
+            "ship_root": "<path-to-game-main-checkout>/.worktrees",
+            "designlib_root": "<path-to-design-library>/.worktrees",
+            "kb_root": "<path-to-kb-repository>/.worktrees",
         },
     }
     # sot-worktree.ps1 writes the local roots file into every task tree, so it
@@ -216,6 +216,7 @@ def test_routing_and_root_configuration_keep_authorities_distinct() -> None:
     local_roots = ".codex/project/sot-roots.local.toml"
     assert local_roots in read_text(ROOT / ".gitignore")
     assert ".sot/memory/" in read_text(ROOT / ".gitignore")
+    assert "/.worktrees/" in read_text(ROOT / ".gitignore")
     tracked = subprocess.run(
         ["git", "-C", str(ROOT), "ls-files", "--", local_roots],
         capture_output=True, text=True, check=True,

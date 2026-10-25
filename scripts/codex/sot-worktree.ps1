@@ -122,7 +122,10 @@ if ($Action -eq 'Create') {
     if ($Task -notmatch '^[a-z0-9][a-z0-9._-]{0,79}$' -or $Task.EndsWith('.') -or $Task -match '^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)') { throw 'Use a safe task directory name (letters, numbers, dot, underscore, hyphen).' }
     if (-not $Branch -or -not $BaseRef -or $Branch -match '^(-|refs/|@)' -or $Branch -in @('main','master','develop')) { throw 'Create requires an explicit new task Branch and BaseRef.' }
     $root = Root-For 'roots' $Repository; $group = Root-For 'worktrees' $Repository
-    if ([IO.Path]::GetFileName($group) -ne $names[$Repository]) { throw 'Worktree group must end in the repository name.' }
+    # Task trees live inside their repository at <root>/.worktrees, which must be git-ignored there.
+    if ($group -ne (Full-Path (Join-Path $root '.worktrees'))) { throw 'Worktree group must be <repository root>/.worktrees.' }
+    & $git -C $root check-ignore --quiet --no-index -- ('.worktrees/' + $Task)
+    if ($LASTEXITCODE -ne 0) { throw "The repository must git-ignore /.worktrees/ before task trees are created inside it." }
     $existing = @(Read-Worktrees $Repository)
     $target = Full-Path (Join-Path $group $Task)
     if ((Test-Path -LiteralPath $target) -or $target -in $existing.path) { throw 'Task path already exists or is registered; inspect it instead.' }
@@ -157,6 +160,9 @@ if ($Action -eq 'Create') {
         return
     }
     if (-not (Test-Path -LiteralPath $group)) { $null = New-Item -ItemType Directory -Path $group }
+    # Godot imports every folder under a project; .gdignore keeps task trees out of the main project.
+    $gdignore = Join-Path $group '.gdignore'
+    if ((Test-Path -LiteralPath (Join-Path $root 'project.godot')) -and -not (Test-Path -LiteralPath $gdignore)) { $null = New-Item -ItemType File -Path $gdignore }
     Invoke-RepoGit $root @('worktree','add','-b',$Branch,'--',$target,$commit) | Out-Null
     try {
         $relative = '.codex/project/sot-roots.local.toml'

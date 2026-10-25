@@ -49,3 +49,6 @@ nul
 
 # CI 与本地测试运行日志（tools/ci/run_godot_tests.sh）
 .ci-logs/
+
+# 任务工作树（scripts/codex/sot-worktree.ps1 在仓库内创建）
+/.worktrees/
