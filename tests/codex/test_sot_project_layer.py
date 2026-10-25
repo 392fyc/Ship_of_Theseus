@@ -217,6 +217,7 @@ def test_routing_and_root_configuration_keep_authorities_distinct() -> None:
     assert local_roots in read_text(ROOT / ".gitignore")
     assert ".sot/memory/" in read_text(ROOT / ".gitignore")
     assert "/.worktrees/" in read_text(ROOT / ".gitignore")
+    assert "/.tmp/" in read_text(ROOT / ".gitignore")
     tracked = subprocess.run(
         ["git", "-C", str(ROOT), "ls-files", "--", local_roots],
         capture_output=True, text=True, check=True,
