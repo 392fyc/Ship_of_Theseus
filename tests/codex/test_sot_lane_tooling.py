@@ -88,7 +88,7 @@ def make_repo(base: Path, name: str, default_branch: str, *, scripts: bool) -> t
     git(repo, "init", "-q", f"--initial-branch={default_branch}")
     git(repo, "config", "core.autocrlf", "false")
     git(repo, "remote", "add", "origin", str(origin))
-    (repo / ".gitignore").write_text(".codex/project/sot-roots.local.toml\n", encoding="utf-8")
+    (repo / ".gitignore").write_text(".codex/project/sot-roots.local.toml\n/.worktrees/\n", encoding="utf-8")
     git(repo, "add", ".gitignore")
     commit_file(repo, "base.txt", "base\n", "base")
     if scripts:
@@ -115,7 +115,7 @@ def script_of(repo: Path, name: str) -> str:
 
 
 def add_task(repo: Path, task: str, branch: str, group: Path | None = None) -> Path:
-    group = group or repo.parent / "worktrees" / repo.name
+    group = group or repo / ".worktrees"
     group.mkdir(parents=True, exist_ok=True)
     path = group / task
     git(repo, "worktree", "add", "-q", "-b", branch, str(path))
@@ -133,7 +133,6 @@ def write_roots(path: Path, **roots: Path) -> Path:
 
 
 def full_roots_file(sandbox: Path, ship: Path, designlib: Path, kb: Path) -> Path:
-    groups = sandbox / "worktrees"
     path = sandbox / "roots.toml"
     path.write_text(
         "[roots]\n"
@@ -141,9 +140,9 @@ def full_roots_file(sandbox: Path, ship: Path, designlib: Path, kb: Path) -> Pat
         f"designlib_root = '{designlib.as_posix()}'\n"
         f"kb_root = '{kb.as_posix()}'\n"
         "[worktrees]\n"
-        f"ship_root = '{(groups / ship.name).as_posix()}'\n"
-        f"designlib_root = '{(groups / designlib.name).as_posix()}'\n"
-        f"kb_root = '{(groups / kb.name).as_posix()}'\n",
+        f"ship_root = '{(ship / ".worktrees").as_posix()}'\n"
+        f"designlib_root = '{(designlib / ".worktrees").as_posix()}'\n"
+        f"kb_root = '{(kb / ".worktrees").as_posix()}'\n",
         encoding="utf-8",
         newline="\n",
     )
@@ -197,11 +196,11 @@ def test_create_dry_run_writes_nothing_and_reports_the_plan(sandbox, trio) -> No
     )
     plan = json.loads(result.stdout)
     assert plan["status"] == "dry-run"
-    assert Path(plan["path"]) == sandbox / "worktrees" / "Ship_of_Theseus" / "planned"
+    assert Path(plan["path"]) == ship / ".worktrees" / "planned"
     assert plan["branch"] == "task/planned"
     assert plan["base_commit"] == git(ship, "rev-parse", "refs/remotes/origin/develop")
     assert f"ship_root = '{ship.as_posix()}'" in plan["local_roots_content"]
-    assert not (sandbox / "worktrees").exists()
+    assert not (ship / ".worktrees").exists()
     assert git(ship, "for-each-ref", "refs/heads") == branches_before
     assert "planned" not in git(ship, "worktree", "list")
 
@@ -211,7 +210,9 @@ def test_create_dry_run_writes_nothing_and_reports_the_plan(sandbox, trio) -> No
         "-RootsFile", roots, "-IgnoreEnvironment",
     )
     assert json.loads(real.stdout)
-    assert (sandbox / "worktrees" / "Ship_of_Theseus" / "planned" / ".codex" / "project" / "sot-roots.local.toml").is_file()
+    assert (ship / ".worktrees" / "planned" / ".codex" / "project" / "sot-roots.local.toml").is_file()
+    # Not a Godot project, so no .gdignore is written.
+    assert not (ship / ".worktrees" / ".gdignore").exists()
 
 
 def test_create_dry_run_still_validates(sandbox, trio) -> None:
@@ -223,7 +224,60 @@ def test_create_dry_run_still_validates(sandbox, trio) -> None:
         "-RootsFile", roots, "-IgnoreEnvironment", "-DryRun", check=False,
     )
     assert result.returncode != 0
-    assert not (sandbox / "worktrees").exists()
+    assert not (ship / ".worktrees").exists()
+
+
+def test_create_rejects_a_group_outside_the_repository(sandbox, trio) -> None:
+    ship, designlib, kb = trio
+    roots = full_roots_file(sandbox, ship, designlib, kb)
+    text = roots.read_text(encoding="utf-8").replace(
+        (ship / ".worktrees").as_posix(), (sandbox / "worktrees" / ship.name).as_posix()
+    )
+    roots.write_text(text, encoding="utf-8", newline="\n")
+    result = ps(
+        script_of(ship, "sot-worktree.ps1"), ship, "-Action", "Create", "-Repository", "ship",
+        "-Task", "outside", "-Branch", "task/outside", "-BaseRef", "refs/remotes/origin/develop",
+        "-RootsFile", roots, "-IgnoreEnvironment", "-DryRun", check=False,
+    )
+    assert result.returncode != 0 and ".worktrees" in (result.stdout + result.stderr)
+
+
+def test_create_requires_the_group_to_be_ignored(sandbox, trio) -> None:
+    ship, designlib, kb = trio
+    (ship / ".gitignore").write_text(".codex/project/sot-roots.local.toml\n", encoding="utf-8")
+    roots = full_roots_file(sandbox, ship, designlib, kb)
+    result = ps(
+        script_of(ship, "sot-worktree.ps1"), ship, "-Action", "Create", "-Repository", "ship",
+        "-Task", "unignored", "-Branch", "task/unignored", "-BaseRef", "refs/remotes/origin/develop",
+        "-RootsFile", roots, "-IgnoreEnvironment", "-DryRun", check=False,
+    )
+    assert result.returncode != 0 and "git-ignore" in (result.stdout + result.stderr)
+
+
+def test_create_keeps_task_trees_out_of_a_godot_project(sandbox, trio) -> None:
+    ship, designlib, kb = trio
+    commit_file(ship, "project.godot", "config_version=5\n", "godot project")
+    roots = full_roots_file(sandbox, ship, designlib, kb)
+    ps(
+        script_of(ship, "sot-worktree.ps1"), ship, "-Action", "Create", "-Repository", "ship",
+        "-Task", "godot", "-Branch", "task/godot", "-BaseRef", "HEAD",
+        "-RootsFile", roots, "-IgnoreEnvironment",
+    )
+    assert (ship / ".worktrees" / ".gdignore").is_file()
+    assert (ship / ".worktrees" / "godot" / "project.godot").is_file()
+    assert git(ship, "status", "--porcelain") == ""
+
+
+def test_create_dry_run_writes_no_gdignore(sandbox, trio) -> None:
+    ship, designlib, kb = trio
+    commit_file(ship, "project.godot", "config_version=5\n", "godot project")
+    roots = full_roots_file(sandbox, ship, designlib, kb)
+    ps(
+        script_of(ship, "sot-worktree.ps1"), ship, "-Action", "Create", "-Repository", "ship",
+        "-Task", "godot", "-Branch", "task/godot", "-BaseRef", "HEAD",
+        "-RootsFile", roots, "-IgnoreEnvironment", "-DryRun",
+    )
+    assert not (ship / ".worktrees").exists()
 
 
 # --------------------------------------------------------------------------- sot-sync
