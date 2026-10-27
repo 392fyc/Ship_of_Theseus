@@ -5,7 +5,7 @@ description: "Return a Mercury-compatible SoT task receipt with changed scope, v
 
 # SoT Task Receipt
 
-本技能扩展 `.codex/project/mercury-task-contract.md`，不得替换或削弱其中的 implementation receipt。子任务结束时返回一个机器可读对象，至少包含 Mercury 基础字段：
+本技能扩展 `.mercury/packs/core/docs/mercury-task-contract.md`，不得替换或削弱其中的 implementation receipt。子任务结束时返回一个机器可读对象，至少包含 Mercury 基础字段：
 
 - `task_id`: 稳定任务标识。
 - `status`: `completed | blocked | failed`。

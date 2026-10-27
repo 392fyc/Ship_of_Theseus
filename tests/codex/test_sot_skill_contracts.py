@@ -96,15 +96,17 @@ def test_agents_is_codex_native_and_routes_each_authority():
         "SOT_MEMORY_ROOT",
         "[roots].memory_root",
         ".sot/memory",
+        ".mercury/packs/",
+        ".mercury/lock.json",
         ".codex/agents/mercury-*",
+        ".claude/agents/mercury-*",
         ".codex/rules/mercury-*",
-        ".codex/project/mercury-*",
-        ".codex/mercury-template.lock",
+        "受管段",
         "Mercury 发起 Issue/PR",
         "设计库 app/tests/scripts",
         "领域 agent、配置、技能和 workflow",
-        ".codex/project/mercury-harness-ownership.md",
-        ".codex/project/mercury-task-contract.md",
+        ".mercury/packs/core/docs/mercury-harness-ownership.md",
+        ".mercury/packs/core/docs/mercury-task-contract.md",
     ]:
         assert required in text, f"AGENTS.md missing authority routing term: {required}"
     assert "MERCURY_ROOT" not in text

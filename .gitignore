@@ -26,6 +26,9 @@ desktop.ini
 # AI Agent runtime config (local only)
 .claude/*
 !.claude/skills/
+!.claude/agents/
+.claude/agents/*
+!.claude/agents/mercury-*.md
 .cursor/*
 !.cursor/rules/
 .mcp.json

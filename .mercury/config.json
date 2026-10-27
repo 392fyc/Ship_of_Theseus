@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "packs": [
+    "core",
+    "deploy"
+  ],
+  "params": {
+    "integration_branch": "develop",
+    "required_checks": [
+      "Godot headless \u56de\u5f52",
+      "\u4ed3\u5e93\u5951\u7ea6\u4e0e\u91c7\u96c6\u914d\u7f6e\u6d4b\u8bd5"
+    ],
+    "guard_write_scripts": [
+      "sot-publish.ps1",
+      "sot-sync.ps1",
+      "sot-worktree.ps1"
+    ]
+  }
+}

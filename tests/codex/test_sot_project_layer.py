@@ -174,7 +174,7 @@ def test_routing_and_root_configuration_keep_authorities_distinct() -> None:
         ".sot/memory",
         "sot_memory_root",
         "[roots].memory_root",
-        "mercury-template.lock",
+        ".mercury/lock.json",
         "单向生成消费",
     ]:
         assert required in routing
@@ -183,15 +183,18 @@ def test_routing_and_root_configuration_keep_authorities_distinct() -> None:
 
     consumption = read_text(ROOT / "docs" / "mercury-harness-consumption.md").lower()
     for required in [
+        ".mercury/packs/",
+        ".mercury/lock.json",
         ".codex/agents/mercury-*",
+        ".claude/agents/mercury-*",
         ".codex/rules/mercury-*",
-        ".codex/project/mercury-*",
-        ".codex/mercury-template.lock",
+        ".github/workflows/mercury-*.yml",
+        "mercury:begin",
         "不得创建、修改或发起",
         "issue/pr",
         "单向生成并消费",
-        ".codex/project/mercury-harness-ownership.md",
-        ".codex/project/mercury-task-contract.md",
+        ".mercury/packs/core/docs/mercury-harness-ownership.md",
+        ".mercury/packs/core/docs/mercury-task-contract.md",
     ]:
         assert required in consumption
 

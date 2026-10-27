@@ -1,3 +1,39 @@
+<!-- MERCURY:BEGIN managed by tools/mercury.py from the packs in .mercury/config.json; edits here stop the installer, change the pack and run apply -->
+## Mercury-managed section
+
+This section, from the begin marker to the end marker, is installed and kept up to date by Mercury
+(`python tools/mercury.py apply`) from the packs the project selects in `.mercury/config.json`. Do not edit it by
+hand: a hand edit stops the next apply. Everything outside the markers belongs to the project and is never touched.
+Paths Mercury manages, and who may change them, are listed in `.mercury/packs/core/docs/mercury-harness-ownership.md`.
+
+## Explanation and reasoning
+
+These rules bind the main agent and every subagent in both Codex and Claude Code, in every kind of task.
+
+- **Explain the Feynman way.** When you explain, report, review, or hand off, write so that someone outside the task can follow it. Use plain words, define each term the reader may not know, build from what the reader already knows, and back each point with a concrete example or the actual evidence. If you cannot explain a point simply, treat it as a gap in your own understanding: return to the source and close the gap, or mark the point as unresolved. Do not cover it with jargon.
+- **Reason from first principles in research, design, and investigation.** Start from the goal, the hard constraints, and facts verified in primary sources or by direct observation, and build the conclusion up from them. Treat conventions, analogies, existing implementations, earlier conclusions, and other agents' claims as hypotheses to check, not as premises. State the assumptions a conclusion depends on and label any that remain unverified. Check the assumptions the conclusion actually depends on, in proportion to risk; evidence that stays applicable under the evidence-reuse rules counts as verified fact. User decisions and authorization are constraints, not hypotheses.
+- **Carry the rules into delegation.** When you delegate to an agent that does not load these instructions, restate both rules in the delegation prompt. Examples: Claude Code's built-in Explore and Plan agents, agents defined with `omitClaudeMd`, and agents working in another repository or directory that has its own instructions.
+
+## Scope, verification, and completion
+
+Use .mercury/packs/core/docs/mercury-task-contract.md for
+bounded scope, test relevance, evidence reuse, provenance-check triggers,
+review, and completion. Read its details when needed for these decisions;
+it does not add a mandatory workflow or weaken governing requirements.
+
+## Mercury roles and Git safety rules
+
+- Mercury installs five roles for both hosts: `mercury-dev`, `mercury-reviewer`, `mercury-acceptance`, `mercury-design` and `mercury-research`, as `.claude/agents/mercury-*.md` and `.codex/agents/mercury-*.toml`. They are generated from `.mercury/packs/core/roles/`; change the source in Mercury, not the generated files. A project role of the same name in `.claude/agents/` takes priority over a user-level one, so these project roles apply in this project.
+- `mercury-reviewer`, `mercury-acceptance`, `mercury-design` and `mercury-research` are read-only. Codex enforces this with the sandbox; the Claude roles run a `PreToolUse` guard (`.mercury/packs/core/hooks/readonly_guard.sh`) that blocks write commands in Bash and PowerShell. The guard is best-effort, not an operating-system sandbox. A project can name more write-type scripts in `params.guard_write_scripts` in `.mercury/config.json`.
+- `.codex/rules/mercury-git-safety.rules` forbids raw `git push` and direct switching to `develop`, `main` or `master` in Codex. Perform Git writes through the controlled entry point that this project's own instructions name; never bypass a denial through another shell.
+
+## Mercury updates (deploy pack)
+
+- `.github/workflows/mercury-update.yml` and `.github/workflows/mercury-verify.yml` are managed files: Mercury renders them from `params` in `.mercury/config.json` (`integration_branch`, `required_checks`, `update_schedule`). Do not edit them by hand; change the params and run the installer from a released Mercury commit.
+- Updates arrive on their own. GitHub runs scheduled workflows only from the default branch, so when that is not the integration branch the scheduled run only starts the same workflow on the integration branch (`gh workflow run`); the update itself always runs from the integration branch's own copy. A scheduled job takes the latest released Mercury commit (`origin/master` of Mercury), and when the managed files differ it opens one pull request from a `mercury/update-*` branch into the integration branch. The same job merges that pull request (squash) only when every condition holds: the source commit is on Mercury's `master` and descends from the recorded one, only Mercury-managed paths changed, and the project's required checks plus the `Mercury verify` check (a GitHub Actions check run, not a status) are green on the exact head. Paths the new release stops shipping may only be deleted. Otherwise it stops and says why.
+- Do not push to, force-push or rebase a `mercury/update-*` branch, do not edit `.mercury/config.json` inside an update pull request, and do not merge an update pull request by hand to get around a failed condition; fix the cause or ask the project owner.
+<!-- MERCURY:END -->
+
 # Ship of Theseus — Codex 项目入口
 
 本仓库是 SoT 日常开发的默认 Codex 工作根。Codex 从仓库根启动，优先读取本文件、项目级 `.codex/` 配置与 `.agents/skills/` 中的项目技能。
@@ -42,9 +78,9 @@
 ## SoT 与 Mercury Harness 所有权
 
 - SoT 自主维护游戏仓、设计库 app/tests/scripts、KB，以及领域 agent、配置、技能和 workflow。上述领域入口可以在 SoT 仓内直接维护。
-- Mercury 只拥有通用 Harness 模板 upstream 清单路径：`.codex/agents/mercury-*`、`.codex/rules/mercury-*`、`.codex/project/mercury-*` 和 `.codex/mercury-template.lock`。SoT 侧不得创建、修改或发起这些路径的内容变更。
-- 需要调整通用模板时，SoT 只提供需求与证据，由 Mercury 发起 Issue/PR；上游合并后再单向生成并消费 SoT 产物。不得在 SoT 反向修改生成源或锁文件。
-- 会话涉及通用 Harness 所有权或任务合同且对应文件已安装时，按需读取 `.codex/project/mercury-harness-ownership.md`、`.codex/project/mercury-task-contract.md` 与 `.codex/project/mercury-lane-contract.md`。这些合同由 Mercury generator 安装；文件缺失时不仿造、不阻断无关领域工作。
+- Mercury 只拥有它装载的通用 Harness 路径：`.mercury/packs/`、`.mercury/lock.json`、`.codex/agents/mercury-*`、`.codex/rules/mercury-*`、`.claude/agents/mercury-*`、`.agents/skills/mercury-*`、`.github/workflows/mercury-*.yml`，以及本文件与 `CLAUDE.md` 顶部由 Mercury 开始、结束标记包围的受管段。`.mercury/config.json` 由 SoT 维护。SoT 侧不得创建、修改或发起这些受管路径的内容变更。
+- 需要调整通用 Harness 时，SoT 只提供需求与证据，由 Mercury 发起 Issue/PR；Mercury 发布到 `master` 后，由 `Mercury update` 工作流开更新 PR 单向装载，或在修改 `.mercury/config.json` 后从已发布的 Mercury 提交运行安装器。不得在 SoT 反向修改受管路径或锁文件。
+- 会话涉及通用 Harness 所有权或任务合同时，按需读取 `.mercury/packs/core/docs/mercury-harness-ownership.md` 与 `.mercury/packs/core/docs/mercury-task-contract.md`；lane 合同 `.mercury/packs/lanes/docs/mercury-lane-contract.md` 只在装载 lanes pack 时存在。这些文件由 Mercury 安装；缺失时不仿造、不阻断无关领域工作。
 
 ## 活跃记忆根
 
