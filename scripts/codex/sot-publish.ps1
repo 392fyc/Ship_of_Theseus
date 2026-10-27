@@ -184,6 +184,15 @@ if ($protectedBranches -contains $branch.ToLowerInvariant()) {
 
 $null = Invoke-Git -GitArgs @("check-ref-format", "--branch", $branch)
 $null = Invoke-Git -GitArgs @("remote", "get-url", "origin")
+# Branches are named for their purpose; an agent or lane prefix is refused for a branch not yet on origin
+# (Mercury #703, docs/lane-collaboration.md section 6). A branch already published keeps its name.
+if ($branch -cmatch '^(claude|codex|lane)/') {
+    $published = @()
+    try { $published = @(Invoke-Git -GitArgs @("ls-remote", "--heads", "origin", "refs/heads/$branch")) } catch { $published = @() }
+    if ($published.Count -eq 0) {
+        throw "Branch '$branch' starts with an agent or lane prefix. Rename it to <type>/<purpose>[-<lane>]-<agent>, for example feature/zhufeng-review-gameplay-design-claude, then publish."
+    }
+}
 $status = @(Invoke-Git -GitArgs @("status", "--porcelain"))
 if ($status.Count -ne 0) {
     throw "Working tree is not clean. Commit changes before publishing."

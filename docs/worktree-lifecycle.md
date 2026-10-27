@@ -34,8 +34,8 @@ PowerShell 7 中，从当前游戏工作区调用以下入口，或使用已解�
 ```powershell
 ./scripts/codex/sot-worktree.ps1 -Action List
 ./scripts/codex/sot-worktree.ps1 -Action Inspect -Repository ship -Task example-task -BaseRef refs/remotes/origin/develop
-./scripts/codex/sot-worktree.ps1 -Action Create -Repository ship -Task example-task -Branch codex/example-task -BaseRef refs/remotes/origin/develop
-./scripts/codex/sot-worktree.ps1 -Action Create -Repository designlib -Task example-task -Branch codex/example-task -BaseRef refs/remotes/origin/master
+./scripts/codex/sot-worktree.ps1 -Action Create -Repository ship -Task example-task -Branch feature/example-task-codex -BaseRef refs/remotes/origin/develop
+./scripts/codex/sot-worktree.ps1 -Action Create -Repository designlib -Task example-task -Branch feature/example-task-codex -BaseRef refs/remotes/origin/master
 ```
 
 `List` 返回三库实际 Git 登记，包括未处于预期目录组的工作树。`Inspect` 只读显示 HEAD、分支、普通状态、ignored 文件、隐藏修改的索引标志，以及指定基准之后的提交数。它不联网，也不把上述信息自动解释成删除许可。

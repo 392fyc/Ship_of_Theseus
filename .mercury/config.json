@@ -3,7 +3,8 @@
   "packs": [
     "core",
     "deploy",
-    "plan"
+    "plan",
+    "lanes"
   ],
   "linked_repos": [
     {
@@ -40,6 +41,9 @@
         "Create",
         "KbReturn"
       ]
-    }
+    },
+    "skip_skills": [
+      "lane-handoff"
+    ]
   }
 }
