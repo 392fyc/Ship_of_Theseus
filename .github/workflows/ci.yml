@@ -32,18 +32,36 @@ jobs:
           workflows = {p.name: yaml.load(p.read_text(encoding='utf-8'), Loader=yaml.BaseLoader)
                        for p in Path('.github/workflows').glob('*.yml')}
           assert all(isinstance(w, dict) and isinstance(w.get('jobs'), dict) for w in workflows.values())
-          sync = workflows['mercury-sync.yml']
-          assert set(sync['on']) == {'schedule', 'workflow_dispatch'}
-          assert sync['permissions'] == {'contents': 'read'}
-          job = sync['jobs']['update']
-          assert job['permissions'] == {'contents': 'write', 'pull-requests': 'write',
-                                        'actions': 'write', 'checks': 'read', 'statuses': 'read'}
+          # The Mercury v1 sync workflow is retired; the Mercury v2 update workflow (managed by Mercury) replaces it.
+          assert 'mercury-sync.yml' not in workflows
+          update = workflows['mercury-update.yml']
+          assert set(update['on']) == {'schedule', 'workflow_dispatch'}
+          assert update['permissions'] == {'contents': 'read'}
+          # On this default branch a scheduled run only starts the same workflow on the integration branch.
+          dispatch = update['jobs']['dispatch']
+          assert dispatch['permissions'] == {'actions': 'write'}
+          assert dispatch['env']['MERCURY_BASE'] == 'develop'
+          assert "github.ref_name != 'develop'" in dispatch['if']
+          command = shlex.split(dispatch['steps'][-1]['run'])
+          assert command[:4] == ['gh', 'workflow', 'run', 'mercury-update.yml']
+          assert command[command.index('--ref') + 1] == '$MERCURY_BASE'
+          assert 'secrets.' not in str(dispatch) and 'create-github-app-token' not in str(dispatch)
+          # The update job reads Mercury from its released master and writes only the integration branch.
+          job = update['jobs']['update']
+          assert set(update['jobs']) == {'dispatch', 'update'}
+          assert len(dispatch['steps']) == 1
+          assert 'permissions' not in job  # the workflow token stays read-only; writes use the narrowed App token
+          app = [s for s in job['steps'] if s.get('uses', '').startswith('actions/create-github-app-token@')]
+          assert len(app) == 1
+          assert {k: v for k, v in app[0]['with'].items() if k.startswith('permission-')} == {
+              'permission-contents': 'write', 'permission-pull-requests': 'write',
+              'permission-workflows': 'write', 'permission-checks': 'read', 'permission-statuses': 'read'}
+          assert job['env']['MERCURY_BASE'] == 'develop'
           source = [s for s in job['steps'] if s.get('with', {}).get('repository') == '392fyc/Mercury']
-          assert len(source) == 1 and source[0]['with']['ref'] == 'develop'
+          assert len(source) == 1 and source[0]['with']['ref'] == 'master'
           assert source[0]['with']['persist-credentials'] == 'false'
-          command = shlex.split(job['steps'][-1]['run'])
-          assert '--publish-only' in command and command[command.index('--base') + 1] == 'develop'
-          assert command[command.index('--repo') + 1] == '392fyc/Ship_of_Theseus'
+          target = [s for s in job['steps'] if s.get('with', {}).get('path') == 'target']
+          assert len(target) == 1 and target[0]['with']['ref'] == 'develop'
           print('Workflow configuration and publication boundaries passed')
           PY
   integration-ci:
