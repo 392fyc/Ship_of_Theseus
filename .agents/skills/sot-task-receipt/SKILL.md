@@ -43,7 +43,7 @@ SoT 跨仓或设计库任务再增加以下字段：
   "task_id": "TASK-000",
   "status": "completed",
   "target_repository": "Ship_of_Theseus",
-  "target_branch": "codex/example",
+  "target_branch": "feature/example-codex",
   "target_head_before": "<full sha>",
   "candidate_head": null,
   "contract_summary": [{"contract": "AGENTS.md", "summary": "Codex project boundary"}],

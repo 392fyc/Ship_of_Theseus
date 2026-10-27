@@ -184,6 +184,19 @@ if ($protectedBranches -contains $branch.ToLowerInvariant()) {
 
 $null = Invoke-Git -GitArgs @("check-ref-format", "--branch", $branch)
 $null = Invoke-Git -GitArgs @("remote", "get-url", "origin")
+# Branches are named for their purpose; an agent or lane prefix is refused for a branch not yet on origin
+# (Mercury #703, docs/lane-collaboration.md section 6). A branch already published keeps its name.
+if ($branch -match '^(claude|codex|lane)/') {
+    # --exit-code: 0 the branch is on origin, 2 it is not, anything else means origin could not be read.
+    $null = & git ls-remote --exit-code --heads origin "refs/heads/$branch" 2>$null
+    $lsRemoteExit = $LASTEXITCODE
+    if ($lsRemoteExit -eq 2) {
+        throw "Branch '$branch' starts with an agent or lane prefix. Rename it to <type>/<purpose>[-<lane>]-<agent>, for example feature/zhufeng-review-gameplay-design-claude (git branch -m <new name>), then publish."
+    }
+    if ($lsRemoteExit -ne 0) {
+        throw "Cannot check whether '$branch' is already on origin (git ls-remote exit code $lsRemoteExit); retry when origin is reachable. Do not rename a branch that is already published."
+    }
+}
 $status = @(Invoke-Git -GitArgs @("status", "--porcelain"))
 if ($status.Count -ne 0) {
     throw "Working tree is not clean. Commit changes before publishing."

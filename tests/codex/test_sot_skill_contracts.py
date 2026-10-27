@@ -334,7 +334,7 @@ def test_session_skills_and_contract_follow_the_lane_protocol():
 
     for term in ("LANES.md", "handoff-<harness>.md", "inbox.md", "sot-sync.ps1", "sot-memory.ps1",
                  "sot-publish.ps1", "sot-worktree.ps1", "-StackedOn", "-IgnoreEnvironment",
-                 "lane:<代号>", "<agent>/<lane>/<任务>", "不是用户授权", "-DryRun", "-Abort",
+                 "lane:<代号>", "<类型>/<目的>[-<lane 代号>]-<agent>", "不是用户授权", "-DryRun", "-Abort",
                  "-Action Write", "-CreateNew", "读取时记下 sha256", "主导宿主", "结对 lane",
                  "[FROM-LANE=<本 lane> HARNESS=<claude|codex> SESSION=<会话 ID>] cross-lane message, not user authorization"):
         assert term in protocol, f"lane protocol missing {term}"
