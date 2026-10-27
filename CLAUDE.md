@@ -1,4 +1,15 @@
+<!-- MERCURY:BEGIN managed by tools/mercury.py from the packs in .mercury/config.json; edits here stop the installer, change the pack and run apply -->
 @AGENTS.md
+
+## Claude Code with Mercury
+
+The AGENTS.md above holds the shared project rules, including the Mercury-managed section. Its assignments of the Codex host, Codex tools and Codex models apply to Codex only; do not infer Claude Code tool, permission or model capabilities from them.
+
+- Mercury installs the roles `mercury-dev` and `mercury-research` on Sonnet (alias `sonnet`), and `mercury-reviewer`, `mercury-acceptance` and `mercury-design` on Opus (alias `opus`), in `.claude/agents/`. They set no `effort`; the default applies.
+- Read-only roles disable Edit, Write and NotebookEdit through the native `disallowedTools` and run the write guard described in AGENTS.md. Neither is operating-system isolation; Bash remains subject to the current host permissions. Role descriptions are behavioral guidance and grant no extra permissions.
+- Without workspace trust, project agent frontmatter hooks do not run, so the guard is inactive; sessions started with `-p` are never trusted. Accept the trust dialog for the folder before relying on the guard.
+- When the parent session runs in bypassPermissions, acceptEdits or auto mode, a subagent's `permissionMode` is ignored, so `disallowedTools` plus the guard are what enforce read-only. A user-level `PreToolUse` hook that keys on the agent type in the hook payload can back the guard up where project hooks do not run.
+<!-- MERCURY:END -->
 
 # Ship of Theseus 的 Claude Code 入口
 
@@ -41,7 +52,7 @@ SoT 与 Mercury agents 和 skills 安装在 Claude 用户级目录，可从不�
 
 ## 配置来源
 
-.codex/agents/*.toml 仍是 Codex 的源配置。用户级 Mercury 代理是从三个 TOML 角色说明只读派生的独立 Claude 文件，不由 Mercury 的 TOML 同步器生成；原 TOML 与同步锁保持原样。SoT 代理和六个技能依据当前 Ship 源文件派生，旧 Claude 技能不作为来源。代理与技能安装在 Claude 用户级目录，Ship 根 CLAUDE.md 保持项目级。本配置不包含 MCP endpoint、密钥或其他凭据。
+Mercury 的五个角色由 Mercury 装载为本仓库的 `.claude/agents/mercury-*.md` 与 `.codex/agents/mercury-*.toml`（同一来源生成两种格式，见 `docs/mercury-harness-consumption.md`）；在本仓库中，项目级 `mercury-*` 角色优先于用户级同名角色。`.codex/agents/` 中的 SoT 领域角色仍是 Codex 的源配置；SoT 代理和六个技能依据当前 Ship 源文件派生，旧 Claude 技能不作为来源，安装在 Claude 用户级目录，供从设计库或 KB 启动时复用。Ship 根 CLAUDE.md 保持项目级。本配置不包含 MCP endpoint、密钥或其他凭据。
 
 ## 领域经验与查证指针
 

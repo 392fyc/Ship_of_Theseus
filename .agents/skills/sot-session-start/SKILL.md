@@ -41,7 +41,7 @@ description: "Initialize a Ship of Theseus Codex session from optional active me
 - 需要结构化玩法目标事实时使用 `sot-designlib`。
 - 需要叙事、定性设计、用户裁决、ADR、研究或工作记录时，通过 `sot-kb-write` 的搜索与读取流程访问 KB。
 - 需要当前可执行行为时读取本游戏仓代码、数据与测试。
-- 涉及通用 Harness 所有权或任务合同且文件已安装时，按需读取 `.codex/project/mercury-harness-ownership.md`、`.codex/project/mercury-task-contract.md` 与 `.codex/project/mercury-lane-contract.md`；它们由 Mercury generator 单向生成，缺失时不仿造。
+- 涉及通用 Harness 所有权或任务合同且文件已安装时，按需读取 `.mercury/packs/core/docs/mercury-harness-ownership.md`、`.mercury/packs/core/docs/mercury-task-contract.md`，以及装载 lanes pack 时才有的 `.mercury/packs/lanes/docs/mercury-lane-contract.md`；它们由 Mercury 单向装载，缺失时不仿造。
 
 ## 5. 汇报启动摘要
 

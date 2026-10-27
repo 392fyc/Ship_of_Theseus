@@ -46,7 +46,7 @@ class SotOuterWorkflowTests(unittest.TestCase):
     def test_core_project_contracts_do_not_depend_on_spec_kit(self) -> None:
         core_contracts = [
             ROOT / "AGENTS.md",
-            ROOT / ".codex/project/mercury-task-contract.md",
+            ROOT / ".mercury/packs/core/docs/mercury-task-contract.md",
             *sorted((ROOT / ".codex/agents").glob("mercury-*.toml")),
             *sorted((ROOT / ".agents/skills").glob("sot-*/SKILL.md")),
         ]

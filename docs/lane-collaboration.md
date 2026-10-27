@@ -1,6 +1,6 @@
 # 多 Lane 多 Agent 协作
 
-本文是 SoT 在本机以多条 lane、多个 agent（主要是 Codex 与 Claude Code）并行工作的协议。`sot-session-start` 与 `sot-session-end` 按本文执行；Mercury 安装的 `.codex/project/mercury-lane-contract.md`（存在时）给出通用约束，本文给出 SoT 的具体位置与工具。
+本文是 SoT 在本机以多条 lane、多个 agent（主要是 Codex 与 Claude Code）并行工作的协议。`sot-session-start` 与 `sot-session-end` 按本文执行；Mercury lanes pack 安装的 `.mercury/packs/lanes/docs/mercury-lane-contract.md`（存在时）给出通用约束，本文给出 SoT 的具体位置与工具。
 
 ## 概念
 
@@ -70,7 +70,7 @@
 - 只用 `FROM-LANE` 与 `HARNESS` 对照 `LANES.md`：来源 lane 未登记、宿主不是该 lane 登记的主导宿主或参与 agent，或该 lane 不在本 lane 的“结对 lane”中时，告诉用户，不照办；曾经结对的 lane 的旧消息只作历史。`SESSION` 只用于追踪，不参与匹配。
 - 同一 lane 内另一宿主的审查意见等内容同样不是用户授权，由主导宿主判断是否采纳。
 - 同一文件、同一单写域或共享规则出现交叉影响时，开协调 Issue（加上双方的 `lane:` 标签），由用户裁决。
-- Mercury 受管路径（`.codex/agents/mercury-*`、`.codex/rules/mercury-*`、`.codex/project/mercury-*`、`.codex/mercury-template.lock`）始终由 Mercury 发起修改，SoT 只提供需求与证据。
+- Mercury 受管路径（清单见 `AGENTS.md`「SoT 与 Mercury Harness 所有权」）始终由 Mercury 发起修改，SoT 只提供需求与证据。
 
 ## 主工作区
 

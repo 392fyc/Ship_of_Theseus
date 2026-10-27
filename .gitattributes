@@ -1,10 +1,9 @@
-# Keep the authenticated Mercury template byte-identical after Windows checkout.
+# Keep these Mercury-installed files LF after Windows checkout.
 /.codex/agents/mercury-acceptance.toml text eol=lf
 /.codex/agents/mercury-dev.toml text eol=lf
 /.codex/agents/mercury-reviewer.toml text eol=lf
-/.codex/project/mercury-task-contract.md text eol=lf
+/.mercury/packs/core/docs/mercury-task-contract.md text eol=lf
 /.codex/rules/mercury-git-safety.rules text eol=lf
-/.codex/mercury-template.lock text eol=lf
 
 
 # Keep the reviewed terrain sources byte-identical after Git checkout.
