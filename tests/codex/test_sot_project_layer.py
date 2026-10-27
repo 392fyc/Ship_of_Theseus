@@ -218,7 +218,7 @@ def test_routing_and_root_configuration_keep_authorities_distinct() -> None:
     # may exist on disk; it must stay ignored and untracked.
     local_roots = ".codex/project/sot-roots.local.toml"
     assert local_roots in read_text(ROOT / ".gitignore")
-    assert ".sot/memory/" in read_text(ROOT / ".gitignore")
+    assert "/.sot/" in read_text(ROOT / ".gitignore").splitlines()
     assert "/.worktrees/" in read_text(ROOT / ".gitignore")
     assert "/.tmp/" in read_text(ROOT / ".gitignore")
     tracked = subprocess.run(
@@ -237,6 +237,13 @@ def test_routing_and_root_configuration_keep_authorities_distinct() -> None:
         ],
     )
     assert ignored_memory.returncode == 0
+    ignored_lane_work = subprocess.run(
+        [
+            "git", "-C", str(ROOT), "check-ignore", "-q", "--no-index", "--",
+            ".sot/lane-work/example-lane/raw.bin",
+        ],
+    )
+    assert ignored_lane_work.returncode == 0
 
 
 def test_project_owned_files_do_not_embed_machine_state_or_runtime_credentials() -> None:

@@ -38,7 +38,7 @@ desktop.ini
 opencode.json
 .omc/
 .codex/project/sot-roots.local.toml
-.sot/memory/
+/.sot/
 # Note: CLAUDE.md / AGENTS.md / .cursorrules / .claude/skills/ / .cursor/rules/ are project-level AI instructions, tracked in VCS
 # Note: .mcp.json / opencode.json contains API keys, never commit
 
