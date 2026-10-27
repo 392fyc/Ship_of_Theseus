@@ -44,6 +44,8 @@ PowerShell 7 中，从当前游戏工作区调用以下入口，或使用已解�
 
 创建后仍应读取目标仓指令与 canonical 合同，遵守既有独立审查、跨仓发布与数据写入授权。KB 日常写入只在固定 vault 当前任务分支中进行：`Create -Repository kb` 明确拒绝，`List/Inspect` 可查看 KB 的已有 Git 工作树；不得把它们另开成 vault 或为释放分支自动删除。
 
+KB 的 PR 合并后，用 `sot-worktree.ps1 -Action KbReturn -Repository kb` 让固定 vault 归位。它依次检查：`kb_root` 是 vault 主 checkout 而不是链接工作树；工作区干净（含 untracked）；不在 detached HEAD；当前分支不是 `main`、`master`、`develop`。当前在任务分支上时，还要有合入证据：GitHub 上有合入默认分支的已合并 PR，其头提交等于末端（squash 或普通合并都适用）；或者末端已在 `origin/<默认分支>` 中，且该分支有自己的提交（按 reflog，末端已不是创建时所在的提交）。最后确认切换与快进都能成功：本地默认分支没有 origin 缺少的提交，也没有被其他 worktree 检出。全部满足才切回 origin 的默认分支、只以 fast-forward 更新，并删除该本地任务分支（凭祖先关系用 `-d`，凭 PR 核实用 `-D`）。已在默认分支上时只做快进。任一条件不满足就停止，不做任何改动。`-DryRun` 只输出计划；它和真实运行一样会先 `git fetch --prune origin`。
+
 ### 测试模式与预演
 
 `sot-worktree.ps1 -IgnoreEnvironment` 只读取 `-RootsFile`，完全忽略 `SOT_*` 环境变量；审查和测试应配合临时 roots 文件使用，避免误写真实仓库。显式传入 `-RootsFile` 但未加该开关时，若有环境变量覆盖，会向 stderr 输出警告并列出变量名。`Create -DryRun` 完成全部校验后只输出计划（路径、分支、起点提交、将写入的本地 roots 内容），不建目录、分支或文件；目标分支已存在时失败，也不检查新树中的本地 roots 文件是否被忽略（该检查需要新树，仅在真实 Create 时执行）。

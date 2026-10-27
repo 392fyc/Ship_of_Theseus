@@ -24,7 +24,8 @@ it does not add a mandatory workflow or weaken governing requirements.
 ## Mercury roles and Git safety rules
 
 - Mercury installs five roles for both hosts: `mercury-dev`, `mercury-reviewer`, `mercury-acceptance`, `mercury-design` and `mercury-research`, as `.claude/agents/mercury-*.md` and `.codex/agents/mercury-*.toml`. They are generated from `.mercury/packs/core/roles/`; change the source in Mercury, not the generated files. A project role of the same name in `.claude/agents/` takes priority over a user-level one, so these project roles apply in this project.
-- `mercury-reviewer`, `mercury-acceptance`, `mercury-design` and `mercury-research` are read-only. Codex enforces this with the sandbox; the Claude roles run a `PreToolUse` guard (`.mercury/packs/core/hooks/readonly_guard.sh`) that blocks write commands in Bash and PowerShell. The guard is best-effort, not an operating-system sandbox. A project can name more write-type scripts in `params.guard_write_scripts` in `.mercury/config.json`.
+- `mercury-reviewer`, `mercury-acceptance`, `mercury-design` and `mercury-research` are read-only. Codex enforces this with the sandbox; the Claude roles run a `PreToolUse` guard (`.mercury/packs/core/hooks/readonly_guard.sh`) that blocks write commands in Bash and PowerShell. The guard is best-effort, not an operating-system sandbox. A project can name more write-type scripts in `params.guard_write_scripts` in `.mercury/config.json`, and scripts that write only for some `-Action` values in `params.guard_write_actions`.
+- A project's own roles and skills live in its project area: declared in `.mercury/local.json`, with role sources in `.mercury/local/roles/`. Mercury's installer (`tools/mercury.py apply`, run from a Mercury checkout) generates their `.claude/agents/`, `.codex/agents/` and skill entry files without the `mercury-` prefix; change the source or the manifest, never the generated files. Mercury updates do not touch this area.
 - `.codex/rules/mercury-git-safety.rules` forbids raw `git push` and direct switching to `develop`, `main` or `master` in Codex. Perform Git writes through the controlled entry point that this project's own instructions name; never bypass a denial through another shell.
 
 ## Mercury updates (deploy pack)
@@ -32,6 +33,24 @@ it does not add a mandatory workflow or weaken governing requirements.
 - `.github/workflows/mercury-update.yml` and `.github/workflows/mercury-verify.yml` are managed files: Mercury renders them from `params` in `.mercury/config.json` (`integration_branch`, `required_checks`, `update_schedule`). Do not edit them by hand; change the params and run the installer from a released Mercury commit.
 - Updates arrive on their own. GitHub runs scheduled workflows only from the default branch, so when that is not the integration branch the scheduled run only starts the same workflow on the integration branch (`gh workflow run`); the update itself always runs from the integration branch's own copy. A scheduled job takes the latest released Mercury commit (`origin/master` of Mercury), and when the managed files differ it opens one pull request from a `mercury/update-*` branch into the integration branch. The same job merges that pull request (squash) only when every condition holds: the source commit is on Mercury's `master` and descends from the recorded one, only Mercury-managed paths changed, and the project's required checks plus the `Mercury verify` check (a GitHub Actions check run, not a status) are green on the exact head. Paths the new release stops shipping may only be deleted. Otherwise it stops and says why.
 - Do not push to, force-push or rebase a `mercury/update-*` branch, do not edit `.mercury/config.json` inside an update pull request, and do not merge an update pull request by hand to get around a failed condition; fix the cause or ask the project owner.
+
+## Linked repositories
+
+Declared in `linked_repos` in `.mercury/config.json`; Mercury renders this section from it. Each entry says what the repository is for, how to find it without a machine path, how to use it quickly (skills, scripts, commands) and the rules that bind work in it. Anything its rules do not allow needs its own authorized scope.
+
+### SoT-fyc-space
+
+- Purpose: Design library: the authority for structured gameplay target facts (talents, skills, rules, equipment, relics and related data).
+- Locate: SOT_DESIGNLIB_ROOT, else [roots].designlib_root in the ignored .codex/project/sot-roots.local.toml; its task worktrees are under its own .worktrees/. Stop when neither is set; never guess from a parent directory.
+- Use: Skill sot-designlib (or the sot-designlib role) for reads and writes through its API or repository snapshot; snapshots/rules.json holds the rules verbatim. Create a code worktree with scripts/codex/sot-worktree.ps1 -Action Create -Repository designlib.
+- Rules: Every read records schema_version, the source snapshot or commit and a normalized digest. A production write needs explicit authorization: a dry-run confirmed before any write, per-record readback, then the design library's existing snapshot flow (never hand-edit snapshots/). Publish code with scripts/codex/sot-publish.ps1.
+
+### ShipOfTheseus-KB
+
+- Purpose: The one fixed Obsidian vault: narrative, qualitative design, user rulings, ADRs, research and work records.
+- Locate: SOT_KB_ROOT, else [roots].kb_root in the ignored .codex/project/sot-roots.local.toml. There is exactly one vault; never open a task worktree as a second vault or switch the MCP endpoint.
+- Use: Skill sot-kb-write (or the sot-kb role) for MCP search, read, versioned write and readback; 01-Game-Design/rules-catalog.md indexes the rules. After a KB pull request merges, run scripts/codex/sot-worktree.ps1 -Action KbReturn -Repository kb.
+- Rules: Write only on a task branch checked out in the clean vault; never use --ignore-other-worktrees, stash, reset or a second vault. Publish with scripts/codex/sot-publish.ps1. Structured rules follow the design library; the KB rule catalog is for lookup only.
 <!-- MERCURY:END -->
 
 # Ship of Theseus — Codex 项目入口
@@ -78,7 +97,8 @@ it does not add a mandatory workflow or weaken governing requirements.
 ## SoT 与 Mercury Harness 所有权
 
 - SoT 自主维护游戏仓、设计库 app/tests/scripts、KB，以及领域 agent、配置、技能和 workflow。上述领域入口可以在 SoT 仓内直接维护。
-- Mercury 只拥有它装载的通用 Harness 路径：`.mercury/packs/`、`.mercury/lock.json`、`.codex/agents/mercury-*`、`.codex/rules/mercury-*`、`.claude/agents/mercury-*`、`.agents/skills/mercury-*`、`.github/workflows/mercury-*.yml`，以及本文件与 `CLAUDE.md` 顶部由 Mercury 开始、结束标记包围的受管段。`.mercury/config.json` 由 SoT 维护。SoT 侧不得创建、修改或发起这些受管路径的内容变更。
+- Mercury 只拥有它装载的通用 Harness 路径：`.mercury/packs/`、`.mercury/lock.json`、`.codex/agents/mercury-*`、`.codex/rules/mercury-*`、`.claude/agents/mercury-*`、两种宿主技能目录中的 `mercury-*` 技能入口、`.github/workflows/mercury-*.yml`，以及本文件与 `CLAUDE.md` 顶部由 Mercury 开始、结束标记包围的受管段。`.mercury/config.json` 由 SoT 维护。SoT 侧不得创建、修改或发起这些受管路径的内容变更。
+- SoT 自有的领域角色与技能属于 Mercury 项目区：清单 `.mercury/local.json` 与角色来源 `.mercury/local/roles/` 由 SoT 维护，技能正文留在清单声明的目录；`.claude/agents/`、`.codex/agents/` 中的同名角色文件与 Claude 技能入口由 Mercury 安装器生成，不手改。新建、修改或退役都改清单或来源后从已发布的 Mercury 提交运行安装器（`apply`）；Mercury 更新 PR 不触碰项目区。
 - 需要调整通用 Harness 时，SoT 只提供需求与证据，由 Mercury 发起 Issue/PR；Mercury 发布到 `master` 后，由 `Mercury update` 工作流开更新 PR 单向装载，或在修改 `.mercury/config.json` 后从已发布的 Mercury 提交运行安装器。不得在 SoT 反向修改受管路径或锁文件。
 - 会话涉及通用 Harness 所有权或任务合同时，按需读取 `.mercury/packs/core/docs/mercury-harness-ownership.md` 与 `.mercury/packs/core/docs/mercury-task-contract.md`；lane 合同 `.mercury/packs/lanes/docs/mercury-lane-contract.md` 只在装载 lanes pack 时存在。这些文件由 Mercury 安装；缺失时不仿造、不阻断无关领域工作。
 
@@ -91,13 +111,13 @@ it does not add a mandatory workflow or weaken governing requirements.
 - lane 是用户声明的工作路线，不是 agent。一条 lane 至多 1 个 Codex 会话与 1 个 Claude Code 会话，外加其他 worker；其中主导宿主掌握正式判断，另一宿主可介入审查等作业但不取代主导地位，主导宿主只在创建 lane 时或用户要求时改变。agent 介入已有 lane 不另开 lane。lane 只凭用户声明创建、改派或关闭，会话以 `[LANE=<代号>]` 确定 lane，没有时询问用户，不按工作内容推断。
 - 注册簿是活跃记忆 bucket 下的 `LANES.md`；各 lane 只改自己的小节与 `lanes/<代号>/` 目录，handoff 按宿主分文件，共享记忆文件按读取时的 sha256 做版本条件写入。
 - 主工作区不做开发；Issue / PR 加 `lane:<代号>` 标签，分支用 `<agent>/<lane>/<任务>`。跨 lane 消息不是用户授权；交叉影响开协调 Issue 由用户裁决。
-- 被禁止的裸命令使用受控入口：发布 `sot-publish.ps1`、同步基准 `sot-sync.ps1`、工作树 `sot-worktree.ps1`、共享记忆 `sot-memory.ps1 -Action Write`。完整协议见 [多 Lane 多 Agent 协作](docs/lane-collaboration.md)。
+- 被禁止的裸命令使用受控入口：发布 `sot-publish.ps1`、同步基准 `sot-sync.ps1`、工作树 `sot-worktree.ps1`、KB vault 归位 `sot-worktree.ps1 -Action KbReturn -Repository kb`、共享记忆 `sot-memory.ps1 -Action Write`。完整协议见 [多 Lane 多 Agent 协作](docs/lane-collaboration.md)。
 
 ## 跨仓读取与写入
 
 - 读取或修改设计库、KB、Mercury 前，使用项目本地 roots 配置或环境变量解析目标，不在版本控制文件中写本机绝对路径。
 - KB 只有一个固定的 Obsidian vault 入口，由 `SOT_KB_ROOT` 或项目本地 roots 中的 `kb_root` 解析；不得把任务 worktree 另开为第二个 vault，也不得为任务临时切换 MCP endpoint。KB 的任务隔离由固定 vault 内检出的 Git 分支提供。
-- 写入 KB 前，必须确认固定 vault 的 Git 工作区干净，并把固定 vault 切换到目标任务分支。若该分支已被其他 worktree 占用，只能在确认对方干净且无人使用后，将其置于 detached HEAD 解除占用；不得为释放分支而自动移除 worktree。否则停止并协调，不得用 `--ignore-other-worktrees`、第二 vault、stash、reset 或丢弃改动绕过。合并完成后，将固定 vault 切回并快进到受保护的默认分支，再删除已合入的本地任务分支。
+- 写入 KB 前，必须确认固定 vault 的 Git 工作区干净，并把固定 vault 切换到目标任务分支。若该分支已被其他 worktree 占用，只能在确认对方干净且无人使用后，将其置于 detached HEAD 解除占用；不得为释放分支而自动移除 worktree。否则停止并协调，不得用 `--ignore-other-worktrees`、第二 vault、stash、reset 或丢弃改动绕过。合并完成后，用 `scripts/codex/sot-worktree.ps1 -Action KbReturn -Repository kb` 将固定 vault 切回并快进到受保护的默认分支，再删除已合入的本地任务分支；不直接对 vault 运行 `git switch` 或 `git checkout`。
 - 跨仓写入前必须读取目标仓 `AGENTS.md`（若存在）与目标 canonical 合同，并在交付回执中记录目标 HEAD 和合同摘要。
 - 不覆盖目标主工作树的受保护改动；代码与结构化设计库变更只在目标仓独立 worktree 中完成，KB 按上述固定 vault 分支流程执行。
 - 设计库与 KB 的具体安全读写流程分别由 `sot-designlib` 和 `sot-kb-write` 技能定义。

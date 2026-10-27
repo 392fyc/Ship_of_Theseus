@@ -1,11 +1,11 @@
 ---
 name: sot-design-present
-description: "用 html-plan-zh 呈现 SoT 的玩法设计提案（职业、技能、回忆天赋与节点、规则数值、模拟评估）时使用：补充 SoT 的论断拆分、卡面写法、评估指标、自主裁决的来源与分类，以及隐私边界。"
+description: "用 mercury-html-plan-zh 呈现 SoT 的玩法设计提案（职业、技能、回忆天赋与节点、规则数值、模拟评估）时使用：补充 SoT 的论断拆分、卡面写法、评估指标、自主裁决的来源与分类，以及隐私边界。"
 ---
 
 # SoT 玩法设计提案的呈现
 
-本技能只补充 SoT 领域的写法。页面结构、块语法、打包与回复处理，以 `html-plan-zh` 技能及其 `references/design-proposals.md` 为准；动笔前先读这两份。
+本技能只补充 SoT 领域的写法。页面结构、块语法、打包与回复处理，以 Mercury plan pack 的 `mercury-html-plan-zh` 技能（完整内容在 `.mercury/packs/plan/skills/html-plan-zh/`）及其 `references/design-proposals.md` 为准；动笔前先读这两份。
 
 ## 什么时候用
 
@@ -54,7 +54,7 @@ description: "用 html-plan-zh 呈现 SoT 的玩法设计提案（职业、技�
    - 内容取舍：不替换、不删除用户定过的回忆与节点；偏弱时列为观察项。
    - 硬规则要求的授权（生产设计库写入、永久删除、跨仓合并）：不放进页面，在聊天里单独请求，或引用用户已经给出的书面授权；所引授权的范围必须覆盖这次操作。
 3. 用户说过的话标“裁决”，用 `doc-quote` 引用原话；原话必须能逐字找到出处。
-4. 以上都覆盖时，页面可以不设决策（`html-plan-zh` 参考第 5 条）。
+4. 以上都覆盖时，页面可以不设决策（`mercury-html-plan-zh` 参考第 5 条）。
 
 ## 隐私与来源
 
@@ -63,4 +63,4 @@ description: "用 html-plan-zh 呈现 SoT 的玩法设计提案（职业、技�
 
 ## 交付
 
-`node <html-plan-zh 目录>/runtime/pack.mjs 页面.html --root <设计库任务工作树> --artifact`。证据分布在多个仓库时，可以重复传入 `--root`（例如再加 KB 或游戏仓）。把离线版文件发给用户，并给私有 Artifact 链接。汇报里列出：本轮自主裁决了什么（按上面的类别）、已知问题、仍需用户授权的事项。
+`node .mercury/packs/plan/skills/html-plan-zh/runtime/pack.mjs 页面.html --root <设计库任务工作树> --artifact`。证据分布在多个仓库时，可以重复传入 `--root`（例如再加 KB 或游戏仓）。把离线版文件发给用户，并给私有 Artifact 链接。汇报里列出：本轮自主裁决了什么（按上面的类别）、已知问题、仍需用户授权的事项。

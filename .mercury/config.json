@@ -2,18 +2,44 @@
   "schema_version": 1,
   "packs": [
     "core",
-    "deploy"
+    "deploy",
+    "plan"
+  ],
+  "linked_repos": [
+    {
+      "name": "SoT-fyc-space",
+      "purpose": "Design library: the authority for structured gameplay target facts (talents, skills, rules, equipment, relics and related data).",
+      "locate": "SOT_DESIGNLIB_ROOT, else [roots].designlib_root in the ignored .codex/project/sot-roots.local.toml; its task worktrees are under its own .worktrees/. Stop when neither is set; never guess from a parent directory.",
+      "use": "Skill sot-designlib (or the sot-designlib role) for reads and writes through its API or repository snapshot; snapshots/rules.json holds the rules verbatim. Create a code worktree with scripts/codex/sot-worktree.ps1 -Action Create -Repository designlib.",
+      "rules": "Every read records schema_version, the source snapshot or commit and a normalized digest. A production write needs explicit authorization: a dry-run confirmed before any write, per-record readback, then the design library's existing snapshot flow (never hand-edit snapshots/). Publish code with scripts/codex/sot-publish.ps1."
+    },
+    {
+      "name": "ShipOfTheseus-KB",
+      "purpose": "The one fixed Obsidian vault: narrative, qualitative design, user rulings, ADRs, research and work records.",
+      "locate": "SOT_KB_ROOT, else [roots].kb_root in the ignored .codex/project/sot-roots.local.toml. There is exactly one vault; never open a task worktree as a second vault or switch the MCP endpoint.",
+      "use": "Skill sot-kb-write (or the sot-kb role) for MCP search, read, versioned write and readback; 01-Game-Design/rules-catalog.md indexes the rules. After a KB pull request merges, run scripts/codex/sot-worktree.ps1 -Action KbReturn -Repository kb.",
+      "rules": "Write only on a task branch checked out in the clean vault; never use --ignore-other-worktrees, stash, reset or a second vault. Publish with scripts/codex/sot-publish.ps1. Structured rules follow the design library; the KB rule catalog is for lookup only."
+    }
   ],
   "params": {
     "integration_branch": "develop",
     "required_checks": [
-      "Godot headless \u56de\u5f52",
-      "\u4ed3\u5e93\u5951\u7ea6\u4e0e\u91c7\u96c6\u914d\u7f6e\u6d4b\u8bd5"
+      "Godot headless 回归",
+      "仓库契约与采集配置测试"
     ],
     "guard_write_scripts": [
       "sot-publish.ps1",
-      "sot-sync.ps1",
-      "sot-worktree.ps1"
-    ]
+      "sot-sync.ps1"
+    ],
+    "guard_write_actions": {
+      "sot-memory.ps1": [
+        "Record",
+        "Write"
+      ],
+      "sot-worktree.ps1": [
+        "Create",
+        "KbReturn"
+      ]
+    }
   }
 }

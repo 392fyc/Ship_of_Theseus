@@ -18,7 +18,7 @@ The AGENTS.md above holds the shared project rules, including the Mercury-manage
 ## 模型与角色
 
 - Ship 主会话使用最新 Opus：从游戏仓根目录启动时使用 claude --model opus，也可在会话中选择 /model opus。Markdown 指令不能替当前会话设置主模型。
-- 用户级代理文件使用 Claude Code 的 YAML frontmatter。执行与研究角色使用 model: sonnet；独立审查与盲验收使用 model: opus。别名由 Claude Code 按当前登录的官方提供方映射到推荐版本，不固定模型 ID。
+- SoT 领域角色（`game-analyst`、`game-critic`、`game-researcher`、`sot-designlib`、`sot-kb`）与 Mercury 角色都装在本仓库 `.claude/agents/`。执行与研究角色使用 model: sonnet；独立审查、对抗审查与盲验收使用 model: opus。别名由 Claude Code 按当前登录的官方提供方映射到推荐版本，不固定模型 ID。
 - 简单、顺序任务由主会话直接完成。只有独立工作流可并行、需要隔离上下文或任务合同要求独立审查时，才使用对应子代理。
 
 ## 根目录解析
@@ -48,11 +48,11 @@ The AGENTS.md above holds the shared project rules, including the Mercury-manage
 
 ## 从设计库或 KB 直接启动
 
-SoT 与 Mercury agents 和 skills 安装在 Claude 用户级目录，可从不同仓库启动时复用。用户级只读 SessionStart hook 从 SOT_SHIP_ROOT 或用户级本地 roots 文件的 roots.ship_root 解析 Ship 根，并提供 Ship AGENTS.md 路径；会话必须读取该文件正文。若 hook 未提供路径，则显式解析 Ship 根并读取 AGENTS.md；缺少明确根时停止询问，不从相邻仓库推断。Ship 的项目级 CLAUDE.md 不会因另一仓库位于相邻目录而自动生效。
+SoT 的角色与技能装在本仓库，只在从 Ship 启动的会话中生效；日常从 Ship 启动，设计库与 KB 不装载 Mercury。用户级只读 SessionStart hook 从 SOT_SHIP_ROOT 或用户级本地 roots 文件的 roots.ship_root 解析 Ship 根，并提供 Ship AGENTS.md 路径；会话必须读取该文件正文。若 hook 未提供路径，则显式解析 Ship 根并读取 AGENTS.md；缺少明确根时停止询问，不从相邻仓库推断。Ship 的项目级 CLAUDE.md 不会因另一仓库位于相邻目录而自动生效。
 
 ## 配置来源
 
-Mercury 的五个角色由 Mercury 装载为本仓库的 `.claude/agents/mercury-*.md` 与 `.codex/agents/mercury-*.toml`（同一来源生成两种格式，见 `docs/mercury-harness-consumption.md`）；在本仓库中，项目级 `mercury-*` 角色优先于用户级同名角色。`.codex/agents/` 中的 SoT 领域角色仍是 Codex 的源配置；SoT 代理和六个技能依据当前 Ship 源文件派生，旧 Claude 技能不作为来源，安装在 Claude 用户级目录，供从设计库或 KB 启动时复用。Ship 根 CLAUDE.md 保持项目级。本配置不包含 MCP endpoint、密钥或其他凭据。
+Mercury 的五个角色由 Mercury 装载为本仓库的 `.claude/agents/mercury-*.md` 与 `.codex/agents/mercury-*.toml`（同一来源生成两种格式，见 `docs/mercury-harness-consumption.md`）；在本仓库中，项目级 `mercury-*` 角色优先于用户级同名角色。SoT 领域角色与技能属于 Mercury 项目区：角色来源在 `.mercury/local/roles/`，清单在 `.mercury/local.json`；安装器生成两种宿主的角色文件与 Claude 技能入口，不手改生成物（见 `docs/mercury-harness-consumption.md`）。Ship 根 CLAUDE.md 保持项目级。本配置不包含 MCP endpoint、密钥或其他凭据。
 
 ## 领域经验与查证指针
 

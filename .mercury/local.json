@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "roles": {
+    "game-analyst": ".mercury/local/roles/game-analyst.md",
+    "game-critic": ".mercury/local/roles/game-critic.md",
+    "game-researcher": ".mercury/local/roles/game-researcher.md",
+    "sot-designlib": ".mercury/local/roles/sot-designlib.md",
+    "sot-kb": ".mercury/local/roles/sot-kb.md"
+  },
+  "skills": {
+    "sot-art-review": {
+      "path": ".claude/skills/sot-art-review",
+      "hosts": [
+        "claude"
+      ]
+    },
+    "sot-design-present": {
+      "path": ".agents/skills/sot-design-present",
+      "hosts": [
+        "claude",
+        "codex"
+      ]
+    },
+    "sot-designlib": {
+      "path": ".agents/skills/sot-designlib",
+      "hosts": [
+        "claude",
+        "codex"
+      ]
+    },
+    "sot-kb-write": {
+      "path": ".agents/skills/sot-kb-write",
+      "hosts": [
+        "claude",
+        "codex"
+      ]
+    },
+    "sot-session-end": {
+      "path": ".agents/skills/sot-session-end",
+      "hosts": [
+        "claude",
+        "codex"
+      ]
+    },
+    "sot-session-start": {
+      "path": ".agents/skills/sot-session-start",
+      "hosts": [
+        "claude",
+        "codex"
+      ]
+    },
+    "sot-task-receipt": {
+      "path": ".agents/skills/sot-task-receipt",
+      "hosts": [
+        "claude",
+        "codex"
+      ]
+    }
+  }
+}
