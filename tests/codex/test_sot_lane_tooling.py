@@ -562,17 +562,30 @@ def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def test_memory_default_root_and_bucket_come_from_the_primary_worktree(sandbox, trio) -> None:
+def test_memory_default_root_comes_from_the_primary_worktree_and_bucket_is_fixed(sandbox, trio) -> None:
     ship, task, mem, _ = memory_setup(sandbox, trio)
     result = json.loads(memory(task, "-Action", "Status").stdout)
     assert Path(result["memory_root"]) == mem
     assert result["memory_root_source"] == "primary-worktree"
-    posix = ship.as_posix()
-    if len(posix) > 2 and posix[1] == ":":
-        expected = posix[0].upper() + "--" + "-".join(part for part in posix[3:].split("/") if part)
-    else:
-        expected = "-" + "-".join(part for part in posix.split("/") if part)
-    assert result["bucket"] == expected and result["bucket"] != "-".join(task.parts[-2:])
+    # The bucket names the project, not the checkout location, so moving the repository keeps its memory.
+    assert result["bucket"] == "Ship_of_Theseus"
+
+
+@pytest.mark.parametrize("action", ["Verify", "Status", "Record", "Write"])
+def test_memory_refuses_a_retired_bucket(sandbox, trio, action) -> None:
+    _, task, mem, _ = memory_setup(sandbox, trio)
+    retired = mem / "projects" / "D--Retired-Bucket"
+    note = "moved to projects/Ship_of_Theseus" + chr(10)
+    retired.write_text(note, encoding="utf-8")
+    source = mem.parent / "note.md"
+    source.write_text("x" + chr(10), encoding="utf-8")
+    extra = {"Verify": ["-Path", "LANES.md"], "Status": [], "Record": ["-Path", "LANES.md"],
+             "Write": ["-Path", "notes/new.md", "-SourceFile", source, "-CreateNew"]}[action]
+    result = memory(task, "-Action", action, *extra, "-Bucket", "D--Retired-Bucket", check=False)
+    assert result.returncode != 0
+    assert "was retired: moved to projects/Ship_of_Theseus" in (result.stdout + result.stderr)
+    assert retired.read_text(encoding="utf-8") == note
+    assert not (mem / "index.jsonl").exists()
 
 
 def test_memory_root_resolution_order(sandbox, trio) -> None:
@@ -795,13 +808,6 @@ def test_publish_continues_with_a_warning_when_gh_is_unusable(sandbox, trio) -> 
 # --------------------------------------------------------------------------- review follow-ups
 
 
-def default_bucket(ship: Path) -> str:
-    posix = ship.as_posix()
-    if len(posix) > 2 and posix[1] == ":":
-        return posix[0].upper() + "--" + "-".join(part for part in posix[3:].split("/") if part)
-    return "-" + "-".join(part for part in posix.split("/") if part)
-
-
 def make_link(link: Path, target: Path) -> None:
     try:
         os.symlink(target, link, target_is_directory=True)
@@ -815,7 +821,7 @@ def make_link(link: Path, target: Path) -> None:
 
 def test_memory_uses_the_real_projects_layout(sandbox, trio) -> None:
     ship, task, mem, _ = memory_setup(sandbox, trio)
-    bucket = default_bucket(ship)
+    bucket = "Ship_of_Theseus"
     source = sandbox / "lanes.md"
     source.write_bytes(b"# lanes\n")
 
