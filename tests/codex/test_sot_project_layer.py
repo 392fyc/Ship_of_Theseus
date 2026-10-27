@@ -375,6 +375,35 @@ def test_publish_refuses_an_agent_prefix_until_the_branch_is_on_origin() -> None
         assert "claude/talent-design-73a9c8" in allowed.stdout
 
 
+def test_publish_refuses_each_agent_or_lane_prefix_in_any_case() -> None:
+    for branch in ("codex/x", "lane/ui-ux/1", "Claude/x"):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp = Path(temp_dir)
+            origin = temp / "origin.git"
+            repo = temp / "repo"
+            origin.mkdir()
+            repo.mkdir()
+            run(["git", "init", "--bare"], origin)
+            init_repository(repo, branch)
+            run(["git", "remote", "add", "origin", str(origin)], repo)
+            refused = run(["pwsh", "-NoProfile", "-File", str(install_publish_script(repo))], repo, check=False)
+            assert refused.returncode != 0, branch
+            assert "<type>/<purpose>[-<lane>]-<agent>" in refused.stdout + refused.stderr, branch
+
+
+def test_publish_does_not_ask_to_rename_when_origin_cannot_be_read() -> None:
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp = Path(temp_dir)
+        repo = temp / "repo"
+        repo.mkdir()
+        init_repository(repo, "codex/ui-ux/already-published")
+        run(["git", "remote", "add", "origin", str(temp / "missing.git")], repo)
+        refused = run(["pwsh", "-NoProfile", "-File", str(install_publish_script(repo))], repo, check=False)
+        text = refused.stdout + refused.stderr
+        assert refused.returncode != 0
+        assert "Cannot check whether" in text and "Rename it" not in text
+
+
 def test_publish_rejects_protected_branches() -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
         repo = Path(temp_dir)

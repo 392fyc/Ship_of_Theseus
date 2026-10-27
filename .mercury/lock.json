@@ -120,7 +120,7 @@
       ".agents/skills/sot-session-end/SKILL.md": "260e31b45d1d37635fdccda8b7f9992ffe0d906bfa693e48c20a9a803c293e33",
       ".agents/skills/sot-session-start/SKILL.md": "5a3d80fc2deecc7803fb2b6cb97184ba7060e3b30f5351d05b8dce2060d8420a",
       ".agents/skills/sot-task-receipt/SKILL.md": "7bd7158a3093f1ea3dcfce8e9d77aeb677dbaed2135b3139e3e3c3ef8f166308",
-      ".claude/skills/sot-art-review/SKILL.md": "92958c50be8b84627480c464e1e0d45bc57d13683d984f94206c50072227cc7e",
+      ".claude/skills/sot-art-review/SKILL.md": "a1e814ee283109760be143f5ee532088eeb9a6ad357c3aefd4d21e0ecf0ea7e9",
       ".mercury/local.json": "2fb1851d9377b9db8ed6edb2ab912982ae49ddaa2d073ec1b41145c69c574218",
       ".mercury/local/roles/game-analyst.md": "95b6f6ac8b8f67412dfc635f2d4f754ce0bdb675c7af230f73c01d3b29794442",
       ".mercury/local/roles/game-critic.md": "a2e2ece9c7c50652820feb4ccdb2b018cc565aabb024c96735db70efb94736ed",

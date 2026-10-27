@@ -54,6 +54,8 @@
 | 当前重点 | 一句话，细节写在 `lanes/<代号>/LANE.md` |
 | 声明 | 日期与用户原话摘录；改派、暂停、关闭时追加新的声明 |
 
+与 `AGENTS.md` 受管段跨 lane 接收规则的字段对照：“宿主”与“参与 agent”对应 Mercury 默认注册簿的 `Harness`（`Claude Code` 记作 `claude`，`Codex` 记作 `codex`），“结对 lane”对应 `Peers`。
+
 各 lane 只编辑自己的小节，小节由主导宿主维护：新增 lane 由用户声明后，由被指定的会话添加；其他宿主介入时由主导宿主登记其角色。不得修改或关闭其他 lane 的小节。没有“参与 agent”字段的旧条目视为只有主导宿主；其他宿主首次介入前，先请主导宿主或用户登记其角色。
 
 ## 4. 会话流程
@@ -76,7 +78,7 @@
 ## 6. 分支、worktree 与 PR
 
 - **分支名**：目的在前，lane 与 agent 只作后缀，与 Mercury 默认一致：`<类型>/<目的>[-<lane 代号>]-<agent>`。类型取 `feature`、`feat`、`fix`、`hotfix`、`docs`、`chore`、`refactor`、`test`、`perf`、`ci`、`build`；目的是任务名或方向，用字母、数字、`.`、`_`、`-`，简洁但不限长度；agent 为 `claude` 或 `codex`，agent 建的分支必须带。例如 lane 工作 `feature/zhufeng-review-gameplay-design-claude`，不属于任何 lane 的工作 `fix/memory-bucket-codex`。
-- 不用 `claude/...`、`codex/...` 这类以 agent 或 lane 开头的分支名：人读分支列表时先看到的应是分支做什么。`scripts/codex/sot-publish.ps1` 拒绝发布以 `claude/`、`codex/`、`lane/` 开头的分支。Claude Code 桌面版自动创建的 worktree 分支（`claude/<名字>-<哈希>`）发布前先改名；已有分支保留原名。
+- 不用 `claude/...`、`codex/...` 这类以 agent 或 lane 开头的分支名：人读分支列表时先看到的应是分支做什么。`scripts/codex/sot-publish.ps1` 拒绝发布以 `claude/`、`codex/`、`lane/` 开头的分支。Claude Code 桌面版自动创建的 worktree 分支（`claude/<名字>-<哈希>`）在该 worktree 里用 `git branch -m <新名>` 改名后再发布；已经推到 origin 的分支保留原名。
 - **基准分支**：游戏仓任务分支从 `develop` 切出并以它为 PR 目标（`.mercury/config.json` 的 `params.integration_branch`）；设计库与 KB 以 `master` 为目标。
 - **何时建分支**：只为通过 PR 交付或审查的工作创建任务分支与 worktree，不为保存未提交文件保留分支或 worktree；已经这样保留的，把文件复制到 lane 工作区并核对后，再按[工作树生命周期](worktree-lifecycle.md)退役分支与 worktree。结论交付到它的权威：结构化设计走设计库写入与快照 PR，定性结论与研究走 KB 的 vault 任务分支，运行实现走游戏仓 PR。原始材料留在 lane 工作区，或在不再需要时删除。
 - **worktree**：用 `scripts/codex/sot-worktree.ps1` 在所属仓库根的 `.worktrees/<任务>/` 创建，PR 合并后按[工作树生命周期](worktree-lifecycle.md)退役。
