@@ -26,6 +26,14 @@
       inbox.md                        # 其他 lane 发来的消息（只追加）
 ```
 
+### lane 工作区
+
+每条 lane 另有一个 lane 工作区，放不属于交付物的材料：提案草稿、模拟原始数据、审核记录、试跑输出。位置固定为游戏仓主工作树的 `.sot/lane-work/<lane>/`，不随 `SOT_MEMORY_ROOT` 改变，也不放进记忆根，因为其中可能有 GB 级的原始数据。在任务 worktree 中工作时，按 Git common directory 与 `git worktree list --porcelain` 定位主工作树（与定位记忆根相同），不要写到任务 worktree 自己的 `.sot/` 下：那里的内容会在 worktree 删除时一并删除。
+
+默认记忆根与 lane 工作区都在被 Git 忽略的 `.sot/` 下，所以不会在主工作区显示为未提交改动。lane 工作区和 `lanes/<lane>/` 一样归属本 lane，只由本 lane 的 agent 写入。`LANE.md` 引用 lane 工作区内的文件时，写相对于 `.sot/lane-work/<lane>/` 的路径。
+
+只为通过 PR 交付或审查的工作创建任务分支与 worktree，不为保存未提交文件保留分支或 worktree；已经这样保留的，把文件复制到 lane 工作区并核对后，再按[工作树生命周期](worktree-lifecycle.md)退役分支与 worktree。结论交付到它的权威：结构化设计走设计库写入与快照 PR，定性结论与研究走 KB 的 vault 任务分支，运行实现走游戏仓 PR。原始材料留在 lane 工作区，或在不再需要时删除。通用规则见 Mercury lane 合同（Mercury #699）。
+
 同一 lane 内同一宿主同时只运行一个会话；需要同一宿主的第二个会话时，由用户另开 lane，两条 lane 以跨 lane 消息协作。worker 不单独写 handoff，由发起它的会话汇总。
 
 ## 注册簿 `LANES.md`
@@ -49,7 +57,7 @@
 
 1. **定位记忆并确定 lane**：解析记忆根与 bucket 后读取 `LANES.md`。起始指令带 `[LANE=<代号>]` 时沿用；没有时向用户询问，不推断。经 handoff 接手的会话继承原 lane。代号未登记、状态不是 `active`，或本宿主既不是主导宿主也不在参与 agent 中时，向用户确认后再继续。bucket 下没有 `LANES.md` 的旧项目，读取 bucket 根的 `session-checkpoint.md` 并告诉用户尚未启用 lane。
 2. **读取并记下哈希**：本 lane 的 `LANE.md`、`session-checkpoint.md` → 本宿主的 `handoff-<harness>.md`（存在时）→ `inbox.md` 中的新消息。读取 `LANES.md`、`MEMORY.md`、`LANE.md`、`session-checkpoint.md` 时同时记下各自的 sha256：读前、读后各运行一次 `scripts/codex/sot-memory.ps1 -Action Verify -Path <相对路径>`，两次输出的 `current_sha256` 一致才采用该值，不一致就重读。磁盘与索引不一致时 `Verify` 会以非零退出码结束，这只说明索引落后，仍然取输出中的 `current_sha256`。
-3. **工作**：开发只在任务工作树进行（见下文“主工作区”）；Issue 与 PR 加 `lane:<代号>` 标签；分支用 `<agent>/<lane>/<任务>`，例如 `claude/gameplay-design/zhufeng-review`。不属于任何 lane 的临时工作沿用 `<agent>/<任务>`。
+3. **工作**：草稿与原始材料放在 lane 工作区（见上文“lane 工作区”）；要交付的开发只在任务工作树进行（见下文“主工作区”）；Issue 与 PR 加 `lane:<代号>` 标签；分支用 `<agent>/<lane>/<任务>`，例如 `claude/gameplay-design/zhufeng-review`。不属于任何 lane 的临时工作沿用 `<agent>/<任务>`。
 4. **结束**：在版本条件下更新本 lane 的 `session-checkpoint.md`；检查主工作区；用户要求 handoff 时只写本宿主的 handoff 文件。非主导宿主在 checkpoint 中只记录自己的作业与结论，不改写主导宿主的正式判断。
 
 ## 共享文件的版本条件
@@ -74,7 +82,7 @@
 
 ## 主工作区
 
-- 游戏仓与设计库的主工作区不做开发，也不长期保留未提交改动；开发与审查都在 `scripts/codex/sot-worktree.ps1` 创建的任务工作树里。例外：`.sot/memory`（被忽略的活跃记忆）写在游戏仓主工作区；KB 使用唯一固定 vault，在其中切任务分支。
+- 游戏仓与设计库的主工作区不做开发，也不长期保留未提交改动；开发与审查都在 `scripts/codex/sot-worktree.ps1` 创建的任务工作树里。例外：`.sot/memory`（被忽略的活跃记忆）与 `.sot/lane-work`（被忽略的 lane 工作区）写在游戏仓主工作区；KB 使用唯一固定 vault，在其中切任务分支。
 - 会话结束时检查两个主工作区：`git -C <主工作区> status --porcelain`。有未提交改动时，在本 lane 的 checkpoint 中登记路径与疑似归属，并报告用户；不得替其他 lane 丢弃或提交。
 
 ## 受控入口

@@ -70,7 +70,7 @@ KB 的 PR 合并后，用 `sot-worktree.ps1 -Action KbReturn -Repository kb` 让
 
 1. 存在已合并的 PR，且本地分支末端等于该 PR 的头提交（`headRefOid`）或是它的祖先；或者分支有自己的提交（`git reflog show <分支>` 中末端不等于创建点），并已全部进入基准分支。没有自己提交、也没有已合并 PR 的分支（例如刚从 develop 切出的分支）不算已合并，按下一节处理。
 2. staged、unstaged、untracked 都没有需要保留的内容；检查 assume-unchanged/skip-worktree，不能只看普通状态。
-3. ignored 文件逐项分类：Godot 导入缓存（`.godot/`、`*.import`、`*.uid`）、`__pycache__`、本地 roots 文件、可重新生成的测试日志可以随树删除；图像原料、数据库、审查证据等需保留的内容先复制到主 checkout 的 `.tmp/<任务>/`（该目录必须已被 Git 忽略，否则停止），逐文件比对哈希一致后再删除工作树。非 force 的 `git worktree remove` 会连同 ignored 文件一起删除，这一步是它们唯一的保护。
+3. ignored 文件逐项分类：Godot 导入缓存（`.godot/`、`*.import`、`*.uid`）、`__pycache__`、本地 roots 文件、可重新生成的测试日志可以随树删除；需保留的内容先复制到主 checkout 的被忽略目录：属于某条 lane 的工作材料（草稿、模拟原始数据、审核记录）复制到该 lane 的 `.sot/lane-work/<lane>/`（见 [lane 工作区](lane-collaboration.md#lane-工作区)），其余图像原料、数据库、审查证据等复制到 `.tmp/<任务>/`。目标目录必须已被 Git 忽略，否则停止；逐文件比对哈希一致后再删除工作树。非 force 的 `git worktree remove` 会连同 ignored 文件一起删除，这一步是它们唯一的保护。
 4. 无锁定或其他会话占用，路径属于正确仓库，主工作树不在清单内。
 
 执行：非 force 的 `git worktree remove <path>`，再 `git branch -d <分支>`。只有在第 1 项核实了 PR 头提交、而 squash 合并使 `-d` 认不出时，才用 `-D`。远端分支由 GitHub 的合并后自动删除处理，用 `git fetch --prune origin` 回读确认，仍存在时报告。出现保护属性、链接、占用或新改动时停止。
