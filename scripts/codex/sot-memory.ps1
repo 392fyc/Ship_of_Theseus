@@ -68,16 +68,15 @@ elseif ($mainWorktree) { $memoryRoot = Join-Path $mainWorktree '.sot/memory'; $r
 else { throw 'Cannot determine the active memory root: no configuration and no primary game worktree.' }
 if (-not (Test-Path -LiteralPath $memoryRoot -PathType Container)) { throw "Active memory is missing at $memoryRoot; nothing is guessed or created." }
 
-# --- Bucket: default from the primary worktree path, e.g. D:/Project/Ship_of_Theseus -> D--Project-Ship_of_Theseus.
-if (-not $Bucket) {
-    if (-not $mainWorktree) { throw 'Cannot derive the bucket without a primary game worktree; pass -Bucket.' }
-    $normalized = $mainWorktree.Replace('\','/')
-    if ($normalized -match '^([A-Za-z]):/(.*)$') { $Bucket = $Matches[1].ToUpperInvariant() + '--' + (($Matches[2] -split '/' | Where-Object { $_ }) -join '-') }
-    else { $Bucket = '-' + (($normalized -split '/' | Where-Object { $_ }) -join '-') }
-}
+# --- Bucket: a fixed project name, so moving the checkout does not split the project's memory.
+if (-not $Bucket) { $Bucket = 'Ship_of_Theseus' }
 if ($Bucket -in @('.','..') -or $Bucket -match '[\\/:\x00-\x1f]') { throw 'Invalid bucket name.' }
 # Real layout: <memory_root>/projects/<bucket>/..., with index relative_path relative to that directory.
 $bucketDirectory = Join-Path (Join-Path $memoryRoot 'projects') $Bucket
+# A retired bucket name is a file that says where its records went; refuse it instead of recreating the bucket.
+if (Test-Path -LiteralPath $bucketDirectory -PathType Leaf) {
+    throw "Bucket '$Bucket' was retired: $("$(Get-Content -LiteralPath $bucketDirectory -Raw)".Trim())"
+}
 $indexPath = Join-Path $memoryRoot 'index.jsonl'
 
 function Assert-NoLink([string]$Full, [string]$Stop) {

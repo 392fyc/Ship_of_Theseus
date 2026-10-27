@@ -11,7 +11,7 @@
 
 ## 存放位置
 
-活跃记忆根按 `SOT_MEMORY_ROOT` → 本地 roots `[roots].memory_root` → 游戏仓主工作树 `.sot/memory` 解析（见 `sot-session-start`）。项目 bucket 由游戏仓主工作树路径生成：盘符大写，加 `--`，再用 `-` 连接各级目录名。
+活跃记忆根按 `SOT_MEMORY_ROOT` → 本地 roots `[roots].memory_root` → 游戏仓主工作树 `.sot/memory` 解析（见 `sot-session-start`）。项目 bucket 固定为 `Ship_of_Theseus`，不随仓库所在路径变化，所以搬动仓库不会让记忆分裂。bucket 改名后，旧名（以及按路径推导出的旧默认名）位置各留一个说明去向的文件，脚本据此拒绝用旧名读写。
 
 ```text
 <memory-root>/
