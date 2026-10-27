@@ -17,7 +17,7 @@ Git 分支提供任务隔离，Obsidian vault 不提供任务隔离。开始 KB 
 2. 确认固定 vault 的工作区干净；存在未提交改动、受保护改动或其他活跃任务占用时停止并协调。
 3. 在固定 vault 中检出目标任务分支。若分支已被其他 worktree 检出，只能在确认该 worktree 干净且无人使用后，将其置于 detached HEAD 来解除占用；不得为释放分支而自动移除 worktree，无法确认时停止。
 4. 通过 MCP 读取、带 `ifMatch` 修改并回读。写入内容与固定 vault 当前检出的任务分支必须始终对应。
-5. 从固定 vault 当前任务分支调用受控发布入口。任务合并后，把固定 vault 切回受保护的默认分支，并仅以 fast-forward 更新到合并后的权威 HEAD。
+5. 从固定 vault 当前任务分支调用受控发布入口。任务合并后，运行 `scripts/codex/sot-worktree.ps1 -Action KbReturn -Repository kb`（可先加 `-DryRun`）：它核对 vault 干净与合入证据，把固定 vault 切回受保护的默认分支，仅以 fast-forward 更新到合并后的权威 HEAD，再删除已合入的本地任务分支。不直接运行 `git switch` 或 `git checkout`。
 
 禁止为任务 worktree 另开第二个 Obsidian vault，禁止临时更换 MCP endpoint 或端口，禁止先写固定 vault 再复制到 worktree，禁止使用 `--ignore-other-worktrees`、stash、reset、自动移除 worktree 或丢弃现有改动来绕过分支占用。
 

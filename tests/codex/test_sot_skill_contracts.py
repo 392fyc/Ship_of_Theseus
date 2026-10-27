@@ -16,6 +16,19 @@ SKILL_PATHS = {
     "sot-task-receipt": SKILL_DIR / "sot-task-receipt" / "SKILL.md",
     "sot-design-present": SKILL_DIR / "sot-design-present" / "SKILL.md",
 }
+# Claude-only skill whose canonical body lives in the Claude skill directory (declared in .mercury/local.json).
+CLAUDE_ONLY_SKILLS = {"sot-art-review": ROOT / ".claude" / "skills" / "sot-art-review" / "SKILL.md"}
+LOCK_PATH = ROOT / ".mercury" / "lock.json"
+
+
+def generated_entries() -> set[Path]:
+    """Thin skill entries that the Mercury installer generated for the project area; they are not skill bodies."""
+    import json
+
+    if not LOCK_PATH.exists():
+        return set()
+    local = json.loads(read_text(LOCK_PATH)).get("local", {})
+    return {ROOT / rel for rel in local.get("files", {}) if rel.endswith("/SKILL.md")}
 
 
 def read_text(path: Path) -> str:
@@ -36,10 +49,24 @@ def parse_name(frontmatter: str) -> str:
 
 def test_sot_skill_contracts_static():
     # Task trees under .worktrees/ are full checkouts of this repository; skip them.
-    discovered = sorted(p for p in ROOT.glob("**/sot-*/SKILL.md") if ".worktrees" not in p.relative_to(ROOT).parts)
-    assert discovered == sorted(SKILL_PATHS.values()), (
-        "sot-* skill procedures must have exactly one canonical body under .agents/skills"
+    generated = generated_entries()
+    discovered = sorted(
+        p for p in ROOT.glob("**/sot-*/SKILL.md")
+        if ".worktrees" not in p.relative_to(ROOT).parts and p not in generated
     )
+    assert discovered == sorted([*SKILL_PATHS.values(), *CLAUDE_ONLY_SKILLS.values()]), (
+        "sot-* skill procedures must have exactly one canonical body: under .agents/skills, "
+        "or in the Claude skill directory for a Claude-only skill"
+    )
+    for entry in generated:
+        name = entry.parent.name
+        assert name in SKILL_PATHS, f"{entry}: generated entry for an unknown skill"
+        assert f"`.agents/skills/{name}/`" in read_text(entry), f"{entry}: must point at the canonical body"
+
+    for name, path in CLAUDE_ONLY_SKILLS.items():
+        text = read_text(path)
+        assert parse_name(parse_frontmatter(text)) == name
+        assert not re.search(r"(?i)(?<![A-Za-z0-9_])[A-Z]:[\\/]", text), f"{path}: machine-specific path"
 
     for name, path in SKILL_PATHS.items():
         assert path.exists(), f"missing skill file: {path}"

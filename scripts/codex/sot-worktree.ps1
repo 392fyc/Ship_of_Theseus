@@ -1,7 +1,7 @@
 #requires -Version 7.0
 [CmdletBinding(PositionalBinding = $false)]
 param(
-    [ValidateSet('List','Create','Inspect')][string]$Action = 'List',
+    [ValidateSet('List','Create','Inspect','KbReturn')][string]$Action = 'List',
     [ValidateSet('all','ship','designlib','kb')][string]$Repository = 'all',
     [string]$Task,
     [Alias('Path')][string]$WorktreePath,
@@ -10,7 +10,7 @@ param(
     [string]$RootsFile = (Join-Path $PSScriptRoot '../../.codex/project/sot-roots.local.toml'),
     # Test mode: read only -RootsFile; SOT_* environment overrides are ignored.
     [switch]$IgnoreEnvironment,
-    # Create only: validate everything and print the plan without writing anything.
+    # Create and KbReturn: validate everything and print the plan without writing anything.
     [switch]$DryRun
 )
 $ErrorActionPreference = 'Stop'
@@ -83,7 +83,7 @@ foreach ($section in @('roots','worktrees')) {
 if ($PSBoundParameters.ContainsKey('RootsFile') -and $overridingVariables.Count) {
     Write-Diagnostic ("-RootsFile was given, but these environment variables override or supply its values: " + ($overridingVariables -join ', ') + ". Use -IgnoreEnvironment to read only the roots file.")
 }
-if ($DryRun -and $Action -ne 'Create') { Write-Diagnostic '-DryRun only applies to -Action Create and is ignored.' }
+if ($DryRun -and $Action -notin @('Create','KbReturn')) { Write-Diagnostic '-DryRun only applies to -Action Create and KbReturn and is ignored.' }
 $names = @{ship='Ship_of_Theseus'; designlib='SoT-fyc-space'; kb='ShipOfTheseus-KB'}
 # memory_root is optional: when absent, sessions use the game's primary Git worktree/.sot/memory.
 $optionalKeys = @('roots.memory_root')
@@ -115,6 +115,84 @@ function Read-Worktrees([string]$Repo) {
         $row.grouped = [IO.Path]::GetDirectoryName($row.path) -eq $group
         [pscustomobject]$row
     }
+}
+if ($Action -eq 'KbReturn') {
+    # After a KB pull request merges: put the fixed vault back on its protected default branch (fast-forward only) and
+    # delete the merged task branch. Agents call this entry instead of switching the vault's branch themselves.
+    if ($Repository -ne 'kb') { throw 'KbReturn needs -Repository kb.' }
+    if ($WorktreePath -or $Task -or $Branch -or $BaseRef) { throw 'KbReturn takes no Path, Task, Branch or BaseRef; it works on the branch the vault has checked out.' }
+    $root = Root-For 'roots' 'kb'
+    if ((Full-Path ((@(Invoke-RepoGit $root @('rev-parse','--show-toplevel')) -join '').Trim())) -ne $root) { throw 'Configured kb_root is not the vault checkout root.' }
+    $gitDir = (@(Invoke-RepoGit $root @('rev-parse','--absolute-git-dir')) -join '').Trim()
+    $commonDir = (@(Invoke-RepoGit $root @('rev-parse','--path-format=absolute','--git-common-dir')) -join '').Trim()
+    if ((Full-Path $gitDir) -ne (Full-Path $commonDir)) { throw 'Configured kb_root is a linked worktree, not the fixed vault checkout.' }
+    $dirty = @((@(Invoke-RepoGit $root @('status','--porcelain=v1','-z','--untracked-files=all')) -join "`n") -split "`0" | Where-Object { $_ })
+    if ($dirty.Count) { throw "The vault has $($dirty.Count) uncommitted or untracked path(s); commit or publish them first. Nothing was changed." }
+    $current = (@(& $git -C $root symbolic-ref --quiet --short HEAD) -join '').Trim()
+    if ($LASTEXITCODE -ne 0 -or -not $current) { throw 'The vault is on a detached HEAD; check out the task branch or inspect it by hand.' }
+    Invoke-RepoGit $root @('fetch','--prune','origin') | Out-Null
+    $symref = @(Invoke-RepoGit $root @('ls-remote','--symref','origin','HEAD')) | Where-Object { $_ -match '^ref: refs/heads/(\S+)\s+HEAD$' } | Select-Object -First 1
+    if (-not $symref) { throw 'Could not read the default branch of origin.' }
+    $default = ([regex]::Match($symref, '^ref: refs/heads/(\S+)')).Groups[1].Value
+    $remoteDefault = 'refs/remotes/origin/' + $default
+    $tip = (@(Invoke-RepoGit $root @('rev-parse','HEAD')) -join '').Trim()
+    $evidence = $null
+    if ($current -cne $default) {
+        # Protected and default branches are never deleted, so they are never treated as task branches.
+        if ($current -cin @('main','master','develop')) { throw "The vault is on protected branch '$current', not a task branch; return it by hand. Nothing was changed." }
+        # A merged pull request whose head is this tip and whose base is the default branch (squash or merge commit).
+        $url = (@(Invoke-RepoGit $root @('remote','get-url','origin')) -join '').Trim()
+        $slug = ([regex]::Match($url, 'github\.com[:/]([^/]+/[^/]+?)(?:\.git)?/?$')).Groups[1].Value
+        $gh = Get-Command gh -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($slug -and $gh) {
+            $raw = @(& $gh.Source pr list --repo $slug --head $current --base $default --state merged --json number,headRefOid,baseRefName)
+            if ($LASTEXITCODE -eq 0) {
+                $pr = @(($raw -join "`n") | ConvertFrom-Json) | Where-Object { $_.headRefOid -eq $tip -and $_.baseRefName -eq $default } | Select-Object -First 1
+                if ($pr) { $evidence = "merged pull request #$($pr.number) into $default has head $tip" }
+            }
+        }
+        if (-not $evidence) {
+            # Without a pull request: the tip must be in the default branch and the branch must have commits of its own
+            # (its tip moved past the commit it was created at, by its reflog), so a fresh, unused branch is never taken for a merged one.
+            & $git -C $root merge-base --is-ancestor $tip $remoteDefault
+            $inDefault = $LASTEXITCODE -eq 0
+            $log = @(& $git -C $root reflog show --format=%H ('refs/heads/' + $current) 2>$null)
+            $own = $log.Count -gt 1 -and $tip -ne $log[-1]
+            if ($inDefault -and $own) { $evidence = "tip is in origin/$default" }
+        }
+        if (-not $evidence) { throw "Branch '$current' has no merge evidence (no merged pull request into $default has its tip as head, and it has no commits of its own that are in origin/$default). Nothing was changed." }
+    }
+    # Check that the switch and the fast-forward can both succeed before doing either.
+    $localDefault = 'refs/heads/' + $default
+    & $git -C $root show-ref --verify --quiet $localDefault
+    if ($LASTEXITCODE -eq 0) {
+        & $git -C $root merge-base --is-ancestor $localDefault $remoteDefault
+        if ($LASTEXITCODE -ne 0) { throw "Local '$default' has commits that origin/$default does not have, so it cannot be fast-forwarded; inspect it by hand. Nothing was changed." }
+    }
+    if ($current -cne $default) {
+        $porcelain = (@(Invoke-RepoGit $root @('worktree','list','--porcelain','-z')) -join "`n") -split "`0`0"
+        foreach ($block in $porcelain) {
+            $lines = $block -split "`0"
+            $path = $lines | Where-Object { $_.StartsWith('worktree ') } | Select-Object -First 1
+            if ($path -and ($lines -contains ('branch ' + $localDefault)) -and (Full-Path $path.Substring(9)) -ne $root) {
+                throw "Branch '$default' is checked out in another worktree; release it there first. Nothing was changed."
+            }
+        }
+    }
+    $plan = [ordered]@{ status = $(if ($DryRun) { 'dry-run' } else { 'returned' }); repository = 'kb'; default_branch = $default
+        task_branch = $(if ($current -cne $default) { $current } else { $null }); task_tip = $tip; merge_evidence = $evidence }
+    if (-not $DryRun) {
+        if ($current -cne $default) { Invoke-RepoGit $root @('switch','--',$default) | Out-Null }
+        Invoke-RepoGit $root @('merge','--ff-only',$remoteDefault) | Out-Null
+        if ($current -cne $default) {
+            # -d when Git can see the merge; -D only for the verified squash merge above.
+            $flag = if ($evidence -like 'tip is in*') { '-d' } else { '-D' }
+            Invoke-RepoGit $root @('branch',$flag,'--',$current) | Out-Null
+        }
+        $plan.head = (@(Invoke-RepoGit $root @('rev-parse','HEAD')) -join '').Trim()
+    }
+    ConvertTo-Json -InputObject $plan -Depth 4
+    return
 }
 if ($Action -eq 'Create') {
     if ($WorktreePath) { throw 'Create uses the configured repository group and Task; Path is only an inspection filter.' }

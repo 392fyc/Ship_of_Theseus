@@ -280,6 +280,139 @@ def test_create_dry_run_writes_no_gdignore(sandbox, trio) -> None:
     assert not (ship / ".worktrees").exists()
 
 
+def kb_on_task_branch(kb: Path, *, merged: bool) -> str:
+    """Put the KB vault on a task branch with one commit; when merged, origin/main fast-forwards to it."""
+    git(kb, "switch", "-q", "-c", "task/kb-note")
+    commit_file(kb, "note.md", "note\n", "kb note")
+    if merged:
+        git(kb, "push", "-q", "origin", "task/kb-note:main")
+    return git(kb, "rev-parse", "HEAD")
+
+
+def kb_return(ship: Path, roots: Path, *args, check=True):
+    return ps(
+        script_of(ship, "sot-worktree.ps1"), ship, "-Action", "KbReturn", "-Repository", "kb",
+        "-RootsFile", roots, "-IgnoreEnvironment", *args, check=check,
+    )
+
+
+def test_kb_return_switches_back_fast_forwards_and_deletes_the_merged_branch(sandbox, trio) -> None:
+    ship, designlib, kb = trio
+    roots = full_roots_file(sandbox, ship, designlib, kb)
+    tip = kb_on_task_branch(kb, merged=True)
+
+    plan = json.loads(kb_return(ship, roots, "-DryRun").stdout)
+    assert plan["status"] == "dry-run" and plan["default_branch"] == "main" and plan["task_branch"] == "task/kb-note"
+    assert git(kb, "branch", "--show-current") == "task/kb-note"
+
+    done = json.loads(kb_return(ship, roots).stdout)
+    assert done["status"] == "returned" and done["head"] == tip
+    assert git(kb, "branch", "--show-current") == "main"
+    assert git(kb, "rev-parse", "HEAD") == tip
+    assert git(kb, "branch", "--list", "task/kb-note") == ""
+
+
+def test_kb_return_refuses_without_merge_evidence_or_with_local_changes(sandbox, trio) -> None:
+    ship, designlib, kb = trio
+    roots = full_roots_file(sandbox, ship, designlib, kb)
+    tip = kb_on_task_branch(kb, merged=False)
+
+    unmerged = kb_return(ship, roots, check=False)
+    assert unmerged.returncode != 0 and "no merge evidence" in (unmerged.stdout + unmerged.stderr)
+    assert git(kb, "branch", "--show-current") == "task/kb-note" and git(kb, "rev-parse", "HEAD") == tip
+
+    git(kb, "push", "-q", "origin", "task/kb-note:main")
+    (kb / "draft.md").write_text("unsaved\n", encoding="utf-8")
+    dirty = kb_return(ship, roots, check=False)
+    assert dirty.returncode != 0 and "untracked" in (dirty.stdout + dirty.stderr)
+    assert git(kb, "branch", "--show-current") == "task/kb-note" and (kb / "draft.md").is_file()
+
+
+def assert_refused_unchanged(kb: Path, result, text: str, branch: str, head: str) -> None:
+    assert result.returncode != 0 and text in (result.stdout + result.stderr)
+    assert git(kb, "branch", "--show-current") == branch and git(kb, "rev-parse", "HEAD") == head
+
+
+def test_kb_return_never_takes_a_protected_or_unused_branch(sandbox, trio) -> None:
+    ship, designlib, kb = trio
+    roots = full_roots_file(sandbox, ship, designlib, kb)
+    base = git(kb, "rev-parse", "HEAD")
+    # A protected branch whose tip is already in origin/main is still not a task branch.
+    git(kb, "branch", "develop")
+    git(kb, "switch", "-q", "develop")
+    assert_refused_unchanged(kb, kb_return(ship, roots, check=False), "protected branch", "develop", base)
+    assert git(kb, "branch", "--list", "develop") != ""
+    # A fresh branch with no commits of its own has its tip in origin/main but is not merged work.
+    git(kb, "switch", "-q", "-c", "task/unused")
+    assert_refused_unchanged(kb, kb_return(ship, roots, check=False), "no merge evidence", "task/unused", base)
+
+
+def test_kb_return_checks_the_switch_and_fast_forward_before_changing_anything(sandbox, trio) -> None:
+    ship, designlib, kb = trio
+    roots = full_roots_file(sandbox, ship, designlib, kb)
+    tip = kb_on_task_branch(kb, merged=True)
+    # Local main gets a commit origin/main lacks, so it could not be fast-forwarded after the switch.
+    git(kb, "switch", "-q", "main")
+    commit_file(kb, "diverged.md", "x\n", "diverged on local main")
+    git(kb, "switch", "-q", "task/kb-note")
+    assert_refused_unchanged(kb, kb_return(ship, roots, check=False), "cannot be fast-forwarded", "task/kb-note", tip)
+
+
+def test_kb_return_refuses_when_main_is_checked_out_elsewhere(sandbox, trio) -> None:
+    ship, designlib, kb = trio
+    roots = full_roots_file(sandbox, ship, designlib, kb)
+    tip = kb_on_task_branch(kb, merged=True)
+    other = sandbox / "kb-other"
+    git(kb, "worktree", "add", "-q", str(other), "main")
+    assert_refused_unchanged(kb, kb_return(ship, roots, check=False), "another worktree", "task/kb-note", tip)
+
+
+def test_kb_return_on_the_default_branch_only_fast_forwards(sandbox, trio) -> None:
+    ship, designlib, kb = trio
+    roots = full_roots_file(sandbox, ship, designlib, kb)
+    tip = kb_on_task_branch(kb, merged=True)
+    git(kb, "switch", "-q", "main")
+    git(kb, "branch", "-q", "-D", "task/kb-note")
+    done = json.loads(kb_return(ship, roots).stdout)
+    assert done["task_branch"] is None and done["head"] == tip
+    assert git(kb, "branch", "--show-current") == "main"
+
+
+def test_kb_return_refuses_a_detached_vault_and_extra_arguments(sandbox, trio) -> None:
+    ship, designlib, kb = trio
+    roots = full_roots_file(sandbox, ship, designlib, kb)
+    base = git(kb, "rev-parse", "HEAD")
+    extra = kb_return(ship, roots, "-Task", "x", check=False)
+    assert extra.returncode != 0 and "takes no Path" in (extra.stdout + extra.stderr)
+    default_repo = ps(
+        script_of(ship, "sot-worktree.ps1"), ship, "-Action", "KbReturn",
+        "-RootsFile", roots, "-IgnoreEnvironment", check=False,
+    )
+    assert default_repo.returncode != 0 and "-Repository kb" in (default_repo.stdout + default_repo.stderr)
+    git(kb, "switch", "-q", "--detach")
+    detached = kb_return(ship, roots, check=False)
+    assert detached.returncode != 0 and "detached HEAD" in (detached.stdout + detached.stderr)
+    assert git(kb, "rev-parse", "HEAD") == base
+
+
+def test_kb_return_refuses_a_linked_worktree_as_the_vault(sandbox, trio) -> None:
+    ship, designlib, kb = trio
+    linked = add_task(kb, "linked", "task/linked")
+    roots = full_roots_file(sandbox, ship, designlib, linked)
+    result = kb_return(ship, roots, check=False)
+    assert result.returncode != 0 and "linked worktree" in (result.stdout + result.stderr)
+
+
+def test_kb_return_is_only_for_the_kb(sandbox, trio) -> None:
+    ship, designlib, kb = trio
+    roots = full_roots_file(sandbox, ship, designlib, kb)
+    result = ps(
+        script_of(ship, "sot-worktree.ps1"), ship, "-Action", "KbReturn", "-Repository", "designlib",
+        "-RootsFile", roots, "-IgnoreEnvironment", check=False,
+    )
+    assert result.returncode != 0 and "-Repository kb" in (result.stdout + result.stderr)
+
+
 # --------------------------------------------------------------------------- sot-sync
 
 
