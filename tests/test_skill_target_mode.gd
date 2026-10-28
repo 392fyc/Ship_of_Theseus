@@ -44,6 +44,11 @@ const EXPECTED_BEHAVIOR_CHANGES: Dictionary = {
 ## 5 条有设计库对应的技能，值从设计库快照抄来（1:2 映射的四条两版取值一致）。
 ## 写死在这里是为了让「抄错了」也能被测出来——否则数据与实现同源，测不出偏差。
 const DESIGNLIB_BACKED: Dictionary = {
+	# 剑士专属技能（gameplay-impl PR3，设计库 762393b）。
+	"myrmidon_zhanji": "单位",
+	"myrmidon_yishan": "方向",
+	"myrmidon_zhaojia": "自身",
+	"myrmidon_juhe": "单位",
 	"swordsman_badao": "单位",
 	"swordsman_juhe": "单位",
 	"swordsman_yishan": "方向",
@@ -129,6 +134,11 @@ func _old_target_relation(sk: Dictionary) -> String:
 		and str((sk.get("area", {}) as Dictionary).get("type", "single")) == "single"
 	if is_self:
 		return "self"
+	# PR1（R1.1）起，设计库伤害条目技能不写 power，有 damage_entries 即为伤害技能
+	# （tactical_manager._is_support_skill）。这是已合并的口径，不是本测试要防的行为变化。
+	var entries: Variant = sk.get("damage_entries", [])
+	if entries is Array and not (entries as Array).is_empty():
+		return "enemy"
 	return "ally" if int(sk.get("power", 0)) <= 0 else "enemy"
 
 

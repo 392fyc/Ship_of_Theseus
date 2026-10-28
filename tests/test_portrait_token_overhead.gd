@@ -235,7 +235,7 @@ func _run() -> void:
 	print("PORTRAIT_OVERHEAD_POST_MOVE_PLACEMENT=", JSON.stringify(_placement_state(after_move_snapshot)))
 
 	# 预测使用正式 damage_forecaster；单位固定血条旁不挂预测数字。
-	manager.request_attack_targeting()
+	_begin_strike(manager)
 	manager.handle_pointer_hover(_screen_for_cell(manager, target.grid_position))
 	await frames(3)
 	layout.call("refresh_layout")
@@ -285,7 +285,7 @@ func _run() -> void:
 	# 仍从真实 UI 攻击选择提交 GameAction；不改人物属性或战斗规则值。
 	var target_hp_before: int = target.stats.hp
 	var contacts_before: int = actor.character_animation.contact_count
-	manager.request_attack_targeting()
+	_begin_strike(manager)
 	manager.handle_pointer_click(_screen_for_cell(manager, target.grid_position))
 	var attack_locked: bool = manager.input_state == manager.InputState.ANIMATING
 	manager.handle_pointer_click(_screen_for_cell(manager, target.grid_position))
@@ -453,7 +453,7 @@ func _run() -> void:
 	if restarted_move_cell != Vector2i(-1, -1) and restarted_move_cell != restarted_actor.grid_position:
 		click(restarted_manager, restarted_move_cell)
 		await wait(0.4)
-		restarted_manager.request_attack_targeting()
+		_begin_strike(restarted_manager)
 		restarted_manager.handle_pointer_hover(_screen_for_cell(restarted_manager, restarted_target.grid_position))
 		await frames(3)
 		restarted_layout.call("refresh_layout")
@@ -911,3 +911,13 @@ func _finish() -> void:
 		session.queue_free()
 	print("PORTRAIT_OVERHEAD_RESULT=", JSON.stringify({"checks": checks, "failures": failures}))
 	quit(0 if failures.is_empty() else 1)
+
+## 剑士线没有普通攻击（gameplay-impl PR3，用户 2026-10-28 裁决 S2）。对没有普攻的单位改用其
+## 技能栏第一格（剑士为斩击）：技能走同一条真实出手、动画锁与接触表现路径
+## （_execute_presented_skill → begin_attack_visual），本测试要验的东西不变。
+func _begin_strike(manager: Node) -> void:
+	var actor: Unit = manager.current_unit
+	if actor != null and not actor.has_basic_attack and not actor.skill_ids.is_empty():
+		manager.request_skill_selection(actor.skill_ids[0])
+	else:
+		manager.request_attack_targeting()

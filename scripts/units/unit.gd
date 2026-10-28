@@ -55,6 +55,11 @@ var reaction_available: bool = true
 # 是否正在进行自己的回合（TacticalManager 在回合开始置 true、回合结束置 false）。
 # 施加持有型状态时据此判断「在自身回合内获得」，影响「到下个自身回合结束」的计数。
 var is_taking_turn: bool = false
+# 是否有普通攻击（职业 JSON 的 basic_attack，缺省 true）。设计上没有普通攻击（技能设计要点 §3），
+# 用户 2026-10-28 裁决 S2：先只去掉剑士线，其他职业与敌人在敌人技能 AI 落地前保留。
+var has_basic_attack: bool = true
+# 心眼被动条目的技能 id（职业 JSON 的 passive_skill_id）；剑士 myrmidon_xinyan，剑圣暂沿用旧 id。
+var passive_skill_id: String = "swordsman_xinyan"
 
 # ── 战斗派生值修正钩子（来源：天赋 L2 / 装备 L4 / 符文 L5 / 肉鸽）──
 # 默认 0，不绑武器；由上层写入修正系数（暴击回避等）。
@@ -81,6 +86,11 @@ var _xinyan_low_qi_stat_key: String = ""
 var _xinyan_low_qi_stat_bonus: int = 0
 var _xinyan_high_qi_stat_key: String = ""
 var _xinyan_high_qi_stat_bonus: int = 0
+# 「剑气每比上限少 N 点，某属性 +M」口径（设计库 myrmidon_xinyan）。step > 0 时启用并取代上面的
+# 高低分档；为 0 时沿用分档（剑圣在其 PR 前仍是分档）。三项都从职业 JSON 读。
+var _xinyan_qi_deficit_per_step: int = 0
+var _xinyan_deficit_stat_key: String = ""
+var _xinyan_deficit_stat_bonus: int = 0
 # ── 兼容字段：仅供 tactical_manager 的剑气条阈值线与被动描述文本读取 ──
 # 新口径下速度加成不再是「达到阈值即 +N」，而是剑气比例分档，因此这两个字段
 # 已不参与任何属性计算，只是把「分档界线」与「低气段速度加成」派生出来给 UI 用。
@@ -188,6 +198,8 @@ func setup(class_data: Dictionary, initial_facing: StringName = &"SE") -> void:
 	# 主手武器随职业/敌人档案带入；副手槽默认空（要由天赋或装备层显式装上）。
 	weapon_id = str(class_data.get("weapon_id", ""))
 	offhand_weapon_id = ""
+	has_basic_attack = bool(class_data.get("basic_attack", true))
+	passive_skill_id = str(class_data.get("passive_skill_id", "swordsman_xinyan"))
 	skill_ids.clear()
 	for skill_id_value: Variant in class_data.get("skill_ids", []):
 		skill_ids.append(str(skill_id_value))
@@ -561,6 +573,8 @@ func get_effective_stat(stat_key: String) -> int:
 	# ── 心眼：剑气比例分档属性加成（低气段 / 高气段各给一种属性）──────
 	# 非剑气类单位（_qi_max<=0）恒返回 0 → 零影响。
 	effective_value += float(_get_xinyan_stat_bonus(normalized_key))
+	# ── 持有型状态给的、随剑气即时变化的固定加值（如剑士〔招架〕的防御与魔防 +N）──
+	effective_value += float(_get_held_state_stat_bonus(normalized_key))
 	# ── 敌人词条 af_vanguard：首回合（round 1）速度加成（仅 SPD 键）──────────
 	# 无该词条单位 _affix_vanguard_active 恒 false → 零影响。
 	if normalized_key == "SPD" and _affix_vanguard_active:
@@ -1136,6 +1150,30 @@ func _get_base_stat_value(stat_key: String) -> int:
 	return 0
 
 
+## 持有型状态 params 里的 qi_scaled_stat_bonus：{stats, base, qi_step} → base + 剑气 ÷ qi_step（向下取整）。
+## 每次读取按当前剑气即时计算，不快照（设计库〔招架〕rules：N 随当前剑气即时变化）。
+func _get_held_state_stat_bonus(normalized_key: String) -> int:
+	var total: int = 0
+	for entry: Dictionary in held_states.to_array():
+		var params: Dictionary = entry.get("params", {})
+		var scaled: Variant = params.get("qi_scaled_stat_bonus", null)
+		if not scaled is Dictionary:
+			continue
+		var spec: Dictionary = scaled
+		var stats_list: Array = spec.get("stats", [])
+		var matched: bool = false
+		for stat_name: Variant in stats_list:
+			if _normalize_stat_key(str(stat_name)) == normalized_key:
+				matched = true
+				break
+		if not matched:
+			continue
+		var step: int = int(spec.get("qi_step", 0))
+		var per_step: int = sword_qi / step if step > 0 else 0
+		total += int(spec.get("base", 0)) + per_step
+	return total
+
+
 ## 从 DataLoader.held_states 注入持有型状态的定义；拿不到 DataLoader 时保持空表
 ## （施加未注册的状态会报错，不会静默生效）。
 func _load_held_state_definitions() -> void:
@@ -1165,6 +1203,9 @@ func _init_sword_qi_resource(class_data: Dictionary) -> void:
 	_xinyan_low_qi_stat_bonus = int(cfg.get("low_qi_stat_bonus", 0))
 	_xinyan_high_qi_stat_key = _normalize_stat_key(str(cfg.get("high_qi_stat_key", "")))
 	_xinyan_high_qi_stat_bonus = int(cfg.get("high_qi_stat_bonus", 0))
+	_xinyan_qi_deficit_per_step = maxi(0, int(cfg.get("qi_deficit_per_step", 0)))
+	_xinyan_deficit_stat_key = _normalize_stat_key(str(cfg.get("deficit_stat_key", "")))
+	_xinyan_deficit_stat_bonus = int(cfg.get("deficit_stat_bonus", 0))
 	# 兼容字段（仅供 UI 读，见字段声明处说明）：分档界线换算成剑气绝对值。
 	_xinyan_speed_threshold = int(
 		float(_qi_max) * float(_xinyan_qi_ratio_threshold_pct) / 100.0)
@@ -1191,6 +1232,11 @@ func _apply_xinyan_passive() -> void:
 func _get_xinyan_stat_bonus(normalized_key: String) -> int:
 	if _qi_max <= 0:
 		return 0
+	if _xinyan_qi_deficit_per_step > 0:
+		# 整档计算、不足一档不计（设计库 myrmidon_xinyan rules）：剑气 0 → (100−0)/40 = 2 档。
+		if _xinyan_deficit_stat_key == "" or normalized_key != _xinyan_deficit_stat_key:
+			return 0
+		return ((_qi_max - sword_qi) / _xinyan_qi_deficit_per_step) * _xinyan_deficit_stat_bonus
 	# 用整数交叉相乘比较，避免除法取整带来的边界漂移：剑气/上限 ≤ 比例/100。
 	var in_low_band: bool = sword_qi * 100 <= _qi_max * _xinyan_qi_ratio_threshold_pct
 	if in_low_band:

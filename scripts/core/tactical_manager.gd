@@ -1056,12 +1056,19 @@ func _build_passive_entry(unit: Unit) -> Dictionary:
 	if unit._qi_max <= 0:
 		return {}
 	var threshold_qi: int = unit._qi_max * unit._xinyan_qi_ratio_threshold_pct / 100
-	var desc: String = "每 %d 点剑气，暴击 +%d（向下取整）。剑气不高于 %d 时 %s +%d，高于 %d 时 %s +%d。" % [
-		unit._xinyan_qi_per_crit_pct, unit._xinyan_crit_per_qi,
-		threshold_qi, _stat_display_name(unit._xinyan_low_qi_stat_key),
-		unit._xinyan_low_qi_stat_bonus,
-		threshold_qi, _stat_display_name(unit._xinyan_high_qi_stat_key),
-		unit._xinyan_high_qi_stat_bonus]
+	var desc: String = ""
+	if unit._xinyan_qi_deficit_per_step > 0:
+		desc = "每 %d 点剑气，暴击 +%d。剑气每比 %d 点少 %d 点，%s +%d。（均按整档计算）" % [
+			unit._xinyan_qi_per_crit_pct, unit._xinyan_crit_per_qi,
+			unit._qi_max, unit._xinyan_qi_deficit_per_step,
+			_stat_display_name(unit._xinyan_deficit_stat_key), unit._xinyan_deficit_stat_bonus]
+	else:
+		desc = "每 %d 点剑气，暴击 +%d（向下取整）。剑气不高于 %d 时 %s +%d，高于 %d 时 %s +%d。" % [
+			unit._xinyan_qi_per_crit_pct, unit._xinyan_crit_per_qi,
+			threshold_qi, _stat_display_name(unit._xinyan_low_qi_stat_key),
+			unit._xinyan_low_qi_stat_bonus,
+			threshold_qi, _stat_display_name(unit._xinyan_high_qi_stat_key),
+			unit._xinyan_high_qi_stat_bonus]
 	# 印记持有加成：只在真的有印记的单位上说（_mark_max<=0 的单位拿不到印记）。
 	# 三种印记对应哪个属性写死在 Unit.get_effective_stat 里，加成值从职业 JSON 读。
 	if unit._mark_max > 0:
@@ -1070,7 +1077,7 @@ func _build_passive_entry(unit: Unit) -> Dictionary:
 			_stat_display_name("SPD"), unit._mark_spd_bonus,
 			_stat_display_name("STR"), unit._mark_str_bonus]
 	return {
-		"skill_id": "swordsman_xinyan",
+		"skill_id": unit.passive_skill_id,
 		"name": "心眼",
 		"is_passive": true,
 		"available": true,
@@ -1081,7 +1088,7 @@ func _build_passive_entry(unit: Unit) -> Dictionary:
 		"action_cost": "",
 		"qi_cost": 0,
 		"mark_cost": 0,
-		"slot_origin_id": "swordsman_xinyan",
+		"slot_origin_id": unit.passive_skill_id,
 	}
 
 
@@ -1315,6 +1322,8 @@ func _get_attack_button_reason() -> String:
 	var validation: Dictionary = GameAction.can_use_normal_attack(current_unit)
 	if bool(validation.get("ok", false)):
 		return ""
+	if not current_unit.has_basic_attack:
+		return "该职业没有普通攻击"
 	return "攻击机会已使用"
 
 
@@ -2120,6 +2129,18 @@ func _apply_hostile_skill_effects(user: Unit, target_unit: Unit,
 
 func _apply_skill_effect_to_unit(user: Unit, target_unit: Unit,
 		effect_data: Dictionary, is_hostile: bool) -> void:
+	# 持有型状态（data/held_states）：持续时间与数值由技能写明（R3.4），原样传给 HeldStateSet。
+	if effect_data.has("held_state_id"):
+		if not _roll_effect_application(target_unit, effect_data, is_hostile):
+			return
+		var duration_value: Variant = effect_data.get("duration", {})
+		var params_value: Variant = effect_data.get("params", {})
+		target_unit.apply_held_state(str(effect_data["held_state_id"]),
+			maxi(1, int(effect_data.get("stacks", 1))),
+			duration_value if duration_value is Dictionary else {},
+			params_value if params_value is Dictionary else {},
+			user.unit_id)
+		return
 	var effect_type: String = str(
 		effect_data.get("effect_id", effect_data.get("type", "")))
 	var effect_value: int = int(effect_data.get("value", 0))

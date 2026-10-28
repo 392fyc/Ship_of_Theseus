@@ -81,6 +81,8 @@ static func can_use_normal_move(unit: Unit) -> Dictionary:
 static func can_use_normal_attack(unit: Unit) -> Dictionary:
 	if unit == null:
 		return {"ok": false, "reason": "No acting unit"}
+	if not unit.has_basic_attack:
+		return {"ok": false, "reason": "No basic attack"}
 	if unit.standard_used:
 		return {"ok": false, "reason": "Standard Action already used"}
 	return {"ok": true, "reason": ""}

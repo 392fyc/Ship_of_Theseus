@@ -1,0 +1,52 @@
+{
+  "id": "myrmidon_juhe",
+  "target_mode": "单位",
+  "name": "居合",
+  "damage_type": "physical",
+  "range": {
+    "type": "diamond",
+    "min": 1,
+    "max": 1
+  },
+  "area": {
+    "type": "single",
+    "size": 0
+  },
+  "attack_type": "melee",
+  "cooldown": 0,
+  "action_cost": "standard",
+  "tags": [
+    "sword",
+    "ougi"
+  ],
+  "hit_bonus": 0,
+  "timing_constraint": "any",
+  "effects": [],
+  "qi_cost": 60,
+  "qi_gain_on_hit": 0,
+  "qi_gain_on_kill": 0,
+  "mark_gain": 0,
+  "mark_cost": 0,
+  "requires_marks": 0,
+  "guaranteed_crit": false,
+  "guaranteed_hit": false,
+  "damage_entries": [
+    {
+      "applies_when": "",
+      "base_attribute": "默认",
+      "coefficient": 1.6,
+      "crit_mode": "正常",
+      "crit_multiplier": 1.0,
+      "damage_type": null,
+      "hit_bonus": 0,
+      "hit_mode": "必定命中",
+      "placeholder": false,
+      "power": 8,
+      "segment_hit_decay": 0,
+      "segments": 1,
+      "sort": 0
+    }
+  ],
+  "description": "奥义·距离 1，造成物理伤害（威力 +8，系数 1.6），必定命中。消耗 60 点剑气。",
+  "_mirror": "设计库镜像字段：name / damage_entries / 射程 / 冷却 / 行动消耗 / 剑气数值来自设计库仓 snapshots/skills.json @ 762393b（myrmidon_juhe）。伤害只读 damage_entries（R1.1 / R1.7，技能威力不加武器威力）；power 字段不写。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。"
+}

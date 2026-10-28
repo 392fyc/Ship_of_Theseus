@@ -292,8 +292,11 @@ func _test_slot_swap_class_gate(dl: Object) -> void:
 	_check("myrmidon 职业存在", not mm.is_empty())
 	var m: Unit = _make_unit(mm)
 	_check("剑士 skill_ids 不含拔刀", not m.skill_ids.has(tgt))
-	_check("剑士持有招架（替换的 provider 槽确实在其技能表内）",
-		m.skill_ids.has("swordsman_zhaojia"))
+	# 剑士的招架是自己的 myrmidon_zhaojia（gameplay-impl PR3），它不声明拔刀替换；
+	# 下面仍拿 swordsman_zhaojia 的替换声明去问剑士，验证职业门控本身。
+	_check("剑士持有自己的招架，且不声明拔刀替换",
+		m.skill_ids.has("myrmidon_zhaojia")
+		and not (dl.skills["myrmidon_zhaojia"] as Dictionary).has("slot_swap_target"))
 	m.gain_random_mark()
 	m.gain_random_mark()
 	m.gain_random_mark()

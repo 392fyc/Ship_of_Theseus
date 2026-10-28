@@ -40,7 +40,7 @@ func _run() -> void:
 	for slot: Button in slots:
 		var skill_id: String = slot._view.skill_id
 		var icon: TextureRect = slot.get_node("%IconRect") as TextureRect
-		var icon_path: String = "res://assets/ui/skills/myrmidon/%s.png" % skill_id.trim_prefix("swordsman_")
+		var icon_path: String = "res://assets/ui/skills/myrmidon/%s.png" % skill_id.trim_prefix("swordsman_").trim_prefix("myrmidon_")
 		_check("正式图标：" + skill_id, icon.texture != null and icon.texture.resource_path == icon_path)
 	for source: Variant in state.get("skills", []):
 		if source is Dictionary:
