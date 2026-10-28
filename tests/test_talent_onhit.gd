@@ -700,7 +700,7 @@ func _test_on_hit_rewrites_damage() -> void:
 	# 把基数做成整数好算：STR 10 + might 10 − DEF 0 = 20，强制暴击 ×1.5 = 30。
 	attacker.stats.str_attr = 10
 	attacker.unequip_offhand()
-	var payload: Dictionary = {"weapon_might": 10}
+	var payload: Dictionary = {"skill_power": 10}
 
 	attacker.talent_ids = []
 	var base_crit: int = _strike(tm, attacker, enemy, payload)
@@ -834,7 +834,7 @@ func _test_modifier_composes_with_offhand() -> void:
 	var enemy: Unit = ctx["enemy"]
 
 	attacker.stats.str_attr = 10
-	var payload: Dictionary = {"weapon_might": 10}
+	var payload: Dictionary = {"skill_power": 10}
 	var dex_eff: int = attacker.get_effective_stat("DEX")
 	var factor: float = 1.0 + float(dex_eff) * 1.0 / 100.0
 	_check("前提：DEX 生效值大于 0（否则倍率恒为 1，这组失去区分力）",
@@ -908,7 +908,7 @@ func _test_hook_matches_resolution() -> void:
 	attacker.unequip_offhand()
 	enemy.stats.lck = 0
 	# 暴击率放在中间：weapon_crit 20 + DEX/2(=20) − LCK 0 → 约 40%。
-	var payload: Dictionary = {"weapon_might": 10, "weapon_crit": 20}
+	var payload: Dictionary = {"skill_power": 10, "weapon_crit": 20}
 	attacker.talent_ids = ["myrmidon_sixian"]
 
 	var dex_eff: int = attacker.get_effective_stat("DEX")
@@ -968,7 +968,7 @@ func _test_offhand_side_gaps() -> void:
 	enemy.stats.lck = 0
 	attacker.equip_offhand(OFFHAND_WEAPON)
 	var off_might: int = _offhand_might()
-	var main_payload: Dictionary = {"weapon_might": 10, "disable_crit": true}
+	var main_payload: Dictionary = {"skill_power": 10, "disable_crit": true}
 
 	var dex_eff: int = attacker.get_effective_stat("DEX")
 	var more: float = 1.0 + float(dex_eff) * 1.0 / 100.0
@@ -1051,7 +1051,7 @@ func _test_offhand_side_gaps() -> void:
 	atk2.stats.str_attr = 10
 	atk2.stats.dex = 100
 	atk2.equip_offhand(OFFHAND_WEAPON)
-	var payload2: Dictionary = {"weapon_might": 10}
+	var payload2: Dictionary = {"skill_power": 10}
 
 	atk2.talent_ids = []
 	var main_alone: int = _strike(tm2, atk2, foe2, payload2)

@@ -596,7 +596,7 @@ func _test_offhand_precision(dl: Object) -> void:
 	enemy.stats.def_attr = 0
 
 	# ── G1. 钉死副手伤害量（杀 M6：副手复用主手 action_data）──
-	# 物理基础伤害 = STR + weapon_might − DEF，再乘 skill_multiplier(=damage_pct/100)。
+	# 物理基础伤害 = STR + skill_power（副手按武器威力等价桥接） − DEF，再乘 skill_multiplier(=damage_pct/100)。
 	# 主副手用 might 差异明显的两把：主手 swordsman_starter(6) / 副手 training_dummy(1)。
 	var strv: int = attacker.get_effective_stat("STR")
 	attacker.talent_ids = ["kensei_ertianyiliu"]

@@ -131,7 +131,7 @@ func _test_badao_mark_timing(tm: Object, sword: Unit, dummy: Unit) -> void:
 	sword.marks["心"] = true
 	sword.marks["道"] = true
 	sword.marks["势"] = true          # 势 → STR +2 → 10→12
-	# 期望非暴击伤害 = (STR12 + weapon_might6 − def2) × power1.8 = 16 × 1.8 = 28.8 → 向下取整 28
+	# 期望非暴击伤害 = (STR12 + 技能威力6（旧技能按武器威力等价桥接） − def2) × power1.8 = 16 × 1.8 = 28.8 → 向下取整 28
 	# 若印记在伤害前被扣（旧 bug），STR=10 → (10+6−2)×1.8 = 25.2 → 向下取整 25
 	dummy.stats.hp = dummy.stats.max_hp
 	var hp_before: int = dummy.stats.hp

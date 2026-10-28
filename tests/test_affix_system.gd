@@ -191,7 +191,7 @@ func _test_frenzy(dl: Object) -> void:
 	dft.stats.max_hp = 999
 	dft.stats.hp = 999
 	var action: Dictionary = {
-		"damage_type": "physical", "weapon_might": 0, "guaranteed_hit": true}
+		"damage_type": "physical", "skill_power": 0, "guaranteed_hit": true}
 	# 满血：frenzy 未触发 → base 20
 	atk.stats.max_hp = 80
 	atk.stats.hp = 80
@@ -219,7 +219,7 @@ func _test_damage_mult(dl: Object) -> void:
 	dft.stats.max_hp = 999
 	dft.stats.hp = 999
 	var action: Dictionary = {
-		"damage_type": "physical", "weapon_might": 0, "guaranteed_hit": true}
+		"damage_type": "physical", "skill_power": 0, "guaranteed_hit": true}
 	# stat_scale=1.5 单位：base 20 → 30
 	var atk: Unit = _make_unit(dl.enemies["goblin_melee"])
 	atk.stats.str_attr = 20
@@ -304,7 +304,7 @@ func _test_regression_zero_impact(dl: Object) -> void:
 	g.stats.str_attr = 10
 	g.stats.dex = 0
 	var pv: Dictionary = DamageCalculator.preview_attack(g, t,
-		{"damage_type": "physical", "weapon_might": 0, "guaranteed_hit": true})
+		{"damage_type": "physical", "skill_power": 0, "guaranteed_hit": true})
 	_eq("无词条输出==base(10)", pv["damage"], 10)
 	g.free()
 	t.free()
