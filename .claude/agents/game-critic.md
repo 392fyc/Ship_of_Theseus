@@ -4,6 +4,14 @@ description: "Adversarially review a SoT design proposal when the user or an agr
 model: "opus"
 tools: "WebSearch, WebFetch, Read, Glob, Grep"
 disallowedTools: "Edit, Write, NotebookEdit"
+hooks:
+  PreToolUse:
+    - matcher: "Bash|PowerShell"
+      hooks:
+        - type: command
+          shell: bash
+          command: "sh \"${CLAUDE_PROJECT_DIR}/.mercury/packs/core/hooks/wait_guard.sh\""
+          timeout: 30
 ---
 
 <!--
