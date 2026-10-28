@@ -1,0 +1,14 @@
+[gd_resource type="FontFile" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/hud/m2/hud_font_setup.gd" id="1_setup"]
+[ext_resource type="FontFile" path="res://assets/fonts/noto_sans_cjk_sc/NotoSansCJKsc-Bold-subset.otf" id="2_source"]
+[ext_resource type="FontFile" path="res://assets/ui/themes/hud_m2_symbols2_font.tres" id="3_symbols2"]
+[ext_resource type="FontFile" path="res://assets/ui/themes/hud_m2_symbols_font.tres" id="4_symbols"]
+[ext_resource type="FontFile" path="res://assets/ui/themes/hud_m2_emoji_font.tres" id="5_emoji"]
+
+[resource]
+script = ExtResource("1_setup")
+source_font = ExtResource("2_source")
+fallback_fonts = [ExtResource("3_symbols2"), ExtResource("4_symbols"), ExtResource("5_emoji")]
+normalize_fallback_metrics = true
+fallback_metric_sizes = Array[int]([8, 9, 10, 11, 12, 13, 14, 16, 20])

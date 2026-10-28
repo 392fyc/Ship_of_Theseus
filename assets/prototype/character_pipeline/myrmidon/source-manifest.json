@@ -1,0 +1,20 @@
+{
+  "provenance": "Built-in imagegen using approved myrmidon portrait and kensei atlas references; lossless WebP transport, no resizing/repainting. Original PNG retained by Main.",
+  "original_png": {
+    "bytes": 839986,
+    "sha256": "fa6ee6e749d6066367f3bc08e2259c24b61aa83d52142f853d6949cf27b010a8"
+  },
+  "received_webp": {
+    "bytes": 598562,
+    "sha256": "245fcbbe566cbfcac5f63d0edcd67ac25d874976b3937edd7e0911bffb726ef8",
+    "size": [
+      1254,
+      1254
+    ],
+    "frame_grid": [
+      2,
+      2
+    ]
+  },
+  "pixel_equivalence": "Main verified alpha and nontransparent RGB; cloud has received WebP only, cannot independently compare absent PNG"
+}

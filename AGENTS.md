@@ -156,6 +156,10 @@ KB 里积累的设计原则、用户裁决和调研，只有在代理每次动�
 - 本机 roots、凭据和运行时连接参数只能来自被忽略的本地配置或受保护环境变量。
 - 秘密扫描只报告类别、文件范围与处置结果，不输出匹配文本。
 
+## 美术表现验收
+
+修改人物棋子、朝向、足点、脚环、血条或职业徽章时，先读取 [人物表现验收准则](docs/art/character-token-acceptance.md)。修改地形表现时，先读取 [地形呈现验收准则](docs/art/terrain-presentation-acceptance.md)，同时检查相邻连接和实际战斗中的可读性。自动检查、独立画面审阅与用户视觉批准须分别记录。
+
 ## GDScript 约束
 
 - `class_name` 与 autoload 同名时，autoload 脚本移除 `class_name`。

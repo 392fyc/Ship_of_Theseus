@@ -10,15 +10,17 @@ extends Node2D
 # class_name DamageForecaster 仍在文件内声明，编辑器/真机可全局引用）。
 const DamageForecasterScript: GDScript = preload("res://scripts/ui/damage_forecaster.gd")
 const RuntimeDashboardScript: GDScript = preload("res://scripts/ui/hud/m2/runtime_dashboard.gd")
+const UnitOverheadLayoutScript: GDScript = preload("res://scripts/ui/unit_overhead_layout.gd")
 
 var _turn_order_bar: TurnOrderBar = null
 var _bottom_dashboard: HudM2RuntimeDashboard = null
+var _unit_overhead_layout: Control = null
 # 伤害预测浮窗（v3）：浮于悬停目标格上方，独立 CanvasLayer 宿主（屏幕空间）。
 var _forecaster_layer: CanvasLayer = null
 var _damage_forecaster: Control = null
-# 头顶数字节点池（浮于各受影响目标头顶，持续显示至瞄准结束）。
-var _forecast_head_nodes: Array[Node] = []
 var _forecast_world_anchor: Vector2 = Vector2.ZERO
+# Optional entry-local placement after the native anchor is calculated.
+var forecast_placement_override: Callable = Callable()
 # 浮窗锚到目标格上方的纵向间距（格中心上方留出 ~半格 + 浮窗高 + 三角）。
 const FORECASTER_ANCHOR_OFFSET_Y: float = 36.0
 # 浮窗在头顶数字上方的额外净空（浮窗底边不压头顶数字）。
@@ -121,11 +123,15 @@ func _ready() -> void:
 
 	tactical_manager.unit_killed.connect(_on_unit_killed)
 
+	_build_unit_overhead_layout()
 	_turn_order_bar = _turn_order_scene.instantiate()
 	$UILayer.add_child(_turn_order_bar)
 	_bottom_dashboard = RuntimeDashboardScript.new()
 	$UILayer.add_child(_bottom_dashboard)
+	_unit_overhead_layout.call("set_reserved_controls", [_turn_order_bar, _bottom_dashboard])
+	_unit_overhead_layout.call("sync_units", tactical_manager.units)
 	_build_damage_forecaster()
+	_unit_overhead_layout.call("set_reserved_controls", [_turn_order_bar, _bottom_dashboard, _damage_forecaster])
 	tactical_manager.turn_manager.queue_changed.connect(_refresh_turn_order)
 	tactical_manager.turn_manager.turn_started.connect(_on_turn_changed)
 	tactical_manager.turn_manager.turn_ended.connect(_on_turn_changed)
@@ -308,58 +314,6 @@ func _build_damage_forecaster() -> void:
 	_forecaster_layer.add_child(_damage_forecaster)
 
 
-## 清除所有头顶数字节点（瞄准结束或重新计算时调用）。
-func _clear_forecast_head_nodes() -> void:
-	for n: Node in _forecast_head_nodes:
-		if is_instance_valid(n):
-			n.queue_free()
-	_forecast_head_nodes.clear()
-
-
-## 为每个受影响目标在其头顶显示「类型字形 + 伤害数字」预览节点。
-## 复用 DamagePopup.compose + _Glyph 样式，与造成伤害飘字视觉一致。
-func _spawn_forecast_head_nodes(targets: Array) -> void:
-	for t: Variant in targets:
-		if not (t is Dictionary):
-			continue
-		var target_dict: Dictionary = t
-		var world: Vector2 = target_dict.get("world", Vector2.ZERO)
-		var dmg: int = int(target_dict.get("damage", 0))
-		var dtype: String = str(target_dict.get("damage_type", "physical"))
-		var parts: Dictionary = DamagePopup.compose(dmg, dtype, false)
-		var screen: Vector2 = _world_to_screen(world)
-		# world 已是 Unit 提供的最终锚点，不再叠加旧版纵向偏移。
-		var base_pos: Vector2 = screen
-
-		# 字形节点
-		var shape: String = str(parts.get("shape", "sword"))
-		if shape != "none":
-			var glyph: Control = DamagePopup._Glyph.new()
-			glyph.shape = shape
-			glyph.color = parts.get("color", Color.WHITE)
-			glyph.custom_minimum_size = Vector2(DamagePopup.GLYPH_SIZE, DamagePopup.GLYPH_SIZE)
-			glyph.size = Vector2(DamagePopup.GLYPH_SIZE, DamagePopup.GLYPH_SIZE)
-			glyph.position = base_pos + Vector2(-DamagePopup.GLYPH_SIZE - DamagePopup.GLYPH_GAP, -DamagePopup.GLYPH_SIZE * 0.5)
-			glyph.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			_forecaster_layer.add_child(glyph)
-			_forecast_head_nodes.append(glyph)
-
-		# 数字标签
-		var txt: String = str(parts.get("text", str(dmg)))
-		var fs: int = int(parts.get("size", DamagePopup.NORMAL_SIZE))
-		var col: Color = parts.get("color", Color.WHITE)
-		var lbl: Label = Label.new()
-		lbl.text = txt
-		lbl.add_theme_font_size_override("font_size", fs)
-		lbl.add_theme_color_override("font_color", col)
-		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lbl.size = Vector2(float(txt.length()) * float(fs) + 24.0, float(fs) + 10.0)
-		lbl.position = base_pos + Vector2(-lbl.size.x * 0.5, -lbl.size.y * 0.5)
-		lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_forecaster_layer.add_child(lbl)
-		_forecast_head_nodes.append(lbl)
-
-
 func _update_damage_forecaster() -> void:
 	if _damage_forecaster == null:
 		return
@@ -369,19 +323,16 @@ func _update_damage_forecaster() -> void:
 		and bool(forecast.get("visible", false))
 	if not show:
 		_damage_forecaster.visible = false
-		_clear_forecast_head_nodes()
+		_unit_overhead_layout.call("set_forecast_targets", [])
 		return
 	var hover: Dictionary = tactical_manager.get_hover_world_pos()
 	if not bool(hover.get("has", false)):
 		_damage_forecaster.visible = false
-		_clear_forecast_head_nodes()
+		_unit_overhead_layout.call("set_forecast_targets", [])
 		return
 
-	# 更新头顶数字（先清再建）
-	_clear_forecast_head_nodes()
 	var targets: Array = forecast.get("targets", [])
-	if not targets.is_empty():
-		_spawn_forecast_head_nodes(targets)
+	_unit_overhead_layout.call("set_forecast_targets", targets)
 
 	_damage_forecaster.set_forecast(forecast)
 	_forecast_world_anchor = hover.get("world", Vector2.ZERO)
@@ -408,6 +359,8 @@ func _layout_damage_forecaster() -> void:
 			pos.y = minf(pos.y, dash_top - visual_size.y - 8.0)
 	pos.y = maxf(4.0, pos.y)
 	_damage_forecaster.position = pos
+	if forecast_placement_override.is_valid():
+		forecast_placement_override.call(_damage_forecaster)
 
 
 ## 世界坐标 → 屏幕坐标（经视口 canvas 变换，含相机平移/缩放）。
@@ -415,9 +368,18 @@ func _world_to_screen(world_pos: Vector2) -> Vector2:
 	return get_viewport().get_canvas_transform() * world_pos
 
 
+func _build_unit_overhead_layout() -> void:
+	_unit_overhead_layout = UnitOverheadLayoutScript.new()
+	_unit_overhead_layout.name = "UnitOverheadLayout"
+	_unit_overhead_layout.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_unit_overhead_layout.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$UILayer.add_child(_unit_overhead_layout)
+
 func _on_unit_killed(unit: Unit) -> void:
 	print("[TacticalScene] Unit killed: %s (%s) | remaining: %d" % [
 		unit.unit_name, unit.faction, tactical_manager.units.size()])
+	if _unit_overhead_layout != null:
+		_unit_overhead_layout.call("sync_units", tactical_manager.units)
 	_refresh_turn_order.call_deferred()
 	if _battle_over:
 		return
@@ -637,6 +599,9 @@ func _make_debug_button(label_text: String) -> Button:
 
 
 func _process(_delta: float) -> void:
+	if _unit_overhead_layout != null:
+		_unit_overhead_layout.call("sync_units", tactical_manager.units)
+		_unit_overhead_layout.call("refresh_layout")
 	if _damage_forecaster != null and _damage_forecaster.visible:
 		_layout_damage_forecaster()
 	if debug_harness_enabled and _debug_overlay != null and not _battle_over:
