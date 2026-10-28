@@ -255,11 +255,11 @@ func _test_enemy_and_no_action(dashboard: Control, manager: Object) -> void:
 
 func _real_skill_icons() -> Dictionary:
 	return {
-		"swordsman_xinyan": load("res://assets/prototype/hud_m2/skill-xinyan.png"),
-		"swordsman_zhanji": load("res://assets/prototype/hud_m2/skill-zhanji.png"),
-		"swordsman_yishan": load("res://assets/prototype/hud_m2/skill-yishan.png"),
-		"swordsman_zhaojia": load("res://assets/prototype/hud_m2/skill-zhaojia.png"),
-		"swordsman_juhe": load("res://assets/prototype/hud_m2/skill-juhe.png"),
+		"kensei_xinyan": load("res://assets/prototype/hud_m2/skill-xinyan.png"),
+		"kensei_zhanji": load("res://assets/prototype/hud_m2/skill-zhanji.png"),
+		"kensei_yishan": load("res://assets/prototype/hud_m2/skill-yishan.png"),
+		"kensei_zhaojia": load("res://assets/prototype/hud_m2/skill-zhaojia.png"),
+		"kensei_juhe": load("res://assets/prototype/hud_m2/skill-juhe.png"),
 	}
 
 

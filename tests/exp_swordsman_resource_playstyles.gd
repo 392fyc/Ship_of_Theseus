@@ -22,6 +22,10 @@ extends SceneTree
 ##   GREEDY 贪婪最优混合：能居合先居合，否则能拔刀就拔刀，否则斩击——
 ##          探针：放开所有手段后是否坍缩成单一最优。
 ##
+## 2026-10-29 旧 swordsman_* 技能下线后，常量改指剑圣现行 kensei_*（设计库 762393b）：
+## 居合冷却 0、无击杀返气，拔刀以自身为中心。上面的策略说明与 tests/剑圣资源打法实证报告.md
+## 记录的是旧技能时期的实验；按新技能重跑之前，那些结论不适用于现行数据。
+##
 ## 运行：
 ##   <Godot_console.exe> --headless --path D:/ShipOfTheseus/Ship_of_Theseus \
 ##     --script res://tests/exp_swordsman_resource_playstyles.gd
@@ -35,11 +39,11 @@ extends SceneTree
 const TRIALS: int = 120
 const ROUNDS: int = 14
 
-const SK_ZHANJI: String = "swordsman_zhanji"
-const SK_YISHAN: String = "swordsman_yishan"
-const SK_ZHAOJIA: String = "swordsman_zhaojia"
-const SK_JUHE: String = "swordsman_juhe"
-const SK_BADAO: String = "swordsman_badao"
+const SK_ZHANJI: String = "kensei_zhanji"
+const SK_YISHAN: String = "kensei_yishan"
+const SK_ZHAOJIA: String = "kensei_zhaojia"
+const SK_JUHE: String = "kensei_juhe"
+const SK_BADAO: String = "kensei_badao"
 const TRACKED_SKILLS: Array[String] = [SK_ZHANJI, SK_YISHAN, SK_ZHAOJIA, SK_JUHE, SK_BADAO]
 
 var _phase: int = 0
@@ -206,7 +210,12 @@ func _run_cell(cell: Dictionary) -> Dictionary:
 				alive_before.append(tg.stats.is_alive())
 
 			_tm._selected_skill_id = skill
-			var action: Object = _tm._build_skill_action(_sword, primary.grid_position, primary)
+			# kensei_badao 以自身为中心（选的目标是自己），其余技能指向主目标。
+			var action: Object = null
+			if skill == SK_BADAO:
+				action = _tm._build_skill_action(_sword, _sword.grid_position, _sword)
+			else:
+				action = _tm._build_skill_action(_sword, primary.grid_position, primary)
 			if action == null:
 				continue
 			var ok: bool = _tm._execute_skill_action(action)

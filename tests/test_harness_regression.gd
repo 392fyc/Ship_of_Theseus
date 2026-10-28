@@ -11,6 +11,7 @@ var _fail: int = 0
 var _fails: Array[String] = []
 var _ran: bool = false
 
+const SplashFixture := preload("res://tests/fixtures/splash_area_skill.gd")
 const ST_SKILL_TARGETING: int = 3  # InputState.SKILL_TARGETING（IDLE0/选中1/ACTION_PHASE2/SKILL_TARGETING3）
 
 
@@ -42,8 +43,12 @@ func _run() -> void:
 
 # ── ① forecast 多目标边界 ─────────────────────────────────
 
+## 多目标汇总用测试夹具 tests/fixtures/splash_area_skill.gd：旧拔刀 swordsman_badao 的
+## 原样副本（选单位落点 + 主目标满额、周围 50% 溅射）。旧拔刀下线后正式数据里没有技能
+## 再用这条通路，夹具字段与旧文件逐项相同，下面的期望值不用重算。
 func _test_forecast_multitarget(scene: Node, tm: Object) -> void:
-	print("\n[①] forecast 多目标边界（拔刀 AoE 汇总 / 0/1/3 目标）")
+	print("\n[①] forecast 多目标边界（溅射夹具 AoE 汇总 / 0/1/3 目标）")
+	var splash_skill_id: String = SplashFixture.install(root.get_node("DataLoader"))
 	var sword: Unit = _find(tm, "kensei")
 	if sword == null:
 		_check("场景含剑圣", false)
@@ -73,7 +78,7 @@ func _test_forecast_multitarget(scene: Node, tm: Object) -> void:
 	tm.input_state = ST_SKILL_TARGETING
 
 	# (a) 拔刀命中 3 目标
-	tm._selected_skill_id = "swordsman_badao"
+	tm._selected_skill_id = splash_skill_id
 	_set_attack_cells(tm, [Vector2i(4, 3)])
 	var fc3: Dictionary = tm._build_skill_forecast_for_hover(Vector2i(4, 3))
 	_check("拔刀 forecast 非空", not fc3.is_empty())
@@ -98,7 +103,7 @@ func _test_forecast_multitarget(scene: Node, tm: Object) -> void:
 		primary_dmg > 0 and splash_dmg > 0 and absi(splash_dmg * 2 - primary_dmg) <= 1)
 
 	# (b) 单体居合 → hit_count==1，total==per_hit
-	tm._selected_skill_id = "swordsman_juhe"
+	tm._selected_skill_id = "kensei_juhe"
 	_set_attack_cells(tm, [Vector2i(4, 3)])
 	var fc1: Dictionary = tm._build_skill_forecast_for_hover(Vector2i(4, 3))
 	_eq("居合 hit_count==1", int(fc1.get("hit_count", 0)), 1)
@@ -106,7 +111,7 @@ func _test_forecast_multitarget(scene: Node, tm: Object) -> void:
 		int(fc1.get("total_damage", -1)), int(fc1.get("per_hit_damage", -2)))
 
 	# (c) 区域无敌 → 返回空
-	tm._selected_skill_id = "swordsman_badao"
+	tm._selected_skill_id = splash_skill_id
 	_set_attack_cells(tm, [Vector2i(7, 7)])
 	var fc0: Dictionary = tm._build_skill_forecast_for_hover(Vector2i(7, 7))
 	_check("拔刀 命中空地（区域无敌）→ forecast 为空", fc0.is_empty())

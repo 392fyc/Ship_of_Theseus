@@ -14,8 +14,8 @@ func _run() -> void:
 	root.size = Vector2i(1280, 720)
 	var catalog: RefCounted = Catalog.new()
 	for skill: String in SKILLS:
-		var id := StringName("swordsman_" + skill)
-		# 剑士用自己的 myrmidon_* 技能（gameplay-impl PR3）；剑圣仍是 swordsman_*。
+		var id := StringName("kensei_" + skill)
+		# 剑士用自己的 myrmidon_* 技能（gameplay-impl PR3），剑圣用 kensei_*（PR4）。
 		var texture: Texture2D = catalog.resolve(StringName("myrmidon_" + skill), &"myrmidon")
 		_check("剑士图标存在且为 104 像素: " + skill, texture != null and texture.get_size() == Vector2(104, 104))
 		if texture != null:
@@ -25,8 +25,9 @@ func _run() -> void:
 		var unknown: Texture2D = catalog.resolve(id, &"unknown")
 		_check("未登记职业回退默认图标: " + skill, unknown == legacy)
 	var missing_override: RefCounted = Catalog.new()
-	missing_override._class_paths = {"myrmidon": {"swordsman_zhanji": "res://assets/ui/skills/myrmidon/missing.png"}}
-	_check("职业图标资源失效时回退默认图标", missing_override.resolve(&"swordsman_zhanji", &"myrmidon") == catalog.resolve(&"swordsman_zhanji", &"kensei"))
+	missing_override._class_paths = {"myrmidon": {"myrmidon_zhanji": "res://assets/ui/skills/myrmidon/missing.png"}}
+	_check("职业图标资源失效时回退默认图标", missing_override.resolve(&"myrmidon_zhanji", &"myrmidon") == catalog.resolve(&"myrmidon_zhanji", &""))
+	_check("旧 swordsman_* 图标登记已移除", catalog.resolve(&"swordsman_zhanji", &"myrmidon") == null)
 	await _check_real_scene("myrmidon", "res://assets/ui/skills/myrmidon/")
 	await _check_real_scene("kensei", "res://assets/prototype/hud_m2/skill-")
 	print("MYRMIDON_SKILL_ICON_RESULT failed=%d" % _failed)
@@ -50,7 +51,7 @@ func _check_real_scene(class_id: String, expected_prefix: String) -> void:
 	for slot: Button in slots:
 		var skill_id: String = slot._view.skill_id
 		var icon: TextureRect = slot.get_node("%IconRect") as TextureRect
-		var name: String = skill_id.trim_prefix("swordsman_").trim_prefix("myrmidon_").trim_prefix("kensei_")
+		var name: String = skill_id.trim_prefix("myrmidon_").trim_prefix("kensei_")
 		var expected: String = expected_prefix + name + ".png"
 		_check("%s 正式技能栏使用 %s 对应图标" % [class_id, name], icon.texture != null and icon.texture.resource_path == expected)
 	if class_id == "myrmidon":

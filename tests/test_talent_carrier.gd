@@ -33,6 +33,7 @@ var _ran: bool = false
 const TALENT_REGISTRY_PATH := "res://scripts/data/talent_registry.gd"
 const STATE_REGISTRY_PATH := "res://scripts/data/state_registry.gd"
 const DATA_LOADER_PATH := "res://scripts/data/data_loader.gd"
+const SplashFixture := preload("res://tests/fixtures/splash_area_skill.gd")
 
 ## 合成的「判不了」状态。Wave 2 之后生产库里的双持已转 evaluable，没有现成的
 ## unevaluable 状态可用了——但 Wave 1 §2.3 的硬判据必须继续被锁住，故自造一个。
@@ -716,9 +717,12 @@ func _test_offhand_precision(dl: Object) -> void:
 		attacker.talent_ids = ["kensei_ertianyiliu"]
 		attacker.equip_offhand("eq_wpn_regal_blade")
 
-		# 技能路径（带 skill_id）同样追加——与普攻一致。
+		# 技能路径（带 skill_id）同样追加——与普攻一致。载体是溅射夹具（已下线旧拔刀
+		# swordsman_badao 的原样副本）：换成剑圣现行 kensei_badao 会改变主手伤害，牵动
+		# 下面一串按 main_only 算的期望；夹具字段与旧文件逐项相同，期望值不用重算。
+		var carrier_skill_id: String = SplashFixture.install(root.get_node("DataLoader"))
 		enemy5.stats.hp = 9999
-		tm._execute_hostile_action(attacker, enemy5, {"skill_id": "swordsman_badao"})
+		tm._execute_hostile_action(attacker, enemy5, {"skill_id": carrier_skill_id})
 		var skill_total: int = 9999 - enemy5.stats.hp
 		_check("技能路径也追加副手伤害（按目标算，不是按动作算）",
 			skill_total > main_only, "skill_total=%d main_only=%d" % [skill_total, main_only])
@@ -729,7 +733,7 @@ func _test_offhand_precision(dl: Object) -> void:
 		# 用 0.25 而不是 0.5——0.5 时主手衰减后恰好等于副手，看不出差别。
 		enemy5.stats.hp = 9999
 		tm._execute_hostile_action(attacker, enemy5, {
-			"skill_id": "swordsman_badao", "area_damage_multiplier": 0.25,
+			"skill_id": carrier_skill_id, "area_damage_multiplier": 0.25,
 		})
 		var splash_total: int = 9999 - enemy5.stats.hp
 		var splash_main: int = int(floor(float(main_only) * 0.25))
@@ -744,8 +748,8 @@ func _test_offhand_precision(dl: Object) -> void:
 
 		# per-target 循环的等效验证：连打两次 = 两次追加（AOE 打 2 个人的效果）。
 		enemy5.stats.hp = 9999
-		tm._execute_hostile_action(attacker, enemy5, {"skill_id": "swordsman_badao"})
-		tm._execute_hostile_action(attacker, enemy5, {"skill_id": "swordsman_badao"})
+		tm._execute_hostile_action(attacker, enemy5, {"skill_id": carrier_skill_id})
+		tm._execute_hostile_action(attacker, enemy5, {"skill_id": carrier_skill_id})
 		_eq("两个目标 = 两次追加（每目标各一次）",
 			9999 - enemy5.stats.hp, (main_only + offhand_sword) * 2)
 

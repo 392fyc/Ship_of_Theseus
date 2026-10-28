@@ -15,6 +15,8 @@ var _fail: int = 0
 var _fails: Array[String] = []
 var _ran: bool = false
 
+const SplashFixture := preload("res://tests/fixtures/splash_area_skill.gd")
+
 
 func _initialize() -> void:
 	print("=== test_swordsman_skillbar (技能栏修复回归) ===")
@@ -50,17 +52,17 @@ func _run() -> void:
 	if enemy != null:
 		_check("非剑圣单位 _build_passive_entry 为空", tm._build_passive_entry(enemy).is_empty())
 
-	# ② slot_swap 数据契约
+	# ② slot_swap 数据契约（剑圣 kensei_*，gameplay-impl PR4）
 	_eq("拔刀 slot_swap_provider=true",
-		bool(tm._get_skill_data("swordsman_badao").get("slot_swap_provider", false)), true)
+		bool(tm._get_skill_data("kensei_badao").get("slot_swap_provider", false)), true)
 	_eq("招架 slot_swap_target=拔刀",
-		str(tm._get_skill_data("swordsman_zhaojia").get("slot_swap_target", "")), "swordsman_badao")
+		str(tm._get_skill_data("kensei_zhaojia").get("slot_swap_target", "")), "kensei_badao")
 
-	# ③ 条目携带 description + cooldown_max（居合 cd3 / 斩击 cd0）
-	var juhe_entry: Dictionary = tm._build_skill_entry(sword, "swordsman_juhe")
-	_check("居合条目含 description", str(juhe_entry.get("description", "")) != "")
-	_eq("居合 cooldown_max=3", int(juhe_entry.get("cooldown_max", -1)), 3)
-	_eq("斩击 cooldown_max=0", int(tm._build_skill_entry(sword, "swordsman_zhanji").get("cooldown_max", -1)), 0)
+	# ③ 条目携带 description + cooldown_max（一闪 cd3 / 斩击 cd0）
+	var yishan_entry: Dictionary = tm._build_skill_entry(sword, "kensei_yishan")
+	_check("一闪条目含 description", str(yishan_entry.get("description", "")) != "")
+	_eq("一闪 cooldown_max=3", int(yishan_entry.get("cooldown_max", -1)), 3)
+	_eq("斩击 cooldown_max=0", int(tm._build_skill_entry(sword, "kensei_zhanji").get("cooldown_max", -1)), 0)
 
 	# ④ _get_skill_entries 构成（需剑圣为行动单位；印记未满）
 	sword.clear_marks()
@@ -107,7 +109,8 @@ func _run() -> void:
 # ── ⑥ forecast 数据契约 ─────────────────────────────────
 # 验证 _build_attack_forecast_for_hover 和 _build_skill_forecast_for_hover
 # 都输出 targets/target_hp/target_hp_max 字段（counter_* 已随自动反击移除，2026-07-11）。
-# AoE 场景（拔刀：主目标 + 溅射目标）验证 targets.size() > 1。
+# AoE 场景（主目标 + 溅射目标）验证 targets.size() > 1。旧拔刀 swordsman_badao 下线后，
+# 这种「选单位 + 溅射」的形状改用测试夹具 tests/fixtures/splash_area_skill.gd。
 func _test_forecast_data_contract(tm: Object, sword: Unit) -> void:
 	print("\n[⑥] forecast 数据契约：targets/target_hp")
 
@@ -155,7 +158,7 @@ func _test_forecast_data_contract(tm: Object, sword: Unit) -> void:
 		_check("攻击 forecast 无 counter_damage（自动反击已移除）",
 			not fc_atk.has("counter_damage"))
 
-	# --- AoE 技能 forecast（拔刀：主目标 + 溅射目标）---
+	# --- AoE 技能 forecast（溅射夹具：主目标 + 溅射目标）---
 	_clear_all_occupancy(tm)
 	var main_pos: Vector2i = Vector2i(1, 0)
 	var splash_pos: Vector2i = Vector2i(2, 0)
@@ -177,7 +180,7 @@ func _test_forecast_data_contract(tm: Object, sword: Unit) -> void:
 
 	tm.current_unit = sword
 	tm.input_state = 3  # InputState.SKILL_TARGETING
-	tm._selected_skill_id = "swordsman_badao"
+	tm._selected_skill_id = SplashFixture.install(root.get_node("DataLoader"))
 	tm._targeting_direction = Vector2i.ZERO
 	sword.standard_used = false
 	sword.movement_used = false

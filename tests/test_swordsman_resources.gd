@@ -109,41 +109,14 @@ func _test_data_layer(dl: Object) -> void:
 		[10, 10, 10])
 	_eq("sword_qi_config.mark_max==3", cfg.get("mark_max"), 3)
 	_eq("skill_ids 长度==5", (cls.get("skill_ids", []) as Array).size(), 5)
-
-	var zhanji: Dictionary = dl.skills.get("swordsman_zhanji", {})
-	# 斩击产气 25（用户 2026-08-13 裁决，由 +10 提上来）：斩击是剑气经济的起点，
-	# +10 撑不住「三刀攒满印记 + 一次拔刀 + 每回合招架」这个循环。设计库
-	# kensei_zhanji / myrmidon_zhanji 的 effect 是权威，本行是它的镜像。
-	_eq("斩击 qi_gain_on_hit==25", zhanji.get("qi_gain_on_hit"), 25)
-	_eq("斩击 qi_cost==0", zhanji.get("qi_cost"), 0)
-	_eq("斩击 power==100", zhanji.get("power"), 100)
-
-	var yishan: Dictionary = dl.skills.get("swordsman_yishan", {})
-	_eq("一闪 qi_cost==10", yishan.get("qi_cost"), 10)
-	_eq("一闪 power==50", yishan.get("power"), 50)
-
-	var zhaojia: Dictionary = dl.skills.get("swordsman_zhaojia", {})
-	_eq("招架 qi_cost==10", zhaojia.get("qi_cost"), 10)
-	_eq("招架 slot_swap_trigger==marks_full", zhaojia.get("slot_swap_trigger"), "marks_full")
-	_eq("招架 slot_swap_target==swordsman_badao", zhaojia.get("slot_swap_target"), "swordsman_badao")
-
-	var juhe: Dictionary = dl.skills.get("swordsman_juhe", {})
-	_eq("居合 qi_cost==60", juhe.get("qi_cost"), 60)
-	_eq("居合 guaranteed_hit==true", juhe.get("guaranteed_hit"), true)
-	_eq("居合 guaranteed_crit==true", juhe.get("guaranteed_crit"), true)
-	_eq("居合 qi_gain_on_kill==30", juhe.get("qi_gain_on_kill"), 30)
-	_eq("居合 mark_gain==1", juhe.get("mark_gain"), 1)
-	_eq("居合 ki_on_kill_cd_reduction==1", juhe.get("ki_on_kill_cd_reduction"), 1)
-	_eq("居合 power==300", juhe.get("power"), 300)
-
-	var badao: Dictionary = dl.skills.get("swordsman_badao", {})
-	_eq("拔刀 requires_marks==3", badao.get("requires_marks"), 3)
-	_eq("拔刀 mark_cost==3", badao.get("mark_cost"), 3)
-	_eq("拔刀 qi_cost==20", badao.get("qi_cost"), 20)
-	_eq("拔刀 crit_damage_mult==1.2（乘算通道）", badao.get("crit_damage_mult"), 1.2)
-	_check("拔刀不再使用加算字段 crit_damage_bonus", not badao.has("crit_damage_bonus"))
-	_eq("拔刀 slot_swap_provider==true", badao.get("slot_swap_provider"), true)
-	_eq("拔刀 power==180", badao.get("power"), 180)
+	# 剑圣五个技能的字段值逐项对照设计库，在 test_kensei_base 里断言；这里只确认
+	# 职业指向 kensei_*，且旧的 swordsman_* 技能文件已经下线、不会被误装载。
+	_eq("剑圣 skill_ids 全部是 kensei_*",
+		str(cls.get("skill_ids", [])),
+		str(["kensei_zhanji", "kensei_yishan", "kensei_zhaojia", "kensei_juhe", "kensei_badao"]))
+	for old_id: String in ["swordsman_zhanji", "swordsman_yishan", "swordsman_zhaojia",
+			"swordsman_juhe", "swordsman_badao"]:
+		_check("旧技能 %s 已下线（DataLoader 里没有）" % old_id, not dl.skills.has(old_id))
 
 
 # ── 2. unit.gd 剑气资源（钳制 / 隔离写入）────────────
@@ -279,17 +252,18 @@ func _test_slot_swap(dl: Object) -> void:
 ## 两侧都要覆盖：拥有 target 则替换生效（剑圣），不拥有则不替换（剑士）。
 func _test_slot_swap_class_gate(dl: Object) -> void:
 	print("\n[5b] 槽位替换职业校验（拔刀=剑圣专属，剑士不得替换）")
-	var zj: Dictionary = dl.skills["swordsman_zhaojia"]
+	# 拿剑圣招架 kensei_zhaojia 的替换声明去问剑士，验证职业门控本身。
+	var zj: Dictionary = dl.skills["kensei_zhaojia"]
 	var trig: String = str(zj.get("slot_swap_trigger", ""))
 	var tgt: String = str(zj.get("slot_swap_target", ""))
+	var req: Dictionary = zj.get("slot_swap_requires", {})
 
 	# ① 不拥有 target 的一侧：剑士
 	var mm: Dictionary = dl.classes.get("myrmidon", {})
 	_check("myrmidon 职业存在", not mm.is_empty())
 	var m: Unit = _make_unit(mm)
 	_check("剑士 skill_ids 不含拔刀", not m.skill_ids.has(tgt))
-	# 剑士的招架是自己的 myrmidon_zhaojia（gameplay-impl PR3），它不声明拔刀替换；
-	# 下面仍拿 swordsman_zhaojia 的替换声明去问剑士，验证职业门控本身。
+	# 剑士的招架是自己的 myrmidon_zhaojia（gameplay-impl PR3），它不声明拔刀替换。
 	_check("剑士持有自己的招架，且不声明拔刀替换",
 		m.skill_ids.has("myrmidon_zhaojia")
 		and not (dl.skills["myrmidon_zhaojia"] as Dictionary).has("slot_swap_target"))
@@ -297,8 +271,9 @@ func _test_slot_swap_class_gate(dl: Object) -> void:
 	m.gain_random_mark()
 	m.gain_random_mark()
 	_check("剑士没有印记系统", m._mark_max == 0 and not m.is_marks_full() and m.get_mark_count() == 0)
+	m.set_sword_qi(100)
 	_eq("剑士无印记 → 招架槽仍是招架（不得替换为剑圣专属拔刀）",
-		m.get_visible_skill_id("swordsman_zhaojia", trig, tgt), "swordsman_zhaojia")
+		m.get_visible_skill_id("kensei_zhaojia", trig, tgt, req), "kensei_zhaojia")
 	m.free()
 
 	# ② 拥有 target 的一侧：剑圣（对照组，确认校验没把正常替换一并挡掉）。剑圣的招架是

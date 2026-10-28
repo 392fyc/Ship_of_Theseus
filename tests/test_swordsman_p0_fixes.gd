@@ -2,7 +2,8 @@ extends SceneTree
 ## P0 修复回归（2026-06-30，源自核心战斗循环实证 sot-swordsman-resource-experiment）
 ##
 ## ① 资源门槛强制：validate_skill_usage 现校验 qi_cost / requires_marks / mark_cost。
-##    居合剑气不足、拔刀印记不足、一闪剑气不足 → 拦截，不执行、不消耗。
+##    居合剑气不足、拔刀印记不足 → 拦截，不执行、不消耗；剑圣一闪不耗剑气（设计库
+##    kensei_yishan），剑气为 0 也放行。
 ## ② 拔刀印记消耗推迟到伤害结算之后：拔刀吃到自身正在消耗的势(STR+2) → 非暴击 28 而非 25。
 ##    （期望值 2026-08-03 由 29 改 28：最终伤害取整口径按 R1.8 从四舍五入改为向下取整，
 ##      28.8 → 28；旧 bug 那一侧 25.2 → 25 不变，本用例的分辨力不受影响。）
@@ -62,23 +63,23 @@ func _run() -> void:
 
 func _test_gate_juhe(tm: Object, sword: Unit, dummy: Unit) -> void:
 	print("\n[①a] 居合剑气门槛：qi<60 拦截、qi>=60 放行")
-	var data: Dictionary = tm._get_skill_data("swordsman_juhe")
+	var data: Dictionary = tm._get_skill_data("kensei_juhe")
 	_reset(sword)
 	sword.set_sword_qi(50)  # < qi_cost 60
 	var v_low: Dictionary = GameAction.validate_skill_usage(sword, data)
 	_check("居合 qi=50 validate ok=false", not bool(v_low.get("ok", true)))
-	tm._selected_skill_id = "swordsman_juhe"
+	tm._selected_skill_id = "kensei_juhe"
 	var act_low: Object = tm._build_skill_action(sword, dummy.grid_position, dummy)
 	var ok_low: bool = tm._execute_skill_action(act_low)
 	_check("居合 qi=50 execute 返回 false", not ok_low)
 	_eq("居合被拦截 → 剑气未消耗(仍50)", sword.sword_qi, 50)
-	_eq("居合被拦截 → 未进冷却", sword.get_skill_cooldown("swordsman_juhe"), 0)
+	_eq("居合被拦截 → 未进冷却", sword.get_skill_cooldown("kensei_juhe"), 0)
 
 	_reset(sword)
 	sword.set_sword_qi(60)  # == qi_cost
 	var v_ok: Dictionary = GameAction.validate_skill_usage(sword, data)
 	_check("居合 qi=60 validate ok=true", bool(v_ok.get("ok", false)))
-	tm._selected_skill_id = "swordsman_juhe"
+	tm._selected_skill_id = "kensei_juhe"
 	var act_ok: Object = tm._build_skill_action(sword, dummy.grid_position, dummy)
 	_check("居合 qi=60 execute 返回 true", tm._execute_skill_action(act_ok))
 
@@ -87,7 +88,7 @@ func _test_gate_juhe(tm: Object, sword: Unit, dummy: Unit) -> void:
 
 func _test_gate_badao(tm: Object, sword: Unit, dummy: Unit) -> void:
 	print("\n[①b] 拔刀印记门槛：印记<3 拦截、满3 放行")
-	var data: Dictionary = tm._get_skill_data("swordsman_badao")
+	var data: Dictionary = tm._get_skill_data("kensei_badao")
 	_reset(sword)
 	sword.set_sword_qi(20)  # >= qi_cost 20（隔离出印记不足的失败原因）
 	sword.clear_marks()
@@ -95,8 +96,9 @@ func _test_gate_badao(tm: Object, sword: Unit, dummy: Unit) -> void:
 	sword.marks["道"] = true  # 仅2枚 < requires_marks 3
 	var v_low: Dictionary = GameAction.validate_skill_usage(sword, data)
 	_check("拔刀 印记=2 validate ok=false", not bool(v_low.get("ok", true)))
-	tm._selected_skill_id = "swordsman_badao"
-	var act_low: Object = tm._build_skill_action(sword, dummy.grid_position, dummy)
+	tm._selected_skill_id = "kensei_badao"
+	# kensei_badao 以自身为中心：选的目标是自己。
+	var act_low: Object = tm._build_skill_action(sword, sword.grid_position, sword)
 	_check("拔刀 印记=2 execute 返回 false", not tm._execute_skill_action(act_low))
 	_eq("拔刀被拦截 → 印记未消耗(仍2)", sword.get_mark_count(), 2)
 
@@ -110,15 +112,16 @@ func _test_gate_badao(tm: Object, sword: Unit, dummy: Unit) -> void:
 	_check("拔刀 满印记 validate ok=true", bool(v_ok.get("ok", false)))
 
 
-# ── P0-① 一闪剑气门槛 ────────────────────────────────────
+# ── P0-① 一闪不设剑气门槛 ────────────────────────────────
 
 func _test_gate_yishan(tm: Object, sword: Unit) -> void:
-	print("\n[①c] 一闪剑气门槛：qi=0 拦截")
-	var data: Dictionary = tm._get_skill_data("swordsman_yishan")
+	print("\n[①c] 一闪不耗剑气：qi=0 也放行（设计库 kensei_yishan）")
+	var data: Dictionary = tm._get_skill_data("kensei_yishan")
+	_eq("前提：一闪 qi_cost==0", int(data.get("qi_cost", -1)), 0)
 	_reset(sword)
-	sword.set_sword_qi(0)  # < qi_cost 1
+	sword.set_sword_qi(0)
 	var v: Dictionary = GameAction.validate_skill_usage(sword, data)
-	_check("一闪 qi=0 validate ok=false", not bool(v.get("ok", true)))
+	_check("一闪 qi=0 validate ok=true", bool(v.get("ok", false)))
 
 
 # ── P0-② 拔刀印记消耗时序 ────────────────────────────────
