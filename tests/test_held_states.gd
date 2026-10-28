@@ -391,6 +391,9 @@ func _test_on_hit_routes_through_pipeline(tm: Object, atk: Unit, _dfn: Unit) -> 
 		{"type": "gain_resource", "resource": "qi", "amount": 0}, {})
 	tm._apply_talent_effect(atk, "probe_talent",
 		{"type": "gain_resource", "resource": "qi", "amount": -10}, {})
+	# 这两条守的是「天赋得气路径对非正数量的端到端结果」：不会回到旧的 set_sword_qi(qi + amount)
+	# 悄悄扣剑气。它们分不出天赋层那条告警防护在不在——统一入口 _change_sword_qi 本身就挡住
+	# amount <= 0，所以删掉告警防护后这里照样是绿的；告警只靠上面打印的 WARNING 人工核对。
 	_eq("数量为 0 / 负数的 gain_resource 被忽略、剑气不变", atk.sword_qi, 35)
 	_eq("数量为 0 / 负数时不发剑气事件", events, [] as Array[String])
 
@@ -424,8 +427,12 @@ func _test_battle_start_clears(tm: Object, u: Unit) -> void:
 	root.add_child(doomed)
 	doomed.setup({"id": "probe_unit", "name": "probe", "base_stats": {"HP": 10}})
 	doomed.is_taking_turn = true
+	# 去掉动画帧，让 _on_death 走直接 queue_free 的分支：否则会挂起「等死亡动画播完」的协程，
+	# 而测试本帧就退出，留下残留节点与悬空的 await。
+	doomed.sprite.sprite_frames = null
 	doomed._on_death()
 	_check("_on_death 复位 is_taking_turn", not doomed.is_taking_turn)
+	_check("一次性单位已排队释放", doomed.is_queued_for_deletion())
 
 
 # ── 工具 ─────────────────────────────────────────────
