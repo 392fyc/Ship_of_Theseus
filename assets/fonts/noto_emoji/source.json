@@ -1,0 +1,36 @@
+{
+  "upstream": {
+    "repository": "google/fonts",
+    "commit": "8b0a1d0f5983c89bc2b93f1b5fb55f9e252744b5",
+    "source_filename": "NotoEmoji-variable.ttf",
+    "source_path": "ofl/notoemoji/NotoEmoji[wght].ttf",
+    "source_url": "https://raw.githubusercontent.com/google/fonts/8b0a1d0f5983c89bc2b93f1b5fb55f9e252744b5/ofl/notoemoji/NotoEmoji%5Bwght%5D.ttf",
+    "source_sha256": "de6c18832938afc99caf132b39d6a30a19bac7f2e812e28db2535b4608d27551",
+    "source_bytes": 1982596,
+    "license": "SIL Open Font License 1.1",
+    "license_file": "LICENSE.txt",
+    "license_sha256": "500bb1ccf43df7bbb522112f9133a52b16e1c35e809632f5d8609b179152de5b",
+    "reserved_font_name_declared": false,
+    "variable_axes": {
+      "wght": {
+        "min": 300,
+        "default": 400,
+        "max": 700
+      }
+    }
+  },
+  "subset": {
+    "family": "Noto Emoji",
+    "style": "Regular",
+    "weight": 400,
+    "font_file": "NotoEmoji-Regular-400-subset.ttf",
+    "font_sha256": "2e1a067b485a7a8f8b8459405d712ab0465f1cb2de971b928471d815d20dbe90",
+    "font_bytes": 2812,
+    "fonttools_version": "4.66.1",
+    "method": "instantiate default wght=400 vector outline, then deterministic fontTools subset",
+    "required_codepoints": [
+      128128,
+      128142
+    ]
+  }
+}

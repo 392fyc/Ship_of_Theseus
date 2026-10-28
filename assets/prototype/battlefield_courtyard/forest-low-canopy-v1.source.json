@@ -1,0 +1,11 @@
+{
+  "asset": "forest-low-canopy-v1.png",
+  "sha256": "6893dd8121bd18a943f77d4f7de0724c0be1cd01af4513effcefa99697596a78",
+  "bytes": 2526334,
+  "dimensions": [
+    1254,
+    1254
+  ],
+  "origin": "Built-in image generation in the authorized cloud recovery; adapted to the existing courtyard shrub style.",
+  "status": "Current MVP texture; canopy volume and per-cell boundary readability remain partial visual acceptance items."
+}
