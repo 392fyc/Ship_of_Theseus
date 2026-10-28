@@ -82,13 +82,26 @@ func _test_formula(atk: Unit, dfn: Unit) -> void:
 	_eq("「以力量计算」的魔法：力量 + 威力 − 魔防",
 		_dmg(atk, dfn, {"damage_type": "magical", "skill_power": 5, "base_attribute": "STR"}),
 		maxi(0, s + 5 - r))
-	var phys_part: int = maxi(0, s + 1 - d)
-	var mag_part: int = maxi(0, m + 1 - r)
+	_eq("「以魔力计算」的物理：魔力 + 威力 − 防御",
+		_dmg(atk, dfn, {"damage_type": "physical", "skill_power": 9, "base_attribute": "MAG"}),
+		maxi(0, m + 9 - d))
+	# 威力 −5 让物理一侧被地板截成 0、魔法一侧为正：「各自地板再平均」与「先平均防御」结果不同。
+	atk.stats.mag = 20
+	dfn.stats.def_attr = 15
+	var m_hi: int = atk.get_effective_stat("MAG")
+	var d_hi: int = dfn.get_effective_stat("DEF")
+	var phys_raw: int = s - 5 - d_hi
+	var mag_part: int = maxi(0, m_hi - 5 - r)
+	var expected_hybrid: int = floori(float(maxi(0, phys_raw) + mag_part) / 2.0)
+	var wrong_hybrid: int = maxi(0, floori(float(phys_raw + mag_part) / 2.0))
+	_check("hybrid 用例能区分「各自地板」与「先合再地板」", expected_hybrid != wrong_hybrid,
+		"expected=%d wrong=%d" % [expected_hybrid, wrong_hybrid])
 	_eq("hybrid：两侧各自地板后平均",
-		_dmg(atk, dfn, {"damage_type": "hybrid", "skill_power": 1}),
-		floori(float(phys_part + mag_part) / 2.0))
-	_eq("纯粹：无视防御，以力量计算",
-		_dmg(atk, dfn, {"damage_type": "pure", "skill_power": 2, "base_attribute": "STR"}), s + 2)
+		_dmg(atk, dfn, {"damage_type": "hybrid", "skill_power": -5}), expected_hybrid)
+	atk.stats.mag = 4
+	dfn.stats.def_attr = 6
+	_eq("纯粹：无视防御，以魔力计算（不落回默认的力量）",
+		_dmg(atk, dfn, {"damage_type": "pure", "skill_power": 2, "base_attribute": "MAG"}), m + 2)
 
 	var base: float = float(maxi(0, s + 10 - d))
 	_eq("普通天赋提升相加后乘：(1 + 20% + 30%)",
@@ -134,11 +147,14 @@ func _test_entry_payload(tm: Object, sword: Unit, dummy: Unit) -> void:
 	dl.skills[TEST_SKILL_ID] = skill
 	_check("有伤害条目的技能视为可用", tm._is_supported_runtime_skill(skill))
 	tm._selected_skill_id = TEST_SKILL_ID
+	var profile: Dictionary = tm._get_unit_basic_attack_profile(sword)
+	# 前置：主手武器威力不为 0，否则「不加武器威力」的断言无法证伪。
+	_check("前置：剑圣主手武器威力 > 0", int(profile.get("weapon_might", 0)) > 0,
+		"weapon_might=%d" % int(profile.get("weapon_might", 0)))
 	var act: Object = tm._build_skill_action(sword, dummy.grid_position, dummy)
 	_check("构建出技能动作", act != null)
 	if act != null:
 		var data: Dictionary = act.data
-		var profile: Dictionary = tm._get_unit_basic_attack_profile(sword)
 		_eq("按 sort 取第一条：skill_power == 条目威力 4（不加武器威力）",
 			data.get("skill_power"), 4.0)
 		_check("payload 不含 weapon_might", not data.has("weapon_might"))
@@ -158,6 +174,36 @@ func _test_entry_payload(tm: Object, sword: Unit, dummy: Unit) -> void:
 	if act2 != null:
 		_eq("条目未写伤害类型时继承技能「魔法」→ magical", act2.data.get("damage_type"), "magical")
 		_check("「默认」不写 base_attribute", not act2.data.has("base_attribute"))
+
+	# 技能 JSON 的旧字段不能漏过条目：条目写「正常」时，旧的必定命中 / 必定暴击 / 暴击加算要被覆盖。
+	var stale: Dictionary = inherit_skill.duplicate(true)
+	stale["guaranteed_hit"] = true
+	stale["guaranteed_crit"] = true
+	stale["crit_damage_bonus"] = 0.5
+	dl.skills[TEST_SKILL_ID] = stale
+	var act3: Object = tm._build_skill_action(sword, dummy.grid_position, dummy)
+	_check("构建出带旧字段的条目技能动作", act3 != null)
+	if act3 != null:
+		_eq("条目「正常」覆盖旧 guaranteed_hit", act3.data.get("guaranteed_hit"), false)
+		_eq("条目「正常」覆盖旧 guaranteed_crit", act3.data.get("guaranteed_crit"), false)
+		_eq("条目「正常」不可暴击为 false", act3.data.get("disable_crit"), false)
+		_eq("条目路径 crit_damage_bonus 清零", act3.data.get("crit_damage_bonus"), 0.0)
+
+	# 调试「必暴」不覆盖条目的「不可暴击」；对可暴击的动作照常强制暴击。
+	var saved: Array = [tm.debug_harness_active, tm.debug_deterministic, tm.debug_crit_mode]
+	tm.debug_harness_active = true
+	tm.debug_deterministic = true
+	tm.debug_crit_mode = tm.CritMode.FORCE
+	var no_crit: Dictionary = {"disable_crit": true}
+	tm._apply_debug_determinism(no_crit)
+	_eq("调试必暴：不可暴击条目仍 disable_crit", no_crit.get("disable_crit"), true)
+	_check("调试必暴：不可暴击条目不被强制暴击", not bool(no_crit.get("guaranteed_crit", false)))
+	var normal: Dictionary = {}
+	tm._apply_debug_determinism(normal)
+	_eq("调试必暴：普通动作 guaranteed_crit", normal.get("guaranteed_crit"), true)
+	tm.debug_harness_active = saved[0]
+	tm.debug_deterministic = saved[1]
+	tm.debug_crit_mode = saved[2]
 
 	var multi: Dictionary = inherit_skill.duplicate(true)
 	(multi["damage_entries"] as Array)[0]["segments"] = 3

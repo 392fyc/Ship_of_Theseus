@@ -2369,14 +2369,12 @@ func _apply_damage_entry(payload: Dictionary, skill_data: Dictionary,
 			payload["base_attribute"] = "MAG"
 		_:
 			payload.erase("base_attribute")
-	if str(entry.get("hit_mode", "正常")) == "必定命中":
-		payload["guaranteed_hit"] = true
-	match str(entry.get("crit_mode", "正常")):
-		"必定暴击":
-			payload["guaranteed_crit"] = true
-		"不可暴击":
-			payload["guaranteed_crit"] = false
-			payload["disable_crit"] = true
+	# 命中、暴击方式与暴击倍率以条目为准，覆盖技能 JSON 里同名旧字段（如旧居合的必定暴击）。
+	payload["guaranteed_hit"] = str(entry.get("hit_mode", "正常")) == "必定命中"
+	var crit_mode: String = str(entry.get("crit_mode", "正常"))
+	payload["guaranteed_crit"] = crit_mode == "必定暴击"
+	payload["disable_crit"] = crit_mode == "不可暴击"
+	payload["crit_damage_bonus"] = 0.0
 	payload["crit_damage_mult"] = float(entry.get("crit_multiplier", 1.0))
 
 
@@ -2521,8 +2519,9 @@ func _apply_debug_determinism(action_data: Dictionary) -> void:
 	action_data["guaranteed_hit"] = true
 	match debug_crit_mode:
 		CritMode.FORCE:
-			action_data["guaranteed_crit"] = true
-			action_data["disable_crit"] = false
+			# 伤害条目声明「不可暴击」的技能（disable_crit 已为 true）保持不可暴击。
+			if not bool(action_data.get("disable_crit", false)):
+				action_data["guaranteed_crit"] = true
 		CritMode.DISABLE:
 			action_data["guaranteed_crit"] = false
 			action_data["disable_crit"] = true
