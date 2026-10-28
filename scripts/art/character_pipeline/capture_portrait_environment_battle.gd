@@ -15,7 +15,8 @@ func _move_input(actor: Unit, destination: Vector2i) -> void:
 		quit(3)
 
 func _attack_input(actor: Unit, target: Unit) -> void:
-	manager.call("request_attack_targeting")
+	# 剑士没有普通攻击（S2）：继承自 facing_align 录制脚本的 _begin_strike 会改用斩击。
+	_begin_strike(manager, target.grid_position)
 	if not target.grid_position in manager.get("_attack_cells"):
 		push_error("Forest recording target is outside the real attack range")
 		quit(3)

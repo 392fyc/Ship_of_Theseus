@@ -186,7 +186,7 @@ func _test_zhaojia(tm: Node, u: Unit) -> void:
 	tm.battle_active = true
 	tm._on_turn_ended(u)
 	_check("施放所在回合结束后仍持有（覆盖敌方回合）", u.held_states.has("myrmidon_zhaojia"))
-	_eq("敌方回合期间防御仍 +5", u.get_effective_stat("DEF") - def0, 5)
+	_eq("施放回合结束后防御仍 +5（直到下个自身回合开始）", u.get_effective_stat("DEF") - def0, 5)
 	tm.turn_manager.current_unit = u
 	tm._on_turn_started(u)
 	tm.battle_active = false
