@@ -1,0 +1,56 @@
+{
+  "upstream": {
+    "repository": "notofonts/noto-fonts",
+    "commit": "ffebf8c1ee449e544955a7e813c54f9b73848eac",
+    "license": "SIL Open Font License 1.1",
+    "license_file": "LICENSE.txt",
+    "license_sha256": "0dab92d0544f7b233403f14b84a663bdbfa746982eda629e7f4f9ffe1b036feb",
+    "reserved_font_name_declared": false
+  },
+  "fonttools_version": "4.66.1",
+  "method": "fontTools.subset with canonical table order and fixed Unicode input",
+  "fonts": [
+    {
+      "family": "Noto Sans Symbols2",
+      "version": "2.003",
+      "font_file": "NotoSansSymbols2-Regular-subset.ttf",
+      "font_sha256": "e3fba50bf66cf9f4475629b2840f27df8b0a6bde04743007c6e263ebbcba2bce",
+      "font_bytes": 6664,
+      "source_filename": "NotoSansSymbols2-Regular.ttf",
+      "source_path": "hinted/ttf/NotoSansSymbols2/NotoSansSymbols2-Regular.ttf",
+      "source_url": "https://raw.githubusercontent.com/notofonts/noto-fonts/ffebf8c1ee449e544955a7e813c54f9b73848eac/hinted/ttf/NotoSansSymbols2/NotoSansSymbols2-Regular.ttf",
+      "source_sha256": "630846d528dbe4c4981370a4d0a9475a1fd1491a129bb411f8e157cdb5de13c6",
+      "source_bytes": 656852,
+      "required_codepoints": [
+        8623,
+        9209,
+        9672,
+        9760,
+        10005,
+        10007,
+        10022,
+        10042,
+        10067,
+        11088,
+        128176,
+        128481
+      ]
+    },
+    {
+      "family": "Noto Sans Symbols",
+      "version": "2.001",
+      "font_file": "NotoSansSymbols-Regular-subset.ttf",
+      "font_sha256": "029bbe8952f5e1270dbfcbf6f29fa43e2b8158a5b87e4fc80d695fefa7d1cd6f",
+      "font_bytes": 6508,
+      "source_filename": "NotoSansSymbols-Regular.ttf",
+      "source_path": "hinted/ttf/NotoSansSymbols/NotoSansSymbols-Regular.ttf",
+      "source_url": "https://raw.githubusercontent.com/notofonts/noto-fonts/ffebf8c1ee449e544955a7e813c54f9b73848eac/hinted/ttf/NotoSansSymbols/NotoSansSymbols-Regular.ttf",
+      "source_sha256": "8f02f31959bbdf6061547a188248e13f84dc5fdd940326ec494675f453f072bb",
+      "source_bytes": 258156,
+      "required_codepoints": [
+        9876,
+        9879
+      ]
+    }
+  ]
+}

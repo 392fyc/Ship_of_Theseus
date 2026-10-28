@@ -4,6 +4,9 @@ extends Node2D
 const TerrainSurface := preload("res://scripts/ui/terrain/terrain_surface.gd")
 const TerrainCatalog := preload("res://scripts/ui/terrain/terrain_catalog.gd")
 
+const CONTACT_TREE_CELL_WORLD_WIDTH := 64.0
+const CONTACT_TREE_AMBIENT_ELLIPSE_SEGMENTS := 32
+
 var grid: Grid
 var profile: Dictionary = {}
 var layout_data: Dictionary = {}
@@ -36,8 +39,14 @@ var _time: float = 0.0
 var _actor_layer: Node2D
 
 
+var _sprite_contact_edge_cache: Dictionary = {}
+var _sprite_contact_frame_cache: int = -1
+var _sprite_contact_visual_cache: Array[Dictionary] = []
+
+
 func configure(value: Grid, visual_profile: Dictionary, layout: Dictionary = {}) -> void:
 	grid = value
+	_sprite_contact_edge_cache.clear()
 	profile = visual_profile
 	layout_data = layout
 	_terrain_catalog = TerrainCatalog.catalog()
@@ -81,6 +90,7 @@ func _ready() -> void:
 
 
 func refresh_terrain_visuals() -> void:
+	_sprite_contact_frame_cache = -1
 	for spec: Dictionary in _props:
 		var old_node: Node2D = spec["node"]
 		if is_instance_valid(old_node):
@@ -133,6 +143,9 @@ func _process(delta: float) -> void:
 		if not is_instance_valid(node):
 			continue
 		node.visible = not graybox
+		if bool(spec.get("portrait_tree_presented", false)):
+			node.modulate.a = 1.0
+			continue
 		var covered: bool = false
 		var bounds: Rect2 = spec["bounds"]
 		if grid.is_valid(_hover_cell):
@@ -154,6 +167,7 @@ func _process(delta: float) -> void:
 		node.modulate.a = target_alpha if node.modulate.a > target_alpha else lerpf(node.modulate.a, target_alpha, minf(delta * 10.0, 1.0))
 		if bool(spec.get("wind", false)):
 			node.rotation = sin(_time * 1.25 + node.position.x * 0.03) * 0.009
+	_sprite_contact_frame_cache = -1
 	queue_redraw()
 	if is_instance_valid(_detail_layer):
 		_detail_layer.queue_redraw()
@@ -510,6 +524,9 @@ func _build_board_props() -> void:
 				_actor_layer.add_child(relief)
 				_props.append({"node": relief, "wind": false, "bounds": Rect2(-36, -86, 72, 105)})
 			if terrain == Cell.Terrain.FOREST:
+				if grid.is_valid(pos) and bool(profile.get("portrait_tree_presentation", {}).get("low_forest_cells", false)):
+					_add_portrait_low_forest(pos)
+					continue
 				var tree_node: Node2D = _add_sprite(_tree, profile["tree"], point(x, y), 0.91 + float((x * 3 + y) % 3) * 0.055,
 					Color("dedac1"), true, (x + y) % 2 == 0)
 				tree_node.set_meta("courtyard_cell", pos)
@@ -543,6 +560,13 @@ func _build_environment_props() -> void:
 	else:
 		# 废弃回廊位于后场，树林包围两侧及前景，入口道接入庭院主路。
 		_add_sprite(_entry, profile["entry"], point(3.2, -3.35), 0.9, Color("ceccb8"))
+		var exterior_style: Dictionary = profile.get("portrait_tree_presentation", {})
+		if exterior_style.has("environment_tree_positions"):
+			var positions: Array = []
+			for coordinates: Array in exterior_style["environment_tree_positions"]:
+				positions.append(Vector2(float(coordinates[0]), float(coordinates[1])))
+			_grove(positions, float(exterior_style["environment_grove_scale"]), false)
+			return
 		_grove([Vector2(8.6, -1.1), Vector2(9.4, 0.8), Vector2(8.8, 3), Vector2(10.1, 5),
 			Vector2(9.2, 7.5), Vector2(8.4, 9.4), Vector2(6.3, 9.2), Vector2(4.4, 10.3),
 			Vector2(1.1, 9.6), Vector2(-0.6, 8.2), Vector2(-1.1, 6.2), Vector2(-1.4, 3.5),
@@ -629,6 +653,22 @@ func _draw_wall_footings(canvas: Node2D = null) -> void:
 		canvas.draw_colored_polygon(shadow, Color("18201638"))
 		tint.a = 0.42
 		_textured_ground_polygon(apron, texture, tint, canvas)
+	if profile.has("portrait_tree_presentation"):
+		for contact: Dictionary in _sprite_contact_shadow_visuals([]):
+			var rgba: Array = profile["portrait_tree_presentation"]["root_shadow_rgba"]
+			var color := Color(rgba[0], rgba[1], rgba[2], rgba[3])
+			for polygon: PackedVector2Array in contact["shadow_polygons"]:
+				var center := Vector2.ZERO
+				for p: Vector2 in polygon:
+					center += p / float(polygon.size())
+				for band: int in 3:
+					var factor: float = [1.0, 0.76, 0.52][band]
+					var soft := PackedVector2Array()
+					for p: Vector2 in polygon:
+						soft.append(center + (p - center) * factor)
+					var band_color := color
+					band_color.a *= [0.2, 0.25, 0.35][band]
+					canvas.draw_colored_polygon(soft, band_color)
 
 
 func _build_architecture_walls() -> void:
@@ -641,13 +681,13 @@ func _build_architecture_walls() -> void:
 			_add_sprite(_rubble, profile["rubble"], point(cell.x + 0.10, cell.y + 0.10), 0.29, Color("b1b19a"))
 
 
-func _grove(positions: Array, size_scale: float) -> void:
+func _grove(positions: Array, size_scale: float, understory: bool = true) -> void:
 	for i: int in positions.size():
 		var p: Vector2 = positions[i]
 		_add_sprite(_tree, profile["tree"], point(p.x, p.y), size_scale + float(i % 3) * 0.13,
-			Color("a4b096"), true, i % 2 == 0)
-		if i % 2 == 0:
-			_add_sprite(_shrub, profile["shrub"], point(p.x + 0.45, p.y + 0.3), 0.9, Color("a2b083"))
+			_prop_tint("environment_tree", Color("a4b096")), true, i % 2 == 0)
+		if understory and i % 2 == 0:
+			_add_sprite(_shrub, profile["shrub"], point(p.x + 0.45, p.y + 0.3), 0.9, _prop_tint("shrub", Color("a2b083")))
 
 
 func _add_sprite(texture: Texture2D, spec: Dictionary, foot: Vector2, size_scale: float,
@@ -658,6 +698,8 @@ func _add_sprite(texture: Texture2D, spec: Dictionary, foot: Vector2, size_scale
 	root.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	var sprite := Sprite2D.new()
 	sprite.texture = texture
+	if texture == _tree and profile.has("portrait_tree_presentation"):
+		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
 	sprite.centered = false
 	var dims: Array = spec["display_size"]
 	var anchor: Array = spec["foot_offset"]
@@ -671,6 +713,9 @@ func _add_sprite(texture: Texture2D, spec: Dictionary, foot: Vector2, size_scale
 	_actor_layer.add_child(root)
 	_props.append({"node": root, "wind": wind,
 		"bounds": Rect2(Vector2(-displayed.x * 0.55, -displayed.y), Vector2(displayed.x * 1.1, displayed.y + 6))})
+	if texture == _tree and profile.has("portrait_tree_presentation"):
+		_props[-1]["sprite_contact_type"] = "tree"
+		_props[-1]["sprite_contact_path"] = str(root.get_path_to(sprite))
 	return root
 
 
@@ -799,3 +844,345 @@ func _draw_blocked_corners(cell: Vector2i, canvas: Node2D = null) -> void:
 		var corner: Vector2 = corners[i]
 		canvas.draw_polyline(PackedVector2Array([corner.lerp(corners[(i + 3) % 4], 0.17),
 			corner, corner.lerp(corners[(i + 1) % 4], 0.17)]), Color("d2b68a99"), 1.0, true)
+func _prop_tint(key: String, fallback: Color) -> Color:
+	var tints: Dictionary = profile.get("prop_tints", {})
+	var rgba: Array = tints.get(key, [])
+	if rgba.size() != 4:
+		return fallback
+	# RGB 可超过 1 以提亮道具；alpha 仍独立保留。
+	return Color(float(rgba[0]), float(rgba[1]), float(rgba[2]), float(rgba[3]))
+
+
+func portrait_forest_connection_mask(pos: Vector2i) -> int:
+	# Only actual board forest joins; exterior trees and diagonal contact do not.
+	if not grid.is_valid(pos) or visual_terrain_at(pos) != Cell.Terrain.FOREST:
+		return 0
+	var result: int = 0
+	var offsets: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+	for i: int in 4:
+		var neighbor: Vector2i = pos + offsets[i]
+		if grid.is_valid(neighbor) and visual_terrain_at(neighbor) == Cell.Terrain.FOREST:
+			result |= 1 << i
+	return result
+
+
+func portrait_forest_edge(pos: Vector2i, edge: int) -> PackedVector2Array:
+	var center: Vector2 = point(pos.x, pos.y)
+	var mask: int = portrait_forest_connection_mask(pos)
+	var corners := PackedVector2Array([Vector2(0, -16), Vector2(32, 0), Vector2(0, 16), Vector2(-32, 0)])
+	var style: Dictionary = profile["portrait_tree_presentation"]
+	var inset: float = float(style.get("low_forest_floor_edge_inset", 0.98))
+	var fringe: float = float(style.get("low_forest_leaf_fringe", 2.6))
+	var a: Vector2 = corners[edge]
+	var b: Vector2 = corners[(edge + 1) % 4]
+	var outward := Vector2((b - a).y, -(b - a).x).normalized()
+	var points := PackedVector2Array()
+	var steps: int = 1 if mask & (1 << edge) else 8
+	var lobes: Array[float] = [-0.35, 1.0, -0.3, 0.8, -0.45, 1.0, -0.2, 0.7, -0.3]
+	for step: int in range(steps + 1):
+		var t: float = float(step) / float(steps)
+		var vertex: Vector2 = a.lerp(b, t)
+		if not (mask & (1 << edge)):
+			vertex *= lerpf(1.0, inset, sin(t * PI))
+			vertex += outward * fringe * lobes[(step + pos.x + pos.y * 3 + edge) % lobes.size()] * sin(t * PI)
+		points.append(center + vertex)
+	return points
+
+
+func portrait_forest_floor(pos: Vector2i) -> PackedVector2Array:
+	var outline := PackedVector2Array()
+	for edge: int in 4:
+		for vertex: Vector2 in portrait_forest_edge(pos, edge):
+			if outline.is_empty() or not outline[-1].is_equal_approx(vertex):
+				outline.append(vertex)
+	if outline[0].is_equal_approx(outline[-1]):
+		outline.remove_at(outline.size() - 1)
+	return outline
+
+
+func portrait_forest_region_depth(pos: Vector2i) -> Vector2:
+	var pending: Array[Vector2i] = [pos]
+	var visited: Dictionary = {pos: true}
+	var depth := Vector2(INF, -INF)
+	while not pending.is_empty():
+		var cell: Vector2i = pending.pop_back()
+		var y: float = point(cell.x, cell.y).y
+		depth.x = minf(depth.x, y - 16.0)
+		depth.y = maxf(depth.y, y + 16.0)
+		for offset: Vector2i in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
+			var neighbor: Vector2i = cell + offset
+			if not visited.has(neighbor) and grid.is_valid(neighbor) and visual_terrain_at(neighbor) == Cell.Terrain.FOREST:
+				visited[neighbor] = true
+				pending.append(neighbor)
+	return depth
+
+
+func portrait_forest_canopy_rise(at: Vector2, depth: Vector2) -> float:
+	var style: Dictionary = profile["portrait_tree_presentation"]
+	return lerpf(float(style.get("low_forest_rear_height", 3.0)), float(style.get("low_forest_front_height", 1.5)),
+		clampf(inverse_lerp(depth.x, depth.y, at.y), 0.0, 1.0))
+
+
+func portrait_forest_patches(pos: Vector2i) -> Array[Array]:
+	var style: Dictionary = profile["portrait_tree_presentation"]
+	var mask: int = portrait_forest_connection_mask(pos)
+	var result: Array[Array] = []
+	if not str(style.get("low_forest_canopy_texture", "")).is_empty():
+		return result # Dense ground-layer canopy replaces the rejected point sprites.
+	var size_scale: float = float(style.get("low_forest_boundary_scale", 0.56))
+	# Plants belong to exposed region edges, not to shared-cell connectors.
+	# Their roots stay in their own cell; no 14-unit lift into a neighbor.
+	for edge: int in [0, 3, 2]:
+		if mask & (1 << edge):
+			continue
+		var variant: int = (pos.x * 3 + pos.y * 5 + edge) % 3
+		var scale_factor: float = [0.92, 1.0, 1.06][variant]
+		var mirrored: bool = (pos.x + pos.y + edge) % 2 == 0
+		if edge == 0:
+			result.append([13.0, -6.5, size_scale * scale_factor, mirrored, edge])
+		elif edge == 3:
+			result.append([-13.0, -6.5, size_scale * scale_factor * 0.90, mirrored, edge])
+		else:
+			result.append([-21.0, 0.0, size_scale * scale_factor * 0.72, mirrored, edge])
+	# The front/right standing and badge area is described by low floor texture,
+	# not another tall plant. Shared interiors have no repeated shrub end-cap.
+	return result
+
+
+func _add_portrait_low_forest(pos: Vector2i) -> void:
+	# Entry-local visual only: rear/side shrubs leave the actual cell foot clear.
+	# No tree sprite is created, hence no tree trunk or tree-contact shadow remains.
+	var style: Dictionary = profile["portrait_tree_presentation"]
+	var rgba: Array = style.get("low_forest_tint", [0.78, 0.83, 0.77, 1.0])
+	var tint := Color(float(rgba[0]), float(rgba[1]), float(rgba[2]), float(rgba[3]))
+	# Thin textured leaf litter is ground, not an outline or a raised canopy.
+	if style.has("low_forest_floor_rgba"):
+		var forest_texture: Texture2D = _moss
+		var canopy_path: String = str(style.get("low_forest_canopy_texture", ""))
+		if not canopy_path.is_empty():
+			forest_texture = load(canopy_path) as Texture2D
+		var floor_node := Polygon2D.new()
+		floor_node.name = "PortraitForestLitter"
+		var ground_outline: PackedVector2Array = portrait_forest_floor(pos)
+		var depth: Vector2 = portrait_forest_region_depth(pos)
+		var raised: bool = not canopy_path.is_empty() and bool(style.get("low_forest_raised_canopy", false))
+		var top := PackedVector2Array()
+		for vertex: Vector2 in ground_outline:
+			top.append(vertex - Vector2(0, portrait_forest_canopy_rise(vertex, depth) if raised else 0.0))
+		floor_node.polygon = top
+		floor_node.texture = forest_texture
+		floor_node.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+		floor_node.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		var span: float = float(style.get("low_forest_floor_texture_span", 96.0))
+		var uv := PackedVector2Array()
+		for vertex: Vector2 in ground_outline:
+			uv.append(vertex / span * forest_texture.get_size())
+		floor_node.uv = uv
+		var floor_rgba: Array = style.get("low_forest_floor_rgba", [0.82, 1.12, 1.42, 0.96])
+		floor_node.color = Color(float(floor_rgba[0]), float(floor_rgba[1]), float(floor_rgba[2]), float(floor_rgba[3]))
+		if raised:
+			# Only exposed screen-front edges receive a thin same-material side
+			# and contact shadow. Shared edges have neither rim nor duplicate shadow.
+			var mask: int = portrait_forest_connection_mask(pos)
+			for edge: int in [1, 2]:
+				if mask & (1 << edge):
+					continue
+				var rim: PackedVector2Array = portrait_forest_edge(pos, edge)
+				for i: int in range(rim.size() - 1):
+					var a: Vector2 = rim[i]
+					var b: Vector2 = rim[i + 1]
+					var shadow := Polygon2D.new()
+					shadow.polygon = PackedVector2Array([a, b, b + Vector2(0, 1.0), a + Vector2(0, 1.0)])
+					shadow.color = Color(0.025, 0.035, 0.02, 0.24)
+					shadow.show_behind_parent = true
+					floor_node.add_child(shadow)
+					var side := Polygon2D.new()
+					side.polygon = PackedVector2Array([a - Vector2(0, portrait_forest_canopy_rise(a, depth)),
+						b - Vector2(0, portrait_forest_canopy_rise(b, depth)), b, a])
+					side.texture = forest_texture
+					side.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+					side.uv = PackedVector2Array([a / span * forest_texture.get_size(), b / span * forest_texture.get_size(),
+						(b + Vector2(0, 1.0)) / span * forest_texture.get_size(), (a + Vector2(0, 1.0)) / span * forest_texture.get_size()])
+					side.color = Color(0.58, 0.66, 0.60, 1.0)
+					side.show_behind_parent = true
+					floor_node.add_child(side)
+		add_child(floor_node)
+		if raised:
+			move_child(floor_node, -1) # Over forest grid only; highlights/Units are later sibling layers.
+		else:
+			move_child(floor_node, _detail_layer.get_index())
+		_props.append({"node": floor_node, "wind": false, "bounds": Rect2(),
+			"portrait_tree_presented": true})
+	for patch: Array in portrait_forest_patches(pos):
+		var foot: Vector2 = point(pos.x, pos.y) + Vector2(float(patch[0]), float(patch[1]))
+		var node: Node2D = _add_sprite(_shrub, profile["shrub"], foot, float(patch[2]), tint, false, bool(patch[3]))
+		node.set_meta("portrait_low_forest_cell", pos)
+
+
+func _sprite_source_contact_edge(sprite: Sprite2D, spec: Dictionary) -> Dictionary:
+	var key: int = sprite.texture.get_instance_id()
+	if _sprite_contact_edge_cache.has(key):
+		return _sprite_contact_edge_cache[key]
+	var image: Image = sprite.texture.get_image()
+	var dims := Vector2(float(spec["display_size"][0]), float(spec["display_size"][1]))
+	var anchor := Vector2(float(spec["foot_offset"][0]), float(spec["foot_offset"][1]))
+	var size: Vector2i = image.get_size()
+	var pixel := Vector2i(clampi(int(anchor.x / dims.x * size.x), 0, size.x - 1),
+		clampi(int(anchor.y / dims.y * size.y), 0, size.y - 1))
+	var result := {"edges": [], "anchor_row_runs": [], "anchor_pixel": pixel,
+		"image_size": size, "alpha_threshold": 0.5,
+		"reason": "No opaque source at the configured ground anchor."}
+	if image.get_pixelv(pixel).a > 0.5:
+		var edges: Array[PackedVector2Array] = []
+		var anchor_row_runs: Array[Vector2i] = []
+		var x: int = 0
+		while x < size.x:
+			while x < size.x and image.get_pixel(x, pixel.y).a <= 0.5:
+				x += 1
+			if x >= size.x:
+				break
+			var left: int = x
+			while x < size.x and image.get_pixel(x, pixel.y).a > 0.5:
+				x += 1
+			var right: int = x - 1
+			anchor_row_runs.append(Vector2i(left, right))
+			var edge := PackedVector2Array()
+			for column: int in range(left, right + 1):
+				var y: int = size.y - 1
+				while y > pixel.y and image.get_pixel(column, y).a <= 0.5:
+					y -= 1
+				for point: Vector2 in [Vector2(column, y + 1), Vector2(column + 1, y + 1)]:
+					if not edge.is_empty() and point == edge[-1]:
+						continue
+					while edge.size() >= 2 and is_zero_approx((edge[-1] - edge[-2]).cross(point - edge[-1])):
+						edge.remove_at(edge.size() - 1)
+					edge.append(point)
+			if edge.size() >= 2:
+				edges.append(edge)
+		result["edges"] = edges
+		result["anchor_row_runs"] = anchor_row_runs
+		result["reason"] = "Source alpha lower boundaries from every opaque run on the existing ground-anchor row."
+	_sprite_contact_edge_cache[key] = result
+	return result
+
+
+func _tree_ambient_ground_shadow_ellipse(sprite: Sprite2D, texture_to_board: Transform2D,
+		edges: Array[PackedVector2Array]) -> PackedVector2Array:
+	if edges.is_empty():
+		return PackedVector2Array()
+	var bounds := Rect2()
+	var has_point: bool = false
+	for edge: PackedVector2Array in edges:
+		for point: Vector2 in edge:
+			if not has_point:
+				bounds = Rect2(point, Vector2.ZERO)
+				has_point = true
+			else:
+				bounds = bounds.expand(point)
+	if not has_point:
+		return PackedVector2Array()
+	var sprite_rect_width: float = sprite.get_rect().size.x
+	var actual_display_width: float = texture_to_board.x.length() * sprite_rect_width
+	var local_style: Dictionary = profile.get("portrait_tree_presentation", {})
+	var fraction: float = float(local_style.get("root_shadow_width_fraction", 0.5))
+	var width: float = minf(CONTACT_TREE_CELL_WORLD_WIDTH * 0.5, actual_display_width * fraction)
+	if width <= 0.0:
+		return PackedVector2Array()
+	var height: float = width * (32.0 / 64.0)
+	var center: Vector2 = bounds.get_center() + Vector2(1.5, 2.0)
+	if not local_style.is_empty():
+		var dims: Array = profile["tree"]["display_size"]
+		var foot: Array = profile["tree"]["foot_offset"]
+		center = texture_to_board * (Vector2(foot[0], foot[1]) / Vector2(dims[0], dims[1]) * sprite.texture.get_size()) + Vector2(1.0, 1.0)
+	var ellipse := PackedVector2Array()
+	for index: int in CONTACT_TREE_AMBIENT_ELLIPSE_SEGMENTS:
+		var angle: float = TAU * float(index) / float(CONTACT_TREE_AMBIENT_ELLIPSE_SEGMENTS)
+		ellipse.append(center + Vector2(cos(angle) * width * 0.5, sin(angle) * height * 0.5))
+	return ellipse
+
+
+func _sprite_contact_shadow_visuals(existing_shadows: Array) -> Array[Dictionary]:
+	if _sprite_contact_frame_cache == Engine.get_process_frames():
+		return _sprite_contact_visual_cache
+	var result: Array[Dictionary] = []
+	var blockers: Array = existing_shadows.duplicate()
+	for prop: Dictionary in _props:
+		if not prop.has("sprite_contact_path"):
+			continue
+		var root: Node2D = prop["node"]
+		if not is_instance_valid(root) or not root.is_visible_in_tree():
+			continue
+		var sprite := root.get_node_or_null(NodePath(prop["sprite_contact_path"])) as Sprite2D
+		if sprite == null:
+			continue
+		var kind: String = prop["sprite_contact_type"]
+		var source: Dictionary = _sprite_source_contact_edge(sprite, profile[kind])
+		var transform: Transform2D = global_transform.affine_inverse() * sprite.global_transform
+		var edges: Array[PackedVector2Array] = []
+		var outward_normals_by_edge: Array[PackedVector2Array] = []
+		var source_edges: Array = source["edges"]
+		for source_edge_value: Variant in source_edges:
+			var source_edge: PackedVector2Array = source_edge_value
+			var edge: PackedVector2Array = transform * source_edge
+			edges.append(edge)
+			var normals := PackedVector2Array()
+			for index: int in maxi(0, edge.size() - 1):
+				var tangent: Vector2 = edge[index + 1] - edge[index]
+				normals.append(Vector2(-tangent.y, tangent.x).normalized() * signf(transform.determinant()))
+			outward_normals_by_edge.append(normals)
+		var contact := {"node": root, "sprite": sprite, "type": kind,
+			"source": source, "texture_to_board": transform,
+			"edges": edges, "outward_normals_by_edge": outward_normals_by_edge,
+			"shadow_polygons": [], "reason": source["reason"]}
+		var rejected_shadow_count: int = 0
+		var ground_shadow_draw_rule: String = "per_source_arc_cast_v1"
+		var draw_shapes: Array[PackedVector2Array] = []
+		if kind == "tree":
+			ground_shadow_draw_rule = "tree_ambient_ellipse_v1"
+			var ellipse: PackedVector2Array = _tree_ambient_ground_shadow_ellipse(
+				sprite, transform, edges)
+			if ellipse.size() >= 3:
+				draw_shapes.append(ellipse)
+		else:
+			for edge: PackedVector2Array in edges:
+				if edge.size() < 2:
+					continue
+				var dims: Array = profile[kind]["display_size"]
+				var anchor: Array = profile[kind]["foot_offset"]
+				var center: Vector2 = transform * Vector2(float(anchor[0]) / float(dims[0]) * sprite.texture.get_width(),
+					float(anchor[1]) / float(dims[1]) * sprite.texture.get_height())
+				var cast_points: PackedVector2Array = edge.duplicate()
+				for point: Vector2 in edge:
+					cast_points.append(center + (point - center) * 1.18 + Vector2(1.5, 2.0))
+				var hull: PackedVector2Array = Geometry2D.convex_hull(cast_points)
+				if hull.size() > 1 and hull[0] == hull[-1]:
+					hull.remove_at(hull.size() - 1)
+				draw_shapes.append(hull)
+		for draw_shape: PackedVector2Array in draw_shapes:
+			var pieces: Array[PackedVector2Array] = [draw_shape]
+			for blocker: PackedVector2Array in blockers:
+				var remaining: Array[PackedVector2Array] = []
+				for piece: PackedVector2Array in pieces:
+					remaining.append_array(Geometry2D.clip_polygons(piece, blocker))
+				pieces = remaining
+			var has_hole: bool = false
+			for piece: PackedVector2Array in pieces:
+				has_hole = has_hole or Geometry2D.is_polygon_clockwise(piece)
+			if has_hole:
+				rejected_shadow_count += 1
+			else:
+				contact["shadow_polygons"].append_array(pieces)
+				blockers.append_array(pieces)
+		contact["ground_shadow_draw_rule"] = ground_shadow_draw_rule
+		if rejected_shadow_count > 0:
+			contact["reason"] = ("The tree ambient ellipse was omitted after subtraction produced a hole."
+				if kind == "tree" else "One or more root-arc shadows were omitted after subtraction produced a hole.")
+		elif edges.is_empty():
+			contact["reason"] = source["reason"]
+		elif contact["shadow_polygons"].is_empty():
+			contact["reason"] = ("Tree ambient ellipse was covered by existing shadow geometry or had no valid draw shape."
+				if kind == "tree" else "Independent root-arc shadows were covered by existing shadow geometry; no additional components drawn.")
+		result.append(contact)
+	_sprite_contact_frame_cache = Engine.get_process_frames()
+	_sprite_contact_visual_cache = result
+	return result

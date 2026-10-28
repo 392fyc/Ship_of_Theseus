@@ -287,6 +287,8 @@ func is_targeting_active() -> bool:
 
 
 func request_skill_selection(skill_id: String) -> void:
+	if input_state == InputState.ANIMATING:
+		return
 	var unit: Unit = _get_player_dashboard_unit()
 	if unit == null:
 		return
@@ -325,6 +327,8 @@ func request_skill_selection(skill_id: String) -> void:
 
 
 func request_end_turn() -> void:
+	if input_state == InputState.ANIMATING:
+		return
 	if not _is_player_turn_active():
 		return
 	_end_player_turn()
@@ -347,6 +351,8 @@ func request_attack_targeting() -> void:
 
 
 func request_toggle_skill_bar() -> void:
+	if input_state == InputState.ANIMATING:
+		return
 	if not _is_player_turn_active():
 		return
 	_inspected_unit = null
@@ -363,7 +369,8 @@ func request_end_move() -> void:
 
 
 func request_cancel_action() -> void:
-	_handle_cancel_action()
+	if input_state != InputState.ANIMATING:
+		_handle_cancel_action()
 
 
 func handle_pointer_hover(screen_pos: Vector2) -> void:
@@ -490,7 +497,7 @@ func _do_enemy_turn(unit: Unit) -> void:
 	if debug_harness_active and debug_dummy_behavior != DummyBehavior.AUTO:
 		print("[AI] %s: dummy behavior=%s (no proactive action)" % [
 			unit.unit_name, _debug_dummy_behavior_label()])
-		if battle_active and unit.stats.is_alive() \
+		if battle_active and is_instance_valid(unit) and unit.stats.is_alive() \
 				and turn_manager.current_unit == unit:
 			turn_manager.end_current_turn()
 		return
@@ -503,7 +510,7 @@ func _do_enemy_turn(unit: Unit) -> void:
 	for action in actions:
 		if not battle_active or turn_manager.current_unit != unit:
 			break
-		if not unit.stats.is_alive():
+		if not is_instance_valid(unit) or not unit.stats.is_alive():
 			break
 		match action.type:
 			GameAction.Type.MOVE:
@@ -521,15 +528,17 @@ func _do_enemy_turn(unit: Unit) -> void:
 				grid.move_unit(unit, from, action.target_pos)
 				await _start_enemy_pacing(0.15)
 			GameAction.Type.ATTACK:
+				if not is_instance_valid(action.target_unit):
+					continue
 				print("[AI] %s: attack %s" % [
 					unit.unit_name, action.target_unit.unit_name])
-				_execute_attack_action(action)
+				await _execute_presented_attack(action)
 			GameAction.Type.SKILL:
 				var skill_name := str(action.data.get("skill_name", action.data.get("skill_id", "skill")))
 				print("[AI] %s: skill %s" % [unit.unit_name, skill_name])
-				_execute_skill_action(action)
+				await _execute_presented_skill(action)
 
-	if battle_active and unit.stats.is_alive() \
+	if battle_active and is_instance_valid(unit) and unit.stats.is_alive() \
 			and turn_manager.current_unit == unit:
 		turn_manager.end_current_turn()
 
@@ -1618,13 +1627,15 @@ func _execute_move(unit: Unit, target: Vector2i) -> void:
 
 
 func _execute_attack_from_input(action: GameAction) -> void:
+	if input_state == InputState.ANIMATING:
+		return
 	var previous_state: InputState = input_state
 	input_state = InputState.ANIMATING
 	_clear_highlights()
 	_clear_targeting_buffers()
 	_combat_forecast = {}
-	var executed: bool = _execute_attack_action(action)
-	if current_unit and current_unit.stats.is_alive() \
+	var executed: bool = await _execute_presented_attack(action)
+	if is_instance_valid(current_unit) and current_unit.stats.is_alive() \
 			and turn_manager.current_unit == current_unit:
 		if executed:
 			_restore_action_phase_state()
@@ -1636,13 +1647,15 @@ func _execute_attack_from_input(action: GameAction) -> void:
 
 
 func _execute_skill_from_input(action: GameAction) -> void:
+	if input_state == InputState.ANIMATING:
+		return
 	var previous_state: InputState = input_state
 	input_state = InputState.ANIMATING
 	_clear_highlights()
 	_clear_targeting_buffers()
 	_combat_forecast = {}
-	var executed: bool = _execute_skill_action(action)
-	if current_unit and current_unit.stats.is_alive() \
+	var executed: bool = await _execute_presented_skill(action)
+	if is_instance_valid(current_unit) and current_unit.stats.is_alive() \
 			and turn_manager.current_unit == current_unit:
 		if executed:
 			_handle_post_skill_execution(previous_state, action)
@@ -1651,6 +1664,49 @@ func _execute_skill_from_input(action: GameAction) -> void:
 			_refresh_attack_cells()
 			_recalculate_hover_artifacts()
 			_show_attack_highlights()
+
+
+## Wait only at the presentation boundary. The rules resolver below stays synchronous.
+func _execute_presented_attack(action: GameAction) -> bool:
+	var actor: Unit = action.actor
+	var target: Unit = action.target_unit
+	if not battle_active or not is_instance_valid(actor) or not is_instance_valid(target):
+		return false
+	if not bool(GameAction.can_use_normal_attack(actor).get("ok", false)):
+		return false
+	var delay: float = actor.begin_attack_visual(target.grid_position)
+	if delay > 0.0:
+		await _start_enemy_pacing(delay)
+	if not battle_active or not is_instance_valid(actor) or not is_instance_valid(target):
+		return false
+	if turn_manager.current_unit != actor:
+		return false
+	var executed: bool = _execute_attack_action(action)
+	if delay > 0.0 and battle_active:
+		await _start_enemy_pacing(maxf(0.0, 1.0 - delay))
+	return executed
+
+
+func _execute_presented_skill(action: GameAction) -> bool:
+	var actor: Unit = action.actor
+	if not battle_active or not is_instance_valid(actor):
+		return false
+	var skill: Dictionary = _get_skill_data(str(action.data.get("skill_id", "")))
+	var delay: float = 0.0
+	if not _is_support_skill(skill) and actor.has_character_animation() \
+			and bool(GameAction.validate_skill_usage(actor, skill).get("ok", false)):
+		var target: Vector2i = action.target_pos
+		# Cell/area casts face the selected cell, not each subsequently hit occupant.
+		if _skill_target_mode(skill) == TARGET_MODE_UNIT and is_instance_valid(action.target_unit):
+			target = action.target_unit.grid_position
+		delay = actor.begin_attack_visual(target)
+		await _start_enemy_pacing(delay)
+	if not battle_active or not is_instance_valid(actor) or turn_manager.current_unit != actor:
+		return false
+	var executed: bool = _execute_skill_action(action)
+	if delay > 0.0 and battle_active:
+		await _start_enemy_pacing(maxf(0.0, 1.0 - delay))
+	return executed
 
 
 func _execute_attack_action(action: GameAction) -> bool:
@@ -1813,6 +1869,7 @@ func _can_execute_hostile_action(attacker: Unit, defender: Unit) -> bool:
 
 func _execute_hostile_action(attacker: Unit, defender: Unit,
 		data: Dictionary) -> void:
+	attacker.show_attack_contact(defender.grid_position)
 	var action_data: Dictionary = _build_hostile_action_context(attacker, defender, data)
 	var damage_type: String = str(action_data.get("damage_type", "physical"))
 

@@ -454,6 +454,8 @@ func _build_sample_card(sample: Dictionary) -> PanelContainer:
 		str(sample.get("rights_status", "unverified")),
 	]
 	provenance_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# 来源说明使用辅助字号，为随包中文字体保留 720p 卡片空间。
+	provenance_label.add_theme_font_size_override("font_size", 14)
 	provenance_label.custom_minimum_size.y = 32.0
 	provenance_label.add_theme_color_override("font_color", COLOR_SUBTLE)
 	content.add_child(provenance_label)

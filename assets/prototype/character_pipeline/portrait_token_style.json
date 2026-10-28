@@ -1,0 +1,514 @@
+{
+  "default_layout": "portrait_courtyard",
+  "unit_screen_height": 72.0,
+  "faction_colors": {
+    "player": "53c5cf",
+    "enemy": "e98a57"
+  },
+  "token_presentation": {
+    "source_row": 0,
+    "column_by_direction": {
+      "NE": 0,
+      "NW": 1,
+      "SW": 2,
+      "SE": 3
+    },
+    "support_contact_points_px_by_direction": {
+      "NE": [
+        [
+          171,
+          387
+        ],
+        [
+          250,
+          405
+        ]
+      ],
+      "NW": [
+        [
+          136,
+          400
+        ],
+        [
+          231,
+          390
+        ]
+      ],
+      "SW": [
+        [
+          125,
+          390
+        ],
+        [
+          215,
+          423
+        ]
+      ],
+      "SE": [
+        [
+          138,
+          423
+        ],
+        [
+          215,
+          390
+        ]
+      ]
+    },
+    "support_center_px_by_direction": {
+      "NE": [
+        210.5,
+        396.0
+      ],
+      "NW": [
+        184.0,
+        395.0
+      ],
+      "SW": [
+        170.0,
+        406.5
+      ],
+      "SE": [
+        176.5,
+        406.5
+      ]
+    },
+    "calibration_basis": "Top-row source-pixel centers of the two visible boot-floor contacts; each support center is their midpoint."
+  },
+  "layout": {
+    "id": "portrait_courtyard",
+    "name": "原画棋子实战",
+    "description": "正式 TacticalScene 实战：左键选择并移动，使用攻击按钮后点选敌人；结束回合后由敌方 AI 行动。剑士使用独立短衣四向棋子，剑圣保留原长衣四向棋子；选中时下方人物区显示各自原画。敌人为既有占位。",
+    "width": 8,
+    "height": 8,
+    "environment": "overgrown",
+    "terrain": [
+      [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ]
+    ],
+    "special_terrain": [],
+    "entry_position": [
+      3,
+      -0.85
+    ],
+    "paving": [
+      [
+        2,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        4,
+        4
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        2,
+        7
+      ],
+      [
+        3,
+        7
+      ]
+    ],
+    "player_units": [
+      {
+        "class_id": "myrmidon",
+        "position": [
+          2,
+          4
+        ]
+      },
+      {
+        "class_id": "kensei",
+        "position": [
+          2,
+          5
+        ]
+      }
+    ],
+    "enemy_units": [
+      {
+        "class_id": "test_lancer",
+        "position": [
+          4,
+          4
+        ]
+      },
+      {
+        "class_id": "test_lancer",
+        "position": [
+          5,
+          5
+        ]
+      }
+    ]
+  },
+  "character_visuals": {
+    "kensei": {
+      "source_row": 0,
+      "column_by_direction": {
+        "NE": 0,
+        "NW": 1,
+        "SW": 2,
+        "SE": 3
+      },
+      "support_contact_points_px_by_direction": {
+        "NE": [
+          [
+            171,
+            387
+          ],
+          [
+            250,
+            405
+          ]
+        ],
+        "NW": [
+          [
+            136,
+            400
+          ],
+          [
+            231,
+            390
+          ]
+        ],
+        "SW": [
+          [
+            125,
+            390
+          ],
+          [
+            215,
+            423
+          ]
+        ],
+        "SE": [
+          [
+            138,
+            423
+          ],
+          [
+            215,
+            390
+          ]
+        ]
+      },
+      "support_center_px_by_direction": {
+        "NE": [
+          210.5,
+          396.0
+        ],
+        "NW": [
+          184.0,
+          395.0
+        ],
+        "SW": [
+          170.0,
+          406.5
+        ],
+        "SE": [
+          176.5,
+          406.5
+        ]
+      },
+      "calibration_basis": "Top-row source-pixel centers of the two visible boot-floor contacts; each support center is their midpoint.",
+      "texture_path": "res://assets/units/kensei/map_token_clean_v2.png",
+      "sha256": "e6f33324c52929769d4698ed75e969470ec45748788503f4637fcb3223dc5415",
+      "frame_grid": [
+        4,
+        2
+      ],
+      "cell_by_direction": {
+        "NE": [
+          0,
+          0
+        ],
+        "NW": [
+          1,
+          0
+        ],
+        "SW": [
+          2,
+          0
+        ],
+        "SE": [
+          3,
+          0
+        ]
+      },
+      "display_height_px": 72.0
+    },
+    "myrmidon": {
+      "texture_path": "res://assets/prototype/character_pipeline/myrmidon/map_token_v1.webp",
+      "sha256": "245fcbbe566cbfcac5f63d0edcd67ac25d874976b3937edd7e0911bffb726ef8",
+      "frame_grid": [
+        2,
+        2
+      ],
+      "cell_by_direction": {
+        "NE": [
+          0,
+          0
+        ],
+        "NW": [
+          1,
+          0
+        ],
+        "SW": [
+          0,
+          1
+        ],
+        "SE": [
+          1,
+          1
+        ]
+      },
+      "support_contact_points_px_by_direction": {
+        "NE": [
+          [
+            286,
+            560
+          ],
+          [
+            401,
+            585
+          ]
+        ],
+        "NW": [
+          [
+            228,
+            588
+          ],
+          [
+            336,
+            557
+          ]
+        ],
+        "SW": [
+          [
+            298,
+            528
+          ],
+          [
+            432,
+            565
+          ]
+        ],
+        "SE": [
+          [
+            194,
+            563
+          ],
+          [
+            319,
+            527
+          ]
+        ]
+      },
+      "support_center_px_by_direction": {
+        "NE": [
+          343.5,
+          572.5
+        ],
+        "NW": [
+          282,
+          572.5
+        ],
+        "SW": [
+          365,
+          546.5
+        ],
+        "SE": [
+          256.5,
+          545
+        ]
+      },
+      "display_height_px": 82.0,
+      "calibration_basis": "Visible boot-floor support midpoints in 627px cells, independently reviewed at native size; no alpha edits."
+    }
+  },
+  "tree_presentation": {
+    "texture_path": "res://assets/prototype/battlefield_courtyard/forest-tree-v2.png",
+    "sha256": "0db7cb1e145af28443d6eed31ad38c84cdcf48cd6d8cff4b2ded224a44799203",
+    "tint": [
+      0.98,
+      1.0,
+      0.96,
+      1.0
+    ],
+    "environment_scale": 0.85,
+    "environment_tree_positions": [[-3.4, 5.8], [-0.8, 10.2], [10.7, 0.1]],
+    "environment_grove_scale": 1.3,
+    "saturation": 0.86,
+    "contrast": 0.92,
+    "canopy_reveal_alpha": 0.18,
+    "root_shadow_rgba": [
+      0.035,
+      0.034,
+      0.025,
+      0.28
+    ],
+    "root_shadow_width_fraction": 0.42,
+    "shrub_tint": [
+      0.78,
+      0.83,
+      0.77,
+      1.0
+    ],
+    "low_forest_cells": true,
+    "low_forest_tint": [
+      0.86,
+      1.02,
+      1.08,
+      1.0
+    ],
+    "low_forest_floor_edge_inset": 0.98,
+    "low_forest_boundary_scale": 0.56,
+    "low_forest_floor_texture_span": 128.0,
+    "low_forest_floor_rgba": [
+      0.95,
+      1.02,
+      1.08,
+      1.0
+    ],
+    "low_forest_canopy_texture": "res://assets/prototype/battlefield_courtyard/forest-low-canopy-v1.png",
+    "low_forest_raised_canopy": true,
+    "low_forest_leaf_fringe": 2.6,
+    "low_forest_rear_height": 3.0,
+    "low_forest_front_height": 1.5
+  }
+}
