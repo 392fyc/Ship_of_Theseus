@@ -231,11 +231,12 @@ func _test_parry_params_present(dl: Object) -> void:
 	_eq("概率属性 = SPD", str(params.get("chance_stat", "")), "SPD")
 	_eq("减伤基数 = 40", int(params.get("reduction_base_pct", -1)), 40)
 	_eq("减伤属性 = DEX", str(params.get("reduction_stat", "")), "DEX")
-	# 待实装括号已去掉——这条是防「实装完忘了改 description」的回归锁。
-	var zj: Dictionary = dl.skills.get("swordsman_zhaojia", {})
-	_check("招架 description 已去掉「待后续实装」",
-		not str(zj.get("description", "")).contains("待后续实装"),
-		str(zj.get("description", "")))
+	# 旧招架 swordsman_zhaojia 已下线，parry 段现在只有交刃在读；剑圣现行招架
+	# kensei_zhaojia 给的是额外闪避，不挂这个架势。
+	var kzj: Dictionary = dl.skills.get("kensei_zhaojia", {})
+	_check("前提：kensei_zhaojia 已装载", not kzj.is_empty())
+	_check("剑圣现行招架不再挂 %s" % PARRY_BUFF,
+		not JSON.stringify(kzj).contains(PARRY_BUFF))
 
 
 # ── D2. 分发对象：被攻击者，不是攻击者 ──────────────

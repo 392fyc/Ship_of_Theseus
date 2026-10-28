@@ -142,7 +142,7 @@ func _test_contiguous(tm: Object) -> void:
 ## 测不出分支被删掉。
 func _test_wiring(dl: Object, tm: Object) -> void:
 	print("\n[P4] 接线：一闪的受伤格来自位移路径，不来自 AreaCalculator")
-	var yishan: Dictionary = dl.skills.get("swordsman_yishan", {})
+	var yishan: Dictionary = dl.skills.get("kensei_yishan", {})
 	_check("前提：一闪已装载", not yishan.is_empty())
 	_check("前提：一闪确实是位移技能", bool(yishan.get("displacement", false)))
 	if yishan.is_empty():

@@ -50,6 +50,6 @@
     }
   ],
   "description": "向所选方向位移，最远 4 格；对沿途的敌人造成物理伤害（威力 +1，系数 0.5）。落点必须可通行且无人占据。",
-  "_engine_note": "area 写 line/1 描述实际形态，与设计库「单体 + 0」（位移技能的不适用标记）有意不同，理由见 swordsman_yishan.json 的 _engine_note。",
+  "_engine_note": "★ 本卡的 area 与设计库**有意不一致，别去「修」**。设计库 `kensei_yishan` / `myrmidon_yishan` 的作用范围两列是「单体 + 0」，那是位移技能统一的「不适用」标记；这里写 line/1 是在描述实际形态。两边各有各的语境，不是漂移。\n\n正常路径下这个值根本不参与受伤格计算——_compute_skill_area_cells 见到 displacement 就改走 _get_displacement_path_cells（施法者→落点的沿途格，不含起点、含落点），area 整个绕开。attack_type 也已显式声明为 area，_derive_attack_type 不会来读它。\n\n它仍然**载荷**的是一条兜底路径：target_mode 若丢失或越界，_skill_target_mode 会响亮退回 _legacy_target_mode_from_area，而那个函数对 area=line 返回「格子」、对 area=single 返回「单位」（没有任何分支能返回「方向」）。「格子」与「方向」在引擎里被 _is_ground_target_skill 当同一档消费，方向捕获另由 range.type==\"line\" 决定（_is_waiting_for_line_direction），所以 line 兜底出来的行为与真值「方向」一致，single 则会让一闪点不了空地、实际不可释放。改成 single/0 只为了两仓字面一致，是拿一条真实的降级保护换一次视觉整齐。",
   "_mirror": "设计库镜像字段：name / damage_entries / 射程 / 冷却 / 行动消耗 / 剑气数值来自设计库仓 snapshots/skills.json @ 762393b（myrmidon_yishan）。伤害只读 damage_entries（R1.1 / R1.7，技能威力不加武器威力）；power 字段不写。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。"
 }

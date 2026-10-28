@@ -58,8 +58,8 @@ var is_taking_turn: bool = false
 # 是否有普通攻击（职业 JSON 的 basic_attack，缺省 true）。设计上没有普通攻击（技能设计要点 §3），
 # 用户 2026-10-28 裁决 S2：先只去掉剑士线，其他职业与敌人在敌人技能 AI 落地前保留。
 var has_basic_attack: bool = true
-# 心眼被动条目的技能 id（职业 JSON 的 passive_skill_id）；剑士 myrmidon_xinyan，剑圣暂沿用旧 id。
-var passive_skill_id: String = "swordsman_xinyan"
+# 心眼被动条目的技能 id（职业 JSON 的 passive_skill_id）；剑士 myrmidon_xinyan，剑圣 kensei_xinyan。
+var passive_skill_id: String = ""
 
 # ── 战斗派生值修正钩子（来源：天赋 L2 / 装备 L4 / 符文 L5 / 肉鸽）──
 # 默认 0，不绑武器；由上层写入修正系数（暴击回避等）。
@@ -204,7 +204,7 @@ func setup(class_data: Dictionary, initial_facing: StringName = &"SE") -> void:
 	weapon_id = str(class_data.get("weapon_id", ""))
 	offhand_weapon_id = ""
 	has_basic_attack = bool(class_data.get("basic_attack", true))
-	passive_skill_id = str(class_data.get("passive_skill_id", "swordsman_xinyan"))
+	passive_skill_id = str(class_data.get("passive_skill_id", ""))
 	skill_ids.clear()
 	for skill_id_value: Variant in class_data.get("skill_ids", []):
 		skill_ids.append(str(skill_id_value))

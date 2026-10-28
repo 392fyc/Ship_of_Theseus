@@ -34,11 +34,15 @@ var _fails: Array[String] = []
 var _ran: bool = false
 
 const DATA_LOADER_PATH := "res://scripts/data/data_loader.gd"
+const SplashFixture := preload("res://tests/fixtures/splash_area_skill.gd")
 
 ## 本次**允许**行为改变的技能，以及改变的理由。名单之外一律必须与旧反推一致。
 ## ★ 这个名单就是本次改动的全部行为影响面，评审看这一处即可。
+## 当初修的是旧拔刀 swordsman_badao；它已下线，正式数据里不再有「选单位 + 菱形范围」
+## 的技能，于是改用它的原样副本（测试夹具 tests/fixtures/splash_area_skill.gd，
+## _run 开头装进本测试自己的 DataLoader），让这条修复继续有用例锁住。
 const EXPECTED_BEHAVIOR_CHANGES: Dictionary = {
-	"swordsman_badao": "拔刀 area=diamond/1 被旧反推误判为选地面；设计库 target_mode=单位",
+	SplashFixture.SKILL_ID: "旧拔刀形状 area=diamond/1 被旧反推误判为选地面；target_mode=单位",
 }
 
 ## 5 条有设计库对应的技能，值从设计库快照抄来（1:2 映射的四条两版取值一致）。
@@ -55,11 +59,6 @@ const DESIGNLIB_BACKED: Dictionary = {
 	"myrmidon_yishan": "方向",
 	"myrmidon_zhaojia": "自身",
 	"myrmidon_juhe": "单位",
-	"swordsman_badao": "单位",
-	"swordsman_juhe": "单位",
-	"swordsman_yishan": "方向",
-	"swordsman_zhanji": "单位",
-	"swordsman_zhaojia": "自身",
 }
 
 
@@ -78,6 +77,7 @@ func _process(_delta: float) -> bool:
 func _run() -> void:
 	var dl: Object = load(DATA_LOADER_PATH).new()
 	dl.load_all()
+	SplashFixture.install(dl)
 	var scene: Node = load("res://scenes/tactical/TacticalScene.tscn").instantiate()
 	root.add_child(scene)
 	var tm: Object = scene.tactical_manager
@@ -182,9 +182,10 @@ func _test_behavior_preserved(dl: Object, tm: Object) -> void:
 # ── T3. 验收判据（任务书 §4，两个方向）──────────────
 
 func _test_acceptance(dl: Object, tm: Object) -> void:
-	print("\n[T3] 验收：拔刀不能再点空地、一闪仍能点空格")
-	var badao: Dictionary = dl.skills.get("swordsman_badao", {})
-	var yishan: Dictionary = dl.skills.get("swordsman_yishan", {})
+	print("\n[T3] 验收：旧拔刀形状不能再点空地、一闪仍能点空格")
+	# badao 是旧拔刀的原样副本（测试夹具），yishan 是剑圣现行一闪。
+	var badao: Dictionary = dl.skills.get(SplashFixture.SKILL_ID, {})
+	var yishan: Dictionary = dl.skills.get("kensei_yishan", {})
 	_check("前提：两条技能都装载了", not badao.is_empty() and not yishan.is_empty())
 
 	# 方向一：拔刀（target_mode=单位）→ 必须选单位，不能点空地。这是本次修的那个错。

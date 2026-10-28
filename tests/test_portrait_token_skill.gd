@@ -33,11 +33,11 @@ func _run() -> void:
 	var hp_before: int = target.stats.hp
 	var qi_before: int = actor.sword_qi
 	target.damage_taken.connect(_damage)
-	manager.request_skill_selection("swordsman_zhanji")
+	manager.request_skill_selection("kensei_zhanji")
 	check("existing 斩击 enters real skill targeting", manager.input_state == manager.InputState.SKILL_TARGETING)
 	var point: Vector2 = root.get_canvas_transform() * manager.grid.grid_to_world(target.grid_position)
 	manager.handle_pointer_click(point)
-	manager.request_skill_selection("swordsman_zhanji")
+	manager.request_skill_selection("kensei_zhanji")
 	manager.handle_pointer_click(point)
 	manager.request_end_turn()
 	await wait(0.15)
@@ -46,7 +46,7 @@ func _run() -> void:
 	await wait(0.35)
 	check("skill impact changes HP exactly once", damage_events == 1 and target.stats.hp < hp_before and actor.standard_used)
 	var loader: Node = root.get_node("DataLoader")
-	var skill: Dictionary = loader.skills["swordsman_zhanji"]
+	var skill: Dictionary = loader.skills["kensei_zhanji"]
 	check("real skill gain occurs once", actor.sword_qi == qi_before + int(skill["qi_gain_on_hit"]))
 	print("SKILL_STATE=", JSON.stringify({"hp_before": hp_before, "hp_after": target.stats.hp,
 		"qi_before": qi_before, "qi_after": actor.sword_qi, "damage_events": damage_events,

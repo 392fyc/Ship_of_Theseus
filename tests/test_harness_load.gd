@@ -99,7 +99,7 @@ func _run() -> void:
 		sword.stats.hp = 1
 		sword.set_sword_qi(5)
 		sword.marks["心"] = true
-		sword.skill_cooldowns["swordsman_juhe"] = 3
+		sword.skill_cooldowns["kensei_yishan"] = 3
 		sword.standard_used = true
 
 	tm.debug_soft_reset()

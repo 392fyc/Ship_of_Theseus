@@ -19,6 +19,9 @@ var _fail: int = 0
 var _fails: Array[String] = []
 var _ran: bool = false
 
+## 只当冷却表的键用，不对应任何技能文件（见 A6–A8 的说明）。
+const CD_TEST_SKILL_ID: String = "test_kill_cd_reduction"
+
 
 func _initialize() -> void:
 	print("=== test_swordsman_integration (批次2) ===")
@@ -121,31 +124,34 @@ func _test_on_hit_wiring(tm: Object, sword: Unit) -> void:
 	tm._apply_sword_qi_on_hit(sword, _make_result(true, false), {"mark_gain": 1})
 	_eq("命中 mark_gain → 印记数1", sword.get_mark_count(), 1)
 
-	# A6 居合击杀 cd-1
-	sword.skill_cooldowns["swordsman_juhe"] = 3
+	# A6–A8 锁的是引擎通路 ki_on_kill_cd_reduction（击杀后把本技能冷却减 N）。旧居合
+	# swordsman_juhe 下线后，正式数据里已没有技能声明这个字段，通路仍在引擎里；
+	# 这里用一个只作冷却键的测试 id，payload 照旧手工给出。
+	# A6 击杀 cd-1
+	sword.skill_cooldowns[CD_TEST_SKILL_ID] = 3
 	tm._apply_sword_qi_on_hit(sword, _make_result(true, true),
-		{"ki_on_kill_cd_reduction": 1, "skill_id": "swordsman_juhe"})
-	_eq("居合击杀 → cd 3→2", sword.get_skill_cooldown("swordsman_juhe"), 2)
+		{"ki_on_kill_cd_reduction": 1, "skill_id": CD_TEST_SKILL_ID})
+	_eq("击杀 → cd 3→2", sword.get_skill_cooldown(CD_TEST_SKILL_ID), 2)
 
 	# A7 cd 减到 0 则移除冷却条目
-	sword.skill_cooldowns["swordsman_juhe"] = 1
+	sword.skill_cooldowns[CD_TEST_SKILL_ID] = 1
 	tm._apply_sword_qi_on_hit(sword, _make_result(true, true),
-		{"ki_on_kill_cd_reduction": 1, "skill_id": "swordsman_juhe"})
+		{"ki_on_kill_cd_reduction": 1, "skill_id": CD_TEST_SKILL_ID})
 	_check("cd 减到0 → 移除冷却条目",
-		sword.get_skill_cooldown("swordsman_juhe") == 0 \
-		and not sword.skill_cooldowns.has("swordsman_juhe"))
+		sword.get_skill_cooldown(CD_TEST_SKILL_ID) == 0 \
+		and not sword.skill_cooldowns.has(CD_TEST_SKILL_ID))
 
-	# A8 居合完整结算（命中+击杀同次：返气 + 得印记 + cd-1）
+	# A8 完整结算（命中+击杀同次：返气 + 得印记 + cd-1）
 	sword.set_sword_qi(0)
 	sword.clear_marks()
-	sword.skill_cooldowns["swordsman_juhe"] = 3
+	sword.skill_cooldowns[CD_TEST_SKILL_ID] = 3
 	tm._apply_sword_qi_on_hit(sword, _make_result(true, true), {
 		"qi_gain_on_hit": 0, "qi_gain_on_kill": 3, "mark_gain": 1,
-		"ki_on_kill_cd_reduction": 1, "skill_id": "swordsman_juhe",
+		"ki_on_kill_cd_reduction": 1, "skill_id": CD_TEST_SKILL_ID,
 	})
-	_eq("居合完整: 返3气", sword.sword_qi, 3)
-	_eq("居合完整: 得1印记", sword.get_mark_count(), 1)
-	_eq("居合完整: cd 3→2", sword.get_skill_cooldown("swordsman_juhe"), 2)
+	_eq("完整结算: 返3气", sword.sword_qi, 3)
+	_eq("完整结算: 得1印记", sword.get_mark_count(), 1)
+	_eq("完整结算: cd 3→2", sword.get_skill_cooldown(CD_TEST_SKILL_ID), 2)
 
 
 # ── B. _build_skill_entry 真实可用性门槛 ────────────────
@@ -165,7 +171,7 @@ func _test_resource_gate(tm: Object, sword: Unit) -> void:
 	# B1 居合剑气门槛：0 气不可用且原因为剑气不足
 	sword.set_sword_qi(0)
 	sword.clear_marks()
-	var e_qi0: Dictionary = tm._build_skill_entry(sword, "swordsman_juhe")
+	var e_qi0: Dictionary = tm._build_skill_entry(sword, "kensei_juhe")
 	_check("居合 0气 → 不可用 且 原因含「剑气」",
 		not bool(e_qi0.get("available", false)) and ("剑气" in str(e_qi0.get("reason", ""))),
 		"available=%s reason=%s" % [str(e_qi0.get("available")), str(e_qi0.get("reason"))])
@@ -173,7 +179,7 @@ func _test_resource_gate(tm: Object, sword: Unit) -> void:
 	# B2 居合剑气满足：60 气可用（居合单体，上游检查应通过）
 	sword.set_sword_qi(60)
 	sword.standard_used = false
-	var e_qi6: Dictionary = tm._build_skill_entry(sword, "swordsman_juhe")
+	var e_qi6: Dictionary = tm._build_skill_entry(sword, "kensei_juhe")
 	_check("居合 60气 → 可用",
 		bool(e_qi6.get("available", false)),
 		"available=%s reason=%s" % [str(e_qi6.get("available")), str(e_qi6.get("reason"))])
@@ -182,7 +188,7 @@ func _test_resource_gate(tm: Object, sword: Unit) -> void:
 	sword.clear_marks()
 	sword.set_sword_qi(20)
 	sword.standard_used = false
-	var e_m0: Dictionary = tm._build_skill_entry(sword, "swordsman_badao")
+	var e_m0: Dictionary = tm._build_skill_entry(sword, "kensei_badao")
 	_check("拔刀 0印记 → 原因含「印记」",
 		"印记" in str(e_m0.get("reason", "")),
 		"available=%s reason=%s" % [str(e_m0.get("available")), str(e_m0.get("reason"))])
@@ -193,7 +199,7 @@ func _test_resource_gate(tm: Object, sword: Unit) -> void:
 	sword.marks["道"] = true
 	sword.marks["势"] = true
 	sword.standard_used = false
-	var e_m3: Dictionary = tm._build_skill_entry(sword, "swordsman_badao")
+	var e_m3: Dictionary = tm._build_skill_entry(sword, "kensei_badao")
 	_check("拔刀 3印记 → 印记门槛通过(原因不含「印记」)",
 		not ("印记" in str(e_m3.get("reason", ""))),
 		"available=%s reason=%s" % [str(e_m3.get("available")), str(e_m3.get("reason"))])

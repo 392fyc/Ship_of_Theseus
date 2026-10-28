@@ -2331,7 +2331,7 @@ func _filter_enemy_target_cells(candidate_cells: Array[Vector2i]) -> Array[Vecto
 ##
 ## 零行为变化的依据：方向捕获只在 `range.type == "line"` 时发生（见
 ## `_is_waiting_for_line_direction`），而现有 `area.type == "line"` 的两条技能
-## （`swordsman_yishan` / `archer_piercing_arrow`）恰好都是 `range.type == "line"`；
+## （剑士 / 剑圣的一闪与 `archer_piercing_arrow`）恰好都是 `range.type == "line"`；
 ## 反过来 `range.type == "line"` 但 area 非 line 的 `knight_charge`，其 direction
 ## 交给 `AreaCalculator` 后按 `single` 处理、本就不参与受伤格计算。
 ##

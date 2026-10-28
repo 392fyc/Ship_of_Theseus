@@ -80,7 +80,9 @@ func _test_zhanji_qi_runtime(tm: Object, sword: Unit) -> void:
 	enemy.stats.lck = 0
 	enemy.stats.max_hp = 9999
 	enemy.stats.hp = 9999
-	enemy.stats.def_attr = 9999  # 高防→伤害压到下限（R1.1 加法层 max(0, ·)），9999 HP 确保不死
+	# 防御归零：剑圣斩击「造成伤害后」才得印记（设计库 kensei_zhanji），伤害为 0 不得，
+	# 所以这里要让斩击真的打出伤害；9999 HP 确保不死。
+	enemy.stats.def_attr = 0
 
 	# 把剑圣移到敌人相邻格（斩击 range diamond1-1）
 	_place_adjacent(tm, sword, enemy)
@@ -95,7 +97,7 @@ func _test_zhanji_qi_runtime(tm: Object, sword: Unit) -> void:
 	sword.clear_marks()
 
 	# 经正式构造路径：设 _selected_skill_id → _build_skill_action → _execute_skill_action
-	tm._selected_skill_id = "swordsman_zhanji"
+	tm._selected_skill_id = "kensei_zhanji"
 	var action: Object = tm._build_skill_action(sword, enemy.grid_position, enemy)
 	_check("斩击 action 构造成功", action != null)
 	if action == null:
@@ -105,12 +107,13 @@ func _test_zhanji_qi_runtime(tm: Object, sword: Unit) -> void:
 	_check("斩击 _execute_skill_action 返回 true", ok)
 	# 产气量不写死：从技能 JSON 读，跟着设计库走（2026-08-13 由 +10 提到 +25 时，
 	# 这一行原本写死的 10 是唯一一处需要人手改的地方——改成读数据后不会再有这种滞后）。
-	var zhanji_qi_gain: int = int(tm._get_skill_data("swordsman_zhanji").get("qi_gain_on_hit", 0))
+	var zhanji_qi_gain: int = int(tm._get_skill_data("kensei_zhanji").get("qi_gain_on_hit", 0))
 	_check("前提：斩击的 qi_gain_on_hit 为正（否则下一条是空转）", zhanji_qi_gain > 0)
 	_eq("斩击命中 → sword_qi +%d（运行时真实链路）" % zhanji_qi_gain,
 		sword.sword_qi, qi_before + zhanji_qi_gain)
-	# 剑圣=转职后职业 → 斩击命中随机获得一枚未持印记（mark_gain=1）
-	_eq("斩击命中 → 得1印记（剑圣转职后，mark_gain=1）", sword.get_mark_count(), 1)
+	# 剑圣斩击造成伤害后随机获得一枚未持印记（mark_gain_after_damage=1）
+	_check("前提：斩击确实打出了伤害", enemy.stats.hp < 9999)
+	_eq("斩击造成伤害 → 得1印记（mark_gain_after_damage=1）", sword.get_mark_count(), 1)
 
 
 # ── (b) 一闪冷却：施放写 cd=3，reset_turn_state 逐回合 -1 ─────
@@ -122,7 +125,7 @@ func _test_yishan_cooldown_runtime(tm: Object, sword: Unit) -> void:
 	sword.movement_used = false
 	sword.swift_used = false
 	sword.skill_cooldowns.clear()
-	sword.set_sword_qi(50)  # 一闪 qi_cost=10
+	sword.set_sword_qi(50)  # 剑圣一闪不耗剑气，给多少都不影响本组
 	sword.clear_marks()
 
 	# 一闪 displacement=true，落点须为空格；选剑圣的一个空邻格作落点
@@ -131,7 +134,7 @@ func _test_yishan_cooldown_runtime(tm: Object, sword: Unit) -> void:
 		_check("找到一闪空落点", false)
 		return
 
-	tm._selected_skill_id = "swordsman_yishan"
+	tm._selected_skill_id = "kensei_yishan"
 	var action: Object = tm._build_skill_action(sword, landing, null)
 	_check("一闪 action 构造成功", action != null)
 	if action == null:
@@ -141,31 +144,34 @@ func _test_yishan_cooldown_runtime(tm: Object, sword: Unit) -> void:
 	var ok: bool = tm._execute_skill_action(action)
 	_check("一闪 _execute_skill_action 返回 true", ok)
 	# 施放后 consume_skill 写入冷却
-	_eq("施放后 skill_cooldowns['swordsman_yishan']==3",
-		sword.get_skill_cooldown("swordsman_yishan"), 3)
-	_check("施放后 一闪不可用(cd>0)", not sword.is_skill_available("swordsman_yishan"))
+	_eq("施放后 skill_cooldowns['kensei_yishan']==3",
+		sword.get_skill_cooldown("kensei_yishan"), 3)
+	_check("施放后 一闪不可用(cd>0)", not sword.is_skill_available("kensei_yishan"))
 
 	# 回合开始 reset_turn_state() → _tick_skill_cooldowns() -1
 	sword.reset_turn_state()
-	_eq("reset 1次 → cd 3→2", sword.get_skill_cooldown("swordsman_yishan"), 2)
+	_eq("reset 1次 → cd 3→2", sword.get_skill_cooldown("kensei_yishan"), 2)
 	sword.reset_turn_state()
-	_eq("reset 2次 → cd 2→1", sword.get_skill_cooldown("swordsman_yishan"), 1)
+	_eq("reset 2次 → cd 2→1", sword.get_skill_cooldown("kensei_yishan"), 1)
 	sword.reset_turn_state()
-	_eq("reset 3次 → cd 1→0(移除)", sword.get_skill_cooldown("swordsman_yishan"), 0)
-	_check("reset 3次后 一闪可用", sword.is_skill_available("swordsman_yishan"))
+	_eq("reset 3次 → cd 1→0(移除)", sword.get_skill_cooldown("kensei_yishan"), 0)
+	_check("reset 3次后 一闪可用", sword.is_skill_available("kensei_yishan"))
 	_check("cd 归零后从 skill_cooldowns 移除",
-		not sword.skill_cooldowns.has("swordsman_yishan"))
+		not sword.skill_cooldowns.has("kensei_yishan"))
 
 
-# ── (c) 居合击杀（可选）：返气 + cd-1 ───────────────────────
+# ── (c) 居合击杀：剑圣居合不返气、无冷却、结算后得印记 ──────────
+# 旧居合（swordsman_juhe）的「击杀返 30 气、冷却 -1」已随下线移除；设计库 kensei_juhe
+# 冷却 0、没有击杀返气，结算后得一枚印记（mark_gain_after_resolve）。击杀返气与
+# 击杀减冷却这两条引擎通路由 test_swordsman_integration 的 A 组直接调用覆盖。
 
 func _test_juhe_kill_optional(tm: Object, sword: Unit) -> void:
-	print("\n[c] 居合击杀 → qi_gain_on_kill + ki_on_kill_cd_reduction（运行时）")
+	print("\n[c] 居合击杀 → 不返气、不进冷却、结算后得 1 印记（运行时）")
 	var enemy: Unit = _find_enemy(tm)
 	if enemy == null:
 		_check("存在敌方单位(居合)", false)
 		return
-	# 让敌人极脆，居合 power300 必杀
+	# 让敌人极脆，居合必杀
 	enemy.stats.spd = 0
 	enemy.stats.lck = 0
 	enemy.stats.def_attr = 0
@@ -182,21 +188,17 @@ func _test_juhe_kill_optional(tm: Object, sword: Unit) -> void:
 	sword.set_sword_qi(60)  # 居合 qi_cost=60
 	sword.clear_marks()
 
-	tm._selected_skill_id = "swordsman_juhe"
+	tm._selected_skill_id = "kensei_juhe"
 	var action: Object = tm._build_skill_action(sword, enemy.grid_position, enemy)
 	if action == null:
 		_check("居合 action 构造成功", false)
 		return
-	# 施放扣60气 → 0；击杀返30气；施放时 consume_skill 用 payload.cooldown=3(JSON)写入，
-	# 再经击杀 ki_on_kill_cd_reduction -1 → 2。
 	var ok: bool = tm._execute_skill_action(action)
 	_check("居合 _execute_skill_action 返回 true", ok)
 	_check("居合击杀 → 敌人死亡", not enemy.stats.is_alive())
-	# 扣60返30 → 净 30 气
-	_eq("居合: 施放扣60气 + 击杀返30气 → sword_qi==30", sword.sword_qi, 30)
-	_eq("居合: 得1印记(mark_gain)", sword.get_mark_count(), 1)
-	# 施放写 cd=3(JSON)，击杀 -1 → 2
-	_eq("居合: cd 写3 → 击杀-1 → 2", sword.get_skill_cooldown("swordsman_juhe"), 2)
+	_eq("居合: 施放扣 60 气、击杀不返气 → sword_qi==0", sword.sword_qi, 0)
+	_eq("居合: 结算后得1印记(mark_gain_after_resolve)", sword.get_mark_count(), 1)
+	_eq("居合: 冷却 0，施放后不进冷却", sword.get_skill_cooldown("kensei_juhe"), 0)
 
 
 # ── 工具 ─────────────────────────────────────────────

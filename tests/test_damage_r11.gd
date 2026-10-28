@@ -217,11 +217,15 @@ func _test_legacy_bridge(tm: Object, sword: Unit, dummy: Unit) -> void:
 	print("\n[②'] 设计库外的旧技能：等价桥接")
 	var profile: Dictionary = tm._get_unit_basic_attack_profile(sword)
 	var might: int = int(profile.get("weapon_might", 0))
-	tm._selected_skill_id = "swordsman_zhanji"
+	# 载体用士兵的斩击 soldier_slash：单体近战、只写 power 不写 damage_entries 的旧口径技能
+	# （原载体 swordsman_zhanji 已下线，两者 power 都是 100、射程都是 1）。
+	tm._selected_skill_id = "soldier_slash"
 	var act: Object = tm._build_skill_action(sword, dummy.grid_position, dummy)
 	_check("构建出旧技能动作", act != null)
 	if act != null:
-		var skill: Dictionary = tm._get_skill_data("swordsman_zhanji")
+		var skill: Dictionary = tm._get_skill_data("soldier_slash")
+		_check("前提：载体是没有 damage_entries 的旧口径技能",
+			not skill.is_empty() and not skill.has("damage_entries"))
 		_eq("旧技能 skill_power == 原武器威力", act.data.get("skill_power"), float(might))
 		_eq("旧技能系数 == power/100", act.data.get("skill_multiplier"),
 			float(skill.get("power", 100)) / 100.0)
