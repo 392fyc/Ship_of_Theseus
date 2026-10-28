@@ -244,10 +244,19 @@ func _test_reapplication(defs: Dictionary) -> void:
 	_eq("独立实例层数合计 2", t.stacks("taunt"), 2)
 	_eq("跨实例消耗 2 层返回 2", t.consume_stacks("taunt", 2), 2)
 	_check("两个实例都已移除", not t.has("taunt"))
+	t.apply("taunt")
+	t.apply("taunt")
+	_eq("部分扣减：2 个实例扣 1 层返回 1", t.consume_stacks("taunt", 1), 1)
+	_eq("部分扣减：剩 1 个实例", t.to_array().size(), 1)
+	_eq("超额扣减：要 3 层只扣到 1", t.consume_stacks("taunt", 3), 1)
+	_check("超额扣减后不再持有", not t.has("taunt"))
 
 	var full := HeldStateSet.new(defs)
 	full.apply("kensei_jianhen", 5)
+	var full_changes: Array[int] = [0]
+	full.changed.connect(func() -> void: full_changes[0] += 1)
 	_check("满层且不刷新时再获得返回 false", not full.apply("kensei_jianhen", 1))
+	_eq("满层且不刷新时不发出 changed", full_changes[0], 0)
 	_eq("满层仍为 5", full.stacks("kensei_jianhen"), 5)
 	var ruoji_full := HeldStateSet.new(defs)
 	ruoji_full.apply("kensei_ruoji", 3, start2)
@@ -376,10 +385,21 @@ func _test_on_hit_routes_through_pipeline(tm: Object, atk: Unit, _dfn: Unit) -> 
 		{"type": "gain_resource", "resource": "qi", "amount": 10}, {})
 	_eq("天赋 gain_resource 得 10 剑气", atk.sword_qi, 35)
 	_eq("天赋得气经统一入口", events, ["gain|talent:probe_talent"] as Array[String])
-	print("  （下一项预期打印 [Talent] 告警，属于被测行为）")
+	events.clear()
+	print("  （下两项预期打印 [Talent] 告警，属于被测行为）")
 	tm._apply_talent_effect(atk, "probe_talent",
 		{"type": "gain_resource", "resource": "qi", "amount": 0}, {})
-	_eq("数量为 0 的 gain_resource 被忽略、剑气不变", atk.sword_qi, 35)
+	tm._apply_talent_effect(atk, "probe_talent",
+		{"type": "gain_resource", "resource": "qi", "amount": -10}, {})
+	_eq("数量为 0 / 负数的 gain_resource 被忽略、剑气不变", atk.sword_qi, 35)
+	_eq("数量为 0 / 负数时不发剑气事件", events, [] as Array[String])
+
+	var kill_result := DamageCalculator.AttackResult.new()
+	kill_result.hit = true
+	kill_result.defender_died = true
+	tm._apply_sword_qi_on_hit(atk, kill_result, {"qi_gain_on_kill": 30, "skill_id": "probe"})
+	_eq("击杀得 30 剑气", atk.sword_qi, 65)
+	_eq("击杀得气经统一入口", events, ["gain|on_kill:probe"] as Array[String])
 	atk.sword_qi_changed.disconnect(listener)
 
 
@@ -397,6 +417,15 @@ func _test_battle_start_clears(tm: Object, u: Unit) -> void:
 	u.apply_held_state("kensei_chengxin", 1)
 	tm._debug_reset_unit(u)
 	_check("调试复位清空持有型状态", not u.held_states.has("kensei_chengxin"))
+
+	# 单位在自身回合内死亡：turn_ended 不会发出，由 _on_death 复位。用独立的一次性单位，
+	# 不动场景里的单位（_on_death 会释放节点）。
+	var doomed: Unit = load("res://scenes/tactical/Unit.tscn").instantiate()
+	root.add_child(doomed)
+	doomed.setup({"id": "probe_unit", "name": "probe", "base_stats": {"HP": 10}})
+	doomed.is_taking_turn = true
+	doomed._on_death()
+	_check("_on_death 复位 is_taking_turn", not doomed.is_taking_turn)
 
 
 # ── 工具 ─────────────────────────────────────────────
