@@ -288,11 +288,18 @@ func _refresh_turn_order() -> void:
 	if _turn_order_bar == null:
 		return
 	var queue := tactical_manager.turn_manager.get_display_queue()
+	var alive_count: int = 0
+	for unit: Unit in tactical_manager.units:
+		if is_instance_valid(unit) and unit.stats.is_alive():
+			alive_count += 1
 	_turn_order_bar.update_queue(queue,
-		tactical_manager.turn_manager.current_unit)
+		tactical_manager.turn_manager.current_unit,
+		tactical_manager.turn_manager.get_round_number(), alive_count)
 
 
 func _refresh_dashboard() -> void:
+	# Resource changes emit dashboard_state_changed between turn boundaries.
+	_refresh_turn_order()
 	if _bottom_dashboard == null:
 		return
 	_bottom_dashboard.update_state(tactical_manager.get_dashboard_data())

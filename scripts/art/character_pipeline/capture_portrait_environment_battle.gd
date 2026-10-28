@@ -51,19 +51,27 @@ func _drive_player_ai() -> void:
 	_event("forest_standing", {"actor":kensei.unit_id,"grid":str(kensei.grid_position)})
 	await create_timer(0.8).timeout
 	manager.call("request_end_turn")
-	while is_instance_valid(manager) and manager.get("current_unit") != swordsman:
-		await create_timer(0.04).timeout
-	await _settled()
-	manager.call("request_end_move")
-	await _attack_input(swordsman, target)
-	manager.call("request_end_turn")
-	await create_timer(0.1).timeout
-	if manager.get("current_unit") != kensei:
-		push_error("Expected the next real kensei turn")
-		quit(3)
-		return
-	await _move_input(kensei, Vector2i(1,6))
-	_event("forest_left", {"actor":kensei.unit_id,"grid":str(kensei.grid_position)})
+	# The next round is sorted again; either player can act first.
+	var swordsman_finished: bool = false
+	var forest_left: bool = false
+	while not (swordsman_finished and forest_left):
+		var current: Unit = manager.get("current_unit") as Unit
+		if current == swordsman and not swordsman_finished:
+			await _settled()
+			manager.call("request_end_move")
+			await _attack_input(swordsman, target)
+			swordsman_finished = true
+			if not forest_left:
+				manager.call("request_end_turn")
+		elif current == kensei and not forest_left:
+			await _settled()
+			await _move_input(kensei, Vector2i(1,6))
+			_event("forest_left", {"actor":kensei.unit_id,"grid":str(kensei.grid_position)})
+			forest_left = true
+			if not swordsman_finished:
+				manager.call("request_end_turn")
+		else:
+			await create_timer(0.04).timeout
 	# Capture input only: leave the empty forest unobscured by hover UI.
 	manager.call("handle_pointer_hover", _screen(Vector2i(2,2)))
 	_event("forest_hover_cleared", {"hover_grid":"(2, 2)"})

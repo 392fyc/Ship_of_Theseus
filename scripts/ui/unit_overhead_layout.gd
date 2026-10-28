@@ -425,7 +425,11 @@ func _layout_owned_health_bar(record: Dictionary, viewport_size: Vector2,
 	if fill != null:
 		fill.bg_color = faction
 	if background != null:
-		background.border_color = faction.lerp(Color(0.10, 0.10, 0.09), 0.5)
+		# Keep the 40x4 bar and head anchor; separate its silhouette from bright ground.
+		background.border_color = Color("101319")
+		background.shadow_color = Color("080b10f5")
+		background.shadow_size = 2
+		background.shadow_offset = Vector2.ZERO
 	_place_owned_group(record, viewport_size, body_obstacles, placed_rects, reserved_rects)
 	if not record.has("class_badge"):
 		var created_badge: Control = ClassBadgeScript.new()

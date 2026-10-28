@@ -78,6 +78,9 @@ func _ready() -> void:
 
 func _build_overlay() -> void:
 	super._build_overlay()
+	_description.clip_text = true
+	_description.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_description.max_lines_visible = 1
 	# 入口只有一个真实战斗布局，移除基类中其他中庭候选布局按钮。
 	var view_label_index: int = -1
 	for index: int in _buttons.get_child_count():
@@ -106,6 +109,21 @@ func _build_overlay() -> void:
 	_layout_buttons[layout_id] = scene_button
 	_buttons.move_child(scene_button, 1)
 	_buttons.move_child(scene_label, 0)
+
+
+func _update_scene_labels() -> void:
+	super._update_scene_labels()
+	_description.text = "左键选择与移动 · 下方选择技能 · 右键取消 · 结束回合后继续行动顺序"
+
+
+func _resize() -> void:
+	super._resize()
+	if not is_instance_valid(battle) or _description == null:
+		return
+	var turn_order: Control = battle.get("_turn_order_bar") as Control
+	if turn_order != null:
+		var right_edge: float = turn_order.get_global_rect().position.x / _overlay.scale.x
+		_description.size = Vector2(maxf(1.0, right_edge - _description.position.x - 24.0), 24.0)
 
 
 func _style_unit_marker(_unit: Unit) -> void:
