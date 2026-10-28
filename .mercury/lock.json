@@ -1,5 +1,5 @@
 {
-  "config_sha256": "bf155e2c5c6fe3d7c410ac9a2d7bded3306ab1d0db92545da0dae67d2b5fa486",
+  "config_sha256": "21bbb86f6b0157940ada73f050f675d0edde27dba037e8041431d979f2d5e96c",
   "executable": [
     ".mercury/packs/lanes/scripts/check-lane-receiver-rule.sh",
     ".mercury/packs/lanes/scripts/check-main-idle.sh",
@@ -98,9 +98,9 @@
     "files": {
       ".claude/agents/game-analyst.md": "bcb631a77a36d57d835b66421e7e46fdf9677f0f04d9f60dd4b09516d28be237",
       ".claude/agents/game-critic.md": "a17dfe40f8505de805e6441ff9c579d8bc8d599f24297ea38f6632a50e03812e",
-      ".claude/agents/game-researcher.md": "df9236eefcd2834491c79f1f731e6c1e79d63763f2af67333ee20100779a8b1c",
+      ".claude/agents/game-researcher.md": "e9cde2127b70fe64ca3be65b76b6e06b12692c186fc44ea6ed1fe43ecb172ee4",
       ".claude/agents/sot-designlib.md": "749b2731e14e82d2b4c253d08cf8675e4cc94318834a7c2b55a1e158d5fa4cc2",
-      ".claude/agents/sot-kb.md": "735115123bae487bdbce7cf67ccefc21576d7241f963b0d178d7338d802ed79a",
+      ".claude/agents/sot-kb.md": "27843a050d57f166d9e131dbc099e84bafb25b4127a3c4dc9edf0ad7a8f4be6a",
       ".claude/skills/sot-design-present/SKILL.md": "d4323666bf41a03a3f2dd9a1769aa4245ed9508aeac8b5d5474891677386c7d5",
       ".claude/skills/sot-designlib/SKILL.md": "d26ad78d98c22dc1d288f7f86f3c58c5aa020e431161c323f35dc0506e39e13e",
       ".claude/skills/sot-kb-write/SKILL.md": "10e5e6249e94c06688bfdcbbe6ef992ee24608a168de5ef7840469e031d769e0",
@@ -109,12 +109,12 @@
       ".claude/skills/sot-task-receipt/SKILL.md": "a1d12477a9735881755510e5c93e9f8e06aa4d8d0a3424f28c9104da3fd4c771",
       ".codex/agents/game-analyst.toml": "68570dd7c89bf1c2964acb8e081ea5ba1a87955948fefb0bf26ba7abd479d308",
       ".codex/agents/game-critic.toml": "c44607c15291c6e984348c0208c96b86ce9d8fb3aced4424574572b672ba3f94",
-      ".codex/agents/game-researcher.toml": "224480d26d61f01c9d766d992d619b4a4e360defe24a4b2a9d0d725a75f9461d",
+      ".codex/agents/game-researcher.toml": "7f49fc71b840fd408a68435d4a25b2c876ca4da183e94041df4efa424c678db8",
       ".codex/agents/sot-designlib.toml": "41703b31aaab265427717aabc894e9351087866a6c55e02a6f5f5cd1bded6a13",
-      ".codex/agents/sot-kb.toml": "3029eda9cb6d4426a02793eba8c99342f4a8230cffc1d0637def64898c2c3981"
+      ".codex/agents/sot-kb.toml": "e13032b5e8556357e947b476581168b34d5c6c4bc3d6931b3010ad9be92c0fea"
     },
     "sources": {
-      ".agents/skills/sot-design-present/SKILL.md": "941babeb1effac2d9ebb906cd6810bf9b305300c2b0298d65d64abc7f9ef67fe",
+      ".agents/skills/sot-design-present/SKILL.md": "995f1b294e7ac24fa6d0a4ad385401f59d6bf60a293372f2350270a30844e3ad",
       ".agents/skills/sot-designlib/SKILL.md": "07e9950ff8982c04423a8070a363fbbf5b7956e9860b2b38c00879b792faf191",
       ".agents/skills/sot-kb-write/SKILL.md": "e73f3c50120aa1d225de67f75f9ba1f830160576e91cde29dca692fb402d7d14",
       ".agents/skills/sot-session-end/SKILL.md": "260e31b45d1d37635fdccda8b7f9992ffe0d906bfa693e48c20a9a803c293e33",
@@ -124,15 +124,15 @@
       ".mercury/local.json": "2fb1851d9377b9db8ed6edb2ab912982ae49ddaa2d073ec1b41145c69c574218",
       ".mercury/local/roles/game-analyst.md": "4db14a7b5fbb9184aa2b14256771d11277aca42793a4ff5ebf83e89bbd7a65dd",
       ".mercury/local/roles/game-critic.md": "39ebc916c1cac315c6c97e9242b0456ee0228f571c57ae8d4e4da62acceaf294",
-      ".mercury/local/roles/game-researcher.md": "cb21ad5afbe20d4619ffa083f9bd9c3c6c20cecb37d0ef2bbcaa628a6b2bb835",
+      ".mercury/local/roles/game-researcher.md": "0a7d5fb0f762f36c3b8be22cc1bae46a42b57d14ed52e5d4e5e83fe8a00c21e8",
       ".mercury/local/roles/sot-designlib.md": "efb6e9b541479f8ba63a6da6f19971e4f012546493ec054da4cd47878a34b9a6",
-      ".mercury/local/roles/sot-kb.md": "40ede3dad725052c8b6ac35d7b40d68eac5acc5b625cc36a418a0f637f6b0134"
+      ".mercury/local/roles/sot-kb.md": "f2267978743e51026c83a68d688ec08f6113e1ad37a91ebd9aadd7612e72ae2e"
     }
   },
   "mercury_json_sha256": "877b2181bd46fddd25f74cc29f873f7ee97b7bde72795e00f48ac81f2ce391c2",
   "schema_version": 1,
   "sections": {
-    "AGENTS.md": "ce966577dc64f8b3ea346776fde944604e6048a5be611a1a7ca258c96fbf7a80",
+    "AGENTS.md": "2e4b126a35fbe35cd120c3a02792da255b7685b5f0405dda7b0c5107170ede4c",
     "CLAUDE.md": "c8adcf29c1d31304ea737b7a1a7dd801ed3ce007436a18a2647ef8a68aaf99f1"
   },
   "source": "mercury@88c2967f2917e539d76acbbf509a0d3570751dbd",

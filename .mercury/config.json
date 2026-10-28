@@ -19,7 +19,7 @@
       "purpose": "The one fixed Obsidian vault: narrative, qualitative design, user rulings, ADRs, research and work records.",
       "locate": "SOT_KB_ROOT, else [roots].kb_root in the ignored .codex/project/sot-roots.local.toml. There is exactly one vault; never open a task worktree as a second vault or switch the MCP endpoint.",
       "use": "Skill sot-kb-write (or the sot-kb role) for MCP reads and versioned writes. Design work starts at 03-AI-Context/design-rules-index.md; reference-game research at 05-Research/references.md. After a KB pull request merges, run scripts/codex/sot-worktree.ps1 -Action KbReturn -Repository kb.",
-      "rules": "Write only on a task branch checked out in the clean vault; never use --ignore-other-worktrees, stash, reset or a second vault. Publish with scripts/codex/sot-publish.ps1. Structured rules follow the design library; the KB rule catalog is for lookup only."
+      "rules": "Write only on a task branch checked out in the clean vault; never use --ignore-other-worktrees, stash, reset or a second vault. Publish with scripts/codex/sot-publish.ps1. Structured rules follow the design library; the KB rule catalog 01-Game-Design/rules-catalog.md is for lookup only."
     }
   ],
   "params": {

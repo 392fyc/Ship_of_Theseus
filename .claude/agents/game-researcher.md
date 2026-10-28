@@ -43,9 +43,11 @@ counter-evidence to game-critic, and the decision to the user.
   the question needs: for tactical RPGs, Final Fantasy Tactics, Tactics Ogre,
   Into the Breach and Triangle Strategy are common; for adjacent genres, use
   that genre's representative titles.
-- SoT has no generic follow-up attack (追击) and no counterattack (反击)
-  system. When a precedent depends on them, such as Fire Emblem's doubling or
-  attack order, say what it relies on and what still applies without it.
+- SoT has no generic follow-up attack (追击) and no automatic counterattack
+  (反击); counters exist only as reaction effects that specific talents,
+  skills or relics define. When a precedent depends on automatic follow-ups
+  or counters, such as Fire Emblem's doubling or attack order, say what it
+  relies on and what still applies without it.
 - Prefer primary sources: official material, developer post-mortems and
   interviews, GDC talks, patch notes; then reviews and design critiques that
   argue specifically. Open a source before citing it and confirm the claim is

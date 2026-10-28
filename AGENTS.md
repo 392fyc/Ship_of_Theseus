@@ -60,7 +60,7 @@ Declared in `linked_repos` in `.mercury/config.json`; Mercury renders this secti
 - Purpose: The one fixed Obsidian vault: narrative, qualitative design, user rulings, ADRs, research and work records.
 - Locate: SOT_KB_ROOT, else [roots].kb_root in the ignored .codex/project/sot-roots.local.toml. There is exactly one vault; never open a task worktree as a second vault or switch the MCP endpoint.
 - Use: Skill sot-kb-write (or the sot-kb role) for MCP reads and versioned writes. Design work starts at 03-AI-Context/design-rules-index.md; reference-game research at 05-Research/references.md. After a KB pull request merges, run scripts/codex/sot-worktree.ps1 -Action KbReturn -Repository kb.
-- Rules: Write only on a task branch checked out in the clean vault; never use --ignore-other-worktrees, stash, reset or a second vault. Publish with scripts/codex/sot-publish.ps1. Structured rules follow the design library; the KB rule catalog is for lookup only.
+- Rules: Write only on a task branch checked out in the clean vault; never use --ignore-other-worktrees, stash, reset or a second vault. Publish with scripts/codex/sot-publish.ps1. Structured rules follow the design library; the KB rule catalog 01-Game-Design/rules-catalog.md is for lookup only.
 <!-- MERCURY:END -->
 
 # Ship of Theseus — Codex 项目入口
@@ -111,7 +111,7 @@ KB 里积累的设计原则、用户裁决和调研，只有在代理每次动�
 - 先读 KB 的 `03-AI-Context/design-rules-index.md`，再按它的开工路由读该实体的设计原则分册，然后读设计库的现行规则与记录。子代理的派发提示要写明这一步和要读的分册。
 - 外部参考先查 KB 的参考作品索引 `05-Research/references.md` 和它链接的已有调研，在此基础上补充，不重复调研。
 - 设计结论要指到依据：KB 分册的页面与小节、设计库规则编号，或用户裁决原话。没有依据的数值标“[占位]”或“推断”。与 KB 原则冲突时写明冲突，交用户裁决，不静默违反。
-- 用户对设计的新裁决，当轮写进 KB 中负责该主题的原则分册（经 `sot-kb-write`）；提案目录与工作记录只保存过程，不代替分册。
+- 用户对设计的新裁决，在任务的 KB 写入授权范围内，当轮写进 KB 中负责该主题的原则分册（经 `sot-kb-write`）；没有 KB 写入授权时，在汇报中列出待入册的裁决原话、日期和目标分册。提案目录与工作记录只保存过程，不代替分册。
 
 ## SoT 与 Mercury Harness 所有权
 
