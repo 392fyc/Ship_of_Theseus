@@ -15,7 +15,8 @@ func _run() -> void:
 	var catalog: RefCounted = Catalog.new()
 	for skill: String in SKILLS:
 		var id := StringName("swordsman_" + skill)
-		var texture: Texture2D = catalog.resolve(id, &"myrmidon")
+		# 剑士用自己的 myrmidon_* 技能（gameplay-impl PR3）；剑圣仍是 swordsman_*。
+		var texture: Texture2D = catalog.resolve(StringName("myrmidon_" + skill), &"myrmidon")
 		_check("剑士图标存在且为 104 像素: " + skill, texture != null and texture.get_size() == Vector2(104, 104))
 		if texture != null:
 			_check("剑士图标路径: " + skill, texture.resource_path == "res://assets/ui/skills/myrmidon/%s.png" % skill)
@@ -49,7 +50,7 @@ func _check_real_scene(class_id: String, expected_prefix: String) -> void:
 	for slot: Button in slots:
 		var skill_id: String = slot._view.skill_id
 		var icon: TextureRect = slot.get_node("%IconRect") as TextureRect
-		var name: String = skill_id.trim_prefix("swordsman_")
+		var name: String = skill_id.trim_prefix("swordsman_").trim_prefix("myrmidon_")
 		var expected: String = expected_prefix + name + ".png"
 		_check("%s 正式技能栏使用 %s 对应图标" % [class_id, name], icon.texture != null and icon.texture.resource_path == expected)
 	if class_id == "myrmidon":
@@ -58,7 +59,7 @@ func _check_real_scene(class_id: String, expected_prefix: String) -> void:
 		dashboard.update_state(no_metadata)
 		_check("缺少职业元数据时回退默认图标", ((slots[1] as Button).get_node("%IconRect") as TextureRect).texture.resource_path == "res://assets/prototype/hud_m2/skill-zhanji.png")
 		var override := GradientTexture2D.new()
-		dashboard.set_icon_textures({"swordsman_zhanji": override})
+		dashboard.set_icon_textures({"myrmidon_zhanji": override})
 		var zhanji: Button = slots[1] as Button
 		_check("调用方显式图标覆盖仍优先", (zhanji.get_node("%IconRect") as TextureRect).texture == override)
 	scene.queue_free()

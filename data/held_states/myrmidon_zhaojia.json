@@ -1,0 +1,14 @@
+{
+  "id": "myrmidon_zhaojia",
+  "name": "招架",
+  "polarity": "positive",
+  "is_permanent": false,
+  "max_stacks": 1,
+  "reapplication_mode": "refresh_duration",
+  "duration_update_mode": "use_incoming",
+  "dispellable": false,
+  "resistable": false,
+  "ignores_immunity": true,
+  "engine_only": true,
+  "_engine_note": "引擎侧状态：设计库没有对应的 State 记录，〔招架〕（myrmidon_zhaojia）的 effect 直接写「持续到下个自身回合开始；期间防御与魔防各 +N」。这里只是承载它的容器，数值与持续时间都由技能 effects 传入。再获得方式、驱散等字段设计库未写，按「冷却 2、不会在持续期间重复获得」取 refresh_duration、不可驱散 [推断]。"
+}

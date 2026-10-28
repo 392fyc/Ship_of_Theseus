@@ -236,7 +236,7 @@ func _run_direction_case(session: Node, case: Dictionary, hero_id: String) -> vo
 	var anchor_before: Vector2 = actor.global_position
 	var contact_before: int = actor.character_animation.get("contact_count")
 	manager.call("request_end_move")
-	manager.call("request_attack_targeting")
+	_begin_strike(manager)
 	manager.call("handle_pointer_click", _screen(target_cell, manager))
 	check(label + " real attack enters presentation lock", manager.get("input_state") == manager.InputState.ANIMATING)
 	_assert_attack_projection(label + " windup", manager, actor, target, direction, expected_cell, anchor_before)
@@ -291,7 +291,7 @@ func _run_canceled_move_case(session: Node, hero_id: String) -> void:
 	await _capture_impact_sample(manager, actor, origin, "canceled_move_restored",
 		"canceled_move_restored_%s.png" % hero_id)
 	manager.call("request_end_move")
-	manager.call("request_attack_targeting")
+	_begin_strike(manager)
 	manager.call("handle_pointer_click", _screen(target_cell, manager))
 	check("attack after canceled move is a real presentation", manager.get("input_state") == manager.InputState.ANIMATING)
 	_assert_attack_projection("canceled " + hero_id + " windup", manager, actor, target,
@@ -410,3 +410,13 @@ func _run() -> void:
 			"impact_samples": impact_samples}, "\t") + "\n")
 	print("PORTRAIT_TOKEN_FACING_ALIGN_RESULT=", JSON.stringify({"checks": checks, "failures": failures}))
 	quit(0 if failures.is_empty() else 1)
+
+## 剑士线没有普通攻击（gameplay-impl PR3，用户 2026-10-28 裁决 S2）。对没有普攻的单位改用其
+## 技能栏第一格（剑士为斩击）：技能走同一条真实出手、动画锁与接触表现路径
+## （_execute_presented_skill → begin_attack_visual），本测试要验的东西不变。
+func _begin_strike(manager: Node) -> void:
+	var actor: Unit = manager.current_unit
+	if actor != null and not actor.has_basic_attack and not actor.skill_ids.is_empty():
+		manager.request_skill_selection(actor.skill_ids[0])
+	else:
+		manager.request_attack_targeting()

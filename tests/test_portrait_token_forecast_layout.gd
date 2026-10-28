@@ -28,7 +28,7 @@ func _run() -> void:
 	var before: Dictionary = {}
 	for row: Dictionary in overhead.call("get_debug_snapshot")["units"]:
 		before[row["instance_id"]] = row["group_rect"]
-	manager.call("request_attack_targeting")
+	_begin_strike(manager)
 	manager.call("handle_pointer_hover",root.get_canvas_transform()*grid.grid_to_world(Vector2i(4,4)))
 	var immediate: Dictionary = session.call("get_forecast_placement_snapshot")
 	_check(not immediate.is_empty() and bool(immediate.get("placement_clear", false)),"first synchronous hover is already placed before any draw")
@@ -66,3 +66,13 @@ func _run() -> void:
 	await process_frame
 	print("FORECAST_LAYOUT_RESULT=",JSON.stringify({"checks":checks,"failures":failures}))
 	quit(0 if failures.is_empty() else 1)
+
+## 剑士线没有普通攻击（gameplay-impl PR3，用户 2026-10-28 裁决 S2）。对没有普攻的单位改用其
+## 技能栏第一格（剑士为斩击）：技能走同一条真实出手、动画锁与接触表现路径
+## （_execute_presented_skill → begin_attack_visual），本测试要验的东西不变。
+func _begin_strike(manager: Node) -> void:
+	var actor: Unit = manager.current_unit
+	if actor != null and not actor.has_basic_attack and not actor.skill_ids.is_empty():
+		manager.request_skill_selection(actor.skill_ids[0])
+	else:
+		manager.request_attack_targeting()

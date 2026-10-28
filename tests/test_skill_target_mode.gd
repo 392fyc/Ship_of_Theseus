@@ -129,6 +129,11 @@ func _old_target_relation(sk: Dictionary) -> String:
 		and str((sk.get("area", {}) as Dictionary).get("type", "single")) == "single"
 	if is_self:
 		return "self"
+	# PR1（R1.1）起，设计库伤害条目技能不写 power，有 damage_entries 即为伤害技能
+	# （tactical_manager._is_support_skill）。这是已合并的口径，不是本测试要防的行为变化。
+	var entries: Variant = sk.get("damage_entries", [])
+	if entries is Array and not (entries as Array).is_empty():
+		return "enemy"
 	return "ally" if int(sk.get("power", 0)) <= 0 else "enemy"
 
 
