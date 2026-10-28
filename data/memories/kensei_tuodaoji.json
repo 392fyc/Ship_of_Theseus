@@ -1,0 +1,13 @@
+{
+  "id": "kensei_tuodaoji",
+  "name": "如影随形",
+  "class_id": "kensei",
+  "rarity": "回忆",
+  "base_skill_id": "kensei_yishan",
+  "upgrade_skill_id": "kensei_huizhan",
+  "form_skill_ids": [
+    "kensei_huizhan"
+  ],
+  "description": "将技能〔一闪〕永久升级为〔踏影〕。",
+  "_mirror": "设计库 762393b talents/kensei_tuodaoji：id、name、class_id、rarity、upgrade_skill_id、effect（→description）。base_skill_id 取升级技能的 upgrade_of（设计库 skills/kensei_huizhan）。"
+}

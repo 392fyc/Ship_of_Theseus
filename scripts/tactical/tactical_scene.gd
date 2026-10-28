@@ -175,6 +175,8 @@ func _spawn_injected_units() -> void:
 		# 无 hp 字段（首关或满血）→ 缺省满血，不改动。玩家不涉词条注入。
 		if player_unit != null and cfg.has("hp"):
 			_apply_injected_hp(player_unit, int(cfg.get("hp", 0)))
+		if player_unit != null:
+			_apply_injected_memories(player_unit, cfg.get("memories", []))
 	for cfg_v: Variant in injected_enemy_units:
 		if not (cfg_v is Dictionary):
 			continue
@@ -190,6 +192,17 @@ func _spawn_injected_units() -> void:
 		var special_affix: Variant = cfg.get("special_affix", null)
 		var stat_scale: float = float(cfg.get("stat_scale", 1.0))
 		enemy_unit.apply_affixes(affixes, special_affix, stat_scale, DataLoader.affixes)
+
+
+## 应用注入的回忆（gameplay-impl PR5，差距清单 M10）：按顺序兑现，被拒的告警并跳过。
+func _apply_injected_memories(unit: Unit, memories_v: Variant) -> void:
+	if not (memories_v is Array):
+		return
+	for memory_id: Variant in memories_v:
+		var result: Dictionary = unit.apply_memory(str(memory_id))
+		if not bool(result.get("ok", false)):
+			push_warning("[TacticalScene] %s 的回忆 %s 未兑现：%s" % [
+				unit.unit_name, str(memory_id), str(result.get("reason", ""))])
 
 
 ## 应用注入的继承 HP（磨损模型 #8）。规则：

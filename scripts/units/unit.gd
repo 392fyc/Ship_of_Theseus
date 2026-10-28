@@ -60,6 +60,8 @@ var is_taking_turn: bool = false
 var has_basic_attack: bool = true
 # 心眼被动条目的技能 id（职业 JSON 的 passive_skill_id）；剑士 myrmidon_xinyan，剑圣 kensei_xinyan。
 var passive_skill_id: String = ""
+# 回忆升级记录（gameplay-impl PR5，差距清单 M10）：setup() 时清空，由 apply_memory 写入。
+var memory_upgrades: MemoryUpgrades = MemoryUpgrades.new()
 
 # ── 战斗派生值修正钩子（来源：天赋 L2 / 装备 L4 / 符文 L5 / 肉鸽）──
 # 默认 0，不绑武器；由上层写入修正系数（暴击回避等）。
@@ -209,6 +211,7 @@ func setup(class_data: Dictionary, initial_facing: StringName = &"SE") -> void:
 	for skill_id_value: Variant in class_data.get("skill_ids", []):
 		skill_ids.append(str(skill_id_value))
 	skill_cooldowns.clear()
+	memory_upgrades.clear()
 	var stat_dict: Dictionary = class_data.get("base_stats", {}).duplicate()
 	for key: String in ["MOV"]:
 		if class_data.has(key):
@@ -813,6 +816,43 @@ func consume_skill(skill_id: String, cooldown_turns: int) -> void:
 		skill_cooldowns.erase(skill_id)
 
 
+# ── 回忆升级（gameplay-impl PR5，差距清单 M10）─────────
+
+## 兑现一张回忆：把基础技能永久换成升级技能，返回 {"ok": bool, "reason": String}。
+## 规则与拒绝原因见 MemoryUpgrades.check。memories / skills 缺省时读 DataLoader，测试可传入自己的表。
+## 战斗中途兑现时，基础技能剩余的冷却转给升级技能 [推断：避免借升级刷新冷却]。
+func apply_memory(memory_id: String, memories: Dictionary = {}, skills: Dictionary = {}) -> Dictionary:
+	var data_loader := get_node_or_null("/root/DataLoader")
+	if memories.is_empty() and data_loader != null:
+		memories = data_loader.get("memories")
+	if skills.is_empty() and data_loader != null:
+		skills = data_loader.get("skills")
+	var memory: Dictionary = memories.get(memory_id, {})
+	var loadout: Array[String] = skill_ids.duplicate()
+	if passive_skill_id != "":
+		loadout.append(passive_skill_id)
+	var reason: String = memory_upgrades.check(memory, unit_id, loadout, skills)
+	if reason != "":
+		return {"ok": false, "reason": reason}
+	var base_id: String = str(memory.get("base_skill_id", ""))
+	var upgrade_id: String = str(memory.get("upgrade_skill_id", ""))
+	memory_upgrades.record(memory)
+	var index: int = skill_ids.find(base_id)
+	if index >= 0:
+		skill_ids[index] = upgrade_id
+	if passive_skill_id == base_id:
+		passive_skill_id = upgrade_id
+	if skill_cooldowns.has(base_id):
+		skill_cooldowns[upgrade_id] = skill_cooldowns[base_id]
+		skill_cooldowns.erase(base_id)
+	return {"ok": true, "reason": ""}
+
+
+## 技能身份（R2.5）：升级技能及其各形态返回它取代的基础技能 id，其余原样返回。
+func get_skill_identity(skill_id: String) -> String:
+	return memory_upgrades.get_identity(skill_id)
+
+
 # ── 剑圣专属资源 API ─────────────────────────────────
 
 func get_mark_count() -> int:
@@ -844,6 +884,8 @@ func get_visible_skill_id(skill_id: String, slot_swap_trigger: String = "",
 		slot_swap_target: String = "", slot_swap_requires: Dictionary = {}) -> String:
 	if slot_swap_target == "":
 		return skill_id
+	# R2.5：替换目标已被回忆升级时，换上来的是它的升级版本（槽位里也只剩升级版本）。
+	slot_swap_target = memory_upgrades.resolve(slot_swap_target)
 	if not skill_ids.has(slot_swap_target):
 		return skill_id
 	var condition_met: bool = false
