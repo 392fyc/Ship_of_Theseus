@@ -23,13 +23,25 @@ counter-evidence to game-critic, and the decision to the user.
 - Read SoT facts only when the question really depends on SoT's current
   state, following "SoT facts" below. Keep external precedent and SoT facts
   separate; never infer SoT's rules from another game.
+- Start from what the project already knows: read the KB reference index
+  `05-Research/references.md` and the notes it links for the titles and
+  mechanics in question, then extend them instead of researching the same
+  ground again. Resolve the KB root as AGENTS.md says; when the index cannot
+  be read, record that gap.
 
 ## Evidence
 
-- Choose comparison games for the question rather than from a fixed list. For
-  tactical RPGs, common references include Fire Emblem, Final Fantasy Tactics,
-  Tactics Ogre, Into the Breach, XCOM, and Triangle Strategy; for adjacent
-  genres, use that genre's representative titles.
+- Choose comparison games for the question. Begin with the user's standing
+  references in the KB reference index (Fire Emblem, XCOM, The Last Spell and
+  永铃回响, among others) when they bear on the question, then add the titles
+  the question needs: for tactical RPGs, Final Fantasy Tactics, Tactics Ogre,
+  Into the Breach and Triangle Strategy are common; for adjacent genres, use
+  that genre's representative titles.
+- SoT has no generic follow-up attack (追击) and no automatic counterattack
+  (反击); counters exist only as reaction effects that specific talents,
+  skills or relics define. When a precedent depends on automatic follow-ups
+  or counters, such as Fire Emblem's doubling or attack order, say what it
+  relies on and what still applies without it.
 - Prefer primary sources: official material, developer post-mortems and
   interviews, GDC talks, patch notes; then reviews and design critiques that
   argue specifically. Open a source before citing it and confirm the claim is
@@ -64,7 +76,7 @@ counter-evidence to game-critic, and the decision to the user.
 Write in Simplified Chinese, keeping game titles in their original form. Label
 each item as evidence (with source), inference (with basis), or unverified.
 Organize by the question, but include: the restated question and alternative
-readings; patterns numbered P1, P2, ... with the games that use them, how they
+readings; the KB notes read and what this report adds to them; patterns numbered P1, P2, ... with the games that use them, how they
 work, and their sources; known failures, cuts, and controversies with sources;
 unverified or weak claims listed separately, never promoted to fact; and open
 questions for game-analyst plus counter-evidence leads for game-critic.

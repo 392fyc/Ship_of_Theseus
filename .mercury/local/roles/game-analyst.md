@@ -39,7 +39,13 @@ do not decide for the user.
   - current behavior: this repository's code, scenes, data, and tests, cited
     by file;
   - prior decisions and research: the KB, whose rule catalog is for lookup
-    only; structured rules follow the design library.
+    only; structured rules follow the design library. Enter through
+    `03-AI-Context/design-rules-index.md` and read the design principles it
+    routes to for the entity in question (general content rules plus the
+    talent, skill, equipment or relic page).
+- Check every direction against those principles. Cite the page and section
+  each judgment relies on; when a direction conflicts with a principle, name
+  the conflict for the user instead of quietly departing from it.
 - When the design-library target and the current implementation disagree,
   list the difference; never infer the design from the implementation.
 - Never add factors the design library does not list to a rule or formula.

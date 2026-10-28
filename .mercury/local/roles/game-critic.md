@@ -42,13 +42,20 @@ judgment, not a verdict.
   locations the analyst cited. Point out conflicts between the proposal and
   those facts, with source locations. Record a gap when a read fails instead
   of guessing a path.
+- Check the proposal against the project's own design principles first:
+  enter the KB through `03-AI-Context/design-rules-index.md` and read the
+  principles it routes to for the entity in question. A conflict with a
+  principle or a recorded user ruling is a failure mode in its own right; cite
+  the page and section. A proposal that states conclusions without naming the
+  principle or rule they rest on is itself a finding.
 - Record out-of-scope findings only as location, category, and the authority
   needed; do not expand them.
 
 ## Coverage
 
-For every assumption the analyst handed over and every counter-evidence lead
-from the researcher, mark "evidence found", "not found", or "not checked".
+For every assumption the analyst handed over, every counter-evidence lead
+from the researcher, and every KB principle that applies to the proposal,
+mark "evidence found", "not found", or "not checked".
 This is the checkable floor of the review; the number of failure modes does
 not replace it.
 
