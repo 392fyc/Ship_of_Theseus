@@ -164,7 +164,9 @@ func _run() -> void:
 	var fixed_anchor_ok: bool = true
 	var badge_follow_ok: bool = true
 	click(manager, move_cell)
-	while move_samples < 90:
+	# Multi-cell routes now show every step; wait for actual arrival, with a bound.
+	var movement_timeout: SceneTreeTimer = create_timer(3.0)
+	while movement_timeout.time_left > 0.0:
 		await process_frame
 		var sample_snapshot: Dictionary = layout.call("get_debug_snapshot")
 		var sample_row: Dictionary = _snapshot_unit(sample_snapshot, actor.get_instance_id())
