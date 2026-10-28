@@ -1,0 +1,56 @@
+{
+  "id": "kensei_badao",
+  "target_mode": "自身",
+  "name": "拔刀",
+  "damage_type": "physical",
+  "range": {
+    "type": "self",
+    "min": 0,
+    "max": 0
+  },
+  "area": {
+    "type": "diamond",
+    "size": 1
+  },
+  "attack_type": "area",
+  "cooldown": 0,
+  "action_cost": "standard",
+  "tags": [
+    "sword",
+    "mark",
+    "area"
+  ],
+  "hit_bonus": 0,
+  "timing_constraint": "any",
+  "effects": [],
+  "qi_cost": 20,
+  "qi_gain_on_hit": 0,
+  "qi_gain_on_kill": 0,
+  "mark_gain": 0,
+  "mark_cost": 3,
+  "requires_marks": 3,
+  "guaranteed_crit": false,
+  "guaranteed_hit": false,
+  "slot_swap_provider": true,
+  "requires_enemy_in_area": true,
+  "damage_entries": [
+    {
+      "applies_when": "",
+      "base_attribute": "默认",
+      "coefficient": 1.5,
+      "crit_mode": "正常",
+      "crit_multiplier": 1.2,
+      "damage_type": null,
+      "hit_bonus": 0,
+      "hit_mode": "正常",
+      "placeholder": false,
+      "power": 1,
+      "segment_hit_decay": 0,
+      "segments": 1,
+      "sort": 0
+    }
+  ],
+  "description": "自身菱形 1 格内至少有 1 名敌人时才能使用。对范围内每名敌人造成物理伤害（威力 +1，系数 1.5，暴击倍率 ×1.2），各自判定命中与暴击。消耗 3 枚印记和 20 点剑气。",
+  "_engine_note": "以自身为中心的范围伤害：target_mode 自身、area 菱形 1，范围内单位按「敌人」结算（_get_area_effect_relation）。requires_enemy_in_area 把「至少 1 名敌人」放进可用性判定；执行时范围内无目标也会拒绝且不扣消耗。印记在伤害结算后才扣（_spend_skill_marks），所以本次伤害仍吃到被消耗印记的加成。",
+  "_mirror": "设计库镜像字段：name / damage_entries / 射程 / 范围 / 冷却 / 行动消耗 / 剑气与印记数值来自设计库仓 snapshots/skills.json @ 762393b（kensei_badao）。伤害只读 damage_entries（R1.1 / R1.7）；power 字段不写。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。"
+}

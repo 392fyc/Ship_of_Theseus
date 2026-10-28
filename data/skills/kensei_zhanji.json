@@ -1,0 +1,56 @@
+{
+  "id": "kensei_zhanji",
+  "target_mode": "单位",
+  "name": "斩击",
+  "damage_type": "physical",
+  "range": {
+    "type": "diamond",
+    "min": 1,
+    "max": 1
+  },
+  "area": {
+    "type": "single",
+    "size": 0
+  },
+  "attack_type": "melee",
+  "cooldown": 0,
+  "action_cost": "standard",
+  "tags": [
+    "basic",
+    "melee",
+    "sword_qi",
+    "mark"
+  ],
+  "hit_bonus": 0,
+  "timing_constraint": "any",
+  "effects": [],
+  "qi_cost": 0,
+  "qi_gain_on_hit": 25,
+  "qi_gain_on_kill": 0,
+  "mark_gain": 0,
+  "mark_cost": 0,
+  "requires_marks": 0,
+  "guaranteed_crit": false,
+  "guaranteed_hit": false,
+  "mark_gain_after_damage": 1,
+  "damage_entries": [
+    {
+      "applies_when": "",
+      "base_attribute": "默认",
+      "coefficient": 1.0,
+      "crit_mode": "正常",
+      "crit_multiplier": 1.0,
+      "damage_type": null,
+      "hit_bonus": 0,
+      "hit_mode": "正常",
+      "placeholder": false,
+      "power": 1,
+      "segment_hit_decay": 0,
+      "segments": 1,
+      "sort": 0
+    }
+  ],
+  "description": "距离 1，造成物理伤害（威力 +1，系数 1.0）。命中后获得 25 点剑气；造成伤害后，随机获得一枚当前未持有的印记。",
+  "_engine_note": "mark_gain_after_damage：设计库 rules「剑气在命中时获得，印记在伤害结算后获得；致命一段仍正常结算」。命中且本段伤害 > 0 时得印记 [推断：伤害为 0 不算「造成伤害」]，在 take_damage 之后结算，所以本段伤害吃不到新印记的加成。",
+  "_mirror": "设计库镜像字段：name / damage_entries / 射程 / 范围 / 冷却 / 行动消耗 / 剑气与印记数值来自设计库仓 snapshots/skills.json @ 762393b（kensei_zhanji）。伤害只读 damage_entries（R1.1 / R1.7）；power 字段不写。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。"
+}

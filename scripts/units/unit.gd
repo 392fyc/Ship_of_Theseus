@@ -101,6 +101,11 @@ var _xinyan_speed_bonus: int = 0
 var _mark_dex_bonus: int = 0
 var _mark_spd_bonus: int = 0
 var _mark_str_bonus: int = 0
+# 印记的百分比提升（设计库 kensei_xinyan：〔心〕技巧、〔道〕速度、〔势〕力量各提升 N%），
+# 按 R1.8 与其他同类提升相加后乘在「基础值 + 全部固定加值」上。从职业 JSON 读，缺省 0。
+var _mark_dex_pct: float = 0.0
+var _mark_spd_pct: float = 0.0
+var _mark_str_pct: float = 0.0
 
 # ── 敌人词条（affix）系统 v0 —— 纯加法，无词条单位零影响 ─────────
 # 与「心眼」同构（spawn 后注入 → 缓存字段 → get_effective_stat/damage 读），不走 BuffEffect。
@@ -557,42 +562,44 @@ func handle_attacked() -> void:
 func get_effective_stat(stat_key: String) -> int:
 	var normalized_key: String = _normalize_stat_key(stat_key)
 	var base_value: int = _get_base_stat_value(normalized_key)
-	var flat_modifier: float = 0.0
-	var percentage_modifier: float = 0.0
+	# R1.8：先把所有固定点数相加，再把所有写作「提升 / 降低」的百分比合并计算，
+	# 计算过程中不取整，最后向下取整。flat_total 从基础值起累加全部固定加值。
+	var flat_total: float = float(base_value)
+	var pct_total: float = 0.0
 	for buff: BuffEffect in buffs:
 		if buff.effect_type != "stat_mod":
 			continue
 		if _normalize_stat_key(buff.stat_key) != normalized_key:
 			continue
 		if buff.is_percentage:
-			percentage_modifier += buff.value
+			pct_total += buff.value
 		else:
-			flat_modifier += buff.value
-	var effective_value: float = float(base_value) + flat_modifier
-	effective_value += float(base_value) * percentage_modifier / 100.0
-	# ── 心眼：剑气比例分档属性加成（低气段 / 高气段各给一种属性）──────
-	# 非剑气类单位（_qi_max<=0）恒返回 0 → 零影响。
-	effective_value += float(_get_xinyan_stat_bonus(normalized_key))
+			flat_total += buff.value
+	# ── 心眼：剑气带来的属性加成（固定点数）。非剑气类单位恒为 0 → 零影响。
+	flat_total += float(_get_xinyan_stat_bonus(normalized_key))
 	# ── 持有型状态给的、随剑气即时变化的固定加值（如剑士〔招架〕的防御与魔防 +N）──
-	effective_value += float(_get_held_state_stat_bonus(normalized_key))
+	flat_total += float(_get_held_state_stat_bonus(normalized_key))
 	# ── 敌人词条 af_vanguard：首回合（round 1）速度加成（仅 SPD 键）──────────
 	# 无该词条单位 _affix_vanguard_active 恒 false → 零影响。
 	if normalized_key == "SPD" and _affix_vanguard_active:
-		effective_value += float(_affix_vanguard_spd_bonus)
-	# ── 印记属性加成（心/道/势）───────────────────────────
+		flat_total += float(_affix_vanguard_spd_bonus)
+	# ── 印记（心/道/势）：固定加值与百分比提升都可配置，未配置的一项为 0 ──
 	if normalized_key == "DEX" and bool(marks.get("心", false)):
-		effective_value += float(_mark_dex_bonus)
+		flat_total += float(_mark_dex_bonus)
+		pct_total += _mark_dex_pct
 	if normalized_key == "SPD" and bool(marks.get("道", false)):
-		effective_value += float(_mark_spd_bonus)
+		flat_total += float(_mark_spd_bonus)
+		pct_total += _mark_spd_pct
 	if normalized_key == "STR" and bool(marks.get("势", false)):
-		effective_value += float(_mark_str_bonus)
+		flat_total += float(_mark_str_bonus)
+		pct_total += _mark_str_pct
 	# ── 敌人词条常驻数值加成（无词条单位两 dict 均空 → 零影响）────────
 	if not _affix_stat_flat.is_empty():
-		effective_value += float(_affix_stat_flat.get(normalized_key, 0))
+		flat_total += float(_affix_stat_flat.get(normalized_key, 0))
 	if not _affix_stat_pct.is_empty():
-		effective_value += float(base_value) \
-			* float(_affix_stat_pct.get(normalized_key, 0)) / 100.0
-	return roundi(effective_value)
+		pct_total += float(_affix_stat_pct.get(normalized_key, 0))
+	# 1e-6 只吸收浮点表示误差（如 20 × 1.15 = 22.999…），不改变向下取整的口径。
+	return floori(flat_total * (100.0 + pct_total) / 100.0 + 0.000001)
 
 
 func get_effective_priority() -> int:
@@ -606,7 +613,23 @@ func get_hit_value(weapon_hit: int = 90) -> int:
 
 func get_avoid_value(terrain_evade_bonus: int = 0) -> int:
 	var effective_spd: int = get_effective_stat("SPD")
-	return effective_spd * 2 + terrain_evade_bonus
+	# R1.2：目标闪避 = 速度 × 2 + 地形闪避 + 其他闪避加减（如剑圣〔招架〕的额外闪避）。
+	return effective_spd * 2 + terrain_evade_bonus + _get_held_state_avoid_bonus()
+
+
+## 持有型状态 params 里的 stat_scaled_avoid_bonus：{stat, pct} → 当前该属性 × pct%（向下取整）。
+## 每次命中判定时读取当前属性，不快照（设计库 kensei_zhaojia rules）。
+func _get_held_state_avoid_bonus() -> int:
+	var total: int = 0
+	for entry: Dictionary in held_states.to_array():
+		var params: Dictionary = entry.get("params", {})
+		var scaled: Variant = params.get("stat_scaled_avoid_bonus", null)
+		if not scaled is Dictionary:
+			continue
+		var spec: Dictionary = scaled
+		var stat_value: int = get_effective_stat(str(spec.get("stat", "")))
+		total += floori(float(stat_value) * float(spec.get("pct", 0)) / 100.0)
+	return total
 
 
 func get_crit_value(weapon_crit: int = 0) -> int:
@@ -804,17 +827,30 @@ func is_marks_full() -> bool:
 ## 全仓只有「建技能栏」与「扫迅捷技能」两处读 skill_ids，施放路径上没有任何职业检查——
 ## 技能栏本身就是访问控制。若此处不校验，只共享剑气的下位职业（剑士 myrmidon）
 ## 会在印记满 3 时把招架槽换成拔刀并真的放得出来，而拔刀按 R2.4 是剑圣（kensei）专属。
+## 触发类型 marks_and_qi = 持有印记数与剑气都达到 slot_swap_requires 的门槛（设计库 kensei_zhaojia：
+## 3 枚印记且剑气不少于 20 → 拔刀；条件不再成立立即恢复）。
+## R3.6：替换形态仍在冷却时保持原技能；冷却结束后条件仍成立即替换。
 func get_visible_skill_id(skill_id: String, slot_swap_trigger: String = "",
-		slot_swap_target: String = "") -> String:
+		slot_swap_target: String = "", slot_swap_requires: Dictionary = {}) -> String:
 	if slot_swap_target == "":
 		return skill_id
 	if not skill_ids.has(slot_swap_target):
 		return skill_id
+	var condition_met: bool = false
 	match slot_swap_trigger:
 		"marks_full":
-			if is_marks_full():
-				return slot_swap_target
-	return skill_id
+			condition_met = is_marks_full()
+		"marks_and_qi":
+			if slot_swap_requires.is_empty():
+				push_warning("[Unit] marks_and_qi 缺 slot_swap_requires，不替换: " + skill_id)
+			else:
+				condition_met = get_mark_count() >= int(slot_swap_requires.get("marks", 0)) \
+					and sword_qi >= int(slot_swap_requires.get("qi", 0))
+	if not condition_met:
+		return skill_id
+	if not is_skill_available(slot_swap_target):
+		return skill_id
+	return slot_swap_target
 
 
 ## 直接设定剑气值并更新心眼被动。只用于战斗开始、调试复位这类「重置」；
@@ -1214,6 +1250,9 @@ func _init_sword_qi_resource(class_data: Dictionary) -> void:
 	_mark_dex_bonus = int(cfg.get("mark_dex_bonus", 2))
 	_mark_spd_bonus = int(cfg.get("mark_spd_bonus", 2))
 	_mark_str_bonus = int(cfg.get("mark_str_bonus", 2))
+	_mark_dex_pct = float(cfg.get("mark_dex_pct", 0))
+	_mark_spd_pct = float(cfg.get("mark_spd_pct", 0))
+	_mark_str_pct = float(cfg.get("mark_str_pct", 0))
 	_apply_xinyan_passive()
 
 
