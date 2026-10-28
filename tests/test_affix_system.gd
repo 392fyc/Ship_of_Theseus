@@ -167,8 +167,10 @@ func _test_numeric_dispatch(dl: Object) -> void:
 		"params": {"stat_key": "STR", "value": 50}}
 	var u: Unit = _make_unit(dl.enemies["goblin_melee"])  # base STR=2
 	u.apply_affixes(["test_str_flat", "test_str_pct"], null, 1.0, pool)
-	# 期望：2(base) + 5(flat) + 2*50/100=1(pct) = 8
-	_eq("stat_flat+stat_pct → STR==8", u.get_effective_stat("STR"), 8)
+	# 期望（R1.8：先把固定点数相加，再乘百分比，最后向下取整）：
+	# (2 base + 5 flat) × (1 + 50%) = 10.5 → 10。gameplay-impl PR4 之前是 2 + 5 + 2×50% = 8，
+	# 百分比只乘基础值、且四舍五入，不符合 R1.8。
+	_eq("stat_flat+stat_pct → STR==10（R1.8）", u.get_effective_stat("STR"), 10)
 	_eq("未涉及属性 DEF 不变==4", u.get_effective_stat("DEF"), 4)
 	u.free()
 	# 零影响对照：无词条 goblin STR==base(2)

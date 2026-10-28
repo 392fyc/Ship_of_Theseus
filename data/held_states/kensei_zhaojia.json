@@ -1,0 +1,14 @@
+{
+  "id": "kensei_zhaojia",
+  "name": "招架",
+  "polarity": "positive",
+  "is_permanent": false,
+  "max_stacks": 1,
+  "reapplication_mode": "refresh_duration",
+  "duration_update_mode": "use_incoming",
+  "dispellable": false,
+  "resistable": false,
+  "ignores_immunity": true,
+  "engine_only": true,
+  "_engine_note": "引擎侧状态：设计库没有对应 State 记录，〔招架〕（kensei_zhaojia）effect 直接写「持续到下个自身回合开始；期间额外闪避 +N，N 等于当前技巧」。这里只是容器，持续时间与倍率由技能 effects 传入。再获得方式、驱散、免疫取与 myrmidon_zhaojia 相同的推断口径 [推断]。"
+}

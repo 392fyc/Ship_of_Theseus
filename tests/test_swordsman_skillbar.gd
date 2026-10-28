@@ -43,7 +43,7 @@ func _run() -> void:
 	_check("心眼条目非空（剑圣 _qi_max>0）", not passive.is_empty())
 	_eq("心眼 is_passive=true", bool(passive.get("is_passive", false)), true)
 	_eq("心眼 name=心眼", str(passive.get("name", "")), "心眼")
-	_eq("心眼 skill_id=swordsman_xinyan", str(passive.get("skill_id", "")), "swordsman_xinyan")
+	_eq("心眼 skill_id=kensei_xinyan（剑圣专属，gameplay-impl PR4）", str(passive.get("skill_id", "")), "kensei_xinyan")
 	_eq("心眼 available=true（被动恒亮）", bool(passive.get("available", false)), true)
 	_check("心眼 description 非空", str(passive.get("description", "")) != "")
 	var enemy: Unit = _find_enemy(tm)
@@ -70,9 +70,9 @@ func _run() -> void:
 		var ids: Array = []
 		for e: Dictionary in entries:
 			ids.append(str(e.get("skill_id", "")))
-		_check("含斩击槽", "swordsman_zhanji" in ids)
-		_check("含招架槽（印记未满）", "swordsman_zhaojia" in ids)
-		_check("含居合槽", "swordsman_juhe" in ids)
+		_check("含斩击槽", "kensei_zhanji" in ids)
+		_check("含招架槽（印记未满）", "kensei_zhaojia" in ids)
+		_check("含居合槽", "kensei_juhe" in ids)
 		_check("无独立拔刀槽（印记未满，不常驻第5技能）", not ("swordsman_badao" in ids))
 	else:
 		print("  · 注：当前非剑圣行动态，_get_skill_entries 空，跳过构成断言（building block 已覆盖逻辑）")
@@ -222,16 +222,18 @@ func _test_forecast_data_contract(tm: Object, sword: Unit) -> void:
 # 一刀切」区分开 —— 剑士没有拔刀、满印也不替换，所以它必须仍然判为有迅捷可用。
 func _test_swift_availability_respects_slot_swap(tm: Object, sword: Unit) -> void:
 	print("\n[⑦] 迅捷可用性判定走槽位替换（满印时招架槽已是拔刀）")
-	var zhaojia: Dictionary = tm._get_skill_data("swordsman_zhaojia")
+	# 剑圣的招架是 kensei_zhaojia（gameplay-impl PR4）：3 印记且剑气 ≥ 20 时换成拔刀。
+	var zhaojia: Dictionary = tm._get_skill_data("kensei_zhaojia")
 	var trig: String = str(zhaojia.get("slot_swap_trigger", ""))
 	var tgt: String = str(zhaojia.get("slot_swap_target", ""))
+	var req: Dictionary = tm._slot_swap_requires(zhaojia)
 
-	sword.set_sword_qi(50)      # 招架 qi_cost=10，够用
+	sword.set_sword_qi(50)      # 满足拔刀的剑气门槛 20
 	sword.skill_cooldowns.clear()
 	sword.swift_used = false
 	sword.clear_marks()
 	_check("前提：剑圣 skill_ids 含拔刀（替换目标确实在表内）",
-		sword.skill_ids.has("swordsman_badao"))
+		sword.skill_ids.has("kensei_badao"))
 	_check("印记未满 → 判为有迅捷可用（招架在槽上）",
 		tm._has_available_swift_skill(sword))
 
@@ -240,7 +242,7 @@ func _test_swift_availability_respects_slot_swap(tm: Object, sword: Unit) -> voi
 	sword.marks["势"] = true
 	_check("前提：印记确实满了", sword.is_marks_full())
 	_eq("前提：招架槽此刻显示的是拔刀",
-		sword.get_visible_skill_id("swordsman_zhaojia", trig, tgt), "swordsman_badao")
+		sword.get_visible_skill_id("kensei_zhaojia", trig, tgt, req), "kensei_badao")
 	_check("印记满 → 判为无迅捷可用（招架槽已变拔刀，standard）",
 		not tm._has_available_swift_skill(sword))
 
@@ -256,7 +258,7 @@ func _test_swift_availability_respects_slot_swap(tm: Object, sword: Unit) -> voi
 		mm.set_sword_qi(50)
 		mm.skill_cooldowns.clear()
 		mm.swift_used = false
-		_check("前提：剑士 skill_ids 不含拔刀", not mm.skill_ids.has("swordsman_badao"))
+		_check("前提：剑士 skill_ids 不含拔刀", not mm.skill_ids.has("kensei_badao"))
 		_check("前提：剑士印记容量为零", mm._mark_max == 0 and not mm.is_marks_full())
 		_check("剑士无印记 → 仍判为有迅捷可用（招架还在）",
 			tm._has_available_swift_skill(mm))
@@ -281,24 +283,18 @@ func _test_passive_description_matches_behavior(tm: Object, sword: Unit) -> void
 		("暴击 +%d" % sword._xinyan_crit_per_qi) in desc, desc)
 	_check("不再出现旧文案的「每点剑气」", not ("每点剑气" in desc), desc)
 	_check("不再把暴击说成百分比（无「暴击率」字样）", not ("暴击率" in desc), desc)
-	# ② 分档方向：≤ 阈值给低气段属性，> 阈值给高气段属性。方向反了是修复前的主要错误。
-	var threshold_qi: int = sword._qi_max * sword._xinyan_qi_ratio_threshold_pct / 100
-	_check("含「不高于 %d」（低气段判据）" % threshold_qi,
-		("不高于 %d" % threshold_qi) in desc, desc)
-	_check("含「高于 %d」（高气段判据）" % threshold_qi,
-		("高于 %d" % threshold_qi) in desc, desc)
-	_check("低气段给的是速度（SPD）", "速度 +%d" % sword._xinyan_low_qi_stat_bonus in desc, desc)
-	_check("高气段给的是技巧（DEX）", "技巧 +%d" % sword._xinyan_high_qi_stat_bonus in desc, desc)
-	# 方向断言：「不高于 N」必须排在「速度」之前、「高于 N」排在「技巧」之前。
-	# 只查两个词都在场是抓不到方向写反的 —— 反着写这两个词照样都在。
-	_check("方向正确：低气段那句在前、给速度",
-		desc.find("不高于 %d 时 速度" % threshold_qi) >= 0
-		or desc.find("不高于 %d 时 %s" % [threshold_qi, "速度"]) >= 0, desc)
-	# ③ 印记持有加成整句（剑圣 _mark_max>0）。
+	# ② 速度（设计库 kensei_xinyan，gameplay-impl PR4）：剑气每比上限少 N 点，速度 +M。
+	# 旧的高低分档已删除，说明里不能再出现分档措辞，否则会把玩家带向反方向。
+	_check("含「每比 %d 点少 %d 点」" % [sword._qi_max, sword._xinyan_qi_deficit_per_step],
+		("每比 %d 点少 %d 点" % [sword._qi_max, sword._xinyan_qi_deficit_per_step]) in desc, desc)
+	_check("速度加成写对：速度 +%d" % sword._xinyan_deficit_stat_bonus,
+		("速度 +%d" % sword._xinyan_deficit_stat_bonus) in desc, desc)
+	_check("不再出现旧分档措辞「不高于」", not ("不高于" in desc), desc)
+	# ③ 印记按种类的百分比提升整句（剑圣 _mark_max>0）。
 	if sword._mark_max > 0:
-		_check("含印记持有加成：心 → 技巧", ("心 → 技巧 +%d" % sword._mark_dex_bonus) in desc, desc)
-		_check("含印记持有加成：道 → 速度", ("道 → 速度 +%d" % sword._mark_spd_bonus) in desc, desc)
-		_check("含印记持有加成：势 → 力量", ("势 → 力量 +%d" % sword._mark_str_bonus) in desc, desc)
+		_check("含印记提升：心 → 技巧", ("心 → 技巧 +%d%%" % int(sword._mark_dex_pct)) in desc, desc)
+		_check("含印记提升：道 → 速度", ("道 → 速度 +%d%%" % int(sword._mark_spd_pct)) in desc, desc)
+		_check("含印记提升：势 → 力量", ("势 → 力量 +%d%%" % int(sword._mark_str_pct)) in desc, desc)
 
 
 func _find_enemy_other(tm: Object, exclude: Unit) -> Unit:

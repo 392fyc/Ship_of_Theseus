@@ -44,6 +44,12 @@ const EXPECTED_BEHAVIOR_CHANGES: Dictionary = {
 ## 5 条有设计库对应的技能，值从设计库快照抄来（1:2 映射的四条两版取值一致）。
 ## 写死在这里是为了让「抄错了」也能被测出来——否则数据与实现同源，测不出偏差。
 const DESIGNLIB_BACKED: Dictionary = {
+	# 剑圣专属技能（gameplay-impl PR4，设计库 762393b）。
+	"kensei_zhanji": "单位",
+	"kensei_yishan": "方向",
+	"kensei_zhaojia": "自身",
+	"kensei_juhe": "单位",
+	"kensei_badao": "自身",
 	# 剑士专属技能（gameplay-impl PR3，设计库 762393b）。
 	"myrmidon_zhanji": "单位",
 	"myrmidon_yishan": "方向",
@@ -162,7 +168,9 @@ func _test_behavior_preserved(dl: Object, tm: Object) -> void:
 	allowed.sort()
 
 	_eq("「能否点空地」的变化面 == 例外名单", str(changed_ground), str(allowed))
-	_eq("「瞄准谁」一条都没变（本次不该动这一维）", str(changed_relation), str([]))
+	# 例外：kensei_badao 是自身中心范围伤害（设计库 target_mode=自身、area 菱形 1），旧推断
+	# 只认「自身 + 单体」为自身，无法表达它；它选自己、打周围敌人（_get_area_effect_relation）。
+	_eq("「瞄准谁」只有登记的例外变了", str(changed_relation), str(["kensei_badao"]))
 	for sid: String in allowed:
 		_check("例外 %s 的理由已登记：%s" % [sid, str(EXPECTED_BEHAVIOR_CHANGES[sid])],
 			str(EXPECTED_BEHAVIOR_CHANGES[sid]) != "")

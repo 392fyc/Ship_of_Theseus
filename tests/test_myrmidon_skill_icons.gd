@@ -50,7 +50,7 @@ func _check_real_scene(class_id: String, expected_prefix: String) -> void:
 	for slot: Button in slots:
 		var skill_id: String = slot._view.skill_id
 		var icon: TextureRect = slot.get_node("%IconRect") as TextureRect
-		var name: String = skill_id.trim_prefix("swordsman_").trim_prefix("myrmidon_")
+		var name: String = skill_id.trim_prefix("swordsman_").trim_prefix("myrmidon_").trim_prefix("kensei_")
 		var expected: String = expected_prefix + name + ".png"
 		_check("%s 正式技能栏使用 %s 对应图标" % [class_id, name], icon.texture != null and icon.texture.resource_path == expected)
 	if class_id == "myrmidon":

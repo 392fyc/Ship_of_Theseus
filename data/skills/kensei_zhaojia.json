@@ -1,0 +1,58 @@
+{
+  "id": "kensei_zhaojia",
+  "target_mode": "自身",
+  "name": "招架",
+  "damage_type": "physical",
+  "power": 0,
+  "range": {
+    "type": "self",
+    "min": 0,
+    "max": 0
+  },
+  "area": {
+    "type": "single",
+    "size": 0
+  },
+  "attack_type": "melee",
+  "cooldown": 2,
+  "action_cost": "swift",
+  "swift_limit": 1,
+  "tags": [
+    "sword",
+    "stance"
+  ],
+  "hit_bonus": 0,
+  "timing_constraint": "any",
+  "effects": [
+    {
+      "held_state_id": "kensei_zhaojia",
+      "duration": {
+        "kind": "until_own_turn_start",
+        "count": 1
+      },
+      "params": {
+        "stat_scaled_avoid_bonus": {
+          "stat": "DEX",
+          "pct": 100
+        }
+      }
+    }
+  ],
+  "qi_cost": 0,
+  "qi_gain_on_hit": 0,
+  "qi_gain_on_kill": 0,
+  "mark_gain": 0,
+  "mark_cost": 0,
+  "requires_marks": 0,
+  "guaranteed_crit": false,
+  "guaranteed_hit": false,
+  "slot_swap_trigger": "marks_and_qi",
+  "slot_swap_target": "kensei_badao",
+  "slot_swap_requires": {
+    "marks": 3,
+    "qi": 20
+  },
+  "description": "迅捷·持续到下个自身回合开始；期间额外闪避 +N，N 等于当前技巧（每次命中判定时读取）。必定命中的攻击不受影响。持有 3 枚印记且剑气不少于 20 点时，本槽变为〔拔刀〕。",
+  "_engine_note": "设计库本技能没有伤害条目（damage_type=无）。power=0 让它走辅助技能路径；damage_type 写 physical 只为满足通用字段，不参与结算。额外闪避按 R1.2「其他闪避加减」进入目标闪避，用持有型状态 kensei_zhaojia 承载，倍率 100%（= 当前技巧）写在 params 里。槽位替换条件 slot_swap_requires 来自设计库 effect，按 R3.6 只在〔拔刀〕不在冷却时替换。",
+  "_mirror": "设计库镜像字段：name / damage_entries / 射程 / 范围 / 冷却 / 行动消耗 / 剑气与印记数值来自设计库仓 snapshots/skills.json @ 762393b（kensei_zhaojia）。伤害只读 damage_entries（R1.1 / R1.7）；power 字段不写。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。"
+}
