@@ -30,7 +30,7 @@ jobs:
           LOG_DIR: .tmp/grid-movement-capture/test-logs
         run: |
           set -o pipefail
-          bash tools/ci/run_godot_tests.sh portrait map_token | tee .tmp/grid-movement-capture/tests.log
+          bash tools/ci/run_godot_tests.sh portrait_token_overhead | tee .tmp/grid-movement-capture/tests.log
       - name: Capture the real battle at the fixed camera
         run: |
           timeout --kill-after=10s 300s xvfb-run -a -s '-screen 0 1280x720x24 -nolisten tcp' "$GODOT" --path . --rendering-method gl_compatibility --audio-driver Dummy --display-driver x11 --resolution 1280x720 --fixed-fps 30 --disable-vsync --script res://scripts/art/character_pipeline/capture_portrait_battle_ui.gd -- --out="$GITHUB_WORKSPACE/.tmp/grid-movement-capture" --frames=360 > .tmp/grid-movement-capture/battle.log 2>&1

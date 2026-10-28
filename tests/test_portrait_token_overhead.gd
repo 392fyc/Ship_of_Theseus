@@ -454,7 +454,13 @@ func _run() -> void:
 		and restarted_move_cell != restarted_actor.grid_position)
 	if restarted_move_cell != Vector2i(-1, -1) and restarted_move_cell != restarted_actor.grid_position:
 		click(restarted_manager, restarted_move_cell)
-		await wait(0.4)
+		var restart_move_timeout: SceneTreeTimer = create_timer(3.0)
+		while restarted_manager.input_state == restarted_manager.InputState.ANIMATING \
+				and restart_move_timeout.time_left > 0.0:
+			await process_frame
+		_check("重开后的移动已完整到达并可进行攻击预测",
+			restarted_actor.grid_position == restarted_move_cell
+			and restarted_manager.input_state == restarted_manager.InputState.ACTION_PHASE)
 		_begin_strike(restarted_manager)
 		restarted_manager.handle_pointer_hover(_screen_for_cell(restarted_manager, restarted_target.grid_position))
 		await frames(3)
