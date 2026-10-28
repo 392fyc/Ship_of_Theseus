@@ -161,6 +161,35 @@ func _test_durations(defs: Dictionary) -> void:
 	_check("永久状态不随回合结束", c.has("kensei_chengxin"))
 	_eq("永久状态剩余计数为 -1", c.remaining("kensei_chengxin"), -1)
 
+	# 敌方回合内获得「到其后第 2 个自身回合开始」：计数与自身回合内获得相同。
+	var e := HeldStateSet.new(defs)
+	e.apply("kensei_jiashi", 1, start2, {}, "", false)
+	e.on_own_turn_started()
+	_eq("敌方回合获得：其后第 1 个回合开始剩 1", e.remaining("kensei_jiashi"), 1)
+	e.on_own_turn_ended()
+	e.on_own_turn_started()
+	_check("敌方回合获得：其后第 2 个回合开始结束", not e.has("kensei_jiashi"))
+
+	# 敌方回合获得「到下个自身回合结束」，在 T1 内被刷新：刷新时所在的 T1 不计，T2 结束才结束。
+	var rf := HeldStateSet.new(defs)
+	var end1: Dictionary = {"kind": "until_own_turn_end", "count": 1}
+	rf.apply("kensei_ruoli", 1, end1, {}, "", false)
+	rf.on_own_turn_started()
+	rf.apply("kensei_ruoli", 1, end1, {}, "", true)
+	rf.on_own_turn_ended()
+	_check("自身回合内刷新：刷新所在回合的结束不计", rf.has("kensei_ruoli"))
+	rf.on_own_turn_started()
+	rf.on_own_turn_ended()
+	_check("刷新后的下个自身回合结束时结束", not rf.has("kensei_ruoli"))
+
+	# 在持有者回合之外获得「到本回合结束」：保留到持有者下一个自身回合结束（已写明的口径）。
+	var ko := HeldStateSet.new(defs)
+	ko.apply("kensei_kongxiang", 1, {"kind": "until_this_turn_end"}, {}, "", false)
+	ko.on_own_turn_started()
+	_check("回合外获得：持有者回合开始时仍在", ko.has("kensei_kongxiang"))
+	ko.on_own_turn_ended()
+	_check("回合外获得：持有者回合结束时结束", not ko.has("kensei_kongxiang"))
+
 
 # ── ② 再获得方式 ─────────────────────────────────────
 
@@ -209,6 +238,22 @@ func _test_reapplication(defs: Dictionary) -> void:
 	_eq("held_ids 去重", t.held_ids(), ["taunt"] as Array[String])
 	t.remove("taunt")
 	_check("remove 移除全部实例", not t.has("taunt"))
+
+	t.apply("taunt")
+	t.apply("taunt")
+	_eq("独立实例层数合计 2", t.stacks("taunt"), 2)
+	_eq("跨实例消耗 2 层返回 2", t.consume_stacks("taunt", 2), 2)
+	_check("两个实例都已移除", not t.has("taunt"))
+
+	var full := HeldStateSet.new(defs)
+	full.apply("kensei_jianhen", 5)
+	_check("满层且不刷新时再获得返回 false", not full.apply("kensei_jianhen", 1))
+	_eq("满层仍为 5", full.stacks("kensei_jianhen"), 5)
+	var ruoji_full := HeldStateSet.new(defs)
+	ruoji_full.apply("kensei_ruoji", 3, start2)
+	ruoji_full.on_own_turn_started()
+	_check("满层但刷新持续时间时返回 true", ruoji_full.apply("kensei_ruoji", 1, start2))
+	_eq("满层刷新后剩余计数为 2", ruoji_full.remaining("kensei_ruoji"), 2)
 
 
 # ── ② 层数与防护 ─────────────────────────────────────
@@ -326,6 +371,15 @@ func _test_on_hit_routes_through_pipeline(tm: Object, atk: Unit, _dfn: Unit) -> 
 	tm._apply_sword_qi_on_hit(atk, result, {"qi_gain_on_hit": 25, "skill_id": "probe"})
 	_eq("命中得 25 剑气", atk.sword_qi, 25)
 	_eq("经统一入口发出事件", events, ["gain|on_hit:probe"] as Array[String])
+	events.clear()
+	tm._apply_talent_effect(atk, "probe_talent",
+		{"type": "gain_resource", "resource": "qi", "amount": 10}, {})
+	_eq("天赋 gain_resource 得 10 剑气", atk.sword_qi, 35)
+	_eq("天赋得气经统一入口", events, ["gain|talent:probe_talent"] as Array[String])
+	print("  （下一项预期打印 [Talent] 告警，属于被测行为）")
+	tm._apply_talent_effect(atk, "probe_talent",
+		{"type": "gain_resource", "resource": "qi", "amount": 0}, {})
+	_eq("数量为 0 的 gain_resource 被忽略、剑气不变", atk.sword_qi, 35)
 	atk.sword_qi_changed.disconnect(listener)
 
 
@@ -337,6 +391,9 @@ func _test_battle_start_clears(tm: Object, u: Unit) -> void:
 	tm.start_battle()
 	tm.stop_battle()
 	_check("start_battle 清空持有型状态（含永久）", not u.held_states.has("kensei_chengxin"))
+	u.is_taking_turn = true
+	tm.stop_battle()
+	_check("stop_battle 复位 is_taking_turn", not u.is_taking_turn)
 	u.apply_held_state("kensei_chengxin", 1)
 	tm._debug_reset_unit(u)
 	_check("调试复位清空持有型状态", not u.held_states.has("kensei_chengxin"))

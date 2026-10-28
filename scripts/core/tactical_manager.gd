@@ -186,6 +186,8 @@ func stop_battle() -> void:
 	for unit: Unit in units:
 		if is_instance_valid(unit):
 			unit.cancel_movement()
+			# 战斗在某人回合中途结束时 turn_ended 不会发出。
+			unit.is_taking_turn = false
 	turn_manager.stop()
 	_clear_hover_state()
 	_clear_highlights()
@@ -3377,6 +3379,11 @@ func _apply_talent_effect(unit: Unit, talent_id: String,
 			var amount: int = int(effect.get("amount", 0))
 			match resource:
 				"qi":
+					if amount <= 0:
+						# gain_resource 只表达获得；扣减要走 spend / lose，数据写错时响亮告警。
+						push_warning("[Talent] %s 的 gain_resource qi 数量必须为正，实际 %d，已忽略"
+							% [talent_id, amount])
+						return
 					unit.gain_sword_qi(amount, "talent:" + talent_id)
 					print("[Talent] %s 「%s」→ +%d 剑气 → %d" % [
 						unit.unit_name, talent_id, amount, unit.sword_qi])

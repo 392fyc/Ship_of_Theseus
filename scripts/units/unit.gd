@@ -849,6 +849,8 @@ func _set_walk_direction(dir: Vector2i) -> void:
 
 
 func _on_death() -> void:
+	# 在自己回合内死亡时 turn_ended 不会发出，这里复位，免得之后被当成「仍在自身回合内」。
+	is_taking_turn = false
 	if _map_token_active:
 		queue_free()
 		return

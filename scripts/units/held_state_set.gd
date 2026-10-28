@@ -13,6 +13,8 @@ extends RefCounted
 ## - `until_own_turn_start`：持续到其后第 N 个自身回合开始（`duration.count` = N）。
 ## - `until_own_turn_end`：持续到其后第 N 个自身回合结束；在自身回合内获得时，当前回合的结束不计数。
 ## - `until_this_turn_end`：持续到持有者当前（或下一个）自身回合结束，额外回合同样会结束它。
+##   只按持有者的回合计时；「持续到施加者本回合结束」（设计库〔破绽〕）这类按他人回合计时的口径
+##   尚未承载，接入时新增口径，不要借用本口径。
 ## 额外回合不计入 N（设计库〔架势〕rules：只按常规自身回合计算）。
 
 signal changed
@@ -79,9 +81,13 @@ func apply(state_id: String, stacks: int = 1, duration: Dictionary = {},
 		REAPPLY_REFRESH:
 			_refresh(entry, timing, params, source_unit_id, during_own_turn)
 		REAPPLY_ADD_STACKS:
-			entry["stacks"] = mini(int(entry["stacks"]) + incoming_stacks, max_stacks)
+			var old_stacks: int = int(entry["stacks"])
+			entry["stacks"] = mini(old_stacks + incoming_stacks, max_stacks)
 			if str(def.get("duration_update_mode", "")) == "use_incoming":
 				_refresh(entry, timing, params, source_unit_id, during_own_turn)
+			elif int(entry["stacks"]) == old_stacks:
+				# 已满层且不刷新持续时间：持有状态没有任何变化。
+				return false
 		REAPPLY_SET_STACKS:
 			entry["stacks"] = incoming_stacks
 			_refresh(entry, timing, params, source_unit_id, during_own_turn)
@@ -122,18 +128,24 @@ func remaining(state_id: String) -> int:
 	return int(_entries[index]["remaining"])
 
 
-## 消耗层数，返回实际消耗数；层数归零时移除该状态。
+## 消耗层数，返回实际消耗数；层数归零的实例移除。独立实例的状态按获得顺序依次扣减，
+## 与 stacks() 的「各实例层数之和」口径一致。
 func consume_stacks(state_id: String, count: int = 1) -> int:
 	if count <= 0:
 		return 0
-	var index: int = _index_of(state_id)
-	if index < 0:
+	var used: int = 0
+	var kept: Array[Dictionary] = []
+	for entry: Dictionary in _entries:
+		if entry["id"] == state_id and used < count:
+			var take: int = mini(count - used, int(entry["stacks"]))
+			entry["stacks"] = int(entry["stacks"]) - take
+			used += take
+			if int(entry["stacks"]) <= 0:
+				continue
+		kept.append(entry)
+	if used == 0:
 		return 0
-	var entry: Dictionary = _entries[index]
-	var used: int = mini(count, int(entry["stacks"]))
-	entry["stacks"] = int(entry["stacks"]) - used
-	if int(entry["stacks"]) <= 0:
-		_entries.remove_at(index)
+	_entries = kept
 	changed.emit()
 	return used
 
