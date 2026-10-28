@@ -52,5 +52,5 @@
   "guaranteed_hit": false,
   "description": "迅捷·持续到下个自身回合开始；期间防御与魔防各 +N，N = 1 + 当前剑气 ÷ 25（向下取整），随剑气即时变化。",
   "_engine_note": "设计库本技能没有伤害条目（damage_type=无）。power=0 让它走辅助技能路径（_is_support_skill）；damage_type 写 physical 只为满足技能数据的通用字段，不参与结算。效果用持有型状态 myrmidon_zhaojia 承载，N 的两个数（1 与 25）来自设计库 effect，写在 params 里，引擎不写死。",
-  "_mirror": "设计库镜像字段：name / damage_entries / 射程 / 冷却 / 行动消耗 / 剑气数值来自设计库仓 snapshots/skills.json @ 762393b（myrmidon_zhaojia）。伤害只读 damage_entries（R1.1 / R1.7，技能威力不加武器威力）；power 字段不写。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。"
+  "_mirror": "设计库镜像字段：name / 射程 / 冷却 / 行动消耗 / 剑气数值 / effect 中的「1 + 剑气 ÷ 25」与持续时间来自设计库仓 snapshots/skills.json @ 762393b（myrmidon_zhaojia）。power 与 damage_type 不是镜像字段，理由见 _engine_note。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。"
 }

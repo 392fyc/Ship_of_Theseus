@@ -182,8 +182,15 @@ func _test_zhaojia(tm: Node, u: Unit) -> void:
 	_eq("剑气 100：魔防 +5", u.get_effective_stat("RES") - res0, 5)
 	_eq("速度不受招架影响", u.held_states.params("myrmidon_zhaojia").get("qi_scaled_stat_bonus", {}).get("stats"),
 		["DEF", "RES"])
-	u.is_taking_turn = false
-	u.held_states.on_own_turn_started()
+	# 走真实回合钩子：施放所在回合结束 → 敌方回合期间仍在 → 下个自身回合开始时结束。
+	tm.battle_active = true
+	tm._on_turn_ended(u)
+	_check("施放所在回合结束后仍持有（覆盖敌方回合）", u.held_states.has("myrmidon_zhaojia"))
+	_eq("敌方回合期间防御仍 +5", u.get_effective_stat("DEF") - def0, 5)
+	tm.turn_manager.current_unit = u
+	tm._on_turn_started(u)
+	tm.battle_active = false
+	tm.turn_manager.current_unit = null
 	_check("下个自身回合开始时结束", not u.held_states.has("myrmidon_zhaojia"))
 	_eq("结束后防御回到原值", u.get_effective_stat("DEF") - def0, 0)
 	u.set_sword_qi(0)
@@ -205,6 +212,23 @@ func _test_attacks(tm: Node, u: Unit, enemy: Unit) -> void:
 		_eq("斩击系数 1.0", act.data.get("skill_multiplier"), 1.0)
 		_eq("斩击命中得气 25", int(act.data.get("qi_gain_on_hit", 0)), 25)
 		_eq("斩击不得印记", int(act.data.get("mark_gain", 0)), 0)
+
+	# 斩击实际施放：命中率拉满（技巧高、目标速度 0），命中后剑气 +25、没有印记。
+	var dex_saved: int = u.stats.dex
+	var spd_saved: int = enemy.stats.spd
+	u.stats.dex = 60
+	enemy.stats.spd = 0
+	u.reset_action_resources()
+	u.skill_cooldowns.clear()
+	u.set_sword_qi(0)
+	var zhanji_hp: int = enemy.stats.hp
+	_cast(tm, u, "myrmidon_zhanji", enemy.grid_position, enemy)
+	_check("斩击命中造成伤害", enemy.stats.hp < zhanji_hp)
+	_eq("斩击命中后剑气 0 → 25", u.sword_qi, 25)
+	_eq("斩击后仍没有印记", u.get_mark_count(), 0)
+	_check("斩击消耗标准行动", u.standard_used)
+	u.stats.dex = dex_saved
+	enemy.stats.spd = spd_saved
 
 	# 居合：消耗 60 剑气、必定命中、正常暴击（不再必定暴击）。
 	u.reset_action_resources()

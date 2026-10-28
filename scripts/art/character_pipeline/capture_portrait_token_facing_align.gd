@@ -192,7 +192,7 @@ func _drive_player_ai() -> void:
 		await create_timer(0.18).timeout
 		if not is_instance_valid(manager) or not is_instance_valid(actor) or not is_instance_valid(target) or manager.get("current_unit") != actor:
 			continue
-		manager.call("request_attack_targeting")
+		_begin_strike(manager, target.grid_position)
 		if target.grid_position in manager.get("_attack_cells"):
 			var grid: Object = manager.get("grid")
 			var projected: Vector2 = root.get_canvas_transform().basis_xform(
@@ -265,3 +265,16 @@ func _capture() -> void:
 		quit()
 		return
 	busy = false
+
+## 剑士线没有普通攻击（gameplay-impl PR3，用户 2026-10-28 裁决 S2）。对没有普攻的单位改用其
+## 技能栏第一格（剑士为斩击）：技能走同一条出手、动画锁与接触表现路径，录到的素材不变。
+## 目标不在可攻击格内时响亮告警，不再静默跳过这一回合的出手。
+func _begin_strike(manager: Node, target_cell: Vector2i) -> void:
+	var actor: Unit = manager.get("current_unit")
+	if actor != null and not actor.has_basic_attack and not actor.skill_ids.is_empty():
+		manager.call("request_skill_selection", actor.skill_ids[0])
+	else:
+		manager.call("request_attack_targeting")
+	if not target_cell in manager.get("_attack_cells"):
+		push_warning("[capture] %s 本回合无法对 %s 出手，跳过" % [
+			actor.unit_id if actor != null else "?", str(target_cell)])

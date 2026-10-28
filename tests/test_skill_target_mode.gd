@@ -44,6 +44,11 @@ const EXPECTED_BEHAVIOR_CHANGES: Dictionary = {
 ## 5 条有设计库对应的技能，值从设计库快照抄来（1:2 映射的四条两版取值一致）。
 ## 写死在这里是为了让「抄错了」也能被测出来——否则数据与实现同源，测不出偏差。
 const DESIGNLIB_BACKED: Dictionary = {
+	# 剑士专属技能（gameplay-impl PR3，设计库 762393b）。
+	"myrmidon_zhanji": "单位",
+	"myrmidon_yishan": "方向",
+	"myrmidon_zhaojia": "自身",
+	"myrmidon_juhe": "单位",
 	"swordsman_badao": "单位",
 	"swordsman_juhe": "单位",
 	"swordsman_yishan": "方向",
