@@ -67,6 +67,12 @@ static func normalize_member(raw: Dictionary) -> Dictionary:
 		member["hp"] = int(raw.get("hp"))
 	if raw.has("talent_points"):
 		member["talent_points"] = int(raw.get("talent_points"))
+	# 已兑现的回忆 id（gameplay-impl PR5）：一局内固定，随成员带进每场战斗。
+	if raw.has("memories") and raw.get("memories") is Array:
+		var memories: Array[String] = []
+		for memory_id: Variant in (raw.get("memories") as Array):
+			memories.append(str(memory_id))
+		member["memories"] = memories
 	if raw.has("relics") and raw.get("relics") is Array:
 		var relics: Array[String] = []
 		for r: Variant in (raw.get("relics") as Array):

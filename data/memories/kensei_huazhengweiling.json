@@ -1,0 +1,16 @@
+{
+  "id": "kensei_huazhengweiling",
+  "name": "兵无常势",
+  "class_id": "kensei",
+  "rarity": "回忆",
+  "base_skill_id": "kensei_badao",
+  "upgrade_skill_id": "kensei_sanduanzhan",
+  "form_skill_ids": [
+    "kensei_sanduanzhan",
+    "kensei_huitian",
+    "kensei_batian"
+  ],
+  "description": "将技能〔拔刀〕永久升级为〔决心〕〔回天〕〔霸天〕；三种形态按持有的印记数量占用〔招架〕槽。",
+  "_mirror": "设计库 762393b talents/kensei_huazhengweiling：id、name、class_id、rarity、upgrade_skill_id、effect（→description）。base_skill_id 取升级技能的 upgrade_of（设计库 skills/kensei_sanduanzhan）。",
+  "_forms_source": "Ship 维护（差距清单 Q4）：设计库 effect「将技能〔拔刀〕永久升级为〔决心〕〔回天〕〔霸天〕」；三者 upgrade_of 均为 kensei_badao。各形态的占槽条件随回忆技能 PR 实装。"
+}

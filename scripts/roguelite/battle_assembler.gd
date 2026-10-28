@@ -87,6 +87,10 @@ static func _build_player_units(map_data: Dictionary, player_roster: Array) -> A
 		# 仅磨损态（含战死 hp=0）带 hp；满血 / 未回填占位不带 → 注入层满血 spawn。
 		if max_hp > 0 and hp >= 0 and hp < max_hp:
 			entry["hp"] = hp
+		# 已兑现的回忆（gameplay-impl PR5）：随成员带进战斗，spawn 后按序兑现。
+		if member_v is Dictionary and (member_v as Dictionary).get("memories", []) is Array \
+				and not ((member_v as Dictionary).get("memories", []) as Array).is_empty():
+			entry["memories"] = ((member_v as Dictionary).get("memories") as Array).duplicate()
 		out.append(entry)
 	return out
 

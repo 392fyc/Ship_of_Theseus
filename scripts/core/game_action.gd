@@ -1,7 +1,7 @@
 class_name GameAction
 extends RefCounted
 
-enum Type { MOVE, ATTACK, SKILL, USE_SWIFT, END_TURN }
+enum Type { MOVE, ATTACK, SKILL, USE_SWIFT, END_TURN, APPLY_MEMORY }
 
 var type: GameAction.Type
 var actor: Unit
@@ -67,6 +67,15 @@ static func make_end_turn(unit: Unit) -> GameAction:
 	var a := GameAction.new()
 	a.type = Type.END_TURN
 	a.actor = unit
+	return a
+
+
+## 兑现一张回忆（gameplay-impl PR5，差距清单 M10）。data 只放可序列化的 id。
+static func make_apply_memory(unit: Unit, memory_id: String) -> GameAction:
+	var a := GameAction.new()
+	a.type = Type.APPLY_MEMORY
+	a.actor = unit
+	a.data = {"actor_id": unit.unit_id, "memory_id": memory_id}
 	return a
 
 

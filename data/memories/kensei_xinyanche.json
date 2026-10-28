@@ -1,0 +1,15 @@
+{
+  "id": "kensei_xinyanche",
+  "name": "大梦将醒",
+  "class_id": "kensei",
+  "rarity": "回忆",
+  "base_skill_id": "kensei_xinyan",
+  "upgrade_skill_id": "kensei_xinyan_che",
+  "form_skill_ids": [
+    "kensei_xinyan_che",
+    "kensei_kongxiangjian"
+  ],
+  "description": "将技能〔心眼〕永久升级为〔心眼·梦〕；进入〔空想〕后，〔空想剑〕会暂时替换〔心眼·梦〕。",
+  "_mirror": "设计库 762393b talents/kensei_xinyanche：id、name、class_id、rarity、upgrade_skill_id、effect（→description）。base_skill_id 取升级技能的 upgrade_of（设计库 skills/kensei_xinyan_che）。",
+  "_forms_source": "Ship 维护（差距清单 Q4）：设计库 effect「进入〔空想〕后，〔空想剑〕会暂时替换〔心眼·梦〕」；两者 upgrade_of 均为 kensei_xinyan。各形态的占槽条件随回忆技能 PR 实装。"
+}

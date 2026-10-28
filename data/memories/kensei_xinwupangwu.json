@@ -1,0 +1,13 @@
+{
+  "id": "kensei_xinwupangwu",
+  "name": "心无旁骛",
+  "class_id": "kensei",
+  "rarity": "回忆",
+  "base_skill_id": "kensei_xinyan",
+  "upgrade_skill_id": "kensei_xinyan_cheng",
+  "form_skill_ids": [
+    "kensei_xinyan_cheng"
+  ],
+  "description": "将技能〔心眼〕永久升级为〔心眼·澄〕。",
+  "_mirror": "设计库 762393b talents/kensei_xinwupangwu：id、name、class_id、rarity、upgrade_skill_id、effect（→description）。base_skill_id 取升级技能的 upgrade_of（设计库 skills/kensei_xinyan_cheng）。"
+}
