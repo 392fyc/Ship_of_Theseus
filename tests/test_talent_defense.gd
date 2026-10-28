@@ -419,11 +419,17 @@ func _test_parry_stance_edges() -> void:
 	var base: int = _incoming(tm, enemy, kensei, 0)
 	_check("基线伤害为正（否则减伤断言全是假通过）", base > 0, "base=%d" % base)
 
-	# 边界一：SPD=0 → 概率 0 → randf() < 0.0 恒为假 → 永不招架。
+	# 边界一：有效速度 0 → 概率 0 → randf() < 0.0 恒为假 → 永不招架。
+	# ★ 只把 stats.spd 设 0 不够：剑气 0 时心眼给速度加成（旧分档低气段 +2），有效速度为 2，
+	# 招架有 2% 概率触发，用例因此偶发失败（期望 46 实际 23）。剑气拉到 100 让心眼不给速度
+	# （旧分档高气段给技巧；新口径「每比 100 少 40 点」在 100 时为 0），并先断言有效速度确为 0。
+	# 剑气在这里不影响受伤：不招架时技巧只决定减伤幅度，不进伤害公式。
 	kensei.stats.spd = 0
+	kensei.set_sword_qi(100)
+	_eq("前提：有效速度确为 0（否则概率不是 0）", kensei.get_effective_stat("SPD"), 0)
 	_add_parry_stance(kensei)
 	_check("前提：架势确实挂上了", kensei.has_buff(PARRY_BUFF))
-	var spd0: int = _incoming(tm, enemy, kensei, 0)
+	var spd0: int = _incoming(tm, enemy, kensei, 100)
 	_eq("SPD=0（概率 0 边界）→ 有架势也不减伤", spd0, base)
 
 	# 边界二：SPD=100 → 概率 1.0 → randf() < 1.0 恒为真 → 必定招架。
