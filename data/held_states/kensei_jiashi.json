@@ -1,0 +1,15 @@
+{
+  "id": "kensei_jiashi",
+  "name": "架势",
+  "effect": "持续到其后第 2 个自身回合开始，覆盖两个敌方回合和中间的一个自身回合；重复获得时刷新持续时间；不可驱散。期间，自身在自身回合内使用技能造成的伤害总降一定比例，比例由给予〔架势〕的技能写明。敌方回合内的反击和〔影〕的照做不受影响。",
+  "rules": "先攻击再开〔架势〕躲不过惩罚：惩罚落在下一个自身回合。额外回合是完整的自身回合，但不计入状态计时：“持续到其后第 N 个自身回合开始”只按常规自身回合计算。〔影〕的照做不计自身的任何状态（见〔临摹〕“照做伤害”），因此不受总降影响。不可抵抗，无视免疫。",
+  "notes": "由〔见切〕（总降 20%）与〔浮生若梦〕（总降 25%）给予。比例随给予它的技能变化，所以比例不写在状态本体里。",
+  "polarity": "neutral",
+  "is_permanent": false,
+  "reapplication_mode": "refresh_duration",
+  "duration_update_mode": "use_incoming",
+  "dispellable": false,
+  "resistable": false,
+  "ignores_immunity": true,
+  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。"
+}

@@ -171,6 +171,11 @@ func start_battle() -> void:
 	var typed_units: Array[Unit] = []
 	for u in units:
 		typed_units.append(u)
+		# 持有型状态（含永久状态）每场战斗开始时为 0 层（设计库〔澄心〕〔剑痕〕〔太阳〕等 effect）。
+		var battle_unit: Unit = u as Unit
+		if battle_unit != null:
+			battle_unit.held_states.clear()
+			battle_unit.is_taking_turn = false
 	turn_manager.add_units(typed_units)
 	turn_manager.start()
 
@@ -181,6 +186,8 @@ func stop_battle() -> void:
 	for unit: Unit in units:
 		if is_instance_valid(unit):
 			unit.cancel_movement()
+			# 战斗在某人回合中途结束时 turn_ended 不会发出。
+			unit.is_taking_turn = false
 	turn_manager.stop()
 	_clear_hover_state()
 	_clear_highlights()
@@ -432,6 +439,9 @@ func _on_turn_started(unit: Unit) -> void:
 		return
 	current_unit = unit
 	unit.reset_turn_state()
+	unit.is_taking_turn = true
+	# 持有型状态的「到其后第 N 个自身回合开始」在此计数；额外回合尚未实现，统一按常规回合。
+	unit.held_states.on_own_turn_started()
 	var turn_start_result: Dictionary = unit.process_turn_start_buffs()
 	if not battle_active or turn_manager.current_unit != unit:
 		return
@@ -462,6 +472,8 @@ func _on_turn_started(unit: Unit) -> void:
 
 func _on_turn_ended(unit: Unit) -> void:
 	unit.process_turn_end_buffs()
+	unit.held_states.on_own_turn_ended()
+	unit.is_taking_turn = false
 	_deselect_unit()
 
 
@@ -1763,7 +1775,7 @@ func _execute_skill_action(action: GameAction) -> bool:
 	# 剑气在施放时扣（心眼暴击的剑气时序不在本次修复范围内）。
 	var qi_cost: int = int(skill_data.get("qi_cost", 0))
 	if qi_cost > 0:
-		user.set_sword_qi(user.sword_qi - qi_cost)
+		user.spend_sword_qi(qi_cost, "skill_cost:" + skill_id)
 	# 修复 P0-②：印记消耗推迟到伤害结算之后再执行（见下方 _spend_skill_marks）。
 	# 否则拔刀在 spend_marks 之后才结算伤害，吃不到自己正在消耗的势(STR+2)印记加成
 	# （实测非暴击对 DEF2 木桩 = 25 而非应有的 29，对 30 血脆敌非暴击打不死）。
@@ -2774,7 +2786,7 @@ func _apply_sword_qi_on_hit(attacker: Unit,
 	# 命中得气（如斩击 qi_gain_on_hit=1）
 	var qi_on_hit: int = int(action_data.get("qi_gain_on_hit", 0))
 	if qi_on_hit > 0:
-		attacker.set_sword_qi(attacker.sword_qi + qi_on_hit)
+		attacker.gain_sword_qi(qi_on_hit, "on_hit:" + str(action_data.get("skill_id", "")))
 		print("[SwordQi] %s +%d qi on hit → %d" % [
 			attacker.unit_name, qi_on_hit, attacker.sword_qi])
 	# 命中后得印记（如居合 mark_gain=1，命中即结算）
@@ -2789,7 +2801,7 @@ func _apply_sword_qi_on_hit(attacker: Unit,
 		return
 	var qi_on_kill: int = int(action_data.get("qi_gain_on_kill", 0))
 	if qi_on_kill > 0:
-		attacker.set_sword_qi(attacker.sword_qi + qi_on_kill)
+		attacker.gain_sword_qi(qi_on_kill, "on_kill:" + str(action_data.get("skill_id", "")))
 		print("[SwordQi] %s +%d qi on kill → %d" % [
 			attacker.unit_name, qi_on_kill, attacker.sword_qi])
 	var cd_reduce: int = int(action_data.get("ki_on_kill_cd_reduction", 0))
@@ -3006,7 +3018,7 @@ func _resolve_defense(attacker: Unit, defender: Unit, outcome: Dictionary,
 			if defender.sword_qi < qi_cost:
 				continue
 			if qi_cost > 0:
-				defender.set_sword_qi(defender.sword_qi - qi_cost)
+				defender.spend_sword_qi(qi_cost, "talent:" + str(wish.get("talent_id", "")))
 			_fill_parry_result(defense, defender, params,
 				"talent:" + str(wish.get("talent_id", "")))
 			print("[Parry] %s 「%s」→ 消耗 %d 剑气换必定减伤 %.1f%%（剩余 %d）" % [
@@ -3326,7 +3338,7 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 	# 副手仍按自己的命中结果结算。
 	var empower_qi: int = int(empower.get("qi_on_hit", 0))
 	if result.hit and empower_qi > 0:
-		attacker.set_sword_qi(attacker.sword_qi + empower_qi)
+		attacker.gain_sword_qi(empower_qi, "talent:" + str(empower.get("talent_id", "")))
 		print("[Talent] %s 「%s」→ 被强化的副手追加命中 → +%d 剑气 → %d" % [
 			attacker.unit_name, str(empower.get("talent_id", "")),
 			empower_qi, attacker.sword_qi])
@@ -3424,7 +3436,12 @@ func _apply_talent_effect(unit: Unit, talent_id: String,
 			var amount: int = int(effect.get("amount", 0))
 			match resource:
 				"qi":
-					unit.set_sword_qi(unit.sword_qi + amount)
+					if amount <= 0:
+						# gain_resource 只表达获得；扣减要走 spend / lose，数据写错时响亮告警。
+						push_warning("[Talent] %s 的 gain_resource qi 数量必须为正，实际 %d，已忽略"
+							% [talent_id, amount])
+						return
+					unit.gain_sword_qi(amount, "talent:" + talent_id)
 					print("[Talent] %s 「%s」→ +%d 剑气 → %d" % [
 						unit.unit_name, talent_id, amount, unit.sword_qi])
 				"mark":
@@ -3672,6 +3689,7 @@ func _debug_reset_unit(unit: Unit) -> void:
 	var buff_snapshot: Array[BuffEffect] = unit.buffs.duplicate()
 	for buff: BuffEffect in buff_snapshot:
 		unit.remove_buff(buff)
+	unit.held_states.clear()
 	# 剑圣资源：剑气回职业初始值 + 清印记（非剑圣 _qi_max==0，set_sword_qi 安全空操作）
 	if unit._qi_max > 0:
 		unit.clear_marks()

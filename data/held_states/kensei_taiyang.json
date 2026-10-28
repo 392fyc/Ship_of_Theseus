@@ -1,0 +1,15 @@
+{
+  "id": "kensei_taiyang",
+  "name": "太阳",
+  "effect": "每层暴击 +1，最多 5 层。永久，不可驱散，每场战斗开始时为 0 层。剑气每实际累计增加 30 点，获得 1 层；使用〔太阳剑〕后获得 1 层；满 5 层时，剑气增加的累计暂停。自身回合结束时，若技能栏为〔太阴剑〕，失去 1 层〔太阳〕。",
+  "rules": "不可驱散、不可抵抗，也不受状态免疫影响。累计只计实际发生的剑气增加；敌方回合中实际发生的剑气增减照常计入累计，阴阳调和只在自身回合内生效。累计进度每场战斗开始时清零。",
+  "notes": "由〔阴阳剑〕产生，调和与圆满规则写在〔太阳剑〕〔太阴剑〕。暴击加成按 R1.3 属于暴击加减，按 R1.8 先与其他固定点数相加，再被百分比提升放大。",
+  "polarity": "positive",
+  "is_permanent": true,
+  "max_stacks": 5,
+  "reapplication_mode": "add_stacks",
+  "dispellable": false,
+  "resistable": false,
+  "ignores_immunity": true,
+  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。"
+}

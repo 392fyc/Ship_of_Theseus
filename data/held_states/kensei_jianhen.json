@@ -1,0 +1,14 @@
+{
+  "id": "kensei_jianhen",
+  "name": "剑痕",
+  "effect": "每层闪避 +3，最多 5 层。永久，不可驱散，每场战斗开始时为 0 层；可以跨越多次〔空想〕保留。即将受到普通控制时，在抵抗判定前失去 1 层〔剑痕〕，并免疫本次效果。",
+  "rules": "不可驱散、不可抵抗，也不受状态免疫影响，最多5层，可以跨越多次〔空想〕保留。明确无视免疫的控制和机制效果不受影响，也不消耗层数。达到5层时不继续保存新的累计进度，必须先消耗层数后才能继续获得。",
+  "polarity": "positive",
+  "is_permanent": true,
+  "max_stacks": 5,
+  "reapplication_mode": "add_stacks",
+  "dispellable": false,
+  "resistable": false,
+  "ignores_immunity": true,
+  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。"
+}

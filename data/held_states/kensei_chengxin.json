@@ -1,0 +1,15 @@
+{
+  "id": "kensei_chengxin",
+  "name": "澄心",
+  "effect": "每层使自身技能伤害的威力 +2，最多 3 层。永久，不可驱散。每场战斗开始时为 0 层。",
+  "rules": "由〔心眼·澄〕在自身回合结束时增减层数：剑气不少于 15 点时消耗 15 点剑气并获得 1 层，剑气少于 15 点时失去 1 层。不可抵抗，无视免疫。",
+  "notes": "威力加成属于加算，计入技能威力。〔影〕的照做不计入。",
+  "polarity": "positive",
+  "is_permanent": true,
+  "max_stacks": 3,
+  "reapplication_mode": "add_stacks",
+  "dispellable": false,
+  "resistable": false,
+  "ignores_immunity": true,
+  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。"
+}

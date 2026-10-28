@@ -1,0 +1,13 @@
+{
+  "id": "kensei_nadao",
+  "name": "纳刀",
+  "effect": "自身造成的伤害总降 50%，不可驱散。持有期间发动的〔拔刀〕显示为〔满月〕：〔纳刀〕的伤害降低对〔满月〕无效，〔满月〕的伤害再总增 30%；结算后移除〔纳刀〕。",
+  "rules": "不可叠加、不可抵抗，也不受状态免疫影响。重复获得时忽略新施加。使用〔拔刀〕时先锁定状态，等该技能的全部直接伤害和使用后效果完成后再移除。获得〔纳刀〕时附带的印记由给予它的技能写明。",
+  "polarity": "neutral",
+  "is_permanent": true,
+  "reapplication_mode": "ignore_incoming",
+  "dispellable": false,
+  "resistable": false,
+  "ignores_immunity": true,
+  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。"
+}
