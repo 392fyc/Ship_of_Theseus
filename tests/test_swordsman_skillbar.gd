@@ -73,7 +73,7 @@ func _run() -> void:
 		_check("含斩击槽", "kensei_zhanji" in ids)
 		_check("含招架槽（印记未满）", "kensei_zhaojia" in ids)
 		_check("含居合槽", "kensei_juhe" in ids)
-		_check("无独立拔刀槽（印记未满，不常驻第5技能）", not ("swordsman_badao" in ids))
+		_check("无独立拔刀槽（印记未满，不常驻第5技能）", not ("kensei_badao" in ids))
 	else:
 		print("  · 注：当前非剑圣行动态，_get_skill_entries 空，跳过构成断言（building block 已覆盖逻辑）")
 
@@ -287,8 +287,10 @@ func _test_passive_description_matches_behavior(tm: Object, sword: Unit) -> void
 	# 旧的高低分档已删除，说明里不能再出现分档措辞，否则会把玩家带向反方向。
 	_check("含「每比 %d 点少 %d 点」" % [sword._qi_max, sword._xinyan_qi_deficit_per_step],
 		("每比 %d 点少 %d 点" % [sword._qi_max, sword._xinyan_qi_deficit_per_step]) in desc, desc)
-	_check("速度加成写对：速度 +%d" % sword._xinyan_deficit_stat_bonus,
-		("速度 +%d" % sword._xinyan_deficit_stat_bonus) in desc, desc)
+	# 断言整句连续文本：单查「速度 +1」会被印记那句「道 → 速度 +10%」碰巧满足。
+	var speed_sentence: String = "剑气每比 %d 点少 %d 点，速度 +%d。" % [
+		sword._qi_max, sword._xinyan_qi_deficit_per_step, sword._xinyan_deficit_stat_bonus]
+	_check("速度那句整句写对：" + speed_sentence, speed_sentence in desc, desc)
 	_check("不再出现旧分档措辞「不高于」", not ("不高于" in desc), desc)
 	# ③ 印记按种类的百分比提升整句（剑圣 _mark_max>0）。
 	if sword._mark_max > 0:

@@ -51,5 +51,5 @@
   ],
   "description": "向所选方向位移，最远 4 格；对沿途的敌人造成物理伤害（威力 +1，系数 0.5）。落点必须可通行且无人占据。",
   "_engine_note": "area 写 line/1 描述实际形态，与设计库「单体 + 0」（位移技能的不适用标记）有意不同，理由见 myrmidon_yishan.json。",
-  "_mirror": "设计库镜像字段：name / damage_entries / 射程 / 范围 / 冷却 / 行动消耗 / 剑气与印记数值来自设计库仓 snapshots/skills.json @ 762393b（kensei_yishan）。伤害只读 damage_entries（R1.1 / R1.7）；power 字段不写。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。"
+  "_mirror": "设计库镜像字段：name / damage_entries / 射程 / 范围 / 冷却 / 行动消耗 / 剑气与印记数值来自设计库仓 snapshots/skills.json @ 762393b（kensei_yishan）。伤害只读 damage_entries（R1.1 / R1.7）；power 字段不写。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。例外：area 不是镜像字段（写 line/1 描述实际形态），理由见 _engine_note。"
 }

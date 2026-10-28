@@ -10,7 +10,7 @@ extends SceneTree
 ##   ④ 招架：额外闪避 = 当前技巧，随技巧即时变化；必定命中不受影响；到下个自身回合开始结束。
 ##   ⑤ 同槽（R3.6）：3 印记且剑气 ≥ 20 → 拔刀；条件不成立立即恢复；拔刀冷却中保持招架。
 ##   ⑥ 拔刀：周围没有敌人不可用且不扣消耗；对范围内每名敌人结算、不伤自己；印记结算后才扣。
-##   ⑦ 斩击：命中得 25 剑气，造成伤害后得印记（伤害为 0 不得）；居合：结算后得印记。
+##   ⑦ 斩击：命中得 25 剑气，造成伤害后得印记（伤害为 0 不得 [推断]）；居合：结算后得印记。
 ##
 ## 运行：
 ##   <Godot_console.exe> --headless --path <worktree> --script res://tests/test_kensei_base.gd
@@ -202,8 +202,11 @@ func _test_zhaojia(tm: Node, ks: Unit, enemy: Unit) -> void:
 	_eq("额外闪避 +技巧 12", ks.get_avoid_value(0) - avoid0, 12)
 	ks.stats.dex = 20
 	_eq("技巧变为 20 → 额外闪避即时变为 +20", ks.get_avoid_value(0) - avoid0, 20)
-	# 必定命中不受影响：闪避再高也命中。
+	# 必定命中不受影响：闪避再高也命中。先做对照：同样条件、不带必定命中时命中率为最低值，
+	# 证明这么高的闪避确实生效。
 	ks.stats.dex = 200
+	var plain: Dictionary = DamageCalculator.preview_attack(enemy, ks, {})
+	_eq("对照：不带必定命中时，额外闪避把命中率压到下限 1%", int(plain.get("hit_percent", -1)), 1)
 	var forced: Dictionary = DamageCalculator.roll_outcome(enemy, ks, {"guaranteed_hit": true})
 	_eq("必定命中的攻击照样命中", bool(forced.get("hit", false)), true)
 	ks.stats.dex = 12
@@ -319,7 +322,9 @@ func _test_marks_timing(tm: Node, ks: Unit, enemy: Unit) -> void:
 	_eq("斩击命中得 25 剑气", ks.sword_qi, 25)
 	_eq("斩击造成伤害后得 1 枚印记", ks.get_mark_count(), 1)
 
-	# 命中但伤害为 0：剑气照得，印记不得。
+	# 命中但伤害为 0：剑气照得，印记不得。[推断] 设计库 effect 同一句里分别写了「命中后获得剑气」与
+	# 「造成伤害后获得印记」，本仓分发里「造成伤害时」要求伤害 > 0；rules「印记在伤害结算后获得」
+	# 也可读成单纯的时序，所以这一条是推断，交付时列为待用户确认的口径。
 	enemy.stats.def_attr = 999
 	ks.clear_marks()
 	ks.set_sword_qi(0)

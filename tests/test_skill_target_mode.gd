@@ -171,6 +171,9 @@ func _test_behavior_preserved(dl: Object, tm: Object) -> void:
 	# 例外：kensei_badao 是自身中心范围伤害（设计库 target_mode=自身、area 菱形 1），旧推断
 	# 只认「自身 + 单体」为自身，无法表达它；它选自己、打周围敌人（_get_area_effect_relation）。
 	_eq("「瞄准谁」只有登记的例外变了", str(changed_relation), str(["kensei_badao"]))
+	var badao: Dictionary = dl.skills.get("kensei_badao", {})
+	_eq("例外 kensei_badao：选目标是自己", tm._get_skill_target_relation(badao), "self")
+	_eq("例外 kensei_badao：范围内结算的是敌人", tm._get_area_effect_relation(badao), "enemy")
 	for sid: String in allowed:
 		_check("例外 %s 的理由已登记：%s" % [sid, str(EXPECTED_BEHAVIOR_CHANGES[sid])],
 			str(EXPECTED_BEHAVIOR_CHANGES[sid]) != "")

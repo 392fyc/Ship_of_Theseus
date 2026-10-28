@@ -54,5 +54,5 @@
   },
   "description": "迅捷·持续到下个自身回合开始；期间额外闪避 +N，N 等于当前技巧（每次命中判定时读取）。必定命中的攻击不受影响。持有 3 枚印记且剑气不少于 20 点时，本槽变为〔拔刀〕。",
   "_engine_note": "设计库本技能没有伤害条目（damage_type=无）。power=0 让它走辅助技能路径；damage_type 写 physical 只为满足通用字段，不参与结算。额外闪避按 R1.2「其他闪避加减」进入目标闪避，用持有型状态 kensei_zhaojia 承载，倍率 100%（= 当前技巧）写在 params 里。槽位替换条件 slot_swap_requires 来自设计库 effect，按 R3.6 只在〔拔刀〕不在冷却时替换。",
-  "_mirror": "设计库镜像字段：name / damage_entries / 射程 / 范围 / 冷却 / 行动消耗 / 剑气与印记数值来自设计库仓 snapshots/skills.json @ 762393b（kensei_zhaojia）。伤害只读 damage_entries（R1.1 / R1.7）；power 字段不写。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。"
+  "_mirror": "设计库镜像字段：name / damage_entries / 射程 / 范围 / 冷却 / 行动消耗 / 剑气与印记数值来自设计库仓 snapshots/skills.json @ 762393b（kensei_zhaojia）。伤害只读 damage_entries（R1.1 / R1.7）；power 字段不写。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。例外：power 与 damage_type 不是镜像字段，理由见 _engine_note。"
 }
