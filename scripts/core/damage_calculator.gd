@@ -1,7 +1,9 @@
 class_name DamageCalculator
 extends RefCounted
-## ADR-005: FE-style additive base damage + multiplicative outer layers.
-## Block removed from base resolution flow.
+## R1.1：底数 =（攻击属性 + 技能威力 − 目标防御，最低 0）× 技能系数，之后依次乘
+## 普通天赋提升（各项相加后乘）、各项总增与总降（逐项相乘）、暴击、地形、遗物与其他最终修正。
+## R1.7：武器威力不进入伤害；`skill_power` 只承载技能威力（设计库外的旧技能与普通攻击由
+## 调用方按等价桥接填入，见 tactical_manager `_legacy_skill_power`）。命中与暴击仍读武器。
 ## Hit/Avoid derived from DEX/SPD (LCK removed, R1.2); Crit derived from DEX/LCK
 ## (LCK still gates crit avoid).
 
@@ -91,10 +93,9 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	var final_multiplier: float = action_data.get("final_multiplier", 1.0)
 	var pure_atk_source: String = action_data.get("pure_atk_source", "phys")
 
-	# R1.8「中间量不取整」：weapon_might 用 float 承接，因为它可能是被修正过的
-	# 中间量（例：副手追加取 might×50%，5×0.5=2.5）。提前截成 int 等于在中间层
-	# floor 一次，与 R1.8「clamp 与 floor 在最外层生效」冲突。主手传整数时行为不变。
-	var weapon_might: float = float(action_data.get("weapon_might", 0))
+	# R1.8「中间量不取整」：skill_power 用 float 承接，因为它可能是被修正过的中间量。
+	var skill_power: float = float(action_data.get("skill_power", 0))
+	var base_attribute: String = str(action_data.get("base_attribute", ""))
 	var terrain_def_bonus: int = action_data.get("terrain_def_bonus", 0)
 	var terrain_res_bonus: int = action_data.get("terrain_res_bonus", 0)
 
@@ -126,10 +127,10 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	# ── Step 3: Base damage (additive, FE-style) ────────
 	var base_damage: float = _calc_base_damage(
 		attacker, defender, damage_type,
-		weapon_might, pure_atk_source, terrain_def_bonus, terrain_res_bonus)
+		skill_power, base_attribute, pure_atk_source, terrain_def_bonus, terrain_res_bonus)
 
 	# ── Step 4: Apply multiplicative layers ─────────────
-	var final_dmg: float = base_damage * skill_multiplier * terrain_multiplier
+	var final_dmg: float = base_damage * skill_multiplier * terrain_multiplier * outer_layer_multiplier(action_data)
 
 	if result.crit:
 		# R1.3 暴击倍率 = (1.5 + Σ 加算 crit_damage_bonus) × Π 乘算 crit_damage_mult，
@@ -169,7 +170,8 @@ static func preview_attack(attacker: Unit, defender: Unit,
 	var relic_multiplier: float = action_data.get("relic_multiplier", 1.0)
 	var final_multiplier: float = action_data.get("final_multiplier", 1.0)
 	var pure_atk_source: String = action_data.get("pure_atk_source", "phys")
-	var weapon_might: float = float(action_data.get("weapon_might", 0))
+	var skill_power: float = float(action_data.get("skill_power", 0))
+	var base_attribute: String = str(action_data.get("base_attribute", ""))
 	var weapon_hit: int = action_data.get("weapon_hit", 0)
 	var weapon_crit: int = action_data.get("weapon_crit", 0)
 	var terrain_evade_bonus: int = action_data.get("terrain_evade_bonus", 0)
@@ -196,9 +198,9 @@ static func preview_attack(attacker: Unit, defender: Unit,
 			crit_rate = maxf(0.0, (crit_value - dodge_value) / 100.0)
 
 	var base_damage: float = _calc_base_damage(
-		attacker, defender, damage_type, weapon_might, pure_atk_source,
+		attacker, defender, damage_type, skill_power, base_attribute, pure_atk_source,
 		terrain_def_bonus, terrain_res_bonus)
-	var final_damage: float = base_damage * skill_multiplier * terrain_multiplier
+	var final_damage: float = base_damage * skill_multiplier * terrain_multiplier * outer_layer_multiplier(action_data)
 	final_damage *= relic_multiplier * final_multiplier
 	# 敌人词条输出乘区（与 resolve_attack 一致，保证 forecast == 实际伤害）。
 	final_damage *= _affix_attack_multiplier(attacker)
@@ -225,51 +227,67 @@ static func preview_attack(attacker: Unit, defender: Unit,
 	}
 
 
+## R1.1 普通天赋提升与总增总降两层的合计倍率。
+## `damage_increase_pcts`：普通天赋提升（百分数），各项先相加，再乘 (1 + Σ/100)。
+## `damage_total_modifiers`：各项总增与总降（倍率，如总降 20% 写 0.8），每一项单独相乘，
+## 不同来源彼此相乘不相加。两个键缺省时倍率为 1.0。
+static func outer_layer_multiplier(action_data: Dictionary) -> float:
+	var increase_sum: float = 0.0
+	var increases: Variant = action_data.get("damage_increase_pcts", [])
+	if increases is Array:
+		for pct: Variant in increases:
+			increase_sum += float(pct)
+	var mult: float = maxf(0.0, 1.0 + increase_sum / 100.0)
+	var totals: Variant = action_data.get("damage_total_modifiers", [])
+	if totals is Array:
+		for modifier: Variant in totals:
+			mult *= float(modifier)
+	return mult
+
+
 static func _calc_base_damage(attacker: Unit, defender: Unit,
 		damage_type: String,
-		weapon_might: float, pure_atk_source: String,
+		skill_power: float, base_attribute: String, pure_atk_source: String,
 		terrain_def_bonus: int, terrain_res_bonus: int) -> float:
-	## R1.1（伤害链）: Additive base damage formula.
-	## physical:  max(0, STR + weapon_might - DEF)
-	## magical:   max(0, MAG + weapon_might - RES)
-	## pure:      [source] + weapon_might  (ignores defense)
-	## hybrid:    ( max(0, STR + weapon_might - DEF) + max(0, MAG + weapon_might - RES) ) / 2
-	##            物理与魔法各按 R1.1 各算一次（各自带自己的地板），再取算术平均。
-	##            2026-08-03 用户裁决 A [已定]，取代旧的 min(DEF,RES) 占位写法。
-	var base: float = 0.0
+	## R1.1 底数（系数由调用方在外层乘）：
+	## physical:  max(0, 攻击属性 + 技能威力 − DEF)，攻击属性默认 STR
+	## magical:   max(0, 攻击属性 + 技能威力 − RES)，攻击属性默认 MAG
+	## pure:      攻击属性 + 技能威力（无视防御）；未写 base_attribute 时按 pure_atk_source
+	## hybrid:    物理段与魔法段各自取 max(0,·) 后取平均（2026-08-03 用户裁决 A）
+	## base_attribute（"STR"/"MAG"）对应设计库伤害条目的「以力量 / 魔力计算」。
 	var defender_def: int = defender.get_effective_stat("DEF") + terrain_def_bonus
 	var defender_res: int = defender.get_effective_stat("RES") + terrain_res_bonus
+	var str_value: float = float(attacker.get_effective_stat("STR"))
+	var mag_value: float = float(attacker.get_effective_stat("MAG"))
 	match damage_type:
 		"physical":
-			base = float(attacker.get_effective_stat("STR") + weapon_might \
-				 - defender_def)
+			var phys_attr: float = mag_value if base_attribute == "MAG" else str_value
+			return maxf(0.0, phys_attr + skill_power - defender_def)
 		"magical":
-			base = float(attacker.get_effective_stat("MAG") + weapon_might \
-				 - defender_res)
+			var mag_attr: float = str_value if base_attribute == "STR" else mag_value
+			return maxf(0.0, mag_attr + skill_power - defender_res)
 		"pure":
 			var raw: float = 0.0
-			match pure_atk_source:
-				"phys":
-					raw = float(attacker.get_effective_stat("STR"))
-				"mag":
-					raw = float(attacker.get_effective_stat("MAG"))
-				"sum":
-					raw = float(
-						attacker.get_effective_stat("STR") + attacker.get_effective_stat("MAG"))
-			base = raw + float(weapon_might)
-			return base  # pure ignores defense
+			if base_attribute == "STR":
+				raw = str_value
+			elif base_attribute == "MAG":
+				raw = mag_value
+			else:
+				match pure_atk_source:
+					"phys":
+						raw = str_value
+					"mag":
+						raw = mag_value
+					"sum":
+						raw = str_value + mag_value
+			return raw + skill_power  # pure ignores defense
 		"hybrid":
 			# 裁决 A（2026-08-03 [已定]）：物理与魔法各按 R1.1 各算一次（各自带自己的
-			# max(0,·) 地板），再取算术平均。
-			# ⚠️ 这不等于「一次性减去平均防御」——只要有一侧被地板截断，两种写法结果就不同，
-			# 所以必须在分支内先各自取地板再平均，不能落到函数末尾那个统一地板
-			# （那条路径是「先平均再取地板」，与裁决不符）。
-			var phys_part: float = maxf(0.0, float(
-				attacker.get_effective_stat("STR") + weapon_might - defender_def))
-			var mag_part: float = maxf(0.0, float(
-				attacker.get_effective_stat("MAG") + weapon_might - defender_res))
+			# max(0,·) 地板），再取算术平均；不等于「一次性减去平均防御」。
+			var phys_part: float = maxf(0.0, str_value + skill_power - defender_def)
+			var mag_part: float = maxf(0.0, mag_value + skill_power - defender_res)
 			return (phys_part + mag_part) / 2.0
-	return maxf(0.0, base)
+	return 0.0
 
 
 ## 敌人词条输出乘区：攻击方 stat_scale 增强（affix_damage_mult）× 条件触发词条。

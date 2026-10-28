@@ -125,7 +125,7 @@ func _test_bulwark(dl: Object) -> void:
 	dft.stats.max_hp = 999
 	dft.stats.hp = 999
 	var base_action: Dictionary = {
-		"damage_type": "physical", "weapon_might": 0, "guaranteed_hit": true}
+		"damage_type": "physical", "skill_power": 0, "guaranteed_hit": true}
 	# 无 affix_defense_multiplier → base 20（零影响对照）。
 	var pv_plain: Dictionary = DamageCalculator.preview_attack(atk, dft, base_action)
 	_eq("无防御乘区 → 伤害==20（零影响对照）", pv_plain["damage"], 20)
@@ -173,10 +173,10 @@ func _test_global_zero_impact(dl: Object) -> void:
 	g.stats.str_attr = 10
 	g.stats.dex = 0
 	var pv: Dictionary = DamageCalculator.preview_attack(g, t,
-		{"damage_type": "physical", "weapon_might": 0, "guaranteed_hit": true})
+		{"damage_type": "physical", "skill_power": 0, "guaranteed_hit": true})
 	_eq("无词条 · 空 action_data 输出==base(10)", pv["damage"], 10)
 	var rz: DamageCalculator.AttackResult = DamageCalculator.resolve_attack(g, t,
-		{"damage_type": "physical", "weapon_might": 0, "guaranteed_hit": true})
+		{"damage_type": "physical", "skill_power": 0, "guaranteed_hit": true})
 	_eq("无词条 · resolve==preview(10)", rz.damage, pv["damage"])
 	g.free()
 	t.free()

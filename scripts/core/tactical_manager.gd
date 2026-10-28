@@ -1969,6 +1969,9 @@ func _matches_target_relation(user: Unit, target_unit: Unit,
 
 
 func _is_support_skill(skill_data: Dictionary) -> bool:
+	# 设计库伤害条目技能不写 power，有条目即为伤害技能。
+	if not _select_damage_entry(skill_data).is_empty():
+		return false
 	return int(skill_data.get("power", 0)) <= 0
 
 
@@ -2290,7 +2293,7 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		"attack_type": _derive_skill_attack_type(skill_data),
 		"skill_multiplier": float(skill_data.get("power", 100)) / 100.0,
 		"terrain_multiplier": 1.0,
-		"weapon_might": int(basic_attack_profile.get("weapon_might", 0)),
+		"skill_power": _legacy_skill_power(basic_attack_profile),
 		"weapon_hit": int(basic_attack_profile.get("weapon_hit", 0))
 			+ int(skill_data.get("hit_bonus", 0)),
 		"weapon_crit": int(basic_attack_profile.get("weapon_crit", 0))
@@ -2312,7 +2315,83 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		"mark_gain": int(skill_data.get("mark_gain", 0)),
 		"ki_on_kill_cd_reduction": int(skill_data.get("ki_on_kill_cd_reduction", 0)),
 	}
+	var damage_entry: Dictionary = _select_damage_entry(skill_data)
+	if not damage_entry.is_empty():
+		_apply_damage_entry(payload, skill_data, damage_entry,
+			int(basic_attack_profile.get("weapon_hit", 0)))
 	return GameAction.make_skill(user, _selected_skill_id, target_pos, target, payload)
+
+
+## R1.7 武器威力不进入伤害。设计库外的旧技能、普通攻击与副手追加尚无「技能威力」，
+## 暂按等价桥接：技能威力 = 原武器威力，系数仍取原 power/100，数值与改动前一致。
+## 这是保持现状的过渡换算，不是设计结论；对应技能导入设计库后改走伤害条目。
+func _legacy_skill_power(basic_attack_profile: Dictionary) -> float:
+	return float(basic_attack_profile.get("weapon_might", 0))
+
+
+## 设计库伤害条目（damage_entries）中本次结算使用的一条。
+## 多条目按 sort 取最小的一条；按 applies_when 选择的钩子留到需要它的技能（霸天）实现。
+func _select_damage_entry(skill_data: Dictionary) -> Dictionary:
+	var entries: Variant = skill_data.get("damage_entries", [])
+	if not entries is Array:
+		return {}
+	var chosen: Dictionary = {}
+	for item: Variant in (entries as Array):
+		if not item is Dictionary:
+			continue
+		var entry: Dictionary = item
+		if chosen.is_empty() or int(entry.get("sort", 0)) < int(chosen.get("sort", 0)):
+			chosen = entry
+	return chosen
+
+
+## 条目的伤害类型：条目写了就用条目的，否则用技能的；返回运行时键，无法识别时为空串。
+func _damage_entry_type(skill_data: Dictionary, entry: Dictionary) -> String:
+	var entry_type: Variant = entry.get("damage_type", null)
+	if entry_type != null and str(entry_type) != "":
+		return _normalize_damage_type(entry_type)
+	return _normalize_damage_type(skill_data.get("damage_type", ""))
+
+
+## 把设计库伤害条目写入技能 payload（R1.1 / R1.7）。
+## 条目枚举保留设计库中文原值（「必定命中」「不可暴击」「力量」「纯粹」等），便于重新导入。
+## 技能威力只取条目 power，不加武器威力；命中与暴击仍以主手武器为底（R1.7）。
+func _apply_damage_entry(payload: Dictionary, skill_data: Dictionary,
+		entry: Dictionary, weapon_hit: int) -> void:
+	payload["damage_type"] = _damage_entry_type(skill_data, entry)
+	payload["skill_power"] = float(entry.get("power", 0))
+	payload["skill_multiplier"] = float(entry.get("coefficient", 1.0))
+	payload["weapon_hit"] = weapon_hit + int(entry.get("hit_bonus", 0))
+	match str(entry.get("base_attribute", "默认")):
+		"力量":
+			payload["base_attribute"] = "STR"
+		"魔力":
+			payload["base_attribute"] = "MAG"
+		_:
+			payload.erase("base_attribute")
+	if str(entry.get("hit_mode", "正常")) == "必定命中":
+		payload["guaranteed_hit"] = true
+	match str(entry.get("crit_mode", "正常")):
+		"必定暴击":
+			payload["guaranteed_crit"] = true
+		"不可暴击":
+			payload["guaranteed_crit"] = false
+			payload["disable_crit"] = true
+	payload["crit_damage_mult"] = float(entry.get("crit_multiplier", 1.0))
+
+
+## 设计库伤害类型中文值 → 运行时键；已是运行时键时原样返回，无法识别返回空串。
+func _normalize_damage_type(value: Variant) -> String:
+	match str(value):
+		"物理", "physical":
+			return "physical"
+		"魔法", "magical":
+			return "magical"
+		"纯粹", "pure":
+			return "pure"
+		"混合", "hybrid":
+			return "hybrid"
+	return ""
 
 
 func _derive_skill_attack_type(skill_data: Dictionary) -> String:
@@ -2384,6 +2463,12 @@ func _is_supported_runtime_skill(skill_data: Dictionary) -> bool:
 		return false
 	if _is_support_skill(skill_data):
 		return true
+	var damage_entry: Dictionary = _select_damage_entry(skill_data)
+	if not damage_entry.is_empty():
+		# 多段（segments > 1，连斩）尚未承载，留到连斩 PR。
+		if int(damage_entry.get("segments", 1)) > 1:
+			return false
+		return _damage_entry_type(skill_data, damage_entry) != ""
 	var damage_type: String = str(skill_data.get("damage_type", ""))
 	if damage_type not in ["physical", "magical", "pure", "hybrid"]:
 		return false
@@ -2401,8 +2486,8 @@ func _build_hostile_action_context(attacker: Unit, defender: Unit,
 	var action_data: Dictionary = base_data.duplicate(true)
 	var basic_attack_profile: Dictionary = _get_unit_basic_attack_profile(attacker)
 	var terrain_context: Dictionary = _get_unit_terrain_context(defender)
-	if not action_data.has("weapon_might"):
-		action_data["weapon_might"] = int(basic_attack_profile.get("weapon_might", 0))
+	if not action_data.has("skill_power"):
+		action_data["skill_power"] = _legacy_skill_power(basic_attack_profile)
 	if not action_data.has("weapon_hit"):
 		action_data["weapon_hit"] = int(basic_attack_profile.get("weapon_hit", 0))
 	if not action_data.has("weapon_crit"):
@@ -2456,7 +2541,7 @@ func _build_basic_attack_action_data(attacker: Unit, defender: Unit,
 		"terrain_multiplier": 1.0,
 		"relic_multiplier": 1.0,
 		"final_multiplier": 1.0,
-		"weapon_might": int(basic_attack_profile.get("weapon_might", 0)),
+		"skill_power": _legacy_skill_power(basic_attack_profile),
 		"weapon_hit": int(basic_attack_profile.get("weapon_hit", 0)),
 		"weapon_crit": int(basic_attack_profile.get("weapon_crit", 0)),
 		"pure_atk_source": str(basic_attack_profile.get("pure_atk_source", "phys")),
@@ -3097,12 +3182,13 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 		#   以此为准）：**计算过程的数值一律不变，只在最后乘 0.5 结算伤害**。
 		#     对： (STR + might − DEF) × … × 50%
 		#     错： STR + (might × 50%) − DEF      ← 别再改回这个
-		#   所以 weapon_might 原样传入、不打折；weapon_hit / weapon_crit 同样原样，
+		#   所以威力原样传入、不打折；weapon_hit / weapon_crit 同样原样，
 		#   副手照 R1.2/R1.3 用自己的原始值独立掷骰。折算见下面的 final_multiplier。
 		#
 		#   武器特效带来的属性加成是**另一回事**：它按二刀开刃的 effect_scale 折算后
-		#   并入 base（与 weapon_might 同层加算，等价），再随整体吃副手的 50%。
-		"weapon_might": float(offhand.get("weapon_might", 0))
+		#   并入 base（与技能威力同层加算，等价），再随整体吃副手的 50%。
+		#   R1.7：副手威力按 `_legacy_skill_power` 同一等价桥接填入 skill_power。
+		"skill_power": float(offhand.get("weapon_might", 0))
 			+ _offhand_effect_might_bonus(
 				offhand, damage_type, _offhand_effect_scale(attacker)),
 		"weapon_hit": int(offhand.get("weapon_hit", 0)),
@@ -3237,10 +3323,10 @@ func _offhand_effect_scale(unit: Unit) -> float:
 	return scale
 
 
-## 把副手武器的属性型特效折算成可并入 weapon_might 的加值。
+## 把副手武器的属性型特效折算成可并入 skill_power 的加值。
 ##
-## 只支持 STR / MAG 两个键：伤害公式里它们与 weapon_might 是同一层加算
-## （R1.1：physical = STR + might − DEF），所以把加成并进 might 与加进属性等价。
+## 只支持 STR / MAG 两个键：伤害公式里它们与 skill_power 是同一层加算
+## （R1.1：physical = STR + 技能威力 − DEF），所以把加成并进威力与加进属性等价。
 ## DEX 之类不支持——它会经 R1.2/R1.3 进命中与暴击链，并进 might 就错了，
 ## 遇到时告警并跳过该条，不静默当 0。
 func _offhand_effect_might_bonus(offhand: Dictionary, damage_type: String,
@@ -3263,7 +3349,7 @@ func _offhand_effect_might_bonus(offhand: Dictionary, damage_type: String,
 		var stat: String = str(effect.get("stat", ""))
 		if stat != "STR" and stat != "MAG":
 			push_warning("[Offhand] 武器特效属性「%s」暂不支持（只支持 STR / MAG——"
-				% stat + "它们与 weapon_might 同层加算；DEX 等会进命中/暴击链，需另接）")
+				% stat + "它们与 skill_power 同层加算；DEX 等会进命中/暴击链，需另接）")
 			continue
 		if stat != wanted:
 			continue    # 物理伤害只吃 STR、魔法只吃 MAG
