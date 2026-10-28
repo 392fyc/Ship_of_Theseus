@@ -1,144 +1,135 @@
 class_name TurnOrderBar
 extends PanelContainer
-## Proposal B — Classic TRPG turn order display.
-## Shows current turn queue with faction color indicators and initiative.
+## Present TurnManager's current-and-remaining queue without predicting future resources.
 
-const PLAYER_COLOR := Color(0.27, 0.53, 0.87)
-const ENEMY_COLOR  := Color(0.87, 0.27, 0.27)
-const CURRENT_BG   := Color(1.0, 0.90, 0.40, 0.12)
-const HEADER_COLOR := Color(0.65, 0.65, 0.75)
-const NAME_COLOR   := Color.WHITE
-const INIT_COLOR   := Color(0.55, 0.55, 0.60)
-const STATUS_COLOR := Color(0.72, 0.72, 0.78)
+const PLAYER_COLOR := Color("69a7dc")
+const ENEMY_COLOR := Color("e48b70")
+const TEXT_COLOR := Color("e0d7c5")
+const MUTED_COLOR := Color("aaa596")
+const USED_COLOR := Color("8d8982")
+const BAR_WIDTH := 180
 
-const BAR_WIDTH    := 180
-const PORTRAIT_SZ  := 24
-const ENTRY_SEP    := 2
-const FONT_NAME    := 13
-const FONT_INIT    := 11
-const FONT_HEADER  := 14
-const FONT_STATUS  := 10
-
-var _vbox: VBoxContainer
+var _entries: VBoxContainer
+var _round_label: Label
+var _completed_label: Label
+var _rows: Array[Dictionary] = []
 
 
 func _ready() -> void:
 	position = Vector2(1080.0, 10.0)
 	custom_minimum_size = Vector2(float(BAR_WIDTH), 0.0)
 	mouse_filter = MOUSE_FILTER_IGNORE
-
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.08, 0.10, 0.85)
-	style.border_width_left = 2
-	style.border_width_top = 2
-	style.border_width_right = 2
-	style.border_width_bottom = 2
-	style.border_color = Color(0.06, 0.06, 0.08)
+	style.bg_color = Color("19191ded")
+	style.set_border_width_all(1)
+	style.border_color = Color("766344")
 	style.content_margin_left = 8.0
 	style.content_margin_right = 8.0
 	style.content_margin_top = 8.0
 	style.content_margin_bottom = 8.0
 	add_theme_stylebox_override("panel", style)
-
-	_vbox = VBoxContainer.new()
-	_vbox.add_theme_constant_override("separation", ENTRY_SEP)
-	add_child(_vbox)
-
-	var header := Label.new()
-	header.text = "Turn Order"
-	header.add_theme_font_size_override("font_size", FONT_HEADER)
-	header.add_theme_color_override("font_color", HEADER_COLOR)
-	header.mouse_filter = MOUSE_FILTER_IGNORE
-	_vbox.add_child(header)
-
-	var sep := HSeparator.new()
-	sep.add_theme_constant_override("separation", 4)
-	_vbox.add_child(sep)
+	var content := VBoxContainer.new()
+	content.mouse_filter = MOUSE_FILTER_IGNORE
+	content.add_theme_constant_override("separation", 5)
+	add_child(content)
+	content.add_child(_label("行动顺序", 14, Color("ddc99d")))
+	_round_label = _label("", 11, MUTED_COLOR)
+	content.add_child(_round_label)
+	_entries = VBoxContainer.new()
+	_entries.mouse_filter = MOUSE_FILTER_IGNORE
+	_entries.add_theme_constant_override("separation", 3)
+	content.add_child(_entries)
+	_completed_label = _label("", 11, MUTED_COLOR)
+	content.add_child(_completed_label)
 
 
-func update_queue(display_queue: Array[Unit], current: Unit) -> void:
-	_clear_entries()
-	for unit in display_queue:
-		_vbox.add_child(_create_entry(unit, unit == current))
-
-
-func _clear_entries() -> void:
-	for i in range(_vbox.get_child_count() - 1, 1, -1):
-		var child := _vbox.get_child(i)
-		_vbox.remove_child(child)
+func update_queue(display_queue: Array[Unit], current: Unit,
+		round_number: int = 0, alive_count: int = 0) -> void:
+	for child: Node in _entries.get_children():
+		_entries.remove_child(child)
 		child.queue_free()
+	_rows.clear()
+	_round_label.text = "第 %d 回合 · 剩余 %d 人" % [round_number, display_queue.size()]
+	_completed_label.text = "存活单位已行动 %d 人" % maxi(0, alive_count - display_queue.size())
+	for index: int in display_queue.size():
+		var unit: Unit = display_queue[index]
+		_entries.add_child(_create_entry(unit, unit == current, index + 1))
+	reset_size()
 
 
-func _create_entry(unit: Unit, is_current: bool) -> PanelContainer:
+func _create_entry(unit: Unit, is_current: bool, order: int) -> PanelContainer:
+	var faction: Color = PLAYER_COLOR if unit.faction == "player" else ENEMY_COLOR
 	var panel := PanelContainer.new()
-	var ps := StyleBoxFlat.new()
-	ps.bg_color = CURRENT_BG if is_current else Color.TRANSPARENT
-	ps.content_margin_left = 4.0
-	ps.content_margin_right = 4.0
-	ps.content_margin_top = 2.0
-	ps.content_margin_bottom = 2.0
-	panel.add_theme_stylebox_override("panel", ps)
 	panel.mouse_filter = MOUSE_FILTER_IGNORE
-
-	var hbox := HBoxContainer.new()
-	hbox.add_theme_constant_override("separation", 6)
-	hbox.mouse_filter = MOUSE_FILTER_IGNORE
-	panel.add_child(hbox)
-
-	var portrait := PanelContainer.new()
-	var portrait_style := StyleBoxFlat.new()
-	portrait_style.bg_color = PLAYER_COLOR if unit.faction == "player" else ENEMY_COLOR
-	portrait_style.corner_radius_top_left = 3
-	portrait_style.corner_radius_top_right = 3
-	portrait_style.corner_radius_bottom_left = 3
-	portrait_style.corner_radius_bottom_right = 3
-	portrait_style.content_margin_left = 0.0
-	portrait_style.content_margin_right = 0.0
-	portrait_style.content_margin_top = 0.0
-	portrait_style.content_margin_bottom = 0.0
-	portrait.add_theme_stylebox_override("panel", portrait_style)
-	portrait.custom_minimum_size = Vector2(float(PORTRAIT_SZ), float(PORTRAIT_SZ))
-	portrait.mouse_filter = MOUSE_FILTER_IGNORE
-	hbox.add_child(portrait)
-
-	var portrait_label := Label.new()
-	portrait_label.text = unit.get_short_label()
-	portrait_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	portrait_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	portrait_label.size = Vector2(float(PORTRAIT_SZ), float(PORTRAIT_SZ))
-	portrait_label.add_theme_font_size_override("font_size", FONT_NAME)
-	portrait_label.add_theme_color_override("font_color", Color.WHITE)
-	portrait_label.add_theme_color_override("font_outline_color", Color.BLACK)
-	portrait_label.add_theme_constant_override("outline_size", 2)
-	portrait_label.mouse_filter = MOUSE_FILTER_IGNORE
-	portrait.add_child(portrait_label)
-
-	var text_box := VBoxContainer.new()
-	text_box.size_flags_horizontal = SIZE_EXPAND_FILL
-	text_box.mouse_filter = MOUSE_FILTER_IGNORE
-	hbox.add_child(text_box)
-
-	var name_lbl := Label.new()
-	name_lbl.text = unit.unit_name
-	name_lbl.add_theme_font_size_override("font_size", FONT_NAME)
-	name_lbl.add_theme_color_override("font_color", NAME_COLOR)
-	name_lbl.size_flags_horizontal = SIZE_EXPAND_FILL
-	name_lbl.mouse_filter = MOUSE_FILTER_IGNORE
-	text_box.add_child(name_lbl)
-
-	var status_lbl := Label.new()
-	status_lbl.text = unit.get_action_status_summary()
-	status_lbl.add_theme_font_size_override("font_size", FONT_STATUS)
-	status_lbl.add_theme_color_override("font_color", STATUS_COLOR)
-	status_lbl.mouse_filter = MOUSE_FILTER_IGNORE
-	text_box.add_child(status_lbl)
-
-	var init_lbl := Label.new()
-	init_lbl.text = "Init %d" % unit.get_effective_stat("SPD")
-	init_lbl.add_theme_font_size_override("font_size", FONT_INIT)
-	init_lbl.add_theme_color_override("font_color", INIT_COLOR)
-	init_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	init_lbl.mouse_filter = MOUSE_FILTER_IGNORE
-	hbox.add_child(init_lbl)
-
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("c2a96b20") if is_current else Color("10111460")
+	style.border_width_left = 2
+	style.border_color = faction if is_current else faction.darkened(0.45)
+	style.content_margin_left = 5.0
+	style.content_margin_right = 4.0
+	style.content_margin_top = 5.0
+	style.content_margin_bottom = 5.0
+	panel.add_theme_stylebox_override("panel", style)
+	var lines := VBoxContainer.new()
+	lines.mouse_filter = MOUSE_FILTER_IGNORE
+	lines.add_theme_constant_override("separation", 3)
+	panel.add_child(lines)
+	var heading := HBoxContainer.new()
+	heading.mouse_filter = MOUSE_FILTER_IGNORE
+	heading.add_theme_constant_override("separation", 5)
+	lines.add_child(heading)
+	var ordinal: Label = _label(str(order), 12, faction)
+	ordinal.custom_minimum_size.x = 12.0
+	heading.add_child(ordinal)
+	var unit_name_label: Label = _label(unit.unit_name, 13, TEXT_COLOR)
+	unit_name_label.size_flags_horizontal = SIZE_EXPAND_FILL
+	heading.add_child(unit_name_label)
+	if is_current:
+		heading.add_child(_label("当前", 11, Color("e4c785")))
+	var speed: Label = _label("速度 %d" % unit.get_effective_stat("SPD"), 10, MUTED_COLOR)
+	heading.add_child(speed)
+	var resource_labels: Array[Label] = []
+	var waiting_label: Label = null
+	if is_current:
+		var resources := HBoxContainer.new()
+		resources.mouse_filter = MOUSE_FILTER_IGNORE
+		resources.add_theme_constant_override("separation", 5)
+		lines.add_child(resources)
+		var names: Array[String] = ["移动", "标准", "迅捷"]
+		var consumed: Array[bool] = [unit.movement_used, unit.standard_used, unit.swift_used]
+		for index: int in names.size():
+			var text: String = names[index] + ("已用" if consumed[index] else "可用")
+			var resource: Label = _label(text, 10, USED_COLOR if consumed[index] else TEXT_COLOR)
+			resources.add_child(resource)
+			resource_labels.append(resource)
+	else:
+		# Waiting units retain previous-turn flags until their own turn begins.
+		waiting_label = _label("等待行动", 11, MUTED_COLOR)
+		lines.add_child(waiting_label)
+	_rows.append({"instance_id":unit.get_instance_id(), "unit_id":unit.unit_id,
+		"current":is_current, "panel":panel, "resources":resource_labels, "waiting":waiting_label})
 	return panel
+
+
+func _label(text_value: String, font_size: int, color: Color) -> Label:
+	var result := Label.new()
+	result.text = text_value
+	result.mouse_filter = MOUSE_FILTER_IGNORE
+	result.add_theme_font_size_override("font_size", font_size)
+	result.add_theme_color_override("font_color", color)
+	return result
+
+
+## Read actual displayed labels for captures and state-transition tests.
+func get_debug_snapshot() -> Dictionary:
+	var rows: Array[Dictionary] = []
+	for row: Dictionary in _rows:
+		var resources: Array[String] = []
+		for label: Label in row["resources"]:
+			resources.append(label.text)
+		var waiting: Label = row["waiting"] as Label
+		rows.append({"instance_id":row["instance_id"], "unit_id":row["unit_id"],
+			"current":row["current"], "resource_texts":resources,
+			"waiting_text":waiting.text if waiting != null else "",
+			"rect":(row["panel"] as Control).get_global_rect()})
+	return {"round_text":_round_label.text, "completed_text":_completed_label.text, "units":rows}

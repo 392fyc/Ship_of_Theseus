@@ -522,6 +522,7 @@ func _do_enemy_turn(unit: Unit) -> void:
 					unit.unit_name, from, action.target_pos])
 				GameAction.consume_normal_move(unit)
 				unit.refresh_status_icons()
+				_emit_dashboard_state_changed()
 				await unit.move_to(action.target_pos, grid)
 				if not battle_active or not is_instance_valid(unit) or turn_manager.current_unit != unit:
 					return
@@ -1645,6 +1646,7 @@ func _execute_move(unit: Unit, target: Vector2i) -> void:
 	_path_preview = []
 	_clear_highlights()
 	_move_range = {}
+	_emit_dashboard_state_changed()
 	await unit.move_to(target, grid)
 	if not battle_active or not is_instance_valid(unit) or turn_manager.current_unit != unit:
 		return
@@ -1750,6 +1752,7 @@ func _execute_attack_action(action: GameAction) -> bool:
 	_move_committed = true
 	attacker.refresh_status_icons()
 	_execute_hostile_action(attacker, defender, action.data)
+	_emit_dashboard_state_changed()
 	return true
 
 
@@ -1865,6 +1868,7 @@ func _execute_skill_action(action: GameAction) -> bool:
 	# ── 位移技能（如一闪）：施放后落在所选目标格 ──
 	if bool(skill_data.get("displacement", false)):
 		_apply_skill_displacement(user, target_pos)
+	_emit_dashboard_state_changed()
 	return true
 
 
