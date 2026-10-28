@@ -81,4 +81,4 @@ headless 跑法（退出码 0 = 全过）：
 ## 协作规则
 
 - `AGENTS.md`（Codex 项目入口，Claude Code 经 `CLAUDE.md` 导入）/ `CLAUDE.md`（Claude Code 宿主差异）/ `.cursorrules`（Cursor）：各工具链的规则入口，含机制红线与 GDScript 禁则。改动机制前先看这三份。
-- 分支命名 `{agent}/{lane}/{task-name}`（不属于任何 lane 的临时工作用 `{agent}/{task-name}`），在任务工作树中开发；多 lane 协作见 `docs/lane-collaboration.md`；经独立审查后用 `scripts/codex/sot-publish.ps1` 发布并走 PR，不直接提交或推送 `develop`、`main`。
+- 分支按目的命名 `<类型>/<目的>[-<lane>]-<agent>`，例如 `feature/zhufeng-review-gameplay-design-claude`，agent 与 lane 只作后缀（见 `docs/lane-collaboration.md` 第 6 节），在任务工作树中开发；多 lane 协作见 `docs/lane-collaboration.md`；经独立审查后用 `scripts/codex/sot-publish.ps1` 发布并走 PR，不直接提交或推送 `develop`、`main`。

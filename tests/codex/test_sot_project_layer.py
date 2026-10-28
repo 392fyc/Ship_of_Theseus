@@ -329,7 +329,7 @@ def test_publish_pushes_only_the_current_task_branch_to_the_same_origin_branch()
         origin.mkdir()
         repo.mkdir()
         run(["git", "init", "--bare"], origin)
-        init_repository(repo, "codex/fixture-publish")
+        init_repository(repo, "feature/fixture-publish-codex")
         run(["git", "remote", "add", "origin", str(origin)], repo)
         fixture_script = install_publish_script(repo)
 
@@ -337,11 +337,11 @@ def test_publish_pushes_only_the_current_task_branch_to_the_same_origin_branch()
             ["pwsh", "-NoProfile", "-File", str(fixture_script)],
             repo,
         )
-        assert "codex/fixture-publish" in result.stdout
+        assert "feature/fixture-publish-codex" in result.stdout
         assert str(origin) not in result.stdout
         local_head = run(["git", "rev-parse", "HEAD"], repo).stdout.strip()
         remote_head = run(
-            ["git", "--git-dir", str(origin), "rev-parse", "refs/heads/codex/fixture-publish"],
+            ["git", "--git-dir", str(origin), "rev-parse", "refs/heads/feature/fixture-publish-codex"],
             temp,
         ).stdout.strip()
         assert remote_head == local_head
@@ -349,7 +349,59 @@ def test_publish_pushes_only_the_current_task_branch_to_the_same_origin_branch()
             ["git", "--git-dir", str(origin), "for-each-ref", "--format=%(refname:short)", "refs/heads"],
             temp,
         ).stdout.splitlines()
-        assert branches == ["codex/fixture-publish"]
+        assert branches == ["feature/fixture-publish-codex"]
+
+
+def test_publish_refuses_an_agent_prefix_until_the_branch_is_on_origin() -> None:
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp = Path(temp_dir)
+        origin = temp / "origin.git"
+        repo = temp / "repo"
+        origin.mkdir()
+        repo.mkdir()
+        run(["git", "init", "--bare"], origin)
+        init_repository(repo, "claude/talent-design-73a9c8")
+        run(["git", "remote", "add", "origin", str(origin)], repo)
+        fixture_script = install_publish_script(repo)
+
+        refused = run(["pwsh", "-NoProfile", "-File", str(fixture_script)], repo, check=False)
+        assert refused.returncode != 0
+        assert "<type>/<purpose>[-<lane>]-<agent>" in refused.stdout + refused.stderr
+        assert run(["git", "--git-dir", str(origin), "for-each-ref", "refs/heads"], temp).stdout == ""
+
+        # A branch that is already on origin (published before the rule) can still be published.
+        run(["git", "push", "-q", "origin", "HEAD:refs/heads/claude/talent-design-73a9c8"], repo)
+        allowed = run(["pwsh", "-NoProfile", "-File", str(fixture_script)], repo)
+        assert "claude/talent-design-73a9c8" in allowed.stdout
+
+
+def test_publish_refuses_each_agent_or_lane_prefix_in_any_case() -> None:
+    for branch in ("codex/x", "lane/ui-ux/1", "Claude/x"):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp = Path(temp_dir)
+            origin = temp / "origin.git"
+            repo = temp / "repo"
+            origin.mkdir()
+            repo.mkdir()
+            run(["git", "init", "--bare"], origin)
+            init_repository(repo, branch)
+            run(["git", "remote", "add", "origin", str(origin)], repo)
+            refused = run(["pwsh", "-NoProfile", "-File", str(install_publish_script(repo))], repo, check=False)
+            assert refused.returncode != 0, branch
+            assert "<type>/<purpose>[-<lane>]-<agent>" in refused.stdout + refused.stderr, branch
+
+
+def test_publish_does_not_ask_to_rename_when_origin_cannot_be_read() -> None:
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp = Path(temp_dir)
+        repo = temp / "repo"
+        repo.mkdir()
+        init_repository(repo, "codex/ui-ux/already-published")
+        run(["git", "remote", "add", "origin", str(temp / "missing.git")], repo)
+        refused = run(["pwsh", "-NoProfile", "-File", str(install_publish_script(repo))], repo, check=False)
+        text = refused.stdout + refused.stderr
+        assert refused.returncode != 0
+        assert "Cannot check whether" in text and "Rename it" not in text
 
 
 def test_publish_rejects_protected_branches() -> None:
@@ -383,7 +435,7 @@ def test_publish_rejects_a_dirty_working_tree() -> None:
         origin.mkdir()
         repo.mkdir()
         run(["git", "init", "--bare"], origin)
-        init_repository(repo, "codex/fixture-dirty")
+        init_repository(repo, "feature/fixture-dirty-codex")
         run(["git", "remote", "add", "origin", str(origin)], repo)
         fixture_script = install_publish_script(repo)
         (repo / "fixture.txt").write_text("dirty\n", encoding="utf-8")
@@ -399,7 +451,7 @@ def test_publish_rejects_a_dirty_working_tree() -> None:
 def test_publish_rejects_invocation_from_another_repository() -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
         repo = Path(temp_dir)
-        init_repository(repo, "codex/foreign-repository")
+        init_repository(repo, "feature/foreign-repository-codex")
         result = run(
             ["pwsh", "-NoProfile", "-File", str(PUBLISH_SCRIPT), "-DryRun"],
             repo,
@@ -418,7 +470,7 @@ def test_publish_dry_run_allows_configured_designlib_linked_worktree() -> None:
         origin.mkdir()
         designlib.mkdir()
         run(["git", "init", "--bare"], origin)
-        init_repository(designlib, "codex/designlib-base")
+        init_repository(designlib, "feature/designlib-base-codex")
         run(["git", "remote", "add", "origin", str(origin)], designlib)
         run(
             [
@@ -426,7 +478,7 @@ def test_publish_dry_run_allows_configured_designlib_linked_worktree() -> None:
                 "worktree",
                 "add",
                 "-b",
-                "codex/designlib-publish",
+                "feature/designlib-publish-codex",
                 str(linked_worktree),
             ],
             designlib,
@@ -440,7 +492,7 @@ def test_publish_dry_run_allows_configured_designlib_linked_worktree() -> None:
         )
 
         assert result.returncode == 0, result.stdout + result.stderr
-        assert "codex/designlib-publish" in result.stdout
+        assert "feature/designlib-publish-codex" in result.stdout
         assert str(designlib) not in result.stdout + result.stderr
         assert str(origin) not in result.stdout + result.stderr
 
@@ -456,12 +508,12 @@ def test_publish_scopes_local_roots_to_repository_section() -> None:
         for path in (origin, repo, designlib, worktree_group):
             path.mkdir(parents=True)
         run(["git", "init", "--bare"], origin)
-        init_repository(repo, "codex/fixture-roots")
-        init_repository(designlib, "codex/fixture-designlib")
+        init_repository(repo, "feature/fixture-roots-codex")
+        init_repository(designlib, "feature/fixture-designlib-codex")
         run(["git", "remote", "add", "origin", str(origin)], repo)
         run(["git", "remote", "add", "origin", str(origin)], designlib)
         run(
-            ["git", "worktree", "add", "-b", "codex/fixture-designlib-task", str(linked_worktree)],
+            ["git", "worktree", "add", "-b", "feature/fixture-designlib-task-codex", str(linked_worktree)],
             designlib,
         )
         fixture_script = install_publish_script(repo)
@@ -491,14 +543,14 @@ def test_publish_scopes_local_roots_to_repository_section() -> None:
             repo,
             env=no_authorized_env,
         )
-        assert "codex/fixture-roots" in result.stdout
+        assert "feature/fixture-roots-codex" in result.stdout
 
         authorized = run(
             ["pwsh", "-NoProfile", "-File", str(fixture_script), "-DryRun"],
             linked_worktree,
             env=no_authorized_env,
         )
-        assert "codex/fixture-designlib-task" in authorized.stdout
+        assert "feature/fixture-designlib-task-codex" in authorized.stdout
 
         local_roots.write_text(
             "[roots]\n"

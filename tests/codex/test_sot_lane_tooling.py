@@ -748,12 +748,12 @@ def fake_gh(directory: Path, payload: object | None, exit_code: int = 0) -> dict
 
 def stacked_setup(sandbox: Path, trio):
     ship, _, _ = trio
-    git(ship, "checkout", "-q", "-b", "lane/a/1")
+    git(ship, "checkout", "-q", "-b", "feature/a-1-codex")
     commit_file(ship, "a.txt", "a\n", "lane a")
-    git(ship, "push", "-q", "origin", "lane/a/1")
-    git(ship, "checkout", "-q", "-b", "lane/b/1")
+    git(ship, "push", "-q", "origin", "feature/a-1-codex")
+    git(ship, "checkout", "-q", "-b", "feature/b-1-codex")
     commit_file(ship, "b.txt", "b\n", "lane b")
-    prs = [{"number": 46, "headRefName": "lane/a/1", "baseRefName": "develop"}]
+    prs = [{"number": 46, "headRefName": "feature/a-1-codex", "baseRefName": "develop"}]
     return ship, prs
 
 
@@ -768,9 +768,9 @@ def test_publish_refuses_stacking_without_declaration(sandbox, trio) -> None:
     text = refused.stdout + refused.stderr
     assert refused.returncode != 0 and "#46" in text and "-StackedOn" in text
 
-    allowed = publish(ship, env, "-StackedOn", "lane/a/1")
+    allowed = publish(ship, env, "-StackedOn", "feature/a-1-codex")
     assert "#46" in allowed.stdout and "merge after" in allowed.stdout
-    assert "lane/b/1" in allowed.stdout
+    assert "feature/b-1-codex" in allowed.stdout
 
 
 def test_publish_stacking_is_not_flagged_for_independent_or_merged_heads(sandbox, trio) -> None:
@@ -778,17 +778,17 @@ def test_publish_stacking_is_not_flagged_for_independent_or_merged_heads(sandbox
     env = fake_gh(sandbox / "bin", prs)
 
     # The PR head itself is not stacked on itself.
-    git(ship, "checkout", "-q", "lane/a/1")
+    git(ship, "checkout", "-q", "feature/a-1-codex")
     assert "#46" not in publish(ship, env).stdout
 
     # A branch cut from the protected base does not contain the PR head.
-    git(ship, "checkout", "-q", "-b", "lane/c/1", "origin/develop")
+    git(ship, "checkout", "-q", "-b", "feature/c-1-codex", "origin/develop")
     commit_file(ship, "c.txt", "c\n", "lane c")
     assert "stacked" not in (publish(ship, env).stdout).lower()
 
     # Once the PR head is part of the protected base, it no longer counts.
-    git(ship, "checkout", "-q", "lane/b/1")
-    git(ship, "push", "-q", "origin", "lane/a/1:develop")
+    git(ship, "checkout", "-q", "feature/b-1-codex")
+    git(ship, "push", "-q", "origin", "feature/a-1-codex:develop")
     git(ship, "fetch", "-q", "origin")
     assert "stacked" not in publish(ship, env).stdout.lower()
 
@@ -896,16 +896,16 @@ def test_memory_write_reports_a_stale_index_when_the_index_cannot_be_replaced(sa
 def test_publish_detects_a_lower_pr_that_advanced_after_this_branch_was_cut(sandbox, trio) -> None:
     ship, prs = stacked_setup(sandbox, trio)
     env = fake_gh(sandbox / "bin", prs)
-    # The lower PR gets a new commit after lane/b/1 was cut: its head is no longer an ancestor of HEAD.
+    # The lower PR gets a new commit after feature/b-1-codex was cut: its head is no longer an ancestor of HEAD.
     origin = git(ship, "remote", "get-url", "origin")
     scratch = sandbox / "scratch-lower"
-    git(sandbox, "clone", "-q", "--branch", "lane/a/1", origin, str(scratch))
+    git(sandbox, "clone", "-q", "--branch", "feature/a-1-codex", origin, str(scratch))
     git(scratch, "config", "core.autocrlf", "false")
     commit_file(scratch, "a2.txt", "more\n", "lower advanced")
-    git(scratch, "push", "-q", "origin", "lane/a/1")
+    git(scratch, "push", "-q", "origin", "feature/a-1-codex")
     refused = publish(ship, env, check=False)
     assert refused.returncode != 0 and "#46" in refused.stdout + refused.stderr
-    allowed = publish(ship, env, "-StackedOn", "lane/a/1")
+    allowed = publish(ship, env, "-StackedOn", "feature/a-1-codex")
     assert "#46" in allowed.stdout
 
 
