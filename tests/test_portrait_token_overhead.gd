@@ -164,7 +164,9 @@ func _run() -> void:
 	var fixed_anchor_ok: bool = true
 	var badge_follow_ok: bool = true
 	click(manager, move_cell)
-	while move_samples < 90:
+	# Multi-cell routes now show every step; wait for actual arrival, with a bound.
+	var movement_timeout: SceneTreeTimer = create_timer(3.0)
+	while movement_timeout.time_left > 0.0:
 		await process_frame
 		var sample_snapshot: Dictionary = layout.call("get_debug_snapshot")
 		var sample_row: Dictionary = _snapshot_unit(sample_snapshot, actor.get_instance_id())
@@ -452,7 +454,13 @@ func _run() -> void:
 		and restarted_move_cell != restarted_actor.grid_position)
 	if restarted_move_cell != Vector2i(-1, -1) and restarted_move_cell != restarted_actor.grid_position:
 		click(restarted_manager, restarted_move_cell)
-		await wait(0.4)
+		var restart_move_timeout: SceneTreeTimer = create_timer(3.0)
+		while restarted_manager.input_state == restarted_manager.InputState.ANIMATING \
+				and restart_move_timeout.time_left > 0.0:
+			await process_frame
+		_check("重开后的移动已完整到达并可进行攻击预测",
+			restarted_actor.grid_position == restarted_move_cell
+			and restarted_manager.input_state == restarted_manager.InputState.ACTION_PHASE)
 		_begin_strike(restarted_manager)
 		restarted_manager.handle_pointer_hover(_screen_for_cell(restarted_manager, restarted_target.grid_position))
 		await frames(3)
