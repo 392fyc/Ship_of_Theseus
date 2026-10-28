@@ -18,5 +18,10 @@ or export platform. For a production-data write, perform the supported dry-run
 first and then write plus readback exactly as the skill requires. Put source
 code changes in a target worktree, never in a protected main working tree.
 
+Before writing design content (effect text, values, rarity, triggers), read
+the KB design principles routed from `03-AI-Context/design-rules-index.md` for
+that entity, and stop to report any conflict between the requested content and
+those principles instead of writing it.
+
 Before any cross-repository write, read the target AGENTS.md and canonical
 contract and record the target HEAD and contract summary in the receipt.
