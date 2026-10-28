@@ -202,11 +202,16 @@ func _test_zhaojia(tm: Node, ks: Unit, enemy: Unit) -> void:
 	_eq("额外闪避 +技巧 12", ks.get_avoid_value(0) - avoid0, 12)
 	ks.stats.dex = 20
 	_eq("技巧变为 20 → 额外闪避即时变为 +20", ks.get_avoid_value(0) - avoid0, 20)
-	# 必定命中不受影响：闪避再高也命中。先做对照：同样条件、不带必定命中时命中率为最低值，
-	# 证明这么高的闪避确实生效。
+	# 必定命中不受影响：闪避再高也命中。先做对照：带正常武器命中、不带必定命中时，
+	# 去掉招架的命中率明显高于下限、挂着招架时被压到下限 1%，证明这份额外闪避确实生效。
 	ks.stats.dex = 200
-	var plain: Dictionary = DamageCalculator.preview_attack(enemy, ks, {})
-	_eq("对照：不带必定命中时，额外闪避把命中率压到下限 1%", int(plain.get("hit_percent", -1)), 1)
+	var held_snapshot: Array[Dictionary] = ks.held_states.to_array()
+	ks.held_states.clear()
+	var without_zj: int = int(DamageCalculator.preview_attack(enemy, ks, {"weapon_hit": 85}).get("hit_percent", -1))
+	ks.held_states.load_array(held_snapshot)
+	var with_zj: int = int(DamageCalculator.preview_attack(enemy, ks, {"weapon_hit": 85}).get("hit_percent", -1))
+	_check("对照：没有招架时命中率高于下限", without_zj > 1, "without=%d" % without_zj)
+	_eq("对照：挂着招架（额外闪避 = 技巧 200）时命中率被压到下限 1%", with_zj, 1)
 	var forced: Dictionary = DamageCalculator.roll_outcome(enemy, ks, {"guaranteed_hit": true})
 	_eq("必定命中的攻击照样命中", bool(forced.get("hit", false)), true)
 	ks.stats.dex = 12
