@@ -8,7 +8,7 @@ extends SceneTree
 ##      以及未知回忆、不是回忆、单位没有基础技能、形态的 upgrade_of 不符。每条拒绝都确认单位没变。
 ##   ⑤ R2.5 槽位替换：〔拔刀〕升级为〔满月〕后，〔招架〕槽换出来的是〔满月〕。
 ##   ⑥ 入口：GameAction.make_apply_memory 只带可序列化的 id；TacticalManager.request_apply_memory
-##      不消耗行动资源；为技能选目标途中拒绝。
+##      不消耗行动资源；为技能选目标途中、动作结算途中拒绝。
 ##   ⑦ 带进战斗：RunState 规整 memories、BattleAssembler 转交、TacticalScene 注入时兑现。
 ##
 ## 升级技能的 JSON 随下一个 PR（回忆技能六组）实装。这里在测试进程里装夹具技能代替：
@@ -334,6 +334,11 @@ func _test_tactical_entry() -> void:
 	_check("为技能选目标途中拒绝", not bool(busy.get("ok", true))
 		and str(busy.get("reason", "")).contains("选择目标"), str(busy.get("reason", "")))
 	_check("拒绝后一闪还在", sword.skill_ids.has("kensei_yishan"))
+	tm.input_state = 6  # InputState.ANIMATING
+	var animating: Dictionary = tm.request_apply_memory(sword, "kensei_tuodaoji")
+	_check("动作结算中拒绝", not bool(animating.get("ok", true))
+		and str(animating.get("reason", "")).contains("结算中"), str(animating.get("reason", "")))
+	_check("结算中拒绝后一闪还在", sword.skill_ids.has("kensei_yishan"))
 	tm.input_state = saved_state
 	tm.current_unit = saved_unit
 	var wrong_type: GameAction = GameAction.make_end_turn(sword)

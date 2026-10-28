@@ -328,7 +328,8 @@ func request_skill_selection(skill_id: String) -> void:
 
 ## 兑现回忆（gameplay-impl PR5，差距清单 M10）：测试与调试入口，经 GameAction.APPLY_MEMORY 执行。
 ## 不消耗行动资源 [推断：回忆是构筑选择，设计没有给战斗内兑现规定代价]。
-## 该单位正在为技能选目标时拒绝，免得选中的技能在目标选择途中被换掉。
+## 该单位正在为技能选目标时拒绝，免得选中的技能在目标选择途中被换掉；
+## 动作动画结算途中也拒绝，免得冷却记到已被替换的基础技能上。
 func request_apply_memory(unit: Unit, memory_id: String) -> Dictionary:
 	if unit == null:
 		return {"ok": false, "reason": "没有单位"}
@@ -339,6 +340,8 @@ func _execute_apply_memory(action: GameAction) -> Dictionary:
 	if action == null or action.type != GameAction.Type.APPLY_MEMORY or action.actor == null:
 		return {"ok": false, "reason": "不是回忆兑现动作"}
 	var actor: Unit = action.actor
+	if input_state == InputState.ANIMATING:
+		return {"ok": false, "reason": "动作结算中，不能兑现回忆"}
 	if actor == current_unit and input_state == InputState.SKILL_TARGETING:
 		return {"ok": false, "reason": "正在为技能选择目标，不能兑现回忆"}
 	var memory_id: String = str(action.data.get("memory_id", ""))
