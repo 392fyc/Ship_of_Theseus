@@ -140,6 +140,7 @@ func _process(_delta: float) -> bool:
 
 
 func _run() -> void:
+	_legacy_kensei_basic_attack_fixture()
 	var dl: Object = load(DATA_LOADER_PATH).new()
 	dl.load_all()
 
@@ -1253,3 +1254,14 @@ func _check(name: String, cond: bool, detail: String = "") -> void:
 
 func _eq(name: String, actual: Variant, expected: Variant) -> void:
 	_check(name, actual == expected, "期望 %s 实际 %s" % [str(expected), str(actual)])
+
+## 夹具：剑圣按用户裁决 S2 已没有普通攻击（gameplay-impl PR4）。本测试测的是天赋的触发与计数，
+## 攻击动作只是载体，原有计数口径建立在「普攻命中 +10 剑气」上。这里只在测试进程内给剑圣
+## 职业数据恢复普攻入口与普攻得气 10，以保留原计数口径；不代表游戏数据。
+func _legacy_kensei_basic_attack_fixture() -> void:
+	var dl: Node = root.get_node_or_null("/root/DataLoader")
+	if dl == null:
+		return
+	var cls: Dictionary = dl.classes.get("kensei", {})
+	cls["basic_attack"] = true
+	cls["basic_attack_qi_gain"] = 10

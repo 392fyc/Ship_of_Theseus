@@ -115,8 +115,8 @@ func _test_data() -> void:
 	_check("招架不再挂旧的概率减伤 buff", str(zhaojia.get("effects", [])).find("swordsman_parry_stance") < 0)
 	_check("剑士招架没有拔刀槽替换", not zhaojia.has("slot_swap_target"))
 	_eq("斩击命中得 25 剑气", int(dl.skills.get("myrmidon_zhanji", {}).get("qi_gain_on_hit", -1)), 25)
-	_check("剑圣仍用 swordsman_*（剑圣 PR 再改）",
-		(dl.classes.get("kensei", {}).get("skill_ids", []) as Array).has("swordsman_zhanji"))
+	_check("剑圣也已迁到自己的 kensei_*（gameplay-impl PR4）",
+		(dl.classes.get("kensei", {}).get("skill_ids", []) as Array).has("kensei_zhanji"))
 
 
 # ── ② S2 ─────────────────────────────────────────────

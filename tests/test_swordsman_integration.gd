@@ -218,9 +218,12 @@ func _test_basic_attack_qi(tm: Object, sword: Unit) -> void:
 	enemy.stats.hp = 999
 	sword.set_sword_qi(0)
 	sword.clear_marks()
-	# 空 data 模拟基础攻击 payload；_build_hostile_action_context 应按职业补 qi_gain_on_hit
+	# 用户裁决 S2（gameplay-impl PR4）：剑圣没有普通攻击，也不再有普攻得气。
+	_check("剑圣没有普通攻击", not sword.has_basic_attack
+		and not bool(GameAction.can_use_normal_attack(sword).get("ok", true)))
+	# 空 data 模拟基础攻击 payload：职业里已没有 basic_attack_qi_gain，命中也不产气。
 	tm._execute_hostile_action(sword, enemy, {})
-	_eq("剑圣普攻命中 → sword_qi==10（基础攻击产气）", sword.sword_qi, 10)
+	_eq("剑圣基础攻击 payload 不产气（basic_attack_qi_gain 已删除）", sword.sword_qi, 0)
 
 
 # ── G. 一闪位移（落在所选目标格）──────────────────────────

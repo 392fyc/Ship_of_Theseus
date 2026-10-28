@@ -79,16 +79,18 @@ func _run() -> void:
 		return
 	_reposition_unit(tactical_manager, enemy, enemy_target)
 	_check("攻击木桩与攻击者合法相邻", _manhattan_distance(unit.grid_position, enemy.grid_position) == 1)
-	var attack: GameAction = GameAction.make_attack(unit, enemy)
+	# 剑圣没有普通攻击（用户裁决 S2，gameplay-impl PR4）：标准行动改用真实的〔斩击〕。
+	tactical_manager._selected_skill_id = "kensei_zhanji"
+	var attack: GameAction = tactical_manager._build_skill_action(unit, enemy.grid_position, enemy)
 	_check("真实标准攻击动作可构造", attack != null)
-	var attack_validation: Dictionary = GameAction.can_use_normal_attack(unit)
+	var attack_validation: Dictionary = GameAction.validate_skill_usage(
+		unit, tactical_manager._get_skill_data("kensei_zhanji"))
 	_check("真实标准攻击动作当前有效", attack != null and bool(attack_validation.get("ok", false)))
 	if attack == null:
 		_finish(scene)
 		return
-	attack.data.merge(tactical_manager._build_basic_attack_action_data(unit, enemy), true)
 	var before_attack: int = _dashboard_signal_count
-	tactical_manager._execute_attack_from_input(attack)
+	tactical_manager._execute_skill_from_input(attack)
 	await process_frame
 	_check("标准行动自动发出仪表盘刷新", _dashboard_signal_count > before_attack)
 	_check("标准攻击后高血木桩仍存活", enemy.stats.is_alive())
@@ -101,10 +103,10 @@ func _run() -> void:
 	_check("迅捷技能前的新回合自动刷新", _dashboard_signal_count > before_swift_turn)
 	_check_runtime_state("迅捷技能前的新回合", unit, resource_bar, false, false, false)
 
-	tactical_manager._selected_skill_id = "swordsman_zhaojia"
+	tactical_manager._selected_skill_id = "kensei_zhaojia"
 	var swift_action: GameAction = tactical_manager._build_skill_action(
 		unit, unit.grid_position, unit)
-	var swift_skill_data: Dictionary = tactical_manager._get_skill_data("swordsman_zhaojia")
+	var swift_skill_data: Dictionary = tactical_manager._get_skill_data("kensei_zhaojia")
 	var swift_validation: Dictionary = GameAction.validate_skill_usage(unit, swift_skill_data)
 	_check("真实招架动作显式非空", swift_action != null)
 	_check("真实招架动作当前有效", swift_action != null and bool(swift_validation.get("ok", false)))

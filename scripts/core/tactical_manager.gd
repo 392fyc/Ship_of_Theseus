@@ -1010,8 +1010,19 @@ func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 	if requires_marks > 0 and unit.get_mark_count() < requires_marks:
 		entry["reason"] = "印记不足（需要 %d 个，当前 %d）" % [requires_marks, unit.get_mark_count()]
 		return entry
+	if bool(skill_data.get("requires_enemy_in_area", false)) \
+			and _get_units_in_skill_area(unit, skill_data,
+				_compute_skill_area_cells(unit, skill_data, unit.grid_position, Vector2i.ZERO)).is_empty():
+		entry["reason"] = "范围内没有敌人"
+		return entry
 	entry["available"] = true
 	return entry
+
+
+## 技能 JSON 的 slot_swap_requires（门槛字典）；没写时为空字典。
+func _slot_swap_requires(skill_data: Dictionary) -> Dictionary:
+	var requires: Variant = skill_data.get("slot_swap_requires", {})
+	return requires if requires is Dictionary else {}
 
 
 func _get_skill_entries() -> Array[Dictionary]:
@@ -1032,7 +1043,8 @@ func _get_skill_entries() -> Array[Dictionary]:
 		# ── 槽位替换（数据驱动）：替换规则由技能 JSON 的 slot_swap_* 声明 ──
 		var display_id: String = unit.get_visible_skill_id(skill_id,
 			str(slot_skill_data.get("slot_swap_trigger", "")),
-			str(slot_skill_data.get("slot_swap_target", "")))
+			str(slot_skill_data.get("slot_swap_target", "")),
+			_slot_swap_requires(slot_skill_data))
 		var entry: Dictionary = _build_skill_entry(unit, display_id)
 		# 保留原始槽位 ID 以便取消时恢复（附加字段，UI 可忽略）
 		entry["slot_origin_id"] = skill_id
@@ -1072,7 +1084,12 @@ func _build_passive_entry(unit: Unit) -> Dictionary:
 			unit._xinyan_high_qi_stat_bonus]
 	# 印记持有加成：只在真的有印记的单位上说（_mark_max<=0 的单位拿不到印记）。
 	# 三种印记对应哪个属性写死在 Unit.get_effective_stat 里，加成值从职业 JSON 读。
-	if unit._mark_max > 0:
+	if unit._mark_max > 0 and (unit._mark_dex_pct > 0 or unit._mark_spd_pct > 0 or unit._mark_str_pct > 0):
+		desc += "持有的每枚印记按种类提升属性：心 → %s +%d%%，道 → %s +%d%%，势 → %s +%d%%。" % [
+			_stat_display_name("DEX"), int(unit._mark_dex_pct),
+			_stat_display_name("SPD"), int(unit._mark_spd_pct),
+			_stat_display_name("STR"), int(unit._mark_str_pct)]
+	elif unit._mark_max > 0:
 		desc += "持有的每枚印记按种类提供属性加成：心 → %s +%d，道 → %s +%d，势 → %s +%d。" % [
 			_stat_display_name("DEX"), unit._mark_dex_bonus,
 			_stat_display_name("SPD"), unit._mark_spd_bonus,
@@ -1400,7 +1417,8 @@ func _has_available_swift_skill(unit: Unit) -> bool:
 			continue
 		var skill_id: String = unit.get_visible_skill_id(slot_id,
 			str(slot_data.get("slot_swap_trigger", "")),
-			str(slot_data.get("slot_swap_target", "")))
+			str(slot_data.get("slot_swap_target", "")),
+			_slot_swap_requires(slot_data))
 		var skill_data: Dictionary = _get_skill_data(skill_id)
 		if str(skill_data.get("action_cost", "")) != "swift":
 			continue
@@ -1841,6 +1859,12 @@ func _execute_skill_action(action: GameAction) -> bool:
 
 	# 伤害结算完成后才扣印记（修复 P0-②：使拔刀吃到自身消耗的势加成）。
 	_spend_skill_marks(user, mark_cost)
+	# 「结算后随机获得一枚印记」（设计库 kensei_juhe）：不以命中或伤害为条件。
+	for _i: int in range(int(skill_data.get("mark_gain_after_resolve", 0))):
+		var resolved_mark: String = user.gain_random_mark()
+		if resolved_mark != "":
+			print("[SwordMark] %s gained mark 「%s」 after %s, total=%d" % [
+				user.unit_name, resolved_mark, skill_id, user.get_mark_count()])
 	# ── 位移技能（如一闪）：施放后落在所选目标格 ──
 	if bool(skill_data.get("displacement", false)):
 		_apply_skill_displacement(user, target_pos)
@@ -2009,7 +2033,7 @@ func _can_confirm_skill_target(grid_pos: Vector2i) -> bool:
 
 func _get_units_in_skill_area(user: Unit, skill_data: Dictionary,
 		area_cells: Array[Vector2i]) -> Array[Unit]:
-	var relation: String = _get_skill_target_relation(skill_data)
+	var relation: String = _get_area_effect_relation(skill_data)
 	var units_by_id: Dictionary = {}
 	for cell_pos: Vector2i in area_cells:
 		var target_unit: Unit = grid.get_unit_at(cell_pos)
@@ -2027,6 +2051,14 @@ func _get_units_in_skill_area(user: Unit, skill_data: Dictionary,
 ## 「自己」这一档从 `target_mode` 读（2026-08-12），不再由 `range.type=="self" and
 ## area.type=="single"` 反推——理由见 `_is_ground_target_skill` 的说明，两处是同一个病。
 ## 友军 / 敌军仍按 `_is_support_skill` 分（那是**效果**的性质，不是选择模型的事）。
+## 范围内哪些单位受影响。以自身为目标的伤害技能（剑圣〔拔刀〕：自身中心菱形 1 格）选的是
+## 自己、打的是周围的敌人；其余技能与选目标的关系相同。只影响范围结算，不改选目标的逻辑。
+func _get_area_effect_relation(skill_data: Dictionary) -> String:
+	if _skill_target_mode(skill_data) == TARGET_MODE_SELF and not _is_support_skill(skill_data):
+		return "enemy"
+	return _get_skill_target_relation(skill_data)
+
+
 func _get_skill_target_relation(skill_data: Dictionary) -> String:
 	if _skill_target_mode(skill_data) == TARGET_MODE_SELF:
 		return "self"
@@ -2407,6 +2439,7 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		"qi_gain_on_hit": int(skill_data.get("qi_gain_on_hit", 0)),
 		"qi_gain_on_kill": int(skill_data.get("qi_gain_on_kill", 0)),
 		"mark_gain": int(skill_data.get("mark_gain", 0)),
+		"mark_gain_after_damage": int(skill_data.get("mark_gain_after_damage", 0)),
 		"ki_on_kill_cd_reduction": int(skill_data.get("ki_on_kill_cd_reduction", 0)),
 	}
 	var damage_entry: Dictionary = _select_damage_entry(skill_data)
@@ -2821,6 +2854,15 @@ func _apply_sword_qi_on_hit(attacker: Unit,
 		if gained_mark != "":
 			print("[SwordMark] %s gained mark 「%s」 on hit, total=%d" % [
 				attacker.unit_name, gained_mark, attacker.get_mark_count()])
+	# 造成伤害后得印记（设计库 kensei_zhanji：剑气在命中时、印记在伤害结算后；致命一段照常结算）。
+	# 本函数在 take_damage 之后调用，所以本段伤害吃不到新印记的加成。伤害为 0 不算「造成伤害」[推断]。
+	var mark_after_damage: int = int(action_data.get("mark_gain_after_damage", 0))
+	if mark_after_damage > 0 and result.damage > 0:
+		for _i: int in range(mark_after_damage):
+			var damage_mark: String = attacker.gain_random_mark()
+			if damage_mark != "":
+				print("[SwordMark] %s gained mark 「%s」 after damage, total=%d" % [
+					attacker.unit_name, damage_mark, attacker.get_mark_count()])
 	# 击杀触发：得气 + 技能 CD 减少
 	if not result.defender_died:
 		return

@@ -130,16 +130,25 @@ func _test_badao_mark_timing(tm: Object, sword: Unit, dummy: Unit) -> void:
 	sword.clear_marks()
 	sword.marks["心"] = true
 	sword.marks["道"] = true
-	sword.marks["势"] = true          # 势 → STR +2 → 10→12
-	# 期望非暴击伤害 = (STR12 + 技能威力6（旧技能按武器威力等价桥接） − def2) × power1.8 = 16 × 1.8 = 28.8 → 向下取整 28
-	# 若印记在伤害前被扣（旧 bug），STR=10 → (10+6−2)×1.8 = 25.2 → 向下取整 25
+	sword.marks["势"] = true          # 势 → 力量提升 10%（设计库 kensei_xinyan，gameplay-impl PR4）
+	# 剑圣的拔刀是 kensei_badao：自身中心菱形 1 格，威力 +1、系数 1.5（R1.1）。
+	# 期望按实际属性现算：伤害 = (力量 + 1 − 防御，最低 0) × 1.5，向下取整。
+	# 若印记在伤害前被扣（旧 bug），力量里就没有〔势〕的 10%，两者必须算出不同的数。
+	var str_with_shi: int = sword.get_effective_stat("STR")
+	sword.marks["势"] = false
+	var str_without_shi: int = sword.get_effective_stat("STR")
+	sword.marks["势"] = true
+	var def_value: int = dummy.get_effective_stat("DEF")
+	var expect_with: int = floori(float(maxi(0, str_with_shi + 1 - def_value)) * 1.5)
+	var expect_without: int = floori(float(maxi(0, str_without_shi + 1 - def_value)) * 1.5)
+	_check("前提：有〔势〕与无〔势〕的伤害确实不同（否则测不出时序）", expect_with != expect_without)
 	dummy.stats.hp = dummy.stats.max_hp
 	var hp_before: int = dummy.stats.hp
-	tm._selected_skill_id = "swordsman_badao"
-	var act: Object = tm._build_skill_action(sword, dummy.grid_position, dummy)
+	tm._selected_skill_id = "kensei_badao"
+	var act: Object = tm._build_skill_action(sword, sword.grid_position, sword)
 	_check("拔刀 满印记 execute 返回 true", tm._execute_skill_action(act))
 	var dmg: int = hp_before - dummy.stats.hp
-	_eq("拔刀非暴击伤害=28（吃到势，非旧 bug 的 25）", dmg, 28)
+	_eq("拔刀非暴击伤害吃到〔势〕（不是印记先扣的旧 bug 值 %d）" % expect_without, dmg, expect_with)
 	_eq("拔刀施放后印记清空(get_mark_count==0)", sword.get_mark_count(), 0)
 
 
