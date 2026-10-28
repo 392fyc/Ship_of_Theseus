@@ -1,0 +1,13 @@
+{
+  "id": "taunt",
+  "name": "嘲讽",
+  "effect": "敌方使用需要选择敌对单位为目标的技能时，若本单位是合法目标，必须优先选择本单位。",
+  "rules": "敌方先按原逻辑决定移动与拟使用技能，再在该技能的合法单位目标中优先选择带有〔嘲讽〕的单位；多个嘲讽目标按原优先级选择。以格子、方向、区域、自身或友方为目标，以及不选择目标的技能不受影响。对嘲讽免疫的单位按原逻辑选择目标。",
+  "polarity": "positive",
+  "is_permanent": true,
+  "reapplication_mode": "create_independent_instance",
+  "dispellable": true,
+  "resistable": false,
+  "ignores_immunity": true,
+  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。"
+}

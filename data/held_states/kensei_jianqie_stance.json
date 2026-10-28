@@ -1,0 +1,18 @@
+{
+  "id": "kensei_jianqie_stance",
+  "name": "见切",
+  "effect": "最大 3 层，持续到其后第 2 个自身回合开始，不可驱散。每个对自身进行命中判定的敌方攻击动作结束后，若自身存活、攻击者与自身上下左右相邻且剑气不少于 10 点，消耗 1 层〔见切〕和 10 点剑气，对攻击者反击一次：造成物理伤害，威力 +1，系数 1.0。再次获得时，层数改为本次获得的层数，并刷新持续时间。层数用完时〔见切〕结束，〔架势〕照常持续到期。",
+  "rules": "反击是〔见切〕产生的追加攻击，独立判定命中与暴击，造成的伤害算作技能伤害。反击不要求来袭攻击命中，每个敌方攻击动作最多发动一次。反击不能再次引发反击。不可抵抗，无视免疫。",
+  "notes": "再获得方式字段暂填 add_stacks，因为现有枚举没有“设定层数”；以 effect 为准：再次获得时层数设为本次获得的层数，不与原有层数相加，并刷新持续时间。反击算作技能伤害为 [提案]（与〔尽意〕的反击口径一致），〔澄心〕〔刻痕〕〔明澈〕的威力加成因此也作用于反击。",
+  "polarity": "neutral",
+  "is_permanent": false,
+  "max_stacks": 3,
+  "reapplication_mode": "add_stacks",
+  "duration_update_mode": "use_incoming",
+  "dispellable": false,
+  "resistable": false,
+  "ignores_immunity": true,
+  "engine_reapplication_mode": "set_stacks",
+  "_engine_note": "engine_reapplication_mode 是引擎侧字段，设计库无对应列，不回流。设计库 reapplication_mode 暂填 add_stacks，notes 写明以 effect 为准（再次获得时层数设为本次层数并刷新持续时间）；用户 2026-10-28 裁决 Q3「按建议开工」= 按 effect 执行。",
+  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。"
+}

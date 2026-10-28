@@ -11,6 +11,9 @@ var _movement_tween: Tween
 # ── 数据 ────────────────────────────────────────────
 var stats: UnitStats = null
 var buffs: Array[BuffEffect] = []
+# 持有型状态（设计库 State 中有层数、有持续时间的那一类，见 held_state_set.gd）。
+# 与旧 buff 并存、互不迁移；定义在 setup() 时从 DataLoader.held_states 注入。
+var held_states: HeldStateSet = HeldStateSet.new()
 var attack_min_range: int = 1
 var attack_range: int = 1
 var skill_ids: Array[String] = []
@@ -49,6 +52,9 @@ var movement_used: bool = false
 var standard_used: bool = false
 var swift_used: bool = false
 var reaction_available: bool = true
+# 是否正在进行自己的回合（TacticalManager 在回合开始置 true、回合结束置 false）。
+# 施加持有型状态时据此判断「在自身回合内获得」，影响「到下个自身回合结束」的计数。
+var is_taking_turn: bool = false
 
 # ── 战斗派生值修正钩子（来源：天赋 L2 / 装备 L4 / 符文 L5 / 肉鸽）──
 # 默认 0，不绑武器；由上层写入修正系数（暴击回避等）。
@@ -112,6 +118,9 @@ signal unit_died
 signal moved(from: Vector2i, to: Vector2i)
 signal movement_finished(completed: bool)
 signal buffs_changed(unit: Unit)
+## 剑气经统一入口变动后发出。kind = 最终生效的方向（gain / spend / lose，拦截器可改写），
+## requested = 请求量（正数），actual = 实际变化量（有符号，超过上限作废、最低到 0）。
+signal sword_qi_changed(unit: Unit, kind: String, requested: int, actual: int, source: String)
 
 # ── 阵营颜色 ─────────────────────────────────────────
 const FACTION_COLORS: Dictionary = {
@@ -152,6 +161,10 @@ var _map_token_active := false
 var _map_token_layout: Dictionary = {}
 
 
+func _init() -> void:
+	held_states.changed.connect(_emit_buffs_changed)
+
+
 func _ready() -> void:
 	_update_health_bar()
 	_rebuild_status_icons()
@@ -168,6 +181,8 @@ func setup(class_data: Dictionary, initial_facing: StringName = &"SE") -> void:
 	map_token_view.visible = false
 	stats = UnitStats.new()
 	buffs.clear()
+	held_states.clear()
+	_load_held_state_definitions()
 	# 主手武器随职业/敌人档案带入；副手槽默认空（要由天赋或装备层显式装上）。
 	weapon_id = str(class_data.get("weapon_id", ""))
 	offhand_weapon_id = ""
@@ -626,12 +641,75 @@ func get_visible_skill_id(skill_id: String, slot_swap_trigger: String = "",
 	return skill_id
 
 
-## 修改剑气值并更新心眼被动。
+## 直接设定剑气值并更新心眼被动。只用于战斗开始、调试复位这类「重置」；
+## 战斗中的获得、消耗、失去一律走 gain_sword_qi / spend_sword_qi / lose_sword_qi，
+## 这样拦截器与 sword_qi_changed 的监听方（〔空想〕〔太阳〕〔太阴〕〔剑痕〕等）不会漏算。
 func set_sword_qi(new_qi: int) -> void:
 	if _qi_max <= 0:
 		return
 	sword_qi = clampi(new_qi, 0, _qi_max)
 	_apply_xinyan_passive()
+
+
+const QI_GAIN := "gain"
+const QI_SPEND := "spend"
+const QI_LOSE := "lose"
+
+## 剑气变动拦截器：Callable(unit: Unit, kind: String, amount: int, source: String) -> Dictionary，
+## 返回 {"kind": ..., "amount": ...} 改写本次变动，返回空字典表示不改。
+## 按添加顺序依次作用；例如〔空想〕会把 gain 改成 lose。
+var _qi_interceptors: Array[Callable] = []
+
+
+func add_qi_interceptor(interceptor: Callable) -> void:
+	if not _qi_interceptors.has(interceptor):
+		_qi_interceptors.append(interceptor)
+
+
+func remove_qi_interceptor(interceptor: Callable) -> void:
+	_qi_interceptors.erase(interceptor)
+
+
+## 获得剑气。返回实际变化量（有符号；被拦截改为失去时为负）。
+func gain_sword_qi(amount: int, source: String = "") -> int:
+	return _change_sword_qi(QI_GAIN, amount, source)
+
+
+## 技能等主动消耗剑气。返回实际变化量（≤ 0）。
+func spend_sword_qi(amount: int, source: String = "") -> int:
+	return _change_sword_qi(QI_SPEND, amount, source)
+
+
+## 被效果夺走或清空剑气（不是主动消耗）。返回实际变化量（≤ 0）。
+func lose_sword_qi(amount: int, source: String = "") -> int:
+	return _change_sword_qi(QI_LOSE, amount, source)
+
+
+## 剑气变动的唯一入口：先过拦截器，再按上限 / 下限结算，最后发 sword_qi_changed。
+func _change_sword_qi(kind: String, amount: int, source: String) -> int:
+	if _qi_max <= 0 or amount <= 0:
+		return 0
+	var final_kind: String = kind
+	var final_amount: int = amount
+	for interceptor: Callable in _qi_interceptors.duplicate():
+		if not interceptor.is_valid():
+			continue
+		var rewrite: Variant = interceptor.call(self, final_kind, final_amount, source)
+		if rewrite is Dictionary and not (rewrite as Dictionary).is_empty():
+			final_kind = str((rewrite as Dictionary).get("kind", final_kind))
+			final_amount = maxi(0, int((rewrite as Dictionary).get("amount", final_amount)))
+	var before: int = sword_qi
+	var signed: int = final_amount if final_kind == QI_GAIN else -final_amount
+	set_sword_qi(sword_qi + signed)
+	var actual: int = sword_qi - before
+	sword_qi_changed.emit(self, final_kind, amount, actual, source)
+	return actual
+
+
+## 施加持有型状态；「是否在自身回合内获得」由 is_taking_turn 决定。参数含义见 HeldStateSet.apply。
+func apply_held_state(state_id: String, stacks: int = 1, duration: Dictionary = {},
+		params: Dictionary = {}, source_unit_id: String = "") -> bool:
+	return held_states.apply(state_id, stacks, duration, params, source_unit_id, is_taking_turn)
 
 
 ## 得到一个未持有的随机印记；返回印记名称，如果已满则返回 ""。
@@ -884,6 +962,17 @@ func _get_base_stat_value(stat_key: String) -> int:
 		"PRIORITY":
 			return priority
 	return 0
+
+
+## 从 DataLoader.held_states 注入持有型状态的定义；拿不到 DataLoader 时保持空表
+## （施加未注册的状态会报错，不会静默生效）。
+func _load_held_state_definitions() -> void:
+	var data_loader := get_node_or_null("/root/DataLoader")
+	if data_loader == null:
+		return
+	var defs: Variant = data_loader.get("held_states")
+	if defs is Dictionary:
+		held_states.set_definitions(defs)
 
 
 ## 剑士线资源初始化：从 class_data["sword_qi_config"] 读取参数。
