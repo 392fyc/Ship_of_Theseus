@@ -233,8 +233,10 @@ func _test_parry_params_present(dl: Object) -> void:
 	_eq("减伤属性 = DEX", str(params.get("reduction_stat", "")), "DEX")
 	# 旧招架 swordsman_zhaojia 已下线，parry 段现在只有交刃在读；剑圣现行招架
 	# kensei_zhaojia 给的是额外闪避，不挂这个架势。
+	var kzj: Dictionary = dl.skills.get("kensei_zhaojia", {})
+	_check("前提：kensei_zhaojia 已装载", not kzj.is_empty())
 	_check("剑圣现行招架不再挂 %s" % PARRY_BUFF,
-		not JSON.stringify(dl.skills.get("kensei_zhaojia", {})).contains(PARRY_BUFF))
+		not JSON.stringify(kzj).contains(PARRY_BUFF))
 
 
 # ── D2. 分发对象：被攻击者，不是攻击者 ──────────────
