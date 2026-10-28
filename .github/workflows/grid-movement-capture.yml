@@ -1,0 +1,87 @@
+name: Grid movement cloud capture
+on:
+  pull_request:
+    branches: [develop]
+    paths:
+      - '.github/workflows/grid-movement-capture.yml'
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Install the same cloud rendering runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends fonts-wqy-microhei xvfb xauth ffmpeg python3-pil >/dev/null
+          mkdir -p .tmp/grid-movement-capture/runtime
+          curl -fsSL -o .tmp/grid-movement-capture/runtime/godot.zip https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          echo 'cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4  .tmp/grid-movement-capture/runtime/godot.zip' | sha256sum -c -
+          unzip -q .tmp/grid-movement-capture/runtime/godot.zip -d .tmp/grid-movement-capture/runtime
+          chmod +x .tmp/grid-movement-capture/runtime/Godot_v4.7.2-stable_linux.x86_64
+          echo "GODOT=$GITHUB_WORKSPACE/.tmp/grid-movement-capture/runtime/Godot_v4.7.2-stable_linux.x86_64" >> "$GITHUB_ENV"
+          git rev-parse HEAD > .tmp/grid-movement-capture/candidate-head.txt
+      - name: Run the relevant regressions
+        env:
+          LOG_DIR: .tmp/grid-movement-capture/test-logs
+        run: |
+          set -o pipefail
+          bash tools/ci/run_godot_tests.sh portrait map_token | tee .tmp/grid-movement-capture/tests.log
+      - name: Capture the real battle at the fixed camera
+        run: |
+          timeout --kill-after=10s 300s xvfb-run -a -s '-screen 0 1280x720x24 -nolisten tcp' "$GODOT" --path . --rendering-method gl_compatibility --audio-driver Dummy --display-driver x11 --resolution 1280x720 --fixed-fps 30 --disable-vsync --script res://scripts/art/character_pipeline/capture_portrait_battle_ui.gd -- --out="$GITHUB_WORKSPACE/.tmp/grid-movement-capture" --frames=360 > .tmp/grid-movement-capture/battle.log 2>&1
+          if grep -E 'SCRIPT ERROR|Parse Error' .tmp/grid-movement-capture/battle.log; then exit 1; fi
+          git diff -- project.godot > .tmp/grid-movement-capture/engine-import.diff
+          git show HEAD:project.godot > project.godot
+          git diff --exit-code
+          ffmpeg -v error -framerate 30 -i .tmp/grid-movement-capture/frames/frame_%05d.png -c:v libx264 -crf 20 -pix_fmt yuv420p -movflags +faststart .tmp/grid-movement-capture/battle.mp4
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          import json, hashlib, re
+          out=Path('.tmp/grid-movement-capture'); trace=json.loads((out/'facing-align-trace.json').read_text())
+          assert trace['frames']==360 and trace['fps']==30 and trace['size']==[1280,720]
+          events=trace['events']; states=trace['states']
+          def event(name, **terms):
+              return next(e for e in events if e['event']==name and all(e.get(k)==v for k,v in terms.items()))['frame']
+          standing=event('forest_standing'); leaving=event('player_move_input',actor='kensei',to='(1, 6)'); left=event('forest_left')
+          assert standing<leaving<left<360
+          assert event('forest_hover_cleared') < 360
+          assert len([e for e in events if e['event']=='player_attack_input'])==2
+          assert any(e['event']=='turn_started' and e.get('faction')=='enemy' for e in events)
+          enemy_starts={}; enemy_moves=[]
+          for state in states:
+              for unit in state['units']:
+                  if unit['faction']!='enemy': continue
+                  key=unit['instance']
+                  if unit['animation']=='walk': enemy_starts.setdefault(key,unit['grid'])
+                  elif key in enemy_starts:
+                      start=[int(n) for n in re.findall(r'-?\d+',enemy_starts.pop(key))]
+                      end=[int(n) for n in re.findall(r'-?\d+',unit['grid'])]
+                      enemy_moves.append(sum(abs(a-b) for a,b in zip(start,end)))
+          assert any(steps>=2 for steps in enemy_moves), 'No completed real AI multi-cell movement'
+          assert all(next(u for u in s['units'] if u['id']=='myrmidon')['battle_ui']['header_clear'] for s in states)
+          picks={'01-opening':0,'02-hover':event('ordinary_unit_hover')+3,'03-targeting':event('player_attack_hover_hold')+3,'04-forest-standing':standing+8,'05-enemy-action':event('turn_started',faction='enemy')+12,'06-after-exit':min(left+12,359)}
+          for name,frame in picks.items():
+              Image.open(out/'frames'/f'frame_{frame:05d}.png').convert('RGB').save(out/f'{name}.jpg',quality=95)
+          (out/'keyframes.json').write_text(json.dumps(picks,indent=2)+'\n')
+          files=[p for p in out.iterdir() if p.is_file()]
+          (out/'media-manifest.json').write_text(json.dumps([{'name':p.name,'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in files],indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: grid-movement-capture
+          retention-days: 7
+          path: |
+            .tmp/grid-movement-capture/*.txt
+            .tmp/grid-movement-capture/*.log
+            .tmp/grid-movement-capture/*.diff
+            .tmp/grid-movement-capture/*.json
+            .tmp/grid-movement-capture/*.jpg
+            .tmp/grid-movement-capture/*.mp4
+            .tmp/grid-movement-capture/test-logs/

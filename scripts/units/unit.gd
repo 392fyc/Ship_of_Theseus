@@ -665,14 +665,18 @@ func load_buffs_from_state(buff_state: Array[Dictionary]) -> void:
 # ── 移动动画 ─────────────────────────────────────────
 
 func move_to(target_pos: Vector2i, grid: Grid) -> void:
-	var world_target: Vector2 = grid.grid_to_world(target_pos)
-	var dir: Vector2i = target_pos - grid_position
-	_set_walk_direction(dir)
-	if has_character_animation():
-		character_animation.play("walk", _facing)
+	var path: Array[Vector2i] = Pathfinding.find_path(grid, grid_position, target_pos, faction)
+	if path.size() < 2:
+		return
+	_begin_walk_segment(path[1] - path[0])
 	var tween: Tween = create_tween()
 	_movement_tween = tween
-	tween.tween_property(self, "position", world_target, 0.25)
+	# Follow the same orthogonal route as the preview. Grid occupancy is committed
+	# once by TacticalManager after the entire presentation has finished.
+	for index: int in range(1, path.size()):
+		if index > 1:
+			tween.tween_callback(_begin_walk_segment.bind(path[index] - path[index - 1]))
+		tween.tween_property(self, "position", grid.grid_to_world(path[index]), 0.25)
 	tween.finished.connect(_on_movement_tween_finished, CONNECT_ONE_SHOT)
 	var completed: bool = await movement_finished
 	_movement_tween = null
@@ -683,6 +687,12 @@ func move_to(target_pos: Vector2i, grid: Grid) -> void:
 	if not _map_token_active and not has_character_animation():
 		sprite.play("idle")
 	moved.emit(grid_position, target_pos)
+
+
+func _begin_walk_segment(direction: Vector2i) -> void:
+	_set_walk_direction(direction)
+	if has_character_animation():
+		character_animation.play("walk", _facing)
 
 
 func _on_movement_tween_finished() -> void:
