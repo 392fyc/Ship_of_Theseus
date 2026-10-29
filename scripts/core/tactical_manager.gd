@@ -443,6 +443,8 @@ func spawn_unit(class_id: String, spawn_pos: Vector2i,
 	if class_data.is_empty():
 		class_data = DataLoader.enemies.get(class_id, {})
 	if class_data.is_empty():
+		class_data = DataLoader.summons.get(class_id, {})
+	if class_data.is_empty():
 		push_error("[TacticalManager] Class/enemy not found: " + class_id)
 		return null
 	var unit_scene := preload("res://scenes/tactical/Unit.tscn")
@@ -465,6 +467,10 @@ func _on_unit_died(unit: Unit) -> void:
 		unit.unit_name, unit.faction, unit.grid_position, unit.stats.hp])
 	grid.remove_unit(unit)
 	units.erase(unit)
+	# 幻象消失：主人技能栏里因它换了形态的槽位换回（颠倒 → 临摹）。
+	if unit.is_illusion and is_instance_valid(unit.illusion_owner) and unit.illusion_slot_id != "":
+		unit.illusion_owner.set_slot_form(unit.illusion_slot_id, unit.illusion_slot_id)
+		_emit_dashboard_state_changed()
 	var was_active := (turn_manager.current_unit == unit)
 	turn_manager.remove_unit(unit)
 	if was_active:
@@ -549,6 +555,8 @@ func _apply_passive_turn_end(unit: Unit) -> void:
 	if unit == null or not unit.stats.is_alive():
 		return
 	_apply_slot_form_turn_end(unit)
+	for illusion: Unit in _get_illusions_of(unit):
+		illusion.on_owner_turn_ended()
 	var spec: Variant = _get_skill_data(unit.passive_skill_id).get("passive_turn_end", null)
 	if spec is Dictionary:
 		var end: Dictionary = spec
@@ -2087,6 +2095,12 @@ func _execute_skill_action(action: GameAction) -> bool:
 	if bool(skill_data.get("displacement", false)) \
 			and not _is_displacement_landing_valid(user, target_pos):
 		return false
+	# 「在一个可通行的空格」（临摹）：扣消耗前拒绝不合格的格子。
+	if bool(skill_data.get("requires_empty_cell", false)) and not _is_empty_passable(target_pos):
+		return false
+	# 和自己的召唤物换位（颠倒）：没有召唤物时拒绝。
+	if bool(skill_data.get("swap_with_summon", false)) and _get_illusions_of(user).is_empty():
+		return false
 	# 先选敌人再选落点（〔踏影〕）：落点必须是该敌人上下左右相邻、能站立且没被别人占的格，
 	# 否则在扣消耗前拒绝。「目标在本轮尚未行动」在发动时判定（结算中目标倒下也不影响）。
 	var landing_cell: Vector2i = LANDING_ANCHOR_NONE
@@ -2134,6 +2148,10 @@ func _execute_skill_action(action: GameAction) -> bool:
 	# ⚠ **位移必须留在伤害结算之后**，不能为了让辅助技能走到就把整块提前：
 	# 一闪的途经伤害靠 `_get_displacement_path_cells(user.grid_position, target_pos)`
 	# 算路径，先位移会让起点变成落点，路径整个算错。
+	# 照做「按这次攻击的技能威力与系数……用自身的属性（包含印记带来的属性加成）」：记下这次攻击
+	# 结算时用的印记（主手伤害结算之前），照做期间按它计算。拔刀系结算后才扣印记，照做照样吃到；
+	# 斩击系伤害后才得的印记不算。
+	var marks_at_attack: Dictionary = user.marks.duplicate()
 	if _is_support_skill(skill_data):
 		print("[Skill] %s uses %s (%d target(s))" % [
 			user.unit_name,
@@ -2215,8 +2233,12 @@ func _execute_skill_action(action: GameAction) -> bool:
 			user.held_states.remove(str(form.get("state_id", "")))
 			user.refresh_status_icons()
 	_apply_slot_switch_after_use(user, skill_id, skill_data)
+	_apply_summon_after_use(user, skill_id, skill_data, target_pos)
+	if bool(skill_data.get("swap_with_summon", false)):
+		_swap_with_illusion(user)
 	_apply_held_skill_triggers(user, skill_id)
 	_consume_on_skill_damage_states(user, skill_id)
+	_run_mimic(user, skill_id, skill_data, data, marks_at_attack)
 	_run_pending_reactions()
 	_emit_dashboard_state_changed()
 	return true
@@ -2233,6 +2255,135 @@ func _apply_slot_switch_after_use(user: Unit, skill_id: String, skill_data: Dict
 	if next_form != "":
 		user.set_slot_form(user.slot_of_form(skill_id), next_form)
 	user.refresh_status_icons()
+
+
+func _is_empty_passable(cell_pos: Vector2i) -> bool:
+	if not grid.is_valid(cell_pos):
+		return false
+	var cell: Cell = grid.get_cell(cell_pos)
+	return cell != null and cell.is_passable() and cell.occupant == null
+
+
+## 该单位召唤、仍在场的幻象。
+func _get_illusions_of(owner: Unit) -> Array[Unit]:
+	var out: Array[Unit] = []
+	for value: Variant in units:
+		var unit: Unit = value as Unit
+		if unit != null and is_instance_valid(unit) and unit.is_illusion \
+				and unit.illusion_owner == owner and unit.stats.is_alive():
+			out.append(unit)
+	return out
+
+
+## 召唤（临摹）：在所选空格召唤技能 JSON summon 写的召唤物，归属于使用者一方；
+## 召唤物在场时，这个技能所在的槽换成 summon.slot_while_present（颠倒）。
+func _apply_summon_after_use(user: Unit, skill_id: String, skill_data: Dictionary,
+		target_pos: Vector2i) -> void:
+	var spec: Variant = skill_data.get("summon", null)
+	if not spec is Dictionary or not _is_empty_passable(target_pos):
+		return
+	var summon: Unit = spawn_unit(str((spec as Dictionary).get("summon_id", "")), target_pos, user.faction)
+	if summon == null:
+		return
+	summon.illusion_owner = user
+	summon.modulate = Color(0.65, 0.7, 1.0, 0.65)
+	if user.is_taking_turn:
+		summon.mark_summoned_in_owner_turn()
+	var slot_id: String = user.slot_of_form(skill_id)
+	var present_form: String = str((spec as Dictionary).get("slot_while_present", ""))
+	if present_form != "":
+		summon.illusion_slot_id = slot_id
+		user.set_slot_form(slot_id, present_form)
+	print("[Summon] %s 在 %s 召唤 %s" % [user.unit_name, target_pos, summon.unit_name])
+
+
+## 与自己的召唤物交换位置（颠倒）。
+func _swap_with_illusion(user: Unit) -> void:
+	var illusions: Array[Unit] = _get_illusions_of(user)
+	if illusions.is_empty():
+		return
+	var illusion: Unit = illusions[0]
+	var user_pos: Vector2i = user.grid_position
+	var illusion_pos: Vector2i = illusion.grid_position
+	grid.remove_unit(user)
+	grid.remove_unit(illusion)
+	grid.place_unit(user, illusion_pos)
+	grid.place_unit(illusion, user_pos)
+	user.position = grid.grid_to_world(illusion_pos)
+	illusion.position = grid.grid_to_world(user_pos)
+	print("[Summon] %s 与 %s 换位：%s ⇄ %s" % [user.unit_name, illusion.unit_name, user_pos, illusion_pos])
+
+
+## 〔影〕的照做：自身主动使用身份为斩击系、拔刀系（R2.5）的伤害技能，全部结算完后，影在自己的位置
+## 再打一遍。规则写在技能栏里的 mimic（临摹）：identities、damage_pct。
+##   单体攻击：按这次攻击的射程从影的位置随机选一个敌人；多段对它依次照做各段。
+##   以自身为中心的范围：以影为中心。朝一个方向的攻击：从影的位置朝同一方向。
+##   伤害：同一技能威力与系数、用自身属性计算，再乘 damage_pct%；自身状态的加成与惩罚不计；
+##   命中暴击由影单独判定；命中时附加这次攻击施加给敌人的状态；不产生资源、事件与计数。
+##   影的射程内没有合法目标时不照做。反击不触发照做。
+func _run_mimic(user: Unit, skill_id: String, skill_data: Dictionary, payload: Dictionary,
+		marks_for_mimic: Dictionary = {}) -> void:
+	if bool(payload.get("is_counter", false)) or _is_support_skill(skill_data):
+		return
+	var spec: Dictionary = {}
+	for slot_id: String in user.skill_ids:
+		var value: Variant = _get_skill_data(slot_id).get("mimic", null)
+		if value is Dictionary:
+			spec = value
+	if spec.is_empty() or not (spec.get("identities", []) as Array).has(user.get_skill_identity(skill_id)):
+		return
+	for illusion: Unit in _get_illusions_of(user):
+		var targets: Array[Unit] = _mimic_targets(user, illusion, skill_data, payload)
+		if targets.is_empty():
+			continue
+		var mimic_payload: Dictionary = payload.duplicate(true)
+		mimic_payload["is_mimic"] = true
+		mimic_payload["final_multiplier"] = float(spec.get("damage_pct", 100)) / 100.0
+		mimic_payload["damage_total_modifiers"] = []
+		mimic_payload.erase("ignored_attacker_states")
+		mimic_payload.erase("held_state_form_active")
+		for key: String in ["qi_gain_on_hit", "qi_gain_on_kill", "qi_gain_after_damage",
+				"mark_gain", "mark_gain_after_damage", "ki_on_kill_cd_reduction"]:
+			mimic_payload[key] = 0
+		mimic_payload["mark_fill_on_hit"] = false
+		print("[Mimic] %s 照做 %s（%d 个目标）" % [illusion.unit_name, skill_id, targets.size()])
+		var marks_now: Dictionary = user.marks.duplicate()
+		if not marks_for_mimic.is_empty():
+			user.marks = marks_for_mimic.duplicate()
+		for target: Unit in targets:
+			if _can_execute_hostile_action(user, target):
+				_execute_hostile_action(user, target, mimic_payload)
+		user.marks = marks_now
+
+
+func _mimic_targets(user: Unit, illusion: Unit, skill_data: Dictionary,
+		payload: Dictionary) -> Array[Unit]:
+	var origin: Vector2i = illusion.grid_position
+	var range_data: Dictionary = skill_data.get("range", {})
+	match _skill_target_mode(skill_data):
+		TARGET_MODE_SELF:
+			return _get_enemies_in_cells(user,
+				AreaCalculator.calculate_cells(grid, origin, skill_data.get("area", {})))
+		TARGET_MODE_UNIT:
+			var candidates: Array[Unit] = _get_enemies_in_cells(user,
+				RangeCalculator.calculate_cells(grid, origin, range_data))
+			if candidates.is_empty():
+				return []
+			if candidates.size() == 1:
+				return candidates
+			return [candidates[randi() % candidates.size()]]
+		_:
+			var direction: Vector2i = _deserialize_vector2i(payload.get("target_direction", {}))
+			if direction == Vector2i.ZERO:
+				return []
+			var target_pos: Vector2i = origin + direction * maxi(1, int(range_data.get("min", 1)))
+			if not grid.is_valid(target_pos):
+				return []
+			var hit: Array[Unit] = _get_enemies_in_cells(user,
+				AreaCalculator.calculate_cells(grid, target_pos, skill_data.get("area", {}), direction))
+			if str(skill_data.get("target_order", "")) == "near_to_far":
+				_sort_units_near_to_far(origin, hit)
+			return hit
 
 
 ## 〔若离〕：自身造成技能伤害时消耗 1 层、获得剑气；每次使用技能最多消耗 1 层，不造成伤害的不消耗。
@@ -2378,7 +2529,9 @@ func _can_execute_hostile_action(attacker: Unit, defender: Unit) -> bool:
 
 func _execute_hostile_action(attacker: Unit, defender: Unit,
 		data: Dictionary) -> void:
-	attacker.show_attack_contact(defender.grid_position)
+	var is_mimic: bool = bool(data.get("is_mimic", false))
+	if not is_mimic:
+		attacker.show_attack_contact(defender.grid_position)
 	var action_data: Dictionary = _build_hostile_action_context(attacker, defender, data)
 
 	# ── 天赋：动作级事件「执行攻击动作时」（Wave 2）────────────────
@@ -2389,7 +2542,10 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 		"defender": defender, "pending_offhand": [],
 		"contexts": [CONTEXT_ACTIVE_ATTACK],
 	}
-	_dispatch_talents(attacker, "执行攻击动作时", action_ctx)
+	# 照做以〔影〕为来源：自身的命中、暴击、造成伤害、击杀效果与资源只由自身的动作触发。
+	action_ctx["is_mimic"] = is_mimic
+	if not is_mimic:
+		_dispatch_talents(attacker, "执行攻击动作时", action_ctx)
 
 	defender.handle_attacked()
 
@@ -2410,13 +2566,14 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 		if not segment_result.hit or not defender.stats.is_alive():
 			break
 
-	_note_reaction(attacker, defender, data)
+	if not is_mimic:
+		_note_reaction(attacker, defender, data)
 
 	# 主手全部副作用结算后，再按队列执行副手追加。
 	# 递归追加进入同一队列，并受每次攻击动作的总次数护栏限制。
 	# 反击是〔见切〕产生的追加攻击，原文没有允许它再产生追加攻击（R1.15），所以不执行副手追加；
 	# 命中、暴击、造成伤害等事件照常分发（追加攻击正常产生自己的事件）。
-	var queue: Array = [] if bool(data.get("is_counter", false)) \
+	var queue: Array = [] if bool(data.get("is_counter", false)) or is_mimic \
 		else (action_ctx["pending_offhand"] as Array).duplicate()
 	var executed: int = 0
 	while not queue.is_empty():
@@ -2509,7 +2666,8 @@ func _resolve_hostile_segment(attacker: Unit, defender: Unit, action_data: Dicti
 		attacker, defender, action_data)
 	_apply_evade_conversion(defender, outcome, action_data)
 	action_ctx["source"] = SOURCE_MAIN_HAND
-	_dispatch_on_hit_events(attacker, outcome, action_ctx)
+	if not bool(action_ctx.get("is_mimic", false)):
+		_dispatch_on_hit_events(attacker, outcome, action_ctx)
 	_merge_on_hit_modifiers(action_data, action_ctx)
 
 	# 防御侧反应在伤害结算前写入减伤乘项，与攻击侧增伤共同进入 final_multiplier。
@@ -2529,13 +2687,22 @@ func _resolve_hostile_segment(attacker: Unit, defender: Unit, action_data: Dicti
 		DamagePopup.spawn_at_anchor(popup_layer, combat_text_anchor,
 			result.damage, damage_type, result.crit, segment_index)
 		defender.take_damage(result.damage, damage_type)
-		if result.damage > 0 and not bool(action_data.get("is_counter", false)):
+		# 幻象的生命不因伤害减少：只有这一下让它消失才算击杀。
+		if defender.is_illusion:
+			result.defender_died = not defender.stats.is_alive()
+		if result.damage > 0 and not bool(action_data.get("is_counter", false)) \
+				and not bool(action_data.get("is_mimic", false)):
 			_action_dealt_damage = true
 	else:
 		DamagePopup.spawn_miss_at_anchor(popup_layer, combat_text_anchor, segment_index)
 
-	if result.hit and defender.stats.is_alive():
+	# 只有明确写明作用于〔影〕的效果才能给它附加状态：攻击带的状态不附加到幻象。
+	if result.hit and defender.stats.is_alive() and not defender.is_illusion:
 		_apply_hostile_skill_effects(attacker, defender, data)
+
+	# 〔影〕的照做只造成伤害和附加状态：剑气与印记的增减、命中 / 造成伤害 / 击杀时的效果都不结算。
+	if bool(action_data.get("is_mimic", false)):
+		return result
 
 	# ── 剑圣资源：命中得气、击杀得气+减CD+得印记 ──────────
 	_apply_sword_qi_on_hit(attacker, result, action_data)
@@ -2640,7 +2807,8 @@ func _matches_target_relation(user: Unit, target_unit: Unit,
 		"self":
 			return target_unit == user
 		"ally":
-			return target_unit.faction == user.faction
+			# 只有明确写明作用于〔影〕的效果才能治疗它或给它附加状态：友方效果默认不选幻象。
+			return target_unit.faction == user.faction and not target_unit.is_illusion
 		"enemy":
 			return target_unit.faction != user.faction
 		_:
@@ -2917,6 +3085,12 @@ func _filter_targetable_cells(candidate_cells: Array[Vector2i],
 	if current_unit == null:
 		return []
 	if _is_ground_target_skill(skill_data):
+		if bool(skill_data.get("requires_empty_cell", false)):
+			var empty_cells: Array[Vector2i] = []
+			for cell_pos: Vector2i in candidate_cells:
+				if _is_empty_passable(cell_pos):
+					empty_cells.append(cell_pos)
+			return empty_cells
 		return candidate_cells
 	var filtered_cells: Array[Vector2i] = []
 	var relation: String = _get_skill_target_relation(skill_data)
@@ -3287,8 +3461,14 @@ func _build_hostile_action_context(attacker: Unit, defender: Unit,
 	# forecast（preview）与执行（resolve）共用本上下文，保证预告==实际伤害。
 	# 无光环时乘区==1.0 → 与 damage_calculator 默认一致（无词条零影响）。
 	action_data["affix_defense_multiplier"] = _affix_bulwark_multiplier(defender)
+	# 敌人对〔影〕的攻击必定命中（临摹 rules）。
+	if defender.is_illusion:
+		action_data["guaranteed_hit"] = true
+		action_data["entry_guaranteed_hit"] = true
 	# 〔澄心〕：每层使自身技能伤害的威力 +N（威力加算，计入技能威力）。反击也是技能伤害。
-	if str(action_data.get("skill_id", "")) != "":
+	# 〔影〕的照做不计自身状态带来的加成与惩罚（临摹 rules）。
+	var is_mimic: bool = bool(action_data.get("is_mimic", false))
+	if str(action_data.get("skill_id", "")) != "" and not is_mimic:
 		var power_bonus: float = _held_state_skill_power_bonus(attacker)
 		if power_bonus != 0.0:
 			action_data["skill_power"] = float(action_data.get("skill_power", 0.0)) + power_bonus
@@ -3298,8 +3478,9 @@ func _build_hostile_action_context(attacker: Unit, defender: Unit,
 	var own_turn_skill: bool = attacker.is_taking_turn \
 		and str(action_data.get("skill_id", "")) != "" \
 		and not bool(action_data.get("is_counter", false))
-	totals.append_array(_attacker_state_damage_modifiers(
-		attacker, action_data.get("ignored_attacker_states", []), own_turn_skill))
+	if not is_mimic:
+		totals.append_array(_attacker_state_damage_modifiers(
+			attacker, action_data.get("ignored_attacker_states", []), own_turn_skill))
 	action_data["damage_total_modifiers"] = totals
 	_apply_debug_determinism(action_data)
 	return action_data
@@ -4443,7 +4624,8 @@ func debug_soft_reset() -> void:
 		turn_manager.stop()
 		var typed_units: Array[Unit] = []
 		for u in units:
-			typed_units.append(u)
+			if not (u as Unit).is_illusion:
+				typed_units.append(u)
 		turn_manager.add_units(typed_units)
 		turn_manager.start()
 	_emit_dashboard_state_changed()

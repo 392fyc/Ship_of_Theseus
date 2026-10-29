@@ -1,0 +1,33 @@
+{
+  "id": "kensei_ying",
+  "name": "影",
+  "description": "〔临摹〕召唤的幻象：属于自身一方，占据所在格，不行动。",
+  "map_token_profile_id": "kensei_map_token",
+  "MOV": 0,
+  "attack_type": "melee",
+  "damage_type": "physical",
+  "basic_attack": false,
+  "basic_attack_range": {
+    "min": 1,
+    "max": 1
+  },
+  "weapon_id": "",
+  "skill_ids": [],
+  "passive_skill_id": "",
+  "base_stats": {
+    "HP": 1,
+    "STR": 0,
+    "MAG": 0,
+    "DEX": 0,
+    "SPD": 0,
+    "LCK": 0,
+    "DEF": 0,
+    "RES": 0
+  },
+  "illusion": {
+    "hits_to_vanish": 4,
+    "owner_turns": 3
+  },
+  "_engine_note": "召唤物不是职业也不是敌人：单独放在 data/summons/（DataLoader.summons），不会出现在招募或刷怪里。illusion：承受 4 个伤害包后消失（每段各计 1 次，与伤害数值无关；生命不因伤害减少），召唤后的第 3 个主人自身回合结束时消失，召唤所在的回合不计入（设计库 kensei_linmo rules）。生命值 1 只为让单位处于存活状态，不参与结算。外观暂用剑圣棋子，生成时半透明着色以示区别。",
+  "_mirror": "规则来自设计库仓 snapshots/skills.json @ 762393b（kensei_linmo 的 rules：〔影〕的定义、4 次伤害包、第 3 个自身回合结束）。〔影〕在设计库里不是独立记录，本文件是引擎侧的承载数据。"
+}

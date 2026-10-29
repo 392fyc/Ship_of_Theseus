@@ -73,6 +73,15 @@ var _slot_forms: Dictionary = {}
 var _qi_accumulation_progress: Dictionary = {}
 # 本场战斗的速度百分比提升（阴阳圆满在本轮尚未行动时达成：速度 +10%，可多次获得）。
 var battle_speed_pct: float = 0.0
+# 幻象（〔临摹〕的〔影〕）：属于主人一方，不行动；受到的伤害包计数，生命不因伤害减少。
+var is_illusion: bool = false
+var illusion_owner: Unit = null
+# 主人技能栏里因这个幻象而换了形态的槽位（临摹 → 颠倒），幻象消失时换回。
+var illusion_slot_id: String = ""
+var _illusion_hits_left: int = 0
+var _illusion_turns_left: int = 0
+# 召唤所在的那个主人回合结束时不计数（「召唤所在的回合不计入」）。
+var _illusion_skip_next_turn_end: bool = false
 # 回忆升级记录（gameplay-impl PR5，差距清单 M10）：setup() 时清空，由 apply_memory 写入。
 var memory_upgrades: MemoryUpgrades = MemoryUpgrades.new()
 
@@ -226,6 +235,11 @@ func setup(class_data: Dictionary, initial_facing: StringName = &"SE") -> void:
 	_base_passive_skill_id = passive_skill_id
 	_qi_loss_scar_progress = 0
 	reset_battle_memory_state()
+	var illusion: Variant = class_data.get("illusion", null)
+	is_illusion = illusion is Dictionary
+	if is_illusion:
+		_illusion_hits_left = int((illusion as Dictionary).get("hits_to_vanish", 1))
+		_illusion_turns_left = int((illusion as Dictionary).get("owner_turns", 1))
 	skill_ids.clear()
 	for skill_id_value: Variant in class_data.get("skill_ids", []):
 		skill_ids.append(str(skill_id_value))
@@ -455,6 +469,13 @@ func _canvas_item_rect_screen(item: CanvasItem, local_rect: Rect2) -> Rect2:
 # ── 战斗接口 ─────────────────────────────────────────
 
 func take_damage(amount: int, damage_type: String = "physical") -> void:
+	# 幻象：每承受 1 个伤害包计 1 次（多段攻击每段各计），与伤害数值无关；计满后消失。
+	if is_illusion:
+		damage_taken.emit(amount, damage_type)
+		_illusion_hits_left -= 1
+		if _illusion_hits_left <= 0:
+			vanish_illusion()
+		return
 	# R1.17：伤害先扣护盾，超过当前护盾的部分再扣生命。damage_taken 仍报整次伤害量。
 	var absorbed: int = mini(shield, maxi(0, amount))
 	shield -= absorbed
@@ -466,6 +487,31 @@ func take_damage(amount: int, damage_type: String = "physical") -> void:
 	if not stats.is_alive():
 		unit_died.emit()
 		_on_death()
+
+
+## 幻象消失：按死亡流程移出战场（TacticalManager._on_unit_died 收尾并把主人的槽位换回）。
+func vanish_illusion() -> void:
+	if not is_illusion or not stats.is_alive():
+		return
+	stats.hp = 0
+	unit_died.emit()
+	_on_death()
+
+
+## 主人自身回合结束时调用：召唤所在的回合不计入，之后每个主人回合结束计 1 次，计满后消失。
+func on_owner_turn_ended() -> void:
+	if not is_illusion or not stats.is_alive():
+		return
+	if _illusion_skip_next_turn_end:
+		_illusion_skip_next_turn_end = false
+		return
+	_illusion_turns_left -= 1
+	if _illusion_turns_left <= 0:
+		vanish_illusion()
+
+
+func mark_summoned_in_owner_turn() -> void:
+	_illusion_skip_next_turn_end = true
 
 
 func heal(amount: int) -> void:

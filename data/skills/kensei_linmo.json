@@ -1,0 +1,51 @@
+{
+  "id": "kensei_linmo",
+  "upgrade_of": "kensei_juhe",
+  "target_mode": "格子",
+  "name": "临摹",
+  "damage_type": "physical",
+  "power": 0,
+  "range": {
+    "type": "diamond",
+    "min": 1,
+    "max": 3
+  },
+  "area": {
+    "type": "single",
+    "size": 0
+  },
+  "attack_type": "ranged",
+  "cooldown": 4,
+  "action_cost": "swift",
+  "swift_limit": 1,
+  "tags": [
+    "summon",
+    "sword_qi"
+  ],
+  "hit_bonus": 0,
+  "timing_constraint": "any",
+  "effects": [],
+  "qi_cost": 60,
+  "qi_gain_on_hit": 0,
+  "qi_gain_on_kill": 0,
+  "mark_gain": 0,
+  "mark_cost": 0,
+  "requires_marks": 0,
+  "guaranteed_crit": false,
+  "guaranteed_hit": false,
+  "requires_empty_cell": true,
+  "summon": {
+    "summon_id": "kensei_ying",
+    "slot_while_present": "kensei_diandao"
+  },
+  "mimic": {
+    "identities": [
+      "kensei_zhanji",
+      "kensei_badao"
+    ],
+    "damage_pct": 50
+  },
+  "description": "消耗 60 点剑气，在一个可通行的空格召唤〔影〕。〔影〕在场时，本技能变为〔颠倒〕；〔影〕消失后，本技能恢复为〔临摹〕。〔影〕是属于自身一方的幻象，占据所在格，不行动；敌人对它的攻击必定命中；它每承受 1 个伤害包计 1 次，共 4 次后消失，或在召唤后的第 3 个自身回合结束时消失（召唤所在的回合不计入）。自身主动使用〔斩击〕〔拔刀〕或它们的回忆技能后，〔影〕在自己的位置再打一遍（照做）：用自身属性按这次攻击的威力与系数计算，再乘 50%；自身状态的加成与惩罚不计；命中与暴击单独判定；命中时附加这次攻击施加给敌人的状态。",
+  "_engine_note": "summon：在所选空格（requires_empty_cell，扣消耗前校验）召唤 data/summons/kensei_ying.json，归属使用者一方，不进回合顺序；影在场时本槽换成颠倒（沿用交替槽 Unit._slot_forms），影消失时 TacticalManager._on_unit_died 换回。mimic：本技能在技能栏里时，自身主动使用身份为斩击系、拔刀系（R2.5，含它们的回忆技能）的伤害技能后，TacticalManager._run_mimic 让影照做——单体攻击按这次的射程从影的位置随机选敌人，以自身为中心的范围以影为中心，方向攻击从影的位置朝同一方向；final_multiplier = 50%；按「这次攻击」的数值，属性用这次攻击结算时的印记（主手伤害结算之前的快照：拔刀系随后被消耗的印记计入，斩击系伤害后才得的印记不计入）[推断：原文「按这次攻击的……数值」]；被排除的「自身状态的加成与惩罚」是伤害总增总降（架势、纳刀、满月）与威力加成（澄心），buff 或持有状态改的属性与暴击（例如太阳）仍随自身属性计入 [推断]；不产生剑气、印记、天赋事件、反击与若离；辅助技能（决心、回天）没有伤害，不照做；反击不触发照做。敌人可以选影为目标（只吸引可回避的单体攻击；引擎里敌人只会普通攻击，用户裁决 Q6），敌人选目标按血量最低，影的生命值是 1，所以射程内有影时敌人会优先打它 [推断：符合「吸引」，但不是原文写明的优先级]。友方效果默认不选影。胜负判定不计影。未承载：「同一次动作中由效果追加的攻击（例如副手攻击）也算作其中一段」——照做只重打主手段，副手追加段不照做（双持装备层尚未接线，实战触发不到）；「使用本技能算作一次使用〔居合〕」（引擎没有技能使用计数）；「专门提升〔居合〕伤害的效果改为作用于照做比例」（引擎没有这类效果）；多格单位的口径（Q7）。",
+  "_mirror": "设计库镜像字段：name / 射程 / 冷却 / 行动消耗 / 剑气消耗 / 〔影〕的规则与数值（4 次、第 3 个自身回合、50%）/ upgrade_of 来自设计库仓 snapshots/skills.json @ 762393b（kensei_linmo）。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。例外：power 与 damage_type 不是镜像字段（设计库本技能没有伤害条目），power=0 走辅助技能路径。"
+}
