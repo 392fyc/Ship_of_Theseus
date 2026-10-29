@@ -1,0 +1,69 @@
+{
+  "id": "kensei_qiefan",
+  "upgrade_of": "kensei_zhaojia",
+  "target_mode": "自身",
+  "name": "浮生若梦",
+  "damage_type": "physical",
+  "power": 0,
+  "range": {
+    "type": "self",
+    "min": 0,
+    "max": 0
+  },
+  "area": {
+    "type": "single",
+    "size": 0
+  },
+  "attack_type": "melee",
+  "cooldown": 3,
+  "action_cost": "swift",
+  "swift_limit": 1,
+  "tags": [
+    "sword",
+    "stance",
+    "reaction"
+  ],
+  "hit_bonus": 0,
+  "timing_constraint": "any",
+  "effects": [
+    {
+      "held_state_id": "kensei_jiashi",
+      "duration": {
+        "kind": "until_own_turn_start",
+        "count": 2
+      },
+      "params": {
+        "damage_total_modifier_own_turn_skill": 0.75
+      }
+    },
+    {
+      "held_state_id": "kensei_ruoji",
+      "duration": {
+        "kind": "until_own_turn_start",
+        "count": 2
+      },
+      "stacks_from_qi": {
+        "base": 1,
+        "qi_step": 30,
+        "max": 3
+      }
+    }
+  ],
+  "qi_cost": 0,
+  "qi_gain_on_hit": 0,
+  "qi_gain_on_kill": 0,
+  "mark_gain": 0,
+  "mark_cost": 0,
+  "requires_marks": 0,
+  "guaranteed_crit": false,
+  "guaranteed_hit": false,
+  "slot_swap_trigger": "marks_and_qi",
+  "slot_swap_target": "kensei_badao",
+  "slot_swap_requires": {
+    "marks": 3,
+    "qi": 20
+  },
+  "description": "获得〔架势〕和〔若即〕，持续到其后第 2 个自身回合开始。〔若即〕的层数为 1，使用时每有 30 点剑气再多 1 层，最大 3 层：原本会命中的可回避攻击改为回避，或原本会成功施加的普通控制改为抵抗，每次消耗 1 层并获得 1 层〔若离〕。〔若离〕持续到下个自身回合结束：自身造成技能伤害时消耗 1 层，获得 15 点剑气。〔架势〕使自身在自身回合内使用技能造成的伤害总降 25%。",
+  "_engine_note": "设计库没有伤害条目：power=0 走辅助技能路径。架势的总降 25% 写在施加时的 params 里（R3.4）；浮生若梦的架势没有嘲讽与额外闪避（那是见切的）。若即层数 stacks_from_qi = 1 + 发动时剑气 ÷ 30，最大 3；已有若即时层数相加、最大 3、刷新持续时间（kensei_ruoji 的 add_stacks）。若即与若离的结算数值在 kensei_ruoji.engine_evade_conversion、kensei_ruoli.engine_on_skill_damage。招架槽（R2.5）：保留 slot_swap_*，持有 3 印记且剑气 ≥ 20 时本槽换出拔刀或它的升级形态。",
+  "_mirror": "设计库镜像字段：name / 冷却 / 行动消耗 / 状态链接与持续时间 / 总降 25% / 层数规则 / upgrade_of 来自设计库仓 snapshots/skills.json @ 762393b（kensei_qiefan）与 states/kensei_ruoji、kensei_ruoli、kensei_jiashi。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。例外：power 与 damage_type 不是镜像字段，理由见 _engine_note。"
+}

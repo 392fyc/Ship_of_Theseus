@@ -11,5 +11,10 @@
   "dispellable": false,
   "resistable": false,
   "ignores_immunity": true,
-  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。"
+  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。",
+  "engine_on_skill_damage": {
+    "consume": 1,
+    "qi_gain": 15
+  },
+  "_engine_note": "engine_on_skill_damage = effect「自身造成技能伤害时，消耗 1 层〔若离〕，获得 15 点剑气；每次使用技能最多消耗 1 层；不造成伤害的技能不消耗」。在技能动作结算完后按本次是否造成过主手伤害判定（TacticalManager._consume_on_skill_damage_states）。空想期间获得改失去由剑气拦截器处理（心眼组）。"
 }

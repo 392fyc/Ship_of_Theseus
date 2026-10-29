@@ -1,0 +1,74 @@
+{
+  "id": "kensei_jieli",
+  "upgrade_of": "kensei_zhaojia",
+  "target_mode": "自身",
+  "name": "见切",
+  "damage_type": "physical",
+  "power": 0,
+  "range": {
+    "type": "self",
+    "min": 0,
+    "max": 0
+  },
+  "area": {
+    "type": "single",
+    "size": 0
+  },
+  "attack_type": "melee",
+  "cooldown": 2,
+  "action_cost": "swift",
+  "swift_limit": 1,
+  "tags": [
+    "sword",
+    "stance",
+    "reaction"
+  ],
+  "hit_bonus": 0,
+  "timing_constraint": "any",
+  "effects": [
+    {
+      "held_state_id": "kensei_jiashi",
+      "duration": {
+        "kind": "until_own_turn_start",
+        "count": 2
+      },
+      "params": {
+        "damage_total_modifier_own_turn_skill": 0.8,
+        "stat_scaled_avoid_bonus": {
+          "stat": "DEX",
+          "pct": 50
+        },
+        "grants_taunt": true
+      }
+    },
+    {
+      "held_state_id": "kensei_jianqie_stance",
+      "duration": {
+        "kind": "until_own_turn_start",
+        "count": 2
+      },
+      "stacks_from_qi": {
+        "base": 1,
+        "qi_step": 30,
+        "max": 3
+      }
+    }
+  ],
+  "qi_cost": 0,
+  "qi_gain_on_hit": 0,
+  "qi_gain_on_kill": 0,
+  "mark_gain": 0,
+  "mark_cost": 0,
+  "requires_marks": 0,
+  "guaranteed_crit": false,
+  "guaranteed_hit": false,
+  "slot_swap_trigger": "marks_and_qi",
+  "slot_swap_target": "kensei_badao",
+  "slot_swap_requires": {
+    "marks": 3,
+    "qi": 20
+  },
+  "description": "获得〔架势〕和〔见切〕，持续到其后第 2 个自身回合开始。〔架势〕使自身在自身回合内使用技能造成的伤害总降 20%；〔架势〕期间，自身具有〔嘲讽〕效果，额外闪避 +N，N 等于当前技巧数值的 50%。〔见切〕的层数为 1，使用时每有 30 点剑气再多 1 层，最大 3 层：每个对自身进行命中判定的敌方攻击动作结束后，若自身存活、攻击者与自身上下左右相邻且剑气不少于 10 点，消耗 1 层〔见切〕和 10 点剑气，对攻击者反击一次（物理伤害，威力 +1，系数 1.0）。",
+  "_engine_note": "设计库没有伤害条目：power=0 走辅助技能路径。架势的总降 20%、额外闪避（技巧 50%，R1.2 其他闪避加减，每次判定读当前技巧）与嘲讽（grants_taunt，与架势同存同灭，Q5）都写在施加架势时的 params 里（R3.4：比例由给予它的技能写明），所以再次使用会刷新持续时间与参数。见切层数 stacks_from_qi = 1 + 发动时剑气 ÷ 30（向下取整），最大 3；再次获得时设为本次层数（kensei_jianqie_stance.engine_reapplication_mode=set_stacks，Q3）。反击数值在 kensei_jianqie_stance.engine_counter。招架槽（R2.5）：保留 slot_swap_*，持有 3 印记且剑气 ≥ 20 时本槽换出拔刀或它的升级形态（拔刀 effect 写的是「〔招架〕槽」）。",
+  "_mirror": "设计库镜像字段：name / 冷却 / 行动消耗 / 状态链接与持续时间 / 总降 20% / 技巧 50% / 层数规则 / upgrade_of 来自设计库仓 snapshots/skills.json @ 762393b（kensei_jieli）与 states/kensei_jianqie_stance、kensei_jiashi。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。例外：power 与 damage_type 不是镜像字段，理由见 _engine_note。"
+}

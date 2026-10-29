@@ -628,6 +628,17 @@ func get_avoid_value(terrain_evade_bonus: int = 0) -> int:
 
 ## 持有型状态 params 里的 stat_scaled_avoid_bonus：{stat, pct} → 当前该属性 × pct%（向下取整）。
 ## 每次命中判定时读取当前属性，不快照（设计库 kensei_zhaojia rules）。
+## 是否带有嘲讽（R1.18）：持有 taunt 状态，或某个持有型状态的参数写了 grants_taunt
+## （〔见切〕给的〔架势〕：「〔架势〕期间具有嘲讽」，与架势同存同灭，Q5）。
+func has_taunt() -> bool:
+	if held_states.has("taunt"):
+		return true
+	for entry: Dictionary in held_states.to_array():
+		if bool((entry.get("params", {}) as Dictionary).get("grants_taunt", false)):
+			return true
+	return false
+
+
 func _get_held_state_avoid_bonus() -> int:
 	var total: int = 0
 	for entry: Dictionary in held_states.to_array():
