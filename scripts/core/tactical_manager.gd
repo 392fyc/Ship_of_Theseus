@@ -2148,6 +2148,10 @@ func _execute_skill_action(action: GameAction) -> bool:
 	# ⚠ **位移必须留在伤害结算之后**，不能为了让辅助技能走到就把整块提前：
 	# 一闪的途经伤害靠 `_get_displacement_path_cells(user.grid_position, target_pos)`
 	# 算路径，先位移会让起点变成落点，路径整个算错。
+	# 照做「按这次攻击的技能威力与系数……用自身的属性（包含印记带来的属性加成）」：记下这次攻击
+	# 结算时用的印记（主手伤害结算之前），照做期间按它计算。拔刀系结算后才扣印记，照做照样吃到；
+	# 斩击系伤害后才得的印记不算。
+	var marks_at_attack: Dictionary = user.marks.duplicate()
 	if _is_support_skill(skill_data):
 		print("[Skill] %s uses %s (%d target(s))" % [
 			user.unit_name,
@@ -2182,9 +2186,6 @@ func _execute_skill_action(action: GameAction) -> bool:
 				_execute_hostile_action(user, target_unit, per_target_payload)
 
 	# 伤害结算完成后才扣印记（修复 P0-②：使拔刀吃到自身消耗的势加成）。
-	# 照做「用自身的属性（包含印记带来的属性加成）」：拔刀系在结算后才扣印记，照做在那之后，
-	# 所以先记下扣之前的印记，照做期间按它计算。
-	var marks_before_spend: Dictionary = user.marks.duplicate()
 	_spend_skill_marks(user, mark_cost)
 	# 护盾（回天）：最大生命 × pct% × 发动时范围内的敌人数，向上取整 [推断：原文没写取整]，
 	# 与现有护盾相加（R1.17）。
@@ -2237,7 +2238,7 @@ func _execute_skill_action(action: GameAction) -> bool:
 		_swap_with_illusion(user)
 	_apply_held_skill_triggers(user, skill_id)
 	_consume_on_skill_damage_states(user, skill_id)
-	_run_mimic(user, skill_id, skill_data, data, marks_before_spend)
+	_run_mimic(user, skill_id, skill_data, data, marks_at_attack)
 	_run_pending_reactions()
 	_emit_dashboard_state_changed()
 	return true
