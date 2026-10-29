@@ -43,7 +43,7 @@ judgment, not a verdict.
   those facts, with source locations. Record a gap when a read fails instead
   of guessing a path.
 - Check the proposal against the project's own design principles first:
-  enter the KB through `03-AI-Context/design-rules-index.md` and read the
+  enter the KB through `docs/03-AI-Context/design-rules-index.md` and read the
   principles it routes to for the entity in question. A conflict with a
   principle or a recorded user ruling is a failure mode in its own right; cite
   the page and section. A proposal that states conclusions without naming the

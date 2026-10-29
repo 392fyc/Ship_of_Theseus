@@ -100,20 +100,20 @@ Mercury 的五个角色由 Mercury 装载为本仓库的 `.claude/agents/mercury
 ### 游戏机制 — 只给指针，不复述
 
 规则正本 = **设计库规则表**（`/api/rules`，共 23 条：R1.1–R1.10 / R2.1–R2.4 / R3.1–R3.4 / R4.1–R4.4 / R5.9）。
-离线可读的全量索引 = KB `01-Game-Design/rules-catalog.md`（每条一句话 + 展开文档链接）；逐字原文 = 设计库仓库 `snapshots/rules.json`。
+离线可读的全量索引 = KB [`01-Game-Design/rules-catalog.md`](docs/01-Game-Design/rules-catalog.md)（每条一句话 + 展开文档链接）；逐字原文 = 设计库仓库 `snapshots/rules.json`。
 按 AGENTS.md「权威路由」与「玩法事实核对」，本文件**不复述规则内容**——写战斗 / 技能 / 伤害逻辑前回查真源，不要凭本文件或凭记忆作答。
 
 最常问错的几处，直接给落点：
 
 | 要确认什么 | 查这里 |
 |---|---|
-| 伤害怎么算、hybrid 怎么合、纯粹伤害是什么 | R1.1；展开见 KB `01-Game-Design/Core-Systems/battle-calculation.md` |
+| 伤害怎么算、hybrid 怎么合、纯粹伤害是什么 | R1.1；展开见 KB [`01-Game-Design/Core-Systems/battle-calculation.md`](docs/01-Game-Design/Core-Systems/battle-calculation.md) |
 | 命中 / 暴击怎么算，哪些属性参与 | R1.2 / R1.3 |
 | 某个修正该落在哪一层，什么时候取整、什么时候 clamp | R1.8 |
 | 一次效果对同一单位结算几次，会不会自己触发自己 | R1.9 / R1.10 |
 | 技能消耗什么行动资源、什么时机能放 | R3.2 / R3.3 |
 | 速度到底影响什么（有没有速度带来的追击） | R3.1 |
-| 建筑受伤走不走伤害公式，摧毁后那格变成什么 | 规则表无此域 → KB `01-Game-Design/Core-Systems/grid-and-map.md` §建筑耐久系统 |
-| 受击方会不会自动反击 | 规则表无此域 → KB `01-Game-Design/Core-Systems/battle-calculation.md` §反击系统 |
+| 建筑受伤走不走伤害公式，摧毁后那格变成什么 | 规则表无此域 → KB [`01-Game-Design/Core-Systems/grid-and-map.md`](docs/01-Game-Design/Core-Systems/grid-and-map.md) §建筑耐久系统 |
+| 受击方会不会自动反击 | 规则表无此域 → KB [`01-Game-Design/Core-Systems/battle-calculation.md`](docs/01-Game-Design/Core-Systems/battle-calculation.md) §反击系统 |
 
 R1.1 / R1.2 / R1.3 各自列全了本链的层与乘区。规则层没有列出的因素（例如距离）**不要自行补进公式**；要让某个因素参与结算，必须由技能 / 天赋 / 遗物条目显式声明，并按 R1.8 落到指定的层。

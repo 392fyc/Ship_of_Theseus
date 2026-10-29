@@ -1,6 +1,6 @@
 # 06 - 天赋树系统(Talent Tree System)
 
-> 返回 [总览](./README.md)
+> 返回 [总览](../game-design-doc.md)
 
 ## 概览
 

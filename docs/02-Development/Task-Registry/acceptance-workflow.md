@@ -107,16 +107,15 @@ When resolving or archiving an issue, sync status across Issue Bundle, phase reg
 
 Git commit is a mandatory precondition for task closure. No human intervention required.
 
-**Responsibility**: Main Agent executes git staging and commit for both repos. This is metadata bookkeeping (staging existing files + writing commit messages), not code modification.
+**Responsibility**: Main Agent executes git staging and commit in the game repository (code and `docs/`). This is metadata bookkeeping (staging existing files + writing commit messages), not code modification.
 
 **Timing**: After all registry and docs are updated, before marking `closed`.
 
 **Procedure**:
 
-1. **KB Repo** (`ShipOfTheseus-KB`): Stage all bundle, registry, and session files changed during this task. Commit.
-2. **Game Repo** (`Ship_of_Theseus`): Stage only the files listed in `implementation_receipt.changed_files`. Commit.
-3. **Commit message format**: `{type}({task_id}): {one-line summary}`
-4. Push is NOT part of this rule. Push timing is decided by Human.
+1. **Game Repo** (`Ship_of_Theseus`): Stage the files listed in `implementation_receipt.changed_files` together with the bundle, registry, and session files changed under `docs/` (the KB, merged into this repository on 2026-10-29). Commit.
+2. **Commit message format**: `{type}({task_id}): {one-line summary}`
+3. Push is NOT part of this rule. Push timing is decided by Human.
 
 **Commit type prefixes**:
 
@@ -128,6 +127,6 @@ Git commit is a mandatory precondition for task closure. No human intervention r
 | `data` | JSON/resource data files |
 | `docs` | Documentation-only changes |
 
-**Preconditions for `closed`**: `docs_synced` + git commits completed for both repos.
+**Preconditions for `closed`**: `docs_synced` + git commit completed in the game repository (code and `docs/`).
 
 **Procedural reference**: See `03-AI-Context/Handoffs/git-sync-procedure.md` for detailed commands and scenarios.

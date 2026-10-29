@@ -6,7 +6,7 @@ alwaysApply: true
 # 已确认的错误模式
 
 > 此节仅收录模型反复犯错后经纠正确认的模式，**不陈述规则本身**。
-> 规则条文查设计库规则表 `/api/rules`（23 条），离线全量索引查 KB `01-Game-Design/rules-catalog.md`。
+> 规则条文查设计库规则表 `/api/rules`（23 条），离线全量索引查 KB `docs/01-Game-Design/rules-catalog.md`。
 
 ## Godot 4.6 兼容性
 - class_name 与 autoload 同名 → 冲突，autoload 脚本**移除 class_name**
@@ -15,9 +15,9 @@ alwaysApply: true
 ## 游戏机制陷阱
 - 让pure参与暴击 / 给pure写暴击倍率 → **错**，无条件不参与，也没有技能级开关（R1.1、R1.3）
 - hybrid先平均防御再减 / 只用单一atk → **错**，两侧各自完整算一次再合（R1.1）
-- 假设引擎里有自动反击 → **错**，已移除；未来以天赋 / 敌方特性形式回归，**不要预设反击框架**（KB `01-Game-Design/Core-Systems/battle-calculation.md` §反击系统）
+- 假设引擎里有自动反击 → **错**，已移除；未来以天赋 / 敌方特性形式回归，**不要预设反击框架**（KB `docs/01-Game-Design/Core-Systems/battle-calculation.md` §反击系统）
 - 假设速度会带来追击 / 二次攻击 → **错**，速度的作用只有两项，追击不在其中（R3.1）
 - 让效果被自己引发的事件再次触发 / 让多个效果互相循环触发 → **错**，唯一例外是效果描述显式声明可反复追加（R1.10）
-- 建筑耐久套用伤害公式 → **错**，建筑不走伤害公式（KB `01-Game-Design/Core-Systems/grid-and-map.md` §建筑耐久系统）
+- 建筑耐久套用伤害公式 → **错**，建筑不走伤害公式（KB `docs/01-Game-Design/Core-Systems/grid-and-map.md` §建筑耐久系统）
 - 建筑摧毁后恢复基础地形效果 → **错**，不恢复（同上）
 - 给伤害 / 命中加距离衰减 → **错**，R1.1 / R1.2 的公式里没有距离项，不要自行补项
