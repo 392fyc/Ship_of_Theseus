@@ -115,6 +115,17 @@ func _test_skill_semantics() -> void:
 	state["mode"] = "enemy"
 	var enemy_views: Array = Adapter.new().build(state)["skills"]
 	_check("敌方技能没有可触发键位", enemy_views.all(func(view: RefCounted) -> bool: return view.hotkey_text.is_empty() and not view.can_activate()))
+	for example: Dictionary in [
+		{"action": "move", "reason": "已失去移动机会", "expected": "移动行动已用"},
+		{"action": "standard", "reason": "攻击机会已使用", "expected": "标准行动已用"},
+		{"action": "swift", "reason": "迅捷机会已使用", "expected": "迅捷行动已用"},
+	]:
+		var spent_state: Dictionary = _state_with_actions({})
+		spent_state["skills"] = [{"skill_id": "spent", "name": "已用技能", "available": false,
+			"action_cost": example["action"], "reason": example["reason"]}]
+		var spent_view: RefCounted = Adapter.new().build(spent_state)["skills"][0]
+		_check("%s原因沿用行动名称且保持不可用" % example["action"],
+			spent_view.tooltip_text.ends_with(example["expected"]) and not spent_view.can_activate())
 
 
 func _test_m2_composition_receives_views() -> void:

@@ -118,7 +118,7 @@ func _normal_sequence() -> void:
 	await _walk_to(actor, Vector2i(3, 4))
 	_check("movement_spent", actor.movement_used)
 	await _hover_skill("myrmidon_yishan", "move_spent")
-	_check("move_spent_reason_visible", _slot("myrmidon_yishan").get_inspection_text().contains("已失去移动机会"))
+	_check("move_spent_reason_visible", _slot("myrmidon_yishan").get_inspection_text().contains("移动行动已用"))
 	await _hover_skill("myrmidon_juhe", "qi_insufficient")
 	_check("qi_insufficient_reason_visible", _slot("myrmidon_juhe").get_inspection_text().contains("剑气不足"))
 	await _hover_skill("myrmidon_zhanji", "standard_cost")
@@ -135,12 +135,12 @@ func _normal_sequence() -> void:
 	await _settled_ui06()
 	_check("standard_spent", actor.standard_used)
 	await _hover_skill("myrmidon_zhanji", "standard_spent")
+	_check("standard_spent_reason_visible", _slot("myrmidon_zhanji").get_inspection_text().contains("标准行动已用"))
 	manager.call("request_end_turn")
 	await create_timer(0.3).timeout
 	var kensei: Unit = manager.get("current_unit") as Unit
 	_check("normal_kensei_turn", kensei.unit_id == "kensei")
 	await _hover_skill("kensei_zhaojia", "mark_requirement")
-	# Keep the standard-spent card visible before ending the swordsman's turn.
 	# Show swift consumption on the next actor, still in the movement phase.
 	await _click_skill("kensei_zhaojia")
 	_check("swift_spent", kensei.swift_used)
