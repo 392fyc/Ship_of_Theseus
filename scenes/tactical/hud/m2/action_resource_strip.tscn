@@ -38,23 +38,34 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 0
 offset_left = 21.0
-offset_top = 7.0
-offset_right = 45.0
-offset_bottom = 31.0
+offset_top = 4.0
+offset_right = 37.0
+offset_bottom = 20.0
 mouse_filter = 2
 script = ExtResource("3_glyph")
 
 [node name="MovementValue" type="Label" parent="MovementZone"]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 42.0
-offset_top = 5.0
-offset_right = 62.0
-offset_bottom = 25.0
+offset_top = 4.0
+offset_right = 88.0
+offset_bottom = 17.0
 mouse_filter = 2
+theme_override_font_sizes/font_size = 10
+vertical_alignment = 1
+theme_type_variation = &"HudM2Text"
+
+[node name="MovementState" type="Label" parent="MovementZone"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_top = 25.0
+offset_right = 88.0
+offset_bottom = 38.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 9
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_type_variation = &"HudM2MovementLabel"
+theme_type_variation = &"HudM2Text"
 
 [node name="StandardZone" type="Panel" parent="."]
 unique_name_in_owner = true
@@ -65,6 +76,32 @@ offset_right = 181.4
 offset_bottom = 48.0
 mouse_filter = 2
 theme_type_variation = &"HudM2Domain"
+
+[node name="StandardName" type="Label" parent="StandardZone"]
+unique_name_in_owner = true
+layout_mode = 0
+text = "标准行动"
+offset_left = 3.0
+offset_top = 4.0
+offset_right = 85.8
+offset_bottom = 17.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_type_variation = &"HudM2Text"
+
+[node name="StandardState" type="Label" parent="StandardZone"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 5.0
+offset_top = 26.0
+offset_right = 31.0
+offset_bottom = 39.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 9
+vertical_alignment = 1
+theme_type_variation = &"HudM2Text"
 
 [node name="PipsCenter" type="Control" parent="StandardZone"]
 layout_mode = 1
@@ -79,7 +116,7 @@ mouse_filter = 2
 unique_name_in_owner = true
 layout_mode = 0
 mouse_filter = 2
-theme_override_constants/separation = 5
+theme_override_constants/separation = 2
 alignment = 1
 
 [node name="SwiftZone" type="Panel" parent="."]
@@ -91,6 +128,32 @@ offset_right = 271.0
 offset_bottom = 48.0
 mouse_filter = 2
 theme_type_variation = &"HudM2Domain"
+
+[node name="SwiftName" type="Label" parent="SwiftZone"]
+unique_name_in_owner = true
+layout_mode = 0
+text = "迅捷行动"
+offset_left = 3.0
+offset_top = 4.0
+offset_right = 85.8
+offset_bottom = 17.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_type_variation = &"HudM2Text"
+
+[node name="SwiftState" type="Label" parent="SwiftZone"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 5.0
+offset_top = 26.0
+offset_right = 31.0
+offset_bottom = 39.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 9
+vertical_alignment = 1
+theme_type_variation = &"HudM2Text"
 
 [node name="PipsCenter" type="Control" parent="SwiftZone"]
 layout_mode = 1
@@ -105,5 +168,5 @@ mouse_filter = 2
 unique_name_in_owner = true
 layout_mode = 0
 mouse_filter = 2
-theme_override_constants/separation = 5
+theme_override_constants/separation = 2
 alignment = 1

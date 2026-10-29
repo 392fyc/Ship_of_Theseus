@@ -87,19 +87,26 @@ func _test_missing_and_action_states() -> void:
 func _test_skill_semantics() -> void:
 	var state: Dictionary = _state_with_actions({"movement_remaining": 1, "movement_available": true, "standard_capacity": 1, "standard_remaining": 1, "swift_capacity": 1, "swift_remaining": 1})
 	state["skills"] = [
-		{"skill_id": "passive", "name": "纯被动", "is_passive": true, "available": true, "description": "被动说明", "resource_cost_display": {"amount": 9, "resource_name": "错误来源"}, "qi_cost": 99},
-		{"skill_id": "hybrid", "name": "A 不可用", "is_passive": true, "active_capable": true, "available": false, "reason": "资源不足", "description": "混合说明", "resource_cost_display": {"amount": 12, "resource_name": "法力"}},
-		{"skill_id": "unavailable", "name": "B 可用", "available": true, "reason": "", "cooldown": 0, "resource_cost_display": {"amount": 7, "resource_name": "斗志"}},
-		{"skill_id": "third", "name": "C 可用", "available": true, "resource_cost_display": {"amount": 3, "resource_name": "灵能"}},
-		{"skill_id": "fourth", "name": "第四", "available": true, "resource_cost_display": {"amount": 4, "resource_name": "灵能"}},
+		{"skill_id": "passive", "name": "纯被动", "is_passive": true, "available": true, "action_cost": "swift", "description": "被动说明", "resource_cost_display": {"amount": 9, "resource_name": "错误来源"}, "qi_cost": 99},
+		{"skill_id": "hybrid", "name": "A 不可用", "is_passive": true, "active_capable": true, "available": false, "action_cost": "move", "reason": "资源不足", "description": "混合说明", "resource_cost_display": {"amount": 12, "resource_name": "法力"}},
+		{"skill_id": "unavailable", "name": "B 冷却", "available": false, "action_cost": "standard", "reason": "冷却中 (2 回合后恢复)", "cooldown": 2, "resource_cost_display": {"amount": 7, "resource_name": "斗志"}},
+		{"skill_id": "third", "name": "招架", "available": true, "action_cost": "swift", "description": "迅捷·持续到下个自身回合开始；期间额外闪避 +N。持有 3 枚印记且剑气不少于 20 点时，本槽变为〔拔刀〕。"},
+		{"skill_id": "fourth", "name": "拔刀", "available": false, "action_cost": "standard", "reason": "印记不足（需要 3 个，当前 2 个）", "description": "消耗 3 枚印记和 20 点剑气。", "resource_cost_display": {"amount": 20, "resource_name": "剑气"}},
+		{"skill_id": "qi_unavailable", "name": "拔刀", "available": false, "action_cost": "standard", "reason": "剑气不足（需要 20，当前 15）", "description": "消耗 3 枚印记和 20 点剑气。", "resource_cost_display": {"amount": 20, "resource_name": "剑气"}},
 	]
 	var icons: Dictionary = {"hybrid": GradientTexture2D.new()}
 	var views: Array = Adapter.new().build(state, icons)["skills"]
-	_check("技能保持真实顺序", views.map(func(view: RefCounted) -> String: return view.skill_id) == ["passive", "hybrid", "unavailable", "third", "fourth"])
+	_check("技能保持真实顺序", views.map(func(view: RefCounted) -> String: return view.skill_id) == ["passive", "hybrid", "unavailable", "third", "fourth", "qi_unavailable"])
 	_check("纯被动无键位动作费用", views[0].passive and not views[0].active_capable and views[0].hotkey_text.is_empty() and views[0].resource_cost_display.is_empty())
+	_check("纯被动说明不写行动消耗", not views[0].tooltip_text.contains("消耗："))
 	_check("显式可主动被动保留行动与调用方图标", views[1].passive and views[1].active_capable and views[1].hotkey_text == "1" and views[1].icon_texture == icons["hybrid"])
-	_check("A 不可用不激活且保留原因", not views[1].can_activate() and views[1].tooltip_text.contains("资源不足"))
-	_check("A 不可用而 B C 可用仍保留一二三", views[1].hotkey_text == "1" and views[2].hotkey_text == "2" and views[3].hotkey_text == "3")
+	_check("A 不可用不激活且保留原因和移动行动费用", not views[1].can_activate() and views[1].tooltip_text.contains("资源不足") and views[1].tooltip_text.contains("消耗：移动行动"))
+	_check("冷却技能保留冷却数与不可用原因", views[2].cooldown_turns == 2 and views[2].tooltip_text.contains("冷却中 (2 回合后恢复)"))
+	_check("标准技能标出标准行动并保留职业资源名", views[2].tooltip_text.contains("消耗：标准行动") and views[2].resource_cost_display == {"amount": 7, "resource_name": "斗志"})
+	_check("招架迅捷前缀不重复且效果和拔刀门槛仍在", views[3].tooltip_text.contains("消耗：迅捷行动") and not views[3].tooltip_text.contains("迅捷·") and views[3].tooltip_text.contains("额外闪避 +N") and views[3].tooltip_text.contains("持有 3 枚印记且剑气不少于 20 点"))
+	_check("拔刀保留标准行动、印记与剑气费用及原因", views[4].tooltip_text.contains("消耗：标准行动") and views[4].tooltip_text.contains("消耗 3 枚印记和 20 点剑气") and views[4].tooltip_text.contains("印记不足") and views[4].resource_cost_display == {"amount": 20, "resource_name": "剑气"})
+	_check("剑气不足原因与拔刀的职业费用仍在说明卡数据中", views[5].tooltip_text.contains("剑气不足（需要 20，当前 15）") and views[5].tooltip_text.contains("消耗 3 枚印记和 20 点剑气") and views[5].resource_cost_display == {"amount": 20, "resource_name": "剑气"})
+	_check("不可用技能仍保留原快捷键顺序", views[1].hotkey_text == "1" and views[2].hotkey_text == "2" and views[3].hotkey_text == "3")
 	_check("前四项主动能力按真实顺序分配一至四", views[1].hotkey_text == "1" and views[2].hotkey_text == "2" and views[3].hotkey_text == "3" and views[4].hotkey_text == "4")
 	state["skills"][1]["available"] = true
 	var changed_views: Array = Adapter.new().build(state)["skills"]
