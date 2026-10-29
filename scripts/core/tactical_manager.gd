@@ -1926,6 +1926,7 @@ func _execute_skill_action(action: GameAction) -> bool:
 
 
 ## 目标按与使用者的曼哈顿距离由近到远排序（裂空 rules：逐个结算，近的先结算）。
+## 距离按单位的锚点格算；引擎目前只有单格单位，多格单位的口径（取最近占据格）未承载（Q7）。
 func _sort_units_near_to_far(origin: Vector2i, target_units: Array[Unit]) -> void:
 	target_units.sort_custom(func(a: Unit, b: Unit) -> bool:
 		return _manhattan(origin, a.grid_position) < _manhattan(origin, b.grid_position))
@@ -2023,16 +2024,16 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 
 
 ## 多段攻击第 segment_index 段（从 0 起）的动作数据。第 n 段（n 从 1 起）命中减 decay×(n−1)，
-## 在未截断命中上扣除后再按通用上下限处理（连斩 rules）；其他效果给的必定命中只作用于第一段；
-## 「第一段命中并造成伤害后」的印记只在第一段结算。
+## 在未截断命中上扣除后再按通用上下限处理（连斩 rules）；其他效果给的必定命中只作用于第一段，
+## 伤害条目自己声明的「必定命中」（entry_guaranteed_hit）每段都保留；
+## 「第一段命中并造成伤害后」的印记（mark_gain_after_damage）只在第一段结算。
 func _build_segment_action_data(action_data: Dictionary, segment_index: int) -> Dictionary:
 	var segment_data: Dictionary = action_data.duplicate(true)
 	if segment_index <= 0:
 		return segment_data
 	segment_data["segment_hit_penalty"] = \
 		int(action_data.get("segment_hit_decay", 0)) * segment_index
-	segment_data["guaranteed_hit"] = false
-	segment_data["mark_gain"] = 0
+	segment_data["guaranteed_hit"] = bool(action_data.get("entry_guaranteed_hit", false))
 	segment_data["mark_gain_after_damage"] = 0
 	# 调试确定性开关仍对每段生效（headless 用例需要逐段可控）。
 	_apply_debug_determinism(segment_data)
@@ -2604,6 +2605,8 @@ func _apply_damage_entry(payload: Dictionary, skill_data: Dictionary,
 			payload.erase("base_attribute")
 	# 命中、暴击方式与暴击倍率以条目为准，覆盖技能 JSON 里同名旧字段（如旧居合的必定暴击）。
 	payload["guaranteed_hit"] = str(entry.get("hit_mode", "正常")) == "必定命中"
+	# 条目自身的必定命中单独记下：多段攻击的后续段只去掉其他效果给的必定命中。
+	payload["entry_guaranteed_hit"] = payload["guaranteed_hit"]
 	var crit_mode: String = str(entry.get("crit_mode", "正常"))
 	payload["guaranteed_crit"] = crit_mode == "必定暴击"
 	payload["disable_crit"] = crit_mode == "不可暴击"

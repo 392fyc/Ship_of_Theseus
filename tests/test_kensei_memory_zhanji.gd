@@ -161,6 +161,7 @@ func _test_liekong(tm: Node, ks: Unit, enemies: Dictionary) -> void:
 	_eq("不可用原因", far_entry.get("reason"), "范围内没有敌人")
 	tm._selected_skill_id = "kensei_liekong"
 	var empty_act: Object = tm._build_skill_action(ks, Vector2i(1, 0), null)
+	_check("空直线的动作仍可构建（拒绝发生在执行时）", empty_act != null)
 	if empty_act != null:
 		_eq("直线内没有敌人时执行被拒绝", bool(tm._execute_skill_action(empty_act)), false)
 	tm._selected_skill_id = ""
@@ -181,6 +182,12 @@ func _test_liekong(tm: Node, ks: Unit, enemies: Dictionary) -> void:
 	tm._sort_units_near_to_far(ks.grid_position, order)
 	_check("目标按距离由近到远排序", order[0] == near and order[1] == far)
 
+	# 真实施放路径里的结算顺序：记录每名敌人受到伤害的先后。
+	var hit_order: Array[String] = []
+	var on_near: Callable = func(_amount: int, _type: String) -> void: hit_order.append("near")
+	var on_far: Callable = func(_amount: int, _type: String) -> void: hit_order.append("far")
+	near.damage_taken.connect(on_near)
+	far.damage_taken.connect(on_far)
 	var qi_sources: Array[String] = []
 	var on_qi: Callable = func(_u: Unit, kind: String, _req: int, actual: int, source: String) -> void:
 		if kind == "gain" and actual > 0:
@@ -188,6 +195,9 @@ func _test_liekong(tm: Node, ks: Unit, enemies: Dictionary) -> void:
 	ks.sword_qi_changed.connect(on_qi)
 	_cast(tm, ks, "kensei_liekong", Vector2i(3, 3), null)
 	ks.sword_qi_changed.disconnect(on_qi)
+	near.damage_taken.disconnect(on_near)
+	far.damage_taken.disconnect(on_far)
+	_eq("施放时由近到远结算", hit_order, ["near", "far"])
 	_check("距离 1 的敌人受到伤害", near.stats.hp < 999, "hp=%d" % near.stats.hp)
 	_check("距离 3 的敌人受到伤害", far.stats.hp < 999, "hp=%d" % far.stats.hp)
 	_eq("距离 4 的敌人不受影响", outside.stats.hp, 999)
@@ -248,10 +258,15 @@ func _test_segment_rules(tm: Node, ks: Unit, enemy: Unit) -> void:
 	_eq("第一段不降命中", int(s0.get("segment_hit_penalty", 0)), 0)
 	_eq("第二段命中 −15", int(s1.get("segment_hit_penalty", 0)), 15)
 	_eq("第三段命中 −30", int(s2.get("segment_hit_penalty", 0)), 30)
-	_check("必定命中只作用于第一段", bool(s0.get("guaranteed_hit", false))
+	_check("其他效果给的必定命中只作用于第一段", bool(s0.get("guaranteed_hit", false))
 		and not bool(s1.get("guaranteed_hit", true)) and not bool(s2.get("guaranteed_hit", true)))
-	_check("第一段之后不再得印记", int(s1.get("mark_gain_after_damage", 1)) == 0
-		and int(s2.get("mark_gain", 1)) == 0)
+	_check("「第一段造成伤害后」的印记只在第一段", int(s0.get("mark_gain_after_damage", 0)) == 1
+		and int(s1.get("mark_gain_after_damage", 1)) == 0 and int(s2.get("mark_gain_after_damage", 1)) == 0)
+	_eq("命中即得的印记不受段数限制（原文没有只在第一段）", int(s2.get("mark_gain", 0)), 1)
+	var own: Dictionary = base.duplicate()
+	own["entry_guaranteed_hit"] = true
+	_check("伤害条目自己声明的必定命中每段都保留",
+		bool(tm._build_segment_action_data(own, 2).get("guaranteed_hit", false)))
 
 	# 命中降低进入掷骰：命中 − 闪避恰为 100 时，无降低必中；降低 99 后只剩 1%。
 	ks.stats.dex = 50
@@ -268,6 +283,14 @@ func _test_segment_rules(tm: Node, ks: Unit, enemy: Unit) -> void:
 			hits_penalty += 1
 	_eq("无降低：200 次全中", hits_plain, 200)
 	_check("降低 99 点后命中率只剩下限 1%", hits_penalty <= 10, "hits=%d" % hits_penalty)
+	# 口径「先从未截断命中里扣，再按上下限」：命中 − 闪避为 150 时降低 15 仍是 135 → 100%。
+	# 若先截断到 100 再扣，就只剩 85%，200 次里几乎必有未中。
+	var hits_untruncated: int = 0
+	for _i: int in range(200):
+		if bool(DamageCalculator.roll_outcome(ks, enemy,
+				{"weapon_hit": weapon_hit + 50, "disable_crit": true, "segment_hit_penalty": 15}).get("hit")):
+			hits_untruncated += 1
+	_eq("命中 − 闪避 150、降低 15：仍 200 次全中（先扣后截断）", hits_untruncated, 200)
 
 	# 未命中即停：在测试进程里把连斩的段命中降低改成 1000（只剩 1% 下限），第二段几乎必然未中。
 	var dl: Node = root.get_node("/root/DataLoader")
@@ -282,10 +305,24 @@ func _test_segment_rules(tm: Node, ks: Unit, enemy: Unit) -> void:
 	ks.set_sword_qi(0)
 	_enter_action_phase(tm, ks)
 	seed(7)
+	# 数本次动作产生的飘字：每个结算过的段各出一个（命中数字或 MISS），每个飘字是
+	# 文字与阴影两个 Label（命中的另有一个形状图标，不是 Label）。
+	# 第一段命中、第二段未中后停下 → 2 个飘字；若未中后继续掷第三段 → 3 个。
+	var labels_before: int = _count_labels(tm.popup_layer)
 	_cast(tm, ks, "kensei_yijue", enemy.grid_position, enemy)
+	_eq("第二段未命中即停：只结算了两段（命中 + MISS 两个飘字）",
+		(_count_labels(tm.popup_layer) - labels_before) / 2, 2)
 	_eq("第二段未命中即停：只有第一段的 +10", ks.sword_qi, 10)
 	dl.skills["kensei_yijue"] = original
 	_leave_action_phase(tm)
+
+
+func _count_labels(layer: Node) -> int:
+	var count: int = 0
+	for child: Node in layer.get_children():
+		if child is Label:
+			count += 1
+	return count
 
 
 ## 让战术管理器处于「剑圣回合的行动阶段」：技能栏与条目可用性都按当前操作单位和阶段判定。
