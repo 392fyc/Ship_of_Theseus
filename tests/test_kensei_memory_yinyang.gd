@@ -210,6 +210,14 @@ func _test_harmony(tm: Node, ks: Unit, enemy: Unit) -> void:
 	_eq("自身回合内获得 10：实际 +20", ks.sword_qi, 20)
 	ks.lose_sword_qi(5, "test")
 	_eq("自身回合内失去 5：实际 −15", ks.sword_qi, 5)
+	ks.gain_sword_qi(10, "talent:test")
+	_eq("天赋给的剑气不是技能效果：不调和（+10）", ks.sword_qi, 15)
+	ks.set_sword_qi(5)
+	# 上面那 10 点让太阳的累计到了 30、多得 1 层：恢复成两者各 2 层，接着测技能消耗。
+	ks.held_states.clear()
+	ks.reset_battle_memory_state()
+	ks.held_states.apply("kensei_taiyang", 2, {"kind": "permanent"})
+	ks.held_states.apply("kensei_taiyin", 2, {"kind": "permanent"})
 	# 技能消耗：额外部分计入消耗，剑气足以支付时才能使用。
 	_enter_action_phase(tm, ks)
 	ks.is_taking_turn = true
@@ -254,18 +262,50 @@ func _test_fulfilled(tm: Node, ks: Unit) -> void:
 	ks.lose_sword_qi(30, "test")
 	_eq("太阴到 5：两者都降为 1 层", [ks.held_states.stacks("kensei_taiyang"),
 		ks.held_states.stacks("kensei_taiyin")], [1, 1])
-	_eq("正在自身回合：排入一个额外回合", tm.turn_manager._queue.size(), 1)
-	_check("额外回合排在队首", tm.turn_manager._queue[0] == ks)
+	_eq("正在自身回合：排入一个额外回合", tm.turn_manager._extra_turn_queue.size(), 1)
+	_eq("额外回合不进按先攻排序的队列", tm.turn_manager._queue.size(), 0)
 	_check("排队的额外回合不算「本轮尚未行动」", not tm.turn_manager.has_pending_turn(ks))
+	# 队列重排（回合结束时任何单位的 buff 变化都会触发）不影响额外回合先进行。
+	var other: Unit = null
+	for u: Variant in tm.units:
+		if u is Unit and (u as Unit).faction == "enemy":
+			other = u
+	tm.turn_manager._queue.append(other)
+	other.stats.spd = 999
+	tm.turn_manager.refresh_queue_order()
 	_eq("速度不变", ks.battle_speed_pct, 0.0)
 	# 额外回合开始：标记为额外回合，状态持续时间不计入。
 	ks.held_states.apply("kensei_jiashi", 1, {"kind": "until_own_turn_start", "count": 2})
 	tm.turn_manager.current_unit = null
 	tm.turn_manager._advance()
-	_check("额外回合开始", tm.turn_manager.current_unit == ks and tm.turn_manager.current_is_extra_turn)
-	_eq("额外回合不计入状态持续时间（架势仍为 2）", ks.held_states.remaining("kensei_jiashi"), 2)
+	_check("额外回合先于队列里速度更快的单位开始", tm.turn_manager.current_unit == ks
+		and tm.turn_manager.current_is_extra_turn)
+	_eq("额外回合不计入持有型状态的持续时间（架势仍为 2）", ks.held_states.remaining("kensei_jiashi"), 2)
+	# 额外回合也不推进普通 buff 的持续时间。
+	var buff: BuffEffect = tm._make_buff_effect_instance(ks, {"effect_id": "defense_up", "duration": 3, "value": 1})
+	ks.add_buff(buff)
+	tm._on_turn_ended(ks)
+	_eq("额外回合结束：普通 buff 持续时间不减（仍为 3）", buff.duration, 3)
+	ks.process_turn_end_buffs(false)
+	_eq("常规回合结束：普通 buff 持续时间减 1", buff.duration, 2)
+	ks.remove_buff(buff)
 	tm.turn_manager.stop()
+	other.stats.spd = 0
 	ks.held_states.remove("kensei_jiashi")
+
+	# 在别的单位回合里达成：等那个回合结束后插入。
+	_reset(ks)
+	tm.turn_manager.current_unit = other
+	ks.held_states.apply("kensei_taiyang", 5, {"kind": "permanent"})
+	ks.held_states.apply("kensei_taiyin", 5, {"kind": "permanent"})
+	ks.check_yin_yang_fulfilled()
+	_eq("他人回合里达成（本轮已行动）：排入额外回合", tm.turn_manager._extra_turn_queue.size(), 1)
+	_eq("他人回合仍在进行", tm.turn_manager.current_unit, other)
+	tm.turn_manager.current_unit = null
+	tm.turn_manager._advance()
+	_check("那个回合结束后，额外回合开始", tm.turn_manager.current_unit == ks
+		and tm.turn_manager.current_is_extra_turn)
+	tm.turn_manager.stop()
 
 	# 本轮尚未行动：本场速度 +10%，可多次获得。
 	_reset(ks)
@@ -279,8 +319,14 @@ func _test_fulfilled(tm: Node, ks: Unit) -> void:
 		ks.check_yin_yang_fulfilled()
 	_eq("本轮尚未行动两次圆满：速度 +20%", ks.battle_speed_pct, 20.0)
 	_eq("速度按 R1.8 向下取整", ks.get_effective_stat("SPD"), floori(float(spd0) * 1.2 + 0.000001))
-	_eq("没有排入额外回合", tm.turn_manager._queue.size(), 1)
+	_eq("没有排入额外回合", tm.turn_manager._extra_turn_queue.size(), 0)
 	tm.turn_manager.stop()
+
+	# 单位死亡移出回合管理时，排队的额外回合一并清掉（多个也一样）。
+	tm.turn_manager.grant_extra_turn(ks)
+	tm.turn_manager.grant_extra_turn(ks)
+	tm.turn_manager.remove_unit(ks)
+	_eq("移出时清掉全部排队的额外回合", tm.turn_manager._extra_turn_queue.size(), 0)
 
 
 # ── 工具 ─────────────────────────────────────────────

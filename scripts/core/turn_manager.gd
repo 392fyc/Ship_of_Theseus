@@ -16,8 +16,9 @@ var current_unit: Unit = null
 var _round_number: int = 0
 ## 当前回合是不是额外回合（〔阴阳剑〕阴阳圆满）。额外回合是完整的自身回合，但不计入状态的持续时间。
 var current_is_extra_turn: bool = false
-## 已排入队首、尚未开始的额外回合：单位 → 待开始的次数。
-var _pending_extra_turns: Dictionary = {}
+## 已排好、尚未开始的额外回合，按获得顺序。单独存放、不进按先攻排序的 _queue：
+## 否则回合结束时任何单位的 buff 变化触发重排，就会把它挤离「当前回合结束后」的位置。
+var _extra_turn_queue: Array[Unit] = []
 
 
 func add_units(units: Array[Unit]) -> void:
@@ -32,6 +33,8 @@ func add_units(units: Array[Unit]) -> void:
 func remove_unit(unit: Unit) -> void:
 	_all_units.erase(unit)
 	_queue.erase(unit)
+	while _extra_turn_queue.has(unit):
+		_extra_turn_queue.erase(unit)
 	if unit.buffs_changed.is_connected(_on_unit_buffs_changed):
 		unit.buffs_changed.disconnect(_on_unit_buffs_changed)
 	if current_unit == unit:
@@ -49,23 +52,19 @@ func get_round_number() -> int:
 	return _round_number
 
 
-## 给单位一个额外的自身回合，排在当前回合结束之后（插到待行动队列最前）。额外回合不占用它
-## 原本的回合；在别的单位的回合里达成时，等那个回合结束后插入（同样是队首）。
+## 给单位一个额外的自身回合，排在当前回合结束之后。额外回合不占用它原本的回合；在别的单位的
+## 回合里达成时，等那个回合结束后插入。多个额外回合按获得顺序依次进行。
 func grant_extra_turn(unit: Unit) -> void:
 	if unit == null or not unit.stats.is_alive():
 		return
-	_queue.push_front(unit)
-	_pending_extra_turns[unit] = int(_pending_extra_turns.get(unit, 0)) + 1
+	_extra_turn_queue.append(unit)
 	queue_changed.emit()
 
 
 ## 该单位本轮次是否还没轮到行动：仍在本轮的待行动队列里（当前行动者已出队，不算）。
 ## 供〔踏影〕「目标在本轮尚未行动」判定。
 func has_pending_turn(unit: Unit) -> bool:
-	if unit == null or not unit in _queue:
-		return false
-	# 排在队里的只是额外回合时，它本轮原本的回合已经用过。
-	return _queue.count(unit) > int(_pending_extra_turns.get(unit, 0))
+	return unit != null and unit in _queue
 
 
 func force_advance() -> void:
@@ -76,6 +75,9 @@ func get_display_queue() -> Array[Unit]:
 	var result: Array[Unit] = []
 	if current_unit != null and current_unit.stats.is_alive():
 		result.append(current_unit)
+	for unit: Unit in _extra_turn_queue:
+		if is_instance_valid(unit) and unit.stats.is_alive():
+			result.append(unit)
 	for unit: Unit in _queue:
 		if unit.stats.is_alive():
 			result.append(unit)
@@ -85,7 +87,7 @@ func get_display_queue() -> Array[Unit]:
 func stop() -> void:
 	current_unit = null
 	current_is_extra_turn = false
-	_pending_extra_turns.clear()
+	_extra_turn_queue.clear()
 	_queue.clear()
 	queue_changed.emit()
 
@@ -126,6 +128,16 @@ func _rebuild_queue() -> void:
 
 
 func _advance() -> void:
+	# 额外回合优先：排在刚结束的那个回合之后，先于本轮其余单位。
+	while not _extra_turn_queue.is_empty():
+		var extra: Unit = _extra_turn_queue.pop_front()
+		if extra == null or not is_instance_valid(extra) or not extra.stats.is_alive():
+			continue
+		current_unit = extra
+		current_is_extra_turn = true
+		queue_changed.emit()
+		turn_started.emit(current_unit)
+		return
 	if _queue.is_empty():
 		round_ended.emit()
 		_rebuild_queue()
@@ -135,13 +147,6 @@ func _advance() -> void:
 			return
 	current_unit = _queue.pop_front()
 	current_is_extra_turn = false
-	var pending_extra: int = int(_pending_extra_turns.get(current_unit, 0))
-	if pending_extra > 0:
-		current_is_extra_turn = true
-		if pending_extra == 1:
-			_pending_extra_turns.erase(current_unit)
-		else:
-			_pending_extra_turns[current_unit] = pending_extra - 1
 	queue_changed.emit()
 	turn_started.emit(current_unit)
 

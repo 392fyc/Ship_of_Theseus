@@ -482,7 +482,7 @@ func _on_turn_started(unit: Unit) -> void:
 	current_unit = unit
 	unit.reset_turn_state()
 	unit.is_taking_turn = true
-	# 持有型状态的「到其后第 N 个自身回合开始」在此计数；额外回合尚未实现，统一按常规回合。
+	# 持有型状态的「到其后第 N 个自身回合开始」在此计数；额外回合不计入（阴阳剑 rules）。
 	unit.held_states.on_own_turn_started(turn_manager.current_is_extra_turn)
 	# R1.17：护盾在每个自身回合开始时自然衰减（不是伤害，不触发受伤类效果）。
 	unit.decay_shield()
@@ -517,7 +517,7 @@ func _on_turn_started(unit: Unit) -> void:
 
 func _on_turn_ended(unit: Unit) -> void:
 	_apply_passive_turn_end(unit)
-	unit.process_turn_end_buffs()
+	unit.process_turn_end_buffs(turn_manager.current_is_extra_turn)
 	unit.held_states.on_own_turn_ended(turn_manager.current_is_extra_turn)
 	unit.is_taking_turn = false
 	_deselect_unit()
@@ -570,6 +570,8 @@ func _apply_passive_turn_end(unit: Unit) -> void:
 
 ## 交替槽的回合结束衰减（〔太阳〕：回合结束时技能栏为太阴剑则失去 1 层；〔太阴〕反之）。
 ## 写在槽位技能 JSON 的 turn_end_slot_decay：当前形态 id → 要失去 1 层的状态 id。
+## 它排在其他回合结束被动（〔心眼·澄〕的 15 剑气）之前：先减层，再结算剑气，所以那 15 点是否吃
+## 阴阳调和按减层后的层数判定 [推断：原文没有规定两者的先后]。
 func _apply_slot_form_turn_end(unit: Unit) -> void:
 	for slot_id: String in unit.skill_ids:
 		var decay: Variant = _get_skill_data(slot_id).get("turn_end_slot_decay", null)

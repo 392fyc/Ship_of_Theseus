@@ -565,7 +565,10 @@ func process_turn_start_buffs() -> Dictionary:
 	return result
 
 
-func process_turn_end_buffs() -> void:
+## is_extra_turn：额外回合不计入状态的持续时间（〔阴阳剑〕rules），持续时间不减。
+func process_turn_end_buffs(is_extra_turn: bool = false) -> void:
+	if is_extra_turn:
+		return
 	var buff_snapshot: Array[BuffEffect] = buffs.duplicate()
 	var duration_changed: bool = false
 	for buff: BuffEffect in buff_snapshot:
@@ -1075,8 +1078,10 @@ func _change_sword_qi(kind: String, amount: int, source: String) -> int:
 		if rewrite is Dictionary and not (rewrite as Dictionary).is_empty():
 			final_kind = str((rewrite as Dictionary).get("kind", final_kind))
 			final_amount = maxi(0, int((rewrite as Dictionary).get("amount", final_amount)))
-	# 阴阳调和：同方向额外 N×5（空想期间与回合外不生效）。只对技能的效果，见 get_harmony_extra。
-	if not source.begins_with(QI_SOURCE_NO_HARMONY_PREFIX) and source != QI_SOURCE_KONGXIANG_CLEAR:
+	# 阴阳调和：同方向额外 N×5（空想期间与回合外不生效）。原文「因技能效果」：天赋给的剑气
+	# （来源 talent:）、空想结束清空、以 raw: 开头的直接改动都不算。
+	if not source.begins_with(QI_SOURCE_NO_HARMONY_PREFIX) and not source.begins_with("talent:") \
+			and source != QI_SOURCE_KONGXIANG_CLEAR:
 		final_amount += get_harmony_extra()
 	var before: int = sword_qi
 	var signed: int = final_amount if final_kind == QI_GAIN else -final_amount
