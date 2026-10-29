@@ -224,6 +224,7 @@ func get_dashboard_data() -> Dictionary:
 		"hp": info_unit.stats.hp,
 		"hp_max": info_unit.stats.max_hp,
 		"hp_ratio": float(info_unit.stats.hp) / maxf(1.0, float(info_unit.stats.max_hp)),
+		"shield": info_unit.shield,
 		"status_text": info_unit.get_action_status_summary(),
 		"action_resources": {
 			"movement_used": info_unit.movement_used,
@@ -1519,7 +1520,8 @@ func _handle_post_skill_execution(previous_state: InputState,
 			_complete_move_phase(true)
 		"standard":
 			_restore_action_phase_state()
-		"swift":
+		# 自由动作（决心）与迅捷一样不占移动和标准动作，用完回到原来的阶段。
+		"swift", "free":
 			match source_state:
 				InputState.MOVE_PHASE:
 					input_state = InputState.MOVE_PHASE
@@ -1541,7 +1543,7 @@ func _handle_post_skill_execution(previous_state: InputState,
 			_restore_action_phase_state()
 
 
-## 这个单位此刻还有迅捷技能可用吗（决定标准动作用完之后进迅捷阶段还是直接结束回合）。
+## 这个单位此刻还有迅捷技能（或自由动作技能）可用吗（决定标准动作用完之后进迅捷阶段还是直接结束回合）。
 ##
 ## ★ 必须与 `_get_skill_entries` 看到**同一批槽**，否则会出现「进了迅捷阶段，可技能栏里
 ## 一个迅捷技能都没有」。2026-08-13 修：此前这里遍历的是 `unit.skill_ids` 原始 id，不走
@@ -1562,7 +1564,8 @@ func _has_available_swift_skill(unit: Unit) -> bool:
 			str(slot_data.get("slot_swap_target", "")),
 			_slot_swap_requires(slot_data))
 		var skill_data: Dictionary = _get_skill_data(skill_id)
-		if str(skill_data.get("action_cost", "")) != "swift":
+		# 自由动作（决心）同样可以在标准动作之后使用，算进来，免得回合被自动结束。
+		if str(skill_data.get("action_cost", "")) not in ["swift", "free"]:
 			continue
 		if _get_phase_mismatch_reason(skill_data) != "":
 			continue
@@ -2727,6 +2730,8 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		payload["landing_cell"] = _serialize_vector2i(landing)
 	# 满月：发动时先锁定纳刀（rules）。持有时纳刀的总降对本技能无效，本技能再总增。
 	var state_form: Dictionary = skill_data.get("held_state_form", {})
+	if not state_form.is_empty():
+		payload["skill_name"] = str(state_form.get("name_without_state", payload["skill_name"]))
 	if not state_form.is_empty() and user.held_states.has(str(state_form.get("state_id", ""))):
 		payload["held_state_form_active"] = true
 		payload["skill_name"] = str(state_form.get("name_with_state", payload["skill_name"]))

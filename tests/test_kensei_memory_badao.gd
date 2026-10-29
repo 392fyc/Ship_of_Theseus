@@ -171,6 +171,10 @@ func _test_mangetsu(tm: Node, dl: Node, ks: Unit, enemy: Unit) -> void:
 	var without_nadao: int = int(DamageCalculator.preview_attack(ks, enemy, plain_ctx).get("damage", 0))
 	_check("满月比拔刀伤害高（×1.3）", with_nadao > without_nadao,
 		"满月=%d 拔刀=%d" % [with_nadao, without_nadao])
+	ks.apply_held_state("kensei_nadao", 1, {"kind": "permanent"})
+	_eq("纳刀的总降也给副手追加用（攻击者状态修正）", tm._attacker_state_damage_modifiers(ks, []), [0.5])
+	_eq("满月声明对纳刀无效时不计入", tm._attacker_state_damage_modifiers(ks, ["kensei_nadao"]), [])
+	ks.held_states.remove("kensei_nadao")
 	_check("满月伤害约为拔刀的 1.3 倍", absi(with_nadao - int(floor(without_nadao * 1.3))) <= 1,
 		"满月=%d 拔刀=%d" % [with_nadao, without_nadao])
 
@@ -235,6 +239,28 @@ func _test_juexin(tm: Node, ks: Unit) -> void:
 	_check("自由动作：不消耗任何行动资源",
 		not ks.standard_used and not ks.swift_used and not ks.movement_used)
 	_eq("进入冷却 2", ks.get_skill_cooldown("kensei_sanduanzhan"), 2)
+
+	# 回合流程：标准动作和迅捷动作都用完、只剩决心时，不自动结束回合，进入迅捷阶段。
+	ks.skill_cooldowns.clear()
+	_set_marks(ks, 1)
+	ks.standard_used = true
+	ks.swift_used = true
+	tm.battle_active = true
+	tm.input_state = 2  # ACTION_PHASE
+	_check("只剩决心时仍有可用的非标准技能", tm._has_available_swift_skill(ks))
+	tm._resolve_post_action_phase()
+	_eq("标准动作后只剩决心：进入迅捷阶段而不是结束回合", tm.input_state, 5)  # SWIFT_PHASE
+	_eq("回合没有结束", tm.turn_manager.current_unit, ks)
+	# 移动阶段用决心：用完回到移动阶段。
+	ks.reset_action_resources()
+	ks.skill_cooldowns.clear()
+	tm.input_state = 1  # MOVE_PHASE
+	tm.selected_unit = ks
+	var act: Object = _build_action(tm, ks, "kensei_sanduanzhan")
+	_check("决心动作可构建", act != null)
+	if act != null:
+		tm._handle_post_skill_execution(1, act)
+	_eq("移动阶段使用决心后仍在移动阶段", tm.input_state, 1)
 	_leave_action_phase(tm)
 
 
@@ -318,6 +344,11 @@ func _test_shield(tm: Node, ks: Unit) -> void:
 	ks.shield = 100
 	ks.decay_shield()
 	_eq("魔抗 400：衰减量只有 10，但最多留 58", ks.shield, 58)
+	# 58% 上限按向下取整：护盾 3、魔抗 400 → 衰减量 ceil(0.3)=1 → 剩 2；上限 floor(1.74)=1 → 1。
+	# 若按四舍五入取上限会剩 2。
+	ks.shield = 3
+	ks.decay_shield()
+	_eq("58% 上限向下取整：护盾 3 → 1", ks.shield, 1)
 	ks.stats.res = base_res
 	ks.shield = 0
 	_eq("没有护盾时衰减为 0", ks.decay_shield(), 0)
@@ -382,6 +413,14 @@ func _set_marks(ks: Unit, count: int) -> void:
 	ks.clear_marks()
 	for i: int in range(count):
 		ks.marks[keys[i]] = true
+
+
+func _build_action(tm: Node, ks: Unit, skill_id: String) -> Object:
+	tm.current_unit = ks
+	tm._selected_skill_id = skill_id
+	var act: Object = tm._build_skill_action(ks, ks.grid_position, ks)
+	tm._selected_skill_id = ""
+	return act
 
 
 func _payload(tm: Node, ks: Unit, skill_id: String) -> Dictionary:
