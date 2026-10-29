@@ -1,0 +1,45 @@
+{
+  "id": "kensei_sanduanzhan",
+  "upgrade_of": "kensei_badao",
+  "target_mode": "自身",
+  "name": "决心",
+  "damage_type": "physical",
+  "power": 0,
+  "range": {
+    "type": "self",
+    "min": 0,
+    "max": 0
+  },
+  "area": {
+    "type": "single",
+    "size": 0
+  },
+  "attack_type": "melee",
+  "cooldown": 2,
+  "action_cost": "free",
+  "tags": [
+    "sword_qi",
+    "mark"
+  ],
+  "hit_bonus": 0,
+  "timing_constraint": "any",
+  "effects": [],
+  "qi_cost": 0,
+  "qi_gain_on_hit": 0,
+  "qi_gain_on_kill": 0,
+  "qi_gain_after_resolve": 15,
+  "mark_gain": 0,
+  "mark_cost": 1,
+  "requires_marks": 1,
+  "guaranteed_crit": false,
+  "guaranteed_hit": false,
+  "slot_swap_provider": true,
+  "slot_swap_requires": {
+    "marks": 1,
+    "marks_exact": true,
+    "qi": 0
+  },
+  "description": "持有 1 枚印记时，〔招架〕槽变为本技能；条件不再成立时，立即恢复〔招架〕。自由动作，消耗 1 枚印记，获得 15 点剑气。",
+  "_engine_note": "〔兵无常势〕的一印形态。设计库 resource_type「无」= 自由动作，引擎 action_cost free（不消耗行动资源）。设计库没有伤害条目：power=0 走辅助技能路径，damage_type 只为满足通用字段。slot_swap_requires.marks_exact：「持有 1 枚印记」按正好 1 枚判定 [推断]，与回天（2 枚）、霸天（3 枚）互斥，所以招架槽同一时刻只会对应一个形态；R3.6 该形态冷却中时招架保持可用。印记在结算后扣（_spend_skill_marks），剑气在结算后给（qi_gain_after_resolve）。",
+  "_mirror": "设计库镜像字段：name / 冷却 / 行动消耗 / 剑气与印记数值 / upgrade_of 来自设计库仓 snapshots/skills.json @ 762393b（kensei_sanduanzhan）。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。例外：power 与 damage_type 不是镜像字段，理由见 _engine_note。"
+}

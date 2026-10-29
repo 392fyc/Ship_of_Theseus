@@ -1,0 +1,88 @@
+{
+  "id": "kensei_batian",
+  "upgrade_of": "kensei_badao",
+  "target_mode": "自身",
+  "name": "霸天",
+  "damage_type": "physical",
+  "range": {
+    "type": "self",
+    "min": 0,
+    "max": 0
+  },
+  "area": {
+    "type": "diamond",
+    "size": 1
+  },
+  "attack_type": "area",
+  "cooldown": 0,
+  "action_cost": "standard",
+  "tags": [
+    "sword",
+    "mark",
+    "area"
+  ],
+  "hit_bonus": 0,
+  "timing_constraint": "any",
+  "effects": [],
+  "qi_cost": 20,
+  "qi_gain_on_hit": 0,
+  "qi_gain_on_kill": 0,
+  "mark_gain": 0,
+  "mark_cost": 3,
+  "requires_marks": 3,
+  "guaranteed_crit": false,
+  "guaranteed_hit": false,
+  "slot_swap_provider": true,
+  "slot_swap_requires": {
+    "marks": 3,
+    "marks_exact": true,
+    "qi": 20
+  },
+  "requires_enemy_in_area": true,
+  "engine_entry_conditions": [
+    {
+      "sort": 0,
+      "enemies_min": 2
+    },
+    {
+      "sort": 1,
+      "enemies_min": 1,
+      "enemies_max": 1
+    }
+  ],
+  "damage_entries": [
+    {
+      "applies_when": "范围内有 2 名以上敌人时",
+      "base_attribute": "默认",
+      "coefficient": 1.5,
+      "crit_mode": "正常",
+      "crit_multiplier": 1.0,
+      "damage_type": null,
+      "hit_bonus": 0,
+      "hit_mode": "正常",
+      "placeholder": false,
+      "power": 1,
+      "segment_hit_decay": 0,
+      "segments": 1,
+      "sort": 0
+    },
+    {
+      "applies_when": "范围内只有 1 名敌人时",
+      "base_attribute": "默认",
+      "coefficient": 1.6,
+      "crit_mode": "正常",
+      "crit_multiplier": 1.0,
+      "damage_type": null,
+      "hit_bonus": 0,
+      "hit_mode": "正常",
+      "placeholder": false,
+      "power": 4,
+      "segment_hit_decay": 0,
+      "segments": 1,
+      "sort": 1
+    }
+  ],
+  "description": "持有 3 枚印记且剑气不少于 20 点时，〔招架〕槽变为本技能；条件不再成立时，立即恢复〔招架〕。自身菱形 1 格内至少有 1 名敌人时才能使用。对范围内的每名敌人造成物理伤害：范围内有 2 名以上敌人时，威力 +1，系数 1.5；范围内只有 1 名敌人时，威力 +4，系数 1.6。消耗 3 枚印记和 20 点剑气。",
+  "_engine_note": "〔兵无常势〕的三印形态。两条伤害条目由 applies_when 互斥：engine_entry_conditions 把它们译成「发动时范围内敌人数 ≥ 2 → sort 0」「= 1 → sort 1」，敌人数在构建动作时（发动时）锁定，只数敌人、多格单位算 1 名。slot_swap_requires.marks_exact：「持有 3 枚印记」按正好 3 枚判定（印记上限就是 3，与「不少于」等价）。印记在伤害结算后才扣，所以本次伤害仍吃到被消耗印记的加成（同拔刀）。",
+  "_mirror": "设计库镜像字段：name / damage_entries / 射程 / 范围 / 冷却 / 行动消耗 / 剑气与印记数值 / upgrade_of 来自设计库仓 snapshots/skills.json @ 762393b（kensei_batian）。伤害只读 damage_entries（R1.1 / R1.7）；power 字段不写。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。"
+}

@@ -55,6 +55,8 @@ var reaction_available: bool = true
 # 是否正在进行自己的回合（TacticalManager 在回合开始置 true、回合结束置 false）。
 # 施加持有型状态时据此判断「在自身回合内获得」，影响「到下个自身回合结束」的计数。
 var is_taking_turn: bool = false
+# 护盾（R1.17）：与生命分开的数值，受到伤害时先扣护盾。每场战斗从 0 开始（setup 清零）。
+var shield: int = 0
 # 是否有普通攻击（职业 JSON 的 basic_attack，缺省 true）。设计上没有普通攻击（技能设计要点 §3），
 # 用户 2026-10-28 裁决 S2：先只去掉剑士线，其他职业与敌人在敌人技能 AI 落地前保留。
 var has_basic_attack: bool = true
@@ -199,6 +201,7 @@ func setup(class_data: Dictionary, initial_facing: StringName = &"SE") -> void:
 	_map_token_layout = {}
 	map_token_view.visible = false
 	stats = UnitStats.new()
+	shield = 0
 	buffs.clear()
 	held_states.clear()
 	_load_held_state_definitions()
@@ -436,7 +439,10 @@ func _canvas_item_rect_screen(item: CanvasItem, local_rect: Rect2) -> Rect2:
 # ── 战斗接口 ─────────────────────────────────────────
 
 func take_damage(amount: int, damage_type: String = "physical") -> void:
-	stats.take_damage(amount)
+	# R1.17：伤害先扣护盾，超过当前护盾的部分再扣生命。damage_taken 仍报整次伤害量。
+	var absorbed: int = mini(shield, maxi(0, amount))
+	shield -= absorbed
+	stats.take_damage(amount - absorbed)
 	if amount > 0 and has_character_animation():
 		character_animation.show_hit()
 	damage_taken.emit(amount, damage_type)
@@ -884,25 +890,81 @@ func get_visible_skill_id(skill_id: String, slot_swap_trigger: String = "",
 		slot_swap_target: String = "", slot_swap_requires: Dictionary = {}) -> String:
 	if slot_swap_target == "":
 		return skill_id
-	# R2.5：替换目标已被回忆升级时，换上来的是它的升级版本（槽位里也只剩升级版本）。
-	slot_swap_target = memory_upgrades.resolve(slot_swap_target)
-	if not skill_ids.has(slot_swap_target):
+	# R2.5：替换目标已被回忆升级时，换上来的是它的升级形态（槽位里也只剩升级技能）。
+	if not skill_ids.has(memory_upgrades.resolve(slot_swap_target)):
 		return skill_id
-	var condition_met: bool = false
-	match slot_swap_trigger:
+	# 多形态回忆（兵无常势）：按形态组顺序逐个判定，每个形态用它自己 JSON 里的
+	# slot_swap_requires（没写时用槽位声明的门槛）。R3.6：条件成立的形态还在冷却时不替换，
+	# 原技能保持可用；各形态冷却分别记录。
+	var skills: Dictionary = _skill_table()
+	for form_id: String in memory_upgrades.resolve_forms(slot_swap_target):
+		var form_data: Variant = skills.get(form_id, {})
+		var requires: Dictionary = slot_swap_requires
+		if form_data is Dictionary and (form_data as Dictionary).get("slot_swap_requires", null) is Dictionary:
+			requires = (form_data as Dictionary)["slot_swap_requires"]
+		if not _slot_swap_condition_met(skill_id, slot_swap_trigger, requires):
+			continue
+		return form_id if is_skill_available(form_id) else skill_id
+	return skill_id
+
+
+## 同槽替换的条件。marks_and_qi：印记数（`marks_exact` 为真时要求正好这么多枚）且剑气不少于门槛。
+func _slot_swap_condition_met(skill_id: String, trigger: String, requires: Dictionary) -> bool:
+	match trigger:
 		"marks_full":
-			condition_met = is_marks_full()
+			return is_marks_full()
 		"marks_and_qi":
-			if slot_swap_requires.is_empty():
+			if requires.is_empty():
 				push_warning("[Unit] marks_and_qi 缺 slot_swap_requires，不替换: " + skill_id)
-			else:
-				condition_met = get_mark_count() >= int(slot_swap_requires.get("marks", 0)) \
-					and sword_qi >= int(slot_swap_requires.get("qi", 0))
-	if not condition_met:
-		return skill_id
-	if not is_skill_available(slot_swap_target):
-		return skill_id
-	return slot_swap_target
+				return false
+			var marks: int = get_mark_count()
+			var need_marks: int = int(requires.get("marks", 0))
+			var marks_ok: bool = marks == need_marks if bool(requires.get("marks_exact", false)) \
+				else marks >= need_marks
+			return marks_ok and sword_qi >= int(requires.get("qi", 0))
+	return false
+
+
+func _skill_table() -> Dictionary:
+	var data_loader := get_node_or_null("/root/DataLoader")
+	if data_loader == null:
+		return {}
+	var skills: Variant = data_loader.get("skills")
+	return skills if skills is Dictionary else {}
+
+
+# ── 护盾（R1.17）────────────────────────────────────
+
+## 获得护盾：与现有护盾相加（回天 rules）。返回获得后的护盾值。
+func gain_shield(amount: int) -> int:
+	if amount > 0:
+		shield += amount
+		_update_health_bar()
+	return shield
+
+
+## 自身回合开始时的自然衰减（R1.17）：衰减量 = 当前护盾 × decay_pct% × res_scale ÷ (res_scale + 魔抗)，
+## 向上取整；衰减后最多保留衰减前的 max_keep_pct%（向下取整）。不是伤害，不触发受伤类效果。
+## 参数在 data/rules/shield.json。返回衰减量。
+func decay_shield() -> int:
+	if shield <= 0:
+		return 0
+	var rule: Dictionary = {}
+	var data_loader := get_node_or_null("/root/DataLoader")
+	if data_loader != null and data_loader.get("rules") is Dictionary:
+		rule = (data_loader.get("rules") as Dictionary).get("shield", {})
+	if rule.is_empty():
+		push_warning("[Unit] 缺 data/rules/shield.json，护盾不衰减")
+		return 0
+	var before: int = shield
+	var res_scale: float = float(rule.get("res_scale", 100))
+	var res: float = float(maxi(0, get_effective_stat("RES")))
+	var decay: int = ceili(float(before) * float(rule.get("decay_pct", 0)) / 100.0
+		* res_scale / (res_scale + res))
+	var keep_cap: int = floori(float(before) * float(rule.get("max_keep_pct", 100)) / 100.0)
+	shield = maxi(0, mini(before - decay, keep_cap))
+	_update_health_bar()
+	return before - shield
 
 
 ## 直接设定剑气值并更新心眼被动。只用于战斗开始、调试复位这类「重置」；

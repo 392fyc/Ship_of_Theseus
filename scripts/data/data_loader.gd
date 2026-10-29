@@ -20,6 +20,8 @@ var states:    Dictionary = {}
 var held_states: Dictionary = {}
 # 回忆天赋（技能升级关系），与普通天赋分开存放：两者不是同一种设计对象（KB 天赋设计要点 §12）。
 var memories: Dictionary = {}
+# 通用规则里的数值参数（例如 R1.17 护盾衰减），一条规则一个文件。
+var rules: Dictionary = {}
 # 天赋载体（Wave 1 · A1）。注册与按事件索引走 scripts/data/talent_registry.gd——
 # 那里会拒收不可执行的卡，本字典是未经筛选的原始数据。
 var talents:   Dictionary = {}
@@ -48,6 +50,7 @@ func load_all() -> void:
 	_load_directory("res://data/held_states/", held_states)
 	_load_directory("res://data/talents/", talents)
 	_load_directory("res://data/memories/", memories)
+	_load_directory("res://data/rules/", rules)
 	_load_directory("res://data/visual_profiles/", visual_profiles)
 	print("[DataLoader] Loaded: %d classes, %d skills, %d buffs, %d enemies, %d maps, %d states, %d talents" \
 		% [classes.size(), skills.size(), buffs.size(), enemies.size(), maps.size(),
