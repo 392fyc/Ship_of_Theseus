@@ -5,7 +5,7 @@ extends SceneTree
 ##    技能威力加算与 0 地板、技能系数、hybrid 两侧各自地板再平均、「以力量计算」的魔法、
 ##    纯粹伤害无视防御、普通天赋提升（相加后乘）与总增总降（逐项相乘）两层倍率。
 ## ② tactical_manager 接线：设计库伤害条目驱动的 payload 不含武器威力（R1.7），
-##    条目枚举（必定命中 / 不可暴击 / 力量 / 纯粹）正确映射；segments>1 判为不支持；
+##    条目枚举（必定命中 / 不可暴击 / 力量 / 纯粹）正确映射；segments>1 判为支持；
 ##    设计库外的旧技能按等价桥接，skill_power == 原武器威力、系数 == power/100。
 ## ③ 挂载护栏：TacticalScene 的 tactical_manager 脚本真的挂上且是期望的那一个。
 
@@ -207,7 +207,7 @@ func _test_entry_payload(tm: Object, sword: Unit, dummy: Unit) -> void:
 
 	var multi: Dictionary = inherit_skill.duplicate(true)
 	(multi["damage_entries"] as Array)[0]["segments"] = 3
-	_check("segments>1 暂判为不支持", not tm._is_supported_runtime_skill(multi))
+	_check("segments>1 已支持（PR6a 连斩承载多段）", tm._is_supported_runtime_skill(multi))
 	dl.skills.erase(TEST_SKILL_ID)
 
 
