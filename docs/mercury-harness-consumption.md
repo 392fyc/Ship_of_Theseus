@@ -11,7 +11,7 @@ Mercury 只维护它装载到本仓库的通用 Harness 路径，每个文件的
 - `.github/workflows/mercury-*.yml`
 - `AGENTS.md` 与 `CLAUDE.md` 中 `MERCURY:BEGIN` 与 `MERCURY:END` 之间的受管段
 
-`.mercury/config.json` 由 SoT 维护：它选择 pack，设置集成分支、必需检查、只读守卫的写入脚本等参数，并声明关联库（设计库与 KB 的职责、定位、快速利用方式与规则，渲染进受管段）。
+`.mercury/config.json` 由 SoT 维护：它选择 pack，设置集成分支、必需检查、只读守卫的写入脚本等参数，并声明关联库（设计库的职责、定位、快速利用方式与规则，渲染进受管段；KB 在本仓库 `docs/`，不再是关联库）。
 
 SoT 自有的领域角色与技能放在 Mercury 项目区，与上面的受管路径分开：
 

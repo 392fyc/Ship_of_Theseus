@@ -5,9 +5,9 @@
 日常 Codex 入口为游戏主仓 `Ship_of_Theseus`。主仓平级，任务工作树建在所属仓库根的 `.worktrees/<task>/`；不能从任务目录的父目录猜跨仓根。实际位置使用环境变量优先、本地 roots 配置回退，见 [工作树生命周期](docs/worktree-lifecycle.md)。
 
 
-> **本仓库不放设计文档。** 设计**正本（canonical）**统一在 Obsidian KB Vault：`SOT_KB_ROOT（或本地 [roots].kb_root）`
-> 2026-06-24 起，原先的设计总纲（本文件旧版）与 `dev_doc/` 下的 01–12 系列分册（回合系统 / 战斗计算 / 职业系统 / 天赋树 等）已全部迁往 KB；仓库内只保留**工程实现**、**工程文档**与**开发工具**。
-> 查设计规则请走 KB（`obsidian_*` MCP 或 `/sot-kb-write`）；各设计主题对应的 KB 路径见 [dev_doc/README.md](./dev_doc/README.md)。
+> **设计文档正本（canonical）在本仓库的 [`docs/`](./docs/)**：它就是 KB，同时是 Obsidian vault（用 Obsidian 打开主工作树的 `docs/` 文件夹）。KB 原为独立仓库 ShipOfTheseus-KB，2026-10-29 以当前快照并入（#90），更早的历史留在已归档的旧仓库。
+> 2026-06-24 起，原先的设计总纲（本文件旧版）与 `dev_doc/` 下的 01–12 系列分册（回合系统 / 战斗计算 / 职业系统 / 天赋树 等）已全部迁往 KB。
+> 查设计规则请读 `docs/`（或 `/sot-kb-write`）；文档与代码在同一任务工作树、同一 PR 中一起修改。各设计主题对应的 KB 路径见 [dev_doc/README.md](./dev_doc/README.md)（其中的 KB 路径相对 `docs/`）。
 
 ## 项目
 

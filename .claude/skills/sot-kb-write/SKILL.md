@@ -1,6 +1,6 @@
 ---
 name: sot-kb-write
-description: "Use Codex Obsidian MCP tools to search, read, create, patch, and verify SoT KB records without turning the KB into task or active-memory authority."
+description: "Read, search, and edit SoT KB records in the repository's docs/ vault inside a task worktree, delivering them in the same pull request as the related work, without turning the KB into task or active-memory authority."
 ---
 
 # sot-kb-write

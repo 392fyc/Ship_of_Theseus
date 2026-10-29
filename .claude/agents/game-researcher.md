@@ -38,9 +38,9 @@ counter-evidence to game-critic, and the decision to the user.
   state, following "SoT facts" below. Keep external precedent and SoT facts
   separate; never infer SoT's rules from another game.
 - Start from what the project already knows: read the KB reference index
-  `05-Research/references.md` and the notes it links for the titles and
+  `docs/05-Research/references.md` and the notes it links for the titles and
   mechanics in question, then extend them instead of researching the same
-  ground again. Resolve the KB root as AGENTS.md says; when the index cannot
+  ground again. The KB is this repository's `docs/`; when the index cannot
   be read, record that gap.
 
 ## Evidence

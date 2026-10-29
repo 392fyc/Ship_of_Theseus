@@ -1,0 +1,66 @@
+acceptance_id: "ACC-P1-SKILL-002"
+task_id: "TASK-P1-SKILL-002"
+phase_id: "P1"
+status: "passed"
+example_artifact: false
+
+input_scope:
+  task_bundle: "02-Development/Task-Bundles/TASK-P1-SKILL-002.yaml"
+  code_scope_summary:
+    - "Representative skill runtime path in tactical combat"
+    - "Action-resource interaction during skill execution"
+    - "Regression checks for move and attack actions"
+  required_refs:
+    - "02-Development/Decisions/adr-2026-02-27-attribute-system-v1.md"
+    - "01-Game-Design/Core-Systems/battle-calculation.md"
+
+environment_requirements:
+  runtime:
+    - "Godot project launches TacticalScene without editor or game log errors."
+    - "At least one unit has an accessible representative skill path for acceptance."
+  tools:
+    - "Godot MCP or equivalent runtime validation path"
+  blockers:
+    - "No blind acceptance if runtime steps depend on undocumented manual knowledge outside the task bundle."
+
+acceptance_checks:
+  - id: "CHK-001"
+    description: "A representative skill can be selected and resolved during TacticalScene runtime."
+    evidence_required: "explicit acceptance evidence"
+  - id: "CHK-002"
+    description: "Skill execution consumes the intended action resource without corrupting turn flow."
+    evidence_required: "explicit acceptance evidence"
+  - id: "CHK-003"
+    description: "Normal move and attack flow still work after the skill path is added."
+    evidence_required: "explicit acceptance evidence"
+
+result: "pass"
+evidence:
+  - "CHK-001: TacticalScene runtime logs show representative skill full path resolved: '[Skill] Aimed Shot ready on 弓箭手', '[Action] Aimed Shot selected for 弓箭手', '[Skill] 弓箭手 uses Aimed Shot on 哥布林战士', '[Attack] 弓箭手→哥布林战士 | hit=true | crit=false | dmg=9', '[Attack] Pursuit: 弓箭手→哥布林战士 | hit=true | crit=false | dmg=8'. Screenshots captured before/after skill execution show target HP drop (22->5)."
+  - "CHK-002: After skill execution, turn flow continued without corruption: log immediately advanced to '[TurnManager] Turn: 仆兵 (player)'. This demonstrates standard action resource consumption and proper end-turn handoff after skill use."
+  - "CHK-003: Normal move and normal attack flows remained functional after skill path integration. Runtime logs show standard non-skill actions in subsequent turns: '[AI] 哥布林弓手: move (6, 5) → (5, 4)', '[AI] 哥布林弓手: attack 弓箭手', '[Attack] 哥布林弓手→弓箭手 | ...', '[AI] 哥布林战士: move (5, 3) → (4, 3)', '[AI] 哥布林战士: attack 弓箭手', plus normal counterattack resolution."
+gaps: []
+followup_action: []
+issue_refs: []
+result_policy:
+  allowed_values:
+    - "pass"
+    - "partial"
+    - "fail"
+    - "blocked"
+  routing:
+    pass: "main_agent_updates_registry_to_verified"
+    partial: "return_to_task_flow"
+    fail: "return_to_task_flow"
+    blocked: "create_or_link_issue_bundle"
+registry_transition_recommendation:
+  task_status_after_acceptance: null
+  docs_sync_required: false
+  issue_required: false
+
+acceptance_receipt:
+  acceptance_agent: "gpt-5.3-codex"
+  executed_at: "2026-03-09T03:44:25+09:00"
+  notes:
+    - "Blind acceptance executed using only task bundle, ADR/battle docs, codebase, and Godot runtime."
+    - "Representative runtime skill category observed in flow is standard-action, single-target, diamond-range offensive skill."

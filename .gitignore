@@ -61,3 +61,15 @@ nul
 
 # 任务临时文件与清理前保留的 ignored 内容
 /.tmp/
+
+# docs/ is the Obsidian vault: per-machine state and plugin data (the REST API plugin stores its key there)
+/docs/.obsidian/workspace.json
+/docs/.obsidian/workspace-mobile.json
+/docs/.obsidian/cache
+/docs/.obsidian/graph.json
+/docs/.obsidian/plugins/*/data.json
+/docs/.trash/
+/docs/**/*.tmp
+/docs/**/*.bak
+# handoff documents are transient; lanes fall back to <main checkout>/.handoff/ once kb_dir is retired
+/docs/handoff/

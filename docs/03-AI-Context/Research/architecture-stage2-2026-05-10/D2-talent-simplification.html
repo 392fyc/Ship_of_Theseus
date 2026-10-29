@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>D2 — L2 Talent Simplification + sw_matrix Prune Demo</title>
+<style>
+  :root {
+    --bg: #16161c;
+    --surface: #1f1f28;
+    --surface-2: #2a2a36;
+    --text: #e8e8ec;
+    --muted: #8a8a96;
+    --border: #3a3a48;
+    --L1: #d4af37;
+    --L2: #4a7fb8;
+    --L3: #5fa869;
+    --L4: #9a8aa8;
+    --L5: #c8643c;
+    --base: #6c6c78;
+    --warn: #d97a4a;
+    --ok: #5fa869;
+    --del: #c8643c;
+    --keep: #4a7fb8;
+    --to-l3: #5fa869;
+    --to-l5: #c8643c;
+    --delete: #6c6c78;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    margin: 0;
+    padding: 32px 16px 64px;
+    line-height: 1.55;
+  }
+  main { max-width: 1100px; margin: 0 auto; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 32px; }
+  header h1 { margin: 0 0 6px; font-size: 22px; font-weight: 600; }
+  header h1 .stream { color: var(--L2); }
+  header .meta { color: var(--muted); font-size: 13px; margin: 0; }
+  section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+            padding: 20px 24px; margin-bottom: 20px; }
+  h2 { margin: 0 0 16px; font-size: 17px; font-weight: 600; color: #f0f0f4;
+       border-left: 4px solid var(--L2); padding-left: 10px; }
+  h3 { margin: 18px 0 8px; font-size: 14px; font-weight: 600; color: #d8d8e0; }
+  p, li { font-size: 13.5px; }
+  code { background: var(--surface-2); padding: 1px 6px; border-radius: 3px; font-size: 12.5px;
+         color: #d4af90; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { padding: 7px 9px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td.id { font-family: monospace; color: #d4af90; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px;
+          background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); }
+  .pill.keep { background: rgba(74, 127, 184, 0.15); color: var(--keep); border-color: var(--keep); }
+  .pill.l3 { background: rgba(95, 168, 105, 0.15); color: var(--to-l3); border-color: var(--to-l3); }
+  .pill.l5 { background: rgba(200, 100, 60, 0.15); color: var(--to-l5); border-color: var(--to-l5); }
+  .pill.del { background: rgba(108, 108, 120, 0.20); color: #b8b8c8; border-color: #6c6c78; }
+  .pill.struct { background: rgba(212, 175, 55, 0.15); color: var(--L1); border-color: var(--L1); }
+  .pill.warn { background: rgba(217, 122, 74, 0.15); color: var(--warn); border-color: var(--warn); }
+  .key-rule {
+    background: rgba(74, 127, 184, 0.08);
+    border-left: 3px solid var(--L2);
+    padding: 12px 14px;
+    margin: 12px 0;
+    font-size: 13px;
+    border-radius: 0 4px 4px 0;
+  }
+  .key-rule b { color: var(--L2); }
+  svg { display: block; margin: 12px auto; }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; margin: 8px 0 16px; font-size: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--border); }
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 12px 0; }
+  .stat-card { background: var(--surface-2); padding: 14px 16px; border-radius: 6px;
+               border: 1px solid var(--border); }
+  .stat-card .num { font-size: 28px; font-weight: 600; color: #f0f0f4; }
+  .stat-card .num.keep { color: var(--keep); }
+  .stat-card .num.l3 { color: var(--to-l3); }
+  .stat-card .num.l5 { color: var(--to-l5); }
+  .stat-card .num.del { color: #b8b8c8; }
+  .stat-card .label { font-size: 11.5px; color: var(--muted); text-transform: uppercase;
+                      letter-spacing: 0.5px; margin-top: 4px; }
+  .stat-card .pct { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 32px;
+           border-top: 1px solid var(--border); padding-top: 16px; }
+  .toc { background: var(--surface-2); padding: 12px 18px; border-radius: 6px; }
+  .toc ol { padding-left: 20px; margin: 4px 0; }
+  .toc li { font-size: 12.5px; margin-bottom: 3px; }
+  .toc a { color: #a8c0e0; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .compact-table th, .compact-table td { padding: 4px 8px; font-size: 12px; }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1><span class="stream">[D2]</span> L2 Talent Simplification Rules + sw_matrix Prune Demo</h1>
+  <p class="meta">S3-side-sot · 2026-05-10 ·
+    <span class="pill keep">stage2_proposal</span> ·
+    parent: <code>architecture-consensus-v2.md</code></p>
+</header>
+
+<section class="toc">
+  <h3 style="margin-top:0;">目录</h3>
+  <ol>
+    <li><a href="#sec1">背景与简化目标</a></li>
+    <li><a href="#sec2">Per node-type 简化决策规则 (含决策树)</a></li>
+    <li><a href="#sec3">sw_matrix 剪枝结果总览</a></li>
+    <li><a href="#sec4">Before / After 节点 type 分布</a></li>
+    <li><a href="#sec5">简化后拓扑示意</a></li>
+    <li><a href="#sec6">渐进 layered 可玩性验证</a></li>
+    <li><a href="#sec7">5 v1 职业可推广性</a></li>
+    <li><a href="#sec8">Open Questions for Stage 3</a></li>
+    <li><a href="#sec9">完整 KEEP / L3 / L5 / DELETE 清单</a></li>
+  </ol>
+</section>
+
+<section id="sec1">
+  <h2>1. 背景与简化目标</h2>
+  <p>来自 consensus v2 §5 Δ-5: <code>sw_matrix_true_path.json</code> 当前 83 节点 (49 passive)
+     需明确 passive 去 L2 / L3 / L5 / 删除. <code>talent-tree-design.md</code> §4.2 当前为抽象描述 ("保留功能性, 迁出通用数值"),
+     D2 stream 把它具象化为可执行规则.</p>
+
+  <div class="key-rule">
+    <b>D2 核心结论</b>: 经过 83 节点逐一审查, 推荐保留 L2 = <b>60 节点</b> (含 5 个 STRUCTURAL 占位),
+    迁 L3 = <b>7</b> 节点, 迁 L5 = <b>10</b> 节点, DELETE/重写 = <b>3</b> 节点.
+    <br/>30-40 prune target 在当前 sw 拓扑下不可达, 真实可达下限 ~58. <b>建议 Stage 3 将 target 校准为 ~55-60</b>.
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="num keep">60</div>
+      <div class="label">KEEP L2</div>
+      <div class="pct">72.3% of 83</div>
+    </div>
+    <div class="stat-card">
+      <div class="num l3">7</div>
+      <div class="label">MIGRATE L3</div>
+      <div class="pct">类固定生长曲线吸收</div>
+    </div>
+    <div class="stat-card">
+      <div class="num l5">10</div>
+      <div class="label">MIGRATE L5</div>
+      <div class="pct">符文池 (流派类 + 经济类)</div>
+    </div>
+    <div class="stat-card">
+      <div class="num del">3</div>
+      <div class="label">DELETE / REWRITE</div>
+      <div class="pct">结构占位重写</div>
+    </div>
+  </div>
+
+  <h3>1.1 当前 sw_matrix type 分布 (83 节点)</h3>
+  <table class="compact-table">
+    <thead>
+      <tr><th>type</th><th>数量</th><th>占比</th><th>简化战场</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>trait</td><td>11</td><td>13.3%</td><td>部分 (hub / start / functional)</td></tr>
+      <tr><td><b>passive</b></td><td><b>49</b></td><td><b>59.0%</b></td><td><b>主战场</b></td></tr>
+      <tr><td>active_skill</td><td>10</td><td>12.0%</td><td>不参与 (强制 L2)</td></tr>
+      <tr><td>skill_upgrade</td><td>5</td><td>6.0%</td><td>不参与 (强制 L2)</td></tr>
+      <tr><td>gauge_extend</td><td>6</td><td>7.2%</td><td>不参与 (强制 L2)</td></tr>
+      <tr><td>advancement</td><td>2</td><td>2.4%</td><td>不参与 (强制 L2)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="sec2">
+  <h2>2. Per node-type 简化决策规则</h2>
+
+  <h3>2.1 三个判定维度 (FNG)</h3>
+  <p>给定一个节点, 用三个正交维度判定:</p>
+  <ul>
+    <li><b>F · 功能性 (Functional)</b>: 改变行为 (新动作, 反应触发, 状态机, 攻击方式改变, 槽位解锁)</li>
+    <li><b>N · 数值性 (Numeric)</b>: 仅修改既有公式常量 (ATK%, +flat stat, +% resist) 不改变行为</li>
+    <li><b>G · 量谱耦合 (Gauge-coupled)</b>: 与某 gauge (剑气/魔刃/势/明/剑元) 直接绑定的产生或消耗</li>
+  </ul>
+  <p><b>保留 L2 硬条件</b>: F=true 或 G=true. <b>迁出条件</b>: F=false 且 G=false.</p>
+
+  <h3>2.2 Per-type 处理表</h3>
+  <table>
+    <thead>
+      <tr><th>type</th><th>F=true 默认</th><th>F=false N=true 默认</th><th>说明</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>trait</code></td>
+        <td><span class="pill keep">L2</span></td>
+        <td><span class="pill l3">L3</span></td>
+        <td>hub/start/structural-gate 即使数值化也保留位置, Stage 3 重写功能内容</td>
+      </tr>
+      <tr>
+        <td><code>passive</code></td>
+        <td><span class="pill keep">L2</span></td>
+        <td>见 §2.3 决策树</td>
+        <td>主战场, 49/83</td>
+      </tr>
+      <tr>
+        <td><code>active_skill</code></td>
+        <td colspan="2"><span class="pill keep">L2 (强制)</span></td>
+        <td>玩家主动决策点, 永远 L2</td>
+      </tr>
+      <tr>
+        <td><code>skill_upgrade</code></td>
+        <td colspan="2"><span class="pill keep">L2 (强制)</span></td>
+        <td>必须与对应 active 同层</td>
+      </tr>
+      <tr>
+        <td><code>advancement</code></td>
+        <td colspan="2"><span class="pill keep">L2 (强制)</span></td>
+        <td>L2 ↔ L3 growth rate 切换的耦合点</td>
+      </tr>
+      <tr>
+        <td><code>gauge_extend</code></td>
+        <td colspan="2"><span class="pill keep">L2 (强制)</span></td>
+        <td>build-defining 节奏机制</td>
+      </tr>
+      <tr>
+        <td><code>gauge_core</code></td>
+        <td colspan="2"><span class="pill keep">L2 (强制)</span></td>
+        <td>(sw_matrix 当前无, 但保留规则)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>2.3 SVG 图 (a): Passive 决策树</h3>
+  <p>49 个 passive 节点用三层问题筛分:</p>
+
+  <svg width="900" height="440" viewBox="0 0 900 440">
+    <defs>
+      <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L0,6 L9,3 z" fill="#8a8a96"/>
+      </marker>
+    </defs>
+
+    <!-- Root: passive node -->
+    <rect x="370" y="10" width="160" height="42" rx="6" fill="#2a2a36" stroke="#4a7fb8" stroke-width="1.5"/>
+    <text x="450" y="30" text-anchor="middle" font-size="13" fill="#e8e8ec" font-weight="600">输入: passive 节点</text>
+    <text x="450" y="46" text-anchor="middle" font-size="11" fill="#8a8a96">(49 个 in sw_matrix)</text>
+
+    <!-- Q1 -->
+    <rect x="370" y="80" width="160" height="42" rx="6" fill="#1f1f28" stroke="#d4af37" stroke-width="1.5"/>
+    <text x="450" y="100" text-anchor="middle" font-size="12" fill="#e8e8ec" font-weight="600">Q1: 是否绑定 gauge?</text>
+    <text x="450" y="116" text-anchor="middle" font-size="11" fill="#8a8a96">(势/明/剑气/魔刃/剑元)</text>
+    <line x1="450" y1="52" x2="450" y2="80" stroke="#8a8a96" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <!-- Q1 YES -> KEEP L2 -->
+    <rect x="120" y="170" width="160" height="42" rx="6" fill="rgba(74,127,184,0.18)" stroke="#4a7fb8" stroke-width="1.5"/>
+    <text x="200" y="190" text-anchor="middle" font-size="12" fill="#a8c0e0" font-weight="600">KEEP L2</text>
+    <text x="200" y="206" text-anchor="middle" font-size="11" fill="#8a8a96">gauge-coupled = build-defining</text>
+    <line x1="380" y1="122" x2="220" y2="170" stroke="#5fa869" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="270" y="148" font-size="11" fill="#5fa869">YES</text>
+
+    <!-- Q2 -->
+    <rect x="540" y="170" width="180" height="42" rx="6" fill="#1f1f28" stroke="#d4af37" stroke-width="1.5"/>
+    <text x="630" y="188" text-anchor="middle" font-size="12" fill="#e8e8ec" font-weight="600">Q2: 是否改变行为?</text>
+    <text x="630" y="204" text-anchor="middle" font-size="10" fill="#8a8a96">(新动作/反应/状态/攻击方式/槽位)</text>
+    <line x1="520" y1="122" x2="610" y2="170" stroke="#d97a4a" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="540" y="148" font-size="11" fill="#d97a4a">NO</text>
+
+    <!-- Q2 YES -> KEEP L2 -->
+    <rect x="380" y="250" width="160" height="42" rx="6" fill="rgba(74,127,184,0.18)" stroke="#4a7fb8" stroke-width="1.5"/>
+    <text x="460" y="270" text-anchor="middle" font-size="12" fill="#a8c0e0" font-weight="600">KEEP L2</text>
+    <text x="460" y="286" text-anchor="middle" font-size="11" fill="#8a8a96">类身份功能性</text>
+    <line x1="600" y1="212" x2="490" y2="250" stroke="#5fa869" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="520" y="232" font-size="11" fill="#5fa869">YES</text>
+
+    <!-- Q3 -->
+    <rect x="600" y="250" width="200" height="42" rx="6" fill="#1f1f28" stroke="#d4af37" stroke-width="1.5"/>
+    <text x="700" y="268" text-anchor="middle" font-size="12" fill="#e8e8ec" font-weight="600">Q3: 是否 build-defining 量级?</text>
+    <text x="700" y="284" text-anchor="middle" font-size="10" fill="#8a8a96">(≥10% 单维 / 条件触发 / sustain / resist)</text>
+    <line x1="660" y1="212" x2="680" y2="250" stroke="#d97a4a" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="640" y="232" font-size="11" fill="#d97a4a">NO (纯数值)</text>
+
+    <!-- Q3 YES -> L5 -->
+    <rect x="540" y="340" width="160" height="50" rx="6" fill="rgba(200,100,60,0.18)" stroke="#c8643c" stroke-width="1.5"/>
+    <text x="620" y="360" text-anchor="middle" font-size="12" fill="#e8a87c" font-weight="600">MIGRATE L5</text>
+    <text x="620" y="376" text-anchor="middle" font-size="11" fill="#8a8a96">符文池 (流派类 + 经济类)</text>
+    <line x1="680" y1="292" x2="635" y2="340" stroke="#5fa869" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="660" y="320" font-size="11" fill="#5fa869">YES</text>
+
+    <!-- Q3 NO -> L3 -->
+    <rect x="730" y="340" width="160" height="50" rx="6" fill="rgba(95,168,105,0.18)" stroke="#5fa869" stroke-width="1.5"/>
+    <text x="810" y="360" text-anchor="middle" font-size="12" fill="#90c290" font-weight="600">MIGRATE L3</text>
+    <text x="810" y="376" text-anchor="middle" font-size="11" fill="#8a8a96">类固定生长曲线吸收</text>
+    <line x1="780" y1="292" x2="800" y2="340" stroke="#d97a4a" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="800" y="320" font-size="11" fill="#d97a4a">NO</text>
+
+    <!-- Legend -->
+    <rect x="20" y="350" width="14" height="14" fill="rgba(74,127,184,0.3)" stroke="#4a7fb8"/>
+    <text x="40" y="362" font-size="11" fill="#a8c0e0">KEEP L2 (功能性)</text>
+    <rect x="20" y="372" width="14" height="14" fill="rgba(95,168,105,0.3)" stroke="#5fa869"/>
+    <text x="40" y="384" font-size="11" fill="#90c290">MIGRATE L3 (类固定)</text>
+    <rect x="20" y="394" width="14" height="14" fill="rgba(200,100,60,0.3)" stroke="#c8643c"/>
+    <text x="40" y="406" font-size="11" fill="#e8a87c">MIGRATE L5 (符文)</text>
+    <rect x="20" y="416" width="14" height="14" fill="#1f1f28" stroke="#d4af37"/>
+    <text x="40" y="428" font-size="11" fill="#d4af37">决策问题</text>
+  </svg>
+
+  <h3>2.4 Q3 build-defining 阈值表</h3>
+  <table>
+    <thead>
+      <tr><th>维度</th><th>L3 阈值 (吸收)</th><th>L5 阈值 (build-defining)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>flat stat (ATK/DEF/HP/Speed/Hit/Evade)</td><td>&lt; +5 单点</td><td>≥ +10 单点 或 +5%+</td></tr>
+      <tr><td>% stat (Crit%/Hit%/Evade%/Resist%)</td><td>&lt; +5%</td><td>≥ +10%</td></tr>
+      <tr><td>条件触发数值 (HP&lt;X% / 上回合未移动 / 最先行动)</td><td colspan="2"><span class="pill l5">L5 一定</span> (条件 = build 信号)</td></tr>
+      <tr><td>sustain (击杀回血 / 受伤吸血)</td><td colspan="2"><span class="pill l5">L5 一定</span></td></tr>
+      <tr><td>categorical resist (元素抗性 / 状态抗性)</td><td colspan="2"><span class="pill l5">L5 一定</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="sec3">
+  <h2>3. sw_matrix 剪枝结果总览 (83 节点逐一)</h2>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-swatch" style="background:rgba(74,127,184,0.3);border-color:#4a7fb8;"></span>KEEP L2</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:rgba(212,175,55,0.3);border-color:#d4af37;"></span>STRUCTURAL (内容部分迁移)</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:rgba(95,168,105,0.3);border-color:#5fa869;"></span>MIGRATE L3</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:rgba(200,100,60,0.3);border-color:#c8643c;"></span>MIGRATE L5</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:rgba(108,108,120,0.3);border-color:#6c6c78;"></span>DELETE / REWRITE</div>
+  </div>
+
+  <h3>3.1 Lv 1-10 共享前段 (20 节点)</h3>
+  <table class="compact-table">
+    <thead>
+      <tr><th>id</th><th>name</th><th>type</th><th>决策</th><th>理由</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="id">sw_start</td><td>剑道入门</td><td>trait</td><td><span class="pill keep">KEEP</span></td><td>起点</td></tr>
+      <tr><td class="id">sw_L2</td><td>锐刃</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>命中后附加 Debuff</td></tr>
+      <tr><td class="id">sw_M2</td><td>敏锐</td><td>passive</td><td><span class="pill l5">L5</span></td><td>条件触发数值 (最先行动 +8% 暴击)</td></tr>
+      <tr><td class="id">sw_R2</td><td>洞察</td><td>passive</td><td><span class="pill l3">L3</span></td><td>命中率基础 +10% 纯数值</td></tr>
+      <tr><td class="id">sw_L3</td><td>连环</td><td>passive</td><td><span class="pill l5">L5</span></td><td>2回合命中 +5% 条件触发</td></tr>
+      <tr><td class="id">sw_M3</td><td>剑舞</td><td>active_skill</td><td><span class="pill keep">KEEP</span></td><td>active 强制保留</td></tr>
+      <tr><td class="id">sw_R3</td><td>虚实</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>闪避后必中, 状态切换</td></tr>
+      <tr><td class="id">sw_L4</td><td>势不可挡</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>引入「势」gauge</td></tr>
+      <tr><td class="id">sw_R4</td><td>灵动</td><td>passive</td><td><span class="pill l3">L3</span></td><td>+5% 闪避基础</td></tr>
+      <tr><td class="id">sw_hub5</td><td>剑心通明</td><td>trait</td><td><span class="pill struct">STRUCT</span></td><td>Lv5 hub 保留位, 数值参数迁 L5</td></tr>
+      <tr><td class="id">sw_L6</td><td>斩铁</td><td>skill_upgrade</td><td><span class="pill keep">KEEP</span></td><td>skill_upgrade 强制保留</td></tr>
+      <tr><td class="id">sw_M6</td><td>剑道精义</td><td>trait</td><td><span class="pill keep">KEEP</span></td><td>反击后先制+1, turn 顺序变更</td></tr>
+      <tr><td class="id">sw_R6</td><td>魔力感知</td><td>passive</td><td><span class="pill l3">L3</span></td><td>M.DEF +3 纯 flat</td></tr>
+      <tr><td class="id">sw_L7</td><td>临界之刃</td><td>passive</td><td><span class="pill l5">L5</span></td><td>HP&lt;70% 爆伤+0.2 条件触发</td></tr>
+      <tr><td class="id">sw_R7</td><td>元素抵抗</td><td>passive</td><td><span class="pill l5">L5</span></td><td>魔法-15% categorical resist</td></tr>
+      <tr><td class="id">sw_hub8</td><td>剑之极</td><td>trait</td><td><span class="pill del">DEL/REWR</span></td><td>P.ATK+3/P.DEF-1 纯数值, 拓扑可直连</td></tr>
+      <tr><td class="id">sw_pre_saint9</td><td>剑圣引路</td><td>passive</td><td><span class="pill del">DEL/REWR</span></td><td>+3% crit, 推荐重写为剑气量谱预备</td></tr>
+      <tr><td class="id">sw_pre_magic9</td><td>魔剑引路</td><td>passive</td><td><span class="pill del">DEL/REWR</span></td><td>+3 MAG, 推荐重写为魔刃感知</td></tr>
+      <tr><td class="id">sw_adv_saint</td><td>剑圣之路</td><td>advancement</td><td><span class="pill keep">KEEP</span></td><td>advancement 强制保留</td></tr>
+      <tr><td class="id">sw_adv_magic</td><td>魔剑之路</td><td>advancement</td><td><span class="pill keep">KEEP</span></td><td>advancement 强制保留</td></tr>
+    </tbody>
+  </table>
+  <p><b>小计</b>: KEEP 11, STRUCT 1, L3 = 3, L5 = 4, DEL/REWR = 3</p>
+
+  <h3>3.2 Lv 11-20 剑圣线 (22 节点)</h3>
+  <table class="compact-table">
+    <thead>
+      <tr><th>id</th><th>name</th><th>type</th><th>决策</th><th>理由</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="id">ss_A11</td><td>二刀流</td><td>trait</td><td><span class="pill keep">KEEP</span></td><td>副手槽位解锁</td></tr>
+      <tr><td class="id">ss_B11</td><td>致命打击</td><td>passive</td><td><span class="pill l5">L5</span></td><td>+10% crit 大数值</td></tr>
+      <tr><td class="id">ss_A12</td><td>迅捷步伐</td><td>passive</td><td><span class="pill l3">L3</span></td><td>Speed +2 纯 flat</td></tr>
+      <tr><td class="id">ss_B12</td><td>剑意共鸣</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>溢出 crit% → crit dmg 转换</td></tr>
+      <tr><td class="id">ss_M12</td><td>残影闪</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>闪避后留残影抵挡</td></tr>
+      <tr><td class="id">ss_A13</td><td>流转不息</td><td>gauge_extend</td><td><span class="pill keep">KEEP</span></td><td>gauge_extend 强制</td></tr>
+      <tr><td class="id">ss_B13</td><td>剑气极意</td><td>trait</td><td><span class="pill keep">KEEP</span></td><td>gauge=100 触发</td></tr>
+      <tr><td class="id">ss_A14</td><td>神速追击</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>追加攻击机制</td></tr>
+      <tr><td class="id">ss_B14</td><td>剑气释放</td><td>active_skill</td><td><span class="pill keep">KEEP</span></td><td>active 强制</td></tr>
+      <tr><td class="id">ss_A15_qual</td><td>幻影连斩</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>追加形变 qual</td></tr>
+      <tr><td class="id">ss_B15_qual</td><td>居合之心</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>剑气释放无视防御</td></tr>
+      <tr><td class="id">ss_A16</td><td>幻影步</td><td>passive</td><td><span class="pill l3">L3</span></td><td>+10% 闪避基础</td></tr>
+      <tr><td class="id">ss_B16</td><td>心如止水</td><td>gauge_extend</td><td><span class="pill keep">KEEP</span></td><td>gauge_extend 强制</td></tr>
+      <tr><td class="id">ss_M16</td><td>饮血剑</td><td>passive</td><td><span class="pill l5">L5</span></td><td>击杀回血 sustain rune</td></tr>
+      <tr><td class="id">ss_A17</td><td>双剑合璧</td><td>trait</td><td><span class="pill keep">KEEP</span></td><td>装备耦合特效</td></tr>
+      <tr><td class="id">ss_B17</td><td>居合定势</td><td>passive</td><td><span class="pill l5">L5</span></td><td>未移动 +0.2 爆伤 条件</td></tr>
+      <tr><td class="id">ss_A18</td><td>连击聚气</td><td>gauge_extend</td><td><span class="pill keep">KEEP</span></td><td>gauge_extend</td></tr>
+      <tr><td class="id">ss_B18</td><td>修罗之怒</td><td>gauge_extend</td><td><span class="pill keep">KEEP</span></td><td>gauge_extend</td></tr>
+      <tr><td class="id">ss_A19</td><td>无影剑</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>追击无视格挡</td></tr>
+      <tr><td class="id">ss_B19</td><td>破甲之刃</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>暴击无视15%格挡率</td></tr>
+      <tr><td class="id">ss_A20_qual</td><td>极意·幻影剑舞</td><td>active_skill</td><td><span class="pill keep">KEEP</span></td><td>active 终极</td></tr>
+      <tr><td class="id">ss_B20_qual</td><td>极意·修罗一闪</td><td>trait</td><td><span class="pill keep">KEEP</span></td><td>终极 trait</td></tr>
+    </tbody>
+  </table>
+  <p><b>小计</b>: KEEP 17, L3 = 2, L5 = 3</p>
+
+  <h3>3.3 Lv 11-20 魔剑线 (22 节点)</h3>
+  <table class="compact-table">
+    <thead>
+      <tr><th>id</th><th>name</th><th>type</th><th>决策</th><th>理由</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="id">ms_A11</td><td>魔武崩解</td><td>active_skill</td><td><span class="pill keep">KEEP</span></td><td>active 强制</td></tr>
+      <tr><td class="id">ms_B11</td><td>古籍研读</td><td>trait</td><td><span class="pill keep">KEEP</span></td><td>法书装备解锁</td></tr>
+      <tr><td class="id">ms_A12</td><td>嗜血魔刃</td><td>gauge_extend</td><td><span class="pill keep">KEEP</span></td><td>gauge_extend 强制</td></tr>
+      <tr><td class="id">ms_B12</td><td>法术延展</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>魔法 +1 射程</td></tr>
+      <tr><td class="id">ms_M12</td><td>奥术护体</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>每层魔刃 -3% 受伤 (gauge-coupled)</td></tr>
+      <tr><td class="id">ms_A13</td><td>魔纹蚀甲</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>双向防御削减机制</td></tr>
+      <tr><td class="id">ms_B13</td><td>奥术回响</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>魔法后追加物理 combo</td></tr>
+      <tr><td class="id">ms_A14</td><td>护甲精通</td><td>passive</td><td><span class="pill l3">L3</span></td><td>P.DEF/M.DEF +2 各 flat</td></tr>
+      <tr><td class="id">ms_B14</td><td>元素附魔</td><td>active_skill</td><td><span class="pill keep">KEEP</span></td><td>active 强制</td></tr>
+      <tr><td class="id">ms_A15_qual</td><td>蚀甲精通</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>蚀甲 stack 2 qual</td></tr>
+      <tr><td class="id">ms_B15_qual</td><td>高阶附魔</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>附魔 +10% hybrid qual</td></tr>
+      <tr><td class="id">ms_A16</td><td>魔刃爆发</td><td>active_skill</td><td><span class="pill keep">KEEP</span></td><td>active 强制</td></tr>
+      <tr><td class="id">ms_B16</td><td>破魔之躯</td><td>passive</td><td><span class="pill l5">L5</span></td><td>+15% 状态抵抗 categorical</td></tr>
+      <tr><td class="id">ms_M16</td><td>魔力转化</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>M.DEF → P.ATK 50% 转换</td></tr>
+      <tr><td class="id">ms_A17</td><td>坚岩护体</td><td>passive</td><td><span class="pill l3">L3</span></td><td>+15 max HP flat</td></tr>
+      <tr><td class="id">ms_B17</td><td>反制法术</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>远程反应触发 magic counter</td></tr>
+      <tr><td class="id">ms_A18</td><td>混伤精通</td><td>passive</td><td><span class="pill l5">L5</span></td><td>hybrid 基础 +15% 大数值</td></tr>
+      <tr><td class="id">ms_B18</td><td>魔力沸腾</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>魔法独立 crit roll</td></tr>
+      <tr><td class="id">ms_A19</td><td>回环魔刃</td><td>gauge_extend</td><td><span class="pill keep">KEEP</span></td><td>gauge_extend 强制</td></tr>
+      <tr><td class="id">ms_B19</td><td>咒术连发</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>50% Debuff 重触发</td></tr>
+      <tr><td class="id">ms_A20_qual</td><td>秘仪·虚空斩</td><td>trait</td><td><span class="pill keep">KEEP</span></td><td>终极 trait</td></tr>
+      <tr><td class="id">ms_B20_qual</td><td>秘仪·符文掌控</td><td>trait</td><td><span class="pill keep">KEEP</span></td><td>普攻变 hybrid 终极</td></tr>
+    </tbody>
+  </table>
+  <p><b>小计</b>: KEEP 17, L3 = 2, L5 = 2</p>
+
+  <h3>3.4 Lv 21-25 深潜区 (19 节点)</h3>
+  <table class="compact-table">
+    <thead>
+      <tr><th>id</th><th>name</th><th>type</th><th>决策</th><th>理由</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="id">ss_A21</td><td>气盛无匹</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>剑气上限+真伤 (gauge)</td></tr>
+      <tr><td class="id">ss_B21</td><td>不屈战魄</td><td>passive</td><td><span class="pill l5">L5</span></td><td>+15% HP + 吸血 一次, 整体 build-defining</td></tr>
+      <tr><td class="id">sc_A21</td><td>虚空行者</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>+1 移动 + ZOC 穿透</td></tr>
+      <tr><td class="id">sc_B21</td><td>剑元护体</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>每层剑元 -2% (gauge)</td></tr>
+      <tr><td class="id">detour_ss_22</td><td>血气唤醒</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>HP&lt;30% 自动回剑气 (gauge)</td></tr>
+      <tr><td class="id">detour_sc_22</td><td>聚元法阵</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>未移动 +1 剑元 (gauge)</td></tr>
+      <tr><td class="id">detour_center_22</td><td>破极之躯</td><td>passive</td><td><span class="pill struct">STRUCT</span></td><td>跨系 detour, 数值待 Stage 3 微调</td></tr>
+      <tr><td class="id">ss_A23</td><td>绝境反弹</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>死亡保命 + 超额反击</td></tr>
+      <tr><td class="id">ss_B23</td><td>暴击穿透</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>暴击无视护甲值</td></tr>
+      <tr><td class="id">sc_A23</td><td>破法剑缘</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>命中剥离 1 buff</td></tr>
+      <tr><td class="id">sc_B23</td><td>飞剑裁决</td><td>passive</td><td><span class="pill keep">KEEP</span></td><td>每消耗 1 剑元 +5% 真伤</td></tr>
+      <tr><td class="id">ss_A24</td><td>强化·无影追击</td><td>skill_upgrade</td><td><span class="pill keep">KEEP</span></td><td>skill_upgrade</td></tr>
+      <tr><td class="id">ss_B24</td><td>强化·修罗一闪</td><td>skill_upgrade</td><td><span class="pill keep">KEEP</span></td><td>skill_upgrade</td></tr>
+      <tr><td class="id">sc_A24</td><td>强化·虚空斩裂</td><td>skill_upgrade</td><td><span class="pill keep">KEEP</span></td><td>skill_upgrade</td></tr>
+      <tr><td class="id">sc_B24</td><td>强化·符文共怒</td><td>skill_upgrade</td><td><span class="pill keep">KEEP</span></td><td>skill_upgrade</td></tr>
+      <tr><td class="id">ss_A25_ult</td><td>天霸凄煌斩</td><td>active_skill</td><td><span class="pill keep">KEEP</span></td><td>true_ultimate</td></tr>
+      <tr><td class="id">ss_B25_ult</td><td>无明三段突</td><td>active_skill</td><td><span class="pill keep">KEEP</span></td><td>true_ultimate</td></tr>
+      <tr><td class="id">sc_A25_ult</td><td>真理崩坏</td><td>active_skill</td><td><span class="pill keep">KEEP</span></td><td>true_ultimate</td></tr>
+      <tr><td class="id">sc_B25_ult</td><td>万剑归宗</td><td>active_skill</td><td><span class="pill keep">KEEP</span></td><td>true_ultimate</td></tr>
+    </tbody>
+  </table>
+  <p><b>小计</b>: KEEP 17, STRUCT 1, L5 = 1</p>
+
+  <p><b>全局合计</b>:
+    <span class="pill keep">KEEP 60</span>
+    <span class="pill struct">含 STRUCT 5</span>
+    <span class="pill l3">L3 = 7</span>
+    <span class="pill l5">L5 = 10</span>
+    <span class="pill del">DEL/REWR = 3</span>
+  </p>
+</section>
+
+<section id="sec4">
+  <h2>4. SVG 图 (b): Before / After 节点 type 分布对比</h2>
+
+  <svg width="900" height="380" viewBox="0 0 900 380">
+    <!-- Title -->
+    <text x="450" y="20" text-anchor="middle" font-size="13" fill="#e8e8ec" font-weight="600">
+      sw_matrix node-type 分布: Before (83) vs After (60 保守版)
+    </text>
+
+    <!-- Y-axis labels -->
+    <text x="40" y="60" font-size="11" fill="#8a8a96" text-anchor="end">50</text>
+    <text x="40" y="120" font-size="11" fill="#8a8a96" text-anchor="end">40</text>
+    <text x="40" y="180" font-size="11" fill="#8a8a96" text-anchor="end">30</text>
+    <text x="40" y="240" font-size="11" fill="#8a8a96" text-anchor="end">20</text>
+    <text x="40" y="300" font-size="11" fill="#8a8a96" text-anchor="end">10</text>
+    <text x="40" y="335" font-size="11" fill="#8a8a96" text-anchor="end">0</text>
+
+    <!-- Y-axis lines -->
+    <line x1="50" y1="55" x2="880" y2="55" stroke="#3a3a48" stroke-width="0.5" stroke-dasharray="2,3"/>
+    <line x1="50" y1="115" x2="880" y2="115" stroke="#3a3a48" stroke-width="0.5" stroke-dasharray="2,3"/>
+    <line x1="50" y1="175" x2="880" y2="175" stroke="#3a3a48" stroke-width="0.5" stroke-dasharray="2,3"/>
+    <line x1="50" y1="235" x2="880" y2="235" stroke="#3a3a48" stroke-width="0.5" stroke-dasharray="2,3"/>
+    <line x1="50" y1="295" x2="880" y2="295" stroke="#3a3a48" stroke-width="0.5" stroke-dasharray="2,3"/>
+    <line x1="50" y1="330" x2="880" y2="330" stroke="#8a8a96" stroke-width="1"/>
+
+    <!-- type groups: 6 types, each pair of bars (before/after) -->
+    <!-- Scale: 1 unit = 6px (50 units = 300px height area = y 30 to 330)  -->
+    <!-- Bar height = value * 6  -->
+
+    <!-- trait: 11 -> 8 -->
+    <rect x="80" y="264" width="40" height="66" fill="#9a8aa8" opacity="0.7"/>
+    <text x="100" y="258" text-anchor="middle" font-size="11" fill="#e8e8ec">11</text>
+    <rect x="125" y="282" width="40" height="48" fill="#4a7fb8"/>
+    <text x="145" y="276" text-anchor="middle" font-size="11" fill="#e8e8ec">8</text>
+    <text x="122" y="350" text-anchor="middle" font-size="11" fill="#d8d8e0">trait</text>
+
+    <!-- passive: 49 -> 29 -->
+    <rect x="220" y="36" width="40" height="294" fill="#9a8aa8" opacity="0.7"/>
+    <text x="240" y="30" text-anchor="middle" font-size="11" fill="#e8e8ec">49</text>
+    <rect x="265" y="156" width="40" height="174" fill="#4a7fb8"/>
+    <text x="285" y="150" text-anchor="middle" font-size="11" fill="#e8e8ec">29</text>
+    <text x="262" y="350" text-anchor="middle" font-size="11" fill="#d8d8e0">passive</text>
+    <text x="262" y="365" text-anchor="middle" font-size="10" fill="#c8643c">-20</text>
+
+    <!-- active_skill: 10 -> 10 -->
+    <rect x="360" y="270" width="40" height="60" fill="#9a8aa8" opacity="0.7"/>
+    <text x="380" y="264" text-anchor="middle" font-size="11" fill="#e8e8ec">10</text>
+    <rect x="405" y="270" width="40" height="60" fill="#4a7fb8"/>
+    <text x="425" y="264" text-anchor="middle" font-size="11" fill="#e8e8ec">10</text>
+    <text x="402" y="350" text-anchor="middle" font-size="11" fill="#d8d8e0">active_skill</text>
+
+    <!-- skill_upgrade: 5 -> 5 -->
+    <rect x="500" y="300" width="40" height="30" fill="#9a8aa8" opacity="0.7"/>
+    <text x="520" y="294" text-anchor="middle" font-size="11" fill="#e8e8ec">5</text>
+    <rect x="545" y="300" width="40" height="30" fill="#4a7fb8"/>
+    <text x="565" y="294" text-anchor="middle" font-size="11" fill="#e8e8ec">5</text>
+    <text x="542" y="350" text-anchor="middle" font-size="11" fill="#d8d8e0">skill_upgrade</text>
+
+    <!-- gauge_extend: 6 -> 6 -->
+    <rect x="630" y="294" width="40" height="36" fill="#9a8aa8" opacity="0.7"/>
+    <text x="650" y="288" text-anchor="middle" font-size="11" fill="#e8e8ec">6</text>
+    <rect x="675" y="294" width="40" height="36" fill="#4a7fb8"/>
+    <text x="695" y="288" text-anchor="middle" font-size="11" fill="#e8e8ec">6</text>
+    <text x="672" y="350" text-anchor="middle" font-size="11" fill="#d8d8e0">gauge_extend</text>
+
+    <!-- advancement: 2 -> 2 -->
+    <rect x="770" y="318" width="40" height="12" fill="#9a8aa8" opacity="0.7"/>
+    <text x="790" y="312" text-anchor="middle" font-size="11" fill="#e8e8ec">2</text>
+    <rect x="815" y="318" width="40" height="12" fill="#4a7fb8"/>
+    <text x="835" y="312" text-anchor="middle" font-size="11" fill="#e8e8ec">2</text>
+    <text x="812" y="350" text-anchor="middle" font-size="11" fill="#d8d8e0">advancement</text>
+
+    <!-- Legend -->
+    <rect x="650" y="60" width="14" height="14" fill="#9a8aa8" opacity="0.7"/>
+    <text x="670" y="72" font-size="11" fill="#d8d8e0">Before (83)</text>
+    <rect x="650" y="82" width="14" height="14" fill="#4a7fb8"/>
+    <text x="670" y="94" font-size="11" fill="#d8d8e0">After (60)</text>
+  </svg>
+
+  <p><b>关键变化</b>: passive 从 49 → 29 (<span style="color:var(--del)">-20</span>), 其他 type 不变. 简化集中在 passive 子集.
+  整体节点数 83 → 60 (<span style="color:var(--del)">-23, 27.7% 缩减</span>).</p>
+
+  <h3>4.1 简化前后真功能性占比</h3>
+  <p>真功能性 = 不含纯数值/条件数值 passive 的节点占比.</p>
+  <ul>
+    <li>简化前 (83 节点): 真功能性 ≈ 41% (~34 / 83)</li>
+    <li>简化后 (60 节点): 真功能性 ≈ <b>92% (~55 / 60)</b></li>
+  </ul>
+
+  <p><b>含义</b>: 简化的核心收益不是节点数减少, 而是 <b>每个保留节点都是有意义的功能选择</b>, 玩家在 run 内升级时面对的不再是
+  "+5% A 还是 +5% B" 这种填充选择.</p>
+</section>
+
+<section id="sec5">
+  <h2>5. SVG 图 (c): 简化后 sw 树拓扑示意</h2>
+
+  <p>下图展示简化后 sw 树的高层拓扑 (60 节点). 颜色按 type 区分, 三个 STRUCTURAL 占位用虚线边框, DELETE 候选节点用灰色透明显示.</p>
+
+  <svg width="980" height="660" viewBox="0 0 980 660">
+    <defs>
+      <marker id="arrow2" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L7,3 z" fill="#5a5a68"/>
+      </marker>
+    </defs>
+
+    <!-- Title -->
+    <text x="490" y="20" text-anchor="middle" font-size="13" fill="#e8e8ec" font-weight="600">
+      简化后 sw 树拓扑 (60 节点 保守版)
+    </text>
+
+    <!-- Lv labels (Y axis) -->
+    <text x="20" y="50" font-size="10" fill="#8a8a96">Lv 1</text>
+    <text x="20" y="80" font-size="10" fill="#8a8a96">Lv 2-4</text>
+    <text x="20" y="120" font-size="10" fill="#8a8a96">Lv 5</text>
+    <text x="20" y="155" font-size="10" fill="#8a8a96">Lv 6-7</text>
+    <text x="20" y="195" font-size="10" fill="#8a8a96">Lv 8</text>
+    <text x="20" y="225" font-size="10" fill="#8a8a96">Lv 9</text>
+    <text x="20" y="255" font-size="10" fill="#8a8a96">Lv 10</text>
+    <text x="20" y="295" font-size="10" fill="#8a8a96">Lv 11-15</text>
+    <text x="20" y="395" font-size="10" fill="#8a8a96">Lv 16-20</text>
+    <text x="20" y="500" font-size="10" fill="#8a8a96">Lv 21-22</text>
+    <text x="20" y="565" font-size="10" fill="#8a8a96">Lv 23-25</text>
+
+    <!-- Lv 1 -->
+    <circle cx="490" cy="50" r="10" fill="#4a7fb8"/>
+    <text x="510" y="54" font-size="10" fill="#d8d8e0">sw_start</text>
+
+    <!-- Lv 2-4 fan -->
+    <circle cx="380" cy="80" r="8" fill="#4a7fb8"/>
+    <text x="335" y="84" font-size="9" fill="#d8d8e0">L2 锐刃</text>
+    <circle cx="490" cy="80" r="8" fill="none" stroke="#6c6c78" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="500" y="84" font-size="9" fill="#6c6c78">M2→L5</text>
+    <circle cx="600" cy="80" r="8" fill="none" stroke="#6c6c78" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="610" y="84" font-size="9" fill="#6c6c78">R2→L3</text>
+    <line x1="488" y1="60" x2="382" y2="74" stroke="#5a5a68" marker-end="url(#arrow2)"/>
+    <line x1="490" y1="60" x2="490" y2="72" stroke="#5a5a68" stroke-dasharray="2,2"/>
+    <line x1="492" y1="60" x2="598" y2="74" stroke="#5a5a68" stroke-dasharray="2,2"/>
+
+    <!-- Lv 3 functional -->
+    <circle cx="490" cy="105" r="8" fill="#5fa869"/>
+    <text x="500" y="109" font-size="9" fill="#d8d8e0">M3 剑舞 (active)</text>
+    <circle cx="600" cy="105" r="8" fill="#4a7fb8"/>
+    <text x="612" y="109" font-size="9" fill="#d8d8e0">R3 虚实</text>
+    <line x1="490" y1="88" x2="490" y2="97" stroke="#5a5a68" marker-end="url(#arrow2)"/>
+    <line x1="492" y1="88" x2="598" y2="97" stroke="#5a5a68" marker-end="url(#arrow2)"/>
+
+    <!-- Lv 4 -->
+    <circle cx="380" cy="130" r="8" fill="#4a7fb8"/>
+    <text x="320" y="134" font-size="9" fill="#d8d8e0">L4 势 gauge</text>
+    <line x1="378" y1="88" x2="380" y2="122" stroke="#5a5a68" marker-end="url(#arrow2)"/>
+    <line x1="490" y1="113" x2="382" y2="124" stroke="#5a5a68"/>
+
+    <!-- Lv 5 hub5 STRUCT -->
+    <circle cx="490" cy="155" r="11" fill="#4a7fb8" stroke="#d4af37" stroke-width="2" stroke-dasharray="3,2"/>
+    <text x="510" y="159" font-size="10" fill="#d4af37" font-weight="600">hub5 (STRUCT)</text>
+    <line x1="380" y1="138" x2="488" y2="148" stroke="#5a5a68"/>
+    <line x1="490" y1="113" x2="490" y2="144" stroke="#5a5a68" marker-end="url(#arrow2)"/>
+
+    <!-- Lv 6 -->
+    <circle cx="380" cy="180" r="8" fill="#5fa869"/>
+    <text x="305" y="184" font-size="9" fill="#d8d8e0">L6 斩铁 (skill_up)</text>
+    <circle cx="490" cy="180" r="8" fill="#4a7fb8"/>
+    <text x="500" y="184" font-size="9" fill="#d8d8e0">M6 剑道精义</text>
+    <line x1="486" y1="166" x2="382" y2="174" stroke="#5a5a68" marker-end="url(#arrow2)"/>
+    <line x1="490" y1="166" x2="490" y2="172" stroke="#5a5a68" marker-end="url(#arrow2)"/>
+
+    <!-- Lv 7 -->
+    <circle cx="380" cy="205" r="8" fill="none" stroke="#6c6c78" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="320" y="209" font-size="9" fill="#6c6c78">L7→L5</text>
+
+    <!-- Lv 8 hub8 DELETE -->
+    <circle cx="490" cy="220" r="11" fill="none" stroke="#6c6c78" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="510" y="224" font-size="10" fill="#6c6c78">hub8 删除/重写</text>
+    <line x1="490" y1="188" x2="490" y2="208" stroke="#5a5a68" stroke-dasharray="3,2"/>
+
+    <!-- Lv 9 pre_*9 -->
+    <circle cx="400" cy="245" r="9" fill="none" stroke="#d4af37" stroke-width="1.5" stroke-dasharray="3,2"/>
+    <text x="320" y="249" font-size="9" fill="#d4af37">pre_saint9 (重写)</text>
+    <circle cx="580" cy="245" r="9" fill="none" stroke="#d4af37" stroke-width="1.5" stroke-dasharray="3,2"/>
+    <text x="595" y="249" font-size="9" fill="#d4af37">pre_magic9 (重写)</text>
+    <line x1="488" y1="232" x2="402" y2="240" stroke="#5a5a68"/>
+    <line x1="492" y1="232" x2="578" y2="240" stroke="#5a5a68"/>
+
+    <!-- Lv 10 advancement -->
+    <circle cx="280" cy="275" r="11" fill="#c8643c"/>
+    <text x="290" y="279" font-size="10" fill="#e8e8ec" font-weight="600">adv_saint</text>
+    <circle cx="700" cy="275" r="11" fill="#c8643c"/>
+    <text x="715" y="279" font-size="10" fill="#e8e8ec" font-weight="600">adv_magic</text>
+    <line x1="395" y1="252" x2="288" y2="265" stroke="#5a5a68" marker-end="url(#arrow2)"/>
+    <line x1="585" y1="252" x2="692" y2="265" stroke="#5a5a68" marker-end="url(#arrow2)"/>
+
+    <!-- Lv 11-15 SS A/B + MS A/B (compact, 2 columns each) -->
+    <!-- SS A line -->
+    <rect x="100" y="305" width="80" height="100" fill="rgba(74,127,184,0.08)" stroke="#4a7fb8" stroke-width="0.5" rx="4"/>
+    <text x="140" y="320" text-anchor="middle" font-size="10" fill="#a8c0e0" font-weight="600">SS-A 双刀流</text>
+    <text x="140" y="335" text-anchor="middle" font-size="9" fill="#d8d8e0">A11 trait</text>
+    <text x="140" y="349" text-anchor="middle" font-size="9" fill="#5fa869">A12→L3</text>
+    <text x="140" y="363" text-anchor="middle" font-size="9" fill="#d8d8e0">A13 (g_ext)</text>
+    <text x="140" y="377" text-anchor="middle" font-size="9" fill="#d8d8e0">A14, A15_q</text>
+    <text x="140" y="391" text-anchor="middle" font-size="9" fill="#8a8a96">8 keep / 2 mig</text>
+
+    <!-- SS B line -->
+    <rect x="240" y="305" width="80" height="100" fill="rgba(74,127,184,0.08)" stroke="#4a7fb8" stroke-width="0.5" rx="4"/>
+    <text x="280" y="320" text-anchor="middle" font-size="10" fill="#a8c0e0" font-weight="600">SS-B 居合</text>
+    <text x="280" y="335" text-anchor="middle" font-size="9" fill="#c8643c">B11→L5</text>
+    <text x="280" y="349" text-anchor="middle" font-size="9" fill="#d8d8e0">B12 共鸣</text>
+    <text x="280" y="363" text-anchor="middle" font-size="9" fill="#d8d8e0">B13 (g)</text>
+    <text x="280" y="377" text-anchor="middle" font-size="9" fill="#d8d8e0">B14 (act), B15_q</text>
+    <text x="280" y="391" text-anchor="middle" font-size="9" fill="#8a8a96">M12 残影</text>
+
+    <!-- MS A line -->
+    <rect x="660" y="305" width="80" height="100" fill="rgba(74,127,184,0.08)" stroke="#4a7fb8" stroke-width="0.5" rx="4"/>
+    <text x="700" y="320" text-anchor="middle" font-size="10" fill="#a8c0e0" font-weight="600">MS-A 蚀甲</text>
+    <text x="700" y="335" text-anchor="middle" font-size="9" fill="#d8d8e0">A11 (act)</text>
+    <text x="700" y="349" text-anchor="middle" font-size="9" fill="#d8d8e0">A12 (g_ext)</text>
+    <text x="700" y="363" text-anchor="middle" font-size="9" fill="#d8d8e0">A13, A15_q</text>
+    <text x="700" y="377" text-anchor="middle" font-size="9" fill="#d8d8e0">M12 奥术护体</text>
+
+    <!-- MS B line -->
+    <rect x="800" y="305" width="80" height="100" fill="rgba(74,127,184,0.08)" stroke="#4a7fb8" stroke-width="0.5" rx="4"/>
+    <text x="840" y="320" text-anchor="middle" font-size="10" fill="#a8c0e0" font-weight="600">MS-B 法书</text>
+    <text x="840" y="335" text-anchor="middle" font-size="9" fill="#d8d8e0">B11 trait</text>
+    <text x="840" y="349" text-anchor="middle" font-size="9" fill="#d8d8e0">B12 射程+1</text>
+    <text x="840" y="363" text-anchor="middle" font-size="9" fill="#d8d8e0">B13 回响</text>
+    <text x="840" y="377" text-anchor="middle" font-size="9" fill="#d8d8e0">B14 (act), B15_q</text>
+
+    <!-- Lv 16-20 SS A/B + MS A/B -->
+    <rect x="100" y="415" width="80" height="100" fill="rgba(74,127,184,0.08)" stroke="#4a7fb8" stroke-width="0.5" rx="4"/>
+    <text x="140" y="430" text-anchor="middle" font-size="10" fill="#a8c0e0" font-weight="600">SS-A 16-20</text>
+    <text x="140" y="445" text-anchor="middle" font-size="9" fill="#5fa869">A16→L3</text>
+    <text x="140" y="459" text-anchor="middle" font-size="9" fill="#d8d8e0">A17 双剑合璧</text>
+    <text x="140" y="473" text-anchor="middle" font-size="9" fill="#d8d8e0">A18, A19</text>
+    <text x="140" y="487" text-anchor="middle" font-size="9" fill="#d8d8e0">A20_q (act)</text>
+
+    <rect x="240" y="415" width="80" height="100" fill="rgba(74,127,184,0.08)" stroke="#4a7fb8" stroke-width="0.5" rx="4"/>
+    <text x="280" y="430" text-anchor="middle" font-size="10" fill="#a8c0e0" font-weight="600">SS-B 16-20</text>
+    <text x="280" y="445" text-anchor="middle" font-size="9" fill="#d8d8e0">B16 (g_ext)</text>
+    <text x="280" y="459" text-anchor="middle" font-size="9" fill="#c8643c">M16 饮血→L5</text>
+    <text x="280" y="473" text-anchor="middle" font-size="9" fill="#c8643c">B17 居合→L5</text>
+    <text x="280" y="487" text-anchor="middle" font-size="9" fill="#d8d8e0">B18, B19, B20_q</text>
+
+    <rect x="660" y="415" width="80" height="100" fill="rgba(74,127,184,0.08)" stroke="#4a7fb8" stroke-width="0.5" rx="4"/>
+    <text x="700" y="430" text-anchor="middle" font-size="10" fill="#a8c0e0" font-weight="600">MS-A 16-20</text>
+    <text x="700" y="445" text-anchor="middle" font-size="9" fill="#d8d8e0">A16 (act)</text>
+    <text x="700" y="459" text-anchor="middle" font-size="9" fill="#5fa869">A14→L3, A17→L3</text>
+    <text x="700" y="473" text-anchor="middle" font-size="9" fill="#c8643c">A18→L5</text>
+    <text x="700" y="487" text-anchor="middle" font-size="9" fill="#d8d8e0">A19, A20_q</text>
+
+    <rect x="800" y="415" width="80" height="100" fill="rgba(74,127,184,0.08)" stroke="#4a7fb8" stroke-width="0.5" rx="4"/>
+    <text x="840" y="430" text-anchor="middle" font-size="10" fill="#a8c0e0" font-weight="600">MS-B 16-20</text>
+    <text x="840" y="445" text-anchor="middle" font-size="9" fill="#c8643c">B16→L5</text>
+    <text x="840" y="459" text-anchor="middle" font-size="9" fill="#d8d8e0">M16 转化</text>
+    <text x="840" y="473" text-anchor="middle" font-size="9" fill="#d8d8e0">B17, B18, B19</text>
+    <text x="840" y="487" text-anchor="middle" font-size="9" fill="#d8d8e0">B20_q</text>
+
+    <!-- Lv 21 -->
+    <circle cx="160" cy="540" r="8" fill="#4a7fb8"/>
+    <text x="170" y="544" font-size="9" fill="#d8d8e0">ss_A21</text>
+    <circle cx="280" cy="540" r="8" fill="none" stroke="#6c6c78" stroke-dasharray="3,2"/>
+    <text x="290" y="544" font-size="9" fill="#6c6c78">B21→L5</text>
+    <circle cx="700" cy="540" r="8" fill="#4a7fb8"/>
+    <text x="710" y="544" font-size="9" fill="#d8d8e0">sc_A21</text>
+    <circle cx="820" cy="540" r="8" fill="#4a7fb8"/>
+    <text x="830" y="544" font-size="9" fill="#d8d8e0">sc_B21</text>
+
+    <!-- Lv 22 detours -->
+    <circle cx="220" cy="565" r="8" fill="#4a7fb8" stroke="#d4af37" stroke-width="1"/>
+    <text x="230" y="569" font-size="9" fill="#d8d8e0">det_ss</text>
+    <circle cx="490" cy="565" r="9" fill="#4a7fb8" stroke="#d4af37" stroke-width="2" stroke-dasharray="3,2"/>
+    <text x="505" y="569" font-size="9" fill="#d4af37">det_center (STRUCT)</text>
+    <circle cx="760" cy="565" r="8" fill="#4a7fb8" stroke="#d4af37" stroke-width="1"/>
+    <text x="770" y="569" font-size="9" fill="#d8d8e0">det_sc</text>
+
+    <!-- Lv 23-25 -->
+    <text x="490" y="610" text-anchor="middle" font-size="11" fill="#d8d8e0" font-weight="600">
+      Lv 23-25 深潜区: 4×3 = 12 节点全保留 (skill_upgrade + active_ult, 见 §3.4)
+    </text>
+    <line x1="160" y1="555" x2="220" y2="565" stroke="#5a5a68" stroke-width="0.5"/>
+    <line x1="280" y1="555" x2="220" y2="565" stroke="#5a5a68" stroke-width="0.5"/>
+
+    <!-- Legend -->
+    <rect x="20" y="540" width="14" height="14" fill="#4a7fb8"/>
+    <text x="40" y="552" font-size="10" fill="#a8c0e0">KEEP L2</text>
+    <rect x="20" y="560" width="14" height="14" fill="#5fa869"/>
+    <text x="40" y="572" font-size="10" fill="#90c290">MIGRATE L3</text>
+    <rect x="20" y="580" width="14" height="14" fill="none" stroke="#6c6c78" stroke-dasharray="3,2"/>
+    <text x="40" y="592" font-size="10" fill="#e8a87c">MIGRATE L5 / 删除</text>
+    <rect x="20" y="600" width="14" height="14" fill="none" stroke="#d4af37" stroke-width="2" stroke-dasharray="3,2"/>
+    <text x="40" y="612" font-size="10" fill="#d4af37">STRUCTURAL</text>
+
+    <!-- Bottom note -->
+    <text x="490" y="640" text-anchor="middle" font-size="10" fill="#8a8a96">
+      Lv 5 / Lv 22 中心 hub 与 detour_center 保留位置, 内容由 Stage 3 重写
+    </text>
+  </svg>
+</section>
+
+<section id="sec6">
+  <h2>6. 渐进 layered 可玩性验证</h2>
+
+  <p>consensus §2 要求每层独立成立, 从下往上叠加. 验证简化后 (60 节点) 仍满足.</p>
+
+  <h3>6.1 剥离 L4 (装备) + L5 (符文) 后</h3>
+  <table class="compact-table">
+    <thead>
+      <tr><th>验证维度</th><th>简化前</th><th>简化后</th><th>结论</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>战斗循环 (active + passive + gauge)</td><td>OK</td><td>OK (10 active + 30 functional passive + 5 gauge + advancement)</td><td>成立</td></tr>
+      <tr><td>build 多样性 (SS A/B vs MS A/B)</td><td>OK</td><td>OK (二刀流 / 居合 / 蚀甲 / 法书 4 流派核心节点全保留)</td><td>成立</td></tr>
+      <tr><td>决策密度 (run 内重大决策点)</td><td>多 (但稀释)</td><td>5+ (Lv10 转职, Lv15 _qual, Lv20 _qual, Lv22 detour, Lv25 ult)</td><td>成立</td></tr>
+      <tr><td>Bridge Tax 拓扑</td><td>完整</td><td>完整 (M-line 共享 + detour_center_22 跨系)</td><td>成立</td></tr>
+    </tbody>
+  </table>
+
+  <div class="key-rule">
+    <b>结论</b>: 简化后 sw + L2(60) + L3 + L1 仍构成完整可玩战棋 RPG. 渐进 layered 原则满足.
+  </div>
+
+  <h3>6.2 简化前后跨维对比</h3>
+  <table class="compact-table">
+    <thead>
+      <tr><th>维度</th><th>简化前 (83)</th><th>简化后 (60)</th><th>Δ</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>L2 决策点数量</td><td>83</td><td>60</td><td>-28%</td></tr>
+      <tr><td>真功能性占比</td><td>~41%</td><td>~92%</td><td><b>+51 ppt</b></td></tr>
+      <tr><td>玩家学习曲线 (节点种类)</td><td>高</td><td>中-低</td><td>改善</td></tr>
+      <tr><td>跨 run reset 信息丢失感</td><td>强</td><td>减弱 (部分数值由 L3 自动接续)</td><td>改善</td></tr>
+      <tr><td>Bridge Tax 拓扑</td><td>完整</td><td>完整</td><td>不变</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="sec7">
+  <h2>7. 5 v1 职业可推广性</h2>
+
+  <table>
+    <thead>
+      <tr><th>职业</th><th>规则适配</th><th>预期保留</th><th>关键 passive 类型</th><th>风险</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>Swordsman</b></td>
+        <td><span class="pill keep">High</span></td>
+        <td>~60</td>
+        <td>gauge-coupled, 反应触发</td>
+        <td>无</td>
+      </tr>
+      <tr>
+        <td><b>Mage</b></td>
+        <td><span class="pill keep">High</span></td>
+        <td>~50-55</td>
+        <td>元素抗性 / 元素穿透 → L5 比例高</td>
+        <td>无</td>
+      </tr>
+      <tr>
+        <td><b>Knight</b></td>
+        <td><span class="pill warn">Mid</span></td>
+        <td>~45-50</td>
+        <td>反伤类 (条件触发) + 嘲讽 (功能)</td>
+        <td>条件触发 passive 多, L5 比例可能偏高</td>
+      </tr>
+      <tr>
+        <td><b>Cleric</b></td>
+        <td><span class="pill keep">High</span></td>
+        <td>~40-45</td>
+        <td>治疗 active, 圣属性穿透</td>
+        <td>无</td>
+      </tr>
+      <tr>
+        <td><b>Archer</b></td>
+        <td><span class="pill keep">High</span></td>
+        <td>~40-50</td>
+        <td>射程+1 (功能), 暴击+% (L5)</td>
+        <td>无</td>
+      </tr>
+      <tr>
+        <td><b>Soldier</b></td>
+        <td><span class="pill warn">Mid-Low</span></td>
+        <td>~35-40</td>
+        <td>baseline, 缺乏明显流派</td>
+        <td><b>需设计干预补功能性 passive</b></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p><b>5 v1 职业平均</b>: ~45 节点 / 类. 全 5 类合计 ~225 L2 节点. 简化收益明显且规则可推广.</p>
+
+  <p><b>警示</b>: <b>Soldier</b> baseline 类需要额外设计干预 (赋予更多功能性 passive 或重新定位). Stage 3 D3 + designer
+  应特别关注.</p>
+</section>
+
+<section id="sec8">
+  <h2>8. Open Questions for Stage 3</h2>
+  <table>
+    <thead>
+      <tr><th>#</th><th>问题</th><th>推荐 owner</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Q1</td><td>30-40 prune target 是否正式校准为 ~55-60? 若坚持 ~40, 是否接受拓扑级 trim 的 Bridge Tax 损失?</td><td>designer + critic</td></tr>
+      <tr><td>Q2</td><td>sw_hub8 / sw_pre_saint9 / sw_pre_magic9 三个结构槽位最终是删除 (拓扑直连) 还是重写为功能 hub?</td><td>designer</td></tr>
+      <tr><td>Q3</td><td>sw_hub5 (剑心通明) 的 "明" 状态机留 L2 后, 数值参数 (+15% / +8) 的 L5 符文 archetype 形态?</td><td>D5 协同</td></tr>
+      <tr><td>Q4</td><td>条件触发 passive (HP&lt;X%, 上回合未移动, 最先行动) 是否<b>全部</b>默认归 L5? 还是保留部分作为 L2 决策风味?</td><td>designer + D5</td></tr>
+      <tr><td>Q5</td><td>sustain 类 passive (击杀回血, 受伤吸血) 是否全部归 L5 sustain rune?</td><td>D5</td></tr>
+      <tr><td>Q6</td><td>categorical resist 在 L5 是 6 格内独立符文还是装备词缀 (D4)?</td><td>D4 + D5 协同</td></tr>
+      <tr><td>Q7</td><td>Soldier baseline 类的功能性 passive 不足问题 — L2 内容补强 vs 接受 L5 主导?</td><td>D3 + designer</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="sec9">
+  <h2>9. 完整清单</h2>
+
+  <h3>9.1 KEEP L2 (60 节点) — 按 Lv</h3>
+  <pre style="background:var(--surface-2); padding:12px; border-radius:6px; font-size:12px; overflow-x:auto; color:#d4af90;">
+Lv 1     sw_start
+Lv 2     sw_L2
+Lv 3     sw_M3, sw_R3
+Lv 4     sw_L4
+Lv 5     sw_hub5 [STRUCT]
+Lv 6     sw_L6, sw_M6
+Lv 8     [sw_hub8 删除候选]
+Lv 9     [sw_pre_saint9 / sw_pre_magic9 重写候选]
+Lv 10    sw_adv_saint, sw_adv_magic
+Lv 11    ss_A11, ms_A11, ms_B11
+Lv 12    ss_B12, ss_M12, ms_B12, ms_M12
+Lv 13    ss_A13, ss_B13, ms_A12, ms_A13, ms_B13
+Lv 14    ss_A14, ss_B14, ms_B14
+Lv 15    ss_A15_qual, ss_B15_qual, ms_A15_qual, ms_B15_qual
+Lv 16    ss_B16, ms_A16, ms_M16
+Lv 17    ss_A17, ms_B17
+Lv 18    ss_A18, ss_B18, ms_B18
+Lv 19    ss_A19, ss_B19, ms_A19, ms_B19
+Lv 20    ss_A20_qual, ss_B20_qual, ms_A20_qual, ms_B20_qual
+Lv 21    ss_A21, sc_A21, sc_B21
+Lv 22    detour_ss_22, detour_sc_22, detour_center_22 [STRUCT]
+Lv 23    ss_A23, ss_B23, sc_A23, sc_B23
+Lv 24    ss_A24, ss_B24, sc_A24, sc_B24
+Lv 25    ss_A25_ult, ss_B25_ult, sc_A25_ult, sc_B25_ult
+  </pre>
+
+  <h3>9.2 MIGRATE L3 清单 (7 节点)</h3>
+  <table class="compact-table">
+    <thead><tr><th>id</th><th>原效果</th><th>L3 处理</th></tr></thead>
+    <tbody>
+      <tr><td class="id">sw_R2</td><td>命中率基础 +10%</td><td>剑士 Hit growth rate 提升</td></tr>
+      <tr><td class="id">sw_R4</td><td>闪避基础 +5%</td><td>剑士 Evade growth 微调</td></tr>
+      <tr><td class="id">sw_R6</td><td>M.DEF +3</td><td>剑士 M.DEF 基础值微调 (转职后 SS/MS growth 不同)</td></tr>
+      <tr><td class="id">ss_A12</td><td>Speed +2</td><td>剑圣 Speed growth +X% (FE 模式)</td></tr>
+      <tr><td class="id">ss_A16</td><td>Evade +10%</td><td>剑圣 Evade growth +X%</td></tr>
+      <tr><td class="id">ms_A14</td><td>P.DEF + M.DEF +2 各</td><td>魔剑 P.DEF / M.DEF growth 微调</td></tr>
+      <tr><td class="id">ms_A17</td><td>Max HP +15</td><td>魔剑 HP growth rate +X%</td></tr>
+    </tbody>
+  </table>
+
+  <h3>9.3 MIGRATE L5 清单 (10 节点)</h3>
+  <table class="compact-table">
+    <thead><tr><th>id</th><th>原效果</th><th>候选 rune archetype</th></tr></thead>
+    <tbody>
+      <tr><td class="id">sw_M2</td><td>最先行动 +8% 暴击</td><td>流派类: 「先制斩」</td></tr>
+      <tr><td class="id">sw_L3</td><td>2 回合命中 +5% 伤害</td><td>经济类: 「连击纹章」</td></tr>
+      <tr><td class="id">sw_L7</td><td>HP&lt;70% 爆伤+0.2</td><td>流派类: 「绝境之刃」</td></tr>
+      <tr><td class="id">sw_R7</td><td>魔法伤害 -15%</td><td>经济类: 「镇魔印」</td></tr>
+      <tr><td class="id">ss_B11</td><td>暴击率 +10%</td><td>流派类: 「致命纹」(双刀暴击 build 主轴)</td></tr>
+      <tr><td class="id">ss_M16</td><td>击杀回血 15%</td><td>经济类: 「饮血纹」(经典 sustain)</td></tr>
+      <tr><td class="id">ss_B17</td><td>未移动 +0.2 爆伤</td><td>流派类: 「居合心法」</td></tr>
+      <tr><td class="id">ms_B16</td><td>状态抵抗 +15%</td><td>经济类: 「破魔符」</td></tr>
+      <tr><td class="id">ms_A18</td><td>hybrid 基础 +15%</td><td>流派类: 「魔武融合」(混伤 build 主轴)</td></tr>
+      <tr><td class="id">ss_B21</td><td>+15% HP + 受伤后吸血</td><td>流派类: 「战魄符」(生存 build)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>9.4 DELETE / REWRITE 候选 (3 节点)</h3>
+  <table class="compact-table">
+    <thead><tr><th>id</th><th>原效果</th><th>Stage 2 建议</th></tr></thead>
+    <tbody>
+      <tr><td class="id">sw_hub8</td><td>P.ATK+3, P.DEF-1</td><td><b>删除</b>, sw_L7/sw_R7 直连 sw_pre_*9. 或 Stage 3 重写为功能 hub</td></tr>
+      <tr><td class="id">sw_pre_saint9</td><td>+3% 暴击</td><td><b>重写</b>为 「剑气量谱预备」 — 解锁 5 点初始储量</td></tr>
+      <tr><td class="id">sw_pre_magic9</td><td>+3 MAG</td><td><b>重写</b>为 「魔刃感知」 — 转职时转化为 1 层魔刃</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  D2 stream · S3-side-sot · 2026-05-10 · Mercury <code>design</code> agent (cross-cwd dispatch)<br/>
+  parent: <code>architecture-consensus-v2.md</code> · 与 D1 / D3 / D4 / D5 在 Stage 3 reconcile
+</footer>
+
+</main>
+</body>
+</html>

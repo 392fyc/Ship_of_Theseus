@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>D5 — L5 Runes 6-Slot System | Stage 2 Proposal</title>
+<style>
+  :root {
+    --bg: #1a1410;
+    --bg2: #221a14;
+    --bg3: #2a1f17;
+    --fg: #e8d8c4;
+    --fg-dim: #a89882;
+    --accent: #c8643c;       /* Stream D5 primary: rune orange */
+    --accent2: #f0a060;      /* lighter accent */
+    --eco: #4a8fb8;          /* economic rune blue */
+    --sty: #c8643c;          /* stylistic rune orange (= accent) */
+    --common: #888;
+    --rare: #5a9fd0;
+    --mythic: #d04a8a;
+    --grid-line: #3a2c20;
+    --ok: #6cb86c;
+    --warn: #d8a040;
+    --err: #c84a4a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    margin: 0;
+    padding: 32px 48px 80px;
+    line-height: 1.55;
+  }
+  h1, h2, h3 {
+    color: var(--accent2);
+    font-weight: 600;
+    margin-top: 2em;
+  }
+  h1 { font-size: 28px; border-bottom: 2px solid var(--accent); padding-bottom: 12px; margin-top: 0; }
+  h2 { font-size: 22px; border-left: 4px solid var(--accent); padding-left: 12px; }
+  h3 { font-size: 17px; color: var(--accent); }
+  .meta {
+    background: var(--bg2);
+    border: 1px solid var(--grid-line);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    margin: 16px 0 24px;
+    font-size: 13px;
+    color: var(--fg-dim);
+  }
+  .meta b { color: var(--fg); }
+  .tldr {
+    background: linear-gradient(135deg, var(--bg2), var(--bg3));
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 18px 22px;
+    margin: 20px 0;
+  }
+  table {
+    border-collapse: collapse;
+    margin: 12px 0;
+    width: 100%;
+    font-size: 13.5px;
+    background: var(--bg2);
+  }
+  th, td {
+    border: 1px solid var(--grid-line);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: var(--bg3); color: var(--accent2); font-weight: 600; }
+  tr:nth-child(even) td { background: rgba(40, 30, 22, 0.4); }
+  code, .mono {
+    font-family: "JetBrains Mono", Consolas, monospace;
+    background: var(--bg3);
+    color: var(--accent2);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 12.5px;
+  }
+  .status-locked { color: var(--ok); font-weight: 600; }
+  .status-proposed { color: var(--warn); font-weight: 600; }
+  .status-rejected { color: var(--err); font-weight: 600; text-decoration: line-through; }
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .pill-common { background: #555; color: #ddd; }
+  .pill-rare { background: var(--rare); color: #fff; }
+  .pill-mythic { background: var(--mythic); color: #fff; }
+  .pill-eco { background: var(--eco); color: #fff; }
+  .pill-sty { background: var(--sty); color: #fff; }
+  .svg-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--grid-line);
+    border-radius: 6px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: center;
+  }
+  .svg-caption {
+    font-size: 12.5px;
+    color: var(--fg-dim);
+    margin-top: 12px;
+    font-style: italic;
+  }
+  ul, ol { padding-left: 24px; }
+  li { margin: 4px 0; }
+  a { color: var(--accent2); }
+  hr { border: none; border-top: 1px solid var(--grid-line); margin: 32px 0; }
+  .footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--grid-line);
+    color: var(--fg-dim);
+    font-size: 12px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<h1>D5 — L5 Runes 6-Slot System Spec (Stage 2 Proposal)</h1>
+
+<div class="meta">
+  <b>Stream:</b> D5 (most novel, deepest research) &nbsp;|&nbsp;
+  <b>Session:</b> S3-side-sot &nbsp;|&nbsp;
+  <b>Date:</b> 2026-05-10 &nbsp;|&nbsp;
+  <b>Status:</b> stage2_proposal &nbsp;|&nbsp;
+  <b>Companion:</b> <a href="D5-runes-system.md">D5-runes-system.md</a> &nbsp;|&nbsp;
+  <b>Parent:</b> <a href="../../Active-Context/architecture-consensus-v2.md">architecture-consensus-v2</a>
+</div>
+
+<div class="tldr">
+  <h3 style="margin-top:0;">TL;DR</h3>
+  <ul>
+    <li><b>6 格硬上限</b> (proposed lock) — 行业证据: 5-7 cap 是 build 可读性临界 (Hades Mirror 16 / Noita 5 / Monster Train 5)。</li>
+    <li><b>2 archetype × 3 tier</b>: 经济类 12 示例 + 流派类 14 示例; Common/Rare/Mythic 不变 effect 类型, 仅放大 + 解锁 unique 条件 (Hades 模式)。</li>
+    <li><b>L2/L5 边界</b>: L2 解锁<i>基础流派能力</i>, L5 流派类符文<i>修饰已有流派</i>。例: L2 <code>mg_fire_basic</code> 解锁火元素普攻 → L5 "扩散燃烧" 改变 burn 在死亡时溅射。</li>
+    <li><b>Run 内典型获取 4-6 个</b>, 6 格 cap 强制至少 1-3 次取舍 = build identity 决策密度的来源。</li>
+    <li><b>Reroll 可 (town 服务限次), Scrap 可, 合成 rejected</b>.</li>
+  </ul>
+</div>
+
+<hr/>
+
+<h2>§1. SVG (a) — 6 格库存 UI 概念图</h2>
+
+<div class="svg-wrap">
+<svg viewBox="0 0 720 360" width="720" height="360" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;">
+  <defs>
+    <linearGradient id="slotBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a1f17"/>
+      <stop offset="100%" stop-color="#1a1410"/>
+    </linearGradient>
+    <radialGradient id="ecoIcon" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#7ab8d8"/>
+      <stop offset="100%" stop-color="#4a8fb8"/>
+    </radialGradient>
+    <radialGradient id="styIcon" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#f0a060"/>
+      <stop offset="100%" stop-color="#c8643c"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background frame -->
+  <rect x="20" y="20" width="680" height="320" fill="#1a1410" stroke="#c8643c" stroke-width="2" rx="8"/>
+  <text x="360" y="48" fill="#f0a060" font-family="sans-serif" font-size="18" font-weight="700" text-anchor="middle">RUNE INVENTORY · 6 / 6 (cap reached)</text>
+
+  <!-- 6 slots: 2 row x 3 col -->
+  <!-- Slot 1: Eco - 学者之碑 (Common) -->
+  <g transform="translate(60, 80)">
+    <rect width="180" height="100" fill="url(#slotBg)" stroke="#888" stroke-width="2" rx="6"/>
+    <circle cx="50" cy="50" r="22" fill="url(#ecoIcon)" stroke="#7ab8d8" stroke-width="2"/>
+    <text x="50" y="56" fill="#fff" font-family="sans-serif" font-size="20" font-weight="700" text-anchor="middle">∑</text>
+    <text x="100" y="35" fill="#e8d8c4" font-family="sans-serif" font-size="13" font-weight="600">学者之碑</text>
+    <text x="100" y="52" fill="#a89882" font-family="sans-serif" font-size="10">EXP +15%</text>
+    <circle cx="14" cy="86" r="6" fill="#888"/>
+    <text x="14" y="89" fill="#fff" font-family="sans-serif" font-size="9" text-anchor="middle">C</text>
+    <rect x="155" y="6" width="20" height="14" fill="#4a8fb8" rx="3"/>
+    <text x="165" y="16" fill="#fff" font-family="sans-serif" font-size="9" font-weight="700" text-anchor="middle">ECO</text>
+  </g>
+
+  <!-- Slot 2: Sty - 扩散燃烧 (Rare) -->
+  <g transform="translate(270, 80)">
+    <rect width="180" height="100" fill="url(#slotBg)" stroke="#5a9fd0" stroke-width="2" rx="6"/>
+    <circle cx="50" cy="50" r="22" fill="url(#styIcon)" stroke="#f0a060" stroke-width="2"/>
+    <path d="M 50 32 L 56 50 L 62 44 L 56 60 L 44 56 L 38 50 Z" fill="#fff" opacity="0.9"/>
+    <text x="100" y="35" fill="#e8d8c4" font-family="sans-serif" font-size="13" font-weight="600">扩散燃烧</text>
+    <text x="100" y="50" fill="#a89882" font-family="sans-serif" font-size="9">burn 死亡时溅射</text>
+    <text x="100" y="62" fill="#a89882" font-family="sans-serif" font-size="9">→ 相邻 1 格 (1r)</text>
+    <polygon points="14,80 9,90 19,90" fill="#5a9fd0"/>
+    <text x="14" y="90" fill="#fff" font-family="sans-serif" font-size="9" text-anchor="middle">R</text>
+    <rect x="155" y="6" width="20" height="14" fill="#c8643c" rx="3"/>
+    <text x="165" y="16" fill="#fff" font-family="sans-serif" font-size="9" font-weight="700" text-anchor="middle">STY</text>
+  </g>
+
+  <!-- Slot 3: Sty - 即时燃烧 (Rare) -->
+  <g transform="translate(480, 80)">
+    <rect width="180" height="100" fill="url(#slotBg)" stroke="#5a9fd0" stroke-width="2" rx="6"/>
+    <circle cx="50" cy="50" r="22" fill="url(#styIcon)" stroke="#f0a060" stroke-width="2"/>
+    <text x="50" y="58" fill="#fff" font-family="sans-serif" font-size="22" font-weight="700" text-anchor="middle">⚡</text>
+    <text x="100" y="35" fill="#e8d8c4" font-family="sans-serif" font-size="13" font-weight="600">即时燃烧</text>
+    <text x="100" y="50" fill="#a89882" font-family="sans-serif" font-size="9">命中即结算</text>
+    <text x="100" y="62" fill="#a89882" font-family="sans-serif" font-size="9">所有剩余 burn DMG</text>
+    <polygon points="14,80 9,90 19,90" fill="#5a9fd0"/>
+    <text x="14" y="90" fill="#fff" font-family="sans-serif" font-size="9" text-anchor="middle">R</text>
+    <rect x="155" y="6" width="20" height="14" fill="#c8643c" rx="3"/>
+    <text x="165" y="16" fill="#fff" font-family="sans-serif" font-size="9" font-weight="700" text-anchor="middle">STY</text>
+  </g>
+
+  <!-- Slot 4: Eco - 法力铭文 ×2 (Common stacked) -->
+  <g transform="translate(60, 200)">
+    <rect width="180" height="100" fill="url(#slotBg)" stroke="#888" stroke-width="2" rx="6"/>
+    <circle cx="50" cy="50" r="22" fill="url(#ecoIcon)" stroke="#7ab8d8" stroke-width="2"/>
+    <text x="50" y="56" fill="#fff" font-family="sans-serif" font-size="20" font-weight="700" text-anchor="middle">M</text>
+    <text x="100" y="35" fill="#e8d8c4" font-family="sans-serif" font-size="13" font-weight="600">法力铭文 ×2</text>
+    <text x="100" y="52" fill="#a89882" font-family="sans-serif" font-size="10">MAG +6 (stack)</text>
+    <circle cx="14" cy="86" r="6" fill="#888"/>
+    <text x="14" y="89" fill="#fff" font-family="sans-serif" font-size="9" text-anchor="middle">C</text>
+    <circle cx="160" cy="80" r="10" fill="#c8643c"/>
+    <text x="160" y="84" fill="#fff" font-family="sans-serif" font-size="11" font-weight="700" text-anchor="middle">×2</text>
+    <rect x="155" y="6" width="20" height="14" fill="#4a8fb8" rx="3"/>
+    <text x="165" y="16" fill="#fff" font-family="sans-serif" font-size="9" font-weight="700" text-anchor="middle">ECO</text>
+  </g>
+
+  <!-- Slot 5: Sty Mythic - 链式祷告 (Mythic) -->
+  <g transform="translate(270, 200)">
+    <rect width="180" height="100" fill="url(#slotBg)" stroke="#d04a8a" stroke-width="2.5" rx="6"/>
+    <circle cx="50" cy="50" r="22" fill="url(#styIcon)" stroke="#d04a8a" stroke-width="3"/>
+    <path d="M 38 38 L 62 62 M 62 38 L 38 62" stroke="#fff" stroke-width="3" opacity="0.9"/>
+    <text x="100" y="35" fill="#f0a060" font-family="sans-serif" font-size="13" font-weight="700">法力虹吸</text>
+    <text x="100" y="50" fill="#a89882" font-family="sans-serif" font-size="9">击杀回 25% MP</text>
+    <text x="100" y="62" fill="#a89882" font-family="sans-serif" font-size="9">下次施法 cost -1</text>
+    <text x="14" y="92" fill="#d04a8a" font-family="sans-serif" font-size="14" font-weight="700" text-anchor="middle">★</text>
+    <rect x="155" y="6" width="20" height="14" fill="#c8643c" rx="3"/>
+    <text x="165" y="16" fill="#fff" font-family="sans-serif" font-size="9" font-weight="700" text-anchor="middle">STY</text>
+  </g>
+
+  <!-- Slot 6: Empty (just demonstrating) -- actually filled with eco_universal_01 -->
+  <g transform="translate(480, 200)">
+    <rect width="180" height="100" fill="url(#slotBg)" stroke="#d04a8a" stroke-width="2.5" rx="6"/>
+    <circle cx="50" cy="50" r="22" fill="url(#ecoIcon)" stroke="#d04a8a" stroke-width="3"/>
+    <text x="50" y="58" fill="#fff" font-family="sans-serif" font-size="20" font-weight="700" text-anchor="middle">✦</text>
+    <text x="100" y="35" fill="#f0a060" font-family="sans-serif" font-size="13" font-weight="700">元素回声</text>
+    <text x="100" y="50" fill="#a89882" font-family="sans-serif" font-size="9">all stat +1</text>
+    <text x="100" y="62" fill="#a89882" font-family="sans-serif" font-size="9">EXP +5%, TP+1</text>
+    <text x="14" y="92" fill="#d04a8a" font-family="sans-serif" font-size="14" font-weight="700" text-anchor="middle">★</text>
+    <rect x="155" y="6" width="20" height="14" fill="#4a8fb8" rx="3"/>
+    <text x="165" y="16" fill="#fff" font-family="sans-serif" font-size="9" font-weight="700" text-anchor="middle">ECO</text>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(60, 320)">
+    <rect width="14" height="10" fill="#4a8fb8" rx="2"/>
+    <text x="22" y="9" fill="#a89882" font-family="sans-serif" font-size="11">ECO 经济类</text>
+    <rect x="100" width="14" height="10" fill="#c8643c" rx="2"/>
+    <text x="122" y="9" fill="#a89882" font-family="sans-serif" font-size="11">STY 流派类</text>
+    <circle cx="207" cy="5" r="5" fill="#888"/>
+    <text x="218" y="9" fill="#a89882" font-family="sans-serif" font-size="11">C Common</text>
+    <polygon points="290,0 285,10 295,10" fill="#5a9fd0"/>
+    <text x="304" y="9" fill="#a89882" font-family="sans-serif" font-size="11">R Rare</text>
+    <text x="358" y="9" fill="#d04a8a" font-family="sans-serif" font-size="13" font-weight="700">★</text>
+    <text x="372" y="9" fill="#a89882" font-family="sans-serif" font-size="11">Mythic</text>
+    <circle cx="445" cy="5" r="6" fill="#c8643c"/>
+    <text x="445" y="9" fill="#fff" font-family="sans-serif" font-size="9" text-anchor="middle">×n</text>
+    <text x="460" y="9" fill="#a89882" font-family="sans-serif" font-size="11">stack count (eco only)</text>
+  </g>
+</svg>
+<div class="svg-caption">图 (a) — 6 格库存 UI 概念图。 2×3 grid; eco/sty 用蓝橙色编码; tier 用左下角图形 (○/◇/★) 区分; 经济类同 ID 可 stack ×2, 流派类不可重复。</div>
+</div>
+
+<hr/>
+
+<h2>§2. SVG (b) — 经济类 vs 流派类 Archetype 对比矩阵</h2>
+
+<div class="svg-wrap">
+<svg viewBox="0 0 760 380" width="760" height="380" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;">
+  <!-- Title -->
+  <text x="380" y="24" fill="#f0a060" font-family="sans-serif" font-size="16" font-weight="700" text-anchor="middle">Economic vs Stylistic — Archetype Matrix</text>
+
+  <!-- Header -->
+  <rect x="20" y="40" width="220" height="40" fill="#3a2c20" stroke="#c8643c" stroke-width="1"/>
+  <text x="130" y="64" fill="#f0a060" font-family="sans-serif" font-size="13" font-weight="600" text-anchor="middle">维度</text>
+  <rect x="240" y="40" width="240" height="40" fill="#1f3a4a" stroke="#4a8fb8" stroke-width="1"/>
+  <text x="360" y="64" fill="#7ab8d8" font-family="sans-serif" font-size="13" font-weight="600" text-anchor="middle">经济类 (Economic)</text>
+  <rect x="480" y="40" width="260" height="40" fill="#3a2014" stroke="#c8643c" stroke-width="1"/>
+  <text x="610" y="64" fill="#f0a060" font-family="sans-serif" font-size="13" font-weight="600" text-anchor="middle">流派类 (Stylistic)</text>
+
+  <!-- Rows -->
+  <g font-family="sans-serif" font-size="11.5" fill="#e8d8c4">
+    <!-- Row 1: Impact -->
+    <rect x="20" y="80" width="220" height="36" fill="#221a14"/>
+    <rect x="240" y="80" width="240" height="36" fill="#1a2832"/>
+    <rect x="480" y="80" width="260" height="36" fill="#28180e"/>
+    <text x="32" y="103">影响力</text>
+    <text x="252" y="103">中 (+5–30% 数值)</text>
+    <text x="492" y="103">大 (build-defining, 改变玩法)</text>
+
+    <!-- Row 2: Mechanic -->
+    <rect x="20" y="116" width="220" height="36" fill="#2a1f17"/>
+    <rect x="240" y="116" width="240" height="36" fill="#223040"/>
+    <rect x="480" y="116" width="260" height="36" fill="#321a10"/>
+    <text x="32" y="139">机制定位</text>
+    <text x="252" y="139">放大原职业模型 (stay-within)</text>
+    <text x="492" y="139">修饰已有 L2 节点行为</text>
+
+    <!-- Row 3: Trigger -->
+    <rect x="20" y="152" width="220" height="36" fill="#221a14"/>
+    <rect x="240" y="152" width="240" height="36" fill="#1a2832"/>
+    <rect x="480" y="152" width="260" height="36" fill="#28180e"/>
+    <text x="32" y="175">触发模式</text>
+    <text x="252" y="175">always-on / per-stage</text>
+    <text x="492" y="175">conditional (kill / hit / cast)</text>
+
+    <!-- Row 4: Stack -->
+    <rect x="20" y="188" width="220" height="36" fill="#2a1f17"/>
+    <rect x="240" y="188" width="240" height="36" fill="#223040"/>
+    <rect x="480" y="188" width="260" height="36" fill="#321a10"/>
+    <text x="32" y="211">同 ID 可重复</text>
+    <text x="252" y="211">允许 stack ≤2 (additive)</text>
+    <text x="492" y="211">禁止重复 (Cult of Lamb 模式)</text>
+
+    <!-- Row 5: Class binding -->
+    <rect x="20" y="224" width="220" height="36" fill="#221a14"/>
+    <rect x="240" y="224" width="240" height="36" fill="#1a2832"/>
+    <rect x="480" y="224" width="260" height="36" fill="#28180e"/>
+    <text x="32" y="247">职业绑定</text>
+    <text x="252" y="247">通用 (跨 class 100% 生效)</text>
+    <text x="492" y="247">主 class 100%, 跨 class ×0.6</text>
+
+    <!-- Row 6: Pool weight -->
+    <rect x="20" y="260" width="220" height="36" fill="#2a1f17"/>
+    <rect x="240" y="260" width="240" height="36" fill="#223040"/>
+    <rect x="480" y="260" width="260" height="36" fill="#321a10"/>
+    <text x="32" y="283">池权重 (proposed)</text>
+    <text x="252" y="283">~50% 池</text>
+    <text x="492" y="283">~50% 池</text>
+
+    <!-- Row 7: Examples -->
+    <rect x="20" y="296" width="220" height="56" fill="#221a14"/>
+    <rect x="240" y="296" width="240" height="56" fill="#1a2832"/>
+    <rect x="480" y="296" width="260" height="56" fill="#28180e"/>
+    <text x="32" y="319">代表示例</text>
+    <text x="252" y="316" font-size="10">学者之碑 (EXP+15%)</text>
+    <text x="252" y="332" font-size="10">力量铭文 (STR+3)</text>
+    <text x="252" y="348" font-size="10">命运之书 (growth+5%/lvl)</text>
+    <text x="492" y="316" font-size="10">扩散燃烧 (burn 死亡溅射)</text>
+    <text x="492" y="332" font-size="10">链式祷告 (heal chain)</text>
+    <text x="492" y="348" font-size="10">闪电跳跃 (chain to nearest)</text>
+  </g>
+</svg>
+<div class="svg-caption">图 (b) — 经济类 vs 流派类 archetype 对比矩阵, 7 维度 × 2 archetype。 经济类 = 数值放大 / 通用 / 可 stack; 流派类 = 行为变质 / class 绑定 / 不可重复。</div>
+</div>
+
+<hr/>
+
+<h2>§3. SVG (c) — 流派类符文 ↔ L2 节点对应关系图 (Mage 燃烧 example)</h2>
+
+<div class="svg-wrap">
+<svg viewBox="0 0 800 400" width="800" height="400" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;">
+  <text x="400" y="22" fill="#f0a060" font-family="sans-serif" font-size="16" font-weight="700" text-anchor="middle">L2 Node × L5 Stylistic Rune — Boundary (Mage Fire example)</text>
+
+  <!-- L2 Layer -->
+  <rect x="40" y="50" width="720" height="120" fill="rgba(122, 184, 216, 0.08)" stroke="#4a8fb8" stroke-width="1.5" stroke-dasharray="6,3" rx="6"/>
+  <text x="56" y="72" fill="#7ab8d8" font-family="sans-serif" font-size="13" font-weight="700">L2 — Talent Tree (per-class, run-reset)</text>
+  <text x="56" y="88" fill="#7ab8d8" font-family="sans-serif" font-size="11">职责: 解锁 base mechanic + base 数值参数</text>
+
+  <!-- L2 nodes -->
+  <g transform="translate(70, 100)">
+    <rect width="160" height="60" fill="#1a2832" stroke="#4a8fb8" stroke-width="2" rx="6"/>
+    <text x="80" y="22" fill="#7ab8d8" font-family="sans-serif" font-size="12" font-weight="700" text-anchor="middle">mg_fire_basic</text>
+    <text x="80" y="38" fill="#a89882" font-family="sans-serif" font-size="10" text-anchor="middle">passive</text>
+    <text x="80" y="52" fill="#e8d8c4" font-family="sans-serif" font-size="10" text-anchor="middle">普攻 fire DMG + burn 1 (3r)</text>
+  </g>
+
+  <g transform="translate(270, 100)">
+    <rect width="160" height="60" fill="#1a2832" stroke="#4a8fb8" stroke-width="2" rx="6"/>
+    <text x="80" y="22" fill="#7ab8d8" font-family="sans-serif" font-size="12" font-weight="700" text-anchor="middle">mg_ice_chain</text>
+    <text x="80" y="38" fill="#a89882" font-family="sans-serif" font-size="10" text-anchor="middle">active skill</text>
+    <text x="80" y="52" fill="#e8d8c4" font-family="sans-serif" font-size="10" text-anchor="middle">冰元素技能 (单体冰冻)</text>
+  </g>
+
+  <g transform="translate(470, 100)">
+    <rect width="160" height="60" fill="#1a2832" stroke="#4a8fb8" stroke-width="2" rx="6"/>
+    <text x="80" y="22" fill="#7ab8d8" font-family="sans-serif" font-size="12" font-weight="700" text-anchor="middle">mg_lightning_bolt</text>
+    <text x="80" y="38" fill="#a89882" font-family="sans-serif" font-size="10" text-anchor="middle">active skill</text>
+    <text x="80" y="52" fill="#e8d8c4" font-family="sans-serif" font-size="10" text-anchor="middle">闪电单体 (高伤直线)</text>
+  </g>
+
+  <!-- L5 Layer -->
+  <rect x="40" y="230" width="720" height="160" fill="rgba(200, 100, 60, 0.08)" stroke="#c8643c" stroke-width="1.5" stroke-dasharray="6,3" rx="6"/>
+  <text x="56" y="252" fill="#f0a060" font-family="sans-serif" font-size="13" font-weight="700">L5 — Rune (6-slot, run-reset)</text>
+  <text x="56" y="268" fill="#f0a060" font-family="sans-serif" font-size="11">职责: 修饰 / 反转 / 放大 已有 L2 节点行为</text>
+
+  <!-- L5 runes -->
+  <g transform="translate(70, 286)">
+    <rect width="160" height="46" fill="#28180e" stroke="#c8643c" stroke-width="1.5" rx="4"/>
+    <text x="80" y="18" fill="#f0a060" font-family="sans-serif" font-size="11" font-weight="700" text-anchor="middle">sty_mg_01 扩散燃烧</text>
+    <text x="80" y="34" fill="#a89882" font-family="sans-serif" font-size="9" text-anchor="middle">burn 死亡时溅射</text>
+  </g>
+  <g transform="translate(70, 336)">
+    <rect width="160" height="46" fill="#28180e" stroke="#c8643c" stroke-width="1.5" rx="4"/>
+    <text x="80" y="18" fill="#f0a060" font-family="sans-serif" font-size="11" font-weight="700" text-anchor="middle">sty_mg_02 即时燃烧</text>
+    <text x="80" y="34" fill="#a89882" font-family="sans-serif" font-size="9" text-anchor="middle">命中即结算所有 burn</text>
+  </g>
+
+  <g transform="translate(270, 286)">
+    <rect width="160" height="46" fill="#28180e" stroke="#c8643c" stroke-width="1.5" rx="4"/>
+    <text x="80" y="18" fill="#f0a060" font-family="sans-serif" font-size="11" font-weight="700" text-anchor="middle">sty_mg_03 冰封连锁</text>
+    <text x="80" y="34" fill="#a89882" font-family="sans-serif" font-size="9" text-anchor="middle">冰冻 chain 相邻 (max 3)</text>
+  </g>
+
+  <g transform="translate(470, 286)">
+    <rect width="160" height="46" fill="#28180e" stroke="#c8643c" stroke-width="1.5" rx="4"/>
+    <text x="80" y="18" fill="#f0a060" font-family="sans-serif" font-size="11" font-weight="700" text-anchor="middle">sty_mg_04 闪电跳跃</text>
+    <text x="80" y="34" fill="#a89882" font-family="sans-serif" font-size="9" text-anchor="middle">闪电跳到最近敌人 ×2</text>
+  </g>
+
+  <!-- Connections (curved) -->
+  <g stroke="#c8643c" stroke-width="1.5" fill="none" opacity="0.7">
+    <path d="M 150 160 Q 150 220 150 286" />
+    <path d="M 150 160 Q 150 250 150 336" />
+    <path d="M 350 160 Q 350 220 350 286" />
+    <path d="M 550 160 Q 550 220 550 286" />
+  </g>
+  <!-- Arrowheads -->
+  <g fill="#c8643c">
+    <polygon points="146,283 154,283 150,290"/>
+    <polygon points="146,333 154,333 150,340"/>
+    <polygon points="346,283 354,283 350,290"/>
+    <polygon points="546,283 554,283 550,290"/>
+  </g>
+
+  <!-- "modifies" labels -->
+  <g font-family="sans-serif" font-size="9" fill="#c8643c" font-style="italic">
+    <text x="155" y="222">modifies</text>
+    <text x="355" y="222">modifies</text>
+    <text x="555" y="222">modifies</text>
+  </g>
+</svg>
+<div class="svg-caption">图 (c) — Mage 流派类符文 ↔ L2 节点对应关系。L2 节点定义"火/冰/雷"基础能力, L5 流派类符文修饰其行为 (溅射 / 即时结算 / chain / 跳跃)。 没了 L2 节点, 对应 L5 符文失效 (UI 灰显)。</div>
+</div>
+
+<hr/>
+
+<h2>§4. SVG (d) — Run 内符文获取 timeline</h2>
+
+<div class="svg-wrap">
+<svg viewBox="0 0 800 240" width="800" height="240" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;">
+  <text x="400" y="22" fill="#f0a060" font-family="sans-serif" font-size="16" font-weight="700" text-anchor="middle">Rune Acquisition Timeline (single run, median scenario)</text>
+
+  <!-- Time axis -->
+  <line x1="40" y1="160" x2="760" y2="160" stroke="#a89882" stroke-width="1.5"/>
+  <g font-family="sans-serif" font-size="10" fill="#a89882">
+    <text x="40" y="180">Run Start</text>
+    <text x="200" y="180" text-anchor="middle">Act 1 (St 1-10)</text>
+    <text x="400" y="180" text-anchor="middle">Act 2 (St 11-20)</text>
+    <text x="600" y="180" text-anchor="middle">Act 3 (St 21-30)</text>
+    <text x="760" y="180" text-anchor="end">Final Boss</text>
+  </g>
+
+  <!-- Tick marks (per stage) -->
+  <g stroke="#3a2c20" stroke-width="1">
+    <line x1="40" y1="155" x2="40" y2="165"/>
+    <line x1="280" y1="155" x2="280" y2="165"/>
+    <line x1="520" y1="155" x2="520" y2="165"/>
+    <line x1="760" y1="155" x2="760" y2="165"/>
+  </g>
+
+  <!-- Acquisition events -->
+  <!-- Run start L1 gift -->
+  <g>
+    <circle cx="40" cy="160" r="9" fill="#888" stroke="#c8643c" stroke-width="2"/>
+    <text x="40" y="164" fill="#fff" font-family="sans-serif" font-size="10" font-weight="700" text-anchor="middle">1</text>
+    <text x="40" y="135" fill="#a89882" font-family="sans-serif" font-size="9" text-anchor="middle">L1 gift</text>
+    <text x="40" y="124" fill="#888" font-family="sans-serif" font-size="9" text-anchor="middle">Common</text>
+  </g>
+
+  <!-- Stage 5 normal random -->
+  <g>
+    <circle cx="160" cy="160" r="7" fill="#888"/>
+    <text x="160" y="135" fill="#a89882" font-family="sans-serif" font-size="9" text-anchor="middle">St5 random</text>
+    <text x="160" y="124" fill="#888" font-family="sans-serif" font-size="9" text-anchor="middle">Common</text>
+  </g>
+
+  <!-- Stage 8 elite -->
+  <g>
+    <circle cx="232" cy="160" r="7" fill="#5a9fd0"/>
+    <text x="232" y="135" fill="#a89882" font-family="sans-serif" font-size="9" text-anchor="middle">St8 elite</text>
+    <text x="232" y="124" fill="#5a9fd0" font-family="sans-serif" font-size="9" text-anchor="middle">Rare</text>
+  </g>
+
+  <!-- Stage 10 boss -->
+  <g>
+    <polygon points="280,150 270,170 290,170" fill="#c8643c" stroke="#f0a060" stroke-width="2"/>
+    <text x="280" y="135" fill="#f0a060" font-family="sans-serif" font-size="9" font-weight="700" text-anchor="middle">St10 BOSS</text>
+    <text x="280" y="124" fill="#5a9fd0" font-family="sans-serif" font-size="9" text-anchor="middle">Rare (3 选 1)</text>
+  </g>
+
+  <!-- Stage 13 town purchase -->
+  <g>
+    <rect x="328" y="153" width="14" height="14" fill="#4a8fb8" stroke="#7ab8d8"/>
+    <text x="335" y="135" fill="#a89882" font-family="sans-serif" font-size="9" text-anchor="middle">St13 town</text>
+    <text x="335" y="124" fill="#888" font-family="sans-serif" font-size="9" text-anchor="middle">Common</text>
+  </g>
+
+  <!-- Stage 16 special event -->
+  <g>
+    <polygon points="400,148 388,170 412,170" fill="#d8a040"/>
+    <text x="400" y="135" fill="#a89882" font-family="sans-serif" font-size="9" text-anchor="middle">St16 event</text>
+    <text x="400" y="124" fill="#5a9fd0" font-family="sans-serif" font-size="9" text-anchor="middle">Rare</text>
+  </g>
+
+  <!-- Stage 20 boss -->
+  <g>
+    <polygon points="520,150 510,170 530,170" fill="#c8643c" stroke="#f0a060" stroke-width="2"/>
+    <text x="520" y="135" fill="#f0a060" font-family="sans-serif" font-size="9" font-weight="700" text-anchor="middle">St20 BOSS</text>
+    <text x="520" y="124" fill="#d04a8a" font-family="sans-serif" font-size="9" text-anchor="middle">★Mythic (3 选 1)</text>
+  </g>
+
+  <!-- Stage 25 town Lv3 -->
+  <g>
+    <rect x="613" y="153" width="14" height="14" fill="#4a8fb8" stroke="#7ab8d8"/>
+    <text x="620" y="135" fill="#a89882" font-family="sans-serif" font-size="9" text-anchor="middle">St25 town Lv3</text>
+    <text x="620" y="124" fill="#5a9fd0" font-family="sans-serif" font-size="9" text-anchor="middle">Rare</text>
+  </g>
+
+  <!-- Stage 30 final boss -->
+  <g>
+    <polygon points="760,150 750,170 770,170" fill="#c8643c" stroke="#f0a060" stroke-width="2"/>
+    <text x="760" y="135" fill="#f0a060" font-family="sans-serif" font-size="9" font-weight="700" text-anchor="end">Final</text>
+    <text x="760" y="124" fill="#d04a8a" font-family="sans-serif" font-size="9" font-weight="700" text-anchor="end">★ Mythic</text>
+  </g>
+
+  <!-- Cap line -->
+  <line x1="40" y1="200" x2="760" y2="200" stroke="#c84a4a" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="50" y="215" fill="#c84a4a" font-family="sans-serif" font-size="10">≈ 9 acquisitions vs 6 cap → 3 取舍 (replace) 决策</text>
+
+  <!-- Legend -->
+  <g transform="translate(40, 50)" font-family="sans-serif" font-size="10" fill="#a89882">
+    <circle cx="6" cy="6" r="6" fill="#888"/>
+    <text x="18" y="9">Common rune</text>
+    <circle cx="100" cy="6" r="6" fill="#5a9fd0"/>
+    <text x="112" y="9">Rare rune</text>
+    <text x="188" y="11" fill="#d04a8a" font-size="13" font-weight="700">★</text>
+    <text x="200" y="9">Mythic</text>
+    <polygon points="262,2 256,12 268,12" fill="#c8643c"/>
+    <text x="274" y="9">Boss drop (保底)</text>
+    <rect x="370" y="0" width="12" height="12" fill="#4a8fb8"/>
+    <text x="388" y="9">Town purchase</text>
+    <polygon points="478,2 472,12 484,12" fill="#d8a040"/>
+    <text x="490" y="9">Special event</text>
+  </g>
+</svg>
+<div class="svg-caption">图 (d) — Run 内符文获取 timeline (中位场景)。 期望 ≈ 9 次获取 vs 6 格 cap → 3 次替换决策 = build identity 关键节奏。 注意 Boss 保底 + Town 稳定补充 + Stage random 三轨并行。</div>
+</div>
+
+<hr/>
+
+<h2>§5. SVG (e) — Cost Curve (Town Rune Altar 兑换 vs Gold)</h2>
+
+<div class="svg-wrap">
+<svg viewBox="0 0 760 320" width="760" height="320" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;">
+  <text x="380" y="22" fill="#f0a060" font-family="sans-serif" font-size="16" font-weight="700" text-anchor="middle">Town Rune Altar — Cost Curve vs Gold Accumulation</text>
+
+  <!-- axes -->
+  <line x1="60" y1="280" x2="720" y2="280" stroke="#a89882" stroke-width="1.5"/>
+  <line x1="60" y1="280" x2="60" y2="50" stroke="#a89882" stroke-width="1.5"/>
+  <text x="380" y="305" fill="#a89882" font-family="sans-serif" font-size="11" text-anchor="middle">Stage Number</text>
+  <text x="20" y="160" fill="#a89882" font-family="sans-serif" font-size="11" text-anchor="middle" transform="rotate(-90, 20, 160)">Gold</text>
+
+  <!-- y-axis ticks -->
+  <g font-family="sans-serif" font-size="9" fill="#a89882">
+    <line x1="55" y1="260" x2="60" y2="260" stroke="#a89882"/><text x="50" y="263" text-anchor="end">500</text>
+    <line x1="55" y1="220" x2="60" y2="220" stroke="#a89882"/><text x="50" y="223" text-anchor="end">1000</text>
+    <line x1="55" y1="180" x2="60" y2="180" stroke="#a89882"/><text x="50" y="183" text-anchor="end">1500</text>
+    <line x1="55" y1="140" x2="60" y2="140" stroke="#a89882"/><text x="50" y="143" text-anchor="end">2000</text>
+    <line x1="55" y1="100" x2="60" y2="100" stroke="#a89882"/><text x="50" y="103" text-anchor="end">2500</text>
+    <line x1="55" y1="60" x2="60" y2="60" stroke="#a89882"/><text x="50" y="63" text-anchor="end">3000</text>
+  </g>
+  <!-- x-axis ticks -->
+  <g font-family="sans-serif" font-size="9" fill="#a89882" text-anchor="middle">
+    <line x1="170" y1="280" x2="170" y2="285" stroke="#a89882"/><text x="170" y="297">5</text>
+    <line x1="280" y1="280" x2="280" y2="285" stroke="#a89882"/><text x="280" y="297">10</text>
+    <line x1="390" y1="280" x2="390" y2="285" stroke="#a89882"/><text x="390" y="297">15</text>
+    <line x1="500" y1="280" x2="500" y2="285" stroke="#a89882"/><text x="500" y="297">20</text>
+    <line x1="610" y1="280" x2="610" y2="285" stroke="#a89882"/><text x="610" y="297">25</text>
+    <line x1="720" y1="280" x2="720" y2="285" stroke="#a89882"/><text x="720" y="297">30</text>
+  </g>
+
+  <!-- Cumulative gold curve (median) -->
+  <!-- (60,280) start; (170,260)=250G; (280,240)=500G; (390,192)=1100G; (500,144)=1700G; (610,88)=2400G; (720,16)=3200G -->
+  <polyline points="60,280 170,260 280,240 390,192 500,144 610,88 720,16" stroke="#7ab8d8" stroke-width="2.5" fill="none"/>
+  <g fill="#7ab8d8">
+    <circle cx="170" cy="260" r="4"/>
+    <circle cx="280" cy="240" r="4"/>
+    <circle cx="390" cy="192" r="4"/>
+    <circle cx="500" cy="144" r="4"/>
+    <circle cx="610" cy="88" r="4"/>
+    <circle cx="720" cy="16" r="4"/>
+  </g>
+
+  <!-- Cost thresholds horizontal lines -->
+  <line x1="60" y1="264" x2="720" y2="264" stroke="#888" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="725" y="267" fill="#888" font-family="sans-serif" font-size="9">200G build Lv1</text>
+
+  <line x1="60" y1="248" x2="720" y2="248" stroke="#5a9fd0" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="725" y="251" fill="#5a9fd0" font-family="sans-serif" font-size="9">400G upg Lv2</text>
+
+  <line x1="60" y1="216" x2="720" y2="216" stroke="#d04a8a" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="725" y="219" fill="#d04a8a" font-family="sans-serif" font-size="9">800G upg Lv3</text>
+
+  <!-- Cost per exchange markers -->
+  <g font-family="sans-serif" font-size="9" fill="#f0a060">
+    <text x="170" y="275">100G/Common</text>
+    <text x="280" y="232">100G/Common</text>
+    <text x="390" y="184">300G/Rare</text>
+    <text x="500" y="136">300G/Rare</text>
+    <text x="610" y="80">600G/Mythic</text>
+  </g>
+
+  <!-- BOSS markers -->
+  <g>
+    <polygon points="280,290 275,300 285,300" fill="#c8643c"/>
+    <polygon points="500,290 495,300 505,300" fill="#c8643c"/>
+    <polygon points="720,290 715,300 725,300" fill="#c8643c"/>
+  </g>
+  <text x="290" y="320" fill="#c8643c" font-family="sans-serif" font-size="9">Act1 BOSS</text>
+  <text x="510" y="320" fill="#c8643c" font-family="sans-serif" font-size="9">Act2 BOSS</text>
+  <text x="690" y="320" fill="#c8643c" font-family="sans-serif" font-size="9">Final BOSS</text>
+
+  <!-- Legend -->
+  <g transform="translate(450, 50)" font-family="sans-serif" font-size="10" fill="#a89882">
+    <line x1="0" y1="6" x2="20" y2="6" stroke="#7ab8d8" stroke-width="2.5"/>
+    <text x="26" y="10">Cumulative Gold (median run)</text>
+  </g>
+
+  <!-- Annotation -->
+  <text x="380" y="48" fill="#f0a060" font-family="sans-serif" font-size="11" font-style="italic" text-anchor="middle" opacity="0.85">玩家在 Stage 10 → 30 间, 期望 town 兑换 1-2 个符文 (gold 必须与 building/equipment 竞争)</text>
+</svg>
+<div class="svg-caption">图 (e) — Town Rune Altar cost curve。 蓝线 = 中位 run 累积 gold; 灰/蓝/粉虚线 = Altar 各级建造门槛 (200/400/800 G); 标注 = 每次兑换 cost。 Gold 曲线在 Stage 10 后才稳定支持 Rune Altar 升 Lv3, 与 town building 竞争 = 设计目标的策略两难。</div>
+</div>
+
+<hr/>
+
+<h2>§6. 业内 Reference 表 (8+ games)</h2>
+
+<table>
+  <thead>
+    <tr><th>游戏</th><th>系统名</th><th>总数</th><th>"6 cap" 类比</th><th>SoT 对照 takeaway</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="https://slay-the-spire.fandom.com/wiki/Relics" target="_blank">Slay the Spire 1/2</a></td>
+      <td>Relic</td>
+      <td>STS1 ~150 / STS2 ~287 EA</td>
+      <td>无显式 cap, 末期 ~10-15</td>
+      <td>用 "boss relic + 大 trade-off" 制造取舍; SoT 用 6 格 cap 制造取舍</td>
+    </tr>
+    <tr>
+      <td><a href="https://hades.fandom.com/wiki/Boons" target="_blank">Hades 1</a></td>
+      <td>Boons + Mirror</td>
+      <td>~70-80 boons, 16 Mirror 类</td>
+      <td>Boons ~12-18 / Mirror A/B 互斥</td>
+      <td>5 rarity 不变 effect kind, 仅放大数值 → SoT 借用此模式 (3 tier 简化版)</td>
+    </tr>
+    <tr>
+      <td><a href="https://hades.fandom.com/wiki/Boons/Hades_II" target="_blank">Hades 2</a></td>
+      <td>Boons + Daedalus + Arcana</td>
+      <td>25 Arcana</td>
+      <td>Arcana Grasp pool ~10-25</td>
+      <td>"容量限制逼取舍" = SoT 6 格的直接前身; SoT 简化为定额 6 (无 Grasp 弹性)</td>
+    </tr>
+    <tr>
+      <td><a href="https://inscryption.fandom.com/wiki/Sigils" target="_blank">Inscryption</a></td>
+      <td>Sigils (card modifiers)</td>
+      <td>79 sigils</td>
+      <td>单卡 ≤ 2-3 sigil</td>
+      <td>"Sigil = 已有 card 的 modifier, 不是新机制" 与 SoT 流派类符文 (modify L2 节点) 同构</td>
+    </tr>
+    <tr>
+      <td><a href="https://noita.wiki.gg/wiki/Wands" target="_blank">Noita</a></td>
+      <td>Perks + Spells</td>
+      <td>~70 perks, ~400 spells</td>
+      <td>Perks max 5 主线; Wand cap 26</td>
+      <td>5-7 cap 区间 = build 可读性临界, SoT 6 格落在最优区间</td>
+    </tr>
+    <tr>
+      <td><a href="https://riskofrain2.fandom.com/wiki/Item_Stacking" target="_blank">Risk of Rain 2</a></td>
+      <td>Items (stacking)</td>
+      <td>100+ items</td>
+      <td><b>无 cap (反例)</b></td>
+      <td>无 cap → build identity collapse → SoT 必须 cap</td>
+    </tr>
+    <tr>
+      <td><a href="https://cult-of-the-lamb.fandom.com/wiki/Tarot_Cards" target="_blank">Cult of the Lamb</a></td>
+      <td>Tarot Cards</td>
+      <td>85 cards</td>
+      <td>同卡不重复, 单 run ~6-10</td>
+      <td>"同卡不重复" 适用 SoT 流派类 (locked-in proposed)</td>
+    </tr>
+    <tr>
+      <td><a href="https://grokipedia.com/page/Backpack_Hero" target="_blank">Backpack Hero</a></td>
+      <td>Polyomino items</td>
+      <td>~200 items</td>
+      <td>3×3-5×5 grid</td>
+      <td>形状取舍 = v2 演进备选, v1 SoT 不采用 (战棋 + grid 双重网格认知负担)</td>
+    </tr>
+    <tr>
+      <td><a href="https://www.thegamer.com/path-of-exile-2-poe2-runes-soul-cores-talismans-sockets-effects-guide/" target="_blank">Path of Exile 2</a></td>
+      <td>Runes + Sockets</td>
+      <td>~150 runes</td>
+      <td>装备 socket 1-6</td>
+      <td>SoT 刻意解耦 L4/L5, 不像 PoE 把 socket 绑装备</td>
+    </tr>
+  </tbody>
+</table>
+
+<p style="font-size: 12px; color: var(--fg-dim); margin-top: 12px;">
+  额外阅读:
+  <a href="https://www.switchbladegaming.com/strategy-games/slay-the-spire-2-relic-tier-list/" target="_blank">STS 2 Tier List 2026</a> ·
+  <a href="https://hades2.wiki.fextralife.com/Daedalus+Hammer" target="_blank">Hades 2 Daedalus Hammer FextraLife</a> ·
+  <a href="https://noita.wiki.gg/wiki/Extra_Wand_Capacity" target="_blank">Noita Extra Wand Capacity Perk</a> ·
+  <a href="https://www.thegamer.com/hades-mirror-of-night-roguelite-progression/" target="_blank">Hades Mirror of Night - TheGamer</a> ·
+  <a href="https://frostilyte.ca/2025/04/09/arcana-cards-meta-progression-in-hades-2-have-me-hooked/" target="_blank">Frostilyte: Hades 2 Arcana</a>
+</p>
+
+<hr/>
+
+<h2>§7. Open Questions for Stage 3</h2>
+
+<table>
+  <thead>
+    <tr><th>ID</th><th>问题</th><th>需要的 stream / agent</th><th>优先级</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Q-D5-1</td><td>跨 class fallback ×0.6 数值是否合理?</td><td>Stage 3 critic + 模拟</td><td>高</td></tr>
+    <tr><td>Q-D5-2</td><td>Mythic 必带负面 trade-off 是否过度?</td><td>Stage 3 critic</td><td>中</td></tr>
+    <tr><td>Q-D5-3</td><td>Run 起始 L1 赠 1 符文: random vs 3 选 1?</td><td>D1 stream handoff</td><td>中</td></tr>
+    <tr><td>Q-D5-4</td><td>Town Rune Altar prerequisite (是否需 weapon/armor shop 先建)?</td><td>town-building update</td><td>低</td></tr>
+    <tr><td>Q-D5-5</td><td>同 ID 经济类 stack ≤ 2 vs ≤ 3?</td><td>Stage 3 平衡</td><td>低</td></tr>
+    <tr><td>Q-D5-6 ⭐</td><td>D2 prune L2 时, 哪些 behavior modifier passive 应迁入 L5 流派类池?</td><td>D2 stream 强 handoff</td><td>高</td></tr>
+    <tr><td>Q-D5-7</td><td>L1 meta horizontal 是否包含 "扩展 rune pool"? 解锁节奏?</td><td>D1 stream 强 handoff</td><td>中</td></tr>
+  </tbody>
+</table>
+
+<hr/>
+
+<h2>§8. Status Summary (3-state)</h2>
+
+<table>
+  <thead>
+    <tr><th>项</th><th>内容</th><th>状态</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>6 格上限</td><td>硬上限, run 内不可扩</td><td><span class="status-proposed">proposed</span></td></tr>
+    <tr><td>2 archetype</td><td>经济类 + 流派类</td><td><span class="status-locked">locked (consensus §7)</span></td></tr>
+    <tr><td>3 rarity tier</td><td>Common / Rare / Mythic</td><td><span class="status-proposed">proposed</span></td></tr>
+    <tr><td>L2 = base, L5 = modifier 边界</td><td>L2 解锁基础流派, L5 修饰已有流派</td><td><span class="status-proposed">proposed</span></td></tr>
+    <tr><td>Town Reroll (限次)</td><td>Prep Phase, 价格涨曲线</td><td><span class="status-proposed">proposed</span></td></tr>
+    <tr><td>Scrap (返还碎片)</td><td>Prep Phase, 主动销毁</td><td><span class="status-proposed">proposed</span></td></tr>
+    <tr><td>合成 (2 低 → 1 高)</td><td>不引入</td><td><span class="status-rejected">rejected</span></td></tr>
+    <tr><td>同 ID 流派类重复</td><td>不允许</td><td><span class="status-proposed">proposed (Cult of Lamb 模式)</span></td></tr>
+    <tr><td>同 ID 经济类 stack</td><td>≤ 2</td><td><span class="status-proposed">proposed</span></td></tr>
+    <tr><td>跨 class 流派类 ×0.6</td><td>主 class 100%, 跨 class 60%</td><td><span class="status-proposed">proposed</span></td></tr>
+    <tr><td>无限堆叠 +DMG 经济符文</td><td>不引入</td><td><span class="status-rejected">rejected</span></td></tr>
+    <tr><td>暴击格挡同时触发符文</td><td>违反 CLAUDE.md 硬约束</td><td><span class="status-rejected">rejected</span></td></tr>
+    <tr><td>反击连环符文</td><td>违反 CLAUDE.md 硬约束</td><td><span class="status-rejected">rejected</span></td></tr>
+    <tr><td>Polyomino 形状槽 (Backpack Hero)</td><td>v2 演进备选</td><td><span class="status-rejected">rejected (v1)</span></td></tr>
+  </tbody>
+</table>
+
+<div class="footer">
+  Generated 2026-05-10 · S3-side-sot · Mercury core <code>design</code> stream D5 ·
+  待 Stage 3 用户确认后 locked-in
+</div>
+
+</body>
+</html>

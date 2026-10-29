@@ -1,0 +1,20 @@
+acceptance_bundle_id: "ACC-P1-ARCH-001"
+task_bundle_id: "TASK-P1-ARCH-001"
+phase_id: "P1"
+status: "passed"
+acceptance_agent: "codex-cli (GPT-5.4, Acceptance Agent)"
+accepted_at: "2026-03-10"
+
+results:
+  - check_id: "CHK-001"
+    result: "pass"
+    detail: "checkpoint.schema.json is valid JSON with all 7 required top-level fields: run_id, task_id, agent, status, progress, scope, resume_context."
+  - check_id: "CHK-002"
+    result: "pass"
+    detail: "handoff-packet.template.yaml covers dispatch (dispatch_id), scope (read_set/write_scope), checkpoint (checkpoint_cadence), and resume (resume_semantics)."
+  - check_id: "CHK-003"
+    result: "pass"
+    detail: "checkpoint.json parses cleanly; all fields satisfy schema type and enum constraints with no missing or mistyped fields."
+
+overall: "pass"
+notes: "All three checks passed. Schema is v1 design; may iterate after first real dispatch cycle."

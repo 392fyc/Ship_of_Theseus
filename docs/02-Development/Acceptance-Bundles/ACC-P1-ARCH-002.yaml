@@ -1,0 +1,20 @@
+acceptance_bundle_id: "ACC-P1-ARCH-002"
+task_bundle_id: "TASK-P1-ARCH-002"
+phase_id: "P1"
+status: "passed"
+acceptance_agent: "claude-code (Main Agent, direct review)"
+accepted_at: "2026-03-10"
+
+results:
+  - check_id: "CHK-001"
+    result: "pass"
+    detail: "sot-task-receipt/SKILL.md exists (81 lines). Covers all 8 receipt fields with field-by-field guidance. Includes quality checklist with 8 verification points."
+  - check_id: "CHK-002"
+    result: "pass"
+    detail: "task-receipt.mdc exists (40 lines). Mirrors SKILL.md field rules and constraints. Consistent coverage of all 8 fields."
+  - check_id: "CHK-003"
+    result: "pass"
+    detail: "AGENTS.md Task Receipt section (lines 42-47) correctly references skill/rule files and lists all mandatory receipt fields. No conflict with slimmed AGENTS.md structure."
+
+overall: "pass"
+notes: "Direct Main Agent review (not blind). Deliverables are config/skill files with no code logic, so blind acceptance overhead not justified. Residual risk: runtime trigger behavior untested."

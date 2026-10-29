@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>剑圣天赋备选池 v2 — 五轮设计审核终版（评审版）</title>
+<style>
+  :root {
+    --bg: #16161c; --surface: #1f1f28; --surface-2: #2a2a36;
+    --text: #e8e8ec; --muted: #8a8a96; --border: #3a3a48;
+    --common: #b0b8c0;   /* 普通 */
+    --rare: #4a7fb8;     /* 稀有 */
+    --epic: #9a7ab8;     /* 史诗 */
+    --legend: #d4953c;   /* 传奇 */
+    --qi: #d4af90; --intent: #7ab8d4;
+    --warn: #d97a4a; --ok: #5fa869;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text);
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    margin: 0; padding: 32px 16px 64px; line-height: 1.55; }
+  main { max-width: 1100px; margin: 0 auto; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 28px; }
+  header h1 { margin: 0 0 6px; font-size: 22px; font-weight: 600; }
+  header .meta { color: var(--muted); font-size: 13px; margin: 0; }
+  section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+            padding: 20px 24px; margin-bottom: 20px; }
+  h2 { margin: 0 0 14px; font-size: 17px; font-weight: 600; color: #f0f0f4; }
+  h3 { margin: 16px 0 8px; font-size: 14px; font-weight: 600; color: #d8d8e0; }
+  p, li { font-size: 13.5px; }
+  code { background: var(--surface-2); padding: 1px 6px; border-radius: 3px; font-size: 12px; color: var(--qi); }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { padding: 7px 9px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; font-size: 11.5px; text-transform: uppercase; letter-spacing: .5px; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px;
+          background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); margin-right: 4px; }
+  .pill.warn { background: rgba(217,122,74,.15); color: var(--warn); border-color: var(--warn); }
+  .pill.ok { background: rgba(95,168,105,.15); color: var(--ok); border-color: var(--ok); }
+  .pill.common { color: var(--common); border-color: var(--common); }
+  .pill.rare { color: var(--rare); border-color: var(--rare); }
+  .pill.epic { color: var(--epic); border-color: var(--epic); }
+  .pill.legend { color: var(--legend); border-color: var(--legend); }
+  .timeline { display: flex; margin: 14px 0 6px; border-radius: 6px; overflow: hidden; font-size: 12px; }
+  .timeline .seg { padding: 12px 8px; color: #fff; flex: 1; text-align: center; border-right: 2px solid var(--bg); }
+  .timeline .seg:last-child { border-right: none; }
+  .timeline .seg b { display: block; font-size: 12.5px; margin-bottom: 3px; }
+  .timeline .seg small { color: rgba(255,255,255,.85); font-size: 10.5px; display: block; }
+  .sg-anchor { background: #5a4a1e; flex: .6; }
+  .sg-cr { background: #3a4654; }
+  .sg-m5 { background: #4a3a5a; flex: .7; }
+  .sg-m10 { background: #6e552d; flex: .7; }
+  .node-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 10px; margin-top: 10px; }
+  .nc { background: var(--surface-2); border: 1px solid var(--border); border-left: 4px solid;
+        border-radius: 6px; padding: 11px 13px; }
+  .nc.common { border-left-color: var(--common); } .nc.rare { border-left-color: var(--rare); }
+  .nc.epic { border-left-color: var(--epic); } .nc.legend { border-left-color: var(--legend); }
+  .nc .nm { font-size: 14px; font-weight: 600; }
+  .nc.common .nm { color: var(--common); } .nc.rare .nm { color: var(--rare); }
+  .nc.epic .nm { color: var(--epic); } .nc.legend .nm { color: var(--legend); }
+  .nc .id { font-size: 10.5px; color: var(--muted); font-family: Consolas, monospace; margin: 1px 0 6px; }
+  .nc .fx { font-size: 12px; color: #d8d8e0; }
+  .nc .lv { font-size: 11.5px; color: var(--muted); margin-top: 5px; }
+  .nc .gate { font-size: 11px; color: var(--warn); margin-top: 3px; }
+  .ab { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+  .ab .face { padding: 6px 8px; border-radius: 4px; font-size: 11.5px; }
+  .ab .face-a { background: rgba(200,100,60,.1); border-left: 3px solid #c8643c; }
+  .ab .face-b { background: rgba(122,184,212,.08); border-left: 3px solid var(--intent); }
+  .key-rule { background: rgba(74,127,184,.08); border-left: 3px solid var(--rare);
+              padding: 11px 14px; margin: 10px 0; font-size: 13px; border-radius: 0 4px 4px 0; }
+  .key-rule b { color: var(--rare); }
+  .key-rule.warn { background: rgba(217,122,74,.08); border-left-color: var(--warn); }
+  .key-rule.warn b { color: var(--warn); }
+  .decide { background: rgba(217,122,74,.07); border: 1px solid var(--warn); border-radius: 6px;
+            padding: 10px 14px; margin-bottom: 8px; font-size: 13px; }
+  .decide b { color: var(--warn); }
+  .decide small { color: var(--muted); display: block; margin-top: 2px; font-size: 11.5px; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 32px;
+           border-top: 1px solid var(--border); padding-top: 16px; }
+  footer a, a { color: #a8c0e0; }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>剑圣天赋备选池 v2 — 26 节点 / 50 点（五轮设计审核终版）</h1>
+  <p class="meta">S5-side-sot · 2026-06-13 · Fable 5 多轮流程产物 ·
+    <span class="pill ok">critique-r5：具备定稿资格</span>
+    <span class="pill warn">评审版 — 待 6 项用户裁定后定稿装配</span>
+    <span class="pill">规则基准 v3.1</span>
+    <span class="pill warn">全部数值 = 原型占位</span></p>
+</header>
+
+<section id="process">
+  <h2>0. 流程实绩</h2>
+  <table>
+    <thead><tr><th>轮次</th><th>裁定</th><th>阻断 / 修正 / 建议</th><th>关键事件</th></tr></thead>
+    <tbody>
+      <tr><td>规则 v1 → v2</td><td>game designer 全面评价</td><td>21 问题 / 9 项 P0</td><td>抽选流水线 / 升级档 / 回炉判定标准成体系</td></tr>
+      <tr><td>Round 1</td><td style="color:var(--warn);">不通过</td><td>1 / 10 / 5</td><td>追步 Lv3 冷却越界（阻断）；预算 56 超带</td></tr>
+      <tr><td>Round 2</td><td>有条件通过</td><td>0 / 5 / 3</td><td>（R5.5, B）（R2.3, B）双双 2/3 → 回炉预警</td></tr>
+      <tr><td>规则 v2 → v3</td><td>定向回炉</td><td>7 项条文</td><td>升级档强度类别封顶表 / 冷却经济干预上位概念</td></tr>
+      <tr><td>Round 3</td><td>有条件通过</td><td>0 / 6 / 2</td><td>F 类确认（落文失同步）→ v3.1 勘误</td></tr>
+      <tr><td>Round 4</td><td>有条件通过</td><td>0 / 5 / 1</td><td>规则侧零新命中（首次）；锚点引用者清单建立</td></tr>
+      <tr><td>Round 5</td><td style="color:var(--ok);">具备定稿资格</td><td>0 / 4 / 1</td><td>4 条文书级微修已落实；流程回顾沉淀给剑仙线</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="draft">
+  <h2>1. 抽选结构（稀有度里程碑制）</h2>
+  <div class="timeline">
+    <div class="seg sg-anchor"><b>Lv1</b><small>锚点 4 选 1（强制）<br/>真闪/背剑式/剑风/疾风怒涛</small></div>
+    <div class="seg sg-cr"><b>Lv2-4</b><small>普通+稀有 抽 3 选 1<br/>首抽保锚点协同</small></div>
+    <div class="seg sg-m5"><b>Lv5 ★</b><small>转职事件（奥义免费二选一）<br/>+ 稀有+史诗，保底史诗</small></div>
+    <div class="seg sg-cr"><b>Lv6-9</b><small>普通+稀有</small></div>
+    <div class="seg sg-m10"><b>Lv10 ★★</b><small>稀有+史诗+传奇<br/>保底传奇</small></div>
+    <div class="seg sg-cr"><b>Lv11-14</b><small>普通+稀有</small></div>
+    <div class="seg sg-m5"><b>Lv15 ★</b><small>保底史诗</small></div>
+    <div class="seg sg-cr"><b>Lv16-19</b><small>普通+稀有</small></div>
+    <div class="seg sg-m10"><b>Lv20 ★★</b><small>保底传奇</small></div>
+  </div>
+  <p style="color:var(--muted); font-size:12px;">
+    满级 20 ｜ 自由点 19 ｜ 池 50 点（2.5× 上限）｜ 取舍比 38% ｜ 节点 1-3 级（升级档占抽选槽位，继承本体稀有度）｜
+    条件过滤：剑意门控（觉醒前剑意节点不入池）/ 前置链 3 条 / 奥义节点需转职完成 ｜ 里程碑保底有回退顺位，候选不足如实呈现
+  </p>
+</section>
+
+<section id="pool">
+  <h2>2. 全量池（26 节点，按稀有度）</h2>
+
+  <h3><span class="pill common">普通 ×8</span> 17 点 ｜ 纯数值 4 + 简单效果 3 + 构筑门 1 ｜ 仅非 5 倍数级出现</h3>
+  <div class="node-grid">
+    <div class="nc common"><div class="nm">剑意觉醒 ◆构筑门</div><div class="id">sw_base_juexing · 1 级</div>
+      <div class="fx">觉醒剑意系统：暴击 +1 层（独立 2 回合，上限 5），每层提升敏捷与速度。觉醒前剑意标签节点不入抽选池。</div>
+      <div class="lv">锚点剑风自带本效果（剑风局不入池）；Lv2-4 窗口保底出现 1 次</div></div>
+    <div class="nc common"><div class="nm">踏歌</div><div class="id">sw_base_tage · 3 级</div>
+      <div class="fx">普攻结算后免费移动 1 格（每回合 1 次，正常触发 ZOC）。</div>
+      <div class="lv">Lv2 步移可穿过敌方占位格 ｜ Lv3 步移 2 格</div></div>
+    <div class="nc common"><div class="nm">收刀式</div><div class="id">sw_base_shoudaoshi · 2 级</div>
+      <div class="fx">击杀敌人时 +10 剑气（击杀事件挂接，剑风局照常生效）。</div>
+      <div class="lv">Lv2 +15</div></div>
+    <div class="nc common"><div class="nm">起手式</div><div class="id">sw_ss_qishoushi · 2 级 · 奥义双覆盖</div>
+      <div class="fx">剑气 ≥80 且未达上限时，普攻伤害 +20%（蓄而不发的威压；满格失效——防囤积）。</div>
+      <div class="lv">Lv2 +30%</div><div class="gate">需 Lv5 转职完成</div></div>
+    <div class="nc common"><div class="nm">运劲</div><div class="id">sw_ss_yunjin · 2 级 · 奥义双覆盖 · 纯数值</div>
+      <div class="fx">奥义剑气消耗 -10。</div><div class="lv">Lv2 -20</div><div class="gate">需 Lv5 转职完成</div></div>
+    <div class="nc common"><div class="nm">淬锋</div><div class="id">sw_base_cuifeng · 2 级 · 纯数值</div>
+      <div class="fx">物理伤害 +10%（增伤词缀桶）。</div><div class="lv">Lv2 +15%</div></div>
+    <div class="nc common"><div class="nm">健体</div><div class="id">sw_base_jianti · 2 级 · 纯数值</div>
+      <div class="fx">最大 HP +15%。</div><div class="lv">Lv2 +25%</div></div>
+    <div class="nc common"><div class="nm">守心</div><div class="id">sw_base_shouxin · 2 级 · 纯数值</div>
+      <div class="fx">招架成功时 +5 剑气（独立进账；背剑式局照常生效——事件挂接裁定）。</div>
+      <div class="lv">Lv2 +10 ｜ ⚠ 与背剑式叠加 = 待裁定 #1</div></div>
+  </div>
+
+  <h3 style="margin-top:20px;"><span class="pill rare">稀有 ×8</span> 19 点 ｜ 全等级出现 ｜ 必带机制改动或联动</h3>
+  <div class="node-grid">
+    <div class="nc rare"><div class="nm">残心</div><div class="id">sw_base_canxin · 3 级</div>
+      <div class="fx">招架成功后下一次普攻升级「斩返」：150% 物理必中（保留至使用）。</div>
+      <div class="lv">Lv2 180% ｜ Lv3 可储存 2 次</div></div>
+    <div class="nc rare"><div class="nm">顺势斩</div><div class="id">sw_base_shunshizhan · 3 级 · 反应类</div>
+      <div class="fx">敌人离开你的控制区时，30% 物理顺势斩 + 5 剑气（每回合 1 次；默认自动可改询问）。</div>
+      <div class="lv">Lv2 50% ｜ Lv3 区内移动也触发（AI 依赖的备选方案档）</div></div>
+    <div class="nc rare"><div class="nm">破绽</div><div class="id">sw_base_pozhan · 3 级</div>
+      <div class="fx">一闪命中施加「破绽」标记：对其下一次攻击行动必定暴击（被格挡则不暴）。每回合 1 标记。</div>
+      <div class="lv">Lv2 兑现 +20% ｜ Lv3 兑现击杀时标记转移</div></div>
+    <div class="nc rare"><div class="nm">追影</div><div class="id">sw_base_zhuiying · 2 级</div>
+      <div class="fx">主动攻击「本回合已行动过」的敌人必定触发追击（无视速度差；反击下仍不触发追击）。</div>
+      <div class="lv">Lv2 追击段 75%</div></div>
+    <div class="nc rare"><div class="nm">无刀取</div><div class="id">sw_base_wudaoqu · 2 级</div>
+      <div class="fx">招架成功时缴械：攻击者下回合无法攻击类行动（每敌每场 1 次；BOSS 免疫待裁定 #3）。</div>
+      <div class="lv">Lv2 即时生效</div></div>
+    <div class="nc rare"><div class="nm">余韵</div><div class="id">sw_ss_yuyin · 2 级 · 奥义双覆盖</div>
+      <div class="fx">奥义结算后，下一次普攻必中且 +30%（保留至使用）。</div>
+      <div class="lv">Lv2 +50%</div><div class="gate">需 Lv5 转职完成</div></div>
+    <div class="nc rare"><div class="nm">迎击</div><div class="id">sw_base_yingji · 2 级</div>
+      <div class="fx">敌人进入你的控制区获得「失措」标记：你对其攻击 +15 命中 +10% 伤害（至其回合结束）。</div>
+      <div class="lv">Lv2 +25 命中 +20%</div></div>
+    <div class="nc rare"><div class="nm">追步</div><div class="id">sw_base_zhuibu · 2 级</div>
+      <div class="fx">击杀敌人后免费移动 1 格（每回合 1 次）。击杀流核心拼图。</div>
+      <div class="lv">Lv2 移动 2 格</div></div>
+  </div>
+
+  <h3 style="margin-top:20px;"><span class="pill epic">史诗 ×6</span> 10 点 ｜ 仅 Lv5/10/15/20 出现，Lv5/15 保底 ｜ 形态变化 / 资源循环级</h3>
+  <div class="node-grid">
+    <div class="nc epic"><div class="nm">纳刀</div><div class="id">sw_base_nadao · 1 级</div>
+      <div class="fx">迅捷动作：本回合未攻击时可用——回合结束 +15 剑气，下回合首次攻击类行动必中。行军死回合变蓄力回合。</div></div>
+    <div class="nc epic"><div class="nm">剑心通明</div><div class="id">sw_base_jianxin · 3 级</div>
+      <div class="fx">迅捷动作：消耗 1 层剑意（FIFO）→ 完成一闪冷却（全模组唯一冷却经济干预出口）。</div>
+      <div class="lv">Lv2 消耗后 +10 剑气（每回合 1 次）｜ Lv3 击杀时免耗重置（R2.3 特许档）</div>
+      <div class="gate">前置：剑意已觉醒</div></div>
+    <div class="nc epic"><div class="nm">见切</div><div class="id">sw_base_jianqie · 2 级 · 反应类</div>
+      <div class="fx">敌方攻击落空（闪避/招架）时，消耗 10 剑气免费普攻反打（每回合 1 次；询问制）。剑意飞轮核心。</div>
+      <div class="lv">Lv2 反打 120%</div>
+      <div class="gate">前置：已持有任一招架标签节点</div></div>
+    <div class="nc epic"><div class="nm">斩铁</div><div class="id">sw_base_zhantie · 1 级</div>
+      <div class="fx">普攻宣言：消耗 3 层剑意 → 本次目标 DEF 视为 0（非 pure，格挡/暴击照常）。高 DEF 墙的剑士自解。</div>
+      <div class="gate">前置：剑意已觉醒</div></div>
+    <div class="nc epic"><div class="nm">二天一流</div><div class="id">sw_base_ertianyiliu · 2 级</div>
+      <div class="fx">姿态切换（迅捷）：攻势 = 普攻贯通身后 1 格（50%）；守势 = 受近战自动反击 50%（不产剑气，每回合 2 次）。</div>
+      <div class="lv">Lv2 均 70% ｜ ⚠ 背剑式局守势压制 = 待裁定 #5</div></div>
+    <div class="nc epic"><div class="nm">无想 ◆A/B 面</div><div class="id">sw_ss_wuxiang · 1 级</div>
+      <div class="ab">
+        <div class="face face-a"><b>A 面（居合）</b>居合击杀 → 本回合额外 1 次移动行动（唯一行动授予出口）</div>
+        <div class="face face-b"><b>B 面（剑域）</b>命中 ≥3 敌 → 下回合原格余波 60%（预告可见）</div>
+      </div>
+      <div class="gate">需 Lv5 转职完成（按形态单面展示）</div></div>
+  </div>
+
+  <h3 style="margin-top:20px;"><span class="pill legend">传奇 ×4</span> 4 点 ｜ 仅 Lv10/20 出现并保底 ｜ 规则级改写 ｜ 默认 1 级</h3>
+  <div class="node-grid">
+    <div class="nc legend"><div class="nm">一闪·极</div><div class="id">sw_base_yishanji</div>
+      <div class="fx">一闪无冷却；本回合内每多用一次消耗翻倍（10→20→40→80），回合结束重置。</div>
+      <div class="lv">适配条款：剑心通明改为「下回合首闪免费」；真闪储存改「首闪免费」= 待裁定 #2</div></div>
+    <div class="nc legend"><div class="nm">心剑合一</div><div class="id">sw_base_xinjianheyi</div>
+      <div class="fx">剑意上限 5→7；不随时间衰减，改为受伤掉 1 层（闪避不掉；自动伤害同样掉层）。考题从「过期前用掉」换成「别挨打」。</div>
+      <div class="gate">前置：已持有 ≥2 剑意标签节点 ｜ ⚠ +剑风 = 审查点 #1</div></div>
+    <div class="nc legend"><div class="nm">剑圣领域 ◆A/B 面</div><div class="id">sw_ss_lingyu</div>
+      <div class="ab">
+        <div class="face face-a"><b>A 面（居合）</b>居合变迅捷行动（每回合奥义仍限 1 次）——行动经济改写</div>
+        <div class="face face-b"><b>B 面（剑域）</b>周围 1 格常驻剑域：敌人进入受 30%（每敌每回合 1 次）</div>
+      </div>
+      <div class="gate">前置：已持有无想 + 转职完成</div></div>
+    <div class="nc legend"><div class="nm">剑海</div><div class="id">sw_ss_jianhai</div>
+      <div class="fx">剑气上限 100→120；溢出每 5 点 → 1 格内随机敌人 30% 剑气波（不产剑气，不可暴击）。</div>
+      <div class="lv">与一闪·极结构互斥；与起手式双视角（溢出流分流 / 囤积流增益）</div></div>
+  </div>
+</section>
+
+<section id="outside">
+  <h2>3. 池外强制内容</h2>
+  <table>
+    <thead><tr><th>时机</th><th>内容</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>Lv1（占 1 点）</td><td>锚点 4 选 1：真闪 / 背剑式 / 剑风 / 疾风怒涛</td><td>用户原设计不可改；剑风自带剑意觉醒；四锚点各有 ≥2 个池内显式协同节点 + 引用者清单（13 行挂接裁定）</td></tr>
+      <tr><td>Lv5（免费）</td><td>转职事件·奥义二选一：居合·一之太刀（单体处决 300% 必暴，击杀返 40）/ 八方剑域（2 格 area 130%，每命中 +1 层剑意）</td><td>不耗天赋点；先转职后抽选；决定无想 / 剑圣领域的 A/B 展示面</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="mech">
+  <h2>4. 关键机制裁定（五轮沉淀）</h2>
+  <div class="key-rule"><b>三桶制结算（R3.12）</b>：技能倍率桶（乘算入口）× 增伤词缀桶（桶内加算）× 暴击桶（独立，pure 锁 1.5x）。新增/替换伤害实例的基础倍率属①桶。</div>
+  <div class="key-rule"><b>事件 vs 奖励路径（R0.8 / R3.13）</b>：锚点改写默认只动奖励路径，事件挂接的节点照常生效（守心 × 背剑式判例通用化）；改写者承担引用者清单 + 适配义务。</div>
+  <div class="key-rule"><b>冷却经济干预（R0.9 / R2.3）</b>：重置/无视/缩减/替代限制器干预统一管辖，全模组唯一出口 = 剑心通明（限一闪）；传奇冷却结构改写承担适配 + 压测义务。</div>
+  <div class="key-rule"><b>反应类自动化（R0.6 / R3.11d）</b>：归类按设计本体的「有意义放弃理由」判定，自动化设置不改变结算归类；默认自动须保留改询问入口。</div>
+  <div class="key-rule"><b>升级档强度封顶（R5.5a/c）</b>：四级强度类别 × 稀有度封顶表；质变级内容不入升级档（R2.3 特许档除外）；传奇默认 1 级（数学强制）。</div>
+  <div class="key-rule warn"><b>回合外剑气防永动</b>：反击不产剑气（含守势）；回合外收入须显式声明 + 观察清单登记（含锚点敏感变体行：剑风局顺势斩净 0 / 见切净 -15、疾风局见切净 0）；全局硬上限仅为兜底不默认启用。</div>
+</section>
+
+<section id="decide">
+  <h2>5. ⚠ 待用户裁定 6 项（决策就绪，附录 K）</h2>
+  <div class="decide"><b>#1 背剑式系回合外剑气收入</b>：3 敌场景单次招架成功 ≈40 剑气（基准 4 倍），是否追加针对性规则？<small>现状：观察中，无规则</small></div>
+  <div class="decide"><b>#2 一闪·极覆盖真闪「储存 1 次」机制</b>（改为本回合首闪免费）是否符合锚点意图？<small>现状：适配条款占位</small></div>
+  <div class="decide"><b>#3 无刀取对 BOSS 级单位是否免疫</b>？<small>现状：BOSS 免疫（占位）</small></div>
+  <div class="decide"><b>#4 敌方 AI 是否做威胁规避</b>（绕 ZOC / 不攻击招架者）——招架构筑线整线存活前提。<small>现状：上提中，设计侧不假设（XCOM 2 / BG3 先例在案）</small></div>
+  <div class="decide"><b>#5 背剑式「不会进行反击动作」文义</b>：状态级压制（现默认：招架状态期间守势被压制）还是仅指招架自身反击？<small>现状：字面读法落稿，窄读法有书面回退路径</small></div>
+  <div class="decide"><b>#6 招架与姿态切换的迅捷槽共存规则</b>（迅捷拥堵的结构阀）。<small>现状：未定，监控级（矩阵已标注反协同）</small></div>
+</section>
+
+<section id="audit">
+  <h2>6. 数值审查点唯一正本（7 条，移交原型期）</h2>
+  <table>
+    <thead><tr><th>#</th><th>审查点</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>剑风 + 心剑合一：稳定 35 剑气/轮发动机（全池最大）</td></tr>
+      <tr><td>2</td><td>疾风怒涛 + 追影：单行动 4 段判定（+1 标准 = 8 段/回合）</td></tr>
+      <tr><td>3</td><td>真闪 + 剑心通明：单回合双真闪</td></tr>
+      <tr><td>4</td><td>剑圣领域 A 面：居合迅捷化的行动经济压强</td></tr>
+      <tr><td>5</td><td>背剑式 + 守势 + 残心：防御回合事件密度（随裁定 #5 重估）</td></tr>
+      <tr><td>6</td><td>必暴覆盖率 × 暴伤：③桶乘算位 vs ②桶加算位估值差（Diablo IV 1.2.0 先例）</td></tr>
+      <tr><td>7</td><td>背剑式局迅捷解锁节点选取率（迅捷槽拥堵）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  Canonical: <code>Ship_of_Theseus/data/talent-tree/v2/roster.md</code>（完整节点卡 + 锚点引用者清单 + 全部附录）·
+  规则基准: <code>v2/rules.md</code>（v3.1）· 审核档案: <code>v2/critique-r1..r5.md</code> ·
+  样式基准: <a href="architecture-consensus-v2.html">architecture-consensus-v2.html</a> ·
+  Generated S5-side-sot 2026-06-13 (Fable 5) · 评审版，定稿装配随附录 K 裁定更新
+</footer>
+
+</main>
+</body>
+</html>

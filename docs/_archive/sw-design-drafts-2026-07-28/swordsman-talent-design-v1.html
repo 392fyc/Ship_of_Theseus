@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>剑圣天赋设计 v1 — Fable 5 设计稿</title>
+<style>
+  :root {
+    --bg: #16161c;
+    --surface: #1f1f28;
+    --surface-2: #2a2a36;
+    --text: #e8e8ec;
+    --muted: #8a8a96;
+    --border: #3a3a48;
+    --t1: #d4af37;  /* Stage 0 锚点 金 */
+    --t2: #4a7fb8;  /* Stage 1 通用 蓝 */
+    --t3: #c8643c;  /* Stage 2 奥义 橙红 */
+    --t4: #5fa869;  /* Stage 3 展开 绿 */
+    --t5: #9a7ab8;  /* Stage 4 质变 紫 */
+    --qi: #d4af90;  /* 剑气 */
+    --intent: #7ab8d4; /* 剑意 */
+    --warn: #d97a4a;
+    --ok: #5fa869;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text);
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    margin: 0; padding: 32px 16px 64px; line-height: 1.55; }
+  main { max-width: 1080px; margin: 0 auto; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 32px; }
+  header h1 { margin: 0 0 6px; font-size: 22px; font-weight: 600; }
+  header .meta { color: var(--muted); font-size: 13px; margin: 0; }
+  section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+            padding: 20px 24px; margin-bottom: 20px; }
+  h2 { margin: 0 0 16px; font-size: 17px; font-weight: 600; color: #f0f0f4; }
+  h3 { margin: 18px 0 8px; font-size: 14px; font-weight: 600; color: #d8d8e0; }
+  p, li { font-size: 13.5px; }
+  code { background: var(--surface-2); padding: 1px 6px; border-radius: 3px; font-size: 12.5px; color: var(--qi); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px;
+          background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); margin-right: 4px; }
+  .pill.warn { background: rgba(217,122,74,.15); color: var(--warn); border-color: var(--warn); }
+  .pill.ok { background: rgba(95,168,105,.15); color: var(--ok); border-color: var(--ok); }
+  .pill.t1 { color: var(--t1); border-color: var(--t1); background: rgba(212,175,55,.1); }
+  .pill.t2 { color: var(--t2); border-color: var(--t2); background: rgba(74,127,184,.1); }
+  .pill.t3 { color: var(--t3); border-color: var(--t3); background: rgba(200,100,60,.12); }
+  .pill.t4 { color: var(--t4); border-color: var(--t4); background: rgba(95,168,105,.1); }
+  .pill.t5 { color: var(--t5); border-color: var(--t5); background: rgba(154,122,184,.12); }
+
+  .timeline { display: flex; margin: 16px 0 8px; border-radius: 6px; overflow: hidden; font-size: 12px; }
+  .timeline .seg { padding: 14px 10px; color: #fff; flex: 1; text-align: center;
+                   border-right: 2px solid var(--bg); }
+  .timeline .seg:last-child { border-right: none; }
+  .timeline .seg b { display: block; font-size: 13px; margin-bottom: 4px; }
+  .timeline .seg small { color: rgba(255,255,255,.85); font-size: 11px; display: block; }
+  .seg-t1 { background: #5a4a1e; flex: .55; }
+  .seg-t2 { background: #2d4f6e; flex: .9; }
+  .seg-t3 { background: #6e3d2d; flex: .55; }
+  .seg-t4 { background: #2d5a3d; flex: 1; }
+  .seg-t5 { background: #4a3a5a; flex: .9; }
+
+  .node-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .node-card { background: var(--surface-2); border: 1px solid var(--border); border-left: 4px solid;
+               border-radius: 6px; padding: 14px 16px; }
+  .node-card.t1 { border-left-color: var(--t1); }
+  .node-card.t2 { border-left-color: var(--t2); }
+  .node-card.t3 { border-left-color: var(--t3); }
+  .node-card.t4 { border-left-color: var(--t4); }
+  .node-card.t5 { border-left-color: var(--t5); }
+  .node-card .nm { font-size: 14.5px; font-weight: 600; margin-bottom: 2px; }
+  .node-card.t1 .nm { color: var(--t1); } .node-card.t2 .nm { color: var(--t2); }
+  .node-card.t3 .nm { color: var(--t3); } .node-card.t4 .nm { color: var(--t4); }
+  .node-card.t5 .nm { color: var(--t5); }
+  .node-card .id { font-size: 11px; color: var(--muted); font-family: Consolas, monospace; margin-bottom: 8px; }
+  .node-card .tip { font-size: 12.5px; color: #d8d8e0; background: rgba(0,0,0,.18);
+                    padding: 8px 10px; border-radius: 4px; margin: 8px 0; }
+  .node-card .syn { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .node-card .syn b { color: #c8c8d2; font-weight: 500; }
+  .ab { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+  .ab .face { padding: 8px 10px; border-radius: 4px; font-size: 12.5px; }
+  .ab .face-a { background: rgba(200,100,60,.1); border-left: 3px solid var(--t3); }
+  .ab .face-b { background: rgba(122,184,212,.08); border-left: 3px solid var(--intent); }
+  .ab .face b { display: block; font-size: 11.5px; margin-bottom: 3px; }
+  .ab .face-a b { color: var(--t3); } .ab .face-b b { color: var(--intent); }
+
+  .key-rule { background: rgba(74,127,184,.08); border-left: 3px solid var(--t2);
+              padding: 12px 14px; margin: 12px 0; font-size: 13px; border-radius: 0 4px 4px 0; }
+  .key-rule b { color: var(--t2); }
+  .key-rule.gold { background: rgba(212,175,55,.07); border-left-color: var(--t1); }
+  .key-rule.gold b { color: var(--t1); }
+
+  .audit-row { display: grid; grid-template-columns: 24px 1fr; gap: 12px;
+               padding: 10px 0; border-bottom: 1px dashed var(--border); align-items: start; }
+  .audit-row:last-child { border-bottom: none; }
+  .audit-row .num { width: 22px; height: 22px; border-radius: 50%; background: var(--surface-2);
+    color: var(--warn); font-size: 11px; font-weight: 700; display: flex; align-items: center;
+    justify-content: center; border: 1px solid var(--warn); }
+  .audit-row .body { font-size: 13px; }
+  svg { display: block; margin: 8px auto; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 32px;
+           border-top: 1px solid var(--border); padding-top: 16px; }
+  footer a { color: #a8c0e0; }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>剑圣天赋设计 v1 — 基础技能变形体系</h1>
+  <p class="meta">S5-side-sot · v1.1 · 2026-06-11 · Fable 5 设计稿 ·
+    <span class="pill ok">首轮回审 6 点已纳入</span>
+    <span class="pill">Stage 0 沿用用户原设计</span>
+    <span class="pill ok">零数值假节点</span>
+    <span class="pill warn">全部数值 = 原型占位</span></p>
+</header>
+
+<section id="philosophy">
+  <h2>0. 设计哲学</h2>
+  <div class="key-rule gold">
+    <b>一句话</b>：每个节点改写一条「事件 → 反应」链路——招架、闪避、击杀、ZOC、回合序、剑气溢出、受击
+    都是可被天赋重写的事件源。攻击不再是「使用技能造成一次伤害」的简单事件。
+  </div>
+  <table>
+    <thead><tr><th>硬要求</th><th>本稿落地方式</th></tr></thead>
+    <tbody>
+      <tr><td>节点真正改变玩法</td><td>19 新节点全部为 IV 形态变化 / V 联动 / III 牺牲换强，II 型纯数值 = 0（升级版 Lv2 数值强化不在此列）</td></tr>
+      <tr><td>节点间联动</td><td>第 4 节联动网络：飞轮回路 / 招架三层兑现 / 标记-兑现连段 / 区域双层网</td></tr>
+      <tr><td>入池按大阶段开放</td><td>5 个 Stage 门控（Lv1 / 2-4 / 5 / 6-9 / 10-14），池内扁平无链式锁</td></tr>
+      <tr><td>控制天赋数量</td><td>单局可见 23 节点、实选约 10（升级版占槽后更少），取舍比 ≈43%（业内健康区间 40-60%）</td></tr>
+      <tr><td>P0-1 A/B 面</td><td>「无想」「剑圣领域」按 Lv5 奥义形态单面展示，节点池零浪费</td></tr>
+      <tr><td>v1.1 觉醒门控</td><td>剑意系统默认休眠，由「剑意觉醒」节点或锚点剑风激活——资源系统本身成为构筑决策</td></tr>
+      <tr><td>v1.1 抽选 + 节点等级</td><td>每级抽 3 选 1；节点 1-3 级（Lv2 数值强化 / Lv3 追加质变）；升级版占抽选槽位</td></tr>
+      <tr><td>v1.1 全局护栏</td><td>敌方回合剑气上限 15（占位）/ 回合外反应净成本 / 冷却重置 ≤1 / 行动点授予 ≤1（仅移动）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="stages">
+  <h2>1. 入池阶段总览</h2>
+  <div class="timeline">
+    <div class="seg seg-t1"><b>Stage 0 · Lv1</b><small>开局基调锚点<br/>4 选 1 互斥（用户原设计）</small></div>
+    <div class="seg seg-t2"><b>Stage 1 · Lv2-4</b><small>转职前事件链<br/>池 7 选 3（抽选制）</small></div>
+    <div class="seg seg-t3"><b>Stage 2 · Lv5</b><small>剑圣转职<br/>奥义 2 选 1 定 A/B 面</small></div>
+    <div class="seg seg-t4"><b>Stage 3 · Lv6-9</b><small>剑圣核心变形<br/>池 6 选 3-4</small></div>
+    <div class="seg seg-t5"><b>Stage 4 · Lv10-14</b><small>质变终局<br/>池 4 选 2</small></div>
+  </div>
+  <p style="color:var(--muted); font-size:12px;">
+    前置依赖：无想 / 剑圣领域 ← 已选定奥义形态；剑心通明 / 斩铁 / 心剑合一 ← <b style="color:var(--intent);">剑意已觉醒</b>。
+    其余全部<b style="color:#d8d8e0;">扁平池 + 阶段门控 + 每级抽 3 选 1</b>（池累积制：早期未选节点继续留池）。
+  </p>
+</section>
+
+<section id="draft">
+  <h2>1.5 抽选机制 · 节点等级 · 觉醒门控（v1.1 新增）</h2>
+  <div class="key-rule">
+    <b>抽选制</b>：每次升级 1 天赋点 → 从「已开放各 Stage 池 + 已持有节点的升级版」抽 3 选 1。
+    强制节点（Lv1 锚点 / Lv5 奥义）不走抽选。池累积制：大阶段只增不减。
+    标签权重轻量引导协同，<b>保证 Lv2 首抽至少 1 个锚点协同候选</b>。
+  </div>
+  <h3>节点等级（升级版占抽选槽位）</h3>
+  <table>
+    <thead><tr><th>示例节点</th><th>Lv1（本体）</th><th>Lv2 = 数值强化</th><th>Lv3 = 追加质变</th></tr></thead>
+    <tbody>
+      <tr><td style="color:var(--t2);">残心</td><td>斩返 150% 必中</td><td>斩返 180% 必中</td><td>斩返可储存 2 次</td></tr>
+      <tr><td style="color:var(--t2);">踏歌</td><td>攻后步移 1 格</td><td>步移可穿过敌方占位格</td><td>步移 2 格</td></tr>
+      <tr><td style="color:var(--t4);">见切</td><td>每回合 1 次，10 剑气</td><td>反打伤害 120%</td><td>反打必定命中（刻意不加次数 / 不降成本——护栏净成本范式）</td></tr>
+    </tbody>
+  </table>
+  <h3>剑意觉醒门控</h3>
+  <p style="font-size:13px;">剑意层数系统<b style="color:var(--intent);">默认休眠</b>。激活二选一：Stage 1 节点
+    <code>sw_t2_juexing</code>（剑意觉醒）或 Lv1 锚点<b style="color:var(--t1);">剑风</b>（自带觉醒）。
+    受门控：剑心通明 / 斩铁 / 心剑合一（觉醒前不入池）。不受门控：破绽（必暴独立成立）、
+    剑域 B（回退条款：未觉醒时每命中改 +5 剑气）。
+    <b>设计意图</b>：非剑意剑圣（纯剑气 / 行动经济流）成为合法构筑。</p>
+  <h3>决策旅程走查（回应回审点 4）</h3>
+  <table>
+    <thead><tr><th>等级</th><th>玩家面对什么</th></tr></thead>
+    <tbody>
+      <tr><td>Lv1</td><td>锚点 4 选 1 定基调（强制全量呈现）</td></tr>
+      <tr><td>Lv2</td><td>第一抽：3 候选含 ≥1 锚点协同项——第一次「构筑感」时刻</td></tr>
+      <tr><td>Lv3-4</td><td>池 7 内继续抽，「新节点 vs 升级已有」的第一次取舍</td></tr>
+      <tr><td>Lv5</td><td>奥义强制二选一 → 定 A/B 面 + 剑意路线价值结构</td></tr>
+      <tr><td>Lv6-9</td><td>Stage 3 池并入，抽选空间最大，构筑成型期</td></tr>
+      <tr><td>Lv10-14</td><td>Stage 4 并入，「再补协同 vs 抢质变」终局取舍</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="resources">
+  <h2>2. 资源循环总图（全节点就位后）</h2>
+  <svg viewBox="0 0 900 380" width="100%" style="max-width:900px;">
+    <defs>
+      <marker id="arr-qi" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 z" fill="#d4af90"/></marker>
+      <marker id="arr-in" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 z" fill="#7ab8d4"/></marker>
+    </defs>
+    <!-- 剑气池 -->
+    <rect x="330" y="40" width="240" height="64" rx="8" fill="#2a2a36" stroke="#d4af90" stroke-width="1.5"/>
+    <text x="450" y="66" fill="#d4af90" font-size="15" font-weight="700" text-anchor="middle">剑气 0-100</text>
+    <text x="450" y="88" fill="#8a8a96" font-size="11" text-anchor="middle">跨回合保留 · 跨战斗清零 · 无衰减</text>
+    <!-- 剑气输入 -->
+    <text x="60" y="36" fill="#c8c8d2" font-size="12">直接物理伤害（被动）+5</text>
+    <line x1="240" y1="32" x2="326" y2="56" stroke="#d4af90" stroke-width="1.3" marker-end="url(#arr-qi)"/>
+    <text x="60" y="66" fill="#c8c8d2" font-size="12">招架成功（硬编码）+5</text>
+    <line x1="226" y1="62" x2="326" y2="70" stroke="#d4af90" stroke-width="1.3" marker-end="url(#arr-qi)"/>
+    <text x="60" y="96" fill="#4a7fb8" font-size="12">纳刀（非攻击回合）+15</text>
+    <line x1="232" y1="92" x2="326" y2="84" stroke="#d4af90" stroke-width="1.3" marker-end="url(#arr-qi)"/>
+    <text x="60" y="126" fill="#4a7fb8" font-size="12">顺势斩（ZOC 离开）+5</text>
+    <line x1="226" y1="122" x2="326" y2="98" stroke="#d4af90" stroke-width="1.3" marker-end="url(#arr-qi)"/>
+    <!-- 剑气输出 -->
+    <text x="660" y="36" fill="#c8c8d2" font-size="12">一闪 -10（极: 10/20/40/80 递增）</text>
+    <line x1="574" y1="56" x2="652" y2="32" stroke="#d4af90" stroke-width="1.3" marker-end="url(#arr-qi)"/>
+    <text x="660" y="66" fill="#5fa869" font-size="12">见切反打 -10</text>
+    <line x1="574" y1="70" x2="652" y2="62" stroke="#d4af90" stroke-width="1.3" marker-end="url(#arr-qi)"/>
+    <text x="660" y="96" fill="#c8643c" font-size="12">奥义 -80（居合击杀返 40）</text>
+    <line x1="574" y1="84" x2="652" y2="92" stroke="#d4af90" stroke-width="1.3" marker-end="url(#arr-qi)"/>
+    <text x="660" y="126" fill="#4a7fb8" font-size="12">溢出 → 每 5 点一道剑气波</text>
+    <line x1="574" y1="98" x2="652" y2="122" stroke="#d4af90" stroke-width="1.3" marker-end="url(#arr-qi)"/>
+
+    <!-- 剑意池 -->
+    <rect x="330" y="220" width="240" height="64" rx="8" fill="#2a2a36" stroke="#7ab8d4" stroke-width="1.5"/>
+    <text x="450" y="246" fill="#7ab8d4" font-size="15" font-weight="700" text-anchor="middle">剑意 0-5 层（心剑: 0-7）</text>
+    <text x="450" y="268" fill="#8a8a96" font-size="11" text-anchor="middle">每层独立 2 回合 · FIFO 消耗 · UI 透明</text>
+    <!-- 剑意输入 -->
+    <text x="60" y="216" fill="#c8c8d2" font-size="12">暴击（概率）+1 层</text>
+    <line x1="196" y1="212" x2="326" y2="236" stroke="#7ab8d4" stroke-width="1.3" marker-end="url(#arr-in)"/>
+    <text x="60" y="246" fill="#5fa869" font-size="12">破绽兑现（确定）+1 层</text>
+    <line x1="226" y1="242" x2="326" y2="252" stroke="#7ab8d4" stroke-width="1.3" marker-end="url(#arr-in)"/>
+    <text x="60" y="276" fill="#c8643c" font-size="12">剑域 每命中 +1 层</text>
+    <line x1="204" y1="272" x2="326" y2="268" stroke="#7ab8d4" stroke-width="1.3" marker-end="url(#arr-in)"/>
+    <!-- 剑意输出 -->
+    <text x="660" y="216" fill="#4a7fb8" font-size="12">剑心通明 -1 层 → 一闪/招架冷却完成</text>
+    <line x1="574" y1="236" x2="652" y2="212" stroke="#7ab8d4" stroke-width="1.3" marker-end="url(#arr-in)"/>
+    <text x="660" y="246" fill="#5fa869" font-size="12">斩铁 -3 层 → DEF 归零（击杀返 1）</text>
+    <line x1="574" y1="252" x2="652" y2="242" stroke="#7ab8d4" stroke-width="1.3" marker-end="url(#arr-in)"/>
+    <text x="660" y="276" fill="#9a7ab8" font-size="12">心剑: 衰减改「受击 -1 层」</text>
+    <line x1="574" y1="268" x2="652" y2="272" stroke="#7ab8d4" stroke-width="1.3" marker-end="url(#arr-in)"/>
+    <!-- 跨池联动 -->
+    <path d="M 450 104 L 450 216" stroke="#5fa869" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#arr-in)"/>
+    <text x="462" y="160" fill="#5fa869" font-size="11.5">见切飞轮: 剑意→敏捷→闪避→反打→暴击→剑意</text>
+    <text x="462" y="178" fill="#8a8a96" font-size="10.5">（阀: 10 剑气/次 + 每回合 1 次）</text>
+    <!-- 剑风改写注记 -->
+    <text x="450" y="340" fill="#d4af37" font-size="11.5" text-anchor="middle">
+      锚点「剑风」改写: 伤害被动断开 → 剑意层数×5 每轮进账（+心剑不衰减 = 35/轮, 全稿最大数值审查点）</text>
+  </svg>
+  <div class="key-rule" style="border-left-color:var(--warn); background:rgba(217,122,74,.07);">
+    <b style="color:var(--warn);">全局护栏（v1.1）</b>：① 敌方回合剑气获取上限 15（占位）——防招架+守势+顺势斩叠加早期永动；
+    ② 回合外反应净成本范式（见切 -10+5 = 净 -5 是范本）；③ 冷却重置全模组 ≤1（剑心通明）；
+    ④ 行动点授予 ≤1 且仅移动行动（无想 A 面）——为中盘行动点扩张预留平衡空间。
+  </div>
+</section>
+
+<section id="s1">
+  <h2>3. 节点总览（18 新节点）</h2>
+
+  <h3><span class="pill t2">Stage 1 · Lv2-4</span> 转职前事件链池（7 选 3 · 抽选制）</h3>
+  <div class="node-grid">
+    <div class="node-card t2">
+      <div class="nm">剑意觉醒 ◆构筑门</div><div class="id">sw_t2_juexing · IV 形态 · 资源解锁（v1.1 新增）</div>
+      <div class="tip">觉醒剑意：暴击 +1 层（独立 2 回合计时，上限 5），每层提升敏捷与速度。觉醒后剑意标签节点进入抽选池。</div>
+      <div class="syn"><b>门控</b>：剑心通明 / 斩铁 / 心剑合一以此为前置；锚点剑风自带本效果（剑风局不入池）</div>
+    </div>
+    <div class="node-card t2">
+      <div class="nm">残心</div><div class="id">sw_t2_canxin · V 联动 · 招架→普攻</div>
+      <div class="tip">招架成功后，下一次普攻升级「斩返」：150% 物理且必定命中。保留至使用，不可叠加。</div>
+      <div class="syn"><b>联动</b>：招架事件树第 1 层；防御回合变蓄力回合</div>
+    </div>
+    <div class="node-card t2">
+      <div class="nm">踏歌</div><div class="id">sw_t2_tage · IV 形态 · 普攻+步法</div>
+      <div class="tip">普攻结算后可立即免费移动 1 格（每回合 1 次，正常触发 ZOC）。</div>
+      <div class="syn"><b>联动</b>：+追影 = 后手贴脸双击再撤；hit-and-run 职业改造</div>
+    </div>
+    <div class="node-card t2">
+      <div class="nm">纳刀</div><div class="id">sw_t2_nadao · IV 形态 · 新迅捷动作</div>
+      <div class="tip">本回合未进行攻击类行动时可用：回合结束 +15 剑气，下回合首次攻击类行动必定命中。</div>
+      <div class="syn"><b>联动</b>：行军死回合变蓄力回合；居合 80 消耗的前置铺垫；剑风流的剑气补给</div>
+    </div>
+    <div class="node-card t2">
+      <div class="nm">剑心通明</div><div class="id">sw_t2_jianxin · IV 形态 · 剑意首个消耗出口</div>
+      <div class="tip">迅捷动作「剑心」：消耗 1 层剑意（FIFO），立即完成一闪或招架的冷却。</div>
+      <div class="syn"><b>前置</b>：剑意已觉醒 · <b>全模组唯一冷却重置</b>（护栏 ③）；废层利用；⚠ 真闪储存+重置 = 单回合双真闪（审查点 #3）</div>
+    </div>
+    <div class="node-card t2">
+      <div class="nm">顺势斩</div><div class="id">sw_t2_shunshi · V 联动 · ZOC 借机攻击</div>
+      <div class="tip">敌人从你的控制区离开时，立即对其造成 30% 物理 + 获得 5 剑气（每回合 1 次，不触发追击）。</div>
+      <div class="syn"><b>联动</b>：复用既有 ZOC 触发点，不新增规则；+剑圣领域 B 面 = 进出双层网</div>
+    </div>
+    <div class="node-card t2">
+      <div class="nm">剑气外溢</div><div class="id">sw_t2_waiyi · IV 形态 · 溢出转化</div>
+      <div class="tip">剑气超上限部分每 5 点 → 对 1 格内随机敌人 30% 物理剑气波（area，不触发剑意被动）。</div>
+      <div class="syn"><b>联动</b>：「放奥义 vs 持满槽」真选择；疾风怒涛快速积累的下游</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:24px;"><span class="pill t3">Stage 2 · Lv5</span> 剑圣转职 · 奥义二选一（定 A/B 面）</h3>
+  <div class="node-grid">
+    <div class="node-card t3">
+      <div class="nm">居合·一之太刀【A 形态】</div><div class="id">sw_t3_ougi_iai · 单体处决轴</div>
+      <div class="tip">80 剑气：相邻单体 300% 物理，必定暴击（被格挡则不暴）。击杀 → 返还 40 剑气（v1.1：删除冷却重置，收口剑心通明）。标准行动。</div>
+      <div class="syn"><b>定调</b>：找残血一刀终结；必暴 = 稳定剑意来源</div>
+    </div>
+    <div class="node-card t3">
+      <div class="nm">八方剑域【B 形态】</div><div class="id">sw_t3_ougi_keniki · 范围引擎轴</div>
+      <div class="tip">80 剑气：自身 2 格内全体 130% 物理（area 不触发反击）。每命中 1 敌 +1 层剑意。标准行动。</div>
+      <div class="syn"><b>定调</b>：进人堆开域；「剑气换剑意」汇率转换器，点火所有剑意消耗节点；未觉醒回退：每命中改 +5 剑气</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:24px;"><span class="pill t4">Stage 3 · Lv6-9</span> 剑圣核心变形池（6 选 3-4）</h3>
+  <div class="node-grid">
+    <div class="node-card t4">
+      <div class="nm">无想 ◆A/B 面</div><div class="id">sw_t4_wuxiang · V 联动 · 奥义事件链</div>
+      <div class="ab">
+        <div class="face face-a"><b>A 面（居合）</b>居合击杀 → 本回合额外 1 次移动行动（疾风迅雷弱化版）</div>
+        <div class="face face-b"><b>B 面（剑域）</b>命中 ≥3 敌 → 下回合开始原格余波 60% 物理（预告式延迟伤害）</div>
+      </div>
+      <div class="syn"><b>联动</b>：A+踏歌 = 连斩游走；B+顺势斩 = 余波逃兵撞 ZOC</div>
+    </div>
+    <div class="node-card t4">
+      <div class="nm">二天一流</div><div class="id">sw_t4_ertian · IV 形态 · 姿态机</div>
+      <div class="tip">迅捷切换姿态：<b>攻势</b> = 普攻贯通目标身后 1 格（50%）；<b>守势</b> = 受近战攻击自动反击 50%（每回合 2 次，不触发追击）。</div>
+      <div class="syn"><b>联动</b>：迅捷槽四选一竞争的核心成员；守势把被围殴变剑气产出</div>
+    </div>
+    <div class="node-card t4">
+      <div class="nm">见切</div><div class="id">sw_t4_jianqie · V 联动 · 落空反打</div>
+      <div class="tip">敌方攻击落空（闪避/招架成功）时，可消耗 10 剑气立即免费普攻该敌（每回合 1 次，不触发追击）。</div>
+      <div class="syn"><b>联动</b>：⚠ 剑意飞轮核心——敏捷↑→闪避↑→反打→暴击→剑意↑（双重阀限制）</div>
+    </div>
+    <div class="node-card t4">
+      <div class="nm">斩铁</div><div class="id">sw_t4_zhantie · III 牺牲换强 · 宣言破防</div>
+      <div class="tip">普攻宣言：消耗 3 层剑意（FIFO）→ 本次目标 DEF 视为 0（非 pure，格挡/暴击规则正常）。击杀 → 返还 1 层剑意（v1.1：删除冷却重置）。</div>
+      <div class="syn"><b>前置</b>：剑意已觉醒；高 DEF 墙的剑士自解；与剑心争夺剑意预算（消费分层）</div>
+    </div>
+    <div class="node-card t4">
+      <div class="nm">追影</div><div class="id">sw_t4_zhuiying · IV 形态 · 追击条件改写</div>
+      <div class="tip">主动攻击「本回合已行动过」的敌人必定触发追击（无视速度差）。反击时依然不触发追击。</div>
+      <div class="syn"><b>联动</b>：回合序变成可阅读资源；⚠ +疾风怒涛 = 单行动 4 段判定（审查点 #2）</div>
+    </div>
+    <div class="node-card t4">
+      <div class="nm">破绽</div><div class="id">sw_t4_pozhan · V 联动 · 标记-兑现</div>
+      <div class="tip">一闪命中施加「破绽」标记（每回合 1 个，持续至被攻击）。对带标记敌人的下一次攻击行动必定暴击（被格挡则不暴）。</div>
+      <div class="syn"><b>联动</b>：暴击从赌概率变成打连段，剑意引擎下限保底；真闪 = 最准标记器</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:24px;"><span class="pill t5">Stage 4 · Lv10-14</span> 质变终局池（4 选 2）</h3>
+  <div class="node-grid">
+    <div class="node-card t5">
+      <div class="nm">无刀取</div><div class="id">sw_t5_wudaoqu · IV 形态 · 招架→缴械</div>
+      <div class="tip">招架成功时缴械攻击者：其下回合无法进行攻击类行动。每敌每场战斗限 1 次。</div>
+      <div class="syn"><b>联动</b>：招架事件树第 3 层（斩返+反打+缴械三层兑现）；自带防滚雪球结构</div>
+    </div>
+    <div class="node-card t5">
+      <div class="nm">一闪·极</div><div class="id">sw_t5_yishanji · IV 形态 · 冷却制→递增消耗制</div>
+      <div class="tip">一闪不再有冷却。本回合内每多用一次，剑气消耗翻倍（10→20→40→80），回合结束重置。</div>
+      <div class="syn"><b>联动</b>：Hades 式「可以贪，贪有代价」；锚点适配：真闪储存改为本回合首次免费</div>
+    </div>
+    <div class="node-card t5">
+      <div class="nm">剑圣领域 ◆A/B 面</div><div class="id">sw_t5_lingyu · IV 形态 · 终局规则改写</div>
+      <div class="ab">
+        <div class="face face-a"><b>A 面（居合）</b>居合变为迅捷行动（每回合限 1 次）——行动经济改写，普攻+居合同回合</div>
+        <div class="face face-b"><b>B 面（剑域）</b>周围 1 格常驻剑域：敌人进入受 30% 物理（每敌每回合 1 次）——本体变地形</div>
+      </div>
+      <div class="syn"><b>联动</b>：A 面迅捷槽要价极高（审查点 #4）；B+顺势斩 = 进出双层网完全体</div>
+    </div>
+    <div class="node-card t5">
+      <div class="nm">心剑合一</div><div class="id">sw_t5_xinjian · IV 形态 · 衰减语义改写</div>
+      <div class="tip">剑意上限 5→7。不再随时间衰减，改为：每次受到伤害失去 1 层（招架降伤仍算受伤；完全闪避不掉层）。</div>
+      <div class="syn"><b>前置</b>：剑意已觉醒；考题从「过期前用掉」换成「别挨打」；⚠ +剑风 = 35 剑气/轮发动机（审查点 #1）</div>
+    </div>
+  </div>
+</section>
+
+<section id="anchors">
+  <h2>4. 锚点交互裁定（Stage 0 × 新节点）</h2>
+  <table>
+    <thead><tr><th>锚点（用户原设计）</th><th>受影响节点</th><th>裁定</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="3" style="color:var(--t1);">真闪<br/><small style="color:var(--muted);">指向位移+储存</small></td>
+        <td>破绽</td><td>指向单体 = 最准标记器（强协同，有意设计）</td></tr>
+      <tr><td>一闪·极</td><td><b>锚点适配条款</b>：储存机制改写为「本回合首次一闪免费」</td></tr>
+      <tr><td>剑心通明</td><td>⚠ 储存+冷却重置 = 单回合双真闪，数值审查点</td></tr>
+      <tr><td rowspan="3" style="color:var(--t1);">剑风<br/><small style="color:var(--muted);">资源循环重构</small></td>
+        <td>剑意系统</td><td><b>自带剑意觉醒</b>（锚点捆绑条款 v1.1）：剑风资源循环以剑意层数为轴，选剑风 = Lv1 即激活</td></tr>
+      <tr><td>纳刀 / 顺势斩 / 见切</td><td>三者剑气收入是节点自带路径、不走伤害被动 → 剑风流的补给来源（有意设计）</td></tr>
+      <tr><td>心剑合一</td><td>⚠ 层数×5 每轮 + 不衰减 = 稳定 35/轮，<b>全稿最大数值审查点</b></td></tr>
+      <tr><td style="color:var(--t1);">背剑式<br/><small style="color:var(--muted);">招架 AOE 反伤</small></td>
+        <td>残心 / 无刀取 / 守势</td><td>招架成功判定保留 → 全部兼容；防御回合事件密度高，数值审查</td></tr>
+      <tr><td style="color:var(--t1);">疾风怒涛<br/><small style="color:var(--muted);">普攻 40%×2</small></td>
+        <td>残心 / 斩铁 / 破绽 / 追影</td><td>宣言/强化按「攻击行动」整体生效，两段均享受；⚠ +追影 = 4 段判定需验证</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="swift">
+  <h2>5. 迅捷槽竞争设计（隐性行动经济深化）</h2>
+  <div class="key-rule">
+    <b>设计点</b>：迅捷槽从「反正用招架」变成每回合真决策——以下 5 个能力全部争抢唯一迅捷槽。
+  </div>
+  <table>
+    <thead><tr><th>迅捷选项</th><th>来源</th><th>放弃的代价</th></tr></thead>
+    <tbody>
+      <tr><td>招架</td><td>基础技能</td><td>防御与招架事件树（残心/见切/无刀取）全部空转</td></tr>
+      <tr><td>纳刀</td><td>sw_t2_nadao</td><td>+15 剑气与必中保险（且与攻击互斥）</td></tr>
+      <tr><td>剑心</td><td>sw_t2_jianxin</td><td>冷却经济（一闪/招架重置）</td></tr>
+      <tr><td>切姿态</td><td>sw_t4_ertian</td><td>攻守模式锁定在上回合的选择</td></tr>
+      <tr><td>居合（A 面终局）</td><td>sw_t5_lingyu A</td><td>当回合的防御/蓄力全放弃 = 全攻宣言</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="audit">
+  <h2>6. 数值审查点（critic 派发输入，按优先级）</h2>
+  <div class="audit-row"><div class="num">1</div><div class="body">
+    <b>剑风 + 心剑合一</b> — 剑意不衰减下「层数×5 每轮」成为稳定 35 剑气/轮发动机，可能击穿剑气消耗设计。</div></div>
+  <div class="audit-row"><div class="num">2</div><div class="body">
+    <b>疾风怒涛 + 追影</b> — 单攻击行动最多 4 段判定（2 段 × 追击 2 段），暴击/剑气触发密度最高组合。</div></div>
+  <div class="audit-row"><div class="num">3</div><div class="body">
+    <b>真闪 + 剑心通明</b> — 储存 + 冷却重置 = 单回合双真闪（160% 伤害 + 双位移）。</div></div>
+  <div class="audit-row"><div class="num">4</div><div class="body">
+    <b>剑圣领域 A 面</b> — 居合迅捷化后「普攻 + 奥义」同回合；80 剑气 + 每回合 1 次 + 迅捷槽竞争三重刹车待实测。</div></div>
+  <div class="audit-row"><div class="num">5</div><div class="body">
+    <b>背剑式 + 守势 + 残心</b> — 防御回合伤害事件密度（AOE×2 + 自动反击×2 + 斩返储存）的总量审查。</div></div>
+</section>
+
+<section id="ai-deps">
+  <h2>6.5 AI 行为需求清单（v1.1，回应回审点 5）</h2>
+  <table>
+    <thead><tr><th>节点</th><th>依赖的 AI 行为</th><th>AI 缺失时的后果</th><th>备选方案</th></tr></thead>
+    <tbody>
+      <tr><td style="color:var(--t2);">顺势斩</td><td>敌人有脱离 / 换位行为（远程风筝、治疗后撤）</td>
+        <td>无脑近身 AI 下触发趋零，节点失效</td><td>触发扩展为「在你控制区内移动」也触发</td></tr>
+      <tr><td style="color:var(--t5);">剑圣领域 B 面</td><td>AI 评估进域代价（绕行 / 远程压制）</td>
+        <td>AI 白送进域伤害</td><td>数值压低；每敌每回合 1 次已是下限</td></tr>
+      <tr><td style="color:var(--t4);">守势（二天一流）</td><td>AI 攻击目标选择（不无脑围殴守势单位）</td>
+        <td>守势反击变成稳定免费输出</td><td>反击次数上限（2/回合）已是阀门</td></tr>
+      <tr><td style="color:var(--t4);">无想 B 面余波</td><td>AI 规避预告格</td>
+        <td>余波变成稳定二段伤害（超预期）</td><td>预告格高亮可见，AI 读格子规避</td></tr>
+    </tbody>
+  </table>
+  <p style="color:var(--muted); font-size:12px;">
+    本清单是<b style="color:#d8d8e0;">战斗 AI 设计任务的需求输入</b>。基线要求：敌 AI 至少具备「远程保持距离」「受威胁换位」两类行为；
+    若 AI 保持纯进攻型，上述 4 节点需启用备选方案或重设计。
+  </p>
+</section>
+
+<section id="pending">
+  <h2>7. 待决问题（需用户裁定）</h2>
+  <table>
+    <thead><tr><th>问题</th><th>本稿占位 / 建议</th></tr></thead>
+    <tbody>
+      <tr><td><b>剑意每层多属性复合加成数值</b>（2026-05-25 选定方向未给数）</td><td>暂以「敏捷+速度」占位</td></tr>
+      <tr><td>基础暴击率</td><td>破绽已提供操作保底，建议基线可压低</td></tr>
+      <tr><td>剑意单回合获得封顶（B3）</td><td>建议：常规暴击每回合至多 +2 层，剑域明示获取不受限</td></tr>
+      <tr><td>满层后再暴击的处理</td><td>建议：丢失（简单清晰）</td></tr>
+      <tr><td>招架成功 +X 剑气终认</td><td>暂按 5</td></tr>
+      <tr><td>剑气上限终认</td><td>本稿按 100 锚定（外溢/一闪·极数值依赖）</td></tr>
+      <tr><td>无刀取对 BOSS 是否免疫</td><td>建议：BOSS 免疫，精英限 1 次</td></tr>
+      <tr><td>原版一闪下破绽标记给谁</td><td>首个命中 或 UI 指定（工程细节）</td></tr>
+      <tr><td>剑风「每次伤害」是否含追加本身（example 遗留）</td><td>建议：不包含（断循环标记，与外溢/余波同构）</td></tr>
+      <tr><td>疾风怒涛两段是否同动画（example 遗留）</td><td>工程侧决定</td></tr>
+      <tr><td>敌方回合剑气获取上限数值终认（v1.1 护栏）</td><td>占位 15，原型期调</td></tr>
+      <tr><td>全部节点 Lv2 / Lv3 升级版设计补全</td><td>现有示例：残心 / 踏歌 / 见切</td></tr>
+      <tr><td>未觉醒构筑的抽选池保底（Stage 3/4 池缩小）</td><td>非剑意候选数量需保证</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="refs">
+  <h2>8. 业内参考映射</h2>
+  <table>
+    <thead><tr><th>业内设计</th><th>借鉴位置</th><th>追溯</th></tr></thead>
+    <tbody>
+      <tr><td>Hades 冲刺连用资源代价</td><td>一闪·极 递增消耗</td><td>A1 §2.E</td></tr>
+      <tr><td>Hades 2 Hex 资源转换</td><td>剑域「剑气换剑意」</td><td>A1 §3.F</td></tr>
+      <tr><td>Hades 2 Aspect 形态定调</td><td>奥义 A/B 双形态</td><td>A1 §3.E</td></tr>
+      <tr><td>火纹 疾风迅雷（弱化）</td><td>无想 A 面</td><td>A2 §设计学综述</td></tr>
+      <tr><td>火纹 追击条件体系</td><td>追影 或门改写</td><td>A1 §1</td></tr>
+      <tr><td>Into the Breach 预告延迟伤害</td><td>无想 B 面余波</td><td>A2 §设计学综述</td></tr>
+      <tr><td>陷阵之志/鬼泣 标记-引爆</td><td>破绽 两段结构</td><td>A2 §设计学综述</td></tr>
+      <tr><td>D&amp;D/BG3 借机攻击</td><td>顺势斩 挂接 ZOC</td><td>A2 §长尾</td></tr>
+      <tr><td>只狼 见切 / 不挨打剑圣</td><td>见切 / 心剑合一</td><td>A2 §长尾交叉验证</td></tr>
+      <tr><td>Slay the Spire 蓄力牌</td><td>纳刀</td><td>A2 §设计学综述</td></tr>
+      <tr><td>Ravenswatch 充能消耗天赋</td><td>剑心通明</td><td>A1 §4</td></tr>
+      <tr><td>Gunfire Reborn 溢出转化</td><td>剑气外溢</td><td>A1 §2.E</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  Canonical: <code>Ship_of_Theseus/data/talent-tree/swordsman-design-v1.md</code>（完整节点卡片 + 机制细节 + 合规自检）·
+  样式基准: <a href="architecture-consensus-v2.html">architecture-consensus-v2.html</a> ·
+  Generated S5-side-sot 2026-06-10 · v1.1 revised 2026-06-11 (Fable 5)
+</footer>
+
+</main>
+</body>
+</html>

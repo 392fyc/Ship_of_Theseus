@@ -18,7 +18,7 @@ description: SoT 美术素材审核 lane（Claude 专用）：审核 Codex 产�
 
 1. Ship `AGENTS.md`；roots 按 `~/.claude/mercury-roots.local.json` 解析，不猜路径。
 2. VA-6 规格：`dev_doc/skillbar-design/bottom-dashboard-combined-visual-design-spec.md`。
-3. KB 现行视觉裁决：`git -C <kb_root> show origin/master:04-Assets/visual-style-decisions.md`（固定 vault 工作区常被其他线路占用且有未提交改动，只读默认分支）。
+3. KB 现行视觉裁决：`git show origin/develop:docs/04-Assets/visual-style-decisions.md`（读集成分支上已合并的版本）。
 4. `assets/prototype/visual_style/sample_manifest.json` v3（五个锚点 + clean_v2 的 SHA 绑定）。
 
 ## 审核流程
@@ -39,7 +39,7 @@ description: SoT 美术素材审核 lane（Claude 专用）：审核 Codex 产�
 - Claude 看图会忽略 alpha，透明区残留 RGB 会直接显示；一律先合成到已知底色再判断。
 - Penpot：应用 2.18.1，本机 MCP 插件 2.17.2（服务哈希比对确认）。冒烟测试通过。插件无 `user:read`，不要读 `currentUser`/`activeUsers`；组件方法是 `isComponentMainInstance()`；`component.instance()` 可能自动放进最近的画板，需显式改父级；`openPage` 会切换用户可见页面，结束前必须切回；`page.remove()` 可能让任务超时，放最后并重新读取确认。
 - Godot 4.6.3（安装位置见本机配置，不写进仓库）；MCP 服务 2.16.0、仓内插件 2.15.0（版本不一致仅告警）。编辑器监听 127.0.0.1:6550，同一时间只开一个编辑器，用完关闭，避免 Codex 连到错误工作树。打开编辑器会把 `project.godot` 改成只有换行符差异，不要提交。
-- Obsidian MCP 连不上时，KB 只读 Git；写入等 MCP 恢复并按 sot-kb-write。`gh` 未登录时无法读 Issue/PR。
+- KB 写入在任务工作树的 `docs/` 中按 sot-kb-write 进行。`gh` 未登录时无法读 Issue/PR。
 
 ## 基线观察（锚点，不是本轮审核结论）
 

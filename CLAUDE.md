@@ -24,7 +24,7 @@ The AGENTS.md above holds the shared project rules, including the Mercury-manage
 
 ## 根目录解析
 
-- Ship 根目录依次从 SOT_SHIP_ROOT、用户级本地 roots 文件 ~/.claude/mercury-roots.local.json 的 roots.ship_root、以及当前 Ship 仓被忽略的 .codex/project/sot-roots.local.toml 的 [roots].ship_root 解析。设计库与固定 KB vault 分别优先使用 SOT_DESIGNLIB_ROOT、SOT_KB_ROOT，再从可信用户级 roots 提供项或已解析的 Ship 本地 roots 文件读取明确配置的值。活跃记忆根按 AGENTS.md「活跃记忆根」一节解析。
+- Ship 根目录依次从 SOT_SHIP_ROOT、用户级本地 roots 文件 ~/.claude/mercury-roots.local.json 的 roots.ship_root、以及当前 Ship 仓被忽略的 .codex/project/sot-roots.local.toml 的 [roots].ship_root 解析。设计库优先使用 SOT_DESIGNLIB_ROOT，再从可信用户级 roots 提供项或已解析的 Ship 本地 roots 文件读取明确配置的值。KB 就是本仓库的 `docs/`，不需要单独解析根目录。活跃记忆根按 AGENTS.md「活跃记忆根」一节解析。
 - 任务工作树目录组优先使用各自的 SOT_*_WORKTREE_ROOT 环境变量，再读取本地 roots 文件的 [worktrees]。未解析出明确根目录时停止并说明缺少哪项配置；禁止从父目录、兄弟目录或相似路径猜测。
 - 本机 roots 配置可保存绝对路径与本地运行参数；这些本机值和凭据不得写入版本控制、分享包、聊天或回执。
 
@@ -32,7 +32,7 @@ The AGENTS.md above holds the shared project rules, including the Mercury-manage
 
 - 结构化玩法目标事实归 SoT-fyc-space 设计库；当前可执行行为归 Ship 游戏仓；叙事、定性设计、用户裁决、ADR 与研究归 KB；任务状态归 GitHub/Git；活跃会话锚点归配置的活跃记忆根（见 AGENTS.md）。
 - 设计库和游戏代码工作使用已解析游戏根中的 scripts/codex/sot-worktree.ps1 管理任务工作树，并从已解析工作根调用 scripts/codex/sot-publish.ps1 发布。不得直接向受保护分支推送。
-- KB 始终使用唯一固定 Obsidian vault；任务隔离通过该 vault 的 Git 任务分支完成。禁止另开任务 vault、切换 MCP endpoint、绕过分支占用或丢弃改动。写前确认 vault、目标分支与工作区状态，MCP 写入使用版本条件，写后立即回读。
+- KB 是本仓库的 `docs/`（Obsidian vault）。文档与代码在同一个任务工作树里一起修改、一起走 PR；Obsidian 与 Obsidian MCP 指向主工作树的 `docs/`，只用于浏览与检索，不经它写入。流程见 sot-kb-write 技能。
 - 生产设计数据写入必须有明确授权，先 dry-run，逐条写入后 readback，再读取受影响集合并记录 schema、来源版本与规范化摘要。
 - 实现、审查和验收职责分离。需要交付回执时使用 sot-task-receipt 技能，并提供本次执行的证据；不得把自评当成独立批准。
 
@@ -47,9 +47,9 @@ The AGENTS.md above holds the shared project rules, including the Mercury-manage
 - 设计库异常（用户 2026-10-23，针对删除被 409 拒绝并列出引用：“说明设计库有问题，这是你职责范围”）：删除被 409 拒绝并列出引用，或诊断发现孤儿行等要人工处置的数据时，由 Claude 用 `GET /api/maintenance/orphans` 等只读诊断查清原因，修数据或修设计库代码，修好后汇报。“id 已存在”这类调用方错误引起的 409 不属于此条。
 - PR 合并（用户 2026-10-22：“PR你有自主合并权，不需要一直等我”）：合并前核对三项：独立审查覆盖的就是当前 HEAD、CI 通过、未解决审查线程为 0；合并时用 `--match-head-commit` 锁定 HEAD。
 
-## 从设计库或 KB 直接启动
+## 从设计库直接启动
 
-SoT 的角色与技能装在本仓库，只在从 Ship 启动的会话中生效；日常从 Ship 启动，设计库与 KB 不装载 Mercury。用户级只读 SessionStart hook 从 SOT_SHIP_ROOT 或用户级本地 roots 文件的 roots.ship_root 解析 Ship 根，并提供 Ship AGENTS.md 路径；会话必须读取该文件正文。若 hook 未提供路径，则显式解析 Ship 根并读取 AGENTS.md；缺少明确根时停止询问，不从相邻仓库推断。Ship 的项目级 CLAUDE.md 不会因另一仓库位于相邻目录而自动生效。
+SoT 的角色与技能装在本仓库，只在从 Ship 启动的会话中生效；日常从 Ship 启动，设计库不装载 Mercury。用户级只读 SessionStart hook 从 SOT_SHIP_ROOT 或用户级本地 roots 文件的 roots.ship_root 解析 Ship 根，并提供 Ship AGENTS.md 路径；会话必须读取该文件正文。若 hook 未提供路径，则显式解析 Ship 根并读取 AGENTS.md；缺少明确根时停止询问，不从相邻仓库推断。Ship 的项目级 CLAUDE.md 不会因另一仓库位于相邻目录而自动生效。
 
 ## 配置来源
 
@@ -92,7 +92,6 @@ Mercury 的五个角色由 Mercury 装载为本仓库的 `.claude/agents/mercury
 
 - **禁止** PowerShell 写入 KB 文件（UTF-8 BOM 问题）
 - **禁止** 对 current-session.md 使用 append（维度爆炸），始终全文替换
-- KB 标题中**禁止**括号 `()`、方括号 `[]`、中文字符（导致 obsidian_patch_content 失败）
 
 ### DO NOT — AI
 

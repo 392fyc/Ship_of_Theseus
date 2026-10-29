@@ -165,9 +165,8 @@ def test_agents_points_cross_repository_publication_to_shared_entrypoint():
     for required in [
         "scripts/codex/sot-publish.ps1",
         "目标仓任务 worktree",
-        "固定 vault",
+        "KB 随 Ship 发布",
         "SOT_DESIGNLIB_ROOT",
-        "SOT_KB_ROOT",
         "不得因目标仓没有同名脚本而判定发布阻断",
         "不得改用原始 `git push`",
     ]:
@@ -181,11 +180,10 @@ def test_cross_repository_skills_expose_shared_publication_entrypoint():
         "不得误报发布阻断",
         "不得改用原始 `git push`",
     ]
-    # The design library publishes from a target-repository worktree; the KB
-    # publishes from its single fixed vault on the task branch (no worktree).
+    # The design library publishes from a target-repository worktree. The KB is
+    # Ship's docs/ and publishes with Ship, so it has no cross-repository rule.
     per_skill = {
         "sot-designlib": ["目标仓 worktree", "目标仓无需提供同名脚本"],
-        "sot-kb-write": ["固定 KB vault", "KB 仓无需提供同名脚本"],
     }
     for skill_name, specific in per_skill.items():
         text = read_text(SKILL_PATHS[skill_name])
@@ -227,20 +225,19 @@ def test_designlib_contract_uses_portable_roots_and_current_one_way_model():
         assert retired not in text, f"sot-designlib retains retired contract: {retired}"
 
 
-def test_kb_contract_is_safe_and_records_cross_repo_context():
+def test_kb_contract_edits_docs_in_the_task_worktree_with_the_work():
     kb = read_text(SKILL_PATHS["sot-kb-write"])
     for required in [
-        "mcp__obsidian__vault_read",
-        "mcp__obsidian__vault_write",
-        "mcp__obsidian__vault_append",
-        "mcp__obsidian__vault_get_document_map",
-        "mcp__obsidian__vault_patch",
+        "`docs/`",
+        "任务工作树",
+        "同一个 PR",
         "mcp__obsidian__search_simple",
-        "01-Game-Design/rules-catalog.md",
-        "SOT_KB_ROOT",
-        "[roots].kb_root",
-        "target_head",
-        "contract_summary",
+        "mcp__obsidian__vault_read",
+        "不使用 Obsidian MCP 的 `vault_write`、`vault_patch`、`vault_append`",
+        "scripts/codex/sot-publish.ps1",
+        "docs/01-Game-Design/rules-catalog.md",
+        "docs/03-AI-Context/design-rules-index.md",
+        "data.json",
         "叙事",
         "定性设计",
         "用户裁决",
@@ -250,9 +247,16 @@ def test_kb_contract_is_safe_and_records_cross_repo_context():
     ]:
         assert required in kb, f"sot-kb-write missing required contract term {required}"
     assert "任务与验收" in kb and "活跃记忆" in kb
-    assert "不得执行跨仓写入" in kb
-    assert "已存在的文档禁止使用 `mcp__obsidian__vault_write`" in kb
-    assert "没有 `ifMatch`" in kb
+    # The retired fixed-vault procedure must not come back.
+    for retired in ["SOT_KB_ROOT", "kb_root", "KbReturn", "ifMatch", "固定 vault"]:
+        assert retired not in kb, f"sot-kb-write retains retired procedure: {retired}"
+
+
+def test_current_instructions_no_longer_route_through_a_separate_kb_repository():
+    for path in [AGENTS_PATH, ROOT / "CLAUDE.md", ROOT / ".codex" / "project" / "sot-authority-routing.md"]:
+        text = read_text(path)
+        for retired in ["SOT_KB_ROOT", "KbReturn", "固定 vault", "固定 KB vault", "ShipOfTheseus-KB"]:
+            assert retired not in text, f"{path.name} still routes through the retired KB repository: {retired}"
 
 
 def test_session_skills_use_optional_active_memory_and_manual_handoff_only():

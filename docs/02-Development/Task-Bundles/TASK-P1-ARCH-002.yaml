@@ -1,0 +1,94 @@
+task_id: "TASK-P1-ARCH-002"
+title: "Cross-agent task-receipt skill propagation"
+phase_id: "P1"
+milestone_refs: []
+adr_refs: ["ADR-007"]
+owner_agent_type: "dev_sub_agent"
+priority: "Sev-2"
+status: "closed"
+example_artifact: false
+
+context:
+  axis_coverage: ["AXIS-4"]
+  rationale: >
+    Sub Agents (Cursor, Codex) lack SoT workflow skills.
+    Task-receipt skill guides Sub Agents to properly fill
+    implementation_receipt in task bundles after completing work.
+  depends_on: "TASK-P1-ARCH-001"
+
+code_scope:
+  include:
+    - ".claude/skills/"
+  exclude: []
+
+read_scope:
+  required_docs:
+    - "02-Development/Templates/task-bundle.template.yaml"
+    - "02-Development/Templates/handoff-packet.template.yaml"
+    - "02-Development/Task-Registry/acceptance-workflow.md"
+  optional_docs:
+    - "02-Development/Task-Bundles/TASK-P1-TOOL-002.yaml"
+
+allowed_write_scope:
+  code_paths:
+    - ".claude/skills/sot-task-receipt/"
+    - ".cursor/rules/"
+  kb_paths:
+    - "02-Development/Task-Bundles/TASK-P1-ARCH-002.yaml"
+
+docs_must_update: []
+docs_must_not_touch:
+  - "02-Development/Task-Registry/"
+  - "03-AI-Context/Active-Context/current-session.md"
+  - "02-Development/Acceptance-Bundles/"
+  - "02-Development/Issue-Bundles/"
+
+definition_of_done:
+  - "sot-task-receipt SKILL.md created for Claude Code project skills"
+  - "Equivalent .mdc rule or SKILL.md for Cursor"
+  - "Equivalent instruction section for Codex AGENTS.md"
+  - "All versions guide filling implementation_receipt correctly"
+
+required_evidence:
+  - "SKILL.md exists at .claude/skills/sot-task-receipt/"
+  - "Cursor equivalent exists at .cursor/rules/ or docs"
+  - "Each version references the correct receipt fields from template"
+
+handoff_to_acceptance:
+  acceptance_bundle_id: "ACC-P1-ARCH-002"
+  trigger_status: "implementation_done"
+  handoff_owner: "main_agent"
+  blind_input_policy:
+    allowed:
+      - "Task Bundle input fields"
+      - "Task Bundle referenced docs"
+      - "Codebase"
+    forbidden:
+      - "Dev-agent narrative outside this bundle"
+      - "Registry mutation by acceptance agent"
+  acceptance_focus:
+    - "CHK-001: sot-task-receipt skill exists and references correct receipt fields"
+    - "CHK-002: Cursor equivalent is consistent with Claude Code version"
+    - "CHK-003: Skill triggers correctly on task completion context"
+
+implementation_receipt:
+  implementer: "Codex CLI (GPT-5)"
+  branch: "develop"
+  summary:
+    - "Created .claude/skills/sot-task-receipt/SKILL.md with trigger guidance, field-by-field receipt rules, workflow steps, and a receipt quality checklist for post-implementation handoff."
+    - "Added .cursor/rules/task-receipt.mdc with equivalent YAML-focused rules so Cursor agents fill implementation_receipt consistently."
+    - "Appended a concise Task Receipt note to AGENTS.md that points Sub Agents to the new skill/rule and lists the required receipt fields."
+  changed_files:
+    - ".claude/skills/sot-task-receipt/SKILL.md"
+    - ".cursor/rules/task-receipt.mdc"
+    - "AGENTS.md"
+  evidence:
+    - "Static verification: .claude/skills/sot-task-receipt/SKILL.md exists and explicitly covers implementer, branch, summary, changed_files, evidence, docs_updated, residual_risks, completed_at, plus a receipt quality checklist."
+    - "Static verification: .cursor/rules/task-receipt.mdc exists with globs: [*.yaml] and mirrors the same implementation_receipt field guidance for Cursor."
+    - "Static verification: AGENTS.md now contains a Task Receipt section pointing agents to the new skill/rule and reiterating the mandatory receipt fields."
+  docs_updated:
+    - "AGENTS.md"
+  residual_risks:
+    - "The new skill and Cursor rule were validated by file inspection only; actual trigger behavior inside Claude Code or Cursor was not runtime-tested in this task."
+    - "The Cursor rule uses a broad *.yaml glob for coverage, so it may also load when editing non-task YAML files."
+  completed_at: "2026-03-10T18:24:43.4495622+09:00"
