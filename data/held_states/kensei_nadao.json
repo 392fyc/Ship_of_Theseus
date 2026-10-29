@@ -9,5 +9,7 @@
   "dispellable": false,
   "resistable": false,
   "ignores_immunity": true,
+  "engine_damage_total_modifier": 0.5,
+  "_engine_note": "engine_damage_total_modifier = 0.5 即 effect「自身造成的伤害总降 50%」，按 R1.1 第二层逐项相乘，由 TacticalManager._attacker_state_damage_modifiers 加进持有者的每次攻击（含副手追加 [推断]）。满月（kensei_dashangduan 的 held_state_form）持有纳刀时对它无效、再总增 30%，结算后移除。",
   "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。"
 }

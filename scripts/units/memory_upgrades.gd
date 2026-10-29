@@ -47,6 +47,14 @@ func resolve(base_skill_id: String) -> String:
 	return str(memory.get("upgrade_skill_id", base_skill_id))
 
 
+## 槽位上可能代表这个基础技能的全部形态：没升级过的只有它自己；升级过的是回忆的形态组
+## （升级技能在前，例如兵无常势 = 决心、回天、霸天）。同槽替换（R3.6）按顺序逐个判定条件。
+func resolve_forms(base_skill_id: String) -> Array[String]:
+	if not _applied.has(base_skill_id):
+		return [base_skill_id]
+	return _form_ids(_definitions.get(str(_applied[base_skill_id]), {}))
+
+
 ## 技能身份（R2.5）：升级技能及其各形态返回被取代的基础技能 id，其余原样返回。
 func get_identity(skill_id: String) -> String:
 	return str(_identity.get(skill_id, skill_id))

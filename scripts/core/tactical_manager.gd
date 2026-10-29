@@ -477,6 +477,8 @@ func _on_turn_started(unit: Unit) -> void:
 	unit.is_taking_turn = true
 	# 持有型状态的「到其后第 N 个自身回合开始」在此计数；额外回合尚未实现，统一按常规回合。
 	unit.held_states.on_own_turn_started()
+	# R1.17：护盾在每个自身回合开始时自然衰减（不是伤害，不触发受伤类效果）。
+	unit.decay_shield()
 	var turn_start_result: Dictionary = unit.process_turn_start_buffs()
 	if not battle_active or turn_manager.current_unit != unit:
 		return
@@ -1030,9 +1032,13 @@ func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 	var class_descriptions: Variant = skill_data.get("class_descriptions", {})
 	if class_descriptions is Dictionary:
 		description = str(class_descriptions.get(unit.unit_id, description))
+	var display_name: String = str(skill_data.get("name", skill_id))
+	var name_form: Dictionary = skill_data.get("held_state_form", {})
+	if not name_form.is_empty() and not unit.held_states.has(str(name_form.get("state_id", ""))):
+		display_name = str(name_form.get("name_without_state", display_name))
 	var entry: Dictionary = {
 		"skill_id": skill_id,
-		"name": str(skill_data.get("name", skill_id)),
+		"name": display_name,
 		"action_cost": str(skill_data.get("action_cost", "standard")),
 		"timing_constraint": str(skill_data.get("timing_constraint", "any")),
 		"swift_limit": int(skill_data.get("swift_limit", 1)),
@@ -1128,16 +1134,31 @@ func _get_landing_target_cells(user: Unit, skill_data: Dictionary) -> Array[Vect
 func _has_enemy_in_required_area(unit: Unit, skill_data: Dictionary) -> bool:
 	var range_data: Dictionary = skill_data.get("range", {})
 	if str(range_data.get("type", "")) != "line":
-		return not _get_units_in_skill_area(unit, skill_data,
+		return not _get_enemies_in_cells(unit,
 			_compute_skill_area_cells(unit, skill_data, unit.grid_position, Vector2i.ZERO)).is_empty()
 	for direction: Vector2i in RangeCalculator.get_line_directions(
 			grid, unit.grid_position, range_data):
 		for target_pos: Vector2i in RangeCalculator.calculate_cells(
 				grid, unit.grid_position, range_data, direction):
-			if not _get_units_in_skill_area(unit, skill_data,
+			if not _get_enemies_in_cells(unit,
 					_compute_skill_area_cells(unit, skill_data, target_pos, direction)).is_empty():
 				return true
 	return false
+
+
+## 格子里的敌人（去重；多格单位只算一名）。「范围内有 N 名敌人」类条件只数敌人，
+## 与技能自己的作用关系无关（回天是增益技能，作用于自身，却要数周围的敌人）。
+func _get_enemies_in_cells(user: Unit, cells: Array[Vector2i]) -> Array[Unit]:
+	var by_id: Dictionary = {}
+	for cell_pos: Vector2i in cells:
+		var unit: Unit = grid.get_unit_at(cell_pos)
+		if _matches_target_relation(user, unit, "enemy"):
+			by_id[unit.get_instance_id()] = unit
+	var out: Array[Unit] = []
+	for value: Variant in by_id.values():
+		if value is Unit:
+			out.append(value)
+	return out
 
 
 ## 技能 JSON 的 slot_swap_requires（门槛字典）；没写时为空字典。
@@ -1910,8 +1931,9 @@ func _execute_skill_action(action: GameAction) -> bool:
 		user, skill_data, area_cells)
 	if not _is_ground_target_skill(skill_data) and target_units.is_empty():
 		return false
-	# 「范围内至少有一名敌人才能使用」（拔刀、裂空）：选格子的技能也在扣消耗前拦截。
-	if bool(skill_data.get("requires_enemy_in_area", false)) and target_units.is_empty():
+	# 「范围内至少有一名敌人才能使用」（拔刀、裂空、回天、霸天）：只数敌人，在扣消耗前拦截。
+	var enemies_in_area: Array[Unit] = _get_enemies_in_cells(user, area_cells)
+	if bool(skill_data.get("requires_enemy_in_area", false)) and enemies_in_area.is_empty():
 		return false
 	if str(skill_data.get("target_order", "")) == "near_to_far":
 		_sort_units_near_to_far(user.grid_position, target_units)
@@ -2001,6 +2023,17 @@ func _execute_skill_action(action: GameAction) -> bool:
 
 	# 伤害结算完成后才扣印记（修复 P0-②：使拔刀吃到自身消耗的势加成）。
 	_spend_skill_marks(user, mark_cost)
+	# 护盾（回天）：最大生命 × pct% × 发动时范围内的敌人数，向上取整 [推断：原文没写取整]，
+	# 与现有护盾相加（R1.17）。
+	var shield_gain: Variant = skill_data.get("shield_gain", null)
+	if shield_gain is Dictionary:
+		var shield_amount: int = ceili(float(user.stats.max_hp)
+			* float((shield_gain as Dictionary).get("max_hp_pct_per_enemy", 0.0)) / 100.0
+			* float(enemies_in_area.size()))
+		if shield_amount > 0:
+			user.gain_shield(shield_amount)
+			print("[Shield] %s +%d shield from %s → %d" % [
+				user.unit_name, shield_amount, skill_id, user.shield])
 	# 「目标在本轮尚未行动时获得 N 点剑气」（设计库 kensei_huizhan）：不以命中为条件。
 	var qi_not_acted: int = int(skill_data.get("qi_gain_if_target_not_acted", 0))
 	if target_pending_turn and qi_not_acted > 0:
@@ -2018,8 +2051,44 @@ func _execute_skill_action(action: GameAction) -> bool:
 	# ── 位移技能（如一闪）：施放后落在所选目标格 ──
 	if bool(skill_data.get("displacement", false)):
 		_apply_skill_displacement(user, target_pos)
+	# 满月：发动时持有纳刀（已在构建动作时锁定），全部直接伤害完成后移除纳刀。
+	if bool(data.get("held_state_form_active", false)):
+		var form: Dictionary = skill_data.get("held_state_form", {})
+		if bool(form.get("remove_state_after_use", false)):
+			user.held_states.remove(str(form.get("state_id", "")))
+			user.refresh_status_icons()
+	_apply_held_skill_triggers(user, skill_id)
 	_emit_dashboard_state_changed()
 	return true
+
+
+## 「持有即生效」的触发：单位技能栏里的技能可以声明 held_triggers，在单位使用某个身份的技能后
+## 生效（R2.5：身份按基础技能算，所以写「招架」的也作用于见切、浮生若梦）。
+## 目前只有满月：使用招架或其回忆技能时，若没有纳刀，获得纳刀和一枚当前未持有的印记；
+## 已持有纳刀时不重复获得（「只有从没有纳刀变为持有纳刀时，才获得印记」）。
+func _apply_held_skill_triggers(user: Unit, used_skill_id: String) -> void:
+	if user == null or not user.stats.is_alive():
+		return
+	var identity: String = user.get_skill_identity(used_skill_id)
+	for owned_id: String in user.skill_ids:
+		var triggers: Variant = _get_skill_data(owned_id).get("held_triggers", [])
+		if not triggers is Array:
+			continue
+		for trigger_value: Variant in (triggers as Array):
+			if not trigger_value is Dictionary:
+				continue
+			var trigger: Dictionary = trigger_value
+			if str(trigger.get("on_use_identity", "")) != identity:
+				continue
+			var state_id: String = str(trigger.get("gain_held_state", ""))
+			if state_id == "" or user.held_states.has(state_id):
+				continue
+			user.apply_held_state(state_id, 1, {"kind": "permanent"})
+			for _i: int in range(int(trigger.get("gain_random_marks", 0))):
+				user.gain_random_mark()
+			user.refresh_status_icons()
+			print("[HeldTrigger] %s 使用 %s → %s 给予 %s，印记=%d" % [
+				user.unit_name, used_skill_id, owned_id, state_id, user.get_mark_count()])
 
 
 ## 目标按与使用者的曼哈顿距离由近到远排序（裂空 rules：逐个结算，近的先结算）。
@@ -2656,7 +2725,18 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 	}
 	if landing != LANDING_ANCHOR_NONE:
 		payload["landing_cell"] = _serialize_vector2i(landing)
-	var damage_entry: Dictionary = _select_damage_entry(skill_data)
+	# 满月：发动时先锁定纳刀（rules）。持有时纳刀的总降对本技能无效，本技能再总增。
+	var state_form: Dictionary = skill_data.get("held_state_form", {})
+	if not state_form.is_empty() and user.held_states.has(str(state_form.get("state_id", ""))):
+		payload["held_state_form_active"] = true
+		payload["skill_name"] = str(state_form.get("name_with_state", payload["skill_name"]))
+		if bool(state_form.get("ignores_state_damage_modifier", false)):
+			payload["ignored_attacker_states"] = [str(state_form.get("state_id", ""))]
+		payload["damage_total_modifiers"] = [
+			float(state_form.get("damage_total_modifier", 1.0))]
+	# 伤害条目按发动时范围内的敌人数选择（霸天：2 名以上 / 只有 1 名）。
+	var damage_entry: Dictionary = _select_damage_entry(skill_data,
+		_get_enemies_in_cells(user, affected_cells).size())
 	if not damage_entry.is_empty():
 		_apply_damage_entry(payload, skill_data, damage_entry,
 			int(basic_attack_profile.get("weapon_hit", 0)))
@@ -2671,11 +2751,26 @@ func _legacy_skill_power(basic_attack_profile: Dictionary) -> float:
 
 
 ## 设计库伤害条目（damage_entries）中本次结算使用的一条。
-## 多条目按 sort 取最小的一条；按 applies_when 选择的钩子留到需要它的技能（霸天）实现。
-func _select_damage_entry(skill_data: Dictionary) -> Dictionary:
+## 技能写了 engine_entry_conditions（按 sort 对应条目，给出范围内敌人数的上下限）且调用方给了
+## 敌人数时，取第一条满足条件的条目（霸天的 applies_when）；否则按 sort 取最小的一条。
+func _select_damage_entry(skill_data: Dictionary, enemy_count: int = -1) -> Dictionary:
 	var entries: Variant = skill_data.get("damage_entries", [])
 	if not entries is Array:
 		return {}
+	var conditions: Variant = skill_data.get("engine_entry_conditions", [])
+	if enemy_count >= 0 and conditions is Array and not (conditions as Array).is_empty():
+		for condition_value: Variant in (conditions as Array):
+			if not condition_value is Dictionary:
+				continue
+			var condition: Dictionary = condition_value
+			if enemy_count < int(condition.get("enemies_min", 0)):
+				continue
+			if condition.has("enemies_max") and enemy_count > int(condition.get("enemies_max", 0)):
+				continue
+			for item: Variant in (entries as Array):
+				if item is Dictionary and int((item as Dictionary).get("sort", -1)) \
+						== int(condition.get("sort", -2)):
+					return item
 	var chosen: Dictionary = {}
 	for item: Variant in (entries as Array):
 		if not item is Dictionary:
@@ -2848,8 +2943,28 @@ func _build_hostile_action_context(attacker: Unit, defender: Unit,
 	# forecast（preview）与执行（resolve）共用本上下文，保证预告==实际伤害。
 	# 无光环时乘区==1.0 → 与 damage_calculator 默认一致（无词条零影响）。
 	action_data["affix_defense_multiplier"] = _affix_bulwark_multiplier(defender)
+	# 攻击者持有的状态带来的总增总降（纳刀：自身造成的伤害总降 50%），满月这类声明无效的除外。
+	var totals: Array = (action_data.get("damage_total_modifiers", []) as Array).duplicate()
+	totals.append_array(_attacker_state_damage_modifiers(
+		attacker, action_data.get("ignored_attacker_states", [])))
+	action_data["damage_total_modifiers"] = totals
 	_apply_debug_determinism(action_data)
 	return action_data
+
+
+## 攻击者持有状态的总增总降（R1.1 第二层，逐项相乘）：状态定义里的 engine_damage_total_modifier。
+## ignored：本次攻击声明对其无效的状态 id。
+func _attacker_state_damage_modifiers(attacker: Unit, ignored: Variant) -> Array:
+	var out: Array = []
+	if attacker == null:
+		return out
+	for state_id: String in attacker.held_states.held_ids():
+		if ignored is Array and (ignored as Array).has(state_id):
+			continue
+		var definition: Dictionary = DataLoader.held_states.get(state_id, {})
+		if definition.has("engine_damage_total_modifier"):
+			out.append(float(definition["engine_damage_total_modifier"]))
+	return out
 
 
 ## 调试确定性开关注入（默认关 → 原样返回，不影响正式战斗）。
@@ -3559,6 +3674,8 @@ func _execute_offhand_followup(attacker: Unit, defender: Unit,
 		"final_multiplier": damage_pct / 100.0,
 		"affix_defense_multiplier": float(
 			main_action_data.get("affix_defense_multiplier", 1.0)),
+		# 纳刀等「自身造成的伤害」总降也作用于副手追加 [推断]；技能自己的总增（满月）不带过来（R1.13）。
+		"damage_total_modifiers": _attacker_state_damage_modifiers(attacker, []),
 		# ★ 刻意不放 area_damage_multiplier：2026-08-09 用户裁决「副手不吃溅射衰减」。
 		# resolve_attack 缺该键时默认 1.0，正是这里想要的。别"顺手补上"。
 	}
@@ -3968,6 +4085,7 @@ func _debug_reset_unit(unit: Unit) -> void:
 		return
 	# HP 满
 	unit.stats.hp = unit.stats.max_hp
+	unit.shield = 0
 	# 行动经济复位
 	unit.reset_action_resources()
 	# 清冷却
