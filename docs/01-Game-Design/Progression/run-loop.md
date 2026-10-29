@@ -1,6 +1,6 @@
 # 08 - 运行循环与关卡结构
 
-> 返回 [总览](./README.md)
+> 返回 [总览](../game-design-doc.md)
 
 ## 概览
 
@@ -450,7 +450,7 @@ EnemyTemplate 扩展（详见 06-enemy-and-ai；2026-07-03 词条制）:
 ---
 
 相关文档：
-- [06 - 天赋树](./06-talent-tree.md) -- 天赋节点与转职触发条件 (pending)
-- [07 - 敌人与 AI](./07-enemy-and-ai.md) -- 战斗难度与 Boss 设计
-- [05 - 职业系统](./05-class-system.md) -- 角色成长与构筑
-- [10 - 开发里程碑](./10-milestones.md) -- Phase 5 实现运行循环
+- [天赋树](../Characters/talent-tree.md) -- 天赋节点与转职触发条件 (pending)
+- [敌人与 AI](../Core-Systems/enemy-and-ai.md) -- 战斗难度与 Boss 设计
+- [职业系统](../Characters/class-system.md) -- 角色成长与构筑
+- [开发里程碑](../../02-Development/Milestones/current-milestone.md) -- Phase 5 实现运行循环

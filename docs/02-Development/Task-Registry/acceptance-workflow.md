@@ -113,10 +113,9 @@ Git commit is a mandatory precondition for task closure. No human intervention r
 
 **Procedure**:
 
-1. **KB Repo** (`ShipOfTheseus-KB`): Stage all bundle, registry, and session files changed during this task. Commit.
-2. **Game Repo** (`Ship_of_Theseus`): Stage only the files listed in `implementation_receipt.changed_files`. Commit.
-3. **Commit message format**: `{type}({task_id}): {one-line summary}`
-4. Push is NOT part of this rule. Push timing is decided by Human.
+1. **Game Repo** (`Ship_of_Theseus`): Stage the files listed in `implementation_receipt.changed_files` together with the bundle, registry, and session files changed under `docs/` (the KB, merged into this repository on 2026-10-29). Commit.
+2. **Commit message format**: `{type}({task_id}): {one-line summary}`
+3. Push is NOT part of this rule. Push timing is decided by Human.
 
 **Commit type prefixes**:
 
