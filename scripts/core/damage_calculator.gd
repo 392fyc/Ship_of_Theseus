@@ -56,7 +56,10 @@ static func roll_outcome(attacker: Unit, defender: Unit,
 	else:
 		var hit_value: int = attacker.get_hit_value(weapon_hit)
 		var avoid_value: int = defender.get_avoid_value(terrain_evade_bonus)
-		var hit_rate: float = clampf((hit_value - avoid_value) / 100.0, 0.01, 1.0)
+		# 多段攻击后续段的命中降低（连斩 rules）：从未截断命中里扣，再按通用上下限处理。
+		var segment_penalty: int = int(action_data.get("segment_hit_penalty", 0))
+		var hit_rate: float = clampf(
+			(hit_value - avoid_value - segment_penalty) / 100.0, 0.01, 1.0)
 		if randf() > hit_rate:
 			return outcome  # miss → hit=false，暴击不掷
 		outcome["hit"] = true
