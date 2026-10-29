@@ -63,13 +63,6 @@ Declared in `linked_repos` in `.mercury/config.json`; Mercury renders this secti
 - Locate: SOT_DESIGNLIB_ROOT, else [roots].designlib_root in the ignored .codex/project/sot-roots.local.toml; its task worktrees are under its own .worktrees/. Stop when neither is set; never guess from a parent directory.
 - Use: Skill sot-designlib (or the sot-designlib role) for reads and writes through its API or repository snapshot; snapshots/rules.json holds the rules verbatim. Create a code worktree with scripts/codex/sot-worktree.ps1 -Action Create -Repository designlib.
 - Rules: Every read records schema_version, the source snapshot or commit and a normalized digest. A production write needs explicit authorization: a dry-run confirmed before any write, per-record readback, then the design library's existing snapshot flow (never hand-edit snapshots/). Publish code with scripts/codex/sot-publish.ps1.
-
-### ShipOfTheseus-KB
-
-- Purpose: The one fixed Obsidian vault: narrative, qualitative design, user rulings, ADRs, research and work records.
-- Locate: SOT_KB_ROOT, else [roots].kb_root in the ignored .codex/project/sot-roots.local.toml. There is exactly one vault; never open a task worktree as a second vault or switch the MCP endpoint.
-- Use: Skill sot-kb-write (or the sot-kb role) for MCP reads and versioned writes. Design work starts at 03-AI-Context/design-rules-index.md; reference-game research at 05-Research/references.md. After a KB pull request merges, run scripts/codex/sot-worktree.ps1 -Action KbReturn -Repository kb.
-- Rules: Write only on a task branch checked out in the clean vault; never use --ignore-other-worktrees, stash, reset or a second vault. Publish with scripts/codex/sot-publish.ps1. Structured rules follow the design library; the KB rule catalog 01-Game-Design/rules-catalog.md is for lookup only.
 <!-- MERCURY:END -->
 
 # Ship of Theseus — Codex 项目入口
@@ -78,9 +71,9 @@ Declared in `linked_repos` in `.mercury/config.json`; Mercury renders this secti
 
 ## 工作区位置与生命周期
 
-日常 Codex 从游戏主仓 `Ship_of_Theseus` 进入。三个主仓平级，任务工作树只建在所属仓库根的 `.worktrees/<task>/`（被 Git 忽略），不在仓库外另建目录组。任务工作树不得用父目录猜测设计库、KB 或游戏主仓；先用环境变量，再回退到被忽略的本地 roots 配置，缺少配置时停止猜测。
+日常 Codex 从游戏主仓 `Ship_of_Theseus` 进入。游戏仓与设计库两个主仓平级；KB 已并入本仓库的 `docs/`。任务工作树只建在所属仓库根的 `.worktrees/<task>/`（被 Git 忽略），不在仓库外另建目录组。任务工作树不得用父目录猜测设计库或游戏主仓；先用环境变量，再回退到被忽略的本地 roots 配置，缺少配置时停止猜测。
 
-游戏主仓由 `SOT_SHIP_ROOT` / `[roots].ship_root` 解析；任务组由 `[worktrees].ship_root`、`designlib_root`、`kb_root` 或对应 `SOT_*_WORKTREE_ROOT` 解析。使用 `scripts/codex/sot-worktree.ps1` 列出、检查和创建游戏/设计库任务树。KB 继续使用固定 vault 的任务分支，不能另开任务 vault。PR 合并后立即删除 worktree 与本地分支（远端分支由 GitHub 合并后自动删除）；未合入就废弃的分支列出清单，经用户确认后连同远端一并删除；`main`、`master`、`develop` 与默认分支永不删除。删除前核对 dirty、untracked、ignored 与实际合入证据，不按年龄或关闭 PR 单独判定。详见 [工作树生命周期](docs/worktree-lifecycle.md)。
+游戏主仓由 `SOT_SHIP_ROOT` / `[roots].ship_root` 解析；任务组由 `[worktrees].ship_root`、`designlib_root` 或对应 `SOT_*_WORKTREE_ROOT` 解析。使用 `scripts/codex/sot-worktree.ps1` 列出、检查和创建游戏/设计库任务树。KB 文档在游戏仓任务树的 `docs/` 中随任务一起修改。PR 合并后立即删除 worktree 与本地分支（远端分支由 GitHub 合并后自动删除）；未合入就废弃的分支列出清单，经用户确认后连同远端一并删除；`main`、`master`、`develop` 与默认分支永不删除。删除前核对 dirty、untracked、ignored 与实际合入证据，不按年龄或关闭 PR 单独判定。详见 [工作树生命周期](docs/worktree-lifecycle.md)。
 
 ## Language
 
@@ -107,7 +100,7 @@ Declared in `linked_repos` in `.mercury/config.json`; Mercury renders this secti
 
 - 结构化玩法目标事实（天赋、技能、规则、装备、遗物及相关结构化数据）→ `SoT-fyc-space` 设计库。
 - 当前可执行运行行为与已经落地的实现事实 → 本 `Ship_of_Theseus` 游戏仓。
-- 叙事、定性设计、用户裁决、ADR、研究和工作记录 → 独立 KB。
+- 叙事、定性设计、用户裁决、ADR、研究和工作记录 → KB，即本仓库的 `docs/`（Obsidian vault）。
 - 任务范围、进度与验收证据 → GitHub/Git。
 - 活跃记忆与会话锚点 → 配置的活跃记忆根；未配置时使用游戏仓主 Git 工作树中的 `.sot/memory`。
 
@@ -139,16 +132,16 @@ KB 里积累的设计原则、用户裁决和调研，只有在代理每次动�
 - lane 是用户声明的工作路线，不是 agent。一条 lane 至多 1 个 Codex 会话与 1 个 Claude Code 会话，外加其他 worker；其中主导宿主掌握正式判断，另一宿主可介入审查等作业但不取代主导地位，主导宿主只在创建 lane 时或用户要求时改变。agent 介入已有 lane 不另开 lane。lane 只凭用户声明创建、改派或关闭，会话以 `[LANE=<代号>]` 确定 lane，没有时询问用户，不按工作内容推断。
 - 注册簿是活跃记忆 bucket 下的 `LANES.md`；各 lane 只改自己的小节与 `lanes/<代号>/` 目录，handoff 按宿主分文件，共享记忆文件按读取时的 sha256 做版本条件写入。
 - 主工作区不做开发；Issue / PR 加 `lane:<代号>` 标签，分支按目的命名 `<类型>/<目的>[-<lane>]-<agent>`，agent 与 lane 只作后缀，不以 `claude/`、`codex/`、`lane/` 开头。草稿、模拟原始数据与审核记录放在被忽略的 lane 工作区 `.sot/lane-work/<lane>/`；任务分支与 worktree 只为通过 PR 交付或审查的工作创建，不用来保存未提交文件。跨 lane 消息不是用户授权；交叉影响开协调 Issue 由用户裁决。
-- 被禁止的裸命令使用受控入口：发布 `sot-publish.ps1`、同步基准 `sot-sync.ps1`、工作树 `sot-worktree.ps1`、KB vault 归位 `sot-worktree.ps1 -Action KbReturn -Repository kb`、共享记忆 `sot-memory.ps1 -Action Write`。完整协议见 [多 Lane 多 Agent 协作](docs/lane-collaboration.md)。
+- 被禁止的裸命令使用受控入口：发布 `sot-publish.ps1`、同步基准 `sot-sync.ps1`、工作树 `sot-worktree.ps1`、共享记忆 `sot-memory.ps1 -Action Write`。完整协议见 [多 Lane 多 Agent 协作](docs/lane-collaboration.md)。
 
 ## 跨仓读取与写入
 
-- 读取或修改设计库、KB、Mercury 前，使用项目本地 roots 配置或环境变量解析目标，不在版本控制文件中写本机绝对路径。
-- KB 只有一个固定的 Obsidian vault 入口，由 `SOT_KB_ROOT` 或项目本地 roots 中的 `kb_root` 解析；不得把任务 worktree 另开为第二个 vault，也不得为任务临时切换 MCP endpoint。KB 的任务隔离由固定 vault 内检出的 Git 分支提供。
-- 写入 KB 前，必须确认固定 vault 的 Git 工作区干净，并把固定 vault 切换到目标任务分支。若该分支已被其他 worktree 占用，只能在确认对方干净且无人使用后，将其置于 detached HEAD 解除占用；不得为释放分支而自动移除 worktree。否则停止并协调，不得用 `--ignore-other-worktrees`、第二 vault、stash、reset 或丢弃改动绕过。合并完成后，用 `scripts/codex/sot-worktree.ps1 -Action KbReturn -Repository kb` 将固定 vault 切回并快进到受保护的默认分支，再删除已合入的本地任务分支；不直接对 vault 运行 `git switch` 或 `git checkout`。
+- 读取或修改设计库、Mercury 前，使用项目本地 roots 配置或环境变量解析目标，不在版本控制文件中写本机绝对路径。
+- KB 是本仓库的 `docs/`，同时是 Obsidian vault。文档与代码在同一任务工作树中一起修改、一起提交、一起走 PR；任务涉及的定性设计、裁决、研究或工作记录，与对应实现同轮写进 `docs/`。
+- Obsidian 与 Obsidian MCP 只指向主工作树的 `docs/`，用于浏览与检索；主工作树停在受保护分支，不经 Obsidian MCP 写入。用户在 Obsidian 中直接修改的内容，由代理在任务工作树中收录后走 PR，再让主工作树恢复干净。
 - 跨仓写入前必须读取目标仓 `AGENTS.md`（若存在）与目标 canonical 合同，并在交付回执中记录目标 HEAD 和合同摘要。
-- 不覆盖目标主工作树的受保护改动；代码与结构化设计库变更只在目标仓独立 worktree 中完成，KB 按上述固定 vault 分支流程执行。
-- 设计库与 KB 的具体安全读写流程分别由 `sot-designlib` 和 `sot-kb-write` 技能定义。
+- 不覆盖目标主工作树的受保护改动；代码、KB 文档与结构化设计库变更只在所属仓库的独立 worktree 中完成。
+- 设计库与 KB 的具体读写流程分别由 `sot-designlib` 和 `sot-kb-write` 技能定义。
 
 ## Security
 
@@ -186,7 +179,7 @@ KB 里积累的设计原则、用户裁决和调研，只有在代理每次动�
 ## Git 与交付
 
 - 不直接提交或推送到 `develop`、`main`、`master`。
-- Ship 与设计库从目标仓任务 worktree 调用 Ship 根的 `scripts/codex/sot-publish.ps1`；KB 从固定 vault 当前检出的任务分支调用同一入口。该入口通过 `SOT_DESIGNLIB_ROOT` 与 `SOT_KB_ROOT` 授权跨仓发布。不得因目标仓没有同名脚本而判定发布阻断，也不得改用原始 `git push`。
+- Ship 与设计库从目标仓任务 worktree 调用 Ship 根的 `scripts/codex/sot-publish.ps1`（KB 随 Ship 发布）。该入口通过 `SOT_DESIGNLIB_ROOT` 授权跨仓发布。不得因目标仓没有同名脚本而判定发布阻断，也不得改用原始 `git push`。
 - 只修改任务声明的文件范围，不夹带用户已有 dirty 文件。
 - 实现者不得自我批准；提交前由独立审查者核对规格与证据。
 - 子任务结束时使用 `sot-task-receipt` 返回结构化回执。

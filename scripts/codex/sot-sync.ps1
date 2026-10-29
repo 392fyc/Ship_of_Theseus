@@ -41,8 +41,8 @@ function Read-RootsFile([string]$Path) {
     foreach ($line in Get-Content -LiteralPath $Path) {
         if ($line -match '^\s*\[') { $section = if ($line -cmatch '^\s*\[\s*roots\s*\]\s*(?:#.*)?$') { 'roots' } else { '' }; continue }
         if ($section -ne 'roots') { continue }
-        if ($line -match "^\s*(designlib_root|kb_root)\s*=\s*'([^']*)'\s*(?:#.*)?$") { $found[$Matches[1]] = $Matches[2] }
-        elseif ($line -match '^\s*(designlib_root|kb_root)\s*=\s*"((?:[^"\\]|\\.)*)"\s*(?:#.*)?$') { $found[$Matches[1]] = $Matches[2].Replace('\\','\').Replace('\"','"') }
+        if ($line -match "^\s*(designlib_root)\s*=\s*'([^']*)'\s*(?:#.*)?$") { $found[$Matches[1]] = $Matches[2] }
+        elseif ($line -match '^\s*(designlib_root)\s*=\s*"((?:[^"\\]|\\.)*)"\s*(?:#.*)?$') { $found[$Matches[1]] = $Matches[2].Replace('\\','\').Replace('\"','"') }
     }
     return $found
 }
@@ -62,7 +62,7 @@ $kind = $null
 if ((Common-Dir $scriptRepository 'script').Equals($currentCommon, $comparison)) { $kind = 'ship' }
 $configured = [ordered]@{}
 $fileRoots = Read-RootsFile $RootsFile
-foreach ($key in @('designlib_root','kb_root')) {
+foreach ($key in @('designlib_root')) {
     $value = if ($IgnoreEnvironment) { $null } else { [Environment]::GetEnvironmentVariable('SOT_' + $key.ToUpperInvariant()) }
     if ($PSBoundParameters.ContainsKey('RootsFile') -and -not [string]::IsNullOrWhiteSpace($value)) {
         Write-Diagnostic ("-RootsFile was given, but SOT_" + $key.ToUpperInvariant() + " overrides or supplies its value. Use -IgnoreEnvironment to read only the roots file.")
@@ -88,10 +88,7 @@ foreach ($line in (Invoke-Git $current @('worktree','list','--porcelain')).out) 
     if ($line.StartsWith('worktree ')) { $firstWorktree = $line.Substring(9); break }
 }
 $isMain = $firstWorktree -and (Same-Path $firstWorktree $current)
-if ($kind -eq 'kb') {
-    # Only the fixed vault (the configured kb_root main worktree) is allowed; task isolation there is the checked-out branch.
-    if (-not ($isMain -and (Same-Path $configured['kb'] $current))) { throw 'Only the fixed KB vault (the configured kb_root checkout) can be synchronized; linked KB worktrees are refused.' }
-} elseif ($isMain) { throw 'The main worktree cannot be synchronized; use a task worktree.' }
+if ($isMain) { throw 'The main worktree cannot be synchronized; use a task worktree.' }
 if ($branch.ToLowerInvariant() -in @('main','master','develop')) { throw "Branch '$branch' is protected; synchronize from a task branch." }
 $mergeInProgress = (Invoke-Git $current @('rev-parse','-q','--verify','MERGE_HEAD') -Lenient).code -eq 0
 

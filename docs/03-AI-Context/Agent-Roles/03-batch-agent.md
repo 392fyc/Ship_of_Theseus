@@ -1,6 +1,6 @@
 # Batch Agent — Batch Generation Role Declaration
 
-> 三仓协作默认从 `Ship_of_Theseus` 游戏仓启动。本文中的 `<ship_root>`、`<kb_root>` 和 `<designlib_root>` 分别取自对应 `SOT_*_ROOT` 环境变量，或当前工作目录中被忽略的 `.codex/project/sot-roots.local.toml`。三个主仓位于共同项目目录下；任务工作树按 `worktrees/<仓库名>/<任务名>` 分组，不能从任务目录的父级推断另一个仓库。游戏代码在游戏任务工作树修改；KB 始终使用固定 vault。以游戏仓现行 `AGENTS.md`、项目技能及 `02-Development/Scripts/agent-runtime-layout.md` 为操作依据。
+> 三仓协作默认从 `Ship_of_Theseus` 游戏仓启动。本文中的 `<ship_root>` 和 `<designlib_root>` 分别取自对应 `SOT_*_ROOT` 环境变量，或当前工作目录中被忽略的 `.codex/project/sot-roots.local.toml`；`<kb_root>` 指游戏仓的 `docs/`（KB 自 2026-10-29 并入游戏仓）。任务工作树建在各仓库根的 `.worktrees/<任务名>`，不能从任务目录的父级推断另一个仓库。游戏代码与 KB 文档都在游戏任务工作树修改。以游戏仓现行 `AGENTS.md`、项目技能及 `02-Development/Scripts/agent-runtime-layout.md` 为操作依据。
 
 > **Tool**: Codex CLI (`codex` command, subscription-based)
 > **Core Value**: Bulk output, repetitive tasks, JSON data file factory

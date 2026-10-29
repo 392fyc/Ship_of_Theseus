@@ -1,5 +1,5 @@
 {
-  "config_sha256": "21bbb86f6b0157940ada73f050f675d0edde27dba037e8041431d979f2d5e96c",
+  "config_sha256": "14211b9ac1554b8f97219e85021bac460306f1bda2695a4d8ef659397d4d23e9",
   "executable": [
     ".mercury/packs/lanes/scripts/check-lane-receiver-rule.sh",
     ".mercury/packs/lanes/scripts/check-main-idle.sh",
@@ -105,41 +105,41 @@
     "files": {
       ".claude/agents/game-analyst.md": "fba9a52ca51ff58537528edca0e340f4c5f489d7d8c7e0d406387543999035f4",
       ".claude/agents/game-critic.md": "4169d847f784d91499cad668e9ae88ebb84f65d15e335ddb195a2206e4c87771",
-      ".claude/agents/game-researcher.md": "7076b950fe33a856dde285f510b71e189787594992ba929df1f4015b9a9be015",
+      ".claude/agents/game-researcher.md": "010fdeab6029cf26aa2dab933df64ba08764fa0c34846a42031020c366a1631c",
       ".claude/agents/sot-designlib.md": "6ef8467af1017e20917128ed65f67173a11550fc9a1802369dd5518c3a80928d",
-      ".claude/agents/sot-kb.md": "7e8a10e2b101febb41aad4b307b47646805043bbccc672856533a5ad68a4b616",
+      ".claude/agents/sot-kb.md": "670067ec9758ad20445260890af820d3d3a8e14741d42d93a234145f2b2065ac",
       ".claude/skills/sot-design-present/SKILL.md": "d4323666bf41a03a3f2dd9a1769aa4245ed9508aeac8b5d5474891677386c7d5",
       ".claude/skills/sot-designlib/SKILL.md": "d26ad78d98c22dc1d288f7f86f3c58c5aa020e431161c323f35dc0506e39e13e",
-      ".claude/skills/sot-kb-write/SKILL.md": "10e5e6249e94c06688bfdcbbe6ef992ee24608a168de5ef7840469e031d769e0",
+      ".claude/skills/sot-kb-write/SKILL.md": "12748e859b2143f4e368edcafefecea18751aa5fe3d9b7ee73f95d9de3c79e29",
       ".claude/skills/sot-session-end/SKILL.md": "b86e789a7fb755e30e99d22318360dc810484ac97398293627d0cd7e5672144f",
       ".claude/skills/sot-session-start/SKILL.md": "e0cd55f1a57ad9ca29e545b0d8b38d7802c63b0843d7f9c2bc62bdededd81b2f",
       ".claude/skills/sot-task-receipt/SKILL.md": "a1d12477a9735881755510e5c93e9f8e06aa4d8d0a3424f28c9104da3fd4c771",
       ".codex/agents/game-analyst.toml": "68570dd7c89bf1c2964acb8e081ea5ba1a87955948fefb0bf26ba7abd479d308",
       ".codex/agents/game-critic.toml": "c44607c15291c6e984348c0208c96b86ce9d8fb3aced4424574572b672ba3f94",
-      ".codex/agents/game-researcher.toml": "7f49fc71b840fd408a68435d4a25b2c876ca4da183e94041df4efa424c678db8",
+      ".codex/agents/game-researcher.toml": "958fdc218168032af5742bc04f23bacaf98e3c9fea4257eece5320378c28d48f",
       ".codex/agents/sot-designlib.toml": "41703b31aaab265427717aabc894e9351087866a6c55e02a6f5f5cd1bded6a13",
-      ".codex/agents/sot-kb.toml": "e13032b5e8556357e947b476581168b34d5c6c4bc3d6931b3010ad9be92c0fea"
+      ".codex/agents/sot-kb.toml": "98b83f4dea26d437ad5d2b3b42be117d5787d15a729c5aafe5fd53aefa73d5f9"
     },
     "sources": {
       ".agents/skills/sot-design-present/SKILL.md": "995f1b294e7ac24fa6d0a4ad385401f59d6bf60a293372f2350270a30844e3ad",
       ".agents/skills/sot-designlib/SKILL.md": "07e9950ff8982c04423a8070a363fbbf5b7956e9860b2b38c00879b792faf191",
-      ".agents/skills/sot-kb-write/SKILL.md": "e73f3c50120aa1d225de67f75f9ba1f830160576e91cde29dca692fb402d7d14",
-      ".agents/skills/sot-session-end/SKILL.md": "260e31b45d1d37635fdccda8b7f9992ffe0d906bfa693e48c20a9a803c293e33",
+      ".agents/skills/sot-kb-write/SKILL.md": "5fcdb00afb959c66e3d0cff70e4af6bb0736fcadd339dc8bec7752c5e66e95da",
+      ".agents/skills/sot-session-end/SKILL.md": "06dca5325f79c7d3698870eb135393a3330c88c7e1b0313cd1dfcd323df075de",
       ".agents/skills/sot-session-start/SKILL.md": "5a3d80fc2deecc7803fb2b6cb97184ba7060e3b30f5351d05b8dce2060d8420a",
       ".agents/skills/sot-task-receipt/SKILL.md": "7bd7158a3093f1ea3dcfce8e9d77aeb677dbaed2135b3139e3e3c3ef8f166308",
-      ".claude/skills/sot-art-review/SKILL.md": "a1e814ee283109760be143f5ee532088eeb9a6ad357c3aefd4d21e0ecf0ea7e9",
+      ".claude/skills/sot-art-review/SKILL.md": "16b6e348cbe1002bffaa1e5428923d256700a7fbbf666c7eda6e57eff201f607",
       ".mercury/local.json": "2fb1851d9377b9db8ed6edb2ab912982ae49ddaa2d073ec1b41145c69c574218",
       ".mercury/local/roles/game-analyst.md": "4db14a7b5fbb9184aa2b14256771d11277aca42793a4ff5ebf83e89bbd7a65dd",
       ".mercury/local/roles/game-critic.md": "39ebc916c1cac315c6c97e9242b0456ee0228f571c57ae8d4e4da62acceaf294",
-      ".mercury/local/roles/game-researcher.md": "0a7d5fb0f762f36c3b8be22cc1bae46a42b57d14ed52e5d4e5e83fe8a00c21e8",
+      ".mercury/local/roles/game-researcher.md": "a087ea8e3efd54eab16671179c8dafc04a932b5d0a147cd308a6a507b979e42a",
       ".mercury/local/roles/sot-designlib.md": "efb6e9b541479f8ba63a6da6f19971e4f012546493ec054da4cd47878a34b9a6",
-      ".mercury/local/roles/sot-kb.md": "f2267978743e51026c83a68d688ec08f6113e1ad37a91ebd9aadd7612e72ae2e"
+      ".mercury/local/roles/sot-kb.md": "74df2e201397a9b1008e20574a74c1aaddd1042e438964645ab9508c7a510983"
     }
   },
   "mercury_json_sha256": "877b2181bd46fddd25f74cc29f873f7ee97b7bde72795e00f48ac81f2ce391c2",
   "schema_version": 1,
   "sections": {
-    "AGENTS.md": "89f47710ebc09dbd8bb5e95e6b3921c70edd67fc907842a9f17b9624c171c926",
+    "AGENTS.md": "19942835e8f758e552f2c8450a0a8ad8d4945ebbb26ca5a2ae7a40635b233510",
     "CLAUDE.md": "c8adcf29c1d31304ea737b7a1a7dd801ed3ce007436a18a2647ef8a68aaf99f1"
   },
   "source": "mercury@0416b657fbe654268114f25bcbace5fbf269c934",

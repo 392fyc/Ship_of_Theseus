@@ -204,14 +204,12 @@ def test_routing_and_root_configuration_keep_authorities_distinct() -> None:
         "roots": {
             "ship_root": "<path-to-game-main-checkout>",
             "designlib_root": "<path-to-design-library>",
-            "kb_root": "<path-to-kb-repository>",
             "memory_root": "<path-to-active-memory>",
         },
         # Task-tree groups read by scripts/codex/sot-worktree.ps1.
         "worktrees": {
             "ship_root": "<path-to-game-main-checkout>/.worktrees",
             "designlib_root": "<path-to-design-library>/.worktrees",
-            "kb_root": "<path-to-kb-repository>/.worktrees",
         },
     }
     # sot-worktree.ps1 writes the local roots file into every task tree, so it
@@ -517,7 +515,7 @@ def test_publish_scopes_local_roots_to_repository_section() -> None:
             designlib,
         )
         fixture_script = install_publish_script(repo)
-        no_authorized_env = {"SOT_DESIGNLIB_ROOT": "", "SOT_KB_ROOT": ""}
+        no_authorized_env = {"SOT_DESIGNLIB_ROOT": ""}
 
         local_roots = repo / ".codex" / "project" / "sot-roots.local.toml"
         local_roots.parent.mkdir(parents=True)

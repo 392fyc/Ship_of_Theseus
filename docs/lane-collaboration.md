@@ -9,7 +9,7 @@
 
 ## 1. 概念
 
-- **lane**：用户声明的一条工作路线，例如“玩法系统设计”。lane 不是 agent，也不是仓库；一条 lane 可以跨 Ship、设计库和 KB。
+- **lane**：用户声明的一条工作路线，例如“玩法系统设计”。lane 不是 agent，也不是仓库；一条 lane 可以跨 Ship（含 KB，即 `docs/`）和设计库。
 - **主导宿主与参与 agent**：一条 lane 至多有 1 个 Codex 会话和 1 个 Claude Code 会话，另可有其他 worker（子代理或其他工具）。其中一个宿主是**主导宿主**，管理该 lane 并掌握正式判断；另一宿主可以介入做审查等作业，但不取代主导地位，它的结论是供主导宿主判断的输入。例如 gameplay-design 由 Claude Code 主导设计，Codex 介入审查。agent 介入已有 lane 时只登记角色，不另开 lane；worker 在发起它的会话的授权与写入位置内工作。
 - **主导宿主只在创建 lane 时或用户要求时改变**，其他宿主不得自行接管。
 - **lane 归属只来自用户声明**。lane 的创建、改派、暂停与关闭都由用户声明，并在注册簿里摘录原话；agent 不按“工作内容看起来属于别处”自行改派。
@@ -79,8 +79,8 @@
 
 - **分支名**：目的在前，lane 与 agent 只作后缀，与 Mercury 默认一致：`<类型>/<目的>[-<lane 代号>]-<agent>`。类型取 `feature`、`feat`、`fix`、`hotfix`、`docs`、`chore`、`refactor`、`test`、`perf`、`ci`、`build`；目的是任务名或方向，用字母、数字、`.`、`_`、`-`，简洁但不限长度；agent 为 `claude` 或 `codex`，agent 建的分支必须带。例如 lane 工作 `feature/zhufeng-review-gameplay-design-claude`，不属于任何 lane 的工作 `fix/memory-bucket-codex`。
 - 不用 `claude/...`、`codex/...` 这类以 agent 或 lane 开头的分支名：人读分支列表时先看到的应是分支做什么。`scripts/codex/sot-publish.ps1` 拒绝发布以 `claude/`、`codex/`、`lane/` 开头的分支。Claude Code 桌面版自动创建的 worktree 分支（`claude/<名字>-<哈希>`）在该 worktree 里用 `git branch -m <新名>` 改名后再发布；已经推到 origin 的分支保留原名。
-- **基准分支**：游戏仓任务分支从 `develop` 切出并以它为 PR 目标（`.mercury/config.json` 的 `params.integration_branch`）；设计库与 KB 以 `master` 为目标。
-- **何时建分支**：只为通过 PR 交付或审查的工作创建任务分支与 worktree，不为保存未提交文件保留分支或 worktree；已经这样保留的，把文件复制到 lane 工作区并核对后，再按[工作树生命周期](worktree-lifecycle.md)退役分支与 worktree。结论交付到它的权威：结构化设计走设计库写入与快照 PR，定性结论与研究走 KB 的 vault 任务分支，运行实现走游戏仓 PR。原始材料留在 lane 工作区，或在不再需要时删除。
+- **基准分支**：游戏仓任务分支从 `develop` 切出并以它为 PR 目标（`.mercury/config.json` 的 `params.integration_branch`）；设计库以 `master` 为目标；KB 在游戏仓 `docs/`，随游戏仓以 `develop` 为目标。
+- **何时建分支**：只为通过 PR 交付或审查的工作创建任务分支与 worktree，不为保存未提交文件保留分支或 worktree；已经这样保留的，把文件复制到 lane 工作区并核对后，再按[工作树生命周期](worktree-lifecycle.md)退役分支与 worktree。结论交付到它的权威：结构化设计走设计库写入与快照 PR，定性结论与研究写进任务工作树的 `docs/`（KB），随相关改动一起走游戏仓 PR，运行实现走游戏仓 PR。原始材料留在 lane 工作区，或在不再需要时删除。
 - **worktree**：用 `scripts/codex/sot-worktree.ps1` 在所属仓库根的 `.worktrees/<任务>/` 创建，PR 合并后按[工作树生命周期](worktree-lifecycle.md)退役。
 - **标签**：Issue 与 PR 加 `lane:<代号>` 标签。
 
@@ -96,7 +96,7 @@
 
 ## 8. 主工作区
 
-- 游戏仓与设计库的主工作区不做开发，也不长期保留未提交改动；开发与审查都在 `scripts/codex/sot-worktree.ps1` 创建的任务工作树里。例外：`.sot/memory`（被忽略的活跃记忆）与 `.sot/lane-work`（被忽略的 lane 工作区）写在游戏仓主工作区；KB 使用唯一固定 vault，在其中切任务分支。
+- 游戏仓与设计库的主工作区不做开发，也不长期保留未提交改动；开发与审查都在 `scripts/codex/sot-worktree.ps1` 创建的任务工作树里。例外：`.sot/memory`（被忽略的活跃记忆）与 `.sot/lane-work`（被忽略的 lane 工作区）写在游戏仓主工作区；KB 是游戏仓的 `docs/`，同样只在任务工作树中修改，主工作区的 `docs/` 只供 Obsidian 浏览。
 - 会话结束时检查两个主工作区：`git -C <主工作区> status --porcelain`。有未提交改动时，在本 lane 的 checkpoint 中登记路径与疑似归属，并报告用户；不得替其他 lane 丢弃或提交。
 
 ## 9. 受控入口

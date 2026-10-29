@@ -1,67 +1,52 @@
 ---
 name: sot-kb-write
-description: "Use Codex Obsidian MCP tools to search, read, create, patch, and verify SoT KB records without turning the KB into task or active-memory authority."
+description: "Read, search, and edit SoT KB records in the repository's docs/ vault inside a task worktree, delivering them in the same pull request as the related work, without turning the KB into task or active-memory authority."
 ---
 
-# SoT KB 安全读写
+# SoT KB 读写
 
-KB 是独立知识库，承载叙事、定性设计、用户裁决、ADR、研究和工作记录。它不是任务与验收权威，也不是活跃记忆权威：前者属于 GitHub/Git，后者属于配置的活跃记忆根（默认游戏仓主 Git 工作树的 `.sot/memory`）。KB 中 `01-Game-Design/rules-catalog.md` 只作检索镜像，结构化玩法事实以设计库为准。
+KB 是本仓库的 `docs/` 目录，同时是 Obsidian vault，承载叙事、定性设计、用户裁决、ADR、研究和工作记录。它不是任务与验收权威，也不是活跃记忆权威：前者属于 GitHub/Git，后者属于配置的活跃记忆根（默认游戏仓主 Git 工作树的 `.sot/memory`）。`docs/01-Game-Design/rules-catalog.md` 只作检索镜像，结构化玩法事实以设计库为准。
 
-Obsidian MCP 的 vault 逻辑根用于文档读写。KB 权威不按 worktree 分裂，所有读写都进入同一个固定 Obsidian vault。按以下顺序解析该固定 vault 及其 Git 仓库根：环境变量 `SOT_KB_ROOT`，然后是游戏仓被忽略的 `.codex/project/sot-roots.local.toml` 内 `[roots].kb_root`。两者都不存在时仍可进行只读 MCP 检索，但不得执行跨仓写入。
+KB 原为独立仓库 ShipOfTheseus-KB，2026-10-29 起以当前快照并入本仓库 `docs/`（Issue #90）；更早的逐文件历史留在已归档的旧仓库中。
 
-## 固定 vault 与分支交接
+## 一起推进
 
-Git 分支提供任务隔离，Obsidian vault 不提供任务隔离。开始 KB 写入前必须依次完成：
+KB 承担本项目 docs 的职责：每次作业把文档和其他内容一起推进。
 
-1. 确认 MCP 实际映射的 vault 与解析出的固定 KB 根是同一仓库，并记录 Git common directory、当前分支、HEAD 与工作区状态。
-2. 确认固定 vault 的工作区干净；存在未提交改动、受保护改动或其他活跃任务占用时停止并协调。
-3. 在固定 vault 中检出目标任务分支。若分支已被其他 worktree 检出，只能在确认该 worktree 干净且无人使用后，将其置于 detached HEAD 来解除占用；不得为释放分支而自动移除 worktree，无法确认时停止。
-4. 通过 MCP 读取、带 `ifMatch` 修改并回读。写入内容与固定 vault 当前检出的任务分支必须始终对应。
-5. 从固定 vault 当前任务分支调用受控发布入口。任务合并后，运行 `scripts/codex/sot-worktree.ps1 -Action KbReturn -Repository kb`（可先加 `-DryRun`）：它核对 vault 干净与合入证据，把固定 vault 切回受保护的默认分支，仅以 fast-forward 更新到合并后的权威 HEAD，再删除已合入的本地任务分支。不直接运行 `git switch` 或 `git checkout`。
+- 任务产生的定性设计、用户裁决、研究结论或工作记录，与对应的代码、数据或配置改动在**同一个任务工作树**中修改、在同一个 PR 中交付。
+- 只改文档的任务同样走任务分支与 PR，不在主工作树写入。
+- 没有 KB 写入授权时，在汇报中列出待入册的裁决原话、日期和目标分册，不写入。
 
-禁止为任务 worktree 另开第二个 Obsidian vault，禁止临时更换 MCP endpoint 或端口，禁止先写固定 vault 再复制到 worktree，禁止使用 `--ignore-other-worktrees`、stash、reset、自动移除 worktree 或丢弃现有改动来绕过分支占用。
+## 读取与检索
 
-## 跨仓写入前置记录
+- 任务工作树内：直接读取 `docs/` 下的文件，或用 `rg` 等工具在 `docs/` 内检索。读的是本任务分支的版本。
+- Obsidian MCP（`mcp__obsidian__search_simple`、`mcp__obsidian__vault_read` 等）映射的是主工作树的 `docs/`，反映主工作树检出的已合并内容，可用于跨文档检索和查看反向链接。它不包含任务分支上尚未合并的修改。
 
-写入前先完成并保留以下证据：
+## 写入
 
-1. 从已解析的 KB 仓库根读取目标 `AGENTS.md`（若存在）。
-2. 读取相关 canonical：通用入口可先查 `01-Game-Design/rules-catalog.md`，具体文档则先取目标文档 map 和附近上下文。
-3. 获取并记录 KB 仓当前 `target_head`；无法获取时停止写入，不以 `unavailable` 代替。
-4. 用一段简短的 `contract_summary` 说明本次可写范围、权威边界与并发保护方式。
+1. 在 `scripts/codex/sot-worktree.ps1 -Action Create -Repository ship` 创建的任务工作树中工作；分支、标签与 PR 规则见 `docs/lane-collaboration.md`。
+2. 用文件编辑工具修改 `docs/` 下的 Markdown。先读后改；新建文件前先检索同名或同主题文档，避免重复入口。
+3. 不使用 Obsidian MCP 的 `vault_write`、`vault_patch`、`vault_append` 等写入工具：它们写入的是主工作树，主工作树停在受保护分支，写入会留下无人负责的未提交改动。
+4. 保持 vault 内链接有效：Obsidian wiki 链接与相对链接都以 `docs/` 为根；移动或重命名文件时同步更新引用它的文档。
+5. 文本文件使用 UTF-8（无 BOM）与 LF。不要用 PowerShell 的 `Set-Content` / `Out-File` 写 KB 文件。
+6. 与相关改动一起提交，经 `scripts/codex/sot-publish.ps1` 发布并开 PR；合并后按[工作树生命周期](../../../docs/worktree-lifecycle.md)退役工作树与分支。
 
-## 选择操作
+## 用户在 Obsidian 中的直接修改
 
-### 搜索与读取
+用户可以在 Obsidian 中直接编辑主工作树的 `docs/`。这会在主工作树留下未提交改动。收录时：
 
-1. `mcp__obsidian__search_simple` 定位候选文档。
-2. `mcp__obsidian__vault_read` 读取目标全文或所需范围。
+1. 在主工作树用 `git status --porcelain -- docs` 列出改动，只取 `docs/` 下的文件；其他路径的改动不碰。
+2. 新建任务工作树，把这些文件逐个复制过去，核对 SHA-256 一致后提交、发布、开 PR。
+3. PR 合并、主工作树快进到包含这些提交之后，主工作树中的这些文件自然变为干净；在此之前不要丢弃主工作树中的改动。
 
-### 结构化补丁（默认）
+## 知识放在能被找到的地方
 
-1. 用 `mcp__obsidian__vault_get_document_map` 获取文档映射与版本信息。
-2. 用 `mcp__obsidian__vault_patch` 携带 `ifMatch` 提交补丁。
-3. 用 `mcp__obsidian__vault_read` 回读变更位置并核对。
-
-### 整文件与新建
-
-- 已存在的文档禁止使用 `mcp__obsidian__vault_write` 整体覆盖；该接口没有 `ifMatch`，先读后写仍可能静默覆盖并发更新。需要大范围修改时拆成带版本条件的结构化 patch；无法安全表达时停止并报告。
-- `mcp__obsidian__vault_write` 只用于新文件：先搜索同名或同主题文档，再确认目标路径不存在，并使用带 Issue 标识的唯一文件名。无法排除同名并发创建时停止，不执行写入。
-- 新文件写入后立即用 `mcp__obsidian__vault_read` 回读并核对完整内容。
-- 仅对有边界的增量日志使用 `mcp__obsidian__vault_append`；不得用它保存会话状态或无限增长的活跃记忆。
-
-## 发布任务分支
-
-固定 KB vault 检出目标任务分支后，从该固定 vault 调用当前 Ship 工作根的 `scripts/codex/sot-publish.ps1`。KB 仓无需提供同名脚本；不得误报发布阻断，也不得改用原始 `git push`。
+- 用户对设计的裁决写进负责该主题的原则分册（入口为 `docs/03-AI-Context/design-rules-index.md`），附日期与原话；只写 ADR 或工作记录不够。
+- 研究按标题归入参考作品索引 `docs/05-Research/references.md`。
+- 新页面改变了代理的开工入口时，同一改动中更新 `design-rules-index.md` 的路由。
 
 ## 安全约束
 
-- 已有文档必须先读后 patch；任何写入都必须独立回读。
-- patch 必须使用 `ifMatch`；冲突时重新读取，不覆盖他人更新。
-- 不把结构化玩法数据复制成第二权威，不把 GitHub 任务状态或 Mercury 活跃记忆迁入 KB。
-- 不输出 token、密码、私钥、个人信息或匹配到的秘密文本。
-- 写入真实 KB 必须有任务授权；能力验证优先使用 dry-run、fixture 或可逆临时对象。
-
-## 固定入口与历史工作树
-
-三个主仓平级，但当前任务树的父目录不是跨仓根解析依据。`[worktrees].kb_root` / `SOT_KB_WORKTREE_ROOT` 只定位历史或明确只读用途的 KB Git 工作树目录组，不改变上述固定 vault 权威。游戏根的 `sot-worktree.ps1` 支持 KB List/Inspect，拒绝 KB Create；日常写入仍按固定 vault 的分支流程，不另开 vault，也不为释放分支而删除占用它的工作树；任务分支合并后删除本地分支。见 [工作树生命周期](../../../docs/worktree-lifecycle.md)。
+- 不把结构化玩法数据复制成第二权威，不把 GitHub 任务状态或活跃记忆迁入 KB。
+- 不写入 token、密码、私钥、个人信息或匹配到的秘密文本；Obsidian 插件的 `data.json` 含密钥，已被 Git 忽略，不得提交。
+- `docs/.obsidian/` 只提交共享配置；`workspace*.json`、`cache`、`graph.json` 与插件 `data.json` 是本机状态。

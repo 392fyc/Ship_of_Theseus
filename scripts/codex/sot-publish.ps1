@@ -47,7 +47,7 @@ function Get-ConfiguredRepositoryRoots {
     param([Parameter(Mandatory = $true)][string]$ScriptRepository)
 
     $configuredRoots = [System.Collections.Generic.List[string]]::new()
-    foreach ($environmentName in @("SOT_DESIGNLIB_ROOT", "SOT_KB_ROOT")) {
+    foreach ($environmentName in @("SOT_DESIGNLIB_ROOT")) {
         $value = [Environment]::GetEnvironmentVariable($environmentName)
         if (-not [string]::IsNullOrWhiteSpace($value)) {
             $configuredRoots.Add($value)
@@ -68,13 +68,13 @@ function Get-ConfiguredRepositoryRoots {
             if ($section -ne "roots") {
                 continue
             }
-            if ($line -match "^\s*(?:designlib_root|kb_root)\s*=\s*'([^']*)'\s*(?:#.*)?$") {
+            if ($line -match "^\s*designlib_root\s*=\s*'([^']*)'\s*(?:#.*)?$") {
                 if (-not [string]::IsNullOrWhiteSpace($Matches[1])) {
                     $configuredRoots.Add($Matches[1])
                 }
                 continue
             }
-            if ($line -match '^\s*(?:designlib_root|kb_root)\s*=\s*"((?:[^"\\]|\\.)*)"\s*(?:#.*)?$') {
+            if ($line -match '^\s*designlib_root\s*=\s*"((?:[^"\\]|\\.)*)"\s*(?:#.*)?$') {
                 $value = $Matches[1].Replace('\\', '\').Replace('\"', '"')
                 if (-not [string]::IsNullOrWhiteSpace($value)) {
                     $configuredRoots.Add($value)

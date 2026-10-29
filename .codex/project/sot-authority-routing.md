@@ -6,7 +6,7 @@ Ship_of_Theseus 是日常 SoT 开发的 Codex 默认工作根。开始工作前�
 |---|---|---|
 | Structured gameplay target facts（结构化玩法目标事实） | SoT 设计库 | 通过 `sot-designlib` lane 使用现有 API 或仓库 snapshot；设计目标不由游戏当前实现反推。 |
 | Current executable behavior（当前可执行行为） | Ship_of_Theseus 游戏仓 | 代码、场景、测试和运行结果描述当前实现事实。 |
-| Narrative、定性设计和裁决理由 | ShipOfTheseus-KB | 保存叙事、qualitative design、用户裁决、ADR、研究与工作记录，不承载任务状态。 |
+| Narrative、定性设计和裁决理由 | KB：Ship_of_Theseus 游戏仓的 `docs/`（Obsidian vault） | 保存叙事、qualitative design、用户裁决、ADR、研究与工作记录，不承载任务状态；与相关实现同一任务工作树、同一 PR 交付。 |
 | 任务与验收 | GitHub/Git | Issue、PR、commit、测试证据和 receipt 是任务进度与验收权威。 |
 | SoT 领域所有权 | SoT | 维护游戏仓、设计库 app/tests/scripts、KB 与领域 agent、配置、技能和 workflow。 |
 | 通用 Harness upstream | Mercury | 只拥有它装载的路径（`.mercury/packs/`、`.mercury/lock.json`、`mercury-*` 角色、规则、技能入口与工作流，以及 `AGENTS.md`、`CLAUDE.md` 的受管段）；SoT 不得修改或发起内容变更，由 Mercury 发起 Issue/PR，发布后单向生成消费。`.mercury/config.json` 由 SoT 维护。 |
