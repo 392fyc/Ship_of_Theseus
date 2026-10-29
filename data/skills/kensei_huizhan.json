@@ -13,7 +13,7 @@
     "type": "single",
     "size": 0
   },
-  "attack_type": "melee",
+  "attack_type": "ranged",
   "cooldown": 2,
   "action_cost": "move",
   "tags": [
@@ -52,6 +52,6 @@
     }
   ],
   "description": "选择射程内的一名敌人，再选择它上下左右相邻的一个空格，直接位移至该格，并对目标造成物理伤害（威力 +1，系数 0.5）。落点必须是自身能够站立且未被其他单位占据的格子；没有合法落点的敌人不能成为目标。如果目标在本轮尚未行动，获得 20 点剑气。",
-  "_engine_note": "landing_mode=adjacent_to_target：两段选目标——先选射程内至少有一个合法落点的敌人，再选它上下左右相邻、能站立且没被其他单位占据的格（自身当前所在格也算，原地出手）。执行时先直接位移（不检查沿途、不走寻路与移动事件，「不视为移动」），再结算伤害；落点不合法时在扣消耗前拒绝。qi_gain_if_target_not_acted：发动时目标仍在本轮待行动队列（TurnManager.has_pending_turn）则在结算后 +20，不以命中为条件 [推断：原文没把剑气挂在命中上]。没有 displacement 字段：那是一闪「沿直线落到所选格、途经格受伤」的口径，与本技能不同。",
+  "_engine_note": "landing_mode=adjacent_to_target：两段选目标——先选射程内至少有一个合法落点的敌人，再选它上下左右相邻、能站立且没被其他单位占据的格（自身当前所在格也算，原地出手）。执行时先直接位移（不检查沿途、不走寻路与移动事件，「不视为移动」），再结算伤害；落点不合法时在扣消耗前拒绝。qi_gain_if_target_not_acted：发动时目标仍在本轮待行动队列（TurnManager.has_pending_turn）则在结算后 +20，不以命中为条件 [推断：原文没把剑气挂在命中上]。attack_type=ranged：R4.3 按射程分类，射程 1–4 大于 1 即远程攻击，与出手时是否相邻无关。「本轮尚未行动」按本轮待行动队列判定：本轮中途加入的单位（例如召唤物）不在队列里，按已行动处理 [推断]。没有 displacement 字段：那是一闪「沿直线落到所选格、途经格受伤」的口径，与本技能不同。",
   "_mirror": "设计库镜像字段：name / damage_entries / 射程 / 冷却 / 行动消耗 / 剑气数值 / upgrade_of 来自设计库仓 snapshots/skills.json @ 762393b（kensei_huizhan）。伤害只读 damage_entries（R1.1 / R1.7）；power 字段不写。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。"
 }

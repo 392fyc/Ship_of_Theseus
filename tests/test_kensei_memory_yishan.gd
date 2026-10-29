@@ -147,6 +147,7 @@ func _test_execute(tm: Node, ks: Unit, target: Unit) -> void:
 	tm._selected_skill_id = "kensei_huizhan"
 	var no_landing: Object = tm._build_skill_action(ks, target.grid_position, target)
 	tm._selected_skill_id = ""
+	_check("没带落点的动作可构建（拒绝发生在执行时）", no_landing != null)
 	if no_landing != null:
 		_eq("没有落点的动作被拒绝", bool(tm._execute_skill_action(no_landing)), false)
 
@@ -184,11 +185,31 @@ func _test_execute(tm: Node, ks: Unit, target: Unit) -> void:
 	ks.set_sword_qi(0)
 	var hp_before: int = target.stats.hp
 	var stay: Object = _build(tm, ks, target, Vector2i(6, 3))
+	_check("原地出手的动作可构建", stay != null)
 	if stay != null:
 		_check("已站在目标旁边时可原地出手", bool(tm._execute_skill_action(stay)))
 	_eq("原地出手不移动", ks.grid_position, Vector2i(6, 3))
 	_check("原地出手仍造成伤害", target.stats.hp < hp_before)
 	_eq("目标本轮已行动 → 不给剑气", ks.sword_qi, 0)
+
+	# 未命中也给：命中压到下限，目标仍在本轮待行动队列里。
+	tm.turn_manager._queue.clear()
+	tm.turn_manager._queue.append(target)
+	ks.reset_action_resources()
+	ks.skill_cooldowns.clear()
+	ks.set_sword_qi(0)
+	ks.stats.dex = 0
+	target.stats.spd = 500
+	hp_before = target.stats.hp
+	var miss_act: Object = _build(tm, ks, target, Vector2i(6, 3))
+	_check("未命中场景的动作可构建", miss_act != null)
+	if miss_act != null:
+		_check("未命中场景执行成功", bool(tm._execute_skill_action(miss_act)))
+	_eq("前提：本次未命中", target.stats.hp, hp_before)
+	_eq("目标本轮尚未行动 → 未命中也 +20 剑气", ks.sword_qi, 20)
+	ks.stats.dex = 80
+	target.stats.spd = 0
+	tm.turn_manager._queue.clear()
 
 	# 被其他单位占据的落点：拒绝。
 	ks.reset_action_resources()
@@ -202,6 +223,7 @@ func _test_execute(tm: Node, ks: Unit, target: Unit) -> void:
 	if blocker != null:
 		tm.grid.move_unit(blocker, Vector2i(2, 1), Vector2i(4, 3))
 		blocker.grid_position = Vector2i(4, 3)
+	_check("落点被占的动作可构建（拒绝发生在执行时）", occupied != null)
 	if occupied != null:
 		_eq("被占据的落点被拒绝", bool(tm._execute_skill_action(occupied)), false)
 	_eq("被拒绝时不移动", ks.grid_position, Vector2i(6, 3))
@@ -259,13 +281,32 @@ func _test_input_flow(tm: Node, ks: Unit, target: Unit) -> void:
 	tm._recalculate_hover_artifacts()
 	_eq("悬停落点时范围预览落在敌人身上", tm._area_preview_cells, [target.grid_position])
 	_check("悬停落点时有伤害预告", not (tm._combat_forecast as Dictionary).is_empty())
+	# 执行失败（落点不合法）时回到第一段：已选敌人清空，可点格重新是敌人。
+	var bad: Object = tm._build_skill_action(ks, target.grid_position, target, Vector2i(7, 7))
+	tm._execute_skill_from_input(bad)
+	await _wait_not_animating(tm)
+	_eq("执行失败后仍在选目标", tm.input_state, 3)
+	_eq("执行失败后回到第一段：已选敌人清空", tm._landing_anchor, Vector2i(-1, -1))
+	_check("执行失败后可点格重新是敌人", target.grid_position in tm._attack_cells)
+	_check("执行失败不消耗移动机会", not ks.movement_used)
+	tm._handle_click(target.grid_position)
 	var hp_before: int = target.stats.hp
 	tm._handle_click(Vector2i(5, 2))
-	await create_timer(2.0).timeout
+	await _wait_not_animating(tm)
 	_eq("点落点后剑圣位移到 (5,2)", ks.grid_position, Vector2i(5, 2))
 	_check("目标受到伤害", target.stats.hp < hp_before)
-	_eq("施放后清空已选敌人", tm._landing_anchor, Vector2i(-1, -1))
+	_check("施放成功：消耗了移动机会", ks.movement_used)
+	_eq("施放成功：进入冷却 2", ks.get_skill_cooldown("kensei_huizhan"), 2)
 	_leave_action_phase(tm)
+
+
+## 等表现层结算结束（input_state 离开 ANIMATING），最多 5 秒。
+func _wait_not_animating(tm: Node) -> void:
+	var deadline: int = Time.get_ticks_msec() + 5000
+	await process_frame
+	while tm.input_state == 6 and Time.get_ticks_msec() < deadline:  # 6 = ANIMATING
+		await process_frame
+	_check("表现层结算在 5 秒内结束", tm.input_state != 6)
 
 
 func _build(tm: Node, ks: Unit, target: Unit, landing: Vector2i) -> Object:
