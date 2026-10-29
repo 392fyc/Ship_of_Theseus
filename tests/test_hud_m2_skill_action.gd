@@ -271,7 +271,7 @@ func _test_strip() -> void:
 			var pips: Array = strip.get_standard_pips() if family == 0 else strip.get_swift_pips()
 			var zone: Control = strip.get_node("StandardZone" if family == 0 else "SwiftZone")
 			var last: Control = pips[-1]
-			_check("%d容量%d族右侧留白4px" % [capacity, family], is_equal_approx(last.position.x + last.size.x, zone.size.x - 4.0))
+			_check("%d容量%d族右侧留白4px" % [capacity, family], is_equal_approx(last.get_global_rect().end.x, zone.get_global_rect().end.x - 4.0))
 			for pip: Control in pips:
 				var visible_bounds: Rect2 = pip.get_path_bounds()
 				visible_bounds.position += pip.global_position
