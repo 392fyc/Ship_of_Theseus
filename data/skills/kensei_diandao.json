@@ -1,0 +1,39 @@
+{
+  "id": "kensei_diandao",
+  "upgrade_of": "kensei_juhe",
+  "target_mode": "自身",
+  "name": "颠倒",
+  "damage_type": "physical",
+  "power": 0,
+  "range": {
+    "type": "self",
+    "min": 0,
+    "max": 0
+  },
+  "area": {
+    "type": "single",
+    "size": 0
+  },
+  "attack_type": "melee",
+  "cooldown": 1,
+  "action_cost": "swift",
+  "swift_limit": 1,
+  "tags": [
+    "mobility"
+  ],
+  "hit_bonus": 0,
+  "timing_constraint": "any",
+  "effects": [],
+  "qi_cost": 0,
+  "qi_gain_on_hit": 0,
+  "qi_gain_on_kill": 0,
+  "mark_gain": 0,
+  "mark_cost": 0,
+  "requires_marks": 0,
+  "guaranteed_crit": false,
+  "guaranteed_hit": false,
+  "swap_with_summon": true,
+  "description": "与〔影〕交换位置。",
+  "_engine_note": "〔虚实相生〕在〔影〕在场时的槽位形态（临摹槽，Unit._slot_forms），不在 skill_ids 里。swap_with_summon：与自己召唤的〔影〕交换位置（TacticalManager._swap_with_illusion），没有影时在扣消耗前拒绝。使用本技能不算使用〔居合〕（原文）。设计库冷却 1 标为 [占位]。",
+  "_mirror": "设计库镜像字段：name / 冷却 / 行动消耗 / upgrade_of 来自设计库仓 snapshots/skills.json @ 762393b（kensei_diandao）。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。例外：power 与 damage_type 不是镜像字段（设计库本技能没有伤害条目）。"
+}

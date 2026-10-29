@@ -410,7 +410,8 @@ func _check_battle_end() -> void:
 	var has_player: bool = false
 	var has_enemy: bool = false
 	for u in tactical_manager.units:
-		if u.stats.is_alive():
+		# 幻象（〔影〕）不算参战单位：只剩影时仍判定全灭。
+		if u.stats.is_alive() and not u.is_illusion:
 			if u.faction == "player":
 				has_player = true
 			else:
