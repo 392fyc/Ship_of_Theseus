@@ -2074,7 +2074,8 @@ func _execute_skill_action(action: GameAction) -> bool:
 
 
 ## 〔若离〕：自身造成技能伤害时消耗 1 层、获得剑气；每次使用技能最多消耗 1 层，不造成伤害的不消耗。
-## 数值在状态定义的 engine_on_skill_damage 里。
+## 数值在状态定义的 engine_on_skill_damage 里。结算时点放在整个技能结算完之后（原文「造成技能伤害时」）：
+## 现有技能没有在结算途中读剑气的条件，结果相同；以后出现这类条件时要改成在伤害段里结算。
 func _consume_on_skill_damage_states(user: Unit, skill_id: String) -> void:
 	if not _action_dealt_damage or user == null or not user.stats.is_alive():
 		return
@@ -2251,7 +2252,10 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 
 	# 主手全部副作用结算后，再按队列执行副手追加。
 	# 递归追加进入同一队列，并受每次攻击动作的总次数护栏限制。
-	var queue: Array = (action_ctx["pending_offhand"] as Array).duplicate()
+	# 反击是〔见切〕产生的追加攻击，原文没有允许它再产生追加攻击（R1.15），所以不执行副手追加；
+	# 命中、暴击、造成伤害等事件照常分发（追加攻击正常产生自己的事件）。
+	var queue: Array = [] if bool(data.get("is_counter", false)) \
+		else (action_ctx["pending_offhand"] as Array).duplicate()
 	var executed: int = 0
 	while not queue.is_empty():
 		if executed >= MAX_OFFHAND_FOLLOWUPS_PER_ACTION:
@@ -2297,12 +2301,14 @@ func _build_segment_action_data(action_data: Dictionary, segment_index: int) -> 
 
 
 ## 〔若即〕：原本会命中的可回避攻击改为回避，消耗 1 层并获得状态定义 engine_evade_conversion 写的状态。
-## 自然未命中不消耗；必中与不可回避的攻击（范围攻击）不受影响 [推断：按〔影〕rules「不可回避的攻击
-## （法术、范围、必中、Boss 重击）」的列举，引擎目前能区分的是必中与范围]。每个伤害段分别判定。
+## 自然未命中不消耗；必中攻击不受影响。「可回避」按引擎的命中判定口径：掷了命中（R1.2）的攻击都算，
+## 范围攻击也一样 [推断，待用户确认：〔影〕rules 把「法术、范围、必中、Boss 重击」列为不可回避，
+## 那条是〔影〕吸引攻击的口径，引擎里范围攻击照常可以被闪开]。每个伤害段分别判定。
+## 调试「强制命中」开关会把所有攻击变成必中，此时若即不会触发。
 func _apply_evade_conversion(defender: Unit, outcome: Dictionary, action_data: Dictionary) -> void:
 	if not bool(outcome.get("hit", false)):
 		return
-	if bool(action_data.get("guaranteed_hit", false)) or str(action_data.get("attack_type", "")) == "area":
+	if bool(action_data.get("guaranteed_hit", false)):
 		return
 	for state_id: String in defender.held_states.held_ids():
 		var spec: Variant = (DataLoader.held_states.get(state_id, {}) as Dictionary).get(

@@ -208,6 +208,34 @@ func _test_counter(tm: Node, ks: Unit, enemy: Unit) -> void:
 	_eq("剑气 9：不反击，层数保留", ks.held_states.stacks("kensei_jianqie_stance"), 1)
 	_eq("剑气 9：攻击者不受伤", enemy.stats.hp, hp_before)
 
+	# 同一动作里重复登记（多段、多目标）：层数与剑气都充足，也只反击一次。
+	ks.held_states.apply("kensei_jianqie_stance", 3, {"kind": "until_own_turn_start", "count": 2})
+	ks.set_sword_qi(50)
+	tm._note_reaction(enemy, ks, {})
+	tm._note_reaction(enemy, ks, {})
+	tm._note_reaction(enemy, ks, {"is_counter": true})
+	tm._run_pending_reactions()
+	_eq("重复登记只反击一次：层数 3 → 2", ks.held_states.stacks("kensei_jianqie_stance"), 2)
+	_eq("重复登记只反击一次：剑气 50 → 40", ks.sword_qi, 40)
+	ks.held_states.remove("kensei_jianqie_stance")
+	ks.held_states.apply("kensei_jianqie_stance", 1, {"kind": "until_own_turn_start", "count": 2})
+
+	# M1：反击不带出副手追加（R1.15）。双持剑圣（二天一流 + 副手）反击时只造成一次伤害。
+	ks.talent_ids = ["kensei_ertianyiliu"]
+	ks.equip_offhand("eq_wpn_regal_blade")
+	tm._talent_registry = null
+	ks.set_sword_qi(50)
+	var hits: Array[int] = []
+	var on_hit: Callable = func(amount: int, _type: String) -> void: hits.append(amount)
+	enemy.damage_taken.connect(on_hit)
+	tm._try_counter(ks, enemy)
+	enemy.damage_taken.disconnect(on_hit)
+	_eq("双持反击：只有反击这一下，没有副手追加", hits.size(), 1)
+	ks.talent_ids = []
+	ks.unequip_offhand()
+	tm._talent_registry = null
+	ks.held_states.apply("kensei_jianqie_stance", 1, {"kind": "until_own_turn_start", "count": 2})
+
 	# 不相邻：登记反应后不反击。
 	ks.set_sword_qi(50)
 	tm._pending_reactions.append({"attacker": enemy, "defender": ks})
@@ -273,19 +301,22 @@ func _test_qiefan(tm: Node, ks: Unit, enemy: Unit) -> void:
 	var sure: Dictionary = {"hit": true, "crit": false}
 	tm._apply_evade_conversion(ks, sure, {"guaranteed_hit": true})
 	_check("必中攻击：仍然命中，不耗层数", bool(sure.hit) and ks.held_states.stacks("kensei_ruoji") == 1)
-	var area: Dictionary = {"hit": true, "crit": false}
-	tm._apply_evade_conversion(ks, area, {"attack_type": "area"})
-	_check("范围攻击：仍然命中，不耗层数", bool(area.hit) and ks.held_states.stacks("kensei_ruoji") == 1)
 	var natural: Dictionary = {"hit": false, "crit": false}
 	tm._apply_evade_conversion(ks, natural, {})
 	_eq("自然未命中：不耗层数", ks.held_states.stacks("kensei_ruoji"), 1)
+	ks.held_states.apply("kensei_ruoji", 1, {"kind": "until_own_turn_start", "count": 2})
+	var area: Dictionary = {"hit": true, "crit": false}
+	tm._apply_evade_conversion(ks, area, {"attack_type": "area"})
+	_check("范围攻击照常掷命中，也能被若即转为回避", not bool(area.hit))
+	_eq("范围攻击转为回避：耗 1 层", ks.held_states.stacks("kensei_ruoji"), 1)
+	_eq("范围攻击转为回避：得若离", ks.held_states.stacks("kensei_ruoli"), 2)
 
 	# 普通控制改为抵抗。
 	ks.stats.lck = 0
 	tm._apply_skill_effect_to_unit(enemy, ks, {"effect_id": "stun", "chance": 100, "duration": 1}, true)
 	_check("眩晕被抵抗", ks.get_buff("stun") == null)
 	_eq("抵抗消耗最后 1 层若即", ks.held_states.stacks("kensei_ruoji"), 0)
-	_eq("抵抗也给若离", ks.held_states.stacks("kensei_ruoli"), 2)
+	_eq("抵抗也给若离", ks.held_states.stacks("kensei_ruoli"), 3)
 	# 没有若即时照常命中。
 	enemy.reset_action_resources()
 	hp_before = ks.stats.hp
@@ -299,14 +330,15 @@ func _test_qiefan(tm: Node, ks: Unit, enemy: Unit) -> void:
 	ks.skill_cooldowns.clear()
 	ks.set_sword_qi(0)
 	ks.clear_marks()
-	_cast(tm, ks, "kensei_zhanji", enemy.grid_position, enemy)
-	_eq("斩击命中 25 + 若离 15 = 40", ks.sword_qi, 40)
-	_eq("每次技能只耗 1 层若离", ks.held_states.stacks("kensei_ruoli"), 1)
+	enemy.stats.hp = 999
+	_cast(tm, ks, "kensei_yijue", enemy.grid_position, enemy)
+	_eq("连斩三段各 +10 = 30，若离 +15 = 45", ks.sword_qi, 45)
+	_eq("三段伤害也只耗 1 层若离（每次技能最多 1 层）", ks.held_states.stacks("kensei_ruoli"), 2)
 	# 不造成伤害的技能不耗。
 	ks.reset_action_resources()
 	ks.skill_cooldowns.clear()
 	_cast(tm, ks, "kensei_qiefan", ks.grid_position, ks)
-	_eq("浮生若梦不造成伤害：不耗若离", ks.held_states.stacks("kensei_ruoli"), 1)
+	_eq("浮生若梦不造成伤害：不耗若离", ks.held_states.stacks("kensei_ruoli"), 2)
 	_leave_action_phase(tm)
 
 
