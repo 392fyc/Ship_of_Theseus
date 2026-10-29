@@ -107,7 +107,7 @@ When resolving or archiving an issue, sync status across Issue Bundle, phase reg
 
 Git commit is a mandatory precondition for task closure. No human intervention required.
 
-**Responsibility**: Main Agent executes git staging and commit for both repos. This is metadata bookkeeping (staging existing files + writing commit messages), not code modification.
+**Responsibility**: Main Agent executes git staging and commit in the game repository (code and `docs/`). This is metadata bookkeeping (staging existing files + writing commit messages), not code modification.
 
 **Timing**: After all registry and docs are updated, before marking `closed`.
 
@@ -127,6 +127,6 @@ Git commit is a mandatory precondition for task closure. No human intervention r
 | `data` | JSON/resource data files |
 | `docs` | Documentation-only changes |
 
-**Preconditions for `closed`**: `docs_synced` + git commits completed for both repos.
+**Preconditions for `closed`**: `docs_synced` + git commit completed in the game repository (code and `docs/`).
 
 **Procedural reference**: See `03-AI-Context/Handoffs/git-sync-procedure.md` for detailed commands and scenarios.

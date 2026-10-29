@@ -2,7 +2,7 @@
 
 ## 来源
 
-- 设计书：ShipOfTheseus-KB 的 `01-Game-Design/game-design-doc.md`，基础地形表列出九类：平原、森林、山地、山峰、墙、浅水、深水、熔岩、沼泽。
+- 设计书：KB（核对时为独立仓库 ShipOfTheseus-KB，2026-10-29 起为本仓库 `docs/`）的 `01-Game-Design/game-design-doc.md`，基础地形表列出九类：平原、森林、山地、山峰、墙、浅水、深水、熔岩、沼泽。
 - 详细说明：`01-Game-Design/Core-Systems/grid-and-map.md` 的基础地形表、三层叠加规则和建筑废墟说明。该文件来源提交为 `29cdd1824296f52176abfdd8c43a27a62c8a17db`，本次只读核对的 KB HEAD 为 `3b8fa3320a140af848035d84ee95d62112626807`。
 - 数值状态：`01-Game-Design/Core-Systems/battle-calculation.md` 的基础地形战斗修正表，森林闪避及山地属性加成的具体数值标为待定。
 - 结构化规则权威：SoT-fyc-space 的 `snapshots/rules.json` 中 R4.1、R4.2、R4.3。它们提供移动、地形修正和攻击线通则；该快照没有逐种地形的独立清单或数值记录。完整读取摘要见 `source-manifest.json`。

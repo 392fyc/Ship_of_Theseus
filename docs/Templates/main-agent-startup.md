@@ -1,6 +1,6 @@
 # Main Agent Startup Template
 
-> 三仓协作默认从 `Ship_of_Theseus` 游戏仓启动。本文中的 `<ship_root>` 和 `<designlib_root>` 分别取自对应 `SOT_*_ROOT` 环境变量，或当前工作目录中被忽略的 `.codex/project/sot-roots.local.toml`；KB 是游戏仓的 `docs/`（2026-10-29 并入）。任务工作树建在各仓库根的 `.worktrees/<任务名>`，不能从任务目录的父级推断另一个仓库。游戏代码与 KB 文档都在游戏任务工作树修改。以游戏仓现行 `AGENTS.md`、项目技能及 `02-Development/Scripts/agent-runtime-layout.md` 为操作依据。
+> 三仓协作默认从 `Ship_of_Theseus` 游戏仓启动。本文中的 `<ship_root>` 和 `<designlib_root>` 分别取自对应 `SOT_*_ROOT` 环境变量，或当前工作目录中被忽略的 `.codex/project/sot-roots.local.toml`；KB 是游戏仓的 `docs/`（2026-10-29 并入）。任务工作树建在各仓库根的 `.worktrees/<任务名>`，不能从任务目录的父级推断另一个仓库。游戏代码与 KB 文档都在游戏任务工作树修改。以游戏仓现行 `AGENTS.md`、项目技能及 `docs/02-Development/Scripts/agent-runtime-layout.md` 为操作依据。
 
 > Copy all content within the "Startup Prompt" block and paste as the first message in a new Claude session.
 > Use each time you start a Main Agent session. No modification needed — paste directly.
