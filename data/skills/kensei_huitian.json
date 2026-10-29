@@ -41,9 +41,9 @@
   },
   "requires_enemy_in_area": true,
   "shield_gain": {
-    "max_hp_pct_per_enemy": 1.5
+    "max_hp_pct_per_enemy": 5
   },
-  "description": "持有 2 枚印记且剑气不少于 10 点时，〔招架〕槽变为本技能；条件不再成立时，立即恢复〔招架〕。自身菱形 1 格内至少有 1 名敌人时才能使用。消耗 2 枚印记和 10 点剑气，获得护盾，护盾量等于最大生命的 1.5% 乘以自身菱形 1 格内的敌人数（多格敌人只计 1 名）。",
-  "_engine_note": "〔兵无常势〕的二印形态。area 菱形 1 只用来数敌人：requires_enemy_in_area 与 shield_gain 都按 _get_enemies_in_cells 只数敌人（去重，多格单位算 1 名），敌人数在发动时锁定。护盾量 = ceil(最大生命 × 1.5% × 敌人数)，向上取整 [推断：原文没写取整；剑圣最大生命 28，向下取整时 1–2 名敌人只得 0]，与现有护盾相加，按 R1.17 先扣护盾、自身回合开始衰减（data/rules/shield.json）。slot_swap_requires.marks_exact：「持有 2 枚印记」按正好 2 枚判定 [推断]。设计库没有伤害条目：power=0 走辅助技能路径，attack_type 按 R4.3 由 area 推为 area。",
-  "_mirror": "设计库镜像字段：name / 范围 / 冷却 / 行动消耗 / 剑气与印记数值 / 护盾比例 / upgrade_of 来自设计库仓 snapshots/skills.json @ 762393b（kensei_huitian）。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。例外：power 与 damage_type 不是镜像字段，理由见 _engine_note。"
+  "description": "持有 2 枚印记且剑气不少于 10 点时，〔招架〕槽变为本技能；条件不再成立时，立即恢复〔招架〕。自身菱形 1 格内至少有 1 名敌人时才能使用。消耗 2 枚印记和 10 点剑气，获得护盾，护盾量等于最大生命的 5% 乘以自身菱形 1 格内的敌人数（多格敌人只计 1 名）。",
+  "_engine_note": "〔兵无常势〕的二印形态。area 菱形 1 只用来数敌人：requires_enemy_in_area 与 shield_gain 都按 _get_enemies_in_cells 只数敌人（去重，多格单位算 1 名），敌人数在发动时锁定。护盾量 = ceil(最大生命 × 5% × 敌人数)（设计库 rules「护盾量向上取整」），与现有护盾相加，按 R1.17 先扣护盾、自身回合开始衰减（data/rules/shield.json）。slot_swap_requires.marks_exact：「持有 2 枚印记」按正好 2 枚判定 [推断]。设计库没有伤害条目：power=0 走辅助技能路径，attack_type 按 R4.3 由 area 推为 area。",
+  "_mirror": "设计库镜像字段：name / 范围 / 冷却 / 行动消耗 / 剑气与印记数值 / 护盾比例 / upgrade_of 来自设计库仓 snapshots/skills.json @ 2c5a837（kensei_huitian；每名敌人 5% 与向上取整来自设计库 PR #79）。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。例外：power 与 damage_type 不是镜像字段，理由见 _engine_note。"
 }
