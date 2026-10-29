@@ -2,9 +2,9 @@
 
 > This document defines the handoff workflow and authority routing for multi-AI collaboration.
 
-## Agent Role Protocol
+## Agent Roles
 
-All agents must follow the identity declaration, boundary enforcement, and handoff identity rules defined in `03-AI-Context/Agent-Roles/agent-role-protocol.md`.
+Agent roles, boundaries, and delivery rules are defined by the repository-root `AGENTS.md` and `CLAUDE.md` and by the roles Mercury generates. The 2026-02 to 03 orchestrator role documents and their identity protocol were retired on 2026-10-30; see [[_archive/agent-roles-2026-10-30/README|the archive]].
 
 ## Important Premise - MCP is Independent of Working Directory
 

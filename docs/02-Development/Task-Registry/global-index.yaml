@@ -87,8 +87,8 @@ artifacts:
     kind: workflow
     phase_id: null
     title: "Agent Role Identity and Boundary Protocol"
-    status: active
-    path: "03-AI-Context/Agent-Roles/agent-role-protocol.md"
+    status: closed
+    path: "_archive/agent-roles-2026-10-30/agent-role-protocol.md"
   - id: AGENT-RUNTIME-LAYOUT
     kind: workflow
     phase_id: null
