@@ -1,0 +1,61 @@
+{
+  "id": "kensei_kongxiangjian",
+  "upgrade_of": "kensei_xinyan",
+  "target_mode": "单位",
+  "name": "空想剑",
+  "damage_type": "physical",
+  "range": {
+    "type": "diamond",
+    "min": 1,
+    "max": 3
+  },
+  "area": {
+    "type": "single",
+    "size": 0
+  },
+  "attack_type": "ranged",
+  "cooldown": 1,
+  "action_cost": "swift",
+  "swift_limit": 1,
+  "tags": [
+    "sword",
+    "mark"
+  ],
+  "hit_bonus": 0,
+  "timing_constraint": "any",
+  "effects": [],
+  "qi_cost": 0,
+  "qi_gain_on_hit": 0,
+  "qi_gain_on_kill": 0,
+  "mark_gain": 0,
+  "mark_cost": 0,
+  "requires_marks": 0,
+  "guaranteed_crit": false,
+  "guaranteed_hit": false,
+  "requires_held_state": "kensei_kongxiang",
+  "mark_fill_on_hit": true,
+  "restore_standard_on_stacks": {
+    "state_id": "kensei_jianhen",
+    "stacks": 5
+  },
+  "damage_entries": [
+    {
+      "applies_when": "",
+      "base_attribute": "力量",
+      "coefficient": 1.0,
+      "crit_mode": "不可暴击",
+      "crit_multiplier": 1.0,
+      "damage_type": "纯粹",
+      "hit_bonus": 0,
+      "hit_mode": "正常",
+      "placeholder": false,
+      "power": 1,
+      "segment_hit_decay": 0,
+      "segments": 1,
+      "sort": 0
+    }
+  ],
+  "description": "只能在〔空想〕期间使用。对目标造成纯粹伤害（以力量计算，威力 +1，系数 1.0）。命中后，获得〔心〕〔道〕〔势〕中当前未持有的全部印记。持有 5 层〔剑痕〕时，消耗 5 层〔剑痕〕，结算后恢复 1 次标准动作。",
+  "_engine_note": "〔大梦将醒〕在〔空想〕期间的被动槽形态（kensei_xinyan_che.slot_swap_on_state），不在技能栏 skill_ids 里。requires_held_state：GameAction.validate_skill_usage 在没有〔空想〕时拒绝。mark_fill_on_hit：命中后补齐全部未持有的印记。restore_standard_on_stacks：结算后若持有 5 层剑痕则消耗 5 层，并在本回合已经用过标准动作时恢复 1 次（以已消耗的为限）；不以命中为条件。纯粹伤害无视防御、不可暴击（R1.1），按力量计算（damage_entries.base_attribute）。attack_type 按 R4.3 由射程 1–3 推为 ranged。",
+  "_mirror": "设计库镜像字段：name / damage_entries / 射程 / 冷却 / 行动消耗 / 剑痕 5 层 / upgrade_of 来自设计库仓 snapshots/skills.json @ 762393b（kensei_kongxiangjian）。伤害只读 damage_entries（R1.1 / R1.7）；power 字段不写。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。"
+}

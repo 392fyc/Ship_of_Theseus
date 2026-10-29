@@ -10,5 +10,8 @@
   "dispellable": false,
   "resistable": false,
   "ignores_immunity": true,
-  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。"
+  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。",
+  "engine_avoid_per_stack": 3,
+  "engine_control_immunity_per_stack": true,
+  "_engine_note": "engine_avoid_per_stack = effect「每层闪避 +3」，R1.2 其他闪避加减（Unit._get_held_state_avoid_bonus）。engine_control_immunity_per_stack = 「即将受到普通控制时，在抵抗判定前失去 1 层〔剑痕〕，并免疫本次效果」：普通控制 = data/buffs 中 effect_type=control 的 buff（TacticalManager._try_control_immunity）。「明确无视免疫的控制」引擎目前没有这类效果，未承载。"
 }

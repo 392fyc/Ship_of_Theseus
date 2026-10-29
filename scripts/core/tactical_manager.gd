@@ -484,6 +484,7 @@ func _on_turn_started(unit: Unit) -> void:
 	unit.held_states.on_own_turn_started()
 	# R1.17：护盾在每个自身回合开始时自然衰减（不是伤害，不触发受伤类效果）。
 	unit.decay_shield()
+	_apply_passive_turn_start(unit)
 	var turn_start_result: Dictionary = unit.process_turn_start_buffs()
 	if not battle_active or turn_manager.current_unit != unit:
 		return
@@ -513,10 +514,55 @@ func _on_turn_started(unit: Unit) -> void:
 
 
 func _on_turn_ended(unit: Unit) -> void:
+	_apply_passive_turn_end(unit)
 	unit.process_turn_end_buffs()
 	unit.held_states.on_own_turn_ended()
 	unit.is_taking_turn = false
 	_deselect_unit()
+
+
+## 被动技能的「自身回合开始时」（〔心眼·梦〕：剑气为上限时进入〔空想〕，持续到本回合结束）。
+## 写在被动技能 JSON 的 passive_turn_start 里。
+func _apply_passive_turn_start(unit: Unit) -> void:
+	var spec: Variant = _get_skill_data(unit.passive_skill_id).get("passive_turn_start", null)
+	if not spec is Dictionary or not unit.stats.is_alive():
+		return
+	var start: Dictionary = spec
+	if bool(start.get("requires_qi_full", false)) and (unit._qi_max <= 0 or unit.sword_qi < unit._qi_max):
+		return
+	var state_id: String = str(start.get("gain_state", ""))
+	if state_id == "":
+		return
+	var duration: Variant = start.get("duration", {})
+	if unit.apply_held_state(state_id, 1, duration if duration is Dictionary else {}) \
+			and (DataLoader.held_states.get(state_id, {}) as Dictionary).has("engine_qi_loss_scar"):
+		unit.begin_qi_loss_scar_state()
+	unit.refresh_status_icons()
+	print("[Passive] %s 进入 %s" % [unit.unit_name, state_id])
+
+
+## 被动技能的「自身回合结束时」（〔心眼·澄〕：剑气足够则消耗换一层〔澄心〕，否则失去一层）；
+## 以及〔空想〕结束时清空剩余剑气与剑痕进度。
+func _apply_passive_turn_end(unit: Unit) -> void:
+	if unit == null or not unit.stats.is_alive():
+		return
+	var spec: Variant = _get_skill_data(unit.passive_skill_id).get("passive_turn_end", null)
+	if spec is Dictionary:
+		var end: Dictionary = spec
+		var state_id: String = str(end.get("state_id", ""))
+		var qi_cost: int = int(end.get("qi_cost", 0))
+		if state_id != "":
+			if unit.sword_qi >= qi_cost:
+				unit.spend_sword_qi(qi_cost, "passive_turn_end:" + unit.passive_skill_id)
+				unit.apply_held_state(state_id, 1, {"kind": "permanent"})
+			else:
+				unit.held_states.consume_stacks(state_id, 1)
+			unit.refresh_status_icons()
+	# 〔空想〕「持续到本回合结束」：结束时清空剩余剑气（不计入剑痕）。状态本身由回合计时移除。
+	for state_id: String in unit.held_states.held_ids():
+		if (DataLoader.held_states.get(state_id, {}) as Dictionary).has("engine_qi_loss_scar"):
+			unit.end_qi_loss_scar_state()
+			break
 
 
 func _on_round_ended() -> void:
@@ -1071,7 +1117,7 @@ func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 		return entry
 	# ── 剑圣资源条件检查 ─────────────────────────────────
 	var qi_cost: int = int(skill_data.get("qi_cost", 0))
-	if qi_cost > 0 and unit.sword_qi < qi_cost:
+	if qi_cost > 0 and unit.sword_qi < qi_cost and not unit.allows_qi_overdraft():
 		entry["reason"] = "剑气不足（需要 %d，当前 %d）" % [qi_cost, unit.sword_qi]
 		return entry
 	var requires_marks: int = int(skill_data.get("requires_marks", 0))
@@ -1215,6 +1261,29 @@ func _get_skill_entries() -> Array[Dictionary]:
 func _build_passive_entry(unit: Unit) -> Dictionary:
 	if unit._qi_max <= 0:
 		return {}
+	# 被动槽在某状态期间换成可用的技能（〔心眼·梦〕在〔空想〕期间变为〔空想剑〕）。
+	var swapped: String = _passive_slot_skill_id(unit)
+	if swapped != "":
+		var swapped_entry: Dictionary = _build_skill_entry(unit, swapped)
+		swapped_entry["slot_origin_id"] = unit.passive_skill_id
+		return swapped_entry
+	# 心眼被回忆升级后：名字与说明取升级技能自己的，基础心眼的加成说明不再适用。
+	if not unit.has_base_xinyan():
+		var upgraded: Dictionary = _get_skill_data(unit.passive_skill_id)
+		return {
+			"skill_id": unit.passive_skill_id,
+			"name": str(upgraded.get("name", unit.passive_skill_id)),
+			"is_passive": true,
+			"available": true,
+			"description": str(upgraded.get("description", "")),
+			"reason": "",
+			"cooldown": 0,
+			"cooldown_max": 0,
+			"action_cost": "",
+			"qi_cost": 0,
+			"mark_cost": 0,
+			"slot_origin_id": unit.passive_skill_id,
+		}
 	var threshold_qi: int = unit._qi_max * unit._xinyan_qi_ratio_threshold_pct / 100
 	var desc: String = ""
 	if unit._xinyan_qi_deficit_per_step > 0:
@@ -1255,6 +1324,17 @@ func _build_passive_entry(unit: Unit) -> Dictionary:
 		"mark_cost": 0,
 		"slot_origin_id": unit.passive_skill_id,
 	}
+
+
+## 被动槽此刻换成的技能 id：被动技能 JSON 的 slot_swap_on_state = {state_id, skill_id}，
+## 持有该状态时返回 skill_id，否则为空串。
+func _passive_slot_skill_id(unit: Unit) -> String:
+	var spec: Variant = _get_skill_data(unit.passive_skill_id).get("slot_swap_on_state", null)
+	if not spec is Dictionary:
+		return ""
+	if not unit.held_states.has(str((spec as Dictionary).get("state_id", ""))):
+		return ""
+	return str((spec as Dictionary).get("skill_id", ""))
 
 
 ## 属性键 → 玩家可见的中文名。查不到就原样返回英文键（宁可露出 "SPE" 也不要显示空白）。
@@ -1556,6 +1636,10 @@ func _handle_post_skill_execution(previous_state: InputState,
 ## 玩家因此被送进一个什么都点不出来的阶段。病根与招架架势那条同型：一个查询函数忘了套用
 ## 另一处已经做了的变换。
 func _has_available_swift_skill(unit: Unit) -> bool:
+	# 被动槽换出的技能（空想剑，迅捷）与技能栏一致地参与判定。
+	var passive_swap: String = _passive_slot_skill_id(unit)
+	if passive_swap != "" and _is_usable_swift_or_free(unit, _get_skill_data(passive_swap)):
+		return true
 	for slot_id: String in unit.skill_ids:
 		var slot_data: Dictionary = _get_skill_data(slot_id)
 		# 槽位提供者（拔刀）不独立占槽，口径同 _get_skill_entries。当前它是 standard、
@@ -1579,6 +1663,14 @@ func _has_available_swift_skill(unit: Unit) -> bool:
 		if bool(validation.get("ok", false)):
 			return true
 	return false
+
+
+func _is_usable_swift_or_free(unit: Unit, skill_data: Dictionary) -> bool:
+	if str(skill_data.get("action_cost", "")) not in ["swift", "free"]:
+		return false
+	if _get_phase_mismatch_reason(skill_data) != "" or not _is_supported_runtime_skill(skill_data):
+		return false
+	return bool(GameAction.validate_skill_usage(unit, skill_data).get("ok", false))
 
 
 func _get_phase_mismatch_reason(skill_data: Dictionary) -> String:
@@ -2043,6 +2135,17 @@ func _execute_skill_action(action: GameAction) -> bool:
 			user.gain_shield(shield_amount)
 			print("[Shield] %s +%d shield from %s → %d" % [
 				user.unit_name, shield_amount, skill_id, user.shield])
+	# 「持有 N 层某状态时，消耗 N 层，结算后恢复 1 次标准动作」（空想剑）：不以命中为条件；
+	# 恢复的标准动作以本回合已经消耗的为限（R3.2：标准行动点不超过容量）。
+	var restore: Variant = skill_data.get("restore_standard_on_stacks", null)
+	if restore is Dictionary:
+		var restore_state: String = str((restore as Dictionary).get("state_id", ""))
+		var restore_need: int = int((restore as Dictionary).get("stacks", 0))
+		if restore_need > 0 and user.held_states.stacks(restore_state) >= restore_need:
+			user.held_states.consume_stacks(restore_state, restore_need)
+			if user.standard_used:
+				user.restore_standard_resource()
+			user.refresh_status_icons()
 	# 「目标在本轮尚未行动时获得 N 点剑气」（设计库 kensei_huizhan）：不以命中为条件。
 	var qi_not_acted: int = int(skill_data.get("qi_gain_if_target_not_acted", 0))
 	if target_pending_turn and qi_not_acted > 0:
@@ -2602,6 +2705,9 @@ func _apply_skill_effect_to_unit(user: Unit, target_unit: Unit,
 			if effect_value > 0:
 				target_unit.take_damage(effect_value, "pure")
 		_:
+			# 〔剑痕〕：即将受到普通控制时，在抵抗判定前失去 1 层，并免疫本次效果。
+			if is_hostile and _try_control_immunity(target_unit, effect_type):
+				return
 			if not _roll_effect_application(target_unit, effect_data, is_hostile):
 				return
 			# 〔若即〕：原本会成功施加的普通控制改为抵抗（先过正常抵抗，再消耗层数）。
@@ -2610,6 +2716,21 @@ func _apply_skill_effect_to_unit(user: Unit, target_unit: Unit,
 			var buff: BuffEffect = _make_buff_effect_instance(user, effect_data)
 			if buff != null:
 				target_unit.add_buff(buff)
+
+
+func _try_control_immunity(target_unit: Unit, buff_id: String) -> bool:
+	if str((DataLoader.buffs.get(buff_id, {}) as Dictionary).get("effect_type", "")) != "control":
+		return false
+	for state_id: String in target_unit.held_states.held_ids():
+		if not bool((DataLoader.held_states.get(state_id, {}) as Dictionary).get(
+				"engine_control_immunity_per_stack", false)):
+			continue
+		if target_unit.held_states.consume_stacks(state_id, 1) <= 0:
+			continue
+		target_unit.refresh_status_icons()
+		print("[Immune] %s 的 %s 免疫了 %s" % [target_unit.unit_name, state_id, buff_id])
+		return true
+	return false
 
 
 func _try_resist_control(target_unit: Unit, buff_id: String) -> bool:
@@ -2882,6 +3003,7 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		"mark_gain": int(skill_data.get("mark_gain", 0)),
 		"mark_gain_after_damage": int(skill_data.get("mark_gain_after_damage", 0)),
 		"qi_gain_after_damage": int(skill_data.get("qi_gain_after_damage", 0)),
+		"mark_fill_on_hit": bool(skill_data.get("mark_fill_on_hit", false)),
 		"ki_on_kill_cd_reduction": int(skill_data.get("ki_on_kill_cd_reduction", 0)),
 	}
 	if landing != LANDING_ANCHOR_NONE:
@@ -3106,6 +3228,11 @@ func _build_hostile_action_context(attacker: Unit, defender: Unit,
 	# forecast（preview）与执行（resolve）共用本上下文，保证预告==实际伤害。
 	# 无光环时乘区==1.0 → 与 damage_calculator 默认一致（无词条零影响）。
 	action_data["affix_defense_multiplier"] = _affix_bulwark_multiplier(defender)
+	# 〔澄心〕：每层使自身技能伤害的威力 +N（威力加算，计入技能威力）。反击也是技能伤害。
+	if str(action_data.get("skill_id", "")) != "":
+		var power_bonus: float = _held_state_skill_power_bonus(attacker)
+		if power_bonus != 0.0:
+			action_data["skill_power"] = float(action_data.get("skill_power", 0.0)) + power_bonus
 	# 攻击者持有的状态带来的总增总降（纳刀：自身造成的伤害总降 50%），满月这类声明无效的除外。
 	var totals: Array = (action_data.get("damage_total_modifiers", []) as Array).duplicate()
 	# 「自身在自身回合内使用技能造成的伤害」（架势）：攻击者正在自己的回合、这是技能动作、不是反击。
@@ -3117,6 +3244,15 @@ func _build_hostile_action_context(attacker: Unit, defender: Unit,
 	action_data["damage_total_modifiers"] = totals
 	_apply_debug_determinism(action_data)
 	return action_data
+
+
+func _held_state_skill_power_bonus(attacker: Unit) -> float:
+	var total: float = 0.0
+	for state_id: String in attacker.held_states.held_ids():
+		var per_stack: float = float((DataLoader.held_states.get(state_id, {}) as Dictionary).get(
+			"engine_skill_power_per_stack", 0))
+		total += per_stack * float(attacker.held_states.stacks(state_id))
+	return total
 
 
 ## 攻击者持有状态的总增总降（R1.1 第二层，逐项相乘）：状态定义里的 engine_damage_total_modifier。
@@ -3349,6 +3485,10 @@ func _apply_sword_qi_on_hit(attacker: Unit,
 		attacker.gain_sword_qi(qi_on_hit, "on_hit:" + str(action_data.get("skill_id", "")))
 		print("[SwordQi] %s +%d qi on hit → %d" % [
 			attacker.unit_name, qi_on_hit, attacker.sword_qi])
+	# 命中后获得全部未持有的印记（设计库 kensei_kongxiangjian）。
+	if bool(action_data.get("mark_fill_on_hit", false)):
+		while attacker.gain_random_mark() != "":
+			pass
 	# 命中并造成伤害后得剑气（设计库 kensei_yijue：每段命中并造成伤害后 +10）。
 	var qi_after_damage: int = int(action_data.get("qi_gain_after_damage", 0))
 	if qi_after_damage > 0 and result.damage > 0:

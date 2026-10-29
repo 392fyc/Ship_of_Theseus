@@ -1,0 +1,32 @@
+{
+  "id": "kensei_xinyan_cheng",
+  "upgrade_of": "kensei_xinyan",
+  "target_mode": "自身",
+  "name": "心眼·澄",
+  "damage_type": "physical",
+  "power": 0,
+  "range": {
+    "type": "self",
+    "min": 0,
+    "max": 0
+  },
+  "area": {
+    "type": "single",
+    "size": 0
+  },
+  "attack_type": "melee",
+  "cooldown": 0,
+  "action_cost": "passive",
+  "tags": [
+    "passive",
+    "sword_qi"
+  ],
+  "effects": [],
+  "passive_turn_end": {
+    "state_id": "kensei_chengxin",
+    "qi_cost": 15
+  },
+  "description": "被动。自身回合结束时，若剑气不少于 15 点，消耗 15 点剑气，获得 1 层〔澄心〕；剑气少于 15 点时，失去 1 层〔澄心〕。〔澄心〕：每层使自身技能伤害的威力 +2，最多 3 层，每场战斗开始时为 0 层。",
+  "_engine_note": "被动，不进技能栏（单位的 passive_skill_id）；action_cost passive 只为满足通用字段，不会被选中执行。passive_turn_end 由 TacticalManager._apply_passive_turn_end 在自身回合结束时结算。升级后基础心眼的剑气与印记属性加成不再生效（Unit.has_base_xinyan；升级技能完整替换基础技能，KB 天赋设计要点 §12）。澄心的威力加成见 kensei_chengxin.engine_skill_power_per_stack。",
+  "_mirror": "设计库镜像字段：name / effect 的数值（15 剑气、1 层澄心）/ upgrade_of 来自设计库仓 snapshots/skills.json @ 762393b（kensei_xinyan_cheng）与 states/kensei_chengxin。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。例外：power、damage_type、range、area、attack_type、action_cost 不是镜像字段，理由见 _engine_note。"
+}

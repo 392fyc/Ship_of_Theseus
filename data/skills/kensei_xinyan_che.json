@@ -1,0 +1,39 @@
+{
+  "id": "kensei_xinyan_che",
+  "upgrade_of": "kensei_xinyan",
+  "target_mode": "自身",
+  "name": "心眼·梦",
+  "damage_type": "physical",
+  "power": 0,
+  "range": {
+    "type": "self",
+    "min": 0,
+    "max": 0
+  },
+  "area": {
+    "type": "single",
+    "size": 0
+  },
+  "attack_type": "melee",
+  "cooldown": 0,
+  "action_cost": "passive",
+  "tags": [
+    "passive",
+    "sword_qi"
+  ],
+  "effects": [],
+  "passive_turn_start": {
+    "requires_qi_full": true,
+    "gain_state": "kensei_kongxiang",
+    "duration": {
+      "kind": "until_this_turn_end"
+    }
+  },
+  "slot_swap_on_state": {
+    "state_id": "kensei_kongxiang",
+    "skill_id": "kensei_kongxiangjian"
+  },
+  "description": "被动。自身回合开始时，若剑气为 100 点，进入〔空想〕，持续到本回合结束。〔空想〕期间，本技能变为〔空想剑〕。〔空想〕：获得剑气改为失去等量剑气；需要消耗剑气的技能剑气不足也能发动，发动后剑气降至 0；实际失去的剑气每累计 25 点获得 1 层〔剑痕〕；结束时清空剩余剑气。",
+  "_engine_note": "被动，不进技能栏（单位的 passive_skill_id）。passive_turn_start 由 TacticalManager._apply_passive_turn_start 在自身回合开始时结算：剑气等于上限（剑圣 100）时施加〔空想〕（until_this_turn_end）。slot_swap_on_state：持有〔空想〕时被动槽换成可用的〔空想剑〕（_passive_slot_skill_id，技能栏与迅捷阶段判定都用它）。不保留基础心眼的剑气与印记属性加成（notes 明写；Unit.has_base_xinyan）。",
+  "_mirror": "设计库镜像字段：name / effect 的条件（剑气 100）与持续时间 / upgrade_of 来自设计库仓 snapshots/skills.json @ 762393b（kensei_xinyan_che）与 states/kensei_kongxiang。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。例外：power、damage_type、range、area、attack_type、action_cost 不是镜像字段，理由见 _engine_note。"
+}

@@ -116,8 +116,12 @@ static func validate_skill_usage(unit: Unit, skill_data: Dictionary,
 	# 声明 qi_cost / requires_marks / mark_cost 时生效（sword_qi、get_mark_count 在
 	# Unit 基类恒存在且默认 0，非剑圣技能不声明这些字段 → 门槛不触发，符合资源每职业独立）。
 	var qi_cost: int = int(skill_data.get("qi_cost", 0))
-	if qi_cost > 0 and unit.sword_qi < qi_cost:
+	if qi_cost > 0 and unit.sword_qi < qi_cost and not unit.allows_qi_overdraft():
 		return {"ok": false, "reason": "剑气不足：需 %d / 现 %d" % [qi_cost, unit.sword_qi]}
+	# 只能在某状态期间使用（〔空想剑〕：只能在〔空想〕期间使用）。
+	var required_state: String = str(skill_data.get("requires_held_state", ""))
+	if required_state != "" and not unit.held_states.has(required_state):
+		return {"ok": false, "reason": "需要状态：%s" % required_state}
 	var marks_needed: int = maxi(
 		int(skill_data.get("requires_marks", 0)), int(skill_data.get("mark_cost", 0)))
 	if marks_needed > 0 and unit.get_mark_count() < marks_needed:
