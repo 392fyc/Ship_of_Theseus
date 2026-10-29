@@ -67,6 +67,12 @@ var passive_skill_id: String = ""
 var _base_passive_skill_id: String = ""
 # 〔空想〕期间实际失去的剑气累计，每满一档得一层〔剑痕〕；不足一档的进度在空想结束时清空。
 var _qi_loss_scar_progress: int = 0
+# 交替技能槽的当前形态（〔阴阳剑〕：居合槽在太阳剑与太阴剑之间交替）：槽位技能 id → 当前形态 id。
+var _slot_forms: Dictionary = {}
+# 剑气累计换层（〔太阳〕累计实际获得、〔太阴〕累计实际失去）：状态 id → 进度。
+var _qi_accumulation_progress: Dictionary = {}
+# 本场战斗的速度百分比提升（阴阳圆满在本轮尚未行动时达成：速度 +10%，可多次获得）。
+var battle_speed_pct: float = 0.0
 # 回忆升级记录（gameplay-impl PR5，差距清单 M10）：setup() 时清空，由 apply_memory 写入。
 var memory_upgrades: MemoryUpgrades = MemoryUpgrades.new()
 
@@ -145,6 +151,8 @@ signal buffs_changed(unit: Unit)
 ## 剑气经统一入口变动后发出。kind = 最终生效的方向（gain / spend / lose，拦截器可改写），
 ## requested = 请求量（正数），actual = 实际变化量（有符号，超过上限作废、最低到 0）。
 signal sword_qi_changed(unit: Unit, kind: String, requested: int, actual: int, source: String)
+## 两种累计状态同时达到上限（〔阴阳剑〕阴阳圆满），两者已降回保留层数；由 TacticalManager 决定给额外回合还是速度。
+signal yin_yang_fulfilled(unit: Unit)
 
 # ── 阵营颜色 ─────────────────────────────────────────
 const FACTION_COLORS: Dictionary = {
@@ -217,6 +225,7 @@ func setup(class_data: Dictionary, initial_facing: StringName = &"SE") -> void:
 	passive_skill_id = str(class_data.get("passive_skill_id", ""))
 	_base_passive_skill_id = passive_skill_id
 	_qi_loss_scar_progress = 0
+	reset_battle_memory_state()
 	skill_ids.clear()
 	for skill_id_value: Variant in class_data.get("skill_ids", []):
 		skill_ids.append(str(skill_id_value))
@@ -611,6 +620,9 @@ func get_effective_stat(stat_key: String) -> int:
 	if mark_bonus_active and normalized_key == "STR" and bool(marks.get("势", false)):
 		flat_total += float(_mark_str_bonus)
 		pct_total += _mark_str_pct
+	# ── 本场战斗的速度提升（阴阳圆满），与其他速度提升相加后生效（R1.8）──
+	if normalized_key == "SPD" and battle_speed_pct != 0.0:
+		pct_total += battle_speed_pct
 	# ── 敌人词条常驻数值加成（无词条单位两 dict 均空 → 零影响）────────
 	if not _affix_stat_flat.is_empty():
 		flat_total += float(_affix_stat_flat.get(normalized_key, 0))
@@ -669,7 +681,17 @@ func _get_held_state_avoid_bonus() -> int:
 func get_crit_value(weapon_crit: int = 0) -> int:
 	var effective_dex: int = get_effective_stat("DEX")
 	# crit_bonus: 加法钩子，心眼被动 floor(剑气/qi_per_crit_pct)×crit_per_qi 写入此处
-	return weapon_crit + int(effective_dex / 2.0) + crit_bonus
+	return weapon_crit + int(effective_dex / 2.0) + crit_bonus + _get_held_state_crit_bonus()
+
+
+## 按层数给的暴击加减（〔太阳〕每层暴击 +1），R1.3 暴击加减。
+func _get_held_state_crit_bonus() -> int:
+	var total: int = 0
+	for state_id: String in held_states.held_ids():
+		var per_stack: int = int(_held_state_definition(state_id).get("engine_crit_per_stack", 0))
+		if per_stack != 0:
+			total += per_stack * held_states.stacks(state_id)
+	return total
 
 
 func get_crit_avoid_value() -> int:
@@ -1053,11 +1075,15 @@ func _change_sword_qi(kind: String, amount: int, source: String) -> int:
 		if rewrite is Dictionary and not (rewrite as Dictionary).is_empty():
 			final_kind = str((rewrite as Dictionary).get("kind", final_kind))
 			final_amount = maxi(0, int((rewrite as Dictionary).get("amount", final_amount)))
+	# 阴阳调和：同方向额外 N×5（空想期间与回合外不生效）。只对技能的效果，见 get_harmony_extra。
+	if not source.begins_with(QI_SOURCE_NO_HARMONY_PREFIX) and source != QI_SOURCE_KONGXIANG_CLEAR:
+		final_amount += get_harmony_extra()
 	var before: int = sword_qi
 	var signed: int = final_amount if final_kind == QI_GAIN else -final_amount
 	set_sword_qi(sword_qi + signed)
 	var actual: int = sword_qi - before
 	_track_qi_loss_scars(actual, source)
+	_track_qi_accumulation(actual)
 	sword_qi_changed.emit(self, final_kind, amount, actual, source)
 	return actual
 
@@ -1087,6 +1113,119 @@ func _track_qi_loss_scars(actual: int, source: String) -> void:
 
 
 const QI_SOURCE_KONGXIANG_CLEAR := "kongxiang_clear"
+## 不吃阴阳调和的剑气变动来源前缀（测试与调试直接改剑气时使用）。
+const QI_SOURCE_NO_HARMONY_PREFIX := "raw:"
+
+
+## 每场战斗开始时复位的回忆技能状态：交替槽回到初始形态、剑气累计清零、本场速度提升清零。
+func reset_battle_memory_state() -> void:
+	_slot_forms.clear()
+	_qi_accumulation_progress.clear()
+	battle_speed_pct = 0.0
+
+
+## 交替槽此刻的形态：没有记录时就是槽位技能自己（〔阴阳剑〕每场开始为太阳剑）。
+func resolve_slot_form(slot_skill_id: String) -> String:
+	return str(_slot_forms.get(slot_skill_id, slot_skill_id))
+
+
+## 使用交替槽里的技能后，把这一槽切到下一个形态。
+func set_slot_form(slot_skill_id: String, form_id: String) -> void:
+	if form_id == slot_skill_id:
+		_slot_forms.erase(slot_skill_id)
+	else:
+		_slot_forms[slot_skill_id] = form_id
+
+
+## 技能栏里某个形态所在的槽位 id（交替槽的形态不在 skill_ids 里，按记录反查）。
+func slot_of_form(form_id: String) -> String:
+	if skill_ids.has(form_id):
+		return form_id
+	for slot_id: Variant in _slot_forms.keys():
+		if str(_slot_forms[slot_id]) == form_id:
+			return str(slot_id)
+	return form_id
+
+
+## 技能栏里声明的剑气累计规则（〔阴阳剑〕：太阳累计实际获得、太阴累计实际失去，每 30 点 1 层）。
+func _qi_accumulators() -> Array:
+	var out: Array = []
+	var skills: Dictionary = _skill_table()
+	for skill_id: String in skill_ids:
+		var rules: Variant = (skills.get(skill_id, {}) as Dictionary).get("qi_accumulators", [])
+		if rules is Array:
+			out.append_array(rules as Array)
+	return out
+
+
+## 阴阳调和：〔太阳〕与〔太阴〕层数相等（N 层）时，自身回合内每次剑气变动额外 ±N×5。
+## 〔空想〕期间不生效。返回额外量（≥ 0）；没有这组规则时为 0。
+func get_harmony_extra() -> int:
+	if not is_taking_turn or _held_state_flag("engine_qi_gain_becomes_loss") != "":
+		return 0
+	var skills: Dictionary = _skill_table()
+	for skill_id: String in skill_ids:
+		var spec: Variant = (skills.get(skill_id, {}) as Dictionary).get("qi_harmony", null)
+		if not spec is Dictionary:
+			continue
+		var states: Array = (spec as Dictionary).get("state_ids", [])
+		if states.size() != 2:
+			continue
+		var a: int = held_states.stacks(str(states[0]))
+		var b: int = held_states.stacks(str(states[1]))
+		if a == b and a > 0:
+			return a * int((spec as Dictionary).get("per_stack", 0))
+	return 0
+
+
+## 剑气累计换层与阴阳圆满。actual 是本次实际变化（有符号）。满层时该方向的累计暂停；
+## 两个累计状态都满层时，两者都降为 fulfilled_keep 层，并发出 yin_yang_fulfilled。
+func _track_qi_accumulation(actual: int) -> void:
+	if actual == 0:
+		return
+	for rule_value: Variant in _qi_accumulators():
+		if not rule_value is Dictionary:
+			continue
+		var rule: Dictionary = rule_value
+		var direction: String = str(rule.get("direction", ""))
+		if (direction == "gain" and actual < 0) or (direction == "loss" and actual > 0):
+			continue
+		var state_id: String = str(rule.get("state_id", ""))
+		var per: int = maxi(1, int(rule.get("per", 1)))
+		var cap: int = int(_held_state_definition(state_id).get("max_stacks", 0))
+		if cap > 0 and held_states.stacks(state_id) >= cap:
+			continue
+		var progress: int = int(_qi_accumulation_progress.get(state_id, 0)) + absi(actual)
+		while progress >= per and (cap <= 0 or held_states.stacks(state_id) < cap):
+			progress -= per
+			apply_held_state(state_id, 1, {"kind": "permanent"})
+		if cap > 0 and held_states.stacks(state_id) >= cap:
+			progress = 0
+		_qi_accumulation_progress[state_id] = progress
+	check_yin_yang_fulfilled()
+
+
+## 阴阳圆满：技能栏里声明的 qi_harmony 两个状态都达到上限时，两者都降为 fulfilled_keep 层。
+func check_yin_yang_fulfilled() -> void:
+	var skills: Dictionary = _skill_table()
+	for skill_id: String in skill_ids:
+		var spec: Variant = (skills.get(skill_id, {}) as Dictionary).get("qi_harmony", null)
+		if not spec is Dictionary:
+			continue
+		var states: Array = (spec as Dictionary).get("state_ids", [])
+		if states.size() != 2:
+			continue
+		for state_value: Variant in states:
+			var sid: String = str(state_value)
+			var cap: int = int(_held_state_definition(sid).get("max_stacks", 0))
+			if cap <= 0 or held_states.stacks(sid) < cap:
+				return
+		var keep: int = maxi(0, int((spec as Dictionary).get("fulfilled_keep", 1)))
+		for state_value: Variant in states:
+			var sid: String = str(state_value)
+			held_states.consume_stacks(sid, held_states.stacks(sid) - keep)
+		yin_yang_fulfilled.emit(self)
+		return
 
 
 ## 进入〔空想〕时从零开始累计（上一次空想若没走到回合结束就消失，例如战斗在回合中途结束，

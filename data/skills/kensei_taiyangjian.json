@@ -1,0 +1,85 @@
+{
+  "id": "kensei_taiyangjian",
+  "upgrade_of": "kensei_juhe",
+  "target_mode": "单位",
+  "name": "太阳剑",
+  "damage_type": "physical",
+  "range": {
+    "type": "diamond",
+    "min": 1,
+    "max": 2
+  },
+  "area": {
+    "type": "single",
+    "size": 0
+  },
+  "attack_type": "ranged",
+  "cooldown": 0,
+  "action_cost": "standard",
+  "tags": [
+    "sword",
+    "ougi",
+    "sword_qi"
+  ],
+  "hit_bonus": 0,
+  "timing_constraint": "any",
+  "effects": [],
+  "qi_cost": 60,
+  "qi_gain_on_hit": 0,
+  "qi_gain_on_kill": 0,
+  "mark_gain": 0,
+  "mark_cost": 0,
+  "requires_marks": 0,
+  "guaranteed_crit": false,
+  "guaranteed_hit": false,
+  "use_switches_slot_to": "kensei_taiyinjian",
+  "gain_held_state_after_use": {
+    "state_id": "kensei_taiyang",
+    "stacks": 1
+  },
+  "qi_accumulators": [
+    {
+      "state_id": "kensei_taiyang",
+      "direction": "gain",
+      "per": 30
+    },
+    {
+      "state_id": "kensei_taiyin",
+      "direction": "loss",
+      "per": 30
+    }
+  ],
+  "qi_harmony": {
+    "state_ids": [
+      "kensei_taiyang",
+      "kensei_taiyin"
+    ],
+    "per_stack": 5,
+    "fulfilled_keep": 1,
+    "fulfilled_speed_pct": 10
+  },
+  "turn_end_slot_decay": {
+    "kensei_taiyinjian": "kensei_taiyang",
+    "kensei_taiyangjian": "kensei_taiyin"
+  },
+  "damage_entries": [
+    {
+      "applies_when": "",
+      "base_attribute": "默认",
+      "coefficient": 1.5,
+      "crit_mode": "正常",
+      "crit_multiplier": 1.0,
+      "damage_type": null,
+      "hit_bonus": 0,
+      "hit_mode": "正常",
+      "placeholder": false,
+      "power": 5,
+      "segment_hit_decay": 0,
+      "segments": 1,
+      "sort": 0
+    }
+  ],
+  "description": "对目标造成物理伤害（威力 +5，系数 1.5）。消耗 60 点剑气。使用后，本技能槽变为〔太阴剑〕，并获得 1 层〔太阳〕。每场战斗开始时，本技能槽为〔太阳剑〕。〔太阳〕与〔太阴〕层数相等（均为 N 层）时，自身在自身回合内每次剑气增减额外 ±N×5（阴阳调和）；两者都达到上限时为阴阳圆满，两者降为 1 层，并获得一个额外的自身回合，或在本轮尚未行动时本场速度提升 10%。",
+  "_engine_note": "居合槽在太阳剑与太阴剑之间交替：本技能是槽位 id（在 skill_ids 里），use_switches_slot_to 记在 Unit._slot_forms，每场战斗开始复位（Unit.reset_battle_memory_state）。qi_accumulators：剑气每实际累计增加 30 点得 1 层〔太阳〕、实际累计减少 30 点得 1 层〔太阴〕（Unit._track_qi_accumulation，满层时该方向暂停；累计的是实际变化，包括阴阳调和的额外部分；空想把获得改成失去时只计入太阴）。qi_harmony：阴阳调和（Unit.get_harmony_extra，自身回合内、空想期间不生效；技能消耗的额外部分计入消耗，GameAction.validate_skill_usage 按含额外部分的消耗判定）与阴阳圆满（两者满层 → 都降为 fulfilled_keep 层，TacticalManager._on_yin_yang_fulfilled：本轮尚未行动 → 本场速度 +10%，否则 → TurnManager.grant_extra_turn，额外回合不计入状态持续时间）。turn_end_slot_decay：回合结束时技能栏为太阴剑则失去 1 层太阳，为太阳剑则失去 1 层太阴。阴阳调和对「因技能效果」的剑气变动生效：引擎按自身回合内所有剑气变动处理（空想结束清空除外）[推断]。attack_type 按 R4.3 由射程 1–2 推为 ranged。",
+  "_mirror": "设计库镜像字段：name / damage_entries / 射程 / 冷却 / 行动消耗 / 剑气消耗 / 交替与状态规则的数值（30 点、N×5、降为 1 层、速度 10%）/ upgrade_of 来自设计库仓 snapshots/skills.json @ 762393b（kensei_taiyangjian）与 states/kensei_taiyang、kensei_taiyin。伤害只读 damage_entries（R1.1 / R1.7）；power 字段不写。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。〔阴阳剑〕前置〔二天一流〕按 Q9 不接。"
+}

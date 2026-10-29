@@ -14,6 +14,10 @@ var _queue: Array[Unit] = []
 var _all_units: Array[Unit] = []
 var current_unit: Unit = null
 var _round_number: int = 0
+## 当前回合是不是额外回合（〔阴阳剑〕阴阳圆满）。额外回合是完整的自身回合，但不计入状态的持续时间。
+var current_is_extra_turn: bool = false
+## 已排入队首、尚未开始的额外回合：单位 → 待开始的次数。
+var _pending_extra_turns: Dictionary = {}
 
 
 func add_units(units: Array[Unit]) -> void:
@@ -45,10 +49,23 @@ func get_round_number() -> int:
 	return _round_number
 
 
+## 给单位一个额外的自身回合，排在当前回合结束之后（插到待行动队列最前）。额外回合不占用它
+## 原本的回合；在别的单位的回合里达成时，等那个回合结束后插入（同样是队首）。
+func grant_extra_turn(unit: Unit) -> void:
+	if unit == null or not unit.stats.is_alive():
+		return
+	_queue.push_front(unit)
+	_pending_extra_turns[unit] = int(_pending_extra_turns.get(unit, 0)) + 1
+	queue_changed.emit()
+
+
 ## 该单位本轮次是否还没轮到行动：仍在本轮的待行动队列里（当前行动者已出队，不算）。
 ## 供〔踏影〕「目标在本轮尚未行动」判定。
 func has_pending_turn(unit: Unit) -> bool:
-	return unit != null and unit in _queue
+	if unit == null or not unit in _queue:
+		return false
+	# 排在队里的只是额外回合时，它本轮原本的回合已经用过。
+	return _queue.count(unit) > int(_pending_extra_turns.get(unit, 0))
 
 
 func force_advance() -> void:
@@ -67,6 +84,8 @@ func get_display_queue() -> Array[Unit]:
 
 func stop() -> void:
 	current_unit = null
+	current_is_extra_turn = false
+	_pending_extra_turns.clear()
 	_queue.clear()
 	queue_changed.emit()
 
@@ -115,6 +134,14 @@ func _advance() -> void:
 			queue_changed.emit()
 			return
 	current_unit = _queue.pop_front()
+	current_is_extra_turn = false
+	var pending_extra: int = int(_pending_extra_turns.get(current_unit, 0))
+	if pending_extra > 0:
+		current_is_extra_turn = true
+		if pending_extra == 1:
+			_pending_extra_turns.erase(current_unit)
+		else:
+			_pending_extra_turns[current_unit] = pending_extra - 1
 	queue_changed.emit()
 	turn_started.emit(current_unit)
 

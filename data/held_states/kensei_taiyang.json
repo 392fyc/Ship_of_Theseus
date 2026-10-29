@@ -11,5 +11,7 @@
   "dispellable": false,
   "resistable": false,
   "ignores_immunity": true,
-  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。"
+  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。",
+  "engine_crit_per_stack": 1,
+  "_engine_note": "engine_crit_per_stack = effect「每层暴击 +1」，R1.3 暴击加减（Unit._get_held_state_crit_bonus）。累计换层、使用太阳剑得层、回合结束衰减、阴阳调和与圆满都写在槽位技能 kensei_taiyangjian 上（qi_accumulators、gain_held_state_after_use、turn_end_slot_decay、qi_harmony）。"
 }
