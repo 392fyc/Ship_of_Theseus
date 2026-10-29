@@ -115,10 +115,6 @@ func _normal_sequence() -> void:
 	_check("normal_starts_with_myrmidon", actor.unit_id == "myrmidon")
 	_event("opening", {"hud": _dashboard().get_last_state()})
 	await _hover_skill("myrmidon_yishan", "move_available")
-	await _hover_skill("myrmidon_zhaojia", "swift_cost")
-	await _click_skill("myrmidon_zhaojia")
-	_check("swift_spent", actor.swift_used)
-	await _hover_skill("myrmidon_zhaojia", "swift_spent")
 	await _walk_to(actor, Vector2i(3, 4))
 	_check("movement_spent", actor.movement_used)
 	await _hover_skill("myrmidon_yishan", "move_spent")
@@ -144,6 +140,11 @@ func _normal_sequence() -> void:
 	var kensei: Unit = manager.get("current_unit") as Unit
 	_check("normal_kensei_turn", kensei.unit_id == "kensei")
 	await _hover_skill("kensei_zhaojia", "mark_requirement")
+	# Keep the standard-spent card visible before ending the swordsman's turn.
+	# Show swift consumption on the next actor, still in the movement phase.
+	await _click_skill("kensei_zhaojia")
+	_check("swift_spent", kensei.swift_used)
+	await _hover_skill("kensei_zhaojia", "swift_spent")
 	manager.call("request_end_turn")
 	await create_timer(3.0).timeout
 
