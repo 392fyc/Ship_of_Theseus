@@ -534,7 +534,9 @@ func _apply_passive_turn_start(unit: Unit) -> void:
 	if state_id == "":
 		return
 	var duration: Variant = start.get("duration", {})
-	unit.apply_held_state(state_id, 1, duration if duration is Dictionary else {})
+	if unit.apply_held_state(state_id, 1, duration if duration is Dictionary else {}) \
+			and (DataLoader.held_states.get(state_id, {}) as Dictionary).has("engine_qi_loss_scar"):
+		unit.begin_qi_loss_scar_state()
 	unit.refresh_status_icons()
 	print("[Passive] %s 进入 %s" % [unit.unit_name, state_id])
 

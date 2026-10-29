@@ -156,8 +156,12 @@ func _test_cheng(tm: Node, ks: Unit, enemy: Unit) -> void:
 	# 每层技能威力 +2：斩击威力 +1 → +7。
 	var ctx: Dictionary = _context(tm, ks, "kensei_zhanji", enemy)
 	_eq("3 层澄心：斩击威力 1 + 6 = 7", float(ctx.get("skill_power", -1)), 7.0)
-	var basic: Dictionary = tm._build_hostile_action_context(ks, enemy, {})
-	_check("非技能动作不加威力", float(basic.get("skill_power", 0.0)) < 7.0)
+	var basic_with: float = float(tm._build_hostile_action_context(ks, enemy, {}).get("skill_power", 0.0))
+	var saved_stacks: int = ks.held_states.stacks("kensei_chengxin")
+	ks.held_states.remove("kensei_chengxin")
+	var basic_without: float = float(tm._build_hostile_action_context(ks, enemy, {}).get("skill_power", 0.0))
+	ks.held_states.apply("kensei_chengxin", saved_stacks, {"kind": "permanent"})
+	_eq("非技能动作：有没有澄心威力都一样", basic_with, basic_without)
 	# 回合结束钩子确实调用。
 	ks.held_states.remove("kensei_chengxin")
 	ks.set_sword_qi(15)
@@ -205,6 +209,7 @@ func _test_meng(tm: Node, dl: Node, ks: Unit) -> void:
 	_check("校验也放行", bool(GameAction.validate_skill_usage(ks, tm._get_skill_data("kensei_juhe")).get("ok", false)))
 	_cast(tm, ks, "kensei_juhe", Vector2i(6, 5), tm.grid.get_unit_at(Vector2i(6, 5)))
 	_eq("透支发动后剑气降至 0", ks.sword_qi, 0)
+	_check("剑气降至 0 不提前结束空想", ks.held_states.has("kensei_kongxiang"))
 	_eq("实际损失 30（累计 30）→ 第 2 层剑痕，余 5 点进度", ks.held_states.stacks("kensei_jianhen"), 2)
 	_eq("进度 5", ks._qi_loss_scar_progress, 5)
 	# 剑气为 0 时的反转没有实际损失，不计入。
@@ -225,6 +230,13 @@ func _test_meng(tm: Node, dl: Node, ks: Unit) -> void:
 	# 空想外获得剑气照常。
 	ks.gain_sword_qi(10, "test")
 	_eq("空想结束后获得剑气照常", ks.sword_qi, 10)
+	# 上一次空想的残留进度（例如战斗在回合中途结束）不带进新的空想。
+	ks._qi_loss_scar_progress = 20
+	ks.set_sword_qi(100)
+	_start_own_turn(tm, ks)
+	_eq("进入空想时进度从零开始", ks._qi_loss_scar_progress, 0)
+	tm.turn_manager.current_unit = ks
+	tm._on_turn_ended(ks)
 	# 剑痕满 5 层时不保存多出的进度。
 	ks.held_states.apply("kensei_jianhen", 5, {"kind": "permanent"})
 	ks.set_sword_qi(100)
@@ -248,6 +260,10 @@ func _test_scars(tm: Node, ks: Unit, enemy: Unit) -> void:
 	tm._apply_skill_effect_to_unit(enemy, ks, {"effect_id": "stun", "chance": 100, "duration": 1}, true)
 	_check("眩晕被免疫", ks.get_buff("stun") == null)
 	_eq("免疫消耗 1 层剑痕", ks.held_states.stacks("kensei_jianhen"), 1)
+	# 免疫在抵抗判定之前：施加率 0（本来必定施加失败）的控制也先消耗 1 层。
+	ks.held_states.apply("kensei_jianhen", 1, {"kind": "permanent"})
+	tm._apply_skill_effect_to_unit(enemy, ks, {"effect_id": "stun", "chance": 0, "duration": 1}, true)
+	_eq("抵抗判定之前就消耗剑痕（施加率 0 的控制也耗 1 层）", ks.held_states.stacks("kensei_jianhen"), 1)
 	tm._apply_skill_effect_to_unit(enemy, ks, {"effect_id": "defense_down", "chance": 100, "duration": 1, "value": -1}, true)
 	_eq("非控制效果不消耗剑痕", ks.held_states.stacks("kensei_jianhen"), 1)
 	var dd: Variant = ks.get_buff("defense_down")
@@ -276,12 +292,15 @@ func _test_kongxiangjian(tm: Node, ks: Unit, enemy: Unit) -> void:
 	_eq("空想剑可用", slot.get("available"), true)
 	_check("空想剑不是被动条目（可以点）", not bool(slot.get("is_passive", false)))
 
-	# 命中后补齐全部印记；纯粹伤害。
+	# 命中后补齐全部印记；纯粹伤害无视防御：给敌人很高的防御，伤害仍是「力量 + 威力 1」。
 	ks.clear_marks()
 	ks.marks["心"] = true
+	enemy.stats.def_attr = 500
+	var expected_damage: int = ks.get_effective_stat("STR") + 1
 	var hp_before: int = enemy.stats.hp
 	_cast(tm, ks, "kensei_kongxiangjian", enemy.grid_position, enemy)
-	_check("对目标造成伤害", enemy.stats.hp < hp_before)
+	_eq("纯粹伤害无视防御：伤害 = 力量 + 1", hp_before - enemy.stats.hp, expected_damage)
+	enemy.stats.def_attr = 0
 	_eq("命中后补齐全部印记", ks.get_mark_count(), 3)
 	_check("消耗迅捷行动", ks.swift_used)
 
@@ -299,6 +318,21 @@ func _test_kongxiangjian(tm: Node, ks: Unit, enemy: Unit) -> void:
 	_cast(tm, ks, "kensei_kongxiangjian", enemy.grid_position, enemy)
 	_eq("标准动作没用过：仍消耗 5 层剑痕", ks.held_states.stacks("kensei_jianhen"), 0)
 	_check("标准动作没用过：不多给（仍未用）", not ks.standard_used)
+	# 未命中也照样消耗与恢复（不以命中为条件）。
+	ks.reset_action_resources()
+	ks.skill_cooldowns.clear()
+	ks.standard_used = true
+	ks.held_states.apply("kensei_jianhen", 5, {"kind": "permanent"})
+	var saved_dex: int = ks.stats.dex
+	ks.stats.dex = 0
+	enemy.stats.spd = 500
+	hp_before = enemy.stats.hp
+	_cast(tm, ks, "kensei_kongxiangjian", enemy.grid_position, enemy)
+	_eq("前提：本次未命中", enemy.stats.hp, hp_before)
+	_eq("未命中也消耗 5 层剑痕", ks.held_states.stacks("kensei_jianhen"), 0)
+	_check("未命中也恢复标准动作", not ks.standard_used)
+	ks.stats.dex = saved_dex
+	enemy.stats.spd = 0
 
 	# 标准与迅捷都用完、只剩空想剑也用过——迅捷还剩时不结束回合。
 	ks.reset_action_resources()

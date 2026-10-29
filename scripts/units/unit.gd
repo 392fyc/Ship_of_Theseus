@@ -1089,6 +1089,12 @@ func _track_qi_loss_scars(actual: int, source: String) -> void:
 const QI_SOURCE_KONGXIANG_CLEAR := "kongxiang_clear"
 
 
+## 进入〔空想〕时从零开始累计（上一次空想若没走到回合结束就消失，例如战斗在回合中途结束，
+## 残留的进度不能带进来：「不足 25 点的进度只在当前〔空想〕内保留」）。
+func begin_qi_loss_scar_state() -> void:
+	_qi_loss_scar_progress = 0
+
+
 ## 〔空想〕结束：清空剩余剑气（不计入剑痕）与不足一档的进度。
 func end_qi_loss_scar_state() -> void:
 	if sword_qi > 0:
