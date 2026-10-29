@@ -13,7 +13,7 @@ permissions:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
         with:
@@ -41,7 +41,7 @@ jobs:
             frames=780
             if [ "$scenario" = threshold ]; then frames=420; fi
             mkdir -p ".tmp/action-cost-capture/$scenario"
-            timeout --kill-after=10s 360s xvfb-run -a -s '-screen 0 1280x720x24 -nolisten tcp' "$GODOT" --path . --rendering-method gl_compatibility --audio-driver Dummy --display-driver x11 --resolution 1280x720 --fixed-fps 30 --disable-vsync --script res://scripts/art/character_pipeline/capture_action_cost_clarity.gd -- --out="$GITHUB_WORKSPACE/.tmp/action-cost-capture/$scenario" --frames="$frames" --case="$scenario" > ".tmp/action-cost-capture/$scenario/battle.log" 2>&1
+            timeout --kill-after=10s 600s xvfb-run -a -s '-screen 0 1280x720x24 -nolisten tcp' "$GODOT" --path . --rendering-method gl_compatibility --audio-driver Dummy --display-driver x11 --resolution 1280x720 --fixed-fps 30 --disable-vsync --script res://scripts/art/character_pipeline/capture_action_cost_clarity.gd -- --out="$GITHUB_WORKSPACE/.tmp/action-cost-capture/$scenario" --frames="$frames" --case="$scenario" > ".tmp/action-cost-capture/$scenario/battle.log" 2>&1
             if grep -E 'SCRIPT ERROR|Parse Error|UI06_CHECK_FAILED' ".tmp/action-cost-capture/$scenario/battle.log"; then exit 1; fi
             ffmpeg -v error -framerate 30 -i ".tmp/action-cost-capture/$scenario/frames/frame_%05d.png" -c:v libx264 -crf 20 -pix_fmt yuv420p -movflags +faststart ".tmp/action-cost-capture/$scenario/battle.mp4"
           done

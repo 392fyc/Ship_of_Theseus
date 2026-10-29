@@ -83,7 +83,8 @@ func _click_skill(skill_id: String) -> void:
 
 
 func _settled_ui06() -> void:
-	var deadline: int = Time.get_ticks_msec() + 15000
+	# Software rendering with PNG capture runs slower than the fixed simulation clock.
+	var deadline: int = Time.get_ticks_msec() + 120000
 	while manager.get("input_state") == manager.InputState.ANIMATING \
 			and frame_index < total_frames - 1 and Time.get_ticks_msec() < deadline:
 		await process_frame
@@ -114,7 +115,6 @@ func _normal_sequence() -> void:
 	_check("normal_starts_with_myrmidon", actor.unit_id == "myrmidon")
 	_event("opening", {"hud": _dashboard().get_last_state()})
 	await _hover_skill("myrmidon_yishan", "move_available")
-	await _hover_skill("myrmidon_juhe", "qi_insufficient")
 	await _hover_skill("myrmidon_zhaojia", "swift_cost")
 	await _click_skill("myrmidon_zhaojia")
 	_check("swift_spent", actor.swift_used)
@@ -122,6 +122,9 @@ func _normal_sequence() -> void:
 	await _walk_to(actor, Vector2i(3, 4))
 	_check("movement_spent", actor.movement_used)
 	await _hover_skill("myrmidon_yishan", "move_spent")
+	_check("move_spent_reason_visible", _slot("myrmidon_yishan").get_inspection_text().contains("已失去移动机会"))
+	await _hover_skill("myrmidon_juhe", "qi_insufficient")
+	_check("qi_insufficient_reason_visible", _slot("myrmidon_juhe").get_inspection_text().contains("剑气不足"))
 	await _hover_skill("myrmidon_zhanji", "standard_cost")
 	await _click_skill("myrmidon_zhanji")
 	var target: Unit = manager.get("grid").get_unit_at(Vector2i(4, 4))
