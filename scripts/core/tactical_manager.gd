@@ -186,6 +186,7 @@ func start_battle() -> void:
 		var battle_unit: Unit = u as Unit
 		if battle_unit != null:
 			battle_unit.held_states.clear()
+			battle_unit.reset_battle_memory_state()
 			battle_unit.is_taking_turn = false
 	turn_manager.add_units(typed_units)
 	turn_manager.start()
@@ -455,6 +456,7 @@ func spawn_unit(class_id: String, spawn_pos: Vector2i,
 	# 记录初始站位（调试软重置回位用），不影响正式流程。
 	_debug_spawn_positions[unit.get_instance_id()] = spawn_pos
 	unit.unit_died.connect(_on_unit_died.bind(unit))
+	unit.yin_yang_fulfilled.connect(_on_yin_yang_fulfilled)
 	return unit
 
 
@@ -480,8 +482,8 @@ func _on_turn_started(unit: Unit) -> void:
 	current_unit = unit
 	unit.reset_turn_state()
 	unit.is_taking_turn = true
-	# 持有型状态的「到其后第 N 个自身回合开始」在此计数；额外回合尚未实现，统一按常规回合。
-	unit.held_states.on_own_turn_started()
+	# 持有型状态的「到其后第 N 个自身回合开始」在此计数；额外回合不计入（阴阳剑 rules）。
+	unit.held_states.on_own_turn_started(turn_manager.current_is_extra_turn)
 	# R1.17：护盾在每个自身回合开始时自然衰减（不是伤害，不触发受伤类效果）。
 	unit.decay_shield()
 	_apply_passive_turn_start(unit)
@@ -515,8 +517,8 @@ func _on_turn_started(unit: Unit) -> void:
 
 func _on_turn_ended(unit: Unit) -> void:
 	_apply_passive_turn_end(unit)
-	unit.process_turn_end_buffs()
-	unit.held_states.on_own_turn_ended()
+	unit.process_turn_end_buffs(turn_manager.current_is_extra_turn)
+	unit.held_states.on_own_turn_ended(turn_manager.current_is_extra_turn)
 	unit.is_taking_turn = false
 	_deselect_unit()
 
@@ -546,6 +548,7 @@ func _apply_passive_turn_start(unit: Unit) -> void:
 func _apply_passive_turn_end(unit: Unit) -> void:
 	if unit == null or not unit.stats.is_alive():
 		return
+	_apply_slot_form_turn_end(unit)
 	var spec: Variant = _get_skill_data(unit.passive_skill_id).get("passive_turn_end", null)
 	if spec is Dictionary:
 		var end: Dictionary = spec
@@ -563,6 +566,39 @@ func _apply_passive_turn_end(unit: Unit) -> void:
 		if (DataLoader.held_states.get(state_id, {}) as Dictionary).has("engine_qi_loss_scar"):
 			unit.end_qi_loss_scar_state()
 			break
+
+
+## 交替槽的回合结束衰减（〔太阳〕：回合结束时技能栏为太阴剑则失去 1 层；〔太阴〕反之）。
+## 写在槽位技能 JSON 的 turn_end_slot_decay：当前形态 id → 要失去 1 层的状态 id。
+## 它排在其他回合结束被动（〔心眼·澄〕的 15 剑气）之前：先减层，再结算剑气，所以那 15 点是否吃
+## 阴阳调和按减层后的层数判定 [推断：原文没有规定两者的先后]。
+func _apply_slot_form_turn_end(unit: Unit) -> void:
+	for slot_id: String in unit.skill_ids:
+		var decay: Variant = _get_skill_data(slot_id).get("turn_end_slot_decay", null)
+		if not decay is Dictionary:
+			continue
+		var state_id: String = str((decay as Dictionary).get(unit.resolve_slot_form(slot_id), ""))
+		if state_id != "" and unit.held_states.consume_stacks(state_id, 1) > 0:
+			unit.refresh_status_icons()
+
+
+## 阴阳圆满：若自身本轮次已经行动过，或正处于自身回合中，当前回合结束后获得一个额外的自身回合；
+## 若自身本轮次尚未行动，则本场战斗内速度提升 N%（可以多次获得）。数值在技能的 qi_harmony 里。
+func _on_yin_yang_fulfilled(unit: Unit) -> void:
+	var spec: Dictionary = {}
+	for slot_id: String in unit.skill_ids:
+		var value: Variant = _get_skill_data(slot_id).get("qi_harmony", null)
+		if value is Dictionary:
+			spec = value
+	if turn_manager != null and turn_manager.has_pending_turn(unit):
+		unit.battle_speed_pct += float(spec.get("fulfilled_speed_pct", 0.0))
+		turn_manager.refresh_queue_order()
+		print("[YinYang] %s 阴阳圆满（本轮尚未行动）→ 本场速度 +%s%%" % [
+			unit.unit_name, str(spec.get("fulfilled_speed_pct", 0.0))])
+	elif turn_manager != null:
+		turn_manager.grant_extra_turn(unit)
+		print("[YinYang] %s 阴阳圆满 → 当前回合结束后获得额外回合" % unit.unit_name)
+	unit.refresh_status_icons()
 
 
 func _on_round_ended() -> void:
@@ -1117,6 +1153,8 @@ func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 		return entry
 	# ── 剑圣资源条件检查 ─────────────────────────────────
 	var qi_cost: int = int(skill_data.get("qi_cost", 0))
+	if qi_cost > 0:
+		qi_cost += unit.get_harmony_extra()
 	if qi_cost > 0 and unit.sword_qi < qi_cost and not unit.allows_qi_overdraft():
 		entry["reason"] = "剑气不足（需要 %d，当前 %d）" % [qi_cost, unit.sword_qi]
 		return entry
@@ -1233,8 +1271,12 @@ func _get_skill_entries() -> Array[Dictionary]:
 		#    （招架）满印记时的替换形态，避免一开始就常驻为第 5 个技能。──
 		if bool(slot_skill_data.get("slot_swap_provider", false)):
 			continue
+		# ── 交替槽（阴阳剑）：先换成当前形态，再按 slot_swap_* 判定 ──
+		var form_id: String = unit.resolve_slot_form(skill_id)
+		if form_id != skill_id:
+			slot_skill_data = _get_skill_data(form_id)
 		# ── 槽位替换（数据驱动）：替换规则由技能 JSON 的 slot_swap_* 声明 ──
-		var display_id: String = unit.get_visible_skill_id(skill_id,
+		var display_id: String = unit.get_visible_skill_id(form_id,
 			str(slot_skill_data.get("slot_swap_trigger", "")),
 			str(slot_skill_data.get("slot_swap_target", "")),
 			_slot_swap_requires(slot_skill_data))
@@ -1647,7 +1689,10 @@ func _has_available_swift_skill(unit: Unit) -> bool:
 		# 将来出现迅捷型 provider 时不必再想起还有这里。
 		if bool(slot_data.get("slot_swap_provider", false)):
 			continue
-		var skill_id: String = unit.get_visible_skill_id(slot_id,
+		var form_slot_id: String = unit.resolve_slot_form(slot_id)
+		if form_slot_id != slot_id:
+			slot_data = _get_skill_data(form_slot_id)
+		var skill_id: String = unit.get_visible_skill_id(form_slot_id,
 			str(slot_data.get("slot_swap_trigger", "")),
 			str(slot_data.get("slot_swap_target", "")),
 			_slot_swap_requires(slot_data))
@@ -2169,11 +2214,25 @@ func _execute_skill_action(action: GameAction) -> bool:
 		if bool(form.get("remove_state_after_use", false)):
 			user.held_states.remove(str(form.get("state_id", "")))
 			user.refresh_status_icons()
+	_apply_slot_switch_after_use(user, skill_id, skill_data)
 	_apply_held_skill_triggers(user, skill_id)
 	_consume_on_skill_damage_states(user, skill_id)
 	_run_pending_reactions()
 	_emit_dashboard_state_changed()
 	return true
+
+
+## 使用后切换交替槽并获得状态（太阳剑：槽变为太阴剑、得 1 层太阳；太阴剑反之）。
+func _apply_slot_switch_after_use(user: Unit, skill_id: String, skill_data: Dictionary) -> void:
+	var gain: Variant = skill_data.get("gain_held_state_after_use", null)
+	if gain is Dictionary:
+		user.apply_held_state(str((gain as Dictionary).get("state_id", "")),
+			maxi(1, int((gain as Dictionary).get("stacks", 1))), {"kind": "permanent"})
+		user.check_yin_yang_fulfilled()
+	var next_form: String = str(skill_data.get("use_switches_slot_to", ""))
+	if next_form != "":
+		user.set_slot_form(user.slot_of_form(skill_id), next_form)
+	user.refresh_status_icons()
 
 
 ## 〔若离〕：自身造成技能伤害时消耗 1 层、获得剑气；每次使用技能最多消耗 1 层，不造成伤害的不消耗。

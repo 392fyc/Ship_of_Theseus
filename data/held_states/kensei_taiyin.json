@@ -11,5 +11,7 @@
   "dispellable": false,
   "resistable": false,
   "ignores_immunity": true,
-  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。"
+  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。",
+  "engine_avoid_per_stack": 1,
+  "_engine_note": "engine_avoid_per_stack = effect「每层闪避 +1」，R1.2 其他闪避加减（Unit._get_held_state_avoid_bonus）。剑气以任何方式减少都计入累计，包括空想结束清空剩余剑气、空想把获得改为失去；其余规则写在 kensei_taiyangjian 上。"
 }

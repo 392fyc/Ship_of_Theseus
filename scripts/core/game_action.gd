@@ -116,6 +116,9 @@ static func validate_skill_usage(unit: Unit, skill_data: Dictionary,
 	# 声明 qi_cost / requires_marks / mark_cost 时生效（sword_qi、get_mark_count 在
 	# Unit 基类恒存在且默认 0，非剑圣技能不声明这些字段 → 门槛不触发，符合资源每职业独立）。
 	var qi_cost: int = int(skill_data.get("qi_cost", 0))
+	# 阴阳调和：使用技能时额外失去的部分计入该技能的剑气消耗，剑气足以支付时才能使用。
+	if qi_cost > 0:
+		qi_cost += unit.get_harmony_extra()
 	if qi_cost > 0 and unit.sword_qi < qi_cost and not unit.allows_qi_overdraft():
 		return {"ok": false, "reason": "剑气不足：需 %d / 现 %d" % [qi_cost, unit.sword_qi]}
 	# 只能在某状态期间使用（〔空想剑〕：只能在〔空想〕期间使用）。
