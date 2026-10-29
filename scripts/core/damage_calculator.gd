@@ -160,6 +160,9 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	# ── Step 5: Calculate final damage (caller applies) ─
 	# R1.8：中间量不取整，最终量向下取整；下限 0 在最外层生效。
 	result.damage = maxi(0, floori(final_dmg))
+	# 幻象（〔影〕）：每个命中的伤害包固定扣 illusion_damage_per_hit，与伤害数值无关。
+	if defender.is_illusion:
+		result.damage = defender.illusion_damage_per_hit
 	result.defender_died = defender.stats.hp <= result.damage
 
 	return result
@@ -214,6 +217,9 @@ static func preview_attack(attacker: Unit, defender: Unit,
 
 	# R1.8：与 resolve_attack 一致向下取整，保证 forecast == 实际伤害。
 	var dmg_int: int = maxi(0, floori(final_damage))
+	# 幻象：与 resolve_attack 一致，预告显示固定的每包伤害。
+	if defender.is_illusion:
+		dmg_int = defender.illusion_damage_per_hit
 	return {
 		"hit_percent": clampi(roundi(hit_rate * 100.0), 0, 100),
 		"crit_percent": clampi(roundi(crit_rate * 100.0), 0, 100),

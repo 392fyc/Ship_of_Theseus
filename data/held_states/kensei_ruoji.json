@@ -21,5 +21,5 @@
     },
     "resists_control": true
   },
-  "_engine_note": "engine_evade_conversion = effect「原本会命中的可回避攻击改为回避，或原本会成功施加的普通控制改为抵抗，每次消耗 1 层〔若即〕，并获得 1 层〔若离〕」。若离的持续时间取 kensei_ruoli effect「持续到下个自身回合结束」。每个伤害段分别判定（rules）；必中攻击不受影响；范围攻击在引擎里照常掷命中，也算可回避 [推断，待用户确认：〔影〕rules 把范围攻击列为不可回避]。普通控制 = data/buffs 中 effect_type=control 的 buff，先过正常抵抗再消耗层数。"
+  "_engine_note": "engine_evade_conversion = effect「原本会命中的可回避攻击改为回避，或原本会成功施加的普通控制改为抵抗，每次消耗 1 层〔若即〕，并获得 1 层〔若离〕」。若离的持续时间取 kensei_ruoli effect「持续到下个自身回合结束」。每个伤害段分别判定（rules）；必中攻击与范围攻击（attack_type = area）不受影响、不耗层数（用户 2026-10-30 裁决：若即对范围攻击失效）。普通控制 = data/buffs 中 effect_type=control 的 buff，先过正常抵抗再消耗层数。"
 }

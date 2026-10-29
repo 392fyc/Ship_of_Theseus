@@ -73,12 +73,13 @@ var _slot_forms: Dictionary = {}
 var _qi_accumulation_progress: Dictionary = {}
 # 本场战斗的速度百分比提升（阴阳圆满在本轮尚未行动时达成：速度 +10%，可多次获得）。
 var battle_speed_pct: float = 0.0
-# 幻象（〔临摹〕的〔影〕）：属于主人一方，不行动；受到的伤害包计数，生命不因伤害减少。
+# 幻象（〔临摹〕的〔影〕）：属于主人一方，不行动；每个伤害包固定扣 illusion_damage_per_hit 点生命。
 var is_illusion: bool = false
 var illusion_owner: Unit = null
 # 主人技能栏里因这个幻象而换了形态的槽位（临摹 → 颠倒），幻象消失时换回。
 var illusion_slot_id: String = ""
-var _illusion_hits_left: int = 0
+## 幻象每承受 1 个伤害包失去的生命（〔影〕为 1：生命值就是能承受的次数）。
+var illusion_damage_per_hit: int = 1
 var _illusion_turns_left: int = 0
 # 召唤所在的那个主人回合结束时不计数（「召唤所在的回合不计入」）。
 var _illusion_skip_next_turn_end: bool = false
@@ -238,7 +239,7 @@ func setup(class_data: Dictionary, initial_facing: StringName = &"SE") -> void:
 	var illusion: Variant = class_data.get("illusion", null)
 	is_illusion = illusion is Dictionary
 	if is_illusion:
-		_illusion_hits_left = int((illusion as Dictionary).get("hits_to_vanish", 1))
+		illusion_damage_per_hit = maxi(1, int((illusion as Dictionary).get("damage_per_hit", 1)))
 		_illusion_turns_left = int((illusion as Dictionary).get("owner_turns", 1))
 	skill_ids.clear()
 	for skill_id_value: Variant in class_data.get("skill_ids", []):
@@ -469,12 +470,17 @@ func _canvas_item_rect_screen(item: CanvasItem, local_rect: Rect2) -> Rect2:
 # ── 战斗接口 ─────────────────────────────────────────
 
 func take_damage(amount: int, damage_type: String = "physical") -> void:
-	# 幻象：每承受 1 个伤害包计 1 次（多段攻击每段各计），与伤害数值无关；计满后消失。
+	# 幻象：每承受 1 个伤害包固定失去 illusion_damage_per_hit 点生命（多段攻击每段各计），
+	# 与伤害数值无关；生命归零时消失。类似 Dota、LoL 的守卫。
 	if is_illusion:
-		damage_taken.emit(amount, damage_type)
-		_illusion_hits_left -= 1
-		if _illusion_hits_left <= 0:
+		damage_taken.emit(illusion_damage_per_hit, damage_type)
+		if stats.hp <= illusion_damage_per_hit:
 			vanish_illusion()
+			return
+		stats.hp -= illusion_damage_per_hit
+		if has_character_animation():
+			character_animation.show_hit()
+		_update_health_bar()
 		return
 	# R1.17：伤害先扣护盾，超过当前护盾的部分再扣生命。damage_taken 仍报整次伤害量。
 	var absorbed: int = mini(shield, maxi(0, amount))

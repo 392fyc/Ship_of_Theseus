@@ -2620,14 +2620,15 @@ func _build_segment_action_data(action_data: Dictionary, segment_index: int) -> 
 
 
 ## 〔若即〕：原本会命中的可回避攻击改为回避，消耗 1 层并获得状态定义 engine_evade_conversion 写的状态。
-## 自然未命中不消耗；必中攻击不受影响。「可回避」按引擎的命中判定口径：掷了命中（R1.2）的攻击都算，
-## 范围攻击也一样 [推断，待用户确认：〔影〕rules 把「法术、范围、必中、Boss 重击」列为不可回避，
-## 那条是〔影〕吸引攻击的口径，引擎里范围攻击照常可以被闪开]。每个伤害段分别判定。
+## 自然未命中不消耗；必中攻击与范围攻击（attack_type = area）不受影响、不耗层数
+## （用户 2026-10-30 裁决：若即对范围攻击失效）。每个伤害段分别判定。
 ## 调试「强制命中」开关会把所有攻击变成必中，此时若即不会触发。
 func _apply_evade_conversion(defender: Unit, outcome: Dictionary, action_data: Dictionary) -> void:
 	if not bool(outcome.get("hit", false)):
 		return
 	if bool(action_data.get("guaranteed_hit", false)):
+		return
+	if str(action_data.get("attack_type", "")) == "area":
 		return
 	for state_id: String in defender.held_states.held_ids():
 		var spec: Variant = (DataLoader.held_states.get(state_id, {}) as Dictionary).get(
@@ -2687,7 +2688,7 @@ func _resolve_hostile_segment(attacker: Unit, defender: Unit, action_data: Dicti
 		DamagePopup.spawn_at_anchor(popup_layer, combat_text_anchor,
 			result.damage, damage_type, result.crit, segment_index)
 		defender.take_damage(result.damage, damage_type)
-		# 幻象的生命不因伤害减少：只有这一下让它消失才算击杀。
+		# 幻象每包固定扣生命，生命归零即消失：只有这一下让它消失才算击杀。
 		if defender.is_illusion:
 			result.defender_died = not defender.stats.is_alive()
 		if result.damage > 0 and not bool(action_data.get("is_counter", false)) \

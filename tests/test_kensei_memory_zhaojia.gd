@@ -304,19 +304,18 @@ func _test_qiefan(tm: Node, ks: Unit, enemy: Unit) -> void:
 	var natural: Dictionary = {"hit": false, "crit": false}
 	tm._apply_evade_conversion(ks, natural, {})
 	_eq("自然未命中：不耗层数", ks.held_states.stacks("kensei_ruoji"), 1)
-	ks.held_states.apply("kensei_ruoji", 1, {"kind": "until_own_turn_start", "count": 2})
 	var area: Dictionary = {"hit": true, "crit": false}
 	tm._apply_evade_conversion(ks, area, {"attack_type": "area"})
-	_check("范围攻击照常掷命中，也能被若即转为回避", not bool(area.hit))
-	_eq("范围攻击转为回避：耗 1 层", ks.held_states.stacks("kensei_ruoji"), 1)
-	_eq("范围攻击转为回避：得若离", ks.held_states.stacks("kensei_ruoli"), 2)
+	_check("范围攻击：若即失效，仍然命中", bool(area.hit))
+	_eq("范围攻击：不耗层数", ks.held_states.stacks("kensei_ruoji"), 1)
+	_eq("范围攻击：不给若离", ks.held_states.stacks("kensei_ruoli"), 1)
 
 	# 普通控制改为抵抗。
 	ks.stats.lck = 0
 	tm._apply_skill_effect_to_unit(enemy, ks, {"effect_id": "stun", "chance": 100, "duration": 1}, true)
 	_check("眩晕被抵抗", ks.get_buff("stun") == null)
 	_eq("抵抗消耗最后 1 层若即", ks.held_states.stacks("kensei_ruoji"), 0)
-	_eq("抵抗也给若离", ks.held_states.stacks("kensei_ruoli"), 3)
+	_eq("抵抗也给若离", ks.held_states.stacks("kensei_ruoli"), 2)
 	# 没有若即时照常命中。
 	enemy.reset_action_resources()
 	hp_before = ks.stats.hp
@@ -333,12 +332,12 @@ func _test_qiefan(tm: Node, ks: Unit, enemy: Unit) -> void:
 	enemy.stats.hp = 999
 	_cast(tm, ks, "kensei_yijue", enemy.grid_position, enemy)
 	_eq("连斩三段各 +10 = 30，若离 +15 = 45", ks.sword_qi, 45)
-	_eq("三段伤害也只耗 1 层若离（每次技能最多 1 层）", ks.held_states.stacks("kensei_ruoli"), 2)
+	_eq("三段伤害也只耗 1 层若离（每次技能最多 1 层）", ks.held_states.stacks("kensei_ruoli"), 1)
 	# 不造成伤害的技能不耗。
 	ks.reset_action_resources()
 	ks.skill_cooldowns.clear()
 	_cast(tm, ks, "kensei_qiefan", ks.grid_position, ks)
-	_eq("浮生若梦不造成伤害：不耗若离", ks.held_states.stacks("kensei_ruoli"), 2)
+	_eq("浮生若梦不造成伤害：不耗若离", ks.held_states.stacks("kensei_ruoli"), 1)
 	_leave_action_phase(tm)
 
 
