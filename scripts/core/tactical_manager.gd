@@ -2187,7 +2187,7 @@ func _execute_skill_action(action: GameAction) -> bool:
 
 	# 伤害结算完成后才扣印记（修复 P0-②：使拔刀吃到自身消耗的势加成）。
 	_spend_skill_marks(user, mark_cost)
-	# 护盾（回天）：最大生命 × pct% × 发动时范围内的敌人数，向上取整 [推断：原文没写取整]，
+	# 护盾（回天）：最大生命 × pct% × 发动时范围内的敌人数，向上取整（设计库 rules「护盾量向上取整」），
 	# 与现有护盾相加（R1.17）。
 	var shield_gain: Variant = skill_data.get("shield_gain", null)
 	if shield_gain is Dictionary:
