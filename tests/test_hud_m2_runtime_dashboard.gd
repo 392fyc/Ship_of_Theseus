@@ -65,6 +65,24 @@ func _test_player_state(dashboard: Control, manager: Object) -> void:
 	_check("运行时仅创建一个固定组合", composition != null and composition.get_parent() == dashboard)
 	_check("宿主默认关闭技能架数字键", not composition.get_node("BottomRow/SkillShelf").shortcut_input_enabled)
 	_check("真实载荷显示五区和行动条", composition.visible and composition.get_node("ActionResourceStrip").visible)
+	var action_strip: Control = composition.get_node("ActionResourceStrip") as Control
+	var live_state: Dictionary = manager.get_dashboard_data()
+	var live_resources: Dictionary = live_state["action_resources"]
+	var movement_value: Label = action_strip.get_node("MovementZone/MovementValue") as Label
+	var movement_state: Label = action_strip.get_node("MovementZone/MovementState") as Label
+	_check("真实 stats.mov 显示为移动力属性", int(live_state["stats"]["mov"]) == int(live_resources["movement_remaining"]) and movement_value.text == "移动力 %d" % int(live_state["stats"]["mov"]))
+	_check("真实移动可用状态有文字", movement_state.text == ("移动可用" if bool(live_resources["movement_available"]) else "移动已用"))
+	var changed_action_state: Dictionary = live_state.duplicate(true)
+	var changed_resources: Dictionary = changed_action_state["action_resources"]
+	changed_resources["movement_available"] = false
+	changed_resources["standard_remaining"] = 0
+	changed_resources["swift_remaining"] = 0
+	dashboard.update_state(changed_action_state)
+	await process_frame
+	_check("行动状态更新不改写移动力数字", movement_value.text == "移动力 %d" % int(live_state["stats"]["mov"]))
+	_check("刷新后移动、标准、迅捷均明确已用", movement_state.text == "移动已用" and action_strip.get_node("StandardZone/StandardState").text == "已用" and action_strip.get_node("SwiftZone/SwiftState").text == "已用")
+	dashboard.update_state(live_state)
+	await process_frame
 	var character: Control = composition.get_node("BottomRow/CharacterHudPanel") as Control
 	var character_card: Control = character.get_inspection_panel()
 	var portrait_image: TextureRect = character.get_node("PortraitContent") as TextureRect
@@ -180,6 +198,20 @@ func _test_sizes_and_inspection(dashboard: Control) -> void:
 			_check("%s五区%d全局几何" % [output_size, index], zone.get_global_rect().position.is_equal_approx(Vector2(positions[index], 596.0) * factor) and zone.get_global_rect().size.is_equal_approx(Vector2(widths[index], 108.0) * factor))
 		var strip: Control = composition.get_node("ActionResourceStrip") as Control
 		_check("%s行动条全局几何" % output_size, strip.get_global_rect().position.is_equal_approx(Vector2(503.0, 550.0) * factor) and strip.get_global_rect().size.is_equal_approx(Vector2(274.0, 40.0) * factor))
+		var action_safe_rect := Rect2(strip.get_global_rect().position, Vector2(strip.get_global_rect().size.x, row.get_global_rect().position.y - strip.get_global_rect().position.y))
+		var action_contents: Array[Control] = [
+			strip.get_node("MovementZone/FootprintGlyph") as Control,
+			strip.get_node("MovementZone/MovementValue") as Control,
+			strip.get_node("MovementZone/MovementState") as Control,
+			strip.get_node("StandardZone/StandardName") as Control,
+			strip.get_node("StandardZone/StandardState") as Control,
+			strip.get_node("SwiftZone/SwiftName") as Control,
+			strip.get_node("SwiftZone/SwiftState") as Control,
+			strip.get_node("StandardZone/PipsCenter/StandardPips") as Control,
+			strip.get_node("SwiftZone/PipsCenter/SwiftPips") as Control,
+		]
+		for action_content: Control in action_contents:
+			_check("%s行动文字和图形没有裁剪或覆盖底栏" % output_size, action_safe_rect.encloses(action_content.get_global_rect()))
 		var host_offset := Vector2(17.0, -11.0)
 		var strip_before_translation: Rect2 = strip.get_global_rect()
 		dashboard.position = host_offset

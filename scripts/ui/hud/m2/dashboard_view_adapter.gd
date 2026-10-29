@@ -26,6 +26,18 @@ const ATTRIBUTE_MAP: Array[Dictionary] = [
 	{"view_key": "LCK", "state_key": "lck"}, {"view_key": "MOV", "state_key": "mov"},
 ]
 
+const ACTION_COST_LABELS: Dictionary = {
+	"move": "移动行动",
+	"standard": "标准行动",
+	"swift": "迅捷行动",
+}
+
+const SPENT_ACTION_REASONS: Dictionary = {
+	"已失去移动机会": "移动行动已用",
+	"攻击机会已使用": "标准行动已用",
+	"迅捷机会已使用": "迅捷行动已用",
+}
+
 
 func build(state: Dictionary, icon_textures: Dictionary = {}) -> Dictionary:
 	var visible: bool = bool(state.get("visible", false))
@@ -224,8 +236,16 @@ func _skill_tooltip(entry: Dictionary) -> String:
 	var name: String = str(entry.get("name", "")).strip_edges()
 	var description: String = str(entry.get("description", "")).strip_edges()
 	var reason: String = str(entry.get("reason", "")).strip_edges()
+	reason = str(SPENT_ACTION_REASONS.get(reason, reason))
+	var action_cost: String = str(entry.get("action_cost", ""))
+	var passive: bool = bool(entry.get("is_passive", false))
+	var active_capable: bool = bool(entry.get("active_capable", not passive))
 	if not name.is_empty():
 		lines.append(name)
+	if not (passive and not active_capable) and ACTION_COST_LABELS.has(action_cost):
+		lines.append("消耗：%s" % ACTION_COST_LABELS[action_cost])
+	if action_cost == "swift" and description.begins_with("迅捷·"):
+		description = description.substr("迅捷·".length()).strip_edges()
 	if not description.is_empty():
 		lines.append(description)
 	if not reason.is_empty():

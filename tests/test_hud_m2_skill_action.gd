@@ -81,7 +81,7 @@ func _fixture(index: int) -> M2View:
 	view.active_capable = true
 	view.hotkey_text = str(index + 1)
 	view.action_type = &"standard"
-	view.tooltip_text = "显示测试夹具"
+	view.tooltip_text = "技能说明\n消耗：标准行动\n资源不足"
 	view.resource_cost_display = {"amount": 999, "resource_name": "法力"}
 	view.icon_texture = GradientTexture2D.new()
 	return view
@@ -102,7 +102,7 @@ func _test_slot() -> void:
 	_check("混合被动保留快捷键", slot.get_node("Content/HotkeyBadge").visible)
 	_check("混合被动保留行动", slot.get_node("Content/ActionBadge").visible)
 	_check("混合被动保留费用", slot.get_node("Content/ResourceCostBadge/ResourceCostText").text == "999")
-	_check("资源名称进入说明", slot.tooltip_text.contains("法力：999"))
+	_check("行动费用职业资源和原因进入说明", slot.tooltip_text.contains("消耗：标准行动") and slot.tooltip_text.contains("法力：999") and slot.tooltip_text.contains("资源不足"))
 	_check("混合被动保留选中", slot.get_node("Content/SelectedOverlay").visible)
 	for extent: int in [64, 56]:
 		slot.custom_minimum_size = Vector2(extent, extent)
@@ -148,11 +148,14 @@ func _test_slot() -> void:
 	await _key(KEY_SPACE)
 	_check("混合被动冷却拒绝输入", activated.size() == 2 and slot.disabled)
 	_check("混合被动冷却仍保留费用", slot.get_node("Content/ResourceCostBadge").visible and slot.get_node("Content/CooldownShade").visible)
+	_check("冷却数字仍可读", slot.get_node("Content/CooldownTurnsLabel").text == "2")
 	view.cooldown_turns = 0
 	view.enabled = false
 	slot.apply_view(view)
 	await _click(slot.get_global_rect().get_center())
+	await process_frame
 	_check("混合被动不可用暗层与输入拒绝", slot.get_node("Content/UnavailableShade").visible and activated.size() == 2)
+	_check("灰态技能仍可显示说明入口和原因", slot.is_inspection_visible() and slot.get_inspection_text().contains("消耗：标准行动") and slot.get_inspection_text().contains("资源不足"))
 	view.enabled = true
 	view.passive = false
 	view.active_capable = false
@@ -227,13 +230,15 @@ func _test_strip() -> void:
 		var zone: Control = strip.get_node(["MovementZone", "StandardZone", "SwiftZone"][index])
 		var expected: Rect2 = [Rect2(3, 3, 88.4, 45), Rect2(92.6, 3, 88.8, 45), Rect2(182.6, 3, 88.4, 45)][index]
 		_check("行动实际内窗口%d" % index, zone.get_rect().is_equal_approx(expected))
-	_check("移动数字不因不可用而清零", strip.get_node("MovementZone/MovementValue").text == "4")
-	_check("移动数字14px", strip.get_node("MovementZone/MovementValue").get_theme_font_size(&"font_size") == 14)
+	_check("移动属性明确叫移动力且不因已用清零", strip.get_node("MovementZone/MovementValue").text == "移动力 4" and strip.get_node("MovementZone/MovementState").text == "移动已用")
+	_check("标准和迅捷名字与可用状态可读", strip.get_node("StandardZone/StandardName").text == "标准行动" and strip.get_node("StandardZone/StandardState").text == "可用" and strip.get_node("SwiftZone/SwiftName").text == "迅捷行动" and strip.get_node("SwiftZone/SwiftState").text == "可用")
+	_check("行动文字不裁剪且落在固定条范围内", _strip_text_is_within(strip))
+	_check("移动力文字10px并可容纳长数值", strip.get_node("MovementZone/MovementValue").get_theme_font_size(&"font_size") == 10 and not strip.get_node("MovementZone/MovementValue").clip_text)
 	var standard: Array = strip.get_standard_pips()
 	var swift: Array = strip.get_swift_pips()
 	_check("行动实际容量2/3", standard.size() == 2 and swift.size() == 3)
-	_check("行动点24px视口", standard[0].size == Vector2(24, 24))
-	_check("行动点间距5", swift[1].position.x - swift[0].position.x == 29)
+	_check("行动点保留图形且缩到文字行内", standard[0].size == Vector2(16, 16))
+	_check("行动点间距2", swift[1].position.x - swift[0].position.x == 18)
 	_check("标准可用点颜色", standard[0].get_display_color() == Color("#54B789"))
 	_check("迅捷可用点颜色", swift[0].get_display_color() == Color("#D49A51"))
 	_check("耗尽点颜色", standard[1].get_display_color() == Color("#655E6C"))
@@ -241,15 +246,22 @@ func _test_strip() -> void:
 	var footprint: Control = strip.get_node("MovementZone/FootprintGlyph")
 	var number: Label = strip.get_node("MovementZone/MovementValue")
 	var foot_bounds: Rect2 = footprint.get_path_bounds()
-	_check("双足实际path高度20且保持原比例", is_equal_approx(foot_bounds.size.y, 20.0) and absf(foot_bounds.size.x - 15.9634257) < 0.001)
+	_check("双足图形保持比例并缩进文字行", is_equal_approx(foot_bounds.size.y, 15.3923048) and absf(foot_bounds.size.x - 12.2856958) < 0.001)
 	for movement: int in [4, 12, 999]:
 		view.movement_remaining = movement
 		strip.apply_view(view)
 		await process_frame
-		var left: float = footprint.position.x + foot_bounds.position.x
-		_check("%d移动图形与数字间距7" % movement, is_equal_approx(number.position.x - left - foot_bounds.size.x, 7.0))
-		_check("%d移动整体中心550.2" % movement, is_equal_approx((left + number.position.x + number.size.x) * 0.5 + 506.0, 550.2))
-		_check("%d移动实际字号不缩放" % movement, number.scale == Vector2.ONE and not number.clip_text)
+		_check("%d显示为移动力属性且状态独立" % movement, number.text == "移动力 %d" % movement and strip.get_node("MovementZone/MovementState").text == "移动已用")
+		_check("%d移动图形和文字整组居中" % movement, is_equal_approx((footprint.position.x + number.position.x + number.size.x) * 0.5, strip.get_node("MovementZone").size.x * 0.5))
+		_check("%d移动文字实际字号不缩放且不裁剪" % movement, number.scale == Vector2.ONE and not number.clip_text and Rect2(number.position, number.size).end.x <= strip.get_node("MovementZone").size.x)
+		_check("%d双足边线不越出行动区" % movement, strip.get_node("MovementZone").get_rect().encloses(Rect2(footprint.position + foot_bounds.position, foot_bounds.size).grow(0.5)))
+	view.movement_available = true
+	view.standard_remaining = 0
+	view.swift_remaining = 0
+	strip.apply_view(view)
+	await process_frame
+	_check("移动恢复时显示移动可用", strip.get_node("MovementZone/MovementState").text == "移动可用")
+	_check("标准和迅捷耗尽时明确显示已用", strip.get_node("StandardZone/StandardState").text == "已用" and strip.get_node("SwiftZone/SwiftState").text == "已用")
 	for capacity: int in range(1, 4):
 		view.standard_capacity = capacity
 		view.swift_capacity = capacity
@@ -258,20 +270,18 @@ func _test_strip() -> void:
 		for family: int in 2:
 			var pips: Array = strip.get_standard_pips() if family == 0 else strip.get_swift_pips()
 			var zone: Control = strip.get_node("StandardZone" if family == 0 else "SwiftZone")
-			var first: Control = pips[0]
 			var last: Control = pips[-1]
-			_check("%d容量%d族整组精确居中" % [capacity, family], is_equal_approx((first.global_position.x + last.global_position.x + 24.0) * 0.5, zone.get_global_rect().get_center().x))
+			_check("%d容量%d族右侧留白4px" % [capacity, family], is_equal_approx(last.get_global_rect().end.x, zone.get_global_rect().end.x - 4.0))
 			for pip: Control in pips:
 				var visible_bounds: Rect2 = pip.get_path_bounds()
 				visible_bounds.position += pip.global_position
 				_check("%d容量%d族描边不裁切" % [capacity, family], zone.get_global_rect().encloses(visible_bounds.grow(0.5)))
-				_check("行动组垂直中心575.5", is_equal_approx(visible_bounds.get_center().y + 550.0, 575.5))
 				if family == 0:
-					_check("标准可见直径20", visible_bounds.size == Vector2(20, 20))
+					_check("标准可见直径16", visible_bounds.size == Vector2(16, 16))
 				else:
 					var triangle: PackedVector2Array = pip.get_swift_points()
 					for side: int in 3:
-						_check("迅捷为24px等边三角", is_equal_approx(triangle[side].distance_to(triangle[(side + 1) % 3]), 24.0))
+						_check("迅捷为16px等边三角", is_equal_approx(triangle[side].distance_to(triangle[(side + 1) % 3]), 16.0))
 	var badge := Glyph.new()
 	badge.size = Vector2(13, 13)
 	badge.configure(Glyph.Kind.STANDARD, false)
@@ -288,6 +298,25 @@ func _test_strip() -> void:
 	_check("沿用行动显示归一", strip.get_standard_pips().size() == 3 and strip.get_swift_pips().size() == 1 and strip.get_swift_pips()[0].spent)
 	strip.queue_free()
 	await process_frame
+
+
+func _strip_text_is_within(strip: Control) -> bool:
+	var visible_area := Rect2(Vector2.ZERO, Vector2(274.0, 46.0))
+	for path: String in ["MovementZone/MovementValue", "MovementZone/MovementState", "StandardZone/StandardName", "StandardZone/StandardState", "SwiftZone/SwiftName", "SwiftZone/SwiftState"]:
+		var control: Control = strip.get_node(path) as Control
+		var rect := Rect2(control.position, control.size)
+		rect.position += control.get_parent_control().position
+		if not visible_area.encloses(rect):
+			return false
+	for pip: Node in strip.get_standard_pips() + strip.get_swift_pips():
+		var glyph: Control = pip as Control
+		var rect := Rect2(glyph.position, glyph.size)
+		var container: Control = glyph.get_parent_control()
+		var center: Control = container.get_parent_control()
+		rect.position += container.position + center.position + center.get_parent_control().position
+		if not visible_area.encloses(rect):
+			return false
+	return true
 
 
 func _click(point: Vector2) -> void:
