@@ -31,6 +31,7 @@ static func decide_actions(unit: Unit, grid: Grid,
 		grid, unit.grid_position, unit.stats.mov, unit.faction)
 
 	# 3. Find a move position that puts a target in attack range
+	# R1.18：先按原逻辑定下移动位置，再在该位置的合法目标里优先选有嘲讽的单位（见下方）。
 	var best_move: Vector2i = unit.grid_position
 	var best_target: Unit = null
 	var best_dist: int = 9999
@@ -50,6 +51,10 @@ static func decide_actions(unit: Unit, grid: Grid,
 					best_target = target
 
 	if best_target:
+		var taunting: Unit = _pick_taunting_target(
+			unit.grid_position, best_move, targets, atk_min_range, atk_range)
+		if taunting != null:
+			best_target = taunting
 		if best_move != unit.grid_position:
 			actions.append(GameAction.make_move(unit, best_move))
 		actions.append(GameAction.make_attack(unit, best_target))
@@ -71,14 +76,41 @@ static func decide_actions(unit: Unit, grid: Grid,
 static func _find_target_in_range(origin: Vector2i,
 		targets: Array[Unit], atk_min_range: int, atk_range: int) -> Unit:
 	## Pick the lowest-HP target within attack range (focus fire).
+	## R1.18：射程内有带嘲讽的单位时，只在它们之中按原优先级（血量最低）选。
 	var best: Unit = null
 	var best_hp: int = 99999
+	var any_taunt: bool = false
+	for target in targets:
+		var dist: int = _manhattan(origin, target.grid_position)
+		if dist >= atk_min_range and dist <= atk_range and target.has_taunt():
+			any_taunt = true
 	for target in targets:
 		var dist: int = _manhattan(origin, target.grid_position)
 		if dist >= atk_min_range and dist <= atk_range:
+			if any_taunt and not target.has_taunt():
+				continue
 			if target.stats.hp < best_hp:
 				best_hp = target.stats.hp
 				best = target
+	return best
+
+
+## R1.18：移动位置已定，在那里射程内的合法目标中挑带嘲讽的；多个时按原优先级
+## （离行动者原位置最近）选。没有带嘲讽的合法目标时返回 null，沿用原选择。
+static func _pick_taunting_target(origin: Vector2i, attack_pos: Vector2i,
+		targets: Array[Unit], atk_min_range: int, atk_range: int) -> Unit:
+	var best: Unit = null
+	var best_dist: int = 99999
+	for target in targets:
+		if not target.has_taunt():
+			continue
+		var dist: int = _manhattan(attack_pos, target.grid_position)
+		if dist < atk_min_range or dist > atk_range:
+			continue
+		var origin_dist: int = _manhattan(origin, target.grid_position)
+		if origin_dist < best_dist:
+			best_dist = origin_dist
+			best = target
 	return best
 
 

@@ -117,6 +117,10 @@ var _has_hover_cell: bool = false
 var _attack_mode: String = ATTACK_MODE_BASIC
 var _selected_skill_id: String = ""
 var _targeting_direction: Vector2i = Vector2i.ZERO
+## 本次攻击动作里受到敌方命中判定、动作结束后可能反应（〔见切〕反击）的单位：攻击者 → 被攻击者。
+var _pending_reactions: Array[Dictionary] = []
+## 当前技能动作的主手伤害段里是否造成过伤害（〔若离〕「造成技能伤害时」）。
+var _action_dealt_damage: bool = false
 ## 两段选目标（landing_mode）时已选中的敌人格；第二段在它周围选落点。
 var _landing_anchor: Vector2i = LANDING_ANCHOR_NONE
 var _skill_bar_expanded: bool = false
@@ -1897,6 +1901,7 @@ func _execute_attack_action(action: GameAction) -> bool:
 	_move_committed = true
 	attacker.refresh_status_icons()
 	_execute_hostile_action(attacker, defender, action.data)
+	_run_pending_reactions()
 	_emit_dashboard_state_changed()
 	return true
 
@@ -1977,6 +1982,7 @@ func _execute_skill_action(action: GameAction) -> bool:
 	var cooldown_turns: int = int(data.get("cooldown", 0))
 	user.consume_skill(skill_id, cooldown_turns)
 	user.refresh_status_icons()
+	_action_dealt_damage = false
 	# 直接位移到落点再出手（踏影 effect「直接位移至该格，并对目标造成物理伤害」）：
 	# 不检查沿途、不视为移动，所以不走寻路与移动事件。
 	if landing_cell != LANDING_ANCHOR_NONE:
@@ -2061,8 +2067,79 @@ func _execute_skill_action(action: GameAction) -> bool:
 			user.held_states.remove(str(form.get("state_id", "")))
 			user.refresh_status_icons()
 	_apply_held_skill_triggers(user, skill_id)
+	_consume_on_skill_damage_states(user, skill_id)
+	_run_pending_reactions()
 	_emit_dashboard_state_changed()
 	return true
+
+
+## 〔若离〕：自身造成技能伤害时消耗 1 层、获得剑气；每次使用技能最多消耗 1 层，不造成伤害的不消耗。
+## 数值在状态定义的 engine_on_skill_damage 里。结算时点放在整个技能结算完之后（原文「造成技能伤害时」）：
+## 现有技能没有在结算途中读剑气的条件，结果相同；以后出现这类条件时要改成在伤害段里结算。
+func _consume_on_skill_damage_states(user: Unit, skill_id: String) -> void:
+	if not _action_dealt_damage or user == null or not user.stats.is_alive():
+		return
+	for state_id: String in user.held_states.held_ids():
+		var spec: Variant = (DataLoader.held_states.get(state_id, {}) as Dictionary).get(
+			"engine_on_skill_damage", null)
+		if not spec is Dictionary:
+			continue
+		if user.held_states.consume_stacks(state_id, int((spec as Dictionary).get("consume", 1))) <= 0:
+			continue
+		var qi: int = int((spec as Dictionary).get("qi_gain", 0))
+		if qi > 0:
+			user.gain_sword_qi(qi, "%s:%s" % [state_id, skill_id])
+		user.refresh_status_icons()
+
+
+## 攻击动作结束后的反应：〔见切〕——对自身进行过命中判定的敌方攻击动作结束后，若自身存活、
+## 攻击者与自身上下左右相邻、剑气足够，消耗 1 层见切和剑气，对攻击者反击一次。
+## 每个敌方攻击动作最多一次（同一动作里的多段、多个目标只登记一次）；反击不再引发反击。
+func _run_pending_reactions() -> void:
+	var pending: Array[Dictionary] = _pending_reactions.duplicate()
+	_pending_reactions.clear()
+	for item: Dictionary in pending:
+		var attacker: Unit = item.get("attacker", null)
+		var defender: Unit = item.get("defender", null)
+		if attacker == null or defender == null:
+			continue
+		if not is_instance_valid(attacker) or not is_instance_valid(defender):
+			continue
+		_try_counter(defender, attacker)
+
+
+func _try_counter(defender: Unit, attacker: Unit) -> void:
+	if not defender.stats.is_alive() or not attacker.stats.is_alive():
+		return
+	for state_id: String in defender.held_states.held_ids():
+		var spec_value: Variant = (DataLoader.held_states.get(state_id, {}) as Dictionary).get(
+			"engine_counter", null)
+		if not spec_value is Dictionary:
+			continue
+		var spec: Dictionary = spec_value
+		if _manhattan(defender.grid_position, attacker.grid_position) != 1:
+			return
+		var qi_cost: int = int(spec.get("qi_cost", 0))
+		if defender.sword_qi < qi_cost:
+			return
+		if defender.held_states.consume_stacks(state_id, 1) <= 0:
+			return
+		if qi_cost > 0:
+			defender.spend_sword_qi(qi_cost, "counter:" + state_id)
+		defender.refresh_status_icons()
+		print("[Counter] %s 反击 %s（%s）" % [defender.unit_name, attacker.unit_name, state_id])
+		_execute_hostile_action(defender, attacker, {
+			"skill_id": "counter:" + state_id,
+			"skill_name": "反击",
+			"is_counter": true,
+			"damage_type": _normalize_damage_type(spec.get("damage_type", "physical")),
+			"skill_power": float(spec.get("power", 0)),
+			"skill_multiplier": float(spec.get("coefficient", 1.0)),
+			"attack_type": "melee",
+			"qi_gain_on_hit": 0,
+			"effects": [],
+		})
+		return
 
 
 ## 「持有即生效」的触发：单位技能栏里的技能可以声明 held_triggers，在单位使用某个身份的技能后
@@ -2171,9 +2248,14 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 		if not segment_result.hit or not defender.stats.is_alive():
 			break
 
+	_note_reaction(attacker, defender, data)
+
 	# 主手全部副作用结算后，再按队列执行副手追加。
 	# 递归追加进入同一队列，并受每次攻击动作的总次数护栏限制。
-	var queue: Array = (action_ctx["pending_offhand"] as Array).duplicate()
+	# 反击是〔见切〕产生的追加攻击，原文没有允许它再产生追加攻击（R1.15），所以不执行副手追加；
+	# 命中、暴击、造成伤害等事件照常分发（追加攻击正常产生自己的事件）。
+	var queue: Array = [] if bool(data.get("is_counter", false)) \
+		else (action_ctx["pending_offhand"] as Array).duplicate()
 	var executed: int = 0
 	while not queue.is_empty():
 		if executed >= MAX_OFFHAND_FOLLOWUPS_PER_ACTION:
@@ -2190,6 +2272,15 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 
 	# 自动反击已整体移除（2026-07-11 用户裁决）：未来以天赋/敌方特性形式回归，
 	# 伤害与特效将与天赋/特性深度绑定，不预设反击框架。
+
+
+func _note_reaction(attacker: Unit, defender: Unit, data: Dictionary) -> void:
+	if bool(data.get("is_counter", false)) or attacker.faction == defender.faction:
+		return
+	for item: Dictionary in _pending_reactions:
+		if item.get("attacker") == attacker and item.get("defender") == defender:
+			return
+	_pending_reactions.append({"attacker": attacker, "defender": defender})
 
 
 ## 多段攻击第 segment_index 段（从 0 起）的动作数据。第 n 段（n 从 1 起）命中减 decay×(n−1)，
@@ -2209,6 +2300,40 @@ func _build_segment_action_data(action_data: Dictionary, segment_index: int) -> 
 	return segment_data
 
 
+## 〔若即〕：原本会命中的可回避攻击改为回避，消耗 1 层并获得状态定义 engine_evade_conversion 写的状态。
+## 自然未命中不消耗；必中攻击不受影响。「可回避」按引擎的命中判定口径：掷了命中（R1.2）的攻击都算，
+## 范围攻击也一样 [推断，待用户确认：〔影〕rules 把「法术、范围、必中、Boss 重击」列为不可回避，
+## 那条是〔影〕吸引攻击的口径，引擎里范围攻击照常可以被闪开]。每个伤害段分别判定。
+## 调试「强制命中」开关会把所有攻击变成必中，此时若即不会触发。
+func _apply_evade_conversion(defender: Unit, outcome: Dictionary, action_data: Dictionary) -> void:
+	if not bool(outcome.get("hit", false)):
+		return
+	if bool(action_data.get("guaranteed_hit", false)):
+		return
+	for state_id: String in defender.held_states.held_ids():
+		var spec: Variant = (DataLoader.held_states.get(state_id, {}) as Dictionary).get(
+			"engine_evade_conversion", null)
+		if not spec is Dictionary:
+			continue
+		if defender.held_states.consume_stacks(state_id, 1) <= 0:
+			continue
+		outcome["hit"] = false
+		outcome["crit"] = false
+		_grant_conversion_state(defender, spec as Dictionary)
+		print("[Evade] %s 的 %s 把命中改为回避" % [defender.unit_name, state_id])
+		return
+
+
+func _grant_conversion_state(unit: Unit, spec: Dictionary) -> void:
+	var gain_state: String = str(spec.get("gain_state", ""))
+	if gain_state == "":
+		return
+	var duration: Variant = spec.get("gain_duration", {})
+	unit.apply_held_state(gain_state, maxi(1, int(spec.get("gain_stacks", 1))),
+		duration if duration is Dictionary else {})
+	unit.refresh_status_icons()
+
+
 ## 一个直接伤害段的完整结算：掷命中与暴击 → 命中、暴击事件 → 防御侧反应 → 伤害 →
 ## 状态、资源、词条与 after-damage 事件。返回本段结果，调用方据此决定是否继续下一段。
 func _resolve_hostile_segment(attacker: Unit, defender: Unit, action_data: Dictionary,
@@ -2220,6 +2345,7 @@ func _resolve_hostile_segment(attacker: Unit, defender: Unit, action_data: Dicti
 	# 但不得回溯改写已经掷出的 hit / crit。剑气回荡只强化随后的一次副手攻击。
 	var outcome: Dictionary = DamageCalculator.roll_outcome(
 		attacker, defender, action_data)
+	_apply_evade_conversion(defender, outcome, action_data)
 	action_ctx["source"] = SOURCE_MAIN_HAND
 	_dispatch_on_hit_events(attacker, outcome, action_ctx)
 	_merge_on_hit_modifiers(action_data, action_ctx)
@@ -2241,6 +2367,8 @@ func _resolve_hostile_segment(attacker: Unit, defender: Unit, action_data: Dicti
 		DamagePopup.spawn_at_anchor(popup_layer, combat_text_anchor,
 			result.damage, damage_type, result.crit, segment_index)
 		defender.take_damage(result.damage, damage_type)
+		if result.damage > 0 and not bool(action_data.get("is_counter", false)):
+			_action_dealt_damage = true
 	else:
 		DamagePopup.spawn_miss_at_anchor(popup_layer, combat_text_anchor, segment_index)
 
@@ -2426,6 +2554,17 @@ func _apply_support_skill(user: Unit, skill_data: Dictionary,
 				user, target_unit, effect_value as Dictionary, false)
 
 
+## 持有型状态效果的层数：stacks（缺省 1）；写了 stacks_from_qi 时 = base + 使用者剑气 ÷ qi_step（向下取整），
+## 不超过 max（见切、若即：「层数为 1，使用时每有 30 点剑气再多 1 层，最大 3 层」）。
+func _effect_stacks(user: Unit, effect_data: Dictionary) -> int:
+	var spec: Variant = effect_data.get("stacks_from_qi", null)
+	if not spec is Dictionary:
+		return maxi(1, int(effect_data.get("stacks", 1)))
+	var step: int = maxi(1, int((spec as Dictionary).get("qi_step", 1)))
+	var stacks: int = int((spec as Dictionary).get("base", 1)) + int(user.sword_qi / step)
+	return clampi(stacks, 1, maxi(1, int((spec as Dictionary).get("max", stacks))))
+
+
 func _apply_hostile_skill_effects(user: Unit, target_unit: Unit,
 		action_data: Dictionary) -> void:
 	var effect_entries: Variant = action_data.get("effects", [])
@@ -2447,7 +2586,7 @@ func _apply_skill_effect_to_unit(user: Unit, target_unit: Unit,
 		var duration_value: Variant = effect_data.get("duration", {})
 		var params_value: Variant = effect_data.get("params", {})
 		target_unit.apply_held_state(str(effect_data["held_state_id"]),
-			maxi(1, int(effect_data.get("stacks", 1))),
+			_effect_stacks(user, effect_data),
 			duration_value if duration_value is Dictionary else {},
 			params_value if params_value is Dictionary else {},
 			user.unit_id)
@@ -2465,9 +2604,28 @@ func _apply_skill_effect_to_unit(user: Unit, target_unit: Unit,
 		_:
 			if not _roll_effect_application(target_unit, effect_data, is_hostile):
 				return
+			# 〔若即〕：原本会成功施加的普通控制改为抵抗（先过正常抵抗，再消耗层数）。
+			if is_hostile and _try_resist_control(target_unit, effect_type):
+				return
 			var buff: BuffEffect = _make_buff_effect_instance(user, effect_data)
 			if buff != null:
 				target_unit.add_buff(buff)
+
+
+func _try_resist_control(target_unit: Unit, buff_id: String) -> bool:
+	if str((DataLoader.buffs.get(buff_id, {}) as Dictionary).get("effect_type", "")) != "control":
+		return false
+	for state_id: String in target_unit.held_states.held_ids():
+		var spec: Variant = (DataLoader.held_states.get(state_id, {}) as Dictionary).get(
+			"engine_evade_conversion", null)
+		if not spec is Dictionary or not bool((spec as Dictionary).get("resists_control", false)):
+			continue
+		if target_unit.held_states.consume_stacks(state_id, 1) <= 0:
+			continue
+		_grant_conversion_state(target_unit, spec as Dictionary)
+		print("[Resist] %s 的 %s 抵抗了 %s" % [target_unit.unit_name, state_id, buff_id])
+		return true
+	return false
 
 
 func _roll_effect_application(target_unit: Unit, effect_data: Dictionary,
@@ -2950,8 +3108,12 @@ func _build_hostile_action_context(attacker: Unit, defender: Unit,
 	action_data["affix_defense_multiplier"] = _affix_bulwark_multiplier(defender)
 	# 攻击者持有的状态带来的总增总降（纳刀：自身造成的伤害总降 50%），满月这类声明无效的除外。
 	var totals: Array = (action_data.get("damage_total_modifiers", []) as Array).duplicate()
+	# 「自身在自身回合内使用技能造成的伤害」（架势）：攻击者正在自己的回合、这是技能动作、不是反击。
+	var own_turn_skill: bool = attacker.is_taking_turn \
+		and str(action_data.get("skill_id", "")) != "" \
+		and not bool(action_data.get("is_counter", false))
 	totals.append_array(_attacker_state_damage_modifiers(
-		attacker, action_data.get("ignored_attacker_states", [])))
+		attacker, action_data.get("ignored_attacker_states", []), own_turn_skill))
 	action_data["damage_total_modifiers"] = totals
 	_apply_debug_determinism(action_data)
 	return action_data
@@ -2959,7 +3121,8 @@ func _build_hostile_action_context(attacker: Unit, defender: Unit,
 
 ## 攻击者持有状态的总增总降（R1.1 第二层，逐项相乘）：状态定义里的 engine_damage_total_modifier。
 ## ignored：本次攻击声明对其无效的状态 id。
-func _attacker_state_damage_modifiers(attacker: Unit, ignored: Variant) -> Array:
+func _attacker_state_damage_modifiers(attacker: Unit, ignored: Variant,
+		own_turn_skill: bool = false) -> Array:
 	var out: Array = []
 	if attacker == null:
 		return out
@@ -2969,6 +3132,10 @@ func _attacker_state_damage_modifiers(attacker: Unit, ignored: Variant) -> Array
 		var definition: Dictionary = DataLoader.held_states.get(state_id, {})
 		if definition.has("engine_damage_total_modifier"):
 			out.append(float(definition["engine_damage_total_modifier"]))
+		# 架势：比例随给予它的技能变化，写在施加时的参数里（R3.4），只作用于自身回合内的技能伤害。
+		var params: Dictionary = attacker.held_states.params(state_id)
+		if own_turn_skill and params.has("damage_total_modifier_own_turn_skill"):
+			out.append(float(params["damage_total_modifier_own_turn_skill"]))
 	return out
 
 

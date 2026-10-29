@@ -14,5 +14,12 @@
   "ignores_immunity": true,
   "engine_reapplication_mode": "set_stacks",
   "_engine_note": "engine_reapplication_mode 是引擎侧字段，设计库无对应列，不回流。设计库 reapplication_mode 暂填 add_stacks，notes 写明以 effect 为准（再次获得时层数设为本次层数并刷新持续时间）；用户 2026-10-28 裁决 Q3「按建议开工」= 按 effect 执行。",
-  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。"
+  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。",
+  "engine_counter": {
+    "qi_cost": 10,
+    "power": 1,
+    "coefficient": 1.0,
+    "damage_type": "物理"
+  },
+  "_engine_counter_note": "engine_counter = effect「消耗 1 层〔见切〕和 10 点剑气，对攻击者反击一次：造成物理伤害，威力 +1，系数 1.0」。由 TacticalManager._run_pending_reactions 在每个敌方攻击动作结束后结算：自身存活、攻击者上下左右相邻、剑气足够；每个敌方攻击动作最多一次；反击带 is_counter，不再引发反击、不吃架势的总降。"
 }
