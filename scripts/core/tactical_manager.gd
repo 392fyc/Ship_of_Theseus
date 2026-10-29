@@ -2182,6 +2182,9 @@ func _execute_skill_action(action: GameAction) -> bool:
 				_execute_hostile_action(user, target_unit, per_target_payload)
 
 	# 伤害结算完成后才扣印记（修复 P0-②：使拔刀吃到自身消耗的势加成）。
+	# 照做「用自身的属性（包含印记带来的属性加成）」：拔刀系在结算后才扣印记，照做在那之后，
+	# 所以先记下扣之前的印记，照做期间按它计算。
+	var marks_before_spend: Dictionary = user.marks.duplicate()
 	_spend_skill_marks(user, mark_cost)
 	# 护盾（回天）：最大生命 × pct% × 发动时范围内的敌人数，向上取整 [推断：原文没写取整]，
 	# 与现有护盾相加（R1.17）。
@@ -2234,7 +2237,7 @@ func _execute_skill_action(action: GameAction) -> bool:
 		_swap_with_illusion(user)
 	_apply_held_skill_triggers(user, skill_id)
 	_consume_on_skill_damage_states(user, skill_id)
-	_run_mimic(user, skill_id, skill_data, data)
+	_run_mimic(user, skill_id, skill_data, data, marks_before_spend)
 	_run_pending_reactions()
 	_emit_dashboard_state_changed()
 	return true
@@ -2317,7 +2320,8 @@ func _swap_with_illusion(user: Unit) -> void:
 ##   伤害：同一技能威力与系数、用自身属性计算，再乘 damage_pct%；自身状态的加成与惩罚不计；
 ##   命中暴击由影单独判定；命中时附加这次攻击施加给敌人的状态；不产生资源、事件与计数。
 ##   影的射程内没有合法目标时不照做。反击不触发照做。
-func _run_mimic(user: Unit, skill_id: String, skill_data: Dictionary, payload: Dictionary) -> void:
+func _run_mimic(user: Unit, skill_id: String, skill_data: Dictionary, payload: Dictionary,
+		marks_for_mimic: Dictionary = {}) -> void:
 	if bool(payload.get("is_counter", false)) or _is_support_skill(skill_data):
 		return
 	var spec: Dictionary = {}
@@ -2342,9 +2346,13 @@ func _run_mimic(user: Unit, skill_id: String, skill_data: Dictionary, payload: D
 			mimic_payload[key] = 0
 		mimic_payload["mark_fill_on_hit"] = false
 		print("[Mimic] %s 照做 %s（%d 个目标）" % [illusion.unit_name, skill_id, targets.size()])
+		var marks_now: Dictionary = user.marks.duplicate()
+		if not marks_for_mimic.is_empty():
+			user.marks = marks_for_mimic.duplicate()
 		for target: Unit in targets:
 			if _can_execute_hostile_action(user, target):
 				_execute_hostile_action(user, target, mimic_payload)
+		user.marks = marks_now
 
 
 func _mimic_targets(user: Unit, illusion: Unit, skill_data: Dictionary,
@@ -2360,6 +2368,8 @@ func _mimic_targets(user: Unit, illusion: Unit, skill_data: Dictionary,
 				RangeCalculator.calculate_cells(grid, origin, range_data))
 			if candidates.is_empty():
 				return []
+			if candidates.size() == 1:
+				return candidates
 			return [candidates[randi() % candidates.size()]]
 		_:
 			var direction: Vector2i = _deserialize_vector2i(payload.get("target_direction", {}))
@@ -2676,13 +2686,17 @@ func _resolve_hostile_segment(attacker: Unit, defender: Unit, action_data: Dicti
 		DamagePopup.spawn_at_anchor(popup_layer, combat_text_anchor,
 			result.damage, damage_type, result.crit, segment_index)
 		defender.take_damage(result.damage, damage_type)
+		# 幻象的生命不因伤害减少：只有这一下让它消失才算击杀。
+		if defender.is_illusion:
+			result.defender_died = not defender.stats.is_alive()
 		if result.damage > 0 and not bool(action_data.get("is_counter", false)) \
 				and not bool(action_data.get("is_mimic", false)):
 			_action_dealt_damage = true
 	else:
 		DamagePopup.spawn_miss_at_anchor(popup_layer, combat_text_anchor, segment_index)
 
-	if result.hit and defender.stats.is_alive():
+	# 只有明确写明作用于〔影〕的效果才能给它附加状态：攻击带的状态不附加到幻象。
+	if result.hit and defender.stats.is_alive() and not defender.is_illusion:
 		_apply_hostile_skill_effects(attacker, defender, data)
 
 	# 〔影〕的照做只造成伤害和附加状态：剑气与印记的增减、命中 / 造成伤害 / 击杀时的效果都不结算。
@@ -3449,6 +3463,7 @@ func _build_hostile_action_context(attacker: Unit, defender: Unit,
 	# 敌人对〔影〕的攻击必定命中（临摹 rules）。
 	if defender.is_illusion:
 		action_data["guaranteed_hit"] = true
+		action_data["entry_guaranteed_hit"] = true
 	# 〔澄心〕：每层使自身技能伤害的威力 +N（威力加算，计入技能威力）。反击也是技能伤害。
 	# 〔影〕的照做不计自身状态带来的加成与惩罚（临摹 rules）。
 	var is_mimic: bool = bool(action_data.get("is_mimic", false))
@@ -4608,7 +4623,8 @@ func debug_soft_reset() -> void:
 		turn_manager.stop()
 		var typed_units: Array[Unit] = []
 		for u in units:
-			typed_units.append(u)
+			if not (u as Unit).is_illusion:
+				typed_units.append(u)
 		turn_manager.add_units(typed_units)
 		turn_manager.start()
 	_emit_dashboard_state_changed()

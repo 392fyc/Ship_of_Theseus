@@ -43,6 +43,7 @@ const SplashFixture := preload("res://tests/fixtures/splash_area_skill.gd")
 ## _run 开头装进本测试自己的 DataLoader），让这条修复继续有用例锁住。
 const EXPECTED_BEHAVIOR_CHANGES: Dictionary = {
 	SplashFixture.SKILL_ID: "旧拔刀形状 area=diamond/1 被旧反推误判为选地面；target_mode=单位",
+	"kensei_linmo": "〔临摹〕在空格召唤〔影〕：设计库 target_mode=格子，area=单体；旧反推只把非单体范围当选地面，会误判为选单位（gameplay-impl PR6f-2）",
 }
 
 ## 5 条有设计库对应的技能，值从设计库快照抄来（1:2 映射的四条两版取值一致）。

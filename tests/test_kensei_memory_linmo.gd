@@ -251,10 +251,36 @@ func _test_mimic(tm: Node, ks: Unit, e1: Unit, e2: Unit) -> void:
 	ks.marks = {"心": true, "道": true, "势": true}
 	ks.set_sword_qi(100)
 	e2_before = e2.stats.hp
+	# 拔刀结算后才扣 3 枚印记；照做要按扣之前的印记算属性（〔势〕力量 +10%）。把力量调高让差别看得出。
+	var saved_str: int = ks.stats.str_attr
+	ks.stats.str_attr = 60
+	var badao_ctx: Dictionary = _context(tm, ks, "kensei_badao", e2)
+	var with_marks: int = int(DamageCalculator.preview_attack(ks, e2, badao_ctx).get("damage", 0))
+	ks.clear_marks()
+	var without_marks: int = int(DamageCalculator.preview_attack(ks, e2, badao_ctx).get("damage", 0))
+	ks.marks = {"心": true, "道": true, "势": true}
+	_check("前提：有无印记的伤害差得出来", with_marks - without_marks >= 4,
+		"有=%d 无=%d" % [with_marks, without_marks])
 	_cast(tm, ks, "kensei_badao", ks.grid_position, ks)
-	_check("拔刀：以影为中心打到影身边的 E2", e2.stats.hp < e2_before)
+	var badao_mimic: int = e2_before - e2.stats.hp
+	_check("拔刀：以影为中心打到影身边的 E2", badao_mimic > 0)
+	_check("拔刀照做按扣印记之前的属性计算（约为有印记时的一半）",
+		absi(badao_mimic - int(with_marks * 0.5)) <= 1,
+		"照做=%d 有印记一半=%d 无印记一半=%d" % [badao_mimic, int(with_marks * 0.5), int(without_marks * 0.5)])
+	_eq("照做之后印记仍是扣完的状态", ks.get_mark_count(), 0)
+	ks.stats.str_attr = saved_str
 	tm.grid.move_unit(e2, Vector2i(2, 5), Vector2i(3, 4))
 	e2.grid_position = Vector2i(3, 4)
+
+	# 方向攻击（裂空）：从影的位置朝同一方向打。剑圣在 (2,2) 向右打到 E1；影在 (2,4) 向右打到 (3,4) 的 E2。
+	var dl: Node = root.get_node("/root/DataLoader")
+	var r: Dictionary = ks.apply_memory("kensei_huajianweiqi", dl.memories, dl.skills)
+	_check("化剑为气兑现成功（斩击 → 裂空）", bool(r.get("ok", false)), str(r.get("reason", "")))
+	ks.reset_action_resources()
+	ks.skill_cooldowns.clear()
+	e2_before = e2.stats.hp
+	_cast(tm, ks, "kensei_liekong", Vector2i(3, 2), null)
+	_check("裂空：影从自己的位置朝同一方向照做，打到 E2", e2.stats.hp < e2_before)
 	tm.debug_harness_active = false
 	tm.debug_deterministic = false
 	_leave_action_phase(tm)
