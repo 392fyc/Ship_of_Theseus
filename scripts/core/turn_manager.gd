@@ -45,6 +45,12 @@ func get_round_number() -> int:
 	return _round_number
 
 
+## 该单位本轮次是否还没轮到行动：仍在本轮的待行动队列里（当前行动者已出队，不算）。
+## 供〔踏影〕「目标在本轮尚未行动」判定。
+func has_pending_turn(unit: Unit) -> bool:
+	return unit != null and unit in _queue
+
+
 func force_advance() -> void:
 	_advance()
 

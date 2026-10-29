@@ -42,6 +42,11 @@ const SUPPORTED_TARGET_MODES: Array[String] = [
 	TARGET_MODE_UNIT, TARGET_MODE_CELL, TARGET_MODE_DIRECTION, TARGET_MODE_SELF,
 ]
 
+## 技能 JSON `landing_mode`：选完敌人后再选落点。`adjacent_to_target` = 该敌人上下左右相邻的
+## 空格（〔踏影〕）。`LANDING_ANCHOR_NONE` 表示还没选敌人。
+const LANDING_MODE_ADJACENT: String = "adjacent_to_target"
+const LANDING_ANCHOR_NONE: Vector2i = Vector2i(-1, -1)
+
 ## 伤害产生路径标签（对应天赋的 `requires_contexts`）。当前只有主动攻击一条路径。
 ##
 ## ⚠ 这里原先写着「Wave 4 的防御侧反应会加第二条，那时这个维度才真正开始区分」
@@ -112,6 +117,8 @@ var _has_hover_cell: bool = false
 var _attack_mode: String = ATTACK_MODE_BASIC
 var _selected_skill_id: String = ""
 var _targeting_direction: Vector2i = Vector2i.ZERO
+## 两段选目标（landing_mode）时已选中的敌人格；第二段在它周围选落点。
+var _landing_anchor: Vector2i = LANDING_ANCHOR_NONE
 var _skill_bar_expanded: bool = false
 var _inspected_unit: Unit = null
 var _pre_move_position: Vector2i = Vector2i.ZERO
@@ -663,6 +670,24 @@ func _handle_click(grid_pos: Vector2i) -> void:
 					_emit_dashboard_state_changed()
 				else:
 					_cancel_targeting()
+			elif _is_waiting_for_landing_target():
+				if grid_pos in _attack_cells:
+					_landing_anchor = grid_pos
+					_refresh_attack_cells()
+					_recalculate_hover_artifacts()
+					_show_attack_highlights()
+					_emit_dashboard_state_changed()
+				else:
+					_cancel_targeting()
+			elif _landing_anchor != LANDING_ANCHOR_NONE:
+				if grid_pos in _attack_cells:
+					var landing_action: GameAction = _build_skill_action(
+						current_unit, _landing_anchor,
+						grid.get_unit_at(_landing_anchor), grid_pos)
+					if landing_action != null:
+						_execute_skill_from_input(landing_action)
+				else:
+					_cancel_targeting()
 			elif _can_confirm_skill_target(grid_pos):
 				var skill_action: GameAction = _build_skill_action(
 					current_unit, grid_pos, unit)
@@ -861,11 +886,14 @@ func _recalculate_hover_artifacts() -> void:
 			and not _is_waiting_for_line_direction() \
 			and _hover_cell in _attack_cells:
 		var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
+		# 两段选目标的第二段：悬停的是落点，预告与范围仍落在已选中的敌人上。
+		var forecast_cell: Vector2i = _landing_anchor \
+			if _landing_anchor != LANDING_ANCHOR_NONE else _hover_cell
 		var area_direction: Vector2i = _get_skill_area_direction(
-			current_unit.grid_position, _hover_cell)
+			current_unit.grid_position, forecast_cell)
 		_area_preview_cells = _compute_skill_area_cells(
-			current_unit, skill_data, _hover_cell, area_direction)
-		_combat_forecast = _build_skill_forecast_for_hover(_hover_cell)
+			current_unit, skill_data, forecast_cell, area_direction)
+		_combat_forecast = _build_skill_forecast_for_hover(forecast_cell)
 	_emit_dashboard_state_changed()
 
 
@@ -957,6 +985,7 @@ func _clear_targeting_buffers() -> void:
 	_area_preview_cells = []
 	_direction_selector_cells = []
 	_targeting_direction = Vector2i.ZERO
+	_landing_anchor = LANDING_ANCHOR_NONE
 
 
 func _restore_action_phase_state() -> void:
@@ -1042,8 +1071,56 @@ func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 			and not _has_enemy_in_required_area(unit, skill_data):
 		entry["reason"] = "范围内没有敌人"
 		return entry
+	if _skill_landing_mode(skill_data) == LANDING_MODE_ADJACENT \
+			and _get_landing_target_cells(unit, skill_data).is_empty():
+		entry["reason"] = "射程内没有可落脚的敌人"
+		return entry
 	entry["available"] = true
 	return entry
+
+
+func _skill_landing_mode(skill_data: Dictionary) -> String:
+	return str(skill_data.get("landing_mode", ""))
+
+
+## 两段选目标的第一段：还没选敌人。
+func _is_waiting_for_landing_target() -> bool:
+	if input_state != InputState.SKILL_TARGETING or _selected_skill_id == "":
+		return false
+	return _skill_landing_mode(_get_skill_data(_selected_skill_id)) == LANDING_MODE_ADJACENT \
+		and _landing_anchor == LANDING_ANCHOR_NONE
+
+
+## 目标上下左右相邻、自身能站立且没被其他单位占据的格（踏影 effect）。自身当前所在格也合法：
+## 已经站在目标旁边时原地出手。不检查沿途（直接位移）。多格目标的「完整占据区域」口径未承载（Q7）。
+func _get_adjacent_landing_cells(user: Unit, target_pos: Vector2i) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	for direction: Vector2i in RangeCalculator.CARDINAL_DIRECTIONS:
+		var cell_pos: Vector2i = target_pos + direction
+		if not grid.is_valid(cell_pos):
+			continue
+		var cell: Cell = grid.get_cell(cell_pos)
+		if cell == null or not cell.is_passable():
+			continue
+		if cell.occupant != null and cell.occupant != user:
+			continue
+		cells.append(cell_pos)
+	return cells
+
+
+## 两段选目标的第一段可选格：射程内、符合目标关系、至少有一个合法落点的单位
+## （没有合法落点的敌人不能成为目标）。
+func _get_landing_target_cells(user: Unit, skill_data: Dictionary) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	var relation: String = _get_skill_target_relation(skill_data)
+	for cell_pos: Vector2i in RangeCalculator.calculate_cells(
+			grid, user.grid_position, skill_data.get("range", {})):
+		if not _matches_target_relation(user, grid.get_unit_at(cell_pos), relation):
+			continue
+		if _get_adjacent_landing_cells(user, cell_pos).is_empty():
+			continue
+		cells.append(cell_pos)
+	return cells
 
 
 ## 「范围内至少有一名敌人」是否成立。以自身为中心的技能（拔刀）看自身周围；
@@ -1561,7 +1638,7 @@ func _build_skill_forecast_for_hover(grid_pos: Vector2i) -> Dictionary:
 		return {}
 	if _selected_skill_id == "" or _is_waiting_for_line_direction():
 		return {}
-	if grid_pos not in _attack_cells:
+	if grid_pos not in _attack_cells and grid_pos != _landing_anchor:
 		return {}
 	var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
 	if skill_data.is_empty():
@@ -1843,6 +1920,18 @@ func _execute_skill_action(action: GameAction) -> bool:
 	if bool(skill_data.get("displacement", false)) \
 			and not _is_displacement_landing_valid(user, target_pos):
 		return false
+	# 先选敌人再选落点（〔踏影〕）：落点必须是该敌人上下左右相邻、能站立且没被别人占的格，
+	# 否则在扣消耗前拒绝。「目标在本轮尚未行动」在发动时判定（结算中目标倒下也不影响）。
+	var landing_cell: Vector2i = LANDING_ANCHOR_NONE
+	var target_pending_turn: bool = false
+	if _skill_landing_mode(skill_data) == LANDING_MODE_ADJACENT:
+		if not data.has("landing_cell") or target_units.is_empty():
+			return false
+		landing_cell = _deserialize_vector2i(data.get("landing_cell"))
+		if landing_cell not in _get_adjacent_landing_cells(user, target_pos):
+			return false
+		target_pending_turn = turn_manager != null \
+			and turn_manager.has_pending_turn(target_units[0])
 
 	var action_cost: String = str(skill_data.get("action_cost", "standard"))
 	var swift_limit: int = int(skill_data.get("swift_limit", 1))
@@ -1863,6 +1952,10 @@ func _execute_skill_action(action: GameAction) -> bool:
 	var cooldown_turns: int = int(data.get("cooldown", 0))
 	user.consume_skill(skill_id, cooldown_turns)
 	user.refresh_status_icons()
+	# 直接位移到落点再出手（踏影 effect「直接位移至该格，并对目标造成物理伤害」）：
+	# 不检查沿途、不视为移动，所以不走寻路与移动事件。
+	if landing_cell != LANDING_ANCHOR_NONE:
+		_apply_skill_displacement(user, landing_cell)
 	var skill_name: String = str(data.get("skill_name", skill_id))
 	# ★ 这里刻意**不早退**（2026-08-11 修）。原本辅助类技能（`power <= 0`）在这里
 	# 直接 `return true`，于是下面的位移块**永远走不到**——`displacement: true` 且
@@ -1908,6 +2001,10 @@ func _execute_skill_action(action: GameAction) -> bool:
 
 	# 伤害结算完成后才扣印记（修复 P0-②：使拔刀吃到自身消耗的势加成）。
 	_spend_skill_marks(user, mark_cost)
+	# 「目标在本轮尚未行动时获得 N 点剑气」（设计库 kensei_huizhan）：不以命中为条件。
+	var qi_not_acted: int = int(skill_data.get("qi_gain_if_target_not_acted", 0))
+	if target_pending_turn and qi_not_acted > 0:
+		user.gain_sword_qi(qi_not_acted, "target_not_acted:" + skill_id)
 	# 「全部目标结算完毕后，再获得 N 点剑气」（设计库 kensei_liekong）：不以命中为条件。
 	var qi_after_resolve: int = int(skill_data.get("qi_gain_after_resolve", 0))
 	if qi_after_resolve > 0:
@@ -2381,6 +2478,14 @@ func _refresh_attack_cells() -> void:
 			_direction_selector_cells = RangeCalculator.get_line_selector_cells(
 				grid, current_unit.grid_position, range_data)
 			return
+		if _skill_landing_mode(skill_data) == LANDING_MODE_ADJACENT:
+			if _landing_anchor == LANDING_ANCHOR_NONE:
+				_range_display_cells = RangeCalculator.calculate_cells(
+					grid, current_unit.grid_position, range_data)
+				_attack_cells = _get_landing_target_cells(current_unit, skill_data)
+			else:
+				_attack_cells = _get_adjacent_landing_cells(current_unit, _landing_anchor)
+			return
 		var candidate_cells: Array[Vector2i] = RangeCalculator.calculate_cells(
 			grid, current_unit.grid_position, range_data, _targeting_direction)
 		_range_display_cells = candidate_cells
@@ -2501,7 +2606,7 @@ func _is_displacement_landing_valid(user: Unit, landing: Vector2i) -> bool:
 
 
 func _build_skill_action(user: Unit, target_pos: Vector2i,
-		target: Unit) -> GameAction:
+		target: Unit, landing: Vector2i = LANDING_ANCHOR_NONE) -> GameAction:
 	if user == null or _selected_skill_id == "":
 		return null
 	var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
@@ -2549,6 +2654,8 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		"qi_gain_after_damage": int(skill_data.get("qi_gain_after_damage", 0)),
 		"ki_on_kill_cd_reduction": int(skill_data.get("ki_on_kill_cd_reduction", 0)),
 	}
+	if landing != LANDING_ANCHOR_NONE:
+		payload["landing_cell"] = _serialize_vector2i(landing)
 	var damage_entry: Dictionary = _select_damage_entry(skill_data)
 	if not damage_entry.is_empty():
 		_apply_damage_entry(payload, skill_data, damage_entry,
