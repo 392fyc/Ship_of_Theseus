@@ -9,5 +9,12 @@
   "dispellable": false,
   "resistable": false,
   "ignores_immunity": true,
-  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。"
+  "_mirror": "除 engine_* 与 _engine_note 外的字段是设计库 State 注册表的只读镜像，锚点 = 设计库仓 snapshots/states.json @ 762393b。引擎侧不改镜像字段；要改回设计库改，重导快照后按新提交同步。持续时间不在状态本体里：按 R3.4 由给予状态的技能写明，施加时传入。",
+  "engine_qi_gain_becomes_loss": true,
+  "engine_qi_overdraft": true,
+  "engine_qi_loss_scar": {
+    "state_id": "kensei_jianhen",
+    "qi_per_stack": 25
+  },
+  "_engine_note": "engine_qi_gain_becomes_loss = effect「任何来源原本使自身获得剑气时，改为失去等量剑气」（Unit._change_sword_qi 里把 gain 改成 lose，不产生获得剑气事件）。engine_qi_overdraft = 「需要消耗剑气的技能，剑气不足时也可以发动，发动后剑气降至 0」。engine_qi_loss_scar = 「自身实际失去的剑气每累计 25 点，获得 1 层〔剑痕〕」，进度在 Unit._qi_loss_scar_progress，空想结束时清空；结束时清空的剩余剑气不计入（来源 kongxiang_clear）。持续时间由〔心眼·梦〕施加：until_this_turn_end。〔空想〕期间心眼·梦的被动槽变为〔空想剑〕（kensei_xinyan_che.slot_swap_on_state）。"
 }

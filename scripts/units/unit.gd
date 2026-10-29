@@ -62,6 +62,11 @@ var shield: int = 0
 var has_basic_attack: bool = true
 # 心眼被动条目的技能 id（职业 JSON 的 passive_skill_id）；剑士 myrmidon_xinyan，剑圣 kensei_xinyan。
 var passive_skill_id: String = ""
+# 职业原本的被动（基础〔心眼〕）。被回忆升级后 passive_skill_id 变成升级技能，基础心眼的
+# 剑气与印记属性加成随之失效（升级技能完整替换基础技能，KB 天赋设计要点 §12）。
+var _base_passive_skill_id: String = ""
+# 〔空想〕期间实际失去的剑气累计，每满一档得一层〔剑痕〕；不足一档的进度在空想结束时清空。
+var _qi_loss_scar_progress: int = 0
 # 回忆升级记录（gameplay-impl PR5，差距清单 M10）：setup() 时清空，由 apply_memory 写入。
 var memory_upgrades: MemoryUpgrades = MemoryUpgrades.new()
 
@@ -210,6 +215,8 @@ func setup(class_data: Dictionary, initial_facing: StringName = &"SE") -> void:
 	offhand_weapon_id = ""
 	has_basic_attack = bool(class_data.get("basic_attack", true))
 	passive_skill_id = str(class_data.get("passive_skill_id", ""))
+	_base_passive_skill_id = passive_skill_id
+	_qi_loss_scar_progress = 0
 	skill_ids.clear()
 	for skill_id_value: Variant in class_data.get("skill_ids", []):
 		skill_ids.append(str(skill_id_value))
@@ -593,13 +600,15 @@ func get_effective_stat(stat_key: String) -> int:
 	if normalized_key == "SPD" and _affix_vanguard_active:
 		flat_total += float(_affix_vanguard_spd_bonus)
 	# ── 印记（心/道/势）：固定加值与百分比提升都可配置，未配置的一项为 0 ──
-	if normalized_key == "DEX" and bool(marks.get("心", false)):
+	# 这组加成属于基础〔心眼〕（设计库 kensei_xinyan effect），心眼被升级后不再生效。
+	var mark_bonus_active: bool = has_base_xinyan()
+	if mark_bonus_active and normalized_key == "DEX" and bool(marks.get("心", false)):
 		flat_total += float(_mark_dex_bonus)
 		pct_total += _mark_dex_pct
-	if normalized_key == "SPD" and bool(marks.get("道", false)):
+	if mark_bonus_active and normalized_key == "SPD" and bool(marks.get("道", false)):
 		flat_total += float(_mark_spd_bonus)
 		pct_total += _mark_spd_pct
-	if normalized_key == "STR" and bool(marks.get("势", false)):
+	if mark_bonus_active and normalized_key == "STR" and bool(marks.get("势", false)):
 		flat_total += float(_mark_str_bonus)
 		pct_total += _mark_str_pct
 	# ── 敌人词条常驻数值加成（无词条单位两 dict 均空 → 零影响）────────
@@ -641,6 +650,11 @@ func has_taunt() -> bool:
 ## 每次命中判定时读取当前属性，不快照（设计库 kensei_zhaojia rules）。
 func _get_held_state_avoid_bonus() -> int:
 	var total: int = 0
+	# 按层数给的闪避（〔剑痕〕每层闪避 +3），R1.2 其他闪避加减。
+	for state_id: String in held_states.held_ids():
+		var per_stack: int = int(_held_state_definition(state_id).get("engine_avoid_per_stack", 0))
+		if per_stack != 0:
+			total += per_stack * held_states.stacks(state_id)
 	for entry: Dictionary in held_states.to_array():
 		var params: Dictionary = entry.get("params", {})
 		var scaled: Variant = params.get("stat_scaled_avoid_bonus", null)
@@ -859,6 +873,7 @@ func apply_memory(memory_id: String, memories: Dictionary = {}, skills: Dictiona
 		skill_ids[index] = upgrade_id
 	if passive_skill_id == base_id:
 		passive_skill_id = upgrade_id
+		_apply_xinyan_passive()
 	if skill_cooldowns.has(base_id):
 		skill_cooldowns[upgrade_id] = skill_cooldowns[base_id]
 		skill_cooldowns.erase(base_id)
@@ -1028,6 +1043,9 @@ func _change_sword_qi(kind: String, amount: int, source: String) -> int:
 		return 0
 	var final_kind: String = kind
 	var final_amount: int = amount
+	# 〔空想〕：任何来源原本使自身获得剑气时，改为失去等量剑气（不产生获得剑气事件）。
+	if final_kind == QI_GAIN and _held_state_flag("engine_qi_gain_becomes_loss") != "":
+		final_kind = QI_LOSE
 	for interceptor: Callable in _qi_interceptors.duplicate():
 		if not interceptor.is_valid():
 			continue
@@ -1039,8 +1057,63 @@ func _change_sword_qi(kind: String, amount: int, source: String) -> int:
 	var signed: int = final_amount if final_kind == QI_GAIN else -final_amount
 	set_sword_qi(sword_qi + signed)
 	var actual: int = sword_qi - before
+	_track_qi_loss_scars(actual, source)
 	sword_qi_changed.emit(self, final_kind, amount, actual, source)
 	return actual
+
+
+## 〔空想〕期间实际失去的剑气每累计一档（状态定义 engine_qi_loss_scar.qi_per_stack）得一层〔剑痕〕。
+## 技能消耗与「获得改失去」的实际损失都计入；没有实际发生的损失、空想结束时清空的剩余剑气不计入。
+## 剑痕满层时不保存多出的进度。
+func _track_qi_loss_scars(actual: int, source: String) -> void:
+	if actual >= 0 or source == QI_SOURCE_KONGXIANG_CLEAR:
+		return
+	var state_id: String = _held_state_flag("engine_qi_loss_scar")
+	if state_id == "":
+		return
+	var spec: Dictionary = _held_state_definition(state_id).get("engine_qi_loss_scar", {})
+	var scar_id: String = str(spec.get("state_id", ""))
+	var per_stack: int = maxi(1, int(spec.get("qi_per_stack", 1)))
+	var cap: int = int(_held_state_definition(scar_id).get("max_stacks", 0))
+	_qi_loss_scar_progress += -actual
+	while _qi_loss_scar_progress >= per_stack:
+		if cap > 0 and held_states.stacks(scar_id) >= cap:
+			_qi_loss_scar_progress = 0
+			return
+		_qi_loss_scar_progress -= per_stack
+		apply_held_state(scar_id, 1, {"kind": "permanent"})
+	if cap > 0 and held_states.stacks(scar_id) >= cap:
+		_qi_loss_scar_progress = 0
+
+
+const QI_SOURCE_KONGXIANG_CLEAR := "kongxiang_clear"
+
+
+## 〔空想〕结束：清空剩余剑气（不计入剑痕）与不足一档的进度。
+func end_qi_loss_scar_state() -> void:
+	if sword_qi > 0:
+		lose_sword_qi(sword_qi, QI_SOURCE_KONGXIANG_CLEAR)
+	_qi_loss_scar_progress = 0
+
+
+## 持有的状态里，第一个在定义中写了 key 的状态 id；没有时为空串。
+func _held_state_flag(key: String) -> String:
+	for state_id: String in held_states.held_ids():
+		if _held_state_definition(state_id).has(key):
+			return state_id
+	return ""
+
+
+func _held_state_definition(state_id: String) -> Dictionary:
+	var data_loader := get_node_or_null("/root/DataLoader")
+	if data_loader == null or not data_loader.get("held_states") is Dictionary:
+		return {}
+	return (data_loader.get("held_states") as Dictionary).get(state_id, {})
+
+
+## 剑气不足时也能发动需要消耗剑气的技能（〔空想〕），发动后剑气降至 0。
+func allows_qi_overdraft() -> bool:
+	return _held_state_flag("engine_qi_overdraft") != ""
 
 
 ## 施加持有型状态；「是否在自身回合内获得」由 is_taking_turn 决定。参数含义见 HeldStateSet.apply。
@@ -1387,14 +1460,23 @@ func _init_sword_qi_resource(class_data: Dictionary) -> void:
 func _apply_xinyan_passive() -> void:
 	if _xinyan_crit_per_qi <= 0:
 		return
+	if not has_base_xinyan():
+		crit_bonus = 0
+		return
 	crit_bonus = (sword_qi / _xinyan_qi_per_crit_pct) * _xinyan_crit_per_qi
+
+
+## 基础〔心眼〕是否还在生效：被动没有被回忆升级。升级后（心眼·澄、心眼·梦）不保留基础心眼的
+## 剑气与印记属性加成（〔心眼·梦〕notes 明写；升级技能完整替换基础技能，KB 天赋设计要点 §12）。
+func has_base_xinyan() -> bool:
+	return passive_skill_id == _base_passive_skill_id
 
 
 ## 心眼剑气分档属性加成：剑气 ≤ 上限的 qi_ratio_threshold_pct% 时给低气段属性，
 ## 高于该比例时给高气段属性。两段属性键与加成值均来自职业 JSON（sword_qi_config）。
 ## 非剑气类单位（_qi_max<=0）恒返回 0，对其他职业零影响。
 func _get_xinyan_stat_bonus(normalized_key: String) -> int:
-	if _qi_max <= 0:
+	if _qi_max <= 0 or not has_base_xinyan():
 		return 0
 	if _xinyan_qi_deficit_per_step > 0:
 		# 整档计算、不足一档不计（设计库 myrmidon_xinyan rules）：剑气 0 → (100−0)/40 = 2 档。
