@@ -32,3 +32,8 @@
 # CI 脚本与清单在 Linux runner 与 WSL 中由 bash 读取，保持 LF。
 /tools/ci/*.sh text eol=lf
 /tools/ci/*.txt text eol=lf
+
+# docs/ is the Obsidian vault (formerly ShipOfTheseus-KB); keep its text LF like the old vault.
+/docs/**/*.md text eol=lf
+/docs/**/*.json text eol=lf
+/docs/**/*.mermaid text eol=lf

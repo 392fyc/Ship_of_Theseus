@@ -1,0 +1,211 @@
+# 07 - 敌人与 AI 系统
+
+> 返回 [[game-design-doc|GDD]]
+
+## 概览
+
+面向小规模战场的 AI 系统(≤10×10,敌人分波入场)。设计原则:**评分系统从简,行为可预测但有威胁**。玩家应能通过观察推断敌人意图。
+
+---
+
+## AI 行为模式
+
+```
+AIBehavior: enum
+  AGGRESSIVE    # Prioritize attacking, charge toward target
+  DEFENSIVE     # Guard within area, only attack when approached
+  SUPPORT       # Prioritize healing/buffing allies
+  HIT_AND_RUN   # Attack then disengage
+  BOSS          # Special action pattern (fixed skill rotation)
+```
+
+```
+EnemyUnit extends Unit:
+  ai_behavior: AIBehavior
+  target_priority: "nearest" | "lowest_hp" | "highest_threat" | "specific_class"
+  patrol_zone: Rect2i | null    # Guard area for DEFENSIVE mode
+```
+
+---
+
+## AI 决策流程
+
+针对每个敌方单位的行动:
+
+```
+1. Enumerate viable movement-and-skill plans:
+   - Reachable destination cells (within BFS range)
+   - Available skills at each destination
+   - Legal target set for evaluating each skill, without locking one target yet
+
+2. Score each movement-and-skill plan under the unit's normal logic:
+   score = expected_damage × 1.0
+         + kill_bonus × 3.0         # Extra points for securing a kill
+         + terrain_score × 0.5      # Points for moving to favorable terrain
+         + behavior_weight           # Adjusted by AIBehavior
+         - danger_penalty × 0.8     # Penalty for moving into enemy attack range
+
+3. Behavior weight adjustments:
+   AGGRESSIVE:  attack_score ×1.5, danger_penalty ×0.3
+   DEFENSIVE:   penalty for leaving patrol_zone, bonus for defensive positions
+   SUPPORT:     heal/buff_score ×2.0, attack_score ×0.3
+   HIT_AND_RUN: bonus for moving away from target after attacking
+
+4. Choose the highest-scoring destination and intended skill
+
+5. Choose the target from that skill's legal target set:
+   - If the skill selects an enemy unit and at least one legal target has Taunt,
+     restrict the candidates to legal Taunt targets, then apply the normal target priority
+   - Otherwise apply the normal target priority to the full legal target set
+   - Skills targeting a cell, direction, area, self, ally, or no target ignore Taunt
+
+6. Execute the chosen plan
+   If no target is attackable → move toward nearest target (AGGRESSIVE) or wait in place (DEFENSIVE)
+```
+
+嘲讽只改变已经选定的移动与技能所使用的单位目标，不重新决定移动或技能。先选择单位再展开范围的技能仍受嘲讽影响；目标锁定后，即使嘲讽在结算前消失也不重新选目标。对嘲讽免疫的单位按原逻辑选择目标。完整口径见 R1.18。
+
+---
+
+## 波次系统
+
+敌人不会一次性全部出现,而是按条件分波加入战场。
+
+```
+WaveConfig:
+  waves: Array[Wave]
+
+Wave:
+  trigger: WaveTrigger
+  enemies: Array[EnemySpawn]
+  announcement: String       # Entry announcement text
+
+WaveTrigger:
+  type: "turn" | "enemy_count" | "hp_threshold" | "immediate"
+  value: int
+  # "turn": Triggered after the Nth action round
+  # "enemy_count": Triggered when enemies on field ≤ value
+  # "hp_threshold": Triggered when Boss HP ≤ value%
+  # "immediate": Appears at battle start
+
+EnemySpawn:
+  template_id: String      # References enemy template
+  position: Vector2i       # Entry position
+  initial_delay: int     # Turns skipped after entry (0 = act immediately, 1 = act next turn)
+```
+
+### 示例 - 一场普通战斗
+
+```json
+{
+  "waves": [
+    {
+      "trigger": { "type": "immediate" },
+      "enemies": [
+        { "template_id": "goblin_melee", "position": [7,3], "initial_delay": 0 },
+        { "template_id": "goblin_melee", "position": [8,4], "initial_delay": 0 },
+        { "template_id": "goblin_archer", "position": [9,2], "initial_delay": 0 }
+      ]
+    },
+    {
+      "trigger": { "type": "enemy_count", "value": 1 },
+      "announcement": "Reinforcements have arrived!",
+      "enemies": [
+        { "template_id": "goblin_melee", "position": [9,7], "initial_delay": 0 },
+        { "template_id": "goblin_shaman", "position": [8,8], "initial_delay": 0 }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+## 敌人模板
+
+```json
+{
+  "id": "goblin_melee",
+  "name": "Goblin Warrior",
+  "base_stats": {
+    "HP": 40, "STR": 10, "MAG": 2,
+    "DEF": 5, "RES": 3,
+    "DEX": 6, "SPD": 9, "LCK": 2,
+    "MOV": 3
+  },
+  "growth_rates": {},
+  "skills": ["slash"],
+  "ai_behavior": "AGGRESSIVE",
+  "target_priority": "nearest",
+  "exp_reward": 15,
+  "drop_table": [
+    { "type": "gold", "amount": 10, "chance": 100 },
+    { "type": "potion", "id": "potion_small_heal", "chance": 10 }
+  ]
+}
+```
+
+> 掉落表不含技能——技能来自职业固定模板 / 天赋 / 遗物（见 run-loop.md Reward System）。
+
+---
+
+## 敌人层级与词条系统
+
+> 敌人分五层阶梯；**词条 Affix = 类似人物被动的一种技能（不是 buff、不是 debuff）**；**特殊词条与基础词条分池、区别对待**。本节为骨架定稿；词条池条目与取值曲线为 [占位]/[提案]。
+
+### 层级阶梯
+
+| Tier | Where it appears | Affix count | Notes |
+|------|------------------|-------------|-------|
+| Normal | All battle types | 0 | 不具备词条 |
+| Lesser Elite | 频率不低，混编在波次中 | 1-3 基础 | 普通房的日常变数 |
+| Greater Elite | 较稀有，多作为**普通房收尾敌人** | 3-5 基础 | 普通房也有纹理梯度 |
+| Elite Chief | **仅精英房出现**（门上骷髅标） | **大精英规格（3-5 基础）+ 1 特殊**，合计 4-6 | **特殊词条进房前可见、基础不可见**；奖励品质/数量更好 |
+| Act Boss | Stage 8 固定 | 随难度 | **传奇敌人 + 独有机制系统**（每幕一套定制） |
+
+- **词条数量在区间内按难度两轴取值**：开局难度档（系统后置）× 幕数递进（Act 1 取下限 → Act 3 取上限——解决「Act 1 精英房应显著弱于 Act 3、且不只是数值」）。取值曲线 [占位]。
+- **精英风险构成**：磨损（恢复不满额、只随开局难度档变动，见 run-loop.md）+ 相性赌（基础词条进房前不可见；特殊词条可见=可在 Prep 针对性换装对策）。
+
+### 词条设计说明
+
+- **实现口径**：词条=**类似人物被动的技能**——不走 buff/debuff 结构（ADR-002 不适用），需要敌方单位的**被动技能挂载点**（我方已有心眼这类被动先例）。词条以 JSON 声明式定义（`data/affixes/`），normal 层恒为空。
+- **两池分开、区别对待**：**基础词条池**=单位被动（示例方向：先手部署、受治疗减半）；**特殊词条池**=房间签名级、更大更醒目的机制，仅精英房头目持有。
+- **可见性与可读性**：特殊词条在门上进房前可见 [已定]；基础词条进房前不可见、入场后战斗内点选敌人以图标+说明可读 [提案]——玩家要能围绕词条布阵对策，相性赌才「可对冲」。Prep「View Intel」只显示特殊词条与常规敌情。
+- **池规模**：v1 基础池约 12-15 个 [占位] + 特殊池 6-8 个 [占位]；v0 基础 5 个左右 + 特殊 1-2 个验证手感 [占位]。
+
+### Schema 扩展
+
+```
+EnemyTemplate 新增字段:
+  tier: "normal" | "lesser_elite" | "greater_elite" | "elite_chief" | "act_boss"
+  base_affixes: Array[affixId]    # 基础词条（被动技能）；数量按 tier 区间 x 难度两轴取值；normal 恒为空
+  special_affix: affixId | null   # 仅 elite_chief：特殊词条，进房前可见；与基础词条分池（data/affixes/base 与 data/affixes/special）
+```
+
+> **v0 词条引擎已实装**：被动挂载点按方案 A（与心眼同构：spawn 后注入 → 缓存字段 → `get_effective_stat` / `damage_calculator` 读，不走 BuffEffect）实装于 `Ship_of_Theseus/scripts/units/unit.gd`（`apply_affixes`）+ `scripts/core/tactical_manager.gd`（`_apply_affixes` 时机分发器）+ `damage_calculator.gd`（affix 乘区）；波次数据 `data/waves/` 的 enemy entry 带 `affixes`/`special_affix`/`stat_scale`，`spawn_unit` 后注入。**无词条单位零影响**（心眼式门控，剑圣 81 断言实证）。v0 词条池 5 基础（`data/affixes/base`）+ 2 特殊（`data/affixes/special`）[占位]。**词条效果状态**：数值增强 stat_scale / afs_frenzy 低血增伤 / af_heal_resist 受治疗减半 / af_vanguard 首回合速度 / afs_bulwark 减伤光环 = **已真实生效**。回归 `tests/test_affix_system.gd` + `test_affix_effects.gd`。实装进度详见记忆 `runloop-v0-session-log`。
+
+---
+
+## Boss 设计方向
+
+Act Boss 是**传奇层级**敌人（见上文「敌人层级与词条系统」）：词条数量随难度递增，且每个 Boss 都有**独有机制系统**（每幕一套定制内容）。Boss 采用特殊 AI 模式，带固定技能循环或阶段切换:
+
+```
+BossAI:
+  phases: Array[BossPhase]
+
+BossPhase:
+  hp_threshold: int          # HP percentage to enter this phase
+  skill_rotation: Array[String]  # Fixed skill rotation
+  behavior_override: AIBehavior
+  summon_wave: Wave | null   # Summon reinforcements on phase transition
+```
+
+Boss 的可读性很重要——玩家应能在几次尝试内摸清 Boss 的行为模式。
+
+---
+
+相关文档:
+- [[grid-and-map|02 - Grid and Map]] — 敌人在地图上的摆放位置
+- [[skills-and-range|04 - Skill and Range]] — 敌人使用的技能定义
+- [[run-loop|08 - Run Loop]] — 一次 Run 内的战斗难度递进

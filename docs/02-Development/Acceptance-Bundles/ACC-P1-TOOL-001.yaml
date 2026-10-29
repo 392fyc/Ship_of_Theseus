@@ -1,0 +1,62 @@
+acceptance_id: "ACC-P1-TOOL-001"
+task_id: "TASK-P1-TOOL-001"
+phase_id: "P1"
+status: "drafted"
+example_artifact: false
+
+input_scope:
+  task_bundle: "02-Development/Task-Bundles/TASK-P1-TOOL-001.yaml"
+  code_scope_summary:
+    - "Godot MCP addon WebSocket client management"
+    - "Sequential agent reconnection behavior"
+    - "Existing MCP operation regression check"
+  required_refs:
+    - "02-Development/Issue-Bundles/ISSUE-2026-03-09-001.yaml"
+
+environment_requirements:
+  runtime:
+    - "Godot editor running with MCP addon active."
+    - "Ability to simulate two sequential MCP client connections."
+  tools:
+    - "Godot MCP or direct WebSocket client for connection testing"
+  blockers:
+    - "If the fix requires a Godot editor restart to take effect, this must be documented but does not block acceptance."
+
+acceptance_checks:
+  - id: "CHK-001"
+    description: "A second agent session can connect to Godot MCP after the first session disconnects, without manual editor restart."
+    evidence_required: "Connection log or runtime evidence showing successful sequential reconnection."
+  - id: "CHK-002"
+    description: "Existing MCP operations (node query, scene management, editor state) work correctly after the fix."
+    evidence_required: "At least one successful MCP operation (e.g. node find, scene open, editor state) after reconnection."
+
+result: "pass"
+evidence:
+  - "CHK-001 pass: Connected to Godot MCP successfully via editor.get_state without any manual Godot editor restart during this acceptance run. Response: current_scene=res://scenes/tactical/TacticalScene.tscn, godot_version=4.6.1-stable, is_playing=false, open_scenes includes 3 scenes."
+  - "CHK-002 pass: Multiple MCP categories succeeded after connection: (1) Editor state -> editor.get_state returned valid state object; (2) Scene management -> scene.open on res://scenes/tactical/TacticalScene.tscn returned 'Opened scene'; (3) Node query -> node.find(name_pattern='*', root_path='.') returned 10 nodes."
+gaps: []
+followup_action: []
+issue_refs:
+  - "ISSUE-2026-03-09-001"
+result_policy:
+  allowed_values:
+    - "pass"
+    - "partial"
+    - "fail"
+    - "blocked"
+  routing:
+    pass: "main_agent_updates_registry_to_verified"
+    partial: "return_to_task_flow"
+    fail: "return_to_task_flow"
+    blocked: "create_or_link_issue_bundle"
+registry_transition_recommendation:
+  task_status_after_acceptance: null
+  docs_sync_required: false
+  issue_required: false
+
+acceptance_receipt:
+  acceptance_agent: "gpt-5.3-codex (Acceptance Agent)"
+  executed_at: "2026-03-10T01:06:24+09:00"
+  notes:
+    - "Blind acceptance constraints followed: only task bundle, issue bundle, codebase/runtime evidence used."
+    - "No manual editor restart was performed by the acceptance agent before successful MCP connection."

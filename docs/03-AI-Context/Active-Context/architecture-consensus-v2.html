@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>SoT 5-Layer Architecture Consensus v2</title>
+<style>
+  :root {
+    --bg: #16161c;
+    --surface: #1f1f28;
+    --surface-2: #2a2a36;
+    --text: #e8e8ec;
+    --muted: #8a8a96;
+    --border: #3a3a48;
+    --L1: #d4af37;
+    --L2: #4a7fb8;
+    --L3: #5fa869;
+    --L4: #9a8aa8;
+    --L5: #c8643c;
+    --base: #6c6c78;
+    --warn: #d97a4a;
+    --ok: #5fa869;
+    --del: #c8643c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    margin: 0;
+    padding: 32px 16px 64px;
+    line-height: 1.55;
+  }
+  main { max-width: 980px; margin: 0 auto; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 32px; }
+  header h1 { margin: 0 0 6px; font-size: 22px; font-weight: 600; }
+  header .meta { color: var(--muted); font-size: 13px; margin: 0; }
+  section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+            padding: 20px 24px; margin-bottom: 20px; }
+  h2 { margin: 0 0 16px; font-size: 17px; font-weight: 600; color: #f0f0f4; }
+  h3 { margin: 18px 0 8px; font-size: 14px; font-weight: 600; color: #d8d8e0; }
+  p, li { font-size: 13.5px; }
+  code { background: var(--surface-2); padding: 1px 6px; border-radius: 3px; font-size: 12.5px;
+         color: #d4af90; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .layer-stack { display: flex; flex-direction: column; gap: 8px; margin: 12px 0 4px; }
+  .layer-card {
+    border-left: 4px solid;
+    background: var(--surface-2);
+    padding: 12px 16px;
+    border-radius: 4px;
+    display: grid;
+    grid-template-columns: 110px 1fr 200px;
+    gap: 16px;
+    align-items: center;
+  }
+  .layer-card .id { font-size: 13px; font-weight: 600; }
+  .layer-card .id .name { color: var(--text); display: block; font-size: 14.5px; margin-top: 2px; }
+  .layer-card .desc { font-size: 12.5px; color: #c8c8d2; }
+  .layer-card .meta { font-size: 11.5px; color: var(--muted); text-align: right; }
+  .layer-card .meta b { color: #d8d8e0; font-weight: 500; }
+  .L1 { border-color: var(--L1); }
+  .L2 { border-color: var(--L2); }
+  .L3 { border-color: var(--L3); }
+  .L4 { border-color: var(--L4); }
+  .L5 { border-color: var(--L5); }
+  .Lbase { border-color: var(--base); }
+  .L1 .id { color: var(--L1); }
+  .L2 .id { color: var(--L2); }
+  .L3 .id { color: var(--L3); }
+  .L4 .id { color: var(--L4); }
+  .L5 .id { color: var(--L5); }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px;
+          background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); margin-right: 4px; }
+  .pill.warn { background: rgba(217, 122, 74, 0.15); color: var(--warn); border-color: var(--warn); }
+  .pill.ok { background: rgba(95, 168, 105, 0.15); color: var(--ok); border-color: var(--ok); }
+  .pill.del { background: rgba(200, 100, 60, 0.18); color: var(--del); border-color: var(--del); }
+  .timeline {
+    display: flex;
+    margin: 20px 0 8px;
+    border-radius: 6px;
+    overflow: hidden;
+    font-size: 12px;
+  }
+  .timeline .seg {
+    padding: 14px 12px;
+    color: #fff;
+    flex: 1;
+    text-align: center;
+    border-right: 2px solid var(--bg);
+    position: relative;
+  }
+  .timeline .seg:last-child { border-right: none; }
+  .timeline .seg b { display: block; font-size: 13px; margin-bottom: 4px; }
+  .timeline .seg small { color: rgba(255,255,255,0.85); font-size: 11px; }
+  .seg-1 { background: #2d4f6e; flex: 0.7; }
+  .seg-2 { background: #6e3d2d; flex: 0.5; }
+  .seg-3 { background: #2d5a3d; }
+  .seg-4 { background: #4a3a5a; flex: 0.6; }
+  .delta-row { display: grid; grid-template-columns: 24px 1fr; gap: 12px;
+               padding: 10px 0; border-bottom: 1px dashed var(--border); align-items: start; }
+  .delta-row:last-child { border-bottom: none; }
+  .delta-row .num {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--surface-2);
+    color: var(--warn); font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--warn);
+  }
+  .delta-row .body { font-size: 13px; }
+  .delta-row .from { color: var(--muted); text-decoration: line-through; }
+  .delta-row .to { color: #f0e0d0; }
+  .stages { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .stage-card { background: var(--surface-2); padding: 14px 16px; border-radius: 6px;
+                border: 1px solid var(--border); }
+  .stage-card .head { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .stage-card h3 { margin-top: 0; font-size: 14px; }
+  .stage-card ul { padding-left: 18px; margin: 6px 0; }
+  .stage-card li { margin-bottom: 4px; font-size: 12.5px; }
+  .stream-grid { display: grid; grid-template-columns: 60px 1fr 1fr; gap: 10px;
+                 padding: 8px 0; border-bottom: 1px solid var(--border); align-items: start; font-size: 12.5px; }
+  .stream-grid:last-child { border-bottom: none; }
+  .stream-grid .id { font-weight: 600; font-size: 13px; }
+  .D1 .id { color: var(--L1); } .D2 .id { color: var(--L2); }
+  .D3 .id { color: var(--L3); } .D4 .id { color: var(--L4); }
+  .D5 .id { color: var(--L5); }
+  .key-rule {
+    background: rgba(74, 127, 184, 0.08);
+    border-left: 3px solid var(--L2);
+    padding: 12px 14px;
+    margin: 12px 0;
+    font-size: 13px;
+    border-radius: 0 4px 4px 0;
+  }
+  .key-rule b { color: var(--L2); }
+  svg { display: block; margin: 8px auto; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 32px;
+           border-top: 1px solid var(--border); padding-top: 16px; }
+  footer a { color: #a8c0e0; }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>Ship of Theseus — 5-Layer Architecture Consensus v2</h1>
+  <p class="meta">S3-side-sot · 2026-05-10 · <span class="pill ok">consensus_locked</span> ·
+    supersedes S67 §7.1 reset semantics ·
+    <span class="pill warn">术语修订 2026-07-02 ADR-010: L5 符文 Rune → 遗物 Relic（用户裁决，机制不变）</span></p>
+</header>
+
+<section id="overview">
+  <h2>1. 五层架构总览</h2>
+  <div class="layer-stack">
+
+    <div class="layer-card L1">
+      <div class="id">L1<span class="name">Global 成长</span></div>
+      <div class="desc">职业解锁 / 收益增益 / 起始属性 / 复活 / run 起始赠送 1 遗物。
+        Horizontal-only，绝不给 vertical power。</div>
+      <div class="meta">
+        <span class="pill">永久</span>
+        <span class="pill warn">影响 小</span><br/>
+        <b>决策时机</b>: run 外
+      </div>
+    </div>
+
+    <div class="layer-card L2">
+      <div class="id">L2<span class="name">局内职业天赋</span></div>
+      <div class="desc">per-class 天赋池。<b>每 run 完全清零，从 Lv1 重新开始</b>。
+        Class Advancement <b>Lv5</b> 不可逆。
+        <br/><span style="opacity:.75;">（解锁条件由天赋自身的 unlock_trigger 字段承载。）</span></div>
+      <div class="meta">
+        <span class="pill del">完全 reset</span>
+        <span class="pill ok">影响 深</span><br/>
+        <b>决策时机</b>: run 内每升级
+      </div>
+    </div>
+
+    <div class="layer-card L3">
+      <div class="id">L3<span class="name">人物成长</span></div>
+      <div class="desc">类固定 stat 曲线。<b>转职后 growth rate 改变</b> (FE 模式)。
+        受 L5 经济类遗物加成（EXP / 属性 / 天赋点）。</div>
+      <div class="meta">
+        <span class="pill">类固定</span>
+        <span class="pill warn">影响 中</span><br/>
+        <b>决策时机</b>: 自动
+      </div>
+    </div>
+
+    <div class="layer-card L4">
+      <div class="id">L4<span class="name">装备 (武器 + 防具)</span></div>
+      <div class="desc">暗金/词缀模式。<b>不承担 build-defining</b>：多数附加额外收益、少数中等改玩法。
+        武器决定攻击类型 / 攻击方式 / 射程；防具决定防御类型 + 基础属性。</div>
+      <div class="meta">
+        <span class="pill del">run-reset</span>
+        <span class="pill warn">影响 小→中</span><br/>
+        <b>决策时机</b>: 随机捡到
+      </div>
+    </div>
+
+    <div class="layer-card L5">
+      <div class="id">L5<span class="name">遗物 Relic 6 格 ⭐</span></div>
+      <div class="desc">两类 archetype:<br/>
+        • <b>经济类</b>: 提升 EXP / 属性 / 天赋点 — 中影响<br/>
+        • <b>流派类</b>: 改变职业形态 (扩散燃烧 / 即时结算燃烧 / 冰冻链 等) — 大影响</div>
+      <div class="meta">
+        <span class="pill del">run-reset</span>
+        <span class="pill ok">影响 中→大</span><br/>
+        <b>决策时机</b>: run 内奖励/商店/事件（城镇渠道暂缓）
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="layered">
+  <h2>2. 渐进式 Layered 可玩性原则</h2>
+  <div class="key-rule">
+    <b>设计验证准则</b>: 每层独立可玩，从下往上叠加。任一上层被剥离，下层仍能跑。
+  </div>
+  <svg viewBox="0 0 720 280" width="100%" style="max-width:680px;">
+    <defs>
+      <linearGradient id="bg-base" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#3a3a48"/><stop offset="100%" stop-color="#2a2a34"/>
+      </linearGradient>
+    </defs>
+    <!-- outer: L4 + L5 -->
+    <rect x="20" y="20" width="680" height="240" rx="8" fill="none" stroke="#9a8aa8" stroke-width="1.5"/>
+    <text x="36" y="42" fill="#9a8aa8" font-size="13" font-weight="600">+ L4 装备 + L5 遗物 (目标完整玩法)</text>
+    <!-- L2 -->
+    <rect x="80" y="60" width="560" height="180" rx="6" fill="none" stroke="#4a7fb8" stroke-width="1.5"/>
+    <text x="96" y="82" fill="#4a7fb8" font-size="13" font-weight="600">+ L2 天赋 (天赋 + 战棋 仍成立)</text>
+    <!-- core: 战棋 + L3 -->
+    <rect x="160" y="100" width="400" height="120" rx="6" fill="url(#bg-base)" stroke="#6c6c78" stroke-width="1.5"/>
+    <text x="360" y="148" fill="#e8e8ec" font-size="14" font-weight="700" text-anchor="middle">战棋 (base)</text>
+    <text x="360" y="172" fill="#5fa869" font-size="12" text-anchor="middle">+ L3 人物成长</text>
+    <text x="360" y="194" fill="#8a8a96" font-size="11" text-anchor="middle">人物属性 · 成长曲线 · 伤害计算 · 行动经济</text>
+  </svg>
+  <p style="color:var(--muted); font-size:12px; text-align:center; margin-top:0;">
+    战棋本身（含 L3）可独立成立 → 加 L2 仍成立 → 加 L4+L5 = 完整玩法
+  </p>
+</section>
+
+<section id="flow">
+  <h2>3. Run 决策路径</h2>
+  <div class="timeline">
+    <div class="seg seg-1"><b>Run 起始</b><small>选职业 + 初期战斗策略</small></div>
+    <div class="seg seg-2"><b>Lv 5 转职</b><small>看已持遗物 → 选转职方向<br/>触发 growth rate 切换<br/>转职不占天赋点<br/>奥义形态二选一占 1 点</small></div>
+    <div class="seg seg-3"><b>Lv 6 – 25~30</b><small>天赋加点 + 遗物组合<br/>(主决策密度)</small></div>
+    <div class="seg seg-4"><b>装备</b><small>随机捡到<br/>决策密度低</small></div>
+  </div>
+  <p style="color:var(--muted); font-size:12px; margin-top:8px;">
+    <b style="color:#d8d8e0;">第一重要决策点</b>: Lv 5 转职。玩家依据本 run 已持遗物池决定转职方向，
+    遗物-转职耦合是核心 build 决策机制。
+  </p>
+  <p style="color:var(--muted); font-size:12px; margin-top:6px;">
+    关卡结构 3 幕 × 8 关 = 24 关，预期终局等级 Lv25–30（class-system.md）。
+    天赋的组织形态与转职节奏详见 01-Game-Design/Characters/talent-tree.md。
+  </p>
+</section>
+
+<section id="interaction">
+  <h2>4. 跨层耦合矩阵</h2>
+  <table>
+    <thead><tr>
+      <th></th><th style="color:#d4af37;">→ L1</th><th style="color:#4a7fb8;">→ L2</th>
+      <th style="color:#5fa869;">→ L3</th><th style="color:#9a8aa8;">→ L4</th><th style="color:#c8643c;">→ L5</th>
+    </tr></thead>
+    <tbody>
+      <tr><th style="color:#d4af37;">L1 ↓</th>
+        <td>—</td><td>解锁更多 class</td><td>轻微初始 stat</td><td>解锁更多装备种类</td><td>run 起始赠 1 遗物</td></tr>
+      <tr><th style="color:#4a7fb8;">L2 ↓</th>
+        <td>—</td><td>—</td><td>转职触发 growth 切换</td><td>解锁特定攻击类型 / 装备 proficiency</td><td>—</td></tr>
+      <tr><th style="color:#5fa869;">L3 ↓</th>
+        <td>—</td><td>提供投点起点 stat</td><td>—</td><td>装备需求 stat 阈值</td><td>—</td></tr>
+      <tr><th style="color:#9a8aa8;">L4 ↓</th>
+        <td>—</td><td>—</td><td>装备词缀微 stat</td><td>—</td><td>装备/遗物协同 (e.g. 火属性武器 × 燃烧遗物)</td></tr>
+      <tr><th style="color:#c8643c;">L5 ↓</th>
+        <td>—</td><td>—</td><td><b>经济类遗物 → EXP/属性/天赋点</b></td><td>—</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p style="color:var(--muted); font-size:12px; margin-top:10px;">
+    Down-row "L? ↓" = 此层向其它层<b style="color:#d8d8e0;">输出</b>；
+    粗体 = 改变玩法形态的强耦合点。
+  </p>
+</section>
+
+<section id="delta">
+  <h2>5. KB Delta（共识落地需要写/改）</h2>
+
+  <div class="delta-row">
+    <div class="num">1</div>
+    <div class="body">
+      <b>S67 §7.1 reset 语义错误</b><br/>
+      <span class="from">"Meta 永久解锁天赋节点 + run 内主动池选激活"</span> →
+      <span class="to">L2 天赋树 <b>每 run 完全清零</b>；meta layer = L1（独立池），不是 L2 子集</span>
+    </div>
+  </div>
+
+  <div class="delta-row">
+    <div class="num">2</div>
+    <div class="body">
+      <b>遗物系统全新</b> — KB 当前无对应文档。需新立 <code>relics-system.md</code>（原计划名 runes-system.md，2026-07-02 ADR-010 更名）。
+      旧「并入或弃用」问题已由 ADR-010 解决：同一系统、Relic 为正典名。
+    </div>
+  </div>
+
+  <div class="delta-row">
+    <div class="num">3</div>
+    <div class="body">
+      <b>L4 装备约束新立</b><br/>
+      <span class="to">硬约束: <b>装备不构筑核心 build</b>（暗金随机 + run-reset → 玩家无法围绕装备规划）</span><br/>
+      当前 GDD 没有这个 ceiling，需写入 equipment spec.
+    </div>
+  </div>
+
+  <div class="delta-row">
+    <div class="num">4</div>
+    <div class="body">
+      <b>L3 转职 growth rate 切换</b><br/>
+      <span class="to">FE 模式: 不同 advancement 有不同 per-level growth rate + 即时属性增减</span><br/>
+      class-system.md 当前只有 base stat，缺 per-level growth + 转职切换语义.
+    </div>
+  </div>
+
+  <div class="delta-row">
+    <div class="num">5</div>
+    <div class="body">
+      <b>L2 → L3 / L5 节点迁移目录</b><br/>
+      <code>sw_matrix_true_path.json</code> 当前 83 节点（49 passive） → prune target ~30-40 节点<br/>
+      需要明确：哪些 passive → L3 自动成长 / L5 遗物池 / 保留 L2.
+    </div>
+  </div>
+</section>
+
+<section id="team">
+  <h2>6. Team 派发计划</h2>
+  <div class="stages">
+    <div class="stage-card">
+      <div class="head">STAGE 1</div>
+      <h3>共识落地</h3>
+      <p style="margin:6px 0 8px; font-size:12.5px; color:var(--muted);">Claude Main 自承</p>
+      <ul>
+        <li>本 HTML + <code>architecture-consensus-v2.md</code></li>
+        <li>所有 Stage 2 stream 共享输入</li>
+      </ul>
+    </div>
+    <div class="stage-card">
+      <div class="head">STAGE 2 — 5 PARALLEL</div>
+      <h3>Design Streams</h3>
+      <p style="margin:6px 0 8px; font-size:12.5px; color:var(--muted);">Mercury <code>design</code> × 5</p>
+      <ul>
+        <li>D1 / D2 / D3 / D4 / D5 见下表</li>
+      </ul>
+    </div>
+    <div class="stage-card">
+      <div class="head">STAGE 3</div>
+      <h3>Synthesis + Critic + Acceptance</h3>
+      <p style="margin:6px 0 8px; font-size:12.5px; color:var(--muted);">Mercury <code>design</code> + <code>critic</code> + <code>acceptance</code></p>
+      <ul>
+        <li>5 层耦合 + Mage 5 决策点 reconcile</li>
+        <li>对抗性漏洞扫描</li>
+        <li>与 GDD / S67 一致性检查</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="margin-top:20px;">Stage 2 streams</h3>
+  <div class="stream-grid D1">
+    <div class="id">D1</div>
+    <div><b>L1 Global 解锁池 spec</b></div>
+    <div>解锁项分类 + 数量上限 + horizontal-only 验证（参考 Hades / Rogue Legacy 2）</div>
+  </div>
+  <div class="stream-grid D2">
+    <div class="id">D2</div>
+    <div><b>L2 简化规则 + sw_matrix prune 提案</b></div>
+    <div>每节点 type 处理清单 + 83 → target 节点的具体 prune demo</div>
+  </div>
+  <div class="stream-grid D3">
+    <div class="id">D3</div>
+    <div><b>L3 stat 曲线 + 转职 growth rate 表</b></div>
+    <div>5 v1 职业 × 16 advancement growth 矩阵 (FE Three Houses 参考)</div>
+  </div>
+  <div class="stream-grid D4">
+    <div class="id">D4</div>
+    <div><b>L4 装备 + 词缀设计空间</b></div>
+    <div>武器/防具类型矩阵 + 词缀深度上限 (非 build-defining 数值边界)</div>
+  </div>
+  <div class="stream-grid D5">
+    <div class="id">D5</div>
+    <div><b>L5 遗物 6 格系统 ⭐</b></div>
+    <div>6 slot 机制 + 经济类/流派类 archetype + 业内 reference (STS / Hades / Inscryption / Noita)</div>
+  </div>
+
+  <p style="margin-top:14px; color:var(--muted); font-size:12px;">
+    预算估: Stage 2 ~125k tokens (5 × 25k), Stage 3 ~60k. 合计 ~200k.
+  </p>
+</section>
+
+<section id="terms">
+  <h2>7. 名词表 (provisional)</h2>
+  <table>
+    <thead><tr><th>术语</th><th>含义</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td>遗物 (Relic)</td><td>L5 6 格内的物品。包含经济类 + 流派类两种 archetype。原名「符文 Rune」，2026-07-02 ADR-010 定 Relic 为正典、Rune 废案</td><td>术语 locked（ADR-010）；archetype 细节 D5 后定</td></tr>
+      <tr><td>经济类遗物</td><td>提升 EXP / 属性 / 天赋点。中等影响。基于原职业模型</td><td>locked</td></tr>
+      <tr><td>流派类遗物</td><td>改变职业形态/玩法模式（扩散燃烧、即时结算等）。大影响。等价 L2 重要节点</td><td>locked</td></tr>
+      <tr><td>渐进式 Layered 可玩性</td><td>每层独立成立，从下往上叠加。base 战棋 → +L2 → +L4+L5</td><td>locked (架构原则)</td></tr>
+      <tr><td>Build-defining</td><td>玩家围绕此构筑路线的核心机制。<b>L2 + L5 流派类</b>承担；L4 装备<b>不</b>承担</td><td>locked</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  Companion: <a href="architecture-consensus-v2.md">architecture-consensus-v2.md</a> ·
+  Generated S3-side-sot 2026-05-10 ·
+  Amended 2026-07-02 per ADR-010（L5 术语 Rune → Relic；L5 决策时机随「城镇 v1/v2 暂缓」裁决改为 run 内奖励/商店/事件——城镇渠道暂缓、非永久移除）
+</footer>
+
+</main>
+</body>
+</html>

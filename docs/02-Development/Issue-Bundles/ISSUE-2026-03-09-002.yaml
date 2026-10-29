@@ -1,0 +1,52 @@
+issue_id: "ISSUE-2026-03-09-002"
+title: "MCP client auto-reconnect loop when multiple agent hosts run simultaneously"
+status: "drafted"
+example_artifact: false
+
+source:
+  reporter_type: "human"
+  reporter_id: null
+  detected_at: "2026-03-10"
+
+type: "tooling"
+priority: "Sev-1"
+impact_scope:
+  code: false
+  kb: false
+  workflow: true
+  environment: true
+
+description:
+  summary: "When Cursor and Codex both have Godot MCP configured and run simultaneously, each client auto-reconnects after being displaced by the other, creating an infinite takeover loop that makes the MCP connection unusable for either agent."
+  details:
+    - "TASK-P1-TOOL-001 resolved the server-side single-client lock by implementing graceful takeover (close code 4002). This works correctly for sequential handoff."
+    - "However, when two MCP-enabled hosts (Cursor + Codex) are both active, each receives a disconnect (4002) and immediately auto-reconnects, displacing the other, creating an endless cycle."
+    - "The server addon behaves correctly per its design. The root cause is client-side: MCP host processes auto-reconnect on disconnect without backoff or mutual exclusion."
+    - "This was explicitly predicted in TASK-P1-TOOL-001 residual_risks as a phase-output for Main Agent."
+  evidence:
+    - "Human observation: Godot editor log showed continuous takeover cycle between ports 49736-49740+ with no stabilization. Each connection lasted only long enough for the other client to reconnect."
+
+decision: "schedule_to_milestone"
+linked_task_ids:
+  - "TASK-P1-TOOL-001"
+linked_acceptance_ids: []
+trigger_condition: "created_from_runtime_detection"
+resolution_status: "resolved"
+owner: "main_agent"
+
+proposed_solutions:
+  - id: "SOL-A"
+    title: "Client-side lifecycle governance"
+    description: "Implement lazy WebSocket connect (connect only on first real tool call, not on host startup), explicit disconnect on session end, and guaranteed child-process teardown on host/session exit."
+    feasibility: "Requires changes outside addons/ - in MCP client config or wrapper scripts"
+    risk: "Each host (Cursor, Codex) may have different MCP client implementations with different reconnect behavior"
+  - id: "SOL-B"
+    title: "Server-side connection throttling"
+    description: "Add a cooldown period after takeover where new connections are rejected or queued, preventing rapid reconnect cycles."
+    feasibility: "Addon modification in websocket_server.gd"
+    risk: "Could delay legitimate handoffs; tuning the cooldown interval is non-trivial"
+  - id: "SOL-C"
+    title: "Operational discipline - disable MCP in idle hosts"
+    description: "When dispatching work to one agent, disable MCP server config in the other host. Zero-code solution."
+    feasibility: "Process-level, immediate"
+    risk: "Human overhead; easy to forget; does not scale"

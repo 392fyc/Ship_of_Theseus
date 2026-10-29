@@ -1,0 +1,115 @@
+acceptance_id: "ACC-P2-BATT-001"
+task_id: "TASK-P2-BATT-001"
+phase_id: "P2"
+status: "completed"
+example_artifact: false
+
+input_scope:
+  task_bundle: "02-Development/Task-Bundles/TASK-P2-BATT-001.yaml"
+  code_scope_summary:
+    - "scripts/core/ - turn_manager, game_action resource validation"
+    - "scripts/ui/ - bottom_dashboard, skill_bar visual rework"
+    - "scripts/tactical/ - tactical_scene turn flow integration"
+    - "scripts/units/ - unit action resource state"
+    - "data/skills/ - 15 skill JSONs with action_cost and timing_constraint"
+  required_refs:
+    - "01-Game-Design/game-design-doc.md"
+    - "01-Game-Design/Core-Systems/turn-system.md"
+    - "01-Game-Design/skills-and-range.md"
+    - "01-Game-Design/Core-Systems/battle-calculation.md"
+
+environment_requirements:
+  runtime:
+    - "Godot 4.6"
+  tools:
+    - "Godot MCP (editor + screenshot)"
+  blockers: []
+
+acceptance_checks:
+  - id: "CHK-001"
+    description: "Per-unit per-turn action resources tracked and reset correctly"
+    evidence_required: "Code reference showing resource reset at turn start"
+    result: "pass"
+  - id: "CHK-002"
+    description: "game_action validates action_cost before skill execution, blocks if resource spent"
+    evidence_required: "Code reference for validation logic in game_action.gd"
+    result: "pass"
+  - id: "CHK-003"
+    description: "Normal move and Move Action skills are mutually exclusive within a turn"
+    evidence_required: "Behavioral verification or code logic"
+    result: "pass"
+  - id: "CHK-004"
+    description: "Normal attack and Standard Action skills are mutually exclusive within a turn"
+    evidence_required: "Behavioral verification or code logic"
+    result: "pass"
+  - id: "CHK-005"
+    description: "Swift Action limited to 1 per turn, does not consume move or attack"
+    evidence_required: "Code reference and runtime test"
+    result: "pass"
+  - id: "CHK-006"
+    description: "timing_constraint enforced: before_move/after_move/before_attack/after_attack"
+    evidence_required: "Code reference for timing validation"
+    result: "pass"
+  - id: "CHK-007"
+    description: "Per-unit per-skill cooldown tracked, decremented at turn end"
+    evidence_required: "Code reference for cooldown logic"
+    result: "pass"
+  - id: "CHK-008"
+    description: "Skill Panel UI shows all skills with cost type, cooldown state, greyed unavailable"
+    evidence_required: "Godot MCP screenshot showing skill panel states"
+    result: "pass"
+  - id: "CHK-009"
+    description: "All 15 skill JSONs updated with action_cost and timing_constraint"
+    evidence_required: "File listing showing updated fields in all skill JSONs"
+    result: "pass"
+  - id: "CHK-010"
+    description: "No hardcoded values in action economy logic - all parameters read from JSON"
+    evidence_required: "Code review confirming data-driven approach"
+    result: "pass"
+
+result: "pass"
+
+evidence:
+  - "Godot MCP editor.run on res://scenes/tactical/TacticalScene.tscn: game runs with zero errors"
+  - "Godot MCP screenshot_game confirms: dark panels, gradient HP bar, gold-bordered avatar, action buttons, status chips"
+  - "Skill card and item card widths consistent (SIZE_EXPAND_FILL + zero-width scrollbar), visual centering confirmed"
+  - "git diff --stat: bottom_dashboard.gd 1317+/1030-, skill_bar.gd included"
+  - "6 signal interfaces complete: attack_requested, skill_toggle_requested, skill_selected, end_turn_requested, end_move_requested, cancel_requested"
+  - "update_state() API signature preserved, skill_bar public API preserved"
+  - "implementation_receipt DoD 10/10 items verified by Main Agent in session-2026-03-14-004"
+
+gaps: []
+
+followup_action:
+  - "get_dashboard_data() needs backend extension for shield/level/xp/stats/char_name keys"
+  - "ITEM_PLACEHOLDERS in bottom_dashboard.gd to be replaced when inventory/item system is implemented"
+  - "CHARACTER_NAMES hardcoded mapping to be replaced when character data layer provides char_name field"
+  - "Relic panel is placeholder pending relic system implementation"
+
+issue_refs: []
+
+result_policy:
+  allowed_values:
+    - "pass"
+    - "partial"
+    - "fail"
+    - "blocked"
+  routing:
+    pass: "main_agent_updates_registry_to_verified"
+    partial: "return_to_task_flow"
+    fail: "return_to_task_flow"
+    blocked: "create_or_link_issue_bundle"
+
+registry_transition_recommendation:
+  task_status_after_acceptance: "verified"
+  docs_sync_required: false
+  issue_required: false
+
+acceptance_receipt:
+  acceptance_agent: "Claude Code Main Agent"
+  executed_at: "2026-03-14"
+  notes:
+    - "Initial review in session-2026-03-14-004 found receipt unchanged_files issue, corrected same session"
+    - "After receipt correction, all 10 DoD items verified: conditional pass upgraded to full pass"
+    - "Residual risks (ITEM_PLACEHOLDERS, CHARACTER_NAMES, missing backend keys) are acknowledged deferrals, not acceptance gaps"
+    - "Formal acceptance bundle created in session-2026-03-14-005"

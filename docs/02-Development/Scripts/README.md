@@ -1,0 +1,27 @@
+# Script Entry Points
+
+## Purpose
+
+Project-level wrappers resolve the fixed KB via SOT_KB_ROOT, falling back to their own KB repository root. Shared legacy generators are optional; current Codex workflow enters through the game repository AGENTS.md. See agent-runtime-layout.md for the three-repository layout.
+
+## Wrapper Files
+
+- `new-task-bundle.ps1`
+- `new-acceptance-bundle.ps1`
+- `new-issue-bundle.ps1`
+
+## Shared Tool Root
+
+- `$HOME/.agents/ship-kb-tools/` (optional legacy generators; invoke only when installed)
+
+## Usage
+
+- `powershell -File 02-Development/Scripts/new-task-bundle.ps1 -PhaseId P1 -Track SKILL -Sequence 2 -Title "Example"`
+- `powershell -File 02-Development/Scripts/new-acceptance-bundle.ps1 -PhaseId P1 -Track SKILL -Sequence 2`
+- `powershell -File 02-Development/Scripts/new-issue-bundle.ps1 -Sequence 2 -Title "Example" -Summary "Example summary"`
+
+## Rules
+
+- Reusable logic belongs in the shared user-level tool root.
+- Project-level wrappers must only supply project defaults and stable paths.
+- Do not place reusable automation into sandbox-specific temp directories.

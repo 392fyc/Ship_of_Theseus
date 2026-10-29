@@ -1,0 +1,119 @@
+acceptance_id: "ACC-P2-TARG-001"
+task_id: "TASK-P2-TARG-001"
+phase_id: "P2"
+status: "completed"
+example_artifact: false
+
+input_scope:
+  task_bundle: "02-Development/Task-Bundles/TASK-P2-TARG-001.yaml"
+  code_scope_summary:
+    - "scripts/core/range_calculator.gd - RangeCalculator static utility (5 range patterns + LOS)"
+    - "scripts/core/area_calculator.gd - AreaCalculator static utility (5 area patterns)"
+    - "scripts/core/tactical_manager.gd - targeting UI flow integration"
+    - "scripts/core/damage_calculator.gd - holy damage type addition"
+    - "data/skills/ - 15 skill JSONs with diversified range/area configs"
+  required_refs:
+    - "01-Game-Design/game-design-doc.md"
+    - "01-Game-Design/skills-and-range.md"
+    - "01-Game-Design/Core-Systems/battle-calculation.md"
+    - "01-Game-Design/Core-Systems/turn-system.md"
+
+environment_requirements:
+  runtime:
+    - "Godot 4.6"
+  tools:
+    - "Godot MCP (editor + screenshot)"
+  blockers: []
+
+acceptance_checks:
+  - id: "CHK-001"
+    description: "RangeCalculator supports all 5 range pattern types (diamond, line, cross, square, self)"
+    evidence_required: "Code reference showing pattern dispatch"
+    result: "pass"
+  - id: "CHK-002"
+    description: "AreaCalculator supports all 5 area pattern types (single, diamond, line, cross, square)"
+    evidence_required: "Code reference showing pattern dispatch"
+    result: "pass"
+  - id: "CHK-003"
+    description: "min_range > 0 correctly excludes close cells (hollow range)"
+    evidence_required: "Code logic + skill JSON examples"
+    result: "pass"
+  - id: "CHK-004"
+    description: "Targeting UI highlights valid range cells when skill is selected"
+    evidence_required: "Code reference for _refresh_attack_cells() and highlight rendering"
+    result: "pass"
+  - id: "CHK-005"
+    description: "Targeting UI shows area preview on hover over valid target cell"
+    evidence_required: "Code reference for _recalculate_hover_artifacts() and area rendering"
+    result: "pass"
+  - id: "CHK-006"
+    description: "Line range shows directional selector and highlights chosen direction only"
+    evidence_required: "Code reference for _is_waiting_for_line_direction() and direction click handling"
+    result: "pass"
+  - id: "CHK-007"
+    description: "Cross range highlights all four directions simultaneously"
+    evidence_required: "RangeCalculator cross pattern iterates all 4 CARDINAL_DIRECTIONS"
+    result: "pass"
+  - id: "CHK-008"
+    description: "Self range auto-targets caster without requiring click"
+    evidence_required: "Code reference for self-type early return in request_skill_selection()"
+    result: "pass"
+  - id: "CHK-009"
+    description: "Line of sight check: Peak terrain blocks targeting through it"
+    evidence_required: "RangeCalculator delegates to Pathfinding.check_attack_line()"
+    result: "pass"
+  - id: "CHK-010"
+    description: "Skill JSONs diversified: at least 1 skill per range type, at least 1 non-single area"
+    evidence_required: "Skill JSON audit table"
+    result: "pass"
+  - id: "CHK-011"
+    description: "No hardcoded range/area values - all parameters read from JSON"
+    evidence_required: "Code review of RangeCalculator and AreaCalculator"
+    result: "pass"
+
+result: "pass"
+
+evidence:
+  - "RangeCalculator.calculate_cells(): switch on pattern type covers diamond/line/cross/square/self, min_range via _get_min_range(), LOS via Pathfinding.check_attack_line()"
+  - "AreaCalculator.calculate_cells(): switch on pattern type covers single/diamond/line/cross/square, line direction via RangeCalculator.normalize_direction()"
+  - "tactical_manager.gd: _refresh_attack_cells() computes range, _recalculate_hover_artifacts() computes area preview, line direction selector waits then recalculates, self-type bypasses targeting entirely"
+  - "Cancel flow: ui_cancel input triggers _cancel_targeting() clearing all targeting state"
+  - "Skill JSON audit: 5/5 range types covered (diamond×7, line×2, cross×1, square×1, self×4), 4 non-single area skills (fireball diamond(1), piercing_arrow line(2), bless diamond(1), rally diamond(1)), 8 skills with min_range > 0"
+  - "Codex CLI runtime check: Godot MCP ran TacticalScene.tscn with zero errors after targeting refactor"
+
+gaps:
+  - "Peak LOS code-verified but not visually exercised (demo map has no Peak terrain tile)"
+  - "Mouse-driven UI flows (line direction click, hover AOE preview) validated by code path analysis, not automated click testing"
+
+followup_action:
+  - "weapon_hit base value (90) hardcoded in tactical_manager.gd _build_skill_action() - belongs to M11 scope"
+  - "terrain_multiplier placeholder (1.0) in _build_skill_action() - belongs to M11 scope"
+  - "Add Peak terrain to a test map when M11 map work begins, to visually validate LOS blocking"
+
+issue_refs: []
+
+result_policy:
+  allowed_values:
+    - "pass"
+    - "partial"
+    - "fail"
+    - "blocked"
+  routing:
+    pass: "main_agent_updates_registry_to_verified"
+    partial: "return_to_task_flow"
+    fail: "return_to_task_flow"
+    blocked: "create_or_link_issue_bundle"
+
+registry_transition_recommendation:
+  task_status_after_acceptance: "verified"
+  docs_sync_required: false
+  issue_required: false
+
+acceptance_receipt:
+  acceptance_agent: "Claude Code Main Agent"
+  executed_at: "2026-03-14"
+  notes:
+    - "Blind acceptance: Main Agent read all implementation files independently without relying on Codex CLI receipt narrative"
+    - "All 11 DoD checks passed. Implementation is clean and well-structured"
+    - "Pre-existing hardcoded values (weapon_hit, terrain_multiplier) are out of TARG-001 scope, deferred to M11"
+    - "Peak LOS gap is acknowledged but acceptable: code path is correct, only demo data lacks Peak tiles"

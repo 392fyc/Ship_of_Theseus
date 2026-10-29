@@ -1,0 +1,174 @@
+task_id: "TASK-P2-BATT-002"
+title: "Action Economy UI/UX and Turn Flow Design Research"
+phase_id: "P2"
+milestone_refs: ["M8"]
+adr_refs: ["ADR-009"]
+owner_agent_type: "design_agent"
+priority: "Sev-0"
+status: "design_done"
+example_artifact: false
+
+code_scope:
+  include:
+    - "scripts/ui/skill_panel.gd"
+    - "scripts/core/tactical_manager.gd"
+    - "scripts/tactical/tactical_scene.gd"
+    - "scenes/tactical/"
+  exclude:
+    - "addons/"
+    - "tools/"
+
+read_scope:
+  required_docs:
+    - "01-Game-Design/Core-Systems/turn-system.md"
+    - "01-Game-Design/skills-and-range.md"
+    - "01-Game-Design/Characters/class-system.md"
+    - "02-Development/Decisions/adr-2026-03-12-action-economy-implementation.md"
+    - "02-Development/Task-Bundles/TASK-P2-BATT-001.yaml"
+  optional_docs:
+    - "01-Game-Design/game-design-doc.md"
+    - "01-Game-Design/Characters/talent-tree-design.md"
+
+allowed_write_scope:
+  code_paths: []
+  kb_paths:
+    - "02-Development/Task-Bundles/TASK-P2-BATT-002.yaml"
+    - "01-Game-Design/Core-Systems/"
+
+docs_must_update: []
+docs_must_not_touch:
+  - "02-Development/Task-Registry/"
+  - "03-AI-Context/Active-Context/current-session.md"
+  - "02-Development/Acceptance-Bundles/"
+  - "02-Development/Issue-Bundles/"
+  - "00-Index/"
+
+context:
+  problem: |
+    TASK-P2-BATT-001 first implementation delivered a functional Action Economy system,
+    but the following aspects do not match the human supervisor's expectations:
+    1. Skill Panel UI style — visual layout, button presentation, position
+    2. Skill display style — icon/text/state indicator format
+    3. Action trigger timing — when the panel appears/disappears, interaction flow
+    4. Turn flow behavior — resource consumption sequence, turn end conditions, overall rhythm
+    These need to be redesigned through a collaborative design session before rework.
+  design_source: |
+    GDD turn-system.md defines the action resource model and in-turn flow.
+    ADR-009 defines implementation architecture decisions.
+    Current implementation exists on branch cursor/action-economy with partial merges.
+  current_state: |
+    - Skill Panel UI exists but style/position/behavior needs revision
+    - Action resources (movement_used/standard_used/swift_used) tracked on unit.gd
+    - ESC cancel logic fixed (no longer force-ends turn)
+    - Camera drag restored, skill panel mouse passthrough fixed
+    - 15 skill JSONs have action_cost; timing_constraint being added
+
+design_spec: |
+  ## Research Deliverables
+
+  This task produces a design specification document covering 4 areas.
+  The output will be used to rework TASK-P2-BATT-001.
+
+  ### Area 1: Skill Panel UI Design
+  - Panel layout (vertical list vs grid vs radial)
+  - Panel position relative to selected unit
+  - Panel show/hide animation and trigger conditions
+  - Button visual format (icon + text + cost badge + cooldown overlay)
+  - Color scheme for available/unavailable/on-cooldown states
+  - Responsive behavior: panel follows unit? fixed position? toggleable?
+
+  ### Area 2: Skill Display Style
+  - Skill button anatomy (what information is shown)
+  - Action cost iconography (move/standard/swift/reaction/free visual indicators)
+  - Cooldown display format (number overlay? progress ring? greyed mask?)
+  - Unavailability reason display (tooltip? inline text? icon?)
+  - Skill tooltip content and layout
+
+  ### Area 3: Action Trigger Timing
+  - When does SkillPanel appear? (on unit select? on dedicated button? always visible?)
+  - When does SkillPanel update? (after each action? real-time?)
+  - When does SkillPanel hide? (on deselect? on turn end? on targeting mode?)
+  - Targeting mode entry/exit flow (click skill -> select target -> confirm/cancel)
+  - Normal move vs normal attack vs skill: selection priority and interaction
+
+  ### Area 4: Turn Flow Rhythm
+  - Visual feedback for resource consumption (which resource was just spent)
+  - Turn phase indicator (whose turn? what phase?)
+  - Auto-end turn behavior (when all resources spent? confirm prompt?)
+  - Manual end turn (button location, confirmation?)
+  - Action undo: can player undo last action before confirming?
+  - Turn transition animation/feedback
+
+  ### Output Format
+  For each area, produce:
+  - ASCII wireframe or layout description
+  - State diagram for interactive flows
+  - Specific parameter values (sizes, colors, timings)
+  - Reference games/examples where applicable
+
+definition_of_done:
+  - "Design spec document covering all 4 areas with concrete visual specs"
+  - "Human supervisor reviewed and approved each area"
+  - "Spec is specific enough for a Dev Agent to implement without further design questions"
+  - "Rework delta for TASK-P2-BATT-001 clearly identified"
+
+required_evidence:
+  - "Design spec document in KB"
+  - "Human approval confirmation"
+
+handoff_to_acceptance:
+  acceptance_bundle_id: null
+  trigger_status: "implementation_done"
+  handoff_owner: "main_agent"
+  blind_input_policy:
+    allowed:
+      - "Task Bundle input fields"
+      - "Task Bundle referenced docs"
+      - "Codebase (read-only)"
+      - "Runtime environment (screenshots)"
+    forbidden:
+      - "Dev-agent narrative outside this bundle"
+      - "Registry mutation"
+  acceptance_focus:
+    - "Design spec completeness: all 4 areas covered"
+    - "Specificity: no ambiguous 'TBD' items remain"
+  acceptance_waiver: true
+  waiver_reason: "Design research task; human review replaces formal blind acceptance"
+
+implementation_receipt:
+  implementer: "design_agent (AntiGravity)"
+  branch: null
+  summary:
+    - "Created action-economy-ui-spec.md covering all 4 design areas with concrete specs"
+    - "Adopted Fire Emblem-style phased turn flow (Move Phase → Attack Phase → Swift Phase)"
+    - "Designed bottom dashboard with primary action menu (Attack/Skill/Item/End Turn) and expandable skill bar"
+    - "Established forced move-phase completion before attack options unlock"
+    - "Added default resource cascade: Standard Action consumes Move + Standard"
+    - "Added Undo Move support (reversible until attack/skill committed)"
+    - "Added Combat Forecast (damage preview) requirement before attack confirmation"
+    - "Merged Free Action into Swift Action with explicit swift_limit field (1 = standard, -1 = unlimited)"
+    - "Added swift_limit and action_cost fields to Skill Data Structure in skills-and-range.md"
+    - "Aligned turn-system.md In-Turn Action Flow from freely-ordered to Phased Order"
+    - "Defined complete UI state machine (S0-S6) with all transitions"
+    - "Defined timing_constraint semantic mapping under phased turn model"
+    - "Defined dual-control scheme (keyboard + mouse) with right-click disambiguation"
+    - "Generated 4 UI visual style references (FE/BG3/FFT/XCOM) for Dev Agent"
+  changed_files:
+    - "01-Game-Design/Core-Systems/action-economy-ui-spec.md [NEW]"
+    - "01-Game-Design/Core-Systems/turn-system.md [MODIFIED]"
+    - "01-Game-Design/skills-and-range.md [MODIFIED]"
+    - "02-Development/Task-Bundles/TASK-P2-BATT-002.yaml [MODIFIED]"
+  evidence:
+    - "Design spec document: 01-Game-Design/Core-Systems/action-economy-ui-spec.md"
+    - "Human supervisor reviewed and approved all 4 areas across multiple revision rounds"
+    - "3-round self-audit completed (completeness, logic consistency, UX coherence)"
+    - "All contradictions between turn-system.md and UI spec resolved"
+  docs_updated:
+    - "01-Game-Design/Core-Systems/action-economy-ui-spec.md"
+    - "01-Game-Design/Core-Systems/turn-system.md"
+    - "01-Game-Design/skills-and-range.md"
+  residual_risks:
+    - "UI size/proportion parameters left to Dev Agent for engine-specific adaptation"
+    - "timing_constraint after_attack semantic may need further testing in edge cases"
+    - "Undo Move network sync complexity for future multiplayer mode"
+  completed_at: "2026-03-13T12:43:00+09:00"

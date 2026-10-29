@@ -1,0 +1,99 @@
+task_id: "TASK-P1-SKILL-002"
+title: "Wire one representative skill into TacticalScene runtime flow"
+phase_id: "P1"
+milestone_refs:
+  - "M5"
+  - "M7"
+adr_refs:
+  - "ADR-005"
+owner_agent_type: "dev_sub_agent"
+priority: "Sev-1"
+status: "closed"
+example_artifact: false
+
+code_scope:
+  include:
+    - "scripts/core/"
+    - "scripts/tactical/"
+    - "scripts/units/"
+    - "scenes/tactical/"
+    - "data/skills/"
+  exclude:
+    - "addons/"
+    - "dev_doc/"
+
+read_scope:
+  required_docs:
+    - "02-Development/Task-Registry/phase-1-registry.yaml"
+    - "02-Development/Decisions/adr-2026-02-27-attribute-system-v1.md"
+    - "01-Game-Design/Core-Systems/battle-calculation.md"
+    - "01-Game-Design/Characters/class-system.md"
+  optional_docs:
+    - "03-AI-Context/Active-Context/current-session.md"
+
+allowed_write_scope:
+  code_paths:
+    - "scripts/core/"
+    - "scripts/tactical/"
+    - "scripts/units/"
+    - "scenes/tactical/"
+    - "data/skills/"
+  kb_paths:
+    - "02-Development/Task-Bundles/TASK-P1-SKILL-002.yaml"
+
+docs_must_update:
+  - "01-Game-Design/Core-Systems/battle-calculation.md"
+docs_must_not_touch:
+  - "02-Development/Task-Registry/"
+  - "03-AI-Context/Active-Context/current-session.md"
+  - "02-Development/Acceptance-Bundles/"
+  - "02-Development/Issue-Bundles/"
+  - "00-Index/"
+
+definition_of_done:
+  - "A representative skill can be selected and resolved in TacticalScene runtime."
+  - "Skill execution consumes the intended action resource and preserves queue continuity."
+  - "Normal move and attack flows continue to work after skill integration."
+required_evidence:
+  - "Code references for dispatcher, executor, and resource consumption path."
+  - "Runtime evidence showing at least one skill resolves successfully in TacticalScene."
+  - "Explicit note for any unsupported skill categories left out of scope."
+
+handoff_to_acceptance:
+  acceptance_bundle_id: "ACC-P1-SKILL-002"
+  trigger_status: "implementation_done"
+  handoff_owner: "main_agent"
+  blind_input_policy:
+    allowed:
+      - "Task Bundle input fields"
+      - "Linked ADR and design docs"
+      - "Codebase"
+      - "Runtime environment"
+    forbidden:
+      - "Dev-agent narrative outside this bundle"
+      - "Acceptance-agent registry edits"
+  acceptance_focus:
+    - "Blind-check one representative skill from selection to effect resolution."
+    - "Verify action-resource consumption and queue continuity."
+    - "Verify move and attack regressions do not appear."
+
+implementation_receipt:
+  implementer: "Codex CLI (GPT-5.4)"
+  branch: "develop"
+  summary:
+    - "Wired TacticalScene attack-select flow to toggle a representative standard skill and dispatch GameAction.SKILL."
+    - "Integrated supported single-target diamond offensive skills into runtime execution, with archer_aimed_shot verified in battle."
+    - "Tracked per-unit skill IDs/cooldowns and moved confirm-key handling to _input so keyboard action injection can reliably select and execute the runtime skill flow."
+  changed_files:
+    - "scripts/core/tactical_manager.gd"
+    - "scripts/units/unit.gd"
+  evidence:
+    - "Keyboard dispatcher and selection path: scripts/core/tactical_manager.gd:166, scripts/core/tactical_manager.gd:215, scripts/core/tactical_manager.gd:272, scripts/core/tactical_manager.gd:599, scripts/core/tactical_manager.gd:621"
+    - "Executor and shared hostile-resolution path: scripts/core/tactical_manager.gd:471, scripts/core/tactical_manager.gd:482, scripts/core/tactical_manager.gd:519"
+    - "Resource/cooldown tracking on units: scripts/units/unit.gd:68, scripts/units/unit.gd:123, scripts/units/unit.gd:154, scripts/units/unit.gd:162, scripts/units/unit.gd:304"
+    - "Runtime evidence: TacticalScene run under keyboard action injection showed '[Skill] Aimed Shot ready on 弓箭手', '[Action] Aimed Shot selected for 弓箭手', '[Skill] 弓箭手 uses Aimed Shot on 哥布林战士', '[Attack] 弓箭手→哥布林战士 | hit=true | crit=false | dmg=9', '[Attack] Pursuit: 弓箭手→哥布林战士 | hit=true | crit=false | dmg=8', '[TurnManager] Turn: 仆兵 (player)'."
+  docs_updated: []
+  residual_risks:
+    - "This implementation intentionally supports only representative offensive standard skills with diamond range and single-target resolution."
+    - "Line/AOE/heal/self/swift skills and secondary status effects from skill JSON remain out of scope for this task bundle."
+  completed_at: "2026-03-09T01:12:41.1378728+09:00"

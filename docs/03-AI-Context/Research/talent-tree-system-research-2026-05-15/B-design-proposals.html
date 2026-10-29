@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>剑圣天赋 3 套方案设计 — Phase B</title>
+<style>
+  :root {
+    --bg: #16161c;
+    --surface: #1f1f28;
+    --surface-2: #2a2a36;
+    --text: #e8e8ec;
+    --muted: #a0a0b0;
+    --muted-2: #8a8a96;
+    --border: #3a3a48;
+    /* 5 类增强主题色（任务规范固定） */
+    --c-pure: #e74c3c;       /* I 纯数值 - 剑气红 */
+    --c-extra: #f39c12;      /* II 额外效果 - 暴击橙 */
+    --c-sacrifice: #3498db;  /* III 牺牲换强 - 闪避蓝 */
+    --c-morph: #9b59b6;      /* IV 形态变化 - 形态紫 */
+    --c-link: #2ecc71;       /* V 联动效果 - 联动绿 */
+    /* 三套方案主题色 */
+    --p1: #d4af37;  /* 方案一 紧凑高密度 - 金 */
+    --p2: #4a7fb8;  /* 方案二 中庸均衡 - 蓝 */
+    --p3: #c8643c;  /* 方案三 长尾高取舍 - 橙红 */
+    /* 槽位主题色 */
+    --slot-pass: #6c6c78;    /* 默认被动 */
+    --slot-atk: #e0a060;     /* 普攻 */
+    --slot-dash: #70b8d0;    /* 一闪 */
+    --slot-parry: #b890d0;   /* 招架 */
+    --slot-ult: #d0606e;     /* 奥义 */
+    --slot-link: #5fa869;    /* 跨槽位/联动/牺牲 */
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    margin: 0;
+    padding: 32px 16px 64px;
+    line-height: 1.55;
+  }
+  main { max-width: 1080px; margin: 0 auto; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; }
+  header h1 { margin: 0 0 6px; font-size: 22px; font-weight: 600; }
+  header .meta { color: var(--muted); font-size: 13px; margin: 0; }
+  nav.toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 18px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    font-size: 13px;
+  }
+  nav.toc a { color: var(--muted); text-decoration: none; }
+  nav.toc a:hover { color: var(--text); }
+  nav.toc .sep { color: var(--border); }
+  section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  h2 { margin: 0 0 16px; font-size: 17px; font-weight: 600; color: #f0f0f4; }
+  h3 { margin: 18px 0 8px; font-size: 14px; font-weight: 600; color: #d8d8e0; }
+  p, li { font-size: 13.5px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { padding: 7px 9px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.4px; }
+  code { background: var(--surface-2); padding: 1px 6px; border-radius: 3px; font-size: 12px; color: #d4af90; }
+  .pill {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    background: var(--surface-2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    margin-right: 3px;
+  }
+  .pill-pure { background: rgba(231,76,60,0.15); color: var(--c-pure); border-color: var(--c-pure); }
+  .pill-extra { background: rgba(243,156,18,0.15); color: var(--c-extra); border-color: var(--c-extra); }
+  .pill-sac { background: rgba(52,152,219,0.15); color: var(--c-sacrifice); border-color: var(--c-sacrifice); }
+  .pill-morph { background: rgba(155,89,182,0.18); color: var(--c-morph); border-color: var(--c-morph); }
+  .pill-link { background: rgba(46,204,113,0.15); color: var(--c-link); border-color: var(--c-link); }
+  .pill-p1 { background: rgba(212,175,55,0.13); color: var(--p1); border-color: var(--p1); }
+  .pill-p2 { background: rgba(74,127,184,0.15); color: var(--p2); border-color: var(--p2); }
+  .pill-p3 { background: rgba(200,100,60,0.18); color: var(--p3); border-color: var(--p3); }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 8px 0 14px; font-size: 11.5px; color: var(--muted); }
+  .legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .card {
+    background: var(--surface-2);
+    border-left: 4px solid var(--border);
+    padding: 12px 14px;
+    border-radius: 4px;
+  }
+  .card.c-p1 { border-left-color: var(--p1); }
+  .card.c-p2 { border-left-color: var(--p2); }
+  .card.c-p3 { border-left-color: var(--p3); }
+  .card h4 { margin: 0 0 6px; font-size: 13.5px; color: var(--text); }
+  .card .val { font-size: 22px; font-weight: 700; color: var(--text); }
+  .card .sub { font-size: 11.5px; color: var(--muted); }
+  details { background: var(--surface-2); border-radius: 4px; padding: 8px 12px; margin: 8px 0; }
+  details summary { cursor: pointer; font-size: 13px; color: var(--text); font-weight: 500; }
+  details[open] summary { color: var(--p2); }
+  details table { margin-top: 8px; }
+  .svg-wrap {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    margin: 12px 0;
+    text-align: center;
+  }
+  .svg-wrap svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  .svg-caption { font-size: 11.5px; color: var(--muted); margin-top: 6px; text-align: center; }
+  .row-flex { display: flex; gap: 16px; align-items: flex-start; }
+  .row-flex > div { flex: 1; }
+  .footnote { font-size: 11.5px; color: var(--muted); border-top: 1px dashed var(--border); margin-top: 16px; padding-top: 10px; }
+  .risk-list { padding-left: 18px; }
+  .risk-list li { margin-bottom: 8px; }
+  .anchor-target { scroll-margin-top: 12px; }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>剑圣天赋 3 套方案设计 — Phase B</h1>
+  <p class="meta">Ship of Theseus · S4-side-sot · 2026-05-15 · 仅剑圣 不含剑仙 · status: review-pending</p>
+</header>
+
+<nav class="toc">
+  <a href="#sec-0">设计前提</a>
+  <span class="sep">·</span>
+  <a href="#sec-1">5 类增强实例化</a>
+  <span class="sep">·</span>
+  <a href="#sec-overview">三套方案概览</a>
+  <span class="sep">·</span>
+  <a href="#sec-p1">方案一 紧凑高密度</a>
+  <span class="sep">·</span>
+  <a href="#sec-p2">方案二 中庸均衡</a>
+  <span class="sep">·</span>
+  <a href="#sec-p3">方案三 长尾高取舍</a>
+  <span class="sep">·</span>
+  <a href="#sec-compare">对比与雷达图</a>
+  <span class="sep">·</span>
+  <a href="#sec-risk">风险与未定项</a>
+</nav>
+
+<section id="sec-0" class="anchor-target">
+  <h2>0 · 设计前提</h2>
+  <p>剑士剑圣 4+1 中轴线（来自 handoff 锁定）：1 默认被动 + 1 普攻 + 2 小技能（一闪/招架） + 1 奥义（Lv5 二选一形态）。剑气 0-100 连续型阈值条，特色暴击 + 生存闪避。21 关/Run，约 Lv22。</p>
+  <h3>业内基准对照</h3>
+  <table>
+    <tr><th>参考</th><th>N 全池</th><th>M 单局</th><th>主入池</th><th>形态变化占比</th><th>资源条</th></tr>
+    <tr><td>Hades 1 神恩</td><td>30-40 形态</td><td>8-15</td><td>区域分层 + 随机 + 前置</td><td>8%</td><td>God Gauge</td></tr>
+    <tr><td>Hades 2 神恩+古卷</td><td>50+</td><td>10-18</td><td>同上 + Aspect 永久</td><td>12%</td><td>Magick + God Gauge + Omega</td></tr>
+    <tr><td>Hades 2 古卷 Arcana</td><td>25 / 75 Grasp</td><td>29 Grasp</td><td>前置依赖（解锁邻牌）</td><td>—</td><td>Grasp 容量</td></tr>
+    <tr><td>鸦卫奇旅</td><td>200+ 天赋</td><td>8-15</td><td>随机 3 选 1</td><td>15%</td><td>日夜循环</td></tr>
+    <tr><td>枪火重生</td><td>~80+ Ascension</td><td>8-10 圣杯</td><td>纯随机</td><td>5%</td><td>弹匣 + 冷却</td></tr>
+    <tr><td>Slay the Spire</td><td>单局 120-180 次</td><td>卡组 20-30</td><td>战斗后 3 选 1</td><td>—</td><td>能量</td></tr>
+    <tr><td>Dead Cells 突变</td><td>56 种</td><td>3 种</td><td>随机抽取（按颜色）</td><td>—</td><td>无</td></tr>
+  </table>
+  <p class="footnote">来源：A1 §1-4 / A2 §2.2 / §2.3 / §3。</p>
+</section>
+
+<section id="sec-1" class="anchor-target">
+  <h2>1 · 5 类技能增强 —— 剑圣场景实例化</h2>
+  <div class="legend">
+    <span><span class="dot" style="background:var(--c-pure)"></span>I 纯数值</span>
+    <span><span class="dot" style="background:var(--c-extra)"></span>II 额外效果追加</span>
+    <span><span class="dot" style="background:var(--c-sacrifice)"></span>III 牺牲换强</span>
+    <span><span class="dot" style="background:var(--c-morph)"></span>IV 形态变化</span>
+    <span><span class="dot" style="background:var(--c-link)"></span>V 联动效果</span>
+  </div>
+
+  <details open>
+    <summary><span class="pill pill-pure">I</span> 纯数值增强</summary>
+    <table>
+      <tr><th>示例</th><th>槽位</th><th>业内类似设计</th><th>来源</th></tr>
+      <tr><td>剑气 ≥ 80 时奥义伤害 +30%</td><td>奥义</td><td>Hades 1 「Damage +20%」类基础堆叠</td><td>A1 §2.E</td></tr>
+      <tr><td>普攻暴击倍率 ×1.2 → ×1.5</td><td>普攻</td><td>枪火重生 Ascension 暴击堆叠</td><td>A1 §4.E</td></tr>
+      <tr><td>招架反击窗口 +1 回合</td><td>招架</td><td>鸦卫奇旅天赋「伤害 +10%」基础堆叠</td><td>A1 §1.E</td></tr>
+    </table>
+  </details>
+
+  <details>
+    <summary><span class="pill pill-extra">II</span> 额外效果追加</summary>
+    <table>
+      <tr><th>示例</th><th>槽位</th><th>业内类似设计</th><th>来源</th></tr>
+      <tr><td>奥义命中后施加 2 回合流血</td><td>奥义</td><td>Hades 1 Dionysus Hangover 追加</td><td>A1 §2.E</td></tr>
+      <tr><td>一闪轨迹 1 回合内对踏入者造成伤害</td><td>一闪</td><td>Hades 2 Poseidon 击退追加</td><td>A1 §3.E</td></tr>
+      <tr><td>招架反击目标 1 回合冰冻</td><td>招架</td><td>Hades 1 Demeter 减速追加</td><td>A1 §2.E</td></tr>
+    </table>
+  </details>
+
+  <details>
+    <summary><span class="pill pill-sac">III</span> 牺牲原效果换其他技能加强</summary>
+    <table>
+      <tr><th>示例</th><th>方向</th><th>业内类似设计</th><th>来源</th></tr>
+      <tr><td>一闪不再积累剑气，但给招架 +1 充能</td><td>一闪 → 招架</td><td>Hades 1 Chaos 强制替换</td><td>A1 §2.E</td></tr>
+      <tr><td>奥义后 1 回合无法暴击，但本次奥义伤害 +60%</td><td>普攻 → 奥义</td><td>Hades 2 Chaos Gift</td><td>A1 §3.E</td></tr>
+      <tr><td>招架放弃反击，给普攻 +20% 暴击率 2 回合</td><td>招架 → 普攻</td><td>枪火重生 Blessing in Disguise</td><td>A1 §4.E</td></tr>
+    </table>
+  </details>
+
+  <details>
+    <summary><span class="pill pill-morph">IV</span> 形态变化</summary>
+    <table>
+      <tr><th>示例</th><th>槽位</th><th>业内类似设计</th><th>来源</th></tr>
+      <tr><td>招架从主动施放变为被动触发</td><td>招架</td><td>鸦卫奇旅 Scarlet 日夜形态自动转换</td><td>A1 §1.G 亮点 1</td></tr>
+      <tr><td>一闪从直线冲锋变为「连续攻击周围随机单位」</td><td>一闪</td><td>Hades 2 Weapon Aspect Staff 形态变化</td><td>A1 §3.E</td></tr>
+      <tr><td>奥义单体高伤 ↔ 范围扇形横扫 (Lv5)</td><td>奥义</td><td>Hades 1 Daedalus Hammer 武器形态分支</td><td>A1 §2.E</td></tr>
+    </table>
+  </details>
+
+  <details>
+    <summary><span class="pill pill-link">V</span> 联动效果</summary>
+    <table>
+      <tr><th>示例</th><th>方向</th><th>业内类似设计</th><th>来源</th></tr>
+      <tr><td>奥义命中后立即触发免费普攻</td><td>奥义 → 普攻</td><td>Hades 1 宙斯「天神之怒」链式</td><td>A2 §1.2</td></tr>
+      <tr><td>招架成功立即将剑气提升至下一档阈值</td><td>招架 → 资源条</td><td>Hades 2 Duo Boon 跨神关联</td><td>A1 §3.E</td></tr>
+      <tr><td>闪避后下一次一闪不消耗剑气且必暴击</td><td>闪避 → 一闪</td><td>鸦卫奇旅 BuildMaker 关键字链</td><td>A1 §1.G 亮点 3</td></tr>
+    </table>
+  </details>
+</section>
+
+<section id="sec-overview" class="anchor-target">
+  <h2>2 · 三套方案核心参数概览</h2>
+  <div class="grid-3">
+    <div class="card c-p1">
+      <h4>方案一 紧凑高密度</h4>
+      <div class="val">N=30 / M=18</div>
+      <div class="sub">取舍 40% · Hades 风格</div>
+      <p style="margin:8px 0 0;font-size:12px;color:var(--muted);">借鉴 Hades 系列「每个 Boon 都实质改变机制」。形态变化占比 23%（高于业内均值），节点少而精，重玩疲劳较快需 L5 符文补偿。</p>
+    </div>
+    <div class="card c-p2">
+      <h4>方案二 中庸均衡</h4>
+      <div class="val">N=35 / M=20</div>
+      <div class="sub">取舍 43% · 业内主流</div>
+      <p style="margin:8px 0 0;font-size:12px;color:var(--muted);">handoff 候选方案 A 精细化。5 类比例贴近 Hades 1 跨游戏均值，纯数值 40% 给基础强度。稳健但缺乏鲜明性格。</p>
+    </div>
+    <div class="card c-p3">
+      <h4>方案三 长尾高取舍</h4>
+      <div class="val">N=42 / M=18</div>
+      <div class="sub">取舍 57% · STS 风格</div>
+      <p style="margin:8px 0 0;font-size:12px;color:var(--muted);">借鉴 Slay the Spire「跳过文化」+ Dead Cells 极简上限。牺牲换强占比 14%（业内 3 倍），鼓励 build 鲜明性。</p>
+    </div>
+  </div>
+</section>
+
+<section id="sec-p1" class="anchor-target">
+  <h2><span class="pill pill-p1">方案一</span> 紧凑高密度（Hades 风格）</h2>
+
+  <h3>核心参数</h3>
+  <table>
+    <tr><th>维度</th><th>数值</th><th>业内对照</th></tr>
+    <tr><td>N 全池</td><td>30</td><td>最接近 Hades 1 神恩规模 30-40 形态（A1 §2.A）</td></tr>
+    <tr><td>M 单局点数</td><td>18</td><td>Lv5 形态选 1 + Lv2-4 (3) + Lv6-22 (17) - 肉鸽预留</td></tr>
+    <tr><td>取舍比例</td><td>40%</td><td>介于 Hades 2 古卷 61% 与 Monster Train 54% 之间</td></tr>
+    <tr><td>主入池机制</td><td>等级阶梯 + 前置依赖</td><td>借鉴 Hades 2 古卷邻牌解锁（A2 §3.2）</td></tr>
+    <tr><td>资源条循环</td><td>模式 A 分段阈值</td><td>FFT TP / DMC 风格表（A2 §4.4 模式 A）</td></tr>
+  </table>
+
+  <div class="row-flex">
+    <div>
+      <h3>5 类增强分布</h3>
+      <div class="svg-wrap">
+        <!-- 方案一 饼图 N=30 -->
+        <svg viewBox="0 0 220 220" width="220" height="220" aria-label="方案一 5 类增强饼图">
+          <!-- I 27% = 8 nodes -->
+          <!-- II 33% = 10 nodes -->
+          <!-- III 7% = 2 nodes -->
+          <!-- IV 23% = 7 nodes -->
+          <!-- V 10% = 3 nodes -->
+          <!-- 圆心 110,110 半径 90 -->
+          <!-- arc 计算：起始 0°（顶部），顺时针 -->
+          <!-- I: 0 → 97.2° -->
+          <path d="M 110,110 L 110,20 A 90 90 0 0 1 199.27 100.81 Z" fill="#e74c3c"/>
+          <!-- II: 97.2 → 216° -->
+          <path d="M 110,110 L 199.27,100.81 A 90 90 0 0 1 56.91 182.81 Z" fill="#f39c12"/>
+          <!-- III: 216 → 241.2° -->
+          <path d="M 110,110 L 56.91,182.81 A 90 90 0 0 1 36.32 153.27 Z" fill="#3498db"/>
+          <!-- IV: 241.2 → 324° -->
+          <path d="M 110,110 L 36.32,153.27 A 90 90 0 0 1 56.91 37.19 Z" fill="#9b59b6"/>
+          <!-- V: 324 → 360° -->
+          <path d="M 110,110 L 56.91,37.19 A 90 90 0 0 1 110 20 Z" fill="#2ecc71"/>
+          <!-- 中心标 -->
+          <circle cx="110" cy="110" r="32" fill="#1f1f28"/>
+          <text x="110" y="106" text-anchor="middle" fill="#e8e8ec" font-size="11">N=30</text>
+          <text x="110" y="122" text-anchor="middle" fill="#a0a0b0" font-size="9">M=18</text>
+        </svg>
+        <div class="svg-caption">方案一：I 27% · II 33% · III 7% · IV 23% · V 10%</div>
+      </div>
+    </div>
+    <div>
+      <h3>节点分布表</h3>
+      <table>
+        <tr><th>类型</th><th>比例</th><th>节点数</th></tr>
+        <tr><td><span class="pill pill-pure">I</span> 纯数值</td><td>27%</td><td>8</td></tr>
+        <tr><td><span class="pill pill-extra">II</span> 额外效果追加</td><td>33%</td><td>10</td></tr>
+        <tr><td><span class="pill pill-sac">III</span> 牺牲换强</td><td>7%</td><td>2</td></tr>
+        <tr><td><span class="pill pill-morph">IV</span> 形态变化</td><td>23%</td><td>7</td></tr>
+        <tr><td><span class="pill pill-link">V</span> 联动效果</td><td>10%</td><td>3</td></tr>
+      </table>
+      <p class="footnote">形态变化 23% 明显高于业内 5%-15% 均值（A1 跨游戏统计），避免 A2 §1.3 Cyberpunk 假节点反例。</p>
+    </div>
+  </div>
+
+  <h3>剑圣线 14 节点骨架（含 Lv5 形态选）</h3>
+  <div class="svg-wrap">
+    <!-- 方案一骨架结构图：横向 Lv 时间轴 + 槽位行 -->
+    <svg viewBox="0 0 1020 360" width="1020" height="360" aria-label="方案一 14 节点骨架">
+      <!-- 背景网格 -->
+      <rect x="0" y="0" width="1020" height="360" fill="#16161c"/>
+      <!-- 槽位行标签 -->
+      <g font-size="11" fill="#a0a0b0">
+        <text x="6" y="60">默认被动</text>
+        <text x="6" y="105">普攻</text>
+        <text x="6" y="150">一闪</text>
+        <text x="6" y="195">招架</text>
+        <text x="6" y="240">奥义</text>
+        <text x="6" y="285">跨槽位</text>
+      </g>
+      <!-- Lv 横轴 -->
+      <line x1="90" y1="320" x2="990" y2="320" stroke="#3a3a48" stroke-width="1"/>
+      <g font-size="10" fill="#8a8a96">
+        <text x="120" y="338" text-anchor="middle">Lv5</text>
+        <text x="180" y="338" text-anchor="middle">Lv6</text>
+        <text x="240" y="338" text-anchor="middle">Lv7</text>
+        <text x="300" y="338" text-anchor="middle">Lv8</text>
+        <text x="360" y="338" text-anchor="middle">Lv9</text>
+        <text x="420" y="338" text-anchor="middle">Lv10</text>
+        <text x="480" y="338" text-anchor="middle">Lv11</text>
+        <text x="540" y="338" text-anchor="middle">Lv12</text>
+        <text x="600" y="338" text-anchor="middle">Lv13</text>
+        <text x="660" y="338" text-anchor="middle">Lv14</text>
+        <text x="720" y="338" text-anchor="middle">Lv15</text>
+        <text x="780" y="338" text-anchor="middle">Lv16</text>
+        <text x="840" y="338" text-anchor="middle">Lv17</text>
+        <text x="900" y="338" text-anchor="middle">Lv18</text>
+      </g>
+      <!-- 槽位行分隔 -->
+      <g stroke="#2a2a36" stroke-dasharray="2,3">
+        <line x1="90" y1="75" x2="990" y2="75"/>
+        <line x1="90" y1="120" x2="990" y2="120"/>
+        <line x1="90" y1="165" x2="990" y2="165"/>
+        <line x1="90" y1="210" x2="990" y2="210"/>
+        <line x1="90" y1="255" x2="990" y2="255"/>
+      </g>
+
+      <!-- 前置连线（绘制在节点之下） -->
+      <g stroke="#9b59b6" stroke-width="1.2" fill="none" opacity="0.55">
+        <!-- sw_sa_03 前置 sw_sa_02: Lv8 一闪 (300,150) ← Lv7 普攻 (240,105) -->
+        <path d="M 240,105 Q 270,128 300,150" stroke-dasharray="3,2"/>
+        <!-- sw_sa_06 前置 form: Lv10 奥义 (420,240) ← Lv5 (120,240) -->
+        <path d="M 120,240 L 420,240" stroke-dasharray="3,2"/>
+        <!-- sw_sa_09 前置 sw_sa_04: Lv13 招架 (600,195) ← Lv8 招架 (300,195) -->
+        <path d="M 300,195 L 600,195" stroke-dasharray="3,2"/>
+        <!-- sw_sa_11 前置 sw_sa_06: Lv15 跨 (720,285) ← Lv10 奥义 (420,240) -->
+        <path d="M 420,240 Q 570,260 720,285" stroke-dasharray="3,2"/>
+        <!-- sw_sa_13 前置 sw_sa_08, sw_sa_05: Lv17 默认 (840,60) ← Lv12 (540,60) & Lv9 (360,60) -->
+        <path d="M 540,60 L 840,60" stroke-dasharray="3,2"/>
+        <path d="M 360,60 Q 600,40 840,60" stroke-dasharray="3,2"/>
+        <!-- sw_sa_14 前置 sw_sa_04, sw_sa_09: Lv18 跨 (900,285) ← Lv8 招架 (300,195) & Lv13 招架 (600,195) -->
+        <path d="M 600,195 Q 750,240 900,285" stroke-dasharray="3,2"/>
+      </g>
+
+      <!-- 节点绘制 -->
+      <!-- Lv5 形态选: 奥义槽 -->
+      <g>
+        <circle cx="120" cy="240" r="14" fill="#9b59b6" stroke="#e8e8ec" stroke-width="1.5"/>
+        <text x="120" y="244" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">F</text>
+        <text x="120" y="268" text-anchor="middle" fill="#a0a0b0" font-size="9">奥义形态选</text>
+      </g>
+      <!-- Lv6 sw_sa_01 默认被动 I -->
+      <g>
+        <circle cx="180" cy="60" r="11" fill="#e74c3c"/>
+        <text x="180" y="80" text-anchor="middle" fill="#a0a0b0" font-size="8">剑气稳态</text>
+      </g>
+      <!-- Lv7 sw_sa_02 普攻 II -->
+      <g>
+        <circle cx="240" cy="105" r="11" fill="#f39c12"/>
+        <text x="240" y="125" text-anchor="middle" fill="#a0a0b0" font-size="8">暴击吞噬</text>
+      </g>
+      <!-- Lv8 sw_sa_03 一闪 IV -->
+      <g>
+        <circle cx="300" cy="150" r="11" fill="#9b59b6"/>
+        <text x="300" y="170" text-anchor="middle" fill="#a0a0b0" font-size="8">连击形态</text>
+      </g>
+      <!-- Lv8 sw_sa_04 招架 IV -->
+      <g>
+        <circle cx="300" cy="195" r="11" fill="#9b59b6"/>
+        <text x="300" y="215" text-anchor="middle" fill="#a0a0b0" font-size="8">居合架势</text>
+      </g>
+      <!-- Lv9 sw_sa_05 默认 II -->
+      <g>
+        <circle cx="360" cy="60" r="11" fill="#f39c12"/>
+        <text x="360" y="80" text-anchor="middle" fill="#a0a0b0" font-size="8">闪避补偿</text>
+      </g>
+      <!-- Lv10 sw_sa_06 奥义 II -->
+      <g>
+        <circle cx="420" cy="240" r="11" fill="#f39c12"/>
+        <text x="420" y="260" text-anchor="middle" fill="#a0a0b0" font-size="8">流血溢出</text>
+      </g>
+      <!-- Lv11 sw_sa_07 一闪 II -->
+      <g>
+        <circle cx="480" cy="150" r="11" fill="#f39c12"/>
+        <text x="480" y="170" text-anchor="middle" fill="#a0a0b0" font-size="8">电场轨迹</text>
+      </g>
+      <!-- Lv12 sw_sa_08 默认 V -->
+      <g>
+        <circle cx="540" cy="60" r="11" fill="#2ecc71"/>
+        <text x="540" y="80" text-anchor="middle" fill="#a0a0b0" font-size="8">剑气循环</text>
+      </g>
+      <!-- Lv13 sw_sa_09 招架 II -->
+      <g>
+        <circle cx="600" cy="195" r="11" fill="#f39c12"/>
+        <text x="600" y="215" text-anchor="middle" fill="#a0a0b0" font-size="8">冰冻反击</text>
+      </g>
+      <!-- Lv14 sw_sa_10 跨 III -->
+      <g>
+        <circle cx="660" cy="285" r="11" fill="#3498db"/>
+        <text x="660" y="305" text-anchor="middle" fill="#a0a0b0" font-size="8">一闪让招架</text>
+      </g>
+      <!-- Lv15 sw_sa_11 跨 V -->
+      <g>
+        <circle cx="720" cy="285" r="11" fill="#2ecc71"/>
+        <text x="720" y="305" text-anchor="middle" fill="#a0a0b0" font-size="8">奥义普攻链</text>
+      </g>
+      <!-- Lv16 sw_sa_12 默认 I -->
+      <g>
+        <circle cx="780" cy="60" r="11" fill="#e74c3c"/>
+        <text x="780" y="80" text-anchor="middle" fill="#a0a0b0" font-size="8">剑气爆发</text>
+      </g>
+      <!-- Lv17 sw_sa_13 默认 IV -->
+      <g>
+        <circle cx="840" cy="60" r="11" fill="#9b59b6"/>
+        <text x="840" y="80" text-anchor="middle" fill="#a0a0b0" font-size="8">暴击闪避质变</text>
+      </g>
+      <!-- Lv18 sw_sa_14 跨 V -->
+      <g>
+        <circle cx="900" cy="285" r="11" fill="#2ecc71"/>
+        <text x="900" y="305" text-anchor="middle" fill="#a0a0b0" font-size="8">居合爆发</text>
+      </g>
+    </svg>
+    <div class="svg-caption">14 节点骨架（含 Lv5 形态选 F）。虚线 = 前置依赖。节点颜色 = 5 类增强类型。</div>
+  </div>
+
+  <details>
+    <summary>节点明细表（点击展开）</summary>
+    <table>
+      <tr><th>ID</th><th>名称</th><th>槽位</th><th>类型</th><th>入池</th><th>描述</th></tr>
+      <tr><td>form_a/b</td><td>奥义形态选</td><td>奥义</td><td><span class="pill pill-morph">IV</span></td><td>Lv5</td><td>A 单体溢出 / B 范围扇形横扫</td></tr>
+      <tr><td>sw_sa_01</td><td>剑气溢出·稳态</td><td>默认被动</td><td><span class="pill pill-pure">I</span></td><td>Lv6</td><td>剑气 ≥ 60 时所有伤害 +15%</td></tr>
+      <tr><td>sw_sa_02</td><td>普攻·暴击吞噬</td><td>普攻</td><td><span class="pill pill-extra">II</span></td><td>Lv7</td><td>普攻暴击额外回 5 剑气</td></tr>
+      <tr><td>sw_sa_03</td><td>一闪·连击形态</td><td>一闪</td><td><span class="pill pill-morph">IV</span></td><td>Lv8（前置 02）</td><td>变为周围 3 随机单位连击</td></tr>
+      <tr><td>sw_sa_04</td><td>招架·居合架势</td><td>招架</td><td><span class="pill pill-morph">IV</span></td><td>Lv8</td><td>被动触发反击周围敌人</td></tr>
+      <tr><td>sw_sa_05</td><td>闪避·剑气补偿</td><td>默认被动</td><td><span class="pill pill-extra">II</span></td><td>Lv9</td><td>闪避成功获 10 剑气</td></tr>
+      <tr><td>sw_sa_06</td><td>奥义·流血溢出</td><td>奥义</td><td><span class="pill pill-extra">II</span></td><td>Lv10（前置 form）</td><td>奥义命中施加 2 回合流血</td></tr>
+      <tr><td>sw_sa_07</td><td>一闪·电场轨迹</td><td>一闪</td><td><span class="pill pill-extra">II</span></td><td>Lv11</td><td>轨迹格 1 回合内造成伤害</td></tr>
+      <tr><td>sw_sa_08</td><td>暴击·剑气循环</td><td>默认被动</td><td><span class="pill pill-link">V</span></td><td>Lv12</td><td>暴击后下次普攻双倍剑气</td></tr>
+      <tr><td>sw_sa_09</td><td>招架·冰冻反击</td><td>招架</td><td><span class="pill pill-extra">II</span></td><td>Lv13（前置 04）</td><td>反击目标 1 回合冰冻</td></tr>
+      <tr><td>sw_sa_10</td><td>一闪让招架</td><td>一闪↔招架</td><td><span class="pill pill-sac">III</span></td><td>Lv14</td><td>一闪不积剑气，招架 +1 充能</td></tr>
+      <tr><td>sw_sa_11</td><td>奥义·普攻链</td><td>奥义→普攻</td><td><span class="pill pill-link">V</span></td><td>Lv15（前置 06）</td><td>奥义命中触发免费普攻</td></tr>
+      <tr><td>sw_sa_12</td><td>剑气溢出·爆发</td><td>默认被动</td><td><span class="pill pill-pure">I</span></td><td>Lv16</td><td>剑气 ≥ 80 时奥义伤害 +30%</td></tr>
+      <tr><td>sw_sa_13</td><td>暴击·闪避质变</td><td>默认被动</td><td><span class="pill pill-morph">IV</span></td><td>Lv17（前置 08、05）</td><td>暴击 ≥ 50% 时闪避必反击</td></tr>
+      <tr><td>sw_sa_14</td><td>居合·爆发</td><td>招架→奥义</td><td><span class="pill pill-link">V</span></td><td>Lv18（前置 04、09）</td><td>反击 3 次后下次奥义剑气减半</td></tr>
+    </table>
+  </details>
+
+  <h3>业内亮点借鉴（3 条）</h3>
+  <ul>
+    <li><b>Hades「失败即叙事」节点意义化（A1 §2.G 亮点 1）：</b>每节点必须实质改变行为，纯数值仅 8/30 且都绑定具体行为窗口</li>
+    <li><b>Hades 2 古卷邻牌解锁（A2 §3.2、§2.2）：</b>深度节点 sw_sa_13/14/11 通过前置触发动态入池</li>
+    <li><b>FFT TP 多档触发（A2 §4.4 模式 A）：</b>剑气分 4 档 0-25/26-50/51-75/76-100，每档触发不同效果</li>
+  </ul>
+
+  <p class="footnote">设计哲学：节点少而精，决策密度高。主要风险：N=30 偏小，重玩易疲劳，依靠 L5 符文层扩展长尾。</p>
+</section>
+
+<section id="sec-p2" class="anchor-target">
+  <h2><span class="pill pill-p2">方案二</span> 中庸均衡（业内主流参数）</h2>
+
+  <h3>核心参数</h3>
+  <table>
+    <tr><th>维度</th><th>数值</th><th>业内对照</th></tr>
+    <tr><td>N 全池</td><td>35</td><td>接近 Hades 1 神恩规模上沿，handoff 方案 A 沿用</td></tr>
+    <tr><td>M 单局点数</td><td>20</td><td>handoff 已锁，21 关 Lv22 节奏匹配（A2 §3.5）</td></tr>
+    <tr><td>取舍比例</td><td>43%</td><td>handoff 已锁方向</td></tr>
+    <tr><td>主入池机制</td><td>等级阶梯 + 前置依赖 + 部分随机</td><td>Hades 2「区域分层 + 随机 + 前置」（A1 §3.D）</td></tr>
+    <tr><td>资源条循环</td><td>模式 A + 模式 B 混合</td><td>FFT TP + Sekiro 架势（A2 §4.4）</td></tr>
+  </table>
+
+  <div class="row-flex">
+    <div>
+      <h3>5 类增强分布</h3>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 220 220" width="220" height="220" aria-label="方案二 5 类增强饼图">
+          <!-- I 40% = 14 -->
+          <!-- II 34% = 12 -->
+          <!-- III 6% = 2 -->
+          <!-- IV 14% = 5 -->
+          <!-- V 6% = 2 -->
+          <!-- I: 0 → 144° -->
+          <path d="M 110,110 L 110,20 A 90 90 0 0 1 162.90 182.90 Z" fill="#e74c3c"/>
+          <!-- II: 144 → 266.4° -->
+          <path d="M 110,110 L 162.90,182.90 A 90 90 0 0 1 24.39 134.43 Z" fill="#f39c12"/>
+          <!-- III: 266.4 → 288° -->
+          <path d="M 110,110 L 24.39,134.43 A 90 90 0 0 1 24.39 85.57 Z" fill="#3498db"/>
+          <!-- IV: 288 → 338.4° -->
+          <path d="M 110,110 L 24.39,85.57 A 90 90 0 0 1 76.85 27.27 Z" fill="#9b59b6"/>
+          <!-- V: 338.4 → 360° -->
+          <path d="M 110,110 L 76.85,27.27 A 90 90 0 0 1 110 20 Z" fill="#2ecc71"/>
+          <circle cx="110" cy="110" r="32" fill="#1f1f28"/>
+          <text x="110" y="106" text-anchor="middle" fill="#e8e8ec" font-size="11">N=35</text>
+          <text x="110" y="122" text-anchor="middle" fill="#a0a0b0" font-size="9">M=20</text>
+        </svg>
+        <div class="svg-caption">方案二：I 40% · II 34% · III 6% · IV 14% · V 6%</div>
+      </div>
+    </div>
+    <div>
+      <h3>节点分布表</h3>
+      <table>
+        <tr><th>类型</th><th>比例</th><th>节点数</th></tr>
+        <tr><td><span class="pill pill-pure">I</span> 纯数值</td><td>40%</td><td>14</td></tr>
+        <tr><td><span class="pill pill-extra">II</span> 额外效果追加</td><td>34%</td><td>12</td></tr>
+        <tr><td><span class="pill pill-sac">III</span> 牺牲换强</td><td>6%</td><td>2</td></tr>
+        <tr><td><span class="pill pill-morph">IV</span> 形态变化</td><td>14%</td><td>5</td></tr>
+        <tr><td><span class="pill pill-link">V</span> 联动效果</td><td>6%</td><td>2</td></tr>
+      </table>
+      <p class="footnote">5 类比例贴近 Hades 1 跨游戏均值（A1 §5），形态变化 14% 匹配业内上端（鸦卫奇旅 15% / Hades 2 12%）。</p>
+    </div>
+  </div>
+
+  <h3>剑圣线 14 节点骨架</h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 1020 360" width="1020" height="360" aria-label="方案二 14 节点骨架">
+      <rect x="0" y="0" width="1020" height="360" fill="#16161c"/>
+      <g font-size="11" fill="#a0a0b0">
+        <text x="6" y="60">默认被动</text>
+        <text x="6" y="105">普攻</text>
+        <text x="6" y="150">一闪</text>
+        <text x="6" y="195">招架</text>
+        <text x="6" y="240">奥义</text>
+        <text x="6" y="285">跨槽位</text>
+      </g>
+      <line x1="90" y1="320" x2="990" y2="320" stroke="#3a3a48" stroke-width="1"/>
+      <g font-size="10" fill="#8a8a96">
+        <text x="120" y="338" text-anchor="middle">Lv5</text>
+        <text x="180" y="338" text-anchor="middle">Lv6</text>
+        <text x="240" y="338" text-anchor="middle">Lv7</text>
+        <text x="300" y="338" text-anchor="middle">Lv8</text>
+        <text x="360" y="338" text-anchor="middle">Lv9</text>
+        <text x="420" y="338" text-anchor="middle">Lv10</text>
+        <text x="480" y="338" text-anchor="middle">Lv11</text>
+        <text x="540" y="338" text-anchor="middle">Lv12</text>
+        <text x="600" y="338" text-anchor="middle">Lv13</text>
+        <text x="660" y="338" text-anchor="middle">Lv14</text>
+        <text x="720" y="338" text-anchor="middle">Lv15</text>
+        <text x="780" y="338" text-anchor="middle">Lv16</text>
+        <text x="840" y="338" text-anchor="middle">Lv17</text>
+        <text x="900" y="338" text-anchor="middle">Lv18-19</text>
+      </g>
+      <g stroke="#2a2a36" stroke-dasharray="2,3">
+        <line x1="90" y1="75" x2="990" y2="75"/>
+        <line x1="90" y1="120" x2="990" y2="120"/>
+        <line x1="90" y1="165" x2="990" y2="165"/>
+        <line x1="90" y1="210" x2="990" y2="210"/>
+        <line x1="90" y1="255" x2="990" y2="255"/>
+      </g>
+      <!-- 前置 -->
+      <g stroke="#9b59b6" stroke-width="1.2" fill="none" opacity="0.55">
+        <!-- sw_sa_07 前置 sw_sa_06 -->
+        <path d="M 480,195 L 540,195" stroke-dasharray="3,2"/>
+        <!-- sw_sa_13 前置 sw_sa_08 -->
+        <path d="M 600,240 Q 700,255 840,240" stroke-dasharray="3,2"/>
+        <!-- sw_sa_14 前置 sw_sa_06, sw_sa_07 -->
+        <path d="M 480,195 Q 700,260 900,285" stroke-dasharray="3,2"/>
+        <path d="M 540,195 Q 720,260 900,285" stroke-dasharray="3,2"/>
+      </g>
+      <!-- 节点 -->
+      <g><circle cx="120" cy="240" r="14" fill="#9b59b6" stroke="#e8e8ec" stroke-width="1.5"/><text x="120" y="244" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">F</text><text x="120" y="268" text-anchor="middle" fill="#a0a0b0" font-size="9">奥义形态选</text></g>
+      <g><circle cx="180" cy="60" r="11" fill="#e74c3c"/><text x="180" y="80" text-anchor="middle" fill="#a0a0b0" font-size="8">剑气基础</text></g>
+      <g><circle cx="240" cy="105" r="11" fill="#e74c3c"/><text x="240" y="125" text-anchor="middle" fill="#a0a0b0" font-size="8">暴击堆叠</text></g>
+      <g><circle cx="300" cy="105" r="11" fill="#f39c12"/><text x="300" y="125" text-anchor="middle" fill="#a0a0b0" font-size="8">暴击吞噬</text></g>
+      <g><circle cx="360" cy="150" r="11" fill="#9b59b6"/><text x="360" y="170" text-anchor="middle" fill="#a0a0b0" font-size="8">连击形态</text></g>
+      <g><circle cx="420" cy="150" r="11" fill="#e74c3c"/><text x="420" y="170" text-anchor="middle" fill="#a0a0b0" font-size="8">一闪堆叠</text></g>
+      <g><circle cx="480" cy="195" r="11" fill="#9b59b6"/><text x="480" y="215" text-anchor="middle" fill="#a0a0b0" font-size="8">居合架势</text></g>
+      <g><circle cx="540" cy="195" r="11" fill="#f39c12"/><text x="540" y="215" text-anchor="middle" fill="#a0a0b0" font-size="8">冰冻追加</text></g>
+      <g><circle cx="600" cy="240" r="11" fill="#f39c12"/><text x="600" y="260" text-anchor="middle" fill="#a0a0b0" font-size="8">流血溢出</text></g>
+      <g><circle cx="660" cy="60" r="11" fill="#f39c12"/><text x="660" y="80" text-anchor="middle" fill="#a0a0b0" font-size="8">闪避补偿</text></g>
+      <g><circle cx="720" cy="60" r="11" fill="#e74c3c"/><text x="720" y="80" text-anchor="middle" fill="#a0a0b0" font-size="8">暴击加成</text></g>
+      <g><circle cx="780" cy="285" r="11" fill="#3498db"/><text x="780" y="305" text-anchor="middle" fill="#a0a0b0" font-size="8">一闪让招架</text></g>
+      <g><circle cx="840" cy="240" r="11" fill="#e74c3c"/><text x="840" y="260" text-anchor="middle" fill="#a0a0b0" font-size="8">奥义爆发</text></g>
+      <g><circle cx="900" cy="285" r="11" fill="#2ecc71"/><text x="900" y="305" text-anchor="middle" fill="#a0a0b0" font-size="8">奥义普攻链/居合爆发</text></g>
+    </svg>
+    <div class="svg-caption">14 节点骨架（剩余 6 点由 N=35 池中随机抽取）。虚线 = 前置依赖。</div>
+  </div>
+
+  <details>
+    <summary>节点明细表（点击展开）</summary>
+    <table>
+      <tr><th>ID</th><th>名称</th><th>槽位</th><th>类型</th><th>入池</th><th>描述</th></tr>
+      <tr><td>form_a/b</td><td>奥义形态选</td><td>奥义</td><td><span class="pill pill-morph">IV</span></td><td>Lv5</td><td>A / B 二选一</td></tr>
+      <tr><td>sw_sa_01</td><td>剑气溢出·基础</td><td>默认被动</td><td><span class="pill pill-pure">I</span></td><td>Lv6</td><td>剑气 ≥ 50 时所有伤害 +10%</td></tr>
+      <tr><td>sw_sa_02</td><td>普攻·暴击率累积</td><td>普攻</td><td><span class="pill pill-pure">I</span></td><td>Lv7</td><td>每次普攻 +2% 暴击率（最多 10 层）</td></tr>
+      <tr><td>sw_sa_03</td><td>普攻·暴击吞噬</td><td>普攻</td><td><span class="pill pill-extra">II</span></td><td>Lv8</td><td>普攻暴击额外回 5 剑气</td></tr>
+      <tr><td>sw_sa_04</td><td>一闪·连击形态</td><td>一闪</td><td><span class="pill pill-morph">IV</span></td><td>Lv9</td><td>剑圣形态默认连击</td></tr>
+      <tr><td>sw_sa_05</td><td>一闪·伤害堆叠</td><td>一闪</td><td><span class="pill pill-pure">I</span></td><td>Lv10</td><td>命中后该敌人受伤 +5%（3 层）</td></tr>
+      <tr><td>sw_sa_06</td><td>招架·居合架势</td><td>招架</td><td><span class="pill pill-morph">IV</span></td><td>Lv11</td><td>被动触发反击周围敌人</td></tr>
+      <tr><td>sw_sa_07</td><td>招架·冰冻追加</td><td>招架</td><td><span class="pill pill-extra">II</span></td><td>Lv12（前置 06）</td><td>反击目标 1 回合冰冻</td></tr>
+      <tr><td>sw_sa_08</td><td>奥义·流血溢出</td><td>奥义</td><td><span class="pill pill-extra">II</span></td><td>Lv13</td><td>奥义命中 2 回合流血</td></tr>
+      <tr><td>sw_sa_09</td><td>闪避·剑气补偿</td><td>默认被动</td><td><span class="pill pill-extra">II</span></td><td>Lv14</td><td>闪避获 10 剑气</td></tr>
+      <tr><td>sw_sa_10</td><td>暴击·剑气加成</td><td>默认被动</td><td><span class="pill pill-pure">I</span></td><td>Lv15</td><td>暴击倍率 ×1.5 → ×1.7</td></tr>
+      <tr><td>sw_sa_11</td><td>一闪让招架</td><td>一闪↔招架</td><td><span class="pill pill-sac">III</span></td><td>Lv16</td><td>一闪不积剑气，招架 +1 充能</td></tr>
+      <tr><td>sw_sa_12</td><td>奥义·爆发数值</td><td>奥义</td><td><span class="pill pill-pure">I</span></td><td>Lv17</td><td>剑气 ≥ 80 时奥义 +30%</td></tr>
+      <tr><td>sw_sa_13</td><td>奥义·普攻链</td><td>奥义→普攻</td><td><span class="pill pill-link">V</span></td><td>Lv18（前置 08）</td><td>奥义命中触发免费普攻</td></tr>
+      <tr><td>sw_sa_14</td><td>居合·爆发</td><td>招架→奥义</td><td><span class="pill pill-link">V</span></td><td>Lv19（前置 06、07）</td><td>反击 3 次后奥义剑气减半</td></tr>
+    </table>
+  </details>
+
+  <h3>业内亮点借鉴</h3>
+  <ul>
+    <li><b>Hades 1/2 区域分层入池（A1 §2.D / §3.D）：</b>3 大关 7 小关 ↔ 区域分层；第 1 大关池仅含 Lv6-9 节点，第 2 大关增 Lv10-15，第 3 大关全开放</li>
+    <li><b>鸦卫奇旅每级 3 选 1（A1 §1.D）：</b>剩余 6 点的随机抽取借鉴此机制，避开 A2 §1.3 鸦卫奇旅池稀释反例的方法是 N=35 中纯数值绑定具体条件</li>
+    <li><b>FFT TP 多档触发（A2 §4.3、§4.4）：</b>剑气 0-100 设 2 个明确档位 50/80，加上满溢消耗</li>
+  </ul>
+
+  <p class="footnote">设计哲学：业内最稳健参数。主要风险：缺乏鲜明性格，依靠剑圣 4+1 形态切换 + 剑气资源条做差异化。</p>
+</section>
+
+<section id="sec-p3" class="anchor-target">
+  <h2><span class="pill pill-p3">方案三</span> 长尾高取舍（Slay the Spire / Dead Cells 风格）</h2>
+
+  <h3>核心参数</h3>
+  <table>
+    <tr><th>维度</th><th>数值</th><th>业内对照</th></tr>
+    <tr><td>N 全池</td><td>42</td><td>接近 Hades 2 神恩+古卷规模（A1 §3.A）</td></tr>
+    <tr><td>M 单局点数</td><td>18</td><td>21 关 Lv22 节奏 - 肉鸽弹性</td></tr>
+    <tr><td>取舍比例</td><td>57%</td><td>接近 Hades 2 古卷 61%（A2 §2.2）</td></tr>
+    <tr><td>主入池机制</td><td>随机抽取主导 + 等级阶梯阀门</td><td>Slay the Spire 战斗后 3 选 1（A2 §3.3）+ Dead Cells</td></tr>
+    <tr><td>资源条循环</td><td>模式 B + 模式 C</td><td>Sekiro 架势 + 仁王 Ki Pulse（A2 §4.4）</td></tr>
+  </table>
+
+  <div class="row-flex">
+    <div>
+      <h3>5 类增强分布</h3>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 220 220" width="220" height="220" aria-label="方案三 5 类增强饼图">
+          <!-- I 24% = 10 -->
+          <!-- II 36% = 15 -->
+          <!-- III 14% = 6 -->
+          <!-- IV 17% = 7 -->
+          <!-- V 9% = 4 -->
+          <!-- I: 0 → 86.4° -->
+          <path d="M 110,110 L 110,20 A 90 90 0 0 1 199.81 115.65 Z" fill="#e74c3c"/>
+          <!-- II: 86.4 → 216° -->
+          <path d="M 110,110 L 199.81,115.65 A 90 90 0 0 1 56.91 182.81 Z" fill="#f39c12"/>
+          <!-- III: 216 → 266.4° -->
+          <path d="M 110,110 L 56.91,182.81 A 90 90 0 0 1 24.39 134.43 Z" fill="#3498db"/>
+          <!-- IV: 266.4 → 327.6° -->
+          <path d="M 110,110 L 24.39,134.43 A 90 90 0 0 1 61.91 33.94 Z" fill="#9b59b6"/>
+          <!-- V: 327.6 → 360° -->
+          <path d="M 110,110 L 61.91,33.94 A 90 90 0 0 1 110 20 Z" fill="#2ecc71"/>
+          <circle cx="110" cy="110" r="32" fill="#1f1f28"/>
+          <text x="110" y="106" text-anchor="middle" fill="#e8e8ec" font-size="11">N=42</text>
+          <text x="110" y="122" text-anchor="middle" fill="#a0a0b0" font-size="9">M=18</text>
+        </svg>
+        <div class="svg-caption">方案三：I 24% · II 36% · III 14% · IV 17% · V 9%</div>
+      </div>
+    </div>
+    <div>
+      <h3>节点分布表</h3>
+      <table>
+        <tr><th>类型</th><th>比例</th><th>节点数</th></tr>
+        <tr><td><span class="pill pill-pure">I</span> 纯数值</td><td>24%</td><td>10</td></tr>
+        <tr><td><span class="pill pill-extra">II</span> 额外效果追加</td><td>36%</td><td>15</td></tr>
+        <tr><td><span class="pill pill-sac">III</span> 牺牲换强</td><td>14%</td><td>6</td></tr>
+        <tr><td><span class="pill pill-morph">IV</span> 形态变化</td><td>17%</td><td>7</td></tr>
+        <tr><td><span class="pill pill-link">V</span> 联动效果</td><td>9%</td><td>4</td></tr>
+      </table>
+      <p class="footnote">牺牲换强 14% 是业内 3-8% 上端的 2 倍（A1 §5），鼓励 build 鲜明性而非全能。</p>
+    </div>
+  </div>
+
+  <h3>剑圣线 14 节点骨架</h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 1020 360" width="1020" height="360" aria-label="方案三 14 节点骨架">
+      <rect x="0" y="0" width="1020" height="360" fill="#16161c"/>
+      <g font-size="11" fill="#a0a0b0">
+        <text x="6" y="60">默认被动</text>
+        <text x="6" y="105">普攻</text>
+        <text x="6" y="150">一闪</text>
+        <text x="6" y="195">招架</text>
+        <text x="6" y="240">奥义</text>
+        <text x="6" y="285">跨槽位</text>
+      </g>
+      <line x1="90" y1="320" x2="990" y2="320" stroke="#3a3a48" stroke-width="1"/>
+      <g font-size="10" fill="#8a8a96">
+        <text x="120" y="338" text-anchor="middle">Lv5</text>
+        <text x="180" y="338" text-anchor="middle">Lv6</text>
+        <text x="240" y="338" text-anchor="middle">Lv7</text>
+        <text x="300" y="338" text-anchor="middle">Lv8</text>
+        <text x="360" y="338" text-anchor="middle">Lv9</text>
+        <text x="420" y="338" text-anchor="middle">Lv10</text>
+        <text x="480" y="338" text-anchor="middle">Lv11</text>
+        <text x="540" y="338" text-anchor="middle">Lv12</text>
+        <text x="600" y="338" text-anchor="middle">Lv13</text>
+        <text x="660" y="338" text-anchor="middle">Lv14</text>
+        <text x="720" y="338" text-anchor="middle">Lv15</text>
+        <text x="780" y="338" text-anchor="middle">Lv16</text>
+        <text x="840" y="338" text-anchor="middle">Lv17</text>
+        <text x="900" y="338" text-anchor="middle">Lv18-19</text>
+      </g>
+      <g stroke="#2a2a36" stroke-dasharray="2,3">
+        <line x1="90" y1="75" x2="990" y2="75"/>
+        <line x1="90" y1="120" x2="990" y2="120"/>
+        <line x1="90" y1="165" x2="990" y2="165"/>
+        <line x1="90" y1="210" x2="990" y2="210"/>
+        <line x1="90" y1="255" x2="990" y2="255"/>
+      </g>
+      <!-- 前置 -->
+      <g stroke="#9b59b6" stroke-width="1.2" fill="none" opacity="0.55">
+        <!-- sw_sa_05 前置 sw_sa_03 -->
+        <path d="M 300,150 Q 360,200 420,285" stroke-dasharray="3,2"/>
+        <!-- sw_sa_07 前置 sw_sa_04 -->
+        <path d="M 360,195 Q 450,240 540,285" stroke-dasharray="3,2"/>
+        <!-- sw_sa_10 前置 sw_sa_08 -->
+        <path d="M 600,60 Q 660,180 720,285" stroke-dasharray="3,2"/>
+        <!-- sw_sa_11 前置 sw_sa_02 -->
+        <path d="M 240,105 Q 500,80 780,60" stroke-dasharray="3,2"/>
+        <!-- sw_sa_13 前置 sw_sa_01 -->
+        <path d="M 180,60 L 840,60" stroke-dasharray="3,2"/>
+        <!-- sw_sa_14 前置 sw_sa_04, sw_sa_07 -->
+        <path d="M 360,195 Q 700,260 900,285" stroke-dasharray="3,2"/>
+        <path d="M 540,285 L 900,285" stroke-dasharray="3,2"/>
+      </g>
+      <!-- 节点 -->
+      <g><circle cx="120" cy="240" r="14" fill="#9b59b6" stroke="#e8e8ec" stroke-width="1.5"/><text x="120" y="244" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">F</text><text x="120" y="268" text-anchor="middle" fill="#a0a0b0" font-size="9">奥义形态选</text></g>
+      <g><circle cx="180" cy="60" r="11" fill="#9b59b6"/><text x="180" y="80" text-anchor="middle" fill="#a0a0b0" font-size="8">满溢觉醒</text></g>
+      <g><circle cx="240" cy="105" r="11" fill="#f39c12"/><text x="240" y="125" text-anchor="middle" fill="#a0a0b0" font-size="8">暴击吞噬</text></g>
+      <g><circle cx="300" cy="150" r="11" fill="#9b59b6"/><text x="300" y="170" text-anchor="middle" fill="#a0a0b0" font-size="8">连击形态</text></g>
+      <g><circle cx="360" cy="195" r="11" fill="#9b59b6"/><text x="360" y="215" text-anchor="middle" fill="#a0a0b0" font-size="8">居合架势</text></g>
+      <g><circle cx="420" cy="285" r="11" fill="#3498db"/><text x="420" y="305" text-anchor="middle" fill="#a0a0b0" font-size="8">一闪让招架</text></g>
+      <g><circle cx="480" cy="285" r="11" fill="#3498db"/><text x="480" y="305" text-anchor="middle" fill="#a0a0b0" font-size="8">奥义让普攻</text></g>
+      <g><circle cx="540" cy="285" r="11" fill="#3498db"/><text x="540" y="305" text-anchor="middle" fill="#a0a0b0" font-size="8">招架让普攻</text></g>
+      <g><circle cx="600" cy="60" r="11" fill="#f39c12"/><text x="600" y="80" text-anchor="middle" fill="#a0a0b0" font-size="8">闪避补偿</text></g>
+      <g><circle cx="660" cy="150" r="11" fill="#f39c12"/><text x="660" y="170" text-anchor="middle" fill="#a0a0b0" font-size="8">电场轨迹</text></g>
+      <g><circle cx="720" cy="285" r="11" fill="#2ecc71"/><text x="720" y="305" text-anchor="middle" fill="#a0a0b0" font-size="8">闪避→一闪</text></g>
+      <g><circle cx="780" cy="60" r="11" fill="#2ecc71"/><text x="780" y="80" text-anchor="middle" fill="#a0a0b0" font-size="8">剑气循环</text></g>
+      <g><circle cx="840" cy="60" r="11" fill="#9b59b6"/><text x="840" y="80" text-anchor="middle" fill="#a0a0b0" font-size="8">觉醒质变</text></g>
+      <g><circle cx="900" cy="285" r="11" fill="#2ecc71"/><text x="900" y="305" text-anchor="middle" fill="#a0a0b0" font-size="8">奥义普攻链 / 居合爆发</text></g>
+    </svg>
+    <div class="svg-caption">14 节点骨架（剩余 4-6 点由 N=42 大池随机抽取，强随机性 + 跳过文化）。虚线 = 前置依赖。</div>
+  </div>
+
+  <details>
+    <summary>节点明细表（点击展开）</summary>
+    <table>
+      <tr><th>ID</th><th>名称</th><th>槽位</th><th>类型</th><th>入池</th><th>描述</th></tr>
+      <tr><td>form_a/b</td><td>奥义形态选</td><td>奥义</td><td><span class="pill pill-morph">IV</span></td><td>Lv5</td><td>A / B 二选一</td></tr>
+      <tr><td>sw_sa_01</td><td>剑气满溢·觉醒</td><td>默认被动</td><td><span class="pill pill-morph">IV</span></td><td>Lv6</td><td>剑气 100 时进入觉醒 1 回合，普攻必暴击</td></tr>
+      <tr><td>sw_sa_02</td><td>普攻·暴击吞噬</td><td>普攻</td><td><span class="pill pill-extra">II</span></td><td>Lv7</td><td>普攻暴击额外回 5 剑气</td></tr>
+      <tr><td>sw_sa_03</td><td>一闪·连击形态</td><td>一闪</td><td><span class="pill pill-morph">IV</span></td><td>Lv8</td><td>剑圣形态默认连击</td></tr>
+      <tr><td>sw_sa_04</td><td>招架·居合架势</td><td>招架</td><td><span class="pill pill-morph">IV</span></td><td>Lv9</td><td>被动触发反击</td></tr>
+      <tr><td>sw_sa_05</td><td>一闪让招架</td><td>一闪↔招架</td><td><span class="pill pill-sac">III</span></td><td>Lv10（前置 03）</td><td>一闪不积剑气，招架 +1 充能</td></tr>
+      <tr><td>sw_sa_06</td><td>奥义让普攻</td><td>奥义↔普攻</td><td><span class="pill pill-sac">III</span></td><td>Lv11</td><td>奥义后 1 回合不可暴击，本次奥义伤害 +60%</td></tr>
+      <tr><td>sw_sa_07</td><td>招架让普攻</td><td>招架↔普攻</td><td><span class="pill pill-sac">III</span></td><td>Lv12（前置 04）</td><td>招架放弃反击，普攻 +20% 暴击率 2 回合</td></tr>
+      <tr><td>sw_sa_08</td><td>闪避·剑气补偿</td><td>默认被动</td><td><span class="pill pill-extra">II</span></td><td>Lv13</td><td>闪避获 10 剑气</td></tr>
+      <tr><td>sw_sa_09</td><td>一闪·电场轨迹</td><td>一闪</td><td><span class="pill pill-extra">II</span></td><td>Lv14</td><td>轨迹格 1 回合内造成伤害</td></tr>
+      <tr><td>sw_sa_10</td><td>闪避→一闪联动</td><td>闪避→一闪</td><td><span class="pill pill-link">V</span></td><td>Lv15（前置 08）</td><td>闪避后下次一闪不消耗剑气且必暴击</td></tr>
+      <tr><td>sw_sa_11</td><td>暴击·剑气循环</td><td>默认被动</td><td><span class="pill pill-link">V</span></td><td>Lv16（前置 02）</td><td>暴击后下次普攻双倍剑气</td></tr>
+      <tr><td>sw_sa_12</td><td>奥义·普攻链</td><td>奥义→普攻</td><td><span class="pill pill-link">V</span></td><td>Lv17</td><td>奥义命中触发免费普攻</td></tr>
+      <tr><td>sw_sa_13</td><td>居合·觉醒质变</td><td>默认被动</td><td><span class="pill pill-morph">IV</span></td><td>Lv18（前置 01）</td><td>觉醒期间所有技能消耗剑气改消耗 HP</td></tr>
+      <tr><td>sw_sa_14</td><td>居合·爆发</td><td>招架→奥义</td><td><span class="pill pill-link">V</span></td><td>Lv19（前置 04、07）</td><td>反击 3 次后奥义剑气减半</td></tr>
+    </table>
+  </details>
+
+  <h3>业内亮点借鉴</h3>
+  <ul>
+    <li><b>Slay the Spire「跳过文化」（A2 §2.1）：</b>随机抽取 + 高取舍 57% 让玩家学会「跳过」，破解 A2 §1.2 痛点二最优解陷阱</li>
+    <li><b>Dead Cells 极简上限（A2 §2.3）：</b>56 突变/3 装备/95% 取舍的极端验证「池大 + 装备少 = 重玩多样性」</li>
+    <li><b>仁王 Ki Pulse 即时回复（A2 §4.1、§4.4 模式 C）：</b>sw_sa_13 觉醒质变 = 战棋转化的 Ki Pulse，HP 换技能高风险高回报窗口</li>
+  </ul>
+
+  <p class="footnote">设计哲学：池大、点少、跳过多。主要风险：池稀释（鸦卫奇旅反例），补偿措施 = 等级阶梯阀门 + 骨架确定性入池路径。</p>
+</section>
+
+<section id="sec-compare" class="anchor-target">
+  <h2>3 · 三套方案对比与雷达图</h2>
+
+  <div class="svg-wrap">
+    <!-- 雷达图：6 维度 -->
+    <svg viewBox="0 0 520 420" width="520" height="420" aria-label="三套方案雷达对比">
+      <!-- 6 维度（按顺时针）：N规模 / M点数 / 取舍 / 形态变化占比 / 牺牲占比 / 联动占比 -->
+      <!-- 中心 260,200 半径 130 -->
+      <!-- 6 个顶点角度：90, 150, 210, 270, 330, 30 (顺时针起点正上方) -->
+      <!-- 顶点坐标 -->
+      <g stroke="#3a3a48" stroke-width="1" fill="none">
+        <!-- 5 圈刻度 -->
+        <polygon points="260,70 372.58,135 372.58,265 260,330 147.42,265 147.42,135" />
+        <polygon points="260,96 350.07,148 350.07,252 260,304 169.93,252 169.93,148" opacity="0.7"/>
+        <polygon points="260,122 327.55,161 327.55,239 260,278 192.45,239 192.45,161" opacity="0.5"/>
+        <polygon points="260,148 305.04,174 305.04,226 260,252 214.96,226 214.96,174" opacity="0.35"/>
+        <polygon points="260,174 282.53,187 282.53,213 260,226 237.47,213 237.47,187" opacity="0.2"/>
+        <!-- 轴线 -->
+        <line x1="260" y1="200" x2="260" y2="70"/>
+        <line x1="260" y1="200" x2="372.58" y2="135"/>
+        <line x1="260" y1="200" x2="372.58" y2="265"/>
+        <line x1="260" y1="200" x2="260" y2="330"/>
+        <line x1="260" y1="200" x2="147.42" y2="265"/>
+        <line x1="260" y1="200" x2="147.42" y2="135"/>
+      </g>
+      <!-- 轴标签 -->
+      <g font-size="11" fill="#e8e8ec">
+        <text x="260" y="56" text-anchor="middle">N 规模</text>
+        <text x="390" y="138" text-anchor="start">M 点数</text>
+        <text x="390" y="272" text-anchor="start">取舍比例</text>
+        <text x="260" y="350" text-anchor="middle">形态变化占比</text>
+        <text x="130" y="272" text-anchor="end">牺牲占比</text>
+        <text x="130" y="138" text-anchor="end">联动占比</text>
+      </g>
+      <!-- 刻度数字（外圈最大值参考） -->
+      <g font-size="9" fill="#8a8a96">
+        <text x="265" y="68">42</text>
+        <text x="376" y="135">20</text>
+        <text x="376" y="266">57%</text>
+        <text x="265" y="346">23%</text>
+        <text x="145" y="266">14%</text>
+        <text x="145" y="135">10%</text>
+      </g>
+
+      <!-- 数据归一化（取每维最大值为外圈 1.0）：
+           N: P1=30, P2=35, P3=42 → 30/42=0.714, 35/42=0.833, 42/42=1.0
+           M: P1=18, P2=20, P3=18 → 18/20=0.9, 20/20=1.0, 18/20=0.9
+           取舍: P1=40, P2=43, P3=57 → 40/57=0.702, 43/57=0.754, 57/57=1.0
+           形态变化: P1=23, P2=14, P3=17 → 1.0, 0.609, 0.739
+           牺牲: P1=7, P2=6, P3=14 → 0.5, 0.429, 1.0
+           联动: P1=10, P2=6, P3=9 → 1.0, 0.6, 0.9
+      -->
+      <!-- 计算坐标偏移：每点 = 中心 + 半径(130*ratio) * 单位向量 -->
+      <!-- 方向单位向量：上(0,-1) 右上(0.866,-0.5) 右下(0.866,0.5) 下(0,1) 左下(-0.866,0.5) 左上(-0.866,-0.5) -->
+
+      <!-- 方案一 P1（金色） -->
+      <polygon points="
+        260,107.18
+        340.27,153.59
+        339.12,245.62
+        260,330
+        203.69,254.50
+        220.99,154.50
+      " fill="#d4af37" fill-opacity="0.18" stroke="#d4af37" stroke-width="2"/>
+
+      <!-- 方案二 P2（蓝色）
+           N=0.833 → 130*0.833=108.29
+           M=1.0 → 130
+           取舍=0.754 → 98.02
+           形态=0.609 → 79.17
+           牺牲=0.429 → 55.77
+           联动=0.6 → 78
+      -->
+      <polygon points="
+        260,91.71
+        372.58,135
+        344.88,249.01
+        260,279.17
+        211.71,227.88
+        192.46,161
+      " fill="#4a7fb8" fill-opacity="0.18" stroke="#4a7fb8" stroke-width="2"/>
+
+      <!-- 方案三 P3（橙红）
+           N=1.0 → 130
+           M=0.9 → 117
+           取舍=1.0 → 130
+           形态=0.739 → 96.07
+           牺牲=1.0 → 130
+           联动=0.9 → 117
+      -->
+      <polygon points="
+        260,70
+        361.32,141.5
+        372.58,265
+        260,296.07
+        147.42,265
+        158.68,141.5
+      " fill="#c8643c" fill-opacity="0.15" stroke="#c8643c" stroke-width="2"/>
+
+      <!-- 图例 -->
+      <g font-size="11">
+        <rect x="20" y="380" width="14" height="10" fill="#d4af37" fill-opacity="0.4" stroke="#d4af37"/>
+        <text x="40" y="389" fill="#e8e8ec">方案一 紧凑高密度</text>
+        <rect x="180" y="380" width="14" height="10" fill="#4a7fb8" fill-opacity="0.4" stroke="#4a7fb8"/>
+        <text x="200" y="389" fill="#e8e8ec">方案二 中庸均衡</text>
+        <rect x="330" y="380" width="14" height="10" fill="#c8643c" fill-opacity="0.4" stroke="#c8643c"/>
+        <text x="350" y="389" fill="#e8e8ec">方案三 长尾高取舍</text>
+      </g>
+    </svg>
+    <div class="svg-caption">6 维度雷达对比（每维以三方案中最大值归一化为外圈 1.0）。方案三在 N/取舍/牺牲/联动 多维占满外圈，方案一在形态变化外圈，方案二居中。</div>
+  </div>
+
+  <h3>完整对比表</h3>
+  <table>
+    <tr>
+      <th>维度</th>
+      <th>方案一 紧凑</th>
+      <th>方案二 均衡</th>
+      <th>方案三 长尾</th>
+    </tr>
+    <tr><td>N 全池</td><td>30</td><td>35</td><td>42</td></tr>
+    <tr><td>M 单局点数</td><td>18</td><td>20</td><td>18</td></tr>
+    <tr><td>取舍比例</td><td>40%</td><td>43%</td><td>57%</td></tr>
+    <tr><td>主入池</td><td>等级阶梯 + 前置</td><td>等级阶梯 + 前置 + 部分随机</td><td>随机抽取主导 + 等级阀门</td></tr>
+    <tr><td>资源条循环</td><td>模式 A 分段</td><td>模式 A + B 混合</td><td>模式 B + C</td></tr>
+    <tr><td>形态变化占比</td><td>23% 高</td><td>14% 中</td><td>17% 中高</td></tr>
+    <tr><td>纯数值占比</td><td>27%</td><td>40%</td><td>24%</td></tr>
+    <tr><td>牺牲换强占比</td><td>7%</td><td>6%</td><td>14% 高</td></tr>
+    <tr><td>联动占比</td><td>10%</td><td>6%</td><td>9%</td></tr>
+    <tr><td>直接业内对照</td><td>Hades 1 神恩</td><td>Hades 1/2 主流</td><td>STS + Dead Cells</td></tr>
+    <tr><td>适合玩家</td><td>不喜假节点 / 每决策都重</td><td>不会出错的稳健派</td><td>喜随机性 / 鲜明 build / 跳过文化</td></tr>
+    <tr><td>主要风险</td><td>N 偏小重玩疲劳</td><td>缺乏鲜明性格</td><td>池稀释 (鸦卫奇旅反例)</td></tr>
+    <tr><td>补偿措施</td><td>依靠 L5 符文层扩展</td><td>依靠剑圣形态切换 + 剑气资源条</td><td>等级阶梯阀门 + 骨架确定性</td></tr>
+  </table>
+
+  <h3>柱状图对比（核心 3 维）</h3>
+  <div class="svg-wrap">
+    <svg viewBox="0 0 720 240" width="720" height="240" aria-label="三套方案核心 3 维柱状对比">
+      <rect x="0" y="0" width="720" height="240" fill="#16161c"/>
+      <!-- Y 轴 0-60 -->
+      <line x1="60" y1="20" x2="60" y2="200" stroke="#3a3a48"/>
+      <line x1="60" y1="200" x2="700" y2="200" stroke="#3a3a48"/>
+      <!-- Y 刻度 -->
+      <g font-size="10" fill="#8a8a96">
+        <text x="55" y="204" text-anchor="end">0</text>
+        <text x="55" y="174" text-anchor="end">10</text>
+        <text x="55" y="144" text-anchor="end">20</text>
+        <text x="55" y="114" text-anchor="end">30</text>
+        <text x="55" y="84" text-anchor="end">40</text>
+        <text x="55" y="54" text-anchor="end">50</text>
+        <text x="55" y="24" text-anchor="end">60</text>
+      </g>
+      <g stroke="#2a2a36" stroke-dasharray="2,3">
+        <line x1="60" y1="170" x2="700" y2="170"/>
+        <line x1="60" y1="140" x2="700" y2="140"/>
+        <line x1="60" y1="110" x2="700" y2="110"/>
+        <line x1="60" y1="80" x2="700" y2="80"/>
+        <line x1="60" y1="50" x2="700" y2="50"/>
+      </g>
+
+      <!-- 3 组：N规模 / M点数 / 取舍比例 -->
+      <!-- 每组 3 柱：P1/P2/P3，每柱宽 38，组间距 80 -->
+      <!-- 组 1 起点 110: N=30/35/42 -->
+      <g>
+        <rect x="110" y="110" width="38" height="90" fill="#d4af37"/>
+        <rect x="150" y="95" width="38" height="105" fill="#4a7fb8"/>
+        <rect x="190" y="74" width="38" height="126" fill="#c8643c"/>
+        <text x="170" y="218" text-anchor="middle" fill="#e8e8ec" font-size="11">N 全池</text>
+        <text x="129" y="106" text-anchor="middle" fill="#fff" font-size="10">30</text>
+        <text x="169" y="91" text-anchor="middle" fill="#fff" font-size="10">35</text>
+        <text x="209" y="70" text-anchor="middle" fill="#fff" font-size="10">42</text>
+      </g>
+      <!-- 组 2 起点 290: M=18/20/18 -->
+      <g>
+        <rect x="290" y="146" width="38" height="54" fill="#d4af37"/>
+        <rect x="330" y="140" width="38" height="60" fill="#4a7fb8"/>
+        <rect x="370" y="146" width="38" height="54" fill="#c8643c"/>
+        <text x="350" y="218" text-anchor="middle" fill="#e8e8ec" font-size="11">M 单局点数</text>
+        <text x="309" y="142" text-anchor="middle" fill="#fff" font-size="10">18</text>
+        <text x="349" y="136" text-anchor="middle" fill="#fff" font-size="10">20</text>
+        <text x="389" y="142" text-anchor="middle" fill="#fff" font-size="10">18</text>
+      </g>
+      <!-- 组 3 起点 470: 取舍=40/43/57 -->
+      <g>
+        <rect x="470" y="80" width="38" height="120" fill="#d4af37"/>
+        <rect x="510" y="71" width="38" height="129" fill="#4a7fb8"/>
+        <rect x="550" y="29" width="38" height="171" fill="#c8643c"/>
+        <text x="530" y="218" text-anchor="middle" fill="#e8e8ec" font-size="11">取舍比例 (%)</text>
+        <text x="489" y="76" text-anchor="middle" fill="#fff" font-size="10">40</text>
+        <text x="529" y="67" text-anchor="middle" fill="#fff" font-size="10">43</text>
+        <text x="569" y="25" text-anchor="middle" fill="#fff" font-size="10">57</text>
+      </g>
+
+      <!-- 图例 -->
+      <g font-size="11">
+        <rect x="620" y="40" width="12" height="10" fill="#d4af37"/>
+        <text x="638" y="49" fill="#e8e8ec">方案一</text>
+        <rect x="620" y="60" width="12" height="10" fill="#4a7fb8"/>
+        <text x="638" y="69" fill="#e8e8ec">方案二</text>
+        <rect x="620" y="80" width="12" height="10" fill="#c8643c"/>
+        <text x="638" y="89" fill="#e8e8ec">方案三</text>
+      </g>
+    </svg>
+    <div class="svg-caption">N 规模、M 单局点数、取舍比例三维并列对比。N 与取舍比例随方案递增；M 点数三套均在 18-20 之间。</div>
+  </div>
+</section>
+
+<section id="sec-risk" class="anchor-target">
+  <h2>4 · 设计风险与未定项（需用户决策）</h2>
+  <ol class="risk-list">
+    <li><b>三套方案选哪套作为主线？</b> 或选择「方案二 N/M + 方案三取舍比例」类混合策略？</li>
+    <li><b>奥义二选一形态的节点呈现方式：</b>Lv5 选定后另一形态的升级节点是否消失？影响骨架节点数（14 ↔ 11）。</li>
+    <li><b>「肉鸽元素超过 M 上限」机制（handoff 标注「此处不讨论」）何时决策？</b>影响方案一/三的 M=18 是否还需肉鸽预留 1 点。</li>
+    <li><b>随机抽取的「重抽（reroll）」是否允许？</b>A1 §3.D 提到 Hades 2 不可重抽；方案二/三引入随机时需明确。</li>
+    <li><b>天赋互锁实际触发点？</b>方案一 sw_sa_04（居合架势）与 sw_sa_07（一闪电场）是否互锁？需 design review 阶段识别。</li>
+    <li><b>L5 符文与 L2 天赋的边界（架构共识 v2 §4）：</b>方案三 sw_sa_13「居合觉醒质变」具有「改变职业形态」特征，是否会跟 L5 流派类符文功能重叠？</li>
+  </ol>
+</section>
+
+<section>
+  <h2>5 · 引用核验声明</h2>
+  <table>
+    <tr><th>引用源</th><th>引用条数</th><th>范围</th></tr>
+    <tr><td>A1 §1 鸦卫奇旅</td><td>8</td><td>§1.A / §1.E / §1.G 亮点 1 / §1.G 亮点 3</td></tr>
+    <tr><td>A1 §2 Hades 1</td><td>12</td><td>§2.A / §2.D / §2.E / §2.G 亮点 1</td></tr>
+    <tr><td>A1 §3 Hades 2</td><td>9</td><td>§3.A / §3.D / §3.E</td></tr>
+    <tr><td>A1 §4 枪火重生</td><td>4</td><td>§4.E</td></tr>
+    <tr><td>A1 跨游戏统计</td><td>3</td><td>§5 5 类比例</td></tr>
+    <tr><td>A2 §1 综述</td><td>5</td><td>§1.2 / §1.3</td></tr>
+    <tr><td>A2 §2 长尾验证</td><td>5</td><td>§2.1 / §2.2 / §2.3</td></tr>
+    <tr><td>A2 §3 入池机制</td><td>6</td><td>§3.1-3.3 / §3.5</td></tr>
+    <tr><td>A2 §4 资源条</td><td>8</td><td>§4.1 / §4.3 / §4.4</td></tr>
+    <tr><td>architecture-consensus-v2</td><td>2</td><td>§1 / §4</td></tr>
+  </table>
+  <p class="footnote">业内类似设计标注完整性：42 条节点（14 × 3 方案）均有业内参考来源标注，100%。未核验数据：无新增（沿用 A1/A2 自带「未核验」字段作为范围参考，未当精确依赖）。</p>
+</section>
+
+</main>
+</body>
+</html>

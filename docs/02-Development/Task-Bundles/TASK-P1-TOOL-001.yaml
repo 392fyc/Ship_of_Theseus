@@ -1,0 +1,110 @@
+task_id: "TASK-P1-TOOL-001"
+title: "Resolve Godot MCP single-client lock for multi-agent handoff"
+phase_id: "P1"
+milestone_refs: []
+adr_refs:
+  - "ADR-007"
+owner_agent_type: "dev_sub_agent"
+priority: "Sev-0"
+status: "closed"
+example_artifact: false
+
+issue_ref: "ISSUE-2026-03-09-001"
+
+code_scope:
+  include:
+    - "addons/"
+  exclude: []
+
+read_scope:
+  required_docs:
+    - "02-Development/Issue-Bundles/ISSUE-2026-03-09-001.yaml"
+    - "02-Development/Task-Registry/acceptance-workflow.md"
+  optional_docs:
+    - "03-AI-Context/Active-Context/current-session.md"
+
+allowed_write_scope:
+  code_paths:
+    - "addons/"
+  kb_paths:
+    - "02-Development/Task-Bundles/TASK-P1-TOOL-001.yaml"
+
+docs_must_update: []
+docs_must_not_touch:
+  - "02-Development/Task-Registry/"
+  - "03-AI-Context/Active-Context/current-session.md"
+  - "02-Development/Acceptance-Bundles/"
+  - "02-Development/Issue-Bundles/"
+  - "00-Index/"
+
+context:
+  problem: "Godot MCP addon WebSocket server accepts only one client at a time. When a second agent attempts to connect while the first session is still alive or not cleanly released, it receives 'another client already connected' and cannot attach."
+  observed_during: "ACC-P1-SKILL-002 acceptance handoff"
+  proposed_solutions:
+    - id: "SOL-A"
+      title: "Multi-client concurrent support"
+      approach: "Patch addon to accept multiple WebSocket connections with session isolation"
+    - id: "SOL-B"
+      title: "Multi-port listener"
+      approach: "Configure addon to listen on multiple ports for different agent roles"
+    - id: "SOL-C"
+      title: "Graceful disconnect protocol"
+      approach: "Keep single-client model, add explicit disconnect handshake so socket is reliably freed before next agent connects"
+
+investigation_steps:
+  - "Read the MCP addon source to identify the WebSocket server bind and client-management logic."
+  - "Determine why a disconnected client session is not reliably freed."
+  - "Evaluate SOL-A, SOL-B, and SOL-C for feasibility and risk in the current addon architecture."
+  - "Implement the chosen solution or recommend an alternative with evidence."
+
+definition_of_done:
+  - "Two sequential agent sessions can connect to Godot MCP without manual editor restart or human intervention between sessions."
+  - "The fix does not break existing single-agent MCP workflows (node queries, scene management, editor control)."
+  - "If the chosen solution is process-level only (no code change), a clear protocol document is provided as evidence."
+
+required_evidence:
+  - "Identification of the root cause in addon source (file and line references)."
+  - "Description of chosen solution and why alternatives were rejected."
+  - "Runtime or protocol evidence showing sequential reconnection works."
+
+handoff_to_acceptance:
+  acceptance_bundle_id: "ACC-P1-TOOL-001"
+  trigger_status: "implementation_done"
+  handoff_owner: "main_agent"
+  blind_input_policy:
+    allowed:
+      - "Task Bundle input fields"
+      - "Linked issue bundle and ADR"
+      - "Codebase (including addons/)"
+      - "Runtime environment"
+    forbidden:
+      - "Dev-agent narrative outside this bundle"
+      - "Acceptance-agent registry edits"
+  acceptance_focus:
+    - "Verify sequential agent reconnection without manual intervention."
+    - "Verify existing MCP operations remain functional after the fix."
+
+implementation_receipt:
+  implementer: "Codex CLI (GPT-5)"
+  branch: "develop"
+  summary:
+    - "Kept the addon single-client, but changed addons/godot_mcp/websocket_server.gd from reject-on-second-connect to queued takeover so a new WebSocket client can replace the current one without restarting the editor."
+    - "Added explicit server-side disconnect primitives and wired a new disconnect_client system command through addons/godot_mcp/plugin.gd so the active MCP client can receive a normal response and then be closed cleanly."
+    - "Retained stale-session cleanup safeguards: heartbeat polling, TCP-status-based stale release, closing grace cleanup, and throttled rejection logging for unexpected contention paths."
+  changed_files:
+    - "addons/godot_mcp/websocket_server.gd"
+    - "addons/godot_mcp/plugin.gd"
+    - "addons/godot_mcp/commands/system_commands.gd"
+  evidence:
+    - "Root cause: the addon maintained a single _ws_peer slot and only freed it after the peer fully reached STATE_CLOSED, so stale or half-closed sessions could keep ownership of the socket. The patched takeover and cleanup logic now lives in addons/godot_mcp/websocket_server.gd lines 39-48, 95-99, 111-169, 252-330, and 333-398."
+    - "Chosen solution: reject SOL-A and SOL-B because the addon still routes editor actions through a single shared plugin/command-router state; multi-client concurrency or multi-port listeners would increase state-conflict risk without solving handoff. Implemented an extended SOL-C: single active client, but explicit takeover plus explicit disconnect command. See addons/godot_mcp/websocket_server.gd lines 12-18 and 146-169, addons/godot_mcp/plugin.gd lines 261-335, and addons/godot_mcp/commands/system_commands.gd lines 6-32."
+    - "Runtime verification rerun on 2026-03-09 23:09 JST: a headless Godot console harness connected client 1, connected client 2 which took over client 1 with close code 4002, invoked a server-side disconnect that closed client 2 with close code 4003, then connected client 3 successfully; the rerun ended with HARNESS_PASS and no editor restart."
+    - "Editor-load verification on 2026-03-09: Godot headless editor startup loaded the plugin successfully ('Plugin initialized') with no parse errors in the modified addon scripts."
+  docs_updated: []
+  residual_risks:
+    - "The addon remains intentionally single-client. It now supports automatic takeover, but it still does not support concurrent multi-agent editor control."
+    - "Client-side MCP process management remains outside this repo. If Cursor/Codex spawns duplicate godot-mcp node processes, the addon can hand off connections cleanly but cannot prevent client auto-reconnect loops or enforce lazy-connect behavior by itself."
+    - "An unrelated existing error path remains in addons/godot_mcp/core/mcp_logger.gd when bind failure logging tries to call get_frame_source on ScriptBacktrace; this surfaced during headless editor startup with port 6550 already in use, but it is separate from the handoff fix."
+    - "Phase-output for Main Agent: if minimal-user-operation handoff remains a product requirement, the next task should target client-side lifecycle governance outside addons/, including explicit disconnect UX, lazy WebSocket connect on first real tool call, and guaranteed child-process teardown on host/session exit."
+    - "Phase-output for Main Agent: the mcp_logger bind-failure traceback bug is now isolated enough to be handled as a separate hardening/debugging task, because it is reproducible during headless editor startup with port 6550 already occupied and is not caused by the handoff changes in this task."
+  completed_at: "2026-03-09T23:09:51+09:00"

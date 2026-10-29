@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>S4-side-sot 剑士剑圣天赋系统调研 — INDEX</title>
+<style>
+  :root {
+    --bg: #16161c;
+    --surface: #1f1f28;
+    --surface-2: #2a2a36;
+    --text: #e8e8ec;
+    --muted: #8a8a96;
+    --border: #3a3a48;
+    --pA: #d4af37;
+    --pB: #4a7fb8;
+    --pC: #d97a4a;
+    --pM: #5fa869;
+    --c-num: #e74c3c;
+    --c-crit: #f39c12;
+    --c-dodge: #3498db;
+    --c-morph: #9b59b6;
+    --c-combo: #2ecc71;
+    --blocker: #c8643c;
+    --warn: #d97a4a;
+    --ok: #5fa869;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    margin: 0;
+    padding: 32px 16px 64px;
+    line-height: 1.55;
+  }
+  main { max-width: 1100px; margin: 0 auto; }
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+    margin-bottom: 28px;
+  }
+  header h1 { margin: 0 0 6px; font-size: 22px; font-weight: 600; }
+  header .meta { color: var(--muted); font-size: 13px; margin: 0; }
+  header .crumb { color: var(--muted); font-size: 12px; margin-top: 6px; }
+  header .crumb a { color: var(--pB); text-decoration: none; }
+  nav.toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 28px;
+    font-size: 13px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+  }
+  nav.toc a { color: var(--pB); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  h2 { margin: 0 0 16px; font-size: 17px; font-weight: 600; color: #f0f0f4; }
+  h3 { margin: 18px 0 8px; font-size: 14px; font-weight: 600; color: #d8d8e0; }
+  p, li { font-size: 13.5px; }
+  code { background: var(--surface-2); padding: 1px 6px; border-radius: 3px;
+         font-size: 12.5px; color: #d4af90; }
+  a.file-link { color: var(--pB); text-decoration: none; }
+  a.file-link:hover { text-decoration: underline; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border);
+           vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; font-size: 12px;
+       text-transform: uppercase; letter-spacing: 0.5px; }
+  .pill {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 11px; background: var(--surface-2); color: var(--muted);
+    border: 1px solid var(--border); margin-right: 4px;
+  }
+  .pill.A { background: rgba(212, 175, 55, 0.15); color: var(--pA); border-color: var(--pA); }
+  .pill.B { background: rgba(74, 127, 184, 0.15); color: var(--pB); border-color: var(--pB); }
+  .pill.C { background: rgba(217, 122, 74, 0.15); color: var(--pC); border-color: var(--pC); }
+  .pill.M { background: rgba(95, 168, 105, 0.15); color: var(--pM); border-color: var(--pM); }
+  .pill.blocker {
+    background: rgba(200, 100, 60, 0.22);
+    color: var(--blocker);
+    border-color: var(--blocker);
+    font-weight: 600;
+  }
+  .blocker-card {
+    border-left: 4px solid var(--blocker);
+    background: rgba(200, 100, 60, 0.06);
+    padding: 14px 18px;
+    border-radius: 4px;
+    margin: 10px 0;
+  }
+  .blocker-card .head {
+    font-weight: 600; color: var(--blocker); font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .scheme-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    margin: 12px 0;
+  }
+  .scheme-card {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    background: var(--surface-2);
+  }
+  .scheme-card.s1 { border-left: 4px solid var(--c-num); }
+  .scheme-card.s2 { border-left: 4px solid var(--c-crit); }
+  .scheme-card.s3 { border-left: 4px solid var(--c-morph); }
+  .scheme-card .name { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .scheme-card .num-row { display: flex; gap: 12px; font-size: 12px; color: var(--muted);
+                          margin-bottom: 6px; }
+  .scheme-card .num-row b { color: var(--text); font-weight: 600; }
+  .scheme-card .tag-row { font-size: 11.5px; color: var(--muted); }
+  .file-card {
+    display: grid;
+    grid-template-columns: 90px 230px 1fr 80px;
+    gap: 14px;
+    padding: 10px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 6px;
+    align-items: center;
+    font-size: 12.5px;
+  }
+  .file-card .phase { font-weight: 600; }
+  .file-card .fname { color: #d8d8e0; }
+  .file-card .fname code { padding: 0; background: none; color: var(--pB); }
+  .file-card .desc { color: var(--muted); font-size: 12px; }
+  .file-card .est { color: var(--muted); text-align: right; font-size: 11.5px; }
+  .workflow-svg { background: var(--surface-2); border-radius: 6px; padding: 10px; }
+  .read-order ol { margin: 8px 0 0 0; padding-left: 22px; }
+  .read-order li { margin-bottom: 6px; }
+  .read-order .step {
+    font-weight: 600; color: var(--pB);
+  }
+  .read-order .udec {
+    color: var(--c-crit);
+    font-weight: 600;
+    font-style: italic;
+  }
+  footer { color: var(--muted); font-size: 12px; margin-top: 24px; text-align: center; }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>S4-side-sot — 剑士剑圣天赋系统调研 INDEX</h1>
+  <p class="meta">Ship of Theseus · 战棋 RPG + Roguelite + 城镇建设 · Godot 4.6 · 单人开发 · 2026-05-15</p>
+  <p class="crumb">KB Path: <code>03-AI-Context/Research/talent-tree-system-research-2026-05-15/</code></p>
+</header>
+
+<nav class="toc">
+  <a href="#tldr">TL;DR</a>
+  <a href="#workflow">工作流</a>
+  <a href="#files">文件清单</a>
+  <a href="#schemes">3 套方案</a>
+  <a href="#blockers">P0 阻断项</a>
+  <a href="#order">阅读顺序</a>
+  <a href="#sources">业内参考</a>
+</nav>
+
+<section id="tldr">
+  <h2>TL;DR — 给用户的三句话</h2>
+  <ol>
+    <li><b>3 套剑圣方案已产出</b>，分别围绕「紧凑高密度（N=30/M=18）」「中庸均衡（N=35/M=20）」「长尾高取舍（N=42/M=18）」三种设计哲学，参数差异化清晰。</li>
+    <li><b>critic 发现 2 个 P0 阻断级跨方案盲点</b>：① Lv5 奥义二选一形态后被放弃形态的升级路径完全缺失，导致 N/M/取舍比例的计算基础不可靠；② 招架被动化（sw_sa_04）+ 招架反击叠加可能违反 handoff「反击不触发连锁」硬规则。<span class="pill blocker">必须先决策，再选方案</span></li>
+    <li><b>业内强证据</b>：4 款主要参考（鸦卫奇旅 / Hades 1 / Hades 2 / 枪火重生）+ 4 个失败案例（Diablo III / Ravenswatch 早期 / WoW Dragonflight / Cyberpunk 2077 1.x），加上战棋同语境的 Wildermyth、Into the Breach、Tactics Ogre Reborn 三个独立反例，形成完整的设计锚点网络。</li>
+  </ol>
+</section>
+
+<section id="workflow">
+  <h2>工作流概览</h2>
+  <p>S4 主任务由 Claude Code Main Agent 派发内部 Sub Agent team 执行（用户特许）。链路为：<b>A1 + A2 并行调研 → B 设计 → C 对抗验证 → Main 综合</b>。</p>
+  <div class="workflow-svg">
+    <svg viewBox="0 0 1000 220" xmlns="http://www.w3.org/2000/svg" width="100%" height="220">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#8a8a96"/>
+        </marker>
+      </defs>
+      <!-- A1 -->
+      <rect x="40" y="20" width="180" height="70" rx="6" fill="#2a2a36" stroke="#d4af37" stroke-width="2"/>
+      <text x="130" y="46" fill="#d4af37" font-size="13" font-weight="600" text-anchor="middle">Phase A1</text>
+      <text x="130" y="64" fill="#e8e8ec" font-size="11" text-anchor="middle">game-researcher</text>
+      <text x="130" y="80" fill="#8a8a96" font-size="10" text-anchor="middle">4 款游戏 raw 数据</text>
+
+      <!-- A2 -->
+      <rect x="40" y="120" width="180" height="70" rx="6" fill="#2a2a36" stroke="#d4af37" stroke-width="2"/>
+      <text x="130" y="146" fill="#d4af37" font-size="13" font-weight="600" text-anchor="middle">Phase A2</text>
+      <text x="130" y="164" fill="#e8e8ec" font-size="11" text-anchor="middle">research</text>
+      <text x="130" y="180" fill="#8a8a96" font-size="10" text-anchor="middle">设计学综述 + 长尾交叉</text>
+
+      <!-- arrow to B -->
+      <path d="M220,55 L 280,55 L 320,105" stroke="#8a8a96" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+      <path d="M220,155 L 280,155 L 320,115" stroke="#8a8a96" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+      <!-- B -->
+      <rect x="330" y="70" width="180" height="70" rx="6" fill="#2a2a36" stroke="#4a7fb8" stroke-width="2"/>
+      <text x="420" y="96" fill="#4a7fb8" font-size="13" font-weight="600" text-anchor="middle">Phase B</text>
+      <text x="420" y="114" fill="#e8e8ec" font-size="11" text-anchor="middle">design</text>
+      <text x="420" y="130" fill="#8a8a96" font-size="10" text-anchor="middle">3 套方案 + HTML</text>
+
+      <!-- arrow to C -->
+      <path d="M510,105 L 570,105" stroke="#8a8a96" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+      <!-- C -->
+      <rect x="580" y="70" width="180" height="70" rx="6" fill="#2a2a36" stroke="#d97a4a" stroke-width="2"/>
+      <text x="670" y="96" fill="#d97a4a" font-size="13" font-weight="600" text-anchor="middle">Phase C</text>
+      <text x="670" y="114" fill="#e8e8ec" font-size="11" text-anchor="middle">game-critic</text>
+      <text x="670" y="130" fill="#8a8a96" font-size="10" text-anchor="middle">对抗验证 + 找盲点</text>
+
+      <!-- arrow to Main -->
+      <path d="M760,105 L 820,105" stroke="#8a8a96" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+      <!-- Main -->
+      <rect x="830" y="70" width="140" height="70" rx="6" fill="#2a2a36" stroke="#5fa869" stroke-width="2"/>
+      <text x="900" y="96" fill="#5fa869" font-size="13" font-weight="600" text-anchor="middle">Main 综合</text>
+      <text x="900" y="114" fill="#e8e8ec" font-size="11" text-anchor="middle">Claude Main</text>
+      <text x="900" y="130" fill="#8a8a96" font-size="10" text-anchor="middle">INDEX + KB commit</text>
+    </svg>
+  </div>
+</section>
+
+<section id="files">
+  <h2>文件清单</h2>
+
+  <div class="file-card">
+    <span class="phase"><span class="pill A">A1</span></span>
+    <span class="fname"><a class="file-link" href="A1-game-data-raw.md"><code>A1-game-data-raw.md</code></a></span>
+    <span class="desc">4 款游戏 raw 数据（鸦卫奇旅 / Hades 1 / Hades 2 / 枪火重生），含跨游戏对比表 + 5 类增强使用比例统计</span>
+    <span class="est">≈ 12 分钟</span>
+  </div>
+
+  <div class="file-card">
+    <span class="phase"><span class="pill A">A2</span></span>
+    <span class="fname"><a class="file-link" href="A2-design-survey-raw.md"><code>A2-design-survey-raw.md</code></a></span>
+    <span class="desc">设计学综述（传统 vs 形态修改）+ 长尾取舍交叉验证（Slay the Spire / Hades 2 Arcana / Monster Train 等）+ 入池机制 4 模式 + 资源条 3 模式</span>
+    <span class="est">≈ 12 分钟</span>
+  </div>
+
+  <div class="file-card">
+    <span class="phase"><span class="pill B">B</span></span>
+    <span class="fname"><a class="file-link" href="B-design-proposals.md"><code>B-design-proposals.md</code></a></span>
+    <span class="desc">3 套剑圣方案主体 + 5 类增强剑圣场景实例化（每类 2-3 例）+ 各方案 14 节点骨架 + 业内亮点借鉴</span>
+    <span class="est">≈ 15 分钟</span>
+  </div>
+
+  <div class="file-card">
+    <span class="phase"><span class="pill B">B</span></span>
+    <span class="fname"><a class="file-link" href="B-design-proposals.html"><code>B-design-proposals.html</code></a></span>
+    <span class="desc">3 套方案可视化（含雷达图 + 14 节点骨架图 + 5 类增强饼图，暗主题）</span>
+    <span class="est">≈ 10 分钟</span>
+  </div>
+
+  <div class="file-card">
+    <span class="phase"><span class="pill C">C</span></span>
+    <span class="fname"><a class="file-link" href="C-critic-feedback.md"><code>C-critic-feedback.md</code></a></span>
+    <span class="desc">对 3 套方案各 ≥2 反对意见 + 2 个 P0 跨方案盲点 + 6 个决策项优先级 + 3 条改进建议</span>
+    <span class="est">≈ 12 分钟</span>
+  </div>
+
+  <div class="file-card">
+    <span class="phase"><span class="pill M">综合</span></span>
+    <span class="fname"><a class="file-link" href="00-SYNTHESIS.md"><code>00-SYNTHESIS.md</code></a></span>
+    <span class="desc">全链路综合报告 + 阅读顺序建议 + 6 个用户决策项详情</span>
+    <span class="est">≈ 8 分钟</span>
+  </div>
+
+  <div class="file-card">
+    <span class="phase"><span class="pill M">综合</span></span>
+    <span class="fname"><code>INDEX.html</code> （本文件）</span>
+    <span class="desc">可视化总入口（暗主题，配套架构介绍）</span>
+    <span class="est">≈ 5 分钟</span>
+  </div>
+</section>
+
+<section id="schemes">
+  <h2>3 套方案速览</h2>
+  <div class="scheme-grid">
+    <div class="scheme-card s1">
+      <div class="name">方案一 紧凑高密度</div>
+      <div class="num-row">
+        <span>N <b>30</b></span>
+        <span>M <b>18</b></span>
+        <span>取舍 <b>40%</b></span>
+      </div>
+      <div class="num-row">
+        <span>形态变化 <b>23%</b></span>
+        <span>牺牲换强 <b>7%</b></span>
+      </div>
+      <div class="tag-row">
+        主入池：等级阶梯 + 前置依赖<br/>
+        资源条：模式 A 分段（FFT TP / DMC 风格表）<br/>
+        业内对照：Hades 1 神恩系统<br/>
+        适合：决策密度爱好者
+      </div>
+    </div>
+
+    <div class="scheme-card s2">
+      <div class="name">方案二 中庸均衡</div>
+      <div class="num-row">
+        <span>N <b>35</b></span>
+        <span>M <b>20</b></span>
+        <span>取舍 <b>43%</b></span>
+      </div>
+      <div class="num-row">
+        <span>形态变化 <b>14%</b></span>
+        <span>牺牲换强 <b>6%</b></span>
+      </div>
+      <div class="tag-row">
+        主入池：等级阶梯 + 前置 + 部分随机<br/>
+        资源条：模式 A + B 混合<br/>
+        业内对照：Hades 1 / 2 主流<br/>
+        适合：稳健均衡玩家
+      </div>
+    </div>
+
+    <div class="scheme-card s3">
+      <div class="name">方案三 长尾高取舍</div>
+      <div class="num-row">
+        <span>N <b>42</b></span>
+        <span>M <b>18</b></span>
+        <span>取舍 <b>57%</b></span>
+      </div>
+      <div class="num-row">
+        <span>形态变化 <b>17%</b></span>
+        <span>牺牲换强 <b>14%</b></span>
+      </div>
+      <div class="tag-row">
+        主入池：随机抽取主导 + 等级阀门<br/>
+        资源条：模式 B + C（Sekiro + 仁王）<br/>
+        业内对照：Slay the Spire + Dead Cells<br/>
+        适合：长尾构筑爱好者
+      </div>
+    </div>
+  </div>
+
+  <p style="color: var(--muted); margin-top: 18px; font-size: 12px;">
+    详细 14 节点骨架与每套方案的具体节点定义见
+    <a class="file-link" href="B-design-proposals.html">B-design-proposals.html</a>
+    （含可视化骨架图）和
+    <a class="file-link" href="B-design-proposals.md">B-design-proposals.md</a>。
+  </p>
+</section>
+
+<section id="blockers">
+  <h2>P0 阻断项 — critic 发现的 2 个跨方案盲点</h2>
+  <p style="color: var(--muted); font-size: 12.5px;">
+    这两项必须先决策，才能比较 3 套方案的真实参数。
+  </p>
+
+  <div class="blocker-card">
+    <div class="head"><span class="pill blocker">P0 阻断</span> 决策项 1：Lv5 奥义二选一形态后另一形态的升级节点如何处理？</div>
+    <div style="font-size: 12.5px;">
+      三套方案均将「奥义形态选择（Lv5 二选一）」作为核心节点，A 形态（单体溢出）与 B 形态（范围扇形横扫）。但 3 套方案的 14 节点骨架中均只列出了「奥义形态选定后」的下游节点，<b>完全没有说明被放弃形态的升级节点是否仍计入 N 全池</b>。<br/>
+      <br/>
+      <b>影响</b>：直接决定 N/M/取舍比例的真实值。若两条形态各 3 个专属节点，方案一实际 N 可能从 30 降至 27，三套方案的参数差异可能被严重压缩。<br/>
+      <br/>
+      <b>选项</b>：
+      <ul>
+        <li>A. 两条形态升级节点都计入 N，未选形态节点变为不可选但仍占池</li>
+        <li>B. Lv5 选定后另一形态升级节点彻底从 N 中移除</li>
+        <li>C. 两条形态共享同一组升级节点，根据当前形态自动适配</li>
+        <li>D. 其他</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="blocker-card">
+    <div class="head"><span class="pill blocker">P0 阻断</span> 决策项 2：招架被动化 + 招架反击的 handoff 规则边界</div>
+    <div style="font-size: 12.5px;">
+      三套方案均包含 sw_sa_04（招架变被动触发居合架势 + 反击周围敌人）+ sw_sa_09（招架冰冻反击）叠加。触发路径变为「被动触发居合架势 → 居合反击 → 反击带冰冻」。<br/>
+      <br/>
+      <b>规则冲突</b>：handoff 明确「反击/追击 → 不触发连锁」「area 攻击 → 不触发反击」。此叠加是否属于禁止的「反击触发连锁」？<br/>
+      <br/>
+      <b>选项</b>：
+      <ul>
+        <li>A. 严格解读：sw_sa_04 + sw_sa_09 不可同时存在，需加互锁</li>
+        <li>B. 宽松解读：被动反击 + 反击元素附加不算「反击触发反击」连锁，允许</li>
+        <li>C. 重新定义 handoff 规则边界</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="order">
+  <h2>推荐阅读顺序（最短决策路径）</h2>
+  <div class="read-order">
+    <ol>
+      <li><span class="step">第 1 步</span> 读本 <code>INDEX.html</code>（你现在所在）— 全局视角 <span style="color:var(--muted);">3 分钟</span></li>
+      <li><span class="step">第 2 步</span> 读 <a class="file-link" href="00-SYNTHESIS.md"><code>00-SYNTHESIS.md</code></a> — 综合报告 + 决策项详情 <span style="color:var(--muted);">8 分钟</span></li>
+      <li><span class="step">第 3 步</span> 读 <a class="file-link" href="C-critic-feedback.md"><code>C-critic-feedback.md</code></a> §「跨三套方案的整体盲点」— 2 个 P0 阻断项详情 <span style="color:var(--muted);">5 分钟</span></li>
+      <li><span class="udec">用户决策点 1</span>：决定 Lv5 奥义分叉路径 + 招架反击规则边界</li>
+      <li><span class="step">第 4 步</span> 读 <a class="file-link" href="B-design-proposals.html"><code>B-design-proposals.html</code></a> — 3 套方案可视化对比 <span style="color:var(--muted);">10 分钟</span></li>
+      <li><span class="step">第 5 步</span> 读 <a class="file-link" href="B-design-proposals.md"><code>B-design-proposals.md</code></a> §「三套方案对比表」 — 数值参数对照 <span style="color:var(--muted);">5 分钟</span></li>
+      <li><span class="step">第 6 步</span> 读 <a class="file-link" href="C-critic-feedback.md"><code>C-critic-feedback.md</code></a> 各方案反对意见 — 每套方案的具体风险 <span style="color:var(--muted);">10 分钟</span></li>
+      <li><span class="udec">用户决策点 2</span>：选定主方案（或宣布混合策略）</li>
+      <li><span class="step">第 7 步（选读）</span> <a class="file-link" href="A1-game-data-raw.md"><code>A1</code></a> + <a class="file-link" href="A2-design-survey-raw.md"><code>A2</code></a> — 需要核查具体引用时再看</li>
+    </ol>
+  </div>
+</section>
+
+<section id="sources">
+  <h2>业内参考与失败案例</h2>
+
+  <h3>4 款主要参考（A1）</h3>
+  <table>
+    <thead>
+      <tr><th>游戏</th><th>关键贡献</th><th>形态变化占比</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>鸦卫奇旅 Ravenswatch</td><td>S4 主要参考；日夜机制与角色形态绑定（社区好评）；天赋关键字匹配链式强化</td><td>15%</td></tr>
+      <tr><td>Hades 1</td><td>神恩系统作为形态修改型典范；失败即叙事；社区驱动迭代</td><td>8%</td></tr>
+      <tr><td>Hades 2</td><td>Weapon Aspect 形态变化机制达到业内最高 12%；Hex + Omega Moves 深化机制</td><td>12%</td></tr>
+      <tr><td>枪火重生 Gunfire Reborn</td><td>构筑多样性高评；紧凑节奏 + 即时反馈；Blessing in Disguise 牺牲换强典型例</td><td>5%</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4 个失败案例（A2 §1.3）</h3>
+  <table>
+    <thead>
+      <tr><th>案例</th><th>失败点</th><th>对 S4 的警示</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Diablo III 技能符文（2012）</td><td>无成本重置 = 零取舍密度</td><td>取舍密度不能太低</td></tr>
+      <tr><td>Ravenswatch 早期（2023）</td><td>升级池稀释（80% 纯数值假节点）</td><td>形态变化占比不能太低</td></tr>
+      <tr><td>WoW Dragonflight（2022）</td><td>「必选项」重新出现</td><td>基础能力不能塞进天赋</td></tr>
+      <tr><td>Cyberpunk 2077 1.x（2020）</td><td>数值型假节点泛滥</td><td>叠加层数型节点要警惕</td></tr>
+    </tbody>
+  </table>
+
+  <h3>战棋同语境独立反例（C 阶段补充）</h3>
+  <table>
+    <thead>
+      <tr><th>反例</th><th>影响的方案</th><th>反例核心</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Into the Breach 飞行员技能</td><td>方案一</td><td>紧凑池 + 前置在战棋下产生池稀释</td></tr>
+      <tr><td>Wildermyth 随机技能投诉</td><td>方案二</td><td>战棋下随机选择决策成本高于动作游戏，催生 save-scumming 文化</td></tr>
+      <tr><td>Tactics Ogre Reborn 移除 TP</td><td>方案三</td><td>积累型资源条在现代战棋玩家中存在认知负担争议</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  Ship of Theseus · S4-side-sot · Claude Code Main Agent + Mercury Sub Agents · 2026-05-15
+</footer>
+
+</main>
+</body>
+</html>

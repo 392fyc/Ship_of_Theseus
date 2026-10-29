@@ -1,0 +1,29 @@
+issue_id: "ISSUE-YYYY-MM-DD-<nnn>"
+title: "<short-issue-title>"
+status: "drafted"
+example_artifact: false
+
+source:
+  reporter_type: "<human|main_agent|dev_agent|acceptance_agent|automation>"
+  reporter_id: null
+  detected_at: null
+
+type: "<bug|inconsistency|environment|tooling|design_gap|process_gap>"
+priority: "Sev-2"
+impact_scope:
+  code: false
+  kb: false
+  workflow: false
+  environment: false
+
+description:
+  summary: "<one-line summary>"
+  details: []
+  evidence: []
+
+decision: "schedule_to_milestone"
+linked_task_ids: []
+linked_acceptance_ids: []
+trigger_condition: "<created_by_triage|created_from_acceptance_blocker|created_from_runtime_detection>"
+resolution_status: "open"
+owner: null

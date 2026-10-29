@@ -1,0 +1,106 @@
+task_id: "TASK-GLOBAL-KM-001"
+title: "KB management and multi-agent framework pattern extraction"
+phase_id: null
+milestone_refs: []
+adr_refs:
+  - "ADR-007"
+owner_agent_type: "main_agent"
+priority: "Sev-3"
+status: "drafted"
+example_artifact: false
+acceptance_waiver: true
+acceptance_waiver_reason: "Knowledge extraction deliverable. Human review only."
+
+scope_description: |
+  Summarize the entire KB management + Agent framework building and optimization
+  journey into a replicable pattern. Analyze what worked, what failed, and what
+  was iteratively improved. Package as a shareable methodology.
+
+  Covers:
+  - Registry-and-bundle workflow design and evolution
+  - Multi-agent role separation and governance
+  - Blind acceptance protocol
+  - Issue triage and lifecycle management
+  - Toolchain automation (wrapper scripts, generators, skills)
+  - Session state management (checkpoint protocol, session ledger)
+  - Dashboard and observability
+  - Agent identity and boundary enforcement
+
+read_scope:
+  required_docs:
+    - "02-Development/Task-Registry/README.md"
+    - "02-Development/Task-Registry/acceptance-workflow.md"
+    - "02-Development/Task-Registry/issue-triage-policy.md"
+    - "02-Development/Task-Registry/governance-audit-checklist.md"
+    - "02-Development/Task-Registry/global-index.yaml"
+    - "02-Development/Task-Registry/phase-1-registry.yaml"
+    - "03-AI-Context/Agent-Roles/agent-role-protocol.md"
+    - "03-AI-Context/Agent-Roles/00-main-agent.md"
+    - "00-Index/AI-Handoff-Guide.md"
+    - "00-Index/Dashboard.md"
+    - "02-Development/Templates/"
+    - "02-Development/Scripts/"
+  optional_docs:
+    - "02-Development/Task-Bundles/"
+    - "02-Development/Acceptance-Bundles/"
+    - "02-Development/Issue-Bundles/"
+    - "02-Development/Decisions/"
+    - "03-AI-Context/Research/harness-engineering-survey.md"
+
+linked_artifacts:
+  tasks:
+    - id: "TASK-P1-SKILL-002"
+      relevance: "First real task through full bundle lifecycle"
+    - id: "TASK-P1-TOOL-001"
+      relevance: "MCP single-client lock — multi-agent infra problem"
+    - id: "TASK-P1-TOOL-002"
+      relevance: "MCP lifecycle governance — toolchain reliability"
+    - id: "TASK-P1-TOOL-003"
+      relevance: "Dashboard visualization — observability layer"
+    - id: "TASK-P1-ARCH-001"
+      relevance: "Checkpoint protocol design — session continuity"
+    - id: "TASK-P1-ARCH-002"
+      relevance: "Task-receipt skill — cross-agent handoff standardization"
+  issues:
+    - id: "ISSUE-2026-03-08-002"
+      relevance: "Wrapper script arg forwarding — toolchain fragility"
+    - id: "ISSUE-2026-03-09-001"
+      relevance: "MCP server takeover — P0 interrupt handling example"
+    - id: "ISSUE-2026-03-09-002"
+      relevance: "MCP auto-reconnect loop — spawned from TOOL-001"
+    - id: "ISSUE-2026-03-09-003"
+      relevance: "mcp_logger traceback — P3 archive decision example"
+  protocols:
+    - "agent-role-protocol.md — identity and boundary enforcement"
+    - "acceptance-workflow.md — blind acceptance and registry transitions"
+    - "issue-triage-policy.md — intake, priority, closure sync"
+    - "governance-audit-checklist.md — recurring integrity checks"
+    - "checkpoint.schema.json — machine-readable session state"
+    - "git-sync-procedure.md — dual-repo commit workflow"
+
+definition_of_done:
+  - "Pattern document covering workflow design, agent governance, and toolchain"
+  - "Lessons learned with concrete before/after examples"
+  - "Replicable template set for other projects adopting similar multi-agent KB workflows"
+  - "Identified remaining gaps or improvement opportunities"
+
+required_evidence:
+  - "Published pattern document in KB or external format"
+
+allowed_write_scope:
+  code_paths: []
+  kb_paths:
+    - "02-Development/Task-Bundles/TASK-GLOBAL-KM-001.yaml"
+    - "03-AI-Context/Research/"
+
+handoff_to_acceptance: null
+
+implementation_receipt:
+  implementer: null
+  branch: null
+  summary: []
+  changed_files: []
+  evidence: []
+  docs_updated: []
+  residual_risks: []
+  completed_at: null

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>Stage 2 INDEX — 5-Layer Architecture Design Streams</title>
+<style>
+  :root {
+    --bg: #16161c; --surface: #1f1f28; --surface-2: #2a2a36;
+    --text: #e8e8ec; --muted: #8a8a96; --border: #3a3a48;
+    --L1: #d4af37; --L2: #4a7fb8; --L3: #5fa869; --L4: #9a8aa8; --L5: #c8643c;
+    --warn: #d97a4a; --crit: #d44a4a; --ok: #5fa869;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    margin: 0; padding: 28px 16px 56px; line-height: 1.55;
+  }
+  main { max-width: 1080px; margin: 0 auto; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; }
+  header h1 { margin: 0 0 6px; font-size: 22px; font-weight: 600; }
+  header .meta { color: var(--muted); font-size: 13px; margin: 0; }
+  section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+            padding: 18px 22px; margin-bottom: 18px; }
+  h2 { margin: 0 0 14px; font-size: 17px; font-weight: 600; color: #f0f0f4; }
+  h3 { margin: 14px 0 6px; font-size: 14px; font-weight: 600; color: #d8d8e0; }
+  p, li { font-size: 13.5px; }
+  code { background: var(--surface-2); padding: 1px 6px; border-radius: 3px; font-size: 12.5px; color: #d4af90; }
+  a { color: #a8c0e0; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 8px 0 4px; }
+  .stat-card { background: var(--surface-2); padding: 14px 12px; border-radius: 6px; text-align: center; }
+  .stat-card .num { font-size: 24px; font-weight: 700; color: #f0f0f4; }
+  .stat-card .label { font-size: 11px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .crit-callout {
+    background: rgba(212, 74, 74, 0.10);
+    border-left: 4px solid var(--crit);
+    padding: 14px 18px;
+    border-radius: 0 6px 6px 0;
+    margin: 12px 0;
+  }
+  .crit-callout .head { color: var(--crit); font-size: 13px; font-weight: 600; text-transform: uppercase;
+                        letter-spacing: 0.8px; margin-bottom: 6px; }
+  .crit-callout p { margin: 4px 0; font-size: 13.5px; }
+  .crit-callout b { color: #f0e0e0; }
+
+  .stream-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .stream-card {
+    background: var(--surface-2);
+    border-left: 5px solid;
+    border-radius: 4px;
+    padding: 16px 18px;
+  }
+  .stream-card.D1 { border-color: var(--L1); }
+  .stream-card.D2 { border-color: var(--L2); }
+  .stream-card.D3 { border-color: var(--L3); }
+  .stream-card.D4 { border-color: var(--L4); }
+  .stream-card.D5 { border-color: var(--L5); }
+  .stream-card .id { font-size: 12px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .stream-card.D1 .id { color: var(--L1); }
+  .stream-card.D2 .id { color: var(--L2); }
+  .stream-card.D3 .id { color: var(--L3); }
+  .stream-card.D4 .id { color: var(--L4); }
+  .stream-card.D5 .id { color: var(--L5); }
+  .stream-card h3 { margin: 4px 0 10px; font-size: 15px; }
+  .stream-card ul { padding-left: 18px; margin: 6px 0; }
+  .stream-card li { font-size: 12.5px; margin-bottom: 4px; }
+  .stream-card .links { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 12px; }
+  .stream-card .links a { margin-right: 12px; }
+  .stream-card .stat-bar { display: flex; gap: 14px; font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+
+  .oq-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .oq-table th, .oq-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .oq-table th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .oq-table .pair { font-weight: 600; }
+  .oq-table .crit-flag { color: var(--crit); }
+  .oq-table .warn-flag { color: var(--warn); }
+  .oq-table .ok-flag { color: var(--ok); }
+
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px;
+          background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); margin-right: 4px; }
+  .pill.crit { background: rgba(212, 74, 74, 0.15); color: var(--crit); border-color: var(--crit); }
+  .pill.warn { background: rgba(217, 122, 74, 0.15); color: var(--warn); border-color: var(--warn); }
+  .pill.ok { background: rgba(95, 168, 105, 0.15); color: var(--ok); border-color: var(--ok); }
+
+  .stage3-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .stage3-card { background: var(--surface-2); padding: 14px 16px; border-radius: 6px; border: 1px solid var(--border); }
+  .stage3-card .head { font-size: 11px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stage3-card h3 { margin: 0 0 8px; font-size: 14px; }
+  .stage3-card ul { padding-left: 16px; margin: 4px 0; }
+  .stage3-card li { font-size: 12px; margin-bottom: 3px; }
+
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 28px;
+           border-top: 1px solid var(--border); padding-top: 14px; }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>Stage 2 INDEX — 5-Layer Architecture Design Streams</h1>
+  <p class="meta">S3-side-sot · 2026-05-10 · <span class="pill ok">5/5 streams complete</span> ·
+    parent: <a href="../../Active-Context/architecture-consensus-v2.html">architecture-consensus-v2</a></p>
+</header>
+
+<section>
+  <h2>Stage 2 概览</h2>
+  <div class="stats-row">
+    <div class="stat-card"><div class="num">5/5</div><div class="label">streams</div></div>
+    <div class="stat-card"><div class="num">10</div><div class="label">deliverables</div></div>
+    <div class="stat-card"><div class="num">~340 KB</div><div class="label">total output</div></div>
+    <div class="stat-card"><div class="num">~145k</div><div class="label">tokens spent</div></div>
+    <div class="stat-card"><div class="num">8</div><div class="label">cross-stream OQs</div></div>
+  </div>
+  <p style="margin: 14px 0 0; font-size:12.5px; color: var(--muted);">
+    5 个 Mercury <code>design</code> agent 并行（cross-cwd dogfood，第二次 S3 验证 OK）。
+    每 stream 产 <code>*.md</code> (canonical text) + <code>*.html</code> (visualization with inline SVG)。
+  </p>
+</section>
+
+<section>
+  <h2>Critical Finding</h2>
+  <div class="crit-callout">
+    <div class="head">⚠ D2 prune target 不可达</div>
+    <p><b>consensus 假设</b>: sw_matrix 83 节点 → prune target 30-40 (~50% reduction)</p>
+    <p><b>D2 实测下限</b>: <b>~58-60 nodes</b>。83 中只有 <b>7 个纯 flat stat</b> (8.4%) 可迁 L3,
+      <b>10 个条件触发/sustain/categorical</b> 可迁 L5, 3 个结构槽位真删/重写候选, 其余 60 都是结构性骨架
+      (Bridge Tax 拓扑 / advancement / gauge / active_skill / functional passive)。</p>
+    <p><b>结论</b>: "节点过多 = 简化" 框架部分错误。真复杂度不只是节点数，也是<b>耦合深度</b>。
+      30-40 target 若坚持需<b>牺牲 Bridge Tax 拓扑</b>本身（与 S67 pillar C 主推冲突）。</p>
+    <p><b>给用户决策</b>: (a) 接受 ~58-60 floor + 通过 L3/L5 稀释认知负担；
+      (b) 重新审视 Bridge Tax 拓扑必要性；(c) 进一步剔除 functional passive (designer 风味取舍).
+      留 Stage 3 critic / user 决.</p>
+  </div>
+</section>
+
+<section>
+  <h2>5 Stream 速览</h2>
+  <div class="stream-grid">
+
+    <div class="stream-card D1">
+      <div class="id">D1 · L1 GLOBAL</div>
+      <h3>Global meta unlock pool spec</h3>
+      <div class="stat-bar"><span>~28k tokens</span><span>11 URLs</span><span>3 SVG</span></div>
+      <ul>
+        <li>L1 池 6 大类: Class &amp; Advancement / Rune Pool / Building &amp; Town / Equipment Catalogue / QoL &amp; Economy / Run-Start Loadout</li>
+        <li>复活 = 稀有 <code>revive_token</code>, 单 run ≤1 次, HP 50% + <b>stage -1</b> (有损代价)</li>
+        <li>Run 起始符文 = <b>3 选 1 玩家可选</b>, 稀有度 ≤ uncommon, 占 L5 第 1 格</li>
+        <li>QoL 严格阶数 cap (起始 gold ≤+30, 折扣 ≤-10%, EXP ≤+10%)</li>
+      </ul>
+      <div class="links">
+        <a href="D1-global-meta.html">📊 HTML</a>
+        <a href="D1-global-meta.md">📄 MD</a>
+      </div>
+    </div>
+
+    <div class="stream-card D2">
+      <div class="id">D2 · L2 TALENT</div>
+      <h3>Simplification rules + sw_matrix prune <span class="pill crit">target unreachable</span></h3>
+      <div class="stat-bar"><span>~32k tokens</span><span>83 nodes audited</span><span>3 SVG</span></div>
+      <ul>
+        <li>83 → <b>KEEP 60 / L3 7 / L5 10 / DEL 3</b> (prune floor &gt; consensus 假设)</li>
+        <li>5 强制 L2 type: active_skill / skill_upgrade / advancement / gauge_extend / gauge_core</li>
+        <li>passive 三层决策树: gauge-coupled→L2 / functional→L2 / numeric build-defining→L5 / 否则→L3</li>
+        <li><b>条件触发 + sustain + categorical resist passive 一定归 L5</b> (build 信号 = 符文 archetype)</li>
+      </ul>
+      <div class="links">
+        <a href="D2-talent-simplification.html">📊 HTML</a>
+        <a href="D2-talent-simplification.md">📄 MD</a>
+      </div>
+    </div>
+
+    <div class="stream-card D3">
+      <div class="id">D3 · L3 GROWTH</div>
+      <h3>Character growth + advancement rate table</h3>
+      <div class="stat-bar"><span>~23k tokens</span><span>4 URLs</span><span>3 SVG</span></div>
+      <ul>
+        <li>选 <b>简化 FE Three Houses 加性模型</b> (rejected Engage strict-dominance bug)</li>
+        <li>Advancement delta 强制约束: ≥1 stat ≤0 + total ∈ [+30, +60]</li>
+        <li>Lv30 期望主属 3-8x base, hard cap STR/MAG 80 / HP 300 / DEF·RES 45</li>
+        <li>L5 经济类符文 3 个 hook (EXP × stat-growth × talent-drop), 单 rune ≤+20%</li>
+        <li>提议 schema <code>growth_delta</code> (additive) — D2/D3 联合 OQ</li>
+      </ul>
+      <div class="links">
+        <a href="D3-character-growth.html">📊 HTML</a>
+        <a href="D3-character-growth.md">📄 MD</a>
+      </div>
+    </div>
+
+    <div class="stream-card D4">
+      <div class="id">D4 · L4 EQUIPMENT</div>
+      <h3>Equipment + affix design space</h3>
+      <div class="stat-bar"><span>~26k tokens</span><span>3 URLs</span><span>3 SVG</span></div>
+      <ul>
+        <li>9 武器 (sword/axe/spear/bow/crossbow/tome/staff/dagger/dual_sword) × 4 防具 (light/medium/heavy/shield)</li>
+        <li>4 rarity tier (Common 0 槽 / Uncommon 1 / Rare 2 / Unique fixed) + 5 词缀类</li>
+        <li><b>L4 硬边界</b>: 单词缀 ≤±15% (Rare) / ±20% (Unique), ≤1 触发条件, 禁链式</li>
+        <li>反 farm: 无 reroll workbench, Unique 仅 Boss 池</li>
+        <li>协同模式: 火武器 × 燃烧符文 = "carrier × ecosystem"</li>
+      </ul>
+      <div class="links">
+        <a href="D4-equipment-affix.html">📊 HTML</a>
+        <a href="D4-equipment-affix.md">📄 MD</a>
+      </div>
+    </div>
+
+    <div class="stream-card D5">
+      <div class="id">D5 · L5 RUNES ⭐</div>
+      <h3>6-slot runes system spec</h3>
+      <div class="stat-bar"><span>~36k tokens</span><span>14 URLs</span><span>5 SVG</span></div>
+      <ul>
+        <li><b>6 格硬锁</b> (Hades 16 mutex / Noita 5 / MT 5 都 ≤7; RoR2 = build identity collapse 反例)</li>
+        <li>26 archetype 示例: 经济类 12 (8C/3R/1M) + 流派类 14 (1C/8R/5M)</li>
+        <li>3-tier (Common/Rare/Mythic), Hades 模式 — tier 不变 effect kind, 仅放大数值</li>
+        <li><b>L2/L5 边界</b>: L2 = 解锁基础流派能力 / L5 = 已有流派的 modifier 反转</li>
+        <li>无对应 L2 节点的流派类符文 → UI 灰显失效</li>
+        <li>Town Rune Altar 3 级 (200/400/800G), 跨 class 流派类 ×0.6 fallback</li>
+      </ul>
+      <div class="links">
+        <a href="D5-runes-system.html">📊 HTML</a>
+        <a href="D5-runes-system.md">📄 MD</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2>Cross-Stream Open Questions (Stage 3 Critic 必清)</h2>
+  <table class="oq-table">
+    <thead><tr>
+      <th>OQ</th><th>跨 stream</th><th>问题</th><th>优先级</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td>OQ-1</td>
+        <td class="pair">D1 × D3</td>
+        <td>L1 大类 E +10% EXP × L5 经济类 +20% stat-growth → 复合 ceiling ~37.5%, 仍 horizontal-only?</td>
+        <td><span class="pill crit">crit</span></td>
+      </tr>
+      <tr>
+        <td>OQ-2</td>
+        <td class="pair">D2 × D3</td>
+        <td>JSON schema 命名: <code>growth_delta</code> (additive, D3 提议) vs <code>growth_rates_override</code> (absolute, KB 现有)</td>
+        <td><span class="pill warn">warn</span></td>
+      </tr>
+      <tr>
+        <td>OQ-3</td>
+        <td class="pair">D4 × D1</td>
+        <td>Unique 装备跨 run 解锁 (D1 大类 D Equipment Catalogue) 是否破坏 horizontal-only</td>
+        <td><span class="pill warn">warn</span></td>
+      </tr>
+      <tr>
+        <td>OQ-4</td>
+        <td class="pair">D4 × D2 × D5</td>
+        <td>Elven Archer 近战弓: L2 talent 解锁 (D5 边界规则) vs L5 修饰 vs L4 武器 type 切换 — 三者有重叠</td>
+        <td><span class="pill warn">warn</span></td>
+      </tr>
+      <tr>
+        <td>OQ-5</td>
+        <td class="pair">D5 → D2</td>
+        <td>D5 的 "L2 解锁基础 / L5 修饰已有" 边界规则需 D2 在 prune 决策中执行 — 哪些 behavior modifier passive 迁 L5</td>
+        <td><span class="pill crit">crit</span></td>
+      </tr>
+      <tr>
+        <td>OQ-6</td>
+        <td class="pair">D5 × D1</td>
+        <td>Rune pool 扩展是否走 meta horizontal (D1 大类 B Rune Pool 应已答, Stage 3 reconcile)</td>
+        <td><span class="pill ok">ok</span></td>
+      </tr>
+      <tr>
+        <td>OQ-7</td>
+        <td class="pair">D3 internal</td>
+        <td>Champion +40 advancement 仍缺 negative delta (违强制约束 ≥1 stat ≤0)</td>
+        <td><span class="pill warn">warn</span></td>
+      </tr>
+      <tr>
+        <td>OQ-8</td>
+        <td class="pair">D5 internal</td>
+        <td>跨 class 流派类符文 ×0.6 fallback 合理性 (e.g. 火法符文给 Knight 用) — 需 critic + 模拟</td>
+        <td><span class="pill warn">warn</span></td>
+      </tr>
+      <tr>
+        <td>OQ-9</td>
+        <td class="pair">D2 internal</td>
+        <td>sw_hub8 / sw_pre_saint9 / sw_pre_magic9 三结构槽位最终命运 (拓扑直连 vs 功能重写)</td>
+        <td><span class="pill warn">warn</span></td>
+      </tr>
+      <tr>
+        <td>OQ-10</td>
+        <td class="pair">D2 × D3</td>
+        <td>Soldier baseline 类的功能性 passive 不足问题 (其他 4 v1 职业可能也有)</td>
+        <td><span class="pill warn">warn</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin: 12px 0 0; font-size: 12px; color: var(--muted);">
+    <b style="color:#f0e0e0;">Critical (2)</b>: OQ-1 (horizontal-only ceiling) + OQ-5 (D5→D2 强制执行 boundary).
+    其余 8 是 warn / ok 级.
+  </p>
+</section>
+
+<section>
+  <h2>Stage 3 派发预案 (用户 review 后)</h2>
+  <div class="stage3-grid">
+    <div class="stage3-card">
+      <div class="head">3.1 SYNTHESIS</div>
+      <h3>Mercury <code>design</code></h3>
+      <ul>
+        <li>5 层耦合 spec 整合</li>
+        <li>10 OQ reconcile (尤 OQ-1 + OQ-5)</li>
+        <li>D2 prune floor 决策建议</li>
+        <li>Mage 5 决策点 reframe (consensus v2 视角)</li>
+        <li>run 决策密度模拟 (1 run ~25 决策点估算)</li>
+      </ul>
+    </div>
+    <div class="stage3-card">
+      <div class="head">3.2 CRITIC</div>
+      <h3>Mercury <code>critic</code></h3>
+      <ul>
+        <li>对抗性扫漏洞</li>
+        <li>OQ-1 horizontal-only 复合 ceiling 验证</li>
+        <li>D2 prune floor 是否还能再压</li>
+        <li>跨 class 符文 ×0.6 fallback 平衡</li>
+        <li>找业界反例 (failure cases)</li>
+      </ul>
+    </div>
+    <div class="stage3-card">
+      <div class="head">3.3 ACCEPTANCE</div>
+      <h3>Mercury <code>acceptance</code></h3>
+      <ul>
+        <li>与 GDD §13 design philosophy 一致性</li>
+        <li>与 class-system.md base stat / proficiency 不冲突</li>
+        <li>与 S67 pillar C (locked parts) 一致</li>
+        <li>与 run-loop.md meta horizontal hard rule 一致</li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin: 12px 0 0; font-size: 12.5px; color: var(--muted);">
+    预算 ~60k tokens. 完成后聚合 → KB commit + 推 master + 更新 talent-tree-design.md §4.2 + 在 architecture-consensus-v2.md 加 stage 2/3 link.
+  </p>
+</section>
+
+<section>
+  <h2>用户 Review Checklist</h2>
+  <p style="margin: 0 0 10px; font-size: 13px;">建议 review 顺序（time-budget ~20 min 浏览器扫读）:</p>
+  <ol style="font-size:13px;">
+    <li><a href="D2-talent-simplification.html"><b>D2</b></a> 优先 — 含 critical finding (prune floor)，决定 Stage 3 走向</li>
+    <li><a href="D5-runes-system.html"><b>D5 ⭐</b></a> — 新概念，6 格 + 26 符文示例 + 业内 reference 最厚</li>
+    <li><a href="D1-global-meta.html">D1</a> · <a href="D3-character-growth.html">D3</a> · <a href="D4-equipment-affix.html">D4</a> 平行 review</li>
+    <li>本 INDEX 顶部 critical callout + cross-stream OQ 表 — 5 分钟快速扫</li>
+  </ol>
+  <p style="margin: 10px 0 0; font-size: 12.5px; color: var(--muted);">
+    Review 完反馈格式建议: <code>per-stream: accept / refine / reject + 关注的 OQ 编号</code>. Stage 3 critic 会聚焦你点的 OQ.
+  </p>
+</section>
+
+<footer>
+  Stage 2 complete · 5/5 streams · 10 deliverables · ~340 KB · Generated 2026-05-10 S3-side-sot
+</footer>
+
+</main>
+</body>
+</html>
