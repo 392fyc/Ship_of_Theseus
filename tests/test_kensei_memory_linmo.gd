@@ -104,7 +104,8 @@ func _test_data(dl: Node) -> void:
 	_eq("照做：斩击系、拔刀系，50%", [linmo.mimic.identities, int(linmo.mimic.damage_pct)],
 		[["kensei_zhanji", "kensei_badao"], 50])
 	var ying: Dictionary = dl.summons.get("kensei_ying", {})
-	_eq("影：4 个伤害包、第 3 个主人回合", [int(ying.illusion.hits_to_vanish), int(ying.illusion.owner_turns)], [4, 3])
+	_eq("影：生命 4、每包扣 1、第 3 个主人回合",
+		[int(ying.base_stats.HP), int(ying.illusion.damage_per_hit), int(ying.illusion.owner_turns)], [4, 1, 3])
 	_check("影不在职业表、也不在敌人表", not dl.classes.has("kensei_ying") and not dl.enemies.has("kensei_ying"))
 
 
@@ -166,11 +167,12 @@ func _test_ying_rules(tm: Node, ks: Unit, ying: Unit, e2: Unit) -> void:
 	_check("敌人对影的攻击必定命中", bool(ctx.get("guaranteed_hit", false)))
 	_check("友方关系不包括影", not tm._matches_target_relation(ks, ying, "ally"))
 	_check("敌方关系包括影（敌人可以打它）", tm._matches_target_relation(e2, ying, "enemy"))
-	var hp_before: int = ying.stats.hp
+	_eq("影的生命 4（= 能承受的次数）", ying.stats.hp, 4)
+	var preview: Dictionary = DamageCalculator.preview_attack(e2, ying, ctx)
+	_eq("预告对影显示每包 1 点", int(preview.get("damage", 0)), 1)
 	ying.take_damage(50, "physical")
-	_eq("伤害包不减生命", ying.stats.hp, hp_before)
-	_eq("计 1 次：还剩 3", ying._illusion_hits_left, 3)
-	ying._illusion_hits_left = 4
+	_eq("一个伤害包只扣 1 点生命：还剩 3", ying.stats.hp, 3)
+	ying.stats.hp = 4
 
 
 # ── ④ 颠倒 ───────────────────────────────────────────
@@ -329,6 +331,7 @@ func _test_hits_vanish(tm: Node, ks: Unit, e2: Unit) -> void:
 		e2.reset_action_resources()
 		tm._execute_attack_action(GameAction.make_attack(e2, ying))
 	_check("3 次后仍在（敌人攻击必定命中，闪避再高也计数）", is_instance_valid(ying) and ying.stats.is_alive())
+	_eq("3 次后生命剩 1", ying.stats.hp, 1)
 	e2.reset_action_resources()
 	tm._execute_attack_action(GameAction.make_attack(e2, ying))
 	_check("第 4 次后消失", not tm.units.has(ying))
