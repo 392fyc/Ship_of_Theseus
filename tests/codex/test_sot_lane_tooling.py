@@ -790,7 +790,16 @@ def test_worktree_ignores_a_retired_kb_root_and_rejects_the_kb_repository(sandbo
             script_of(ship, "sot-worktree.ps1"), ship, "-Action", action, "-Repository", "kb",
             "-RootsFile", roots, "-IgnoreEnvironment", check=False,
         )
+        output = rejected.stdout + rejected.stderr
         assert rejected.returncode != 0
+        assert ("ValidateSet" in output or "does not belong to the set" in output), output
+
+    plan = json.loads(ps(
+        script_of(ship, "sot-worktree.ps1"), ship, "-Action", "Create", "-Repository", "ship", "-Task", "x",
+        "-Branch", "task/x", "-BaseRef", "refs/remotes/origin/develop", "-RootsFile", roots,
+        "-IgnoreEnvironment", "-DryRun",
+    ).stdout)
+    assert plan["status"] == "dry-run" and "kb_root" not in plan["local_roots_content"]
 
 
 def test_sync_authorizes_through_environment_and_warns_on_override(sandbox, trio) -> None:

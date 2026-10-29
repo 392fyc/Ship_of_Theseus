@@ -10,7 +10,7 @@
     .worktrees/<task>/         设计库任务树
 ```
 
-`.worktrees/` 必须被所在仓库的 Git 忽略（`/.worktrees/`），否则 `Create` 拒绝创建。KB 是游戏仓的 `docs/`（Obsidian vault）：Obsidian 只打开主工作树的 `docs/`，任务树中的 `docs/` 随任务修改，不另开 vault。
+`.worktrees/` 必须被所在仓库的 Git 忽略（`/.worktrees/`），否则 `Create` 拒绝创建。KB 是游戏仓的 `docs/`（Obsidian vault）：Obsidian 只打开主工作树的 `docs/`，任务树中的 `docs/` 随任务修改，不另开 vault。主工作树的 `.handoff-config` 不再设置 `kb_dir`，交接文档落在被忽略的 `<主工作树>/.handoff/`。
 
 任务工作树不能用父目录或 `../<另一个仓库>` 猜测跨仓位置。先解析环境变量，再回退到当前游戏工作区被忽略的 `.codex/project/sot-roots.local.toml`。若环境仍指向旧位置，应修正进程环境或重启客户端，不能因旧路径不存在而猜另一个位置。
 

@@ -13,14 +13,14 @@ understand current project progress, then continue with: [specific task]
 ## Design Discussion - Write to Doc
 ```
 We just discussed and confirmed the following: [summary]
-Please use the patch_content tool to organize the above conclusions and write them
-into the [section name] section of `01-Game-Design/[document-path].md` in Obsidian.
+Please organize the above conclusions and write them into the [section name] section
+of `docs/01-Game-Design/[document-path].md` in the task worktree (see sot-kb-write).
 ```
 
 ## Session End - Update Progress
 ```
-This session is about to end. Please use the patch_content tool to update
-`03-AI-Context/Active-Context/current-session.md`,
+This session is about to end. Please update
+`docs/03-AI-Context/Active-Context/current-session.md` in the task worktree,
 recording today's progress, confirmed decisions, and next actions.
 ```
 

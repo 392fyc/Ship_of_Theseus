@@ -34,6 +34,4 @@
 /tools/ci/*.txt text eol=lf
 
 # docs/ is the Obsidian vault (formerly ShipOfTheseus-KB); keep its text LF like the old vault.
-/docs/**/*.md text eol=lf
-/docs/**/*.json text eol=lf
-/docs/**/*.mermaid text eol=lf
+/docs/** text=auto eol=lf

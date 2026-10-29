@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Project-level wrappers resolve the KB via SOT_KB_ROOT, falling back to the vault root two levels up (the game repository's docs/ since the KB moved there). Shared legacy generators are optional; current workflow enters through the game repository AGENTS.md. See agent-runtime-layout.md for the layout.
+Project-level wrappers use the vault root two levels up, which is the game repository's docs/ (SOT_KB_ROOT is retired). Shared legacy generators are optional; current workflow enters through the game repository AGENTS.md. See agent-runtime-layout.md for the layout.
 
 ## Wrapper Files
 
