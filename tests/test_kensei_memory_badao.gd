@@ -108,7 +108,7 @@ func _test_data(dl: Node) -> void:
 	var h: Dictionary = dl.skills["kensei_huitian"]
 	_eq("回天 迅捷、冷却 4", [str(h.action_cost), int(h.cooldown)], ["swift", 4])
 	_eq("回天 消耗 2 印记 10 剑气", [int(h.mark_cost), int(h.qi_cost)], [2, 10])
-	_eq("回天 每名敌人 1.5%", float(h.shield_gain.max_hp_pct_per_enemy), 1.5)
+	_eq("回天 每名敌人 5%", float(h.shield_gain.max_hp_pct_per_enemy), 5.0)
 	var b: Dictionary = dl.skills["kensei_batian"]
 	_eq("霸天 两条伤害条目", (b.damage_entries as Array).size(), 2)
 	_eq("霸天 消耗 3 印记 20 剑气", [int(b.mark_cost), int(b.qi_cost)], [3, 20])
@@ -275,9 +275,9 @@ func _test_huitian(tm: Node, ks: Unit, enemies: Dictionary) -> void:
 	_set_marks(ks, 2)
 	ks.set_sword_qi(10)
 	_eq("周围 2 名敌人时可用", tm._build_skill_entry(ks, "kensei_huitian").get("available"), true)
-	var expected: int = ceili(float(ks.stats.max_hp) * 1.5 / 100.0 * 2.0)
+	var expected: int = ceili(float(ks.stats.max_hp) * 5.0 / 100.0 * 2.0)
 	_cast(tm, ks, "kensei_huitian", ks.grid_position, ks)
-	_eq("护盾 = ceil(最大生命 × 1.5% × 2)", ks.shield, expected)
+	_eq("护盾 = ceil(最大生命 × 5% × 2)", ks.shield, expected)
 	_check("前提：护盾大于 0", ks.shield > 0)
 	_eq("消耗 2 印记", ks.get_mark_count(), 0)
 	_eq("消耗 10 剑气", ks.sword_qi, 0)
