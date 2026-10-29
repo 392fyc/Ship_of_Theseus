@@ -1,0 +1,57 @@
+{
+  "id": "kensei_yijue",
+  "upgrade_of": "kensei_zhanji",
+  "target_mode": "单位",
+  "name": "连斩",
+  "damage_type": "physical",
+  "range": {
+    "type": "diamond",
+    "min": 1,
+    "max": 1
+  },
+  "area": {
+    "type": "single",
+    "size": 0
+  },
+  "attack_type": "melee",
+  "cooldown": 0,
+  "action_cost": "standard",
+  "tags": [
+    "melee",
+    "sword_qi",
+    "mark"
+  ],
+  "hit_bonus": 0,
+  "timing_constraint": "any",
+  "effects": [],
+  "qi_cost": 0,
+  "qi_gain_on_hit": 0,
+  "qi_gain_on_kill": 0,
+  "qi_gain_after_damage": 10,
+  "mark_gain": 0,
+  "mark_cost": 0,
+  "requires_marks": 0,
+  "guaranteed_crit": false,
+  "guaranteed_hit": false,
+  "mark_gain_after_damage": 1,
+  "damage_entries": [
+    {
+      "applies_when": "",
+      "base_attribute": "默认",
+      "coefficient": 0.4,
+      "crit_mode": "正常",
+      "crit_multiplier": 1.0,
+      "damage_type": null,
+      "hit_bonus": 0,
+      "hit_mode": "正常",
+      "placeholder": false,
+      "power": 1,
+      "segment_hit_decay": 15,
+      "segments": 3,
+      "sort": 0
+    }
+  ],
+  "description": "对目标连续斩击，最多 3 段，每段造成物理伤害（威力 +1，系数 0.4）。第一段正常判定命中，此后每段命中比前一段低 15 点；任何一段未命中或目标倒下，连斩即停止。每段命中并造成伤害后获得 10 点剑气；第一段命中并造成伤害后，随机获得一枚当前未持有的印记。",
+  "_engine_note": "多段由伤害条目 segments / segment_hit_decay 驱动（TacticalManager._resolve_hostile_segment 逐段结算）：第 n 段命中 = 未截断命中 − 15×(n−1)，再按 1%–100% 处理；其他效果给的必定命中只作用于第一段；每段各自分发命中、暴击、造成伤害事件（R1.10）；未命中或目标倒下即停，已结算的段保留（R1.11）。qi_gain_after_damage 每段命中且伤害 > 0 时给；mark_gain_after_damage 只在第一段结算。副手追加整次只结算一次，在全部段之后。",
+  "_mirror": "设计库镜像字段：name / damage_entries / 射程 / 范围 / 冷却 / 行动消耗 / 剑气与印记数值 / upgrade_of 来自设计库仓 snapshots/skills.json @ 762393b（kensei_yijue）。伤害只读 damage_entries（R1.1 / R1.7）；power 字段不写。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。"
+}

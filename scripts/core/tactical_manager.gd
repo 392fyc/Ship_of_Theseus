@@ -1039,12 +1039,28 @@ func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 		entry["reason"] = "印记不足（需要 %d 个，当前 %d）" % [requires_marks, unit.get_mark_count()]
 		return entry
 	if bool(skill_data.get("requires_enemy_in_area", false)) \
-			and _get_units_in_skill_area(unit, skill_data,
-				_compute_skill_area_cells(unit, skill_data, unit.grid_position, Vector2i.ZERO)).is_empty():
+			and not _has_enemy_in_required_area(unit, skill_data):
 		entry["reason"] = "范围内没有敌人"
 		return entry
 	entry["available"] = true
 	return entry
+
+
+## 「范围内至少有一名敌人」是否成立。以自身为中心的技能（拔刀）看自身周围；
+## 直线射程的方向型技能（裂空「前方直线 3 格」）只要任一方向的范围内有敌人即可。
+func _has_enemy_in_required_area(unit: Unit, skill_data: Dictionary) -> bool:
+	var range_data: Dictionary = skill_data.get("range", {})
+	if str(range_data.get("type", "")) != "line":
+		return not _get_units_in_skill_area(unit, skill_data,
+			_compute_skill_area_cells(unit, skill_data, unit.grid_position, Vector2i.ZERO)).is_empty()
+	for direction: Vector2i in RangeCalculator.get_line_directions(
+			grid, unit.grid_position, range_data):
+		for target_pos: Vector2i in RangeCalculator.calculate_cells(
+				grid, unit.grid_position, range_data, direction):
+			if not _get_units_in_skill_area(unit, skill_data,
+					_compute_skill_area_cells(unit, skill_data, target_pos, direction)).is_empty():
+				return true
+	return false
 
 
 ## 技能 JSON 的 slot_swap_requires（门槛字典）；没写时为空字典。
@@ -1817,6 +1833,11 @@ func _execute_skill_action(action: GameAction) -> bool:
 		user, skill_data, area_cells)
 	if not _is_ground_target_skill(skill_data) and target_units.is_empty():
 		return false
+	# 「范围内至少有一名敌人才能使用」（拔刀、裂空）：选格子的技能也在扣消耗前拦截。
+	if bool(skill_data.get("requires_enemy_in_area", false)) and target_units.is_empty():
+		return false
+	if str(skill_data.get("target_order", "")) == "near_to_far":
+		_sort_units_near_to_far(user.grid_position, target_units)
 
 	# 位移技能落点二次校验（双保险）：消耗资源前拦截无效落点 → 零消耗。
 	if bool(skill_data.get("displacement", false)) \
@@ -1887,6 +1908,10 @@ func _execute_skill_action(action: GameAction) -> bool:
 
 	# 伤害结算完成后才扣印记（修复 P0-②：使拔刀吃到自身消耗的势加成）。
 	_spend_skill_marks(user, mark_cost)
+	# 「全部目标结算完毕后，再获得 N 点剑气」（设计库 kensei_liekong）：不以命中为条件。
+	var qi_after_resolve: int = int(skill_data.get("qi_gain_after_resolve", 0))
+	if qi_after_resolve > 0:
+		user.gain_sword_qi(qi_after_resolve, "after_resolve:" + skill_id)
 	# 「结算后随机获得一枚印记」（设计库 kensei_juhe）：不以命中或伤害为条件。
 	for _i: int in range(int(skill_data.get("mark_gain_after_resolve", 0))):
 		var resolved_mark: String = user.gain_random_mark()
@@ -1898,6 +1923,17 @@ func _execute_skill_action(action: GameAction) -> bool:
 		_apply_skill_displacement(user, target_pos)
 	_emit_dashboard_state_changed()
 	return true
+
+
+## 目标按与使用者的曼哈顿距离由近到远排序（裂空 rules：逐个结算，近的先结算）。
+## 距离按单位的锚点格算；引擎目前只有单格单位，多格单位的口径（取最近占据格）未承载（Q7）。
+func _sort_units_near_to_far(origin: Vector2i, target_units: Array[Unit]) -> void:
+	target_units.sort_custom(func(a: Unit, b: Unit) -> bool:
+		return _manhattan(origin, a.grid_position) < _manhattan(origin, b.grid_position))
+
+
+func _manhattan(a: Vector2i, b: Vector2i) -> int:
+	return absi(a.x - b.x) + absi(a.y - b.y)
 
 
 ## 在伤害结算之后扣减技能的印记消耗（修复 P0-②；mark_cost<=0 时空操作）。
@@ -1936,7 +1972,6 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 		data: Dictionary) -> void:
 	attacker.show_attack_contact(defender.grid_position)
 	var action_data: Dictionary = _build_hostile_action_context(attacker, defender, data)
-	var damage_type: String = str(action_data.get("damage_type", "physical"))
 
 	# ── 天赋：动作级事件「执行攻击动作时」（Wave 2）────────────────
 	# 这里比「命中时」还早——在命中判定之前，与 A2 要开的真 on-hit 钩子不是同一处。
@@ -1949,6 +1984,68 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 	_dispatch_talents(attacker, "执行攻击动作时", action_ctx)
 
 	defender.handle_attacked()
+
+	# 多段攻击（伤害条目 segments > 1，例如〔连斩〕）：每段独立判定命中、暴击与伤害，
+	# 各自分发命中与造成伤害事件（R1.10）；任一段未命中或目标倒下即停（R1.11），
+	# 已结算的段照常保留。动作级事件（上面的「执行攻击动作时」）与副手追加整次只结算一次。
+	# 单段攻击不复制 action_data，与改动前完全相同。
+	var segments: int = maxi(1, int(action_data.get("segments", 1)))
+	var segment_data: Dictionary = action_data
+	# 「暴击时」等事件写进 action_ctx 的增伤只属于那一段，下一段从动作开始时的值重新算。
+	var action_more_damage: float = float(action_ctx.get("more_damage_multiplier", 1.0))
+	for segment_index: int in range(segments):
+		if segments > 1:
+			segment_data = _build_segment_action_data(action_data, segment_index)
+			action_ctx["more_damage_multiplier"] = action_more_damage
+		var segment_result: DamageCalculator.AttackResult = _resolve_hostile_segment(
+			attacker, defender, segment_data, data, action_ctx, segment_index)
+		if not segment_result.hit or not defender.stats.is_alive():
+			break
+
+	# 主手全部副作用结算后，再按队列执行副手追加。
+	# 递归追加进入同一队列，并受每次攻击动作的总次数护栏限制。
+	var queue: Array = (action_ctx["pending_offhand"] as Array).duplicate()
+	var executed: int = 0
+	while not queue.is_empty():
+		if executed >= MAX_OFFHAND_FOLLOWUPS_PER_ACTION:
+			push_warning("[Offhand] %s 一次攻击动作内的副手追加已达上限 %d 次，剩余 %d 次丢弃——检查递归追加的概率与衰减参数"
+				% [attacker.unit_name, MAX_OFFHAND_FOLLOWUPS_PER_ACTION, queue.size()])
+			break
+		var followup: Variant = queue.pop_front()
+		if not followup is Dictionary:
+			continue
+		executed += 1
+		for spawned: Variant in _execute_offhand_followup(
+				attacker, defender, segment_data, followup, action_ctx):
+			queue.append(spawned)
+
+	# 自动反击已整体移除（2026-07-11 用户裁决）：未来以天赋/敌方特性形式回归，
+	# 伤害与特效将与天赋/特性深度绑定，不预设反击框架。
+
+
+## 多段攻击第 segment_index 段（从 0 起）的动作数据。第 n 段（n 从 1 起）命中减 decay×(n−1)，
+## 在未截断命中上扣除后再按通用上下限处理（连斩 rules）；其他效果给的必定命中只作用于第一段，
+## 伤害条目自己声明的「必定命中」（entry_guaranteed_hit）每段都保留；
+## 「第一段命中并造成伤害后」的印记（mark_gain_after_damage）只在第一段结算。
+func _build_segment_action_data(action_data: Dictionary, segment_index: int) -> Dictionary:
+	var segment_data: Dictionary = action_data.duplicate(true)
+	if segment_index <= 0:
+		return segment_data
+	segment_data["segment_hit_penalty"] = \
+		int(action_data.get("segment_hit_decay", 0)) * segment_index
+	segment_data["guaranteed_hit"] = bool(action_data.get("entry_guaranteed_hit", false))
+	segment_data["mark_gain_after_damage"] = 0
+	# 调试确定性开关仍对每段生效（headless 用例需要逐段可控）。
+	_apply_debug_determinism(segment_data)
+	return segment_data
+
+
+## 一个直接伤害段的完整结算：掷命中与暴击 → 命中、暴击事件 → 防御侧反应 → 伤害 →
+## 状态、资源、词条与 after-damage 事件。返回本段结果，调用方据此决定是否继续下一段。
+func _resolve_hostile_segment(attacker: Unit, defender: Unit, action_data: Dictionary,
+		data: Dictionary, action_ctx: Dictionary,
+		segment_index: int) -> DamageCalculator.AttackResult:
+	var damage_type: String = str(action_data.get("damage_type", "physical"))
 
 	# 命中与暴击事件在伤害数值结算前分发，可修改本次伤害参数，
 	# 但不得回溯改写已经掷出的 hit / crit。剑气回荡只强化随后的一次副手攻击。
@@ -1973,10 +2070,10 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 	var combat_text_anchor := defender.get_combat_text_anchor_world(-50.0)
 	if result.hit:
 		DamagePopup.spawn_at_anchor(popup_layer, combat_text_anchor,
-			result.damage, damage_type, result.crit)
+			result.damage, damage_type, result.crit, segment_index)
 		defender.take_damage(result.damage, damage_type)
 	else:
-		DamagePopup.spawn_miss_at_anchor(popup_layer, combat_text_anchor)
+		DamagePopup.spawn_miss_at_anchor(popup_layer, combat_text_anchor, segment_index)
 
 	if result.hit and defender.stats.is_alive():
 		_apply_hostile_skill_effects(attacker, defender, data)
@@ -2012,26 +2109,7 @@ func _execute_hostile_action(attacker: Unit, defender: Unit,
 			_dispatch_talents(attacker, "造成伤害时", talent_ctx)
 	if result.defender_died:
 		_dispatch_talents(attacker, "击杀时", talent_ctx)
-
-	# 主手全部副作用结算后，再按队列执行副手追加。
-	# 递归追加进入同一队列，并受每次攻击动作的总次数护栏限制。
-	var queue: Array = (action_ctx["pending_offhand"] as Array).duplicate()
-	var executed: int = 0
-	while not queue.is_empty():
-		if executed >= MAX_OFFHAND_FOLLOWUPS_PER_ACTION:
-			push_warning("[Offhand] %s 一次攻击动作内的副手追加已达上限 %d 次，剩余 %d 次丢弃——检查递归追加的概率与衰减参数"
-				% [attacker.unit_name, MAX_OFFHAND_FOLLOWUPS_PER_ACTION, queue.size()])
-			break
-		var followup: Variant = queue.pop_front()
-		if not followup is Dictionary:
-			continue
-		executed += 1
-		for spawned: Variant in _execute_offhand_followup(
-				attacker, defender, action_data, followup, action_ctx):
-			queue.append(spawned)
-
-	# 自动反击已整体移除（2026-07-11 用户裁决）：未来以天赋/敌方特性形式回归，
-	# 伤害与特效将与天赋/特性深度绑定，不预设反击框架。
+	return result
 
 
 func _is_waiting_for_line_direction() -> bool:
@@ -2468,6 +2546,7 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		"qi_gain_on_kill": int(skill_data.get("qi_gain_on_kill", 0)),
 		"mark_gain": int(skill_data.get("mark_gain", 0)),
 		"mark_gain_after_damage": int(skill_data.get("mark_gain_after_damage", 0)),
+		"qi_gain_after_damage": int(skill_data.get("qi_gain_after_damage", 0)),
 		"ki_on_kill_cd_reduction": int(skill_data.get("ki_on_kill_cd_reduction", 0)),
 	}
 	var damage_entry: Dictionary = _select_damage_entry(skill_data)
@@ -2526,11 +2605,15 @@ func _apply_damage_entry(payload: Dictionary, skill_data: Dictionary,
 			payload.erase("base_attribute")
 	# 命中、暴击方式与暴击倍率以条目为准，覆盖技能 JSON 里同名旧字段（如旧居合的必定暴击）。
 	payload["guaranteed_hit"] = str(entry.get("hit_mode", "正常")) == "必定命中"
+	# 条目自身的必定命中单独记下：多段攻击的后续段只去掉其他效果给的必定命中。
+	payload["entry_guaranteed_hit"] = payload["guaranteed_hit"]
 	var crit_mode: String = str(entry.get("crit_mode", "正常"))
 	payload["guaranteed_crit"] = crit_mode == "必定暴击"
 	payload["disable_crit"] = crit_mode == "不可暴击"
 	payload["crit_damage_bonus"] = 0.0
 	payload["crit_damage_mult"] = float(entry.get("crit_multiplier", 1.0))
+	payload["segments"] = maxi(1, int(entry.get("segments", 1)))
+	payload["segment_hit_decay"] = int(entry.get("segment_hit_decay", 0))
 
 
 ## 设计库伤害类型中文值 → 运行时键；已是运行时键时原样返回，无法识别返回空串。
@@ -2618,9 +2701,6 @@ func _is_supported_runtime_skill(skill_data: Dictionary) -> bool:
 		return true
 	var damage_entry: Dictionary = _select_damage_entry(skill_data)
 	if not damage_entry.is_empty():
-		# 多段（segments > 1，连斩）尚未承载，留到连斩 PR。
-		if int(damage_entry.get("segments", 1)) > 1:
-			return false
 		return _damage_entry_type(skill_data, damage_entry) != ""
 	var damage_type: String = str(skill_data.get("damage_type", ""))
 	if damage_type not in ["physical", "magical", "pure", "hybrid"]:
@@ -2875,6 +2955,11 @@ func _apply_sword_qi_on_hit(attacker: Unit,
 		attacker.gain_sword_qi(qi_on_hit, "on_hit:" + str(action_data.get("skill_id", "")))
 		print("[SwordQi] %s +%d qi on hit → %d" % [
 			attacker.unit_name, qi_on_hit, attacker.sword_qi])
+	# 命中并造成伤害后得剑气（设计库 kensei_yijue：每段命中并造成伤害后 +10）。
+	var qi_after_damage: int = int(action_data.get("qi_gain_after_damage", 0))
+	if qi_after_damage > 0 and result.damage > 0:
+		attacker.gain_sword_qi(qi_after_damage,
+			"after_damage:" + str(action_data.get("skill_id", "")))
 	# 命中后得印记（如居合 mark_gain=1，命中即结算）
 	var mark_gain: int = int(action_data.get("mark_gain", 0))
 	if mark_gain > 0:

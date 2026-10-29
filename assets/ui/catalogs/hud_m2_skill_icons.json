@@ -9,6 +9,8 @@
   "kensei_yishan": "res://assets/prototype/hud_m2/skill-yishan.png",
   "kensei_zhaojia": "res://assets/prototype/hud_m2/skill-zhaojia.png",
   "kensei_juhe": "res://assets/prototype/hud_m2/skill-juhe.png",
+  "kensei_liekong": "res://assets/prototype/hud_m2/skill-zhanji.png",
+  "kensei_yijue": "res://assets/prototype/hud_m2/skill-zhanji.png",
   "_class_overrides": {
     "myrmidon": {
       "myrmidon_xinyan": "res://assets/ui/skills/myrmidon/xinyan.png",
