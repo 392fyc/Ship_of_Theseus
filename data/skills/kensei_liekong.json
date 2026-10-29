@@ -1,0 +1,60 @@
+{
+  "id": "kensei_liekong",
+  "upgrade_of": "kensei_zhanji",
+  "target_mode": "格子",
+  "name": "裂空",
+  "damage_type": "physical",
+  "range": {
+    "type": "line",
+    "min": 1,
+    "max": 1
+  },
+  "area": {
+    "type": "line",
+    "size": 2
+  },
+  "attack_type": "area",
+  "cooldown": 0,
+  "action_cost": "standard",
+  "tags": [
+    "melee",
+    "sword_qi",
+    "mark",
+    "area"
+  ],
+  "hit_bonus": 0,
+  "timing_constraint": "any",
+  "effects": [],
+  "qi_cost": 0,
+  "qi_gain_on_hit": 10,
+  "qi_gain_on_kill": 0,
+  "qi_gain_after_resolve": 5,
+  "mark_gain": 0,
+  "mark_cost": 0,
+  "requires_marks": 0,
+  "guaranteed_crit": false,
+  "guaranteed_hit": false,
+  "mark_gain_after_resolve": 1,
+  "requires_enemy_in_area": true,
+  "target_order": "near_to_far",
+  "damage_entries": [
+    {
+      "applies_when": "",
+      "base_attribute": "默认",
+      "coefficient": 0.9,
+      "crit_mode": "正常",
+      "crit_multiplier": 1.0,
+      "damage_type": null,
+      "hit_bonus": 0,
+      "hit_mode": "正常",
+      "placeholder": false,
+      "power": 1,
+      "segment_hit_decay": 0,
+      "segments": 1,
+      "sort": 0
+    }
+  ],
+  "description": "前方直线 3 格内至少有一名敌人时才能使用。对范围内的每名敌人造成物理伤害（威力 +1，系数 0.9），由近到远逐个结算。每命中一名敌人，获得 10 点剑气；全部目标结算完毕后，再获得 5 点剑气。使用后，随机获得一枚当前未持有的印记。",
+  "_engine_note": "设计库 range 直线 1–1、area 直线 3：引擎的 area.line 从所选格起算、size 是所选格之后再延伸的格数，所以「前方直线 3 格」写成 range line 1–1（选方向后点相邻格）+ area line size 2，覆盖距离 1、2、3 三格。target_order=near_to_far：目标按与自身的距离由近到远逐个结算（rules）。qi_gain_on_hit 只来自主手伤害，副手追加不给（rules）；qi_gain_after_resolve 在全部目标与副手追加结算完之后给，不以命中为条件；mark_gain_after_resolve 每次使用得一枚，与命中无关。requires_enemy_in_area：任一方向的直线内有敌人才可用，执行时范围内无敌人则拒绝且不扣消耗。",
+  "_mirror": "设计库镜像字段：name / damage_entries / 射程 / 范围 / 冷却 / 行动消耗 / 剑气与印记数值 / upgrade_of 来自设计库仓 snapshots/skills.json @ 762393b（kensei_liekong）。伤害只读 damage_entries（R1.1 / R1.7）；power 字段不写。引擎侧不改镜像字段，要改回设计库改，重导快照后按新提交同步。"
+}
