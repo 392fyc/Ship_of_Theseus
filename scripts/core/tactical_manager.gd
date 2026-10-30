@@ -2610,7 +2610,7 @@ func _note_reaction(attacker: Unit, defender: Unit, data: Dictionary) -> void:
 ## 多段攻击第 segment_index 段（从 0 起）的动作数据。第 n 段（n 从 1 起）命中减 decay×(n−1)，
 ## 在未截断命中上扣除后再按通用上下限处理（连斩 rules）；其他效果给的必定命中只作用于第一段，
 ## 伤害条目自己声明的「必定命中」（entry_guaranteed_hit）每段都保留；
-## 「第一段命中并造成伤害后」的印记（mark_gain_after_damage）只在第一段结算。
+## 「第一段命中后、伤害结算后」的印记（mark_gain_after_damage）只在第一段结算。
 func _build_segment_action_data(action_data: Dictionary, segment_index: int) -> Dictionary:
 	var segment_data: Dictionary = action_data.duplicate(true)
 	if segment_index <= 0:
@@ -3740,8 +3740,8 @@ func _apply_sword_qi_on_hit(attacker: Unit,
 	if bool(action_data.get("mark_fill_on_hit", false)):
 		while attacker.gain_random_mark() != "":
 			pass
-	# 命中并造成伤害后得剑气（设计库 kensei_yijue：每段命中并造成伤害后 +10）。
-	# 「造成伤害后」指伤害结算之后的时点：命中即给，伤害为 0 也给（用户 2026-10-30 裁决）。
+	# 命中后、伤害结算后得剑气（设计库 kensei_yijue：每段命中后 +10）。
+	# 伤害为 0 也给（用户 2026-10-30 裁决）。
 	var qi_after_damage: int = int(action_data.get("qi_gain_after_damage", 0))
 	if qi_after_damage > 0:
 		attacker.gain_sword_qi(qi_after_damage,
