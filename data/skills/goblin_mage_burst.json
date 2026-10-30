@@ -1,0 +1,22 @@
+{
+  "id": "goblin_mage_burst",
+  "target_mode": "格子",
+  "name": "爆裂法球",
+  "damage_type": "magical",
+  "power": 80,
+  "hit_bonus": 0,
+  "range": { "type": "diamond", "min": 1, "max": 2 },
+  "area": { "type": "diamond", "size": 2 },
+  "attack_type": "area",
+  "cooldown": 2,
+  "action_cost": "standard",
+  "timing_constraint": "any",
+  "effects": [],
+  "tags": [
+    "magic",
+    "area",
+    "enemy"
+  ],
+  "description": "在 1–2 格内选一格，对以它为中心、半径 2 的菱形范围内的敌人造成魔法伤害。",
+  "_note": "[占位] 用户 2026-10-31 定射程与范围；威力与冷却由 Claude 推定。"
+}
