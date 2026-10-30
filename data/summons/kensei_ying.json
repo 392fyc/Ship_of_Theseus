@@ -28,6 +28,6 @@
     "damage_per_hit": 1,
     "owner_turns": 3
   },
-  "_engine_note": "召唤物不是职业也不是敌人：单独放在 data/summons/（DataLoader.summons），不会出现在招募或刷怪里。illusion：生命值 4 就是能承受的伤害包次数，每个命中的伤害包固定扣 damage_per_hit = 1 点生命（多段攻击每段各计，与伤害数值无关，预告也显示 1），生命归零时消失，类似 Dota、LoL 的守卫（用户 2026-10-30 裁决；设计库 kensei_linmo rules「承受 4 次后消失」）。召唤后的第 3 个主人自身回合结束时也消失，召唤所在的回合不计入。外观暂用剑圣棋子，生成时半透明着色以示区别。",
-  "_mirror": "规则来自设计库仓 snapshots/skills.json @ 762393b（kensei_linmo 的 rules：〔影〕的定义、4 次伤害包、第 3 个自身回合结束）。〔影〕在设计库里不是独立记录，本文件是引擎侧的承载数据。"
+  "_engine_note": "召唤物不是职业也不是敌人：单独放在 data/summons/（DataLoader.summons），不会出现在招募或刷怪里。illusion：生命值 4 就是能承受的伤害包次数，每个命中的伤害包固定扣 damage_per_hit = 1 点生命（多段攻击每段各计，与伤害数值无关，预告也显示 1），生命归零时消失，类似 Dota、LoL 的守卫（用户 2026-10-30 裁决；设计库 kensei_linmo rules「承受 4 次后消失」）。召唤后的第 3 个主人自身回合结束时也消失，召唤所在的回合不计入；主人死亡时立即消失（设计库 kensei_linmo rules @ 5ae61a3，用户 2026-10-30）。外观暂用剑圣棋子，生成时半透明着色以示区别。",
+  "_mirror": "规则来自设计库仓 snapshots/skills.json @ 5ae61a3（kensei_linmo 的 rules：〔影〕的定义、4 次伤害包、第 3 个自身回合结束、自身死亡时消失）。〔影〕在设计库里不是独立记录，本文件是引擎侧的承载数据。"
 }

@@ -354,8 +354,10 @@ func _test_battle_end(tm: Node, scene: Node, ks: Unit) -> void:
 		tm._execute_skill_action(act)
 	_leave_action_phase(tm)
 	_check("前提：影在场", tm.grid.get_unit_at(Vector2i(2, 4)) != null)
+	var ying: Unit = tm.grid.get_unit_at(Vector2i(2, 4))
 	ks.take_damage(99999, "pure")
-	_check("剑圣倒下、只剩影：判定战斗结束", bool(scene._battle_over))
+	_check("剑圣死亡时影随之消失", not tm.units.has(ying) and tm.grid.get_unit_at(Vector2i(2, 4)) == null)
+	_check("剑圣倒下：判定战斗结束", bool(scene._battle_over))
 	_eq("判定为全灭", str(scene.result_label.text), "DEFEAT")
 
 
