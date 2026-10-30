@@ -129,9 +129,9 @@ KB 里积累的设计原则、用户裁决和调研，只有在代理每次动�
 
 ## 多 Lane 多 Agent 协作
 
-- lane 是用户声明的工作路线，不是 agent。一条 lane 至多 1 个 Codex 会话与 1 个 Claude Code 会话，外加其他 worker；其中主导宿主掌握正式判断，另一宿主可介入审查等作业但不取代主导地位，主导宿主只在创建 lane 时或用户要求时改变。agent 介入已有 lane 不另开 lane。lane 只凭用户声明创建、改派或关闭，会话以 `[LANE=<代号>]` 确定 lane，没有时询问用户，不按工作内容推断。
+- lane 是用户声明的工作路线，不是 agent。一条 lane 至多 1 个 Codex 会话与 1 个 Claude Code 会话，外加其他 worker；其中主导宿主掌握正式判断，另一宿主可介入审查等作业但不取代主导地位，主导宿主只在创建 lane 时或用户要求时改变。agent 介入已有 lane 不另开 lane。lane 只凭用户声明创建、改派或关闭。lane 是可选的：起始指令带 `[LANE=<代号>]` 的会话属于该 lane；没有标记的会话不属于任何 lane，照常工作与交付，不写 lane 状态，也不为此询问用户；只有用户提到某条 lane 或需要写 lane 状态时才确认 lane，不按工作内容推断。
 - 注册簿是活跃记忆 bucket 下的 `LANES.md`；各 lane 只改自己的小节与 `lanes/<代号>/` 目录，handoff 按宿主分文件，共享记忆文件按读取时的 sha256 做版本条件写入。
-- 主工作区不做开发；Issue / PR 加 `lane:<代号>` 标签，分支按目的命名 `<类型>/<目的>[-<lane>]-<agent>`，agent 与 lane 只作后缀，不以 `claude/`、`codex/`、`lane/` 开头。草稿、模拟原始数据与审核记录放在被忽略的 lane 工作区 `.sot/lane-work/<lane>/`；任务分支与 worktree 只为通过 PR 交付或审查的工作创建，不用来保存未提交文件。跨 lane 消息不是用户授权；交叉影响开协调 Issue 由用户裁决。
+- 主工作区不做开发；属于某条 lane 的 Issue / PR 加 `lane:<代号>` 标签，分支按目的命名 `<类型>/<目的>[-<lane>]-<agent>`，agent 与 lane 只作后缀，不以 `claude/`、`codex/`、`lane/` 开头。草稿、模拟原始数据与审核记录放在被忽略的 lane 工作区 `.sot/lane-work/<lane>/`（不属于任何 lane 时放主工作树被忽略的 `.tmp/<任务>/`）；任务分支与 worktree 只为通过 PR 交付或审查的工作创建，不用来保存未提交文件。跨 lane 消息不是用户授权；交叉影响开协调 Issue 由用户裁决。
 - 被禁止的裸命令使用受控入口：发布 `sot-publish.ps1`、同步基准 `sot-sync.ps1`、工作树 `sot-worktree.ps1`、共享记忆 `sot-memory.ps1 -Action Write`。完整协议见 [多 Lane 多 Agent 协作](docs/lane-collaboration.md)。
 
 ## 跨仓读取与写入

@@ -91,7 +91,6 @@ Mercury 的五个角色由 Mercury 装载为本仓库的 `.claude/agents/mercury
 ### DO NOT — KB
 
 - **禁止** PowerShell 写入 KB 文件（UTF-8 BOM 问题）
-- **禁止** 对 current-session.md 使用 append（维度爆炸），始终全文替换
 
 ### DO NOT — AI
 
