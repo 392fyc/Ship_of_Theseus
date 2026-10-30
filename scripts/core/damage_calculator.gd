@@ -202,21 +202,19 @@ static func preview_attack(attacker: Unit, defender: Unit,
 	var base_damage: float = _calc_base_damage(
 		attacker, defender, damage_type, skill_power, base_attribute, pure_atk_source,
 		terrain_def_bonus, terrain_res_bonus)
-	var final_damage: float = base_damage * skill_multiplier * terrain_multiplier * outer_layer_multiplier(action_data)
-	final_damage *= relic_multiplier * final_multiplier
-	# 敌人词条输出乘区（与 resolve_attack 一致，保证 forecast == 实际伤害）。
-	final_damage *= _affix_attack_multiplier(attacker)
-	# 区域溅射衰减（与 resolve_attack 一致，保证 forecast == 实际伤害）。
-	final_damage *= float(action_data.get("area_damage_multiplier", 1.0))
-	# afs_bulwark 防御乘区（与 resolve_attack 一致，保证 forecast == 实际伤害）。
-	final_damage *= float(action_data.get("affix_defense_multiplier", 1.0))
+	var pre_crit: float = base_damage * skill_multiplier * terrain_multiplier * outer_layer_multiplier(action_data)
+	var final_damage: float = _apply_post_crit_layers(pre_crit, attacker,
+		relic_multiplier, final_multiplier, action_data)
 
 	# R1.8：与 resolve_attack 一致向下取整，保证 forecast == 实际伤害。
 	var dmg_int: int = maxi(0, floori(final_damage))
-	# 暴击时的伤害（倍率见 crit_multiplier），敌人 AI 用它估算击杀概率；不能暴击时等于 damage。
+	# 暴击时的伤害，敌人 AI 用它估算击杀概率；不能暴击时等于 damage。
+	# 暴击倍率乘在与 resolve_attack 相同的位置：浮点乘法换序可能让取整后差 1。
 	var crit_dmg_int: int = dmg_int
 	if not crit_blocked:
-		crit_dmg_int = maxi(0, floori(final_damage * crit_multiplier(action_data)))
+		crit_dmg_int = maxi(0, floori(_apply_post_crit_layers(
+			pre_crit * crit_multiplier(action_data), attacker,
+			relic_multiplier, final_multiplier, action_data)))
 	# 幻象：与 resolve_attack 一致，预告显示固定的每包伤害。
 	if defender.is_illusion:
 		dmg_int = defender.illusion_damage_per_hit
@@ -236,6 +234,17 @@ static func preview_attack(attacker: Unit, defender: Unit,
 		"damage_type": damage_type,
 		"is_heal": false,
 	}
+
+
+## 暴击之后的各乘区，顺序与 resolve_attack 相同，保证 forecast == 实际伤害：
+## 遗物与最终修正、敌人词条输出、区域溅射衰减、afs_bulwark 防御乘区。
+static func _apply_post_crit_layers(dmg: float, attacker: Unit, relic_multiplier: float,
+		final_multiplier: float, action_data: Dictionary) -> float:
+	var out: float = dmg * (relic_multiplier * final_multiplier)
+	out *= _affix_attack_multiplier(attacker)
+	out *= float(action_data.get("area_damage_multiplier", 1.0))
+	out *= float(action_data.get("affix_defense_multiplier", 1.0))
+	return out
 
 
 ## R1.3 暴击倍率 = (1.5 + Σ 加算 crit_damage_bonus) × Π 乘算 crit_damage_mult，加算先于乘算。
