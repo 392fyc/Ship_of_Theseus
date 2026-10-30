@@ -60,9 +60,9 @@
 
 ## 4. 会话流程
 
-1. **定位记忆并确定 lane**：解析记忆根与 bucket 后读取 `LANES.md`。起始指令带 `[LANE=<代号>]` 时沿用；没有时向用户询问，不推断。经 handoff 接手的会话继承原 lane。代号未登记、状态不是 `active`，或本宿主既不是主导宿主也不在参与 agent 中时，向用户确认后再继续。bucket 下没有 `LANES.md` 的旧项目，读取 bucket 根的 `session-checkpoint.md` 并告诉用户尚未启用 lane。
+1. **定位记忆并确定 lane**：解析记忆根与 bucket 后读取 `LANES.md`。起始指令带 `[LANE=<代号>]` 时沿用。lane 是可选的：没有标记的会话不属于任何 lane，跳过第 2 步与第 4 步中针对 lane 的读写，照常工作与交付，不为此询问用户；只有用户提到某条 lane 或需要写 lane 状态（checkpoint、handoff）时才向用户确认，不推断。经 handoff 接手的会话继承原 lane。代号未登记、状态不是 `active`，或本宿主既不是主导宿主也不在参与 agent 中时，向用户确认后再继续。bucket 下没有 `LANES.md` 的旧项目，读取 bucket 根的 `session-checkpoint.md` 并告诉用户尚未启用 lane。
 2. **读取并记下哈希**：本 lane 的 `LANE.md`、`session-checkpoint.md` → 本宿主的 `handoff-<harness>.md`（存在时）→ `inbox.md` 中的新消息。读取 `LANES.md`、`MEMORY.md`、`LANE.md`、`session-checkpoint.md` 时同时记下各自的 sha256：读前、读后各运行一次 `scripts/codex/sot-memory.ps1 -Action Verify -Path <相对路径>`，两次输出的 `current_sha256` 一致才采用该值，不一致就重读。磁盘与索引不一致时 `Verify` 会以非零退出码结束，这只说明索引落后，仍然取输出中的 `current_sha256`。
-3. **工作**：草稿与原始材料放在 lane 工作区（见第 2 节“lane 工作区”）；要交付的开发只在任务工作树进行，分支、worktree 与 PR 按第 6 节。
+3. **工作**：草稿与原始材料放在 lane 工作区（见第 2 节“lane 工作区”）；不属于任何 lane 的会话放在主工作树被 Git 忽略的 `.tmp/<任务>/`；要交付的开发只在任务工作树进行，分支、worktree 与 PR 按第 6 节。
 4. **结束**：在版本条件下更新本 lane 的 `session-checkpoint.md`；检查主工作区；用户要求 handoff 时只写本宿主的 handoff 文件。非主导宿主在 checkpoint 中只记录自己的作业与结论，不改写主导宿主的正式判断。
 
 ## 5. 共享文件的版本条件
@@ -82,7 +82,7 @@
 - **基准分支**：游戏仓任务分支从 `develop` 切出并以它为 PR 目标（`.mercury/config.json` 的 `params.integration_branch`）；设计库以 `master` 为目标；KB 在游戏仓 `docs/`，随游戏仓以 `develop` 为目标。
 - **何时建分支**：只为通过 PR 交付或审查的工作创建任务分支与 worktree，不为保存未提交文件保留分支或 worktree；已经这样保留的，把文件复制到 lane 工作区并核对后，再按[工作树生命周期](worktree-lifecycle.md)退役分支与 worktree。结论交付到它的权威：结构化设计走设计库写入与快照 PR，定性结论与研究写进任务工作树的 `docs/`（KB），随相关改动一起走游戏仓 PR，运行实现走游戏仓 PR。原始材料留在 lane 工作区，或在不再需要时删除。
 - **worktree**：用 `scripts/codex/sot-worktree.ps1` 在所属仓库根的 `.worktrees/<任务>/` 创建，PR 合并后按[工作树生命周期](worktree-lifecycle.md)退役。
-- **标签**：Issue 与 PR 加 `lane:<代号>` 标签。
+- **标签**：属于某条 lane 的 Issue 与 PR 加 `lane:<代号>` 标签；不属于任何 lane 的不加。
 
 ## 7. 跨 lane 消息与协调
 

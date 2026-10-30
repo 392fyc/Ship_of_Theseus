@@ -21,7 +21,7 @@ description: "Close a Ship of Theseus Codex session by updating available active
 
 `<memory-root>/projects/<project-bucket>/lanes/<lane>/session-checkpoint.md`
 
-lane 未确定时先问用户，不写入其他 lane 的目录。checkpoint 由同一 lane 的多个 agent 共享，按 [多 Lane 多 Agent 协作](../../../docs/lane-collaboration.md) 的版本条件写入：把新内容写到临时文件，用 `scripts/codex/sot-memory.ps1 -Action Write -Path lanes/<lane>/session-checkpoint.md -SourceFile <临时文件> -ExpectedSha256 <会话启动读取时记下的哈希>` 一次完成比较、原子替换与登记；被拒绝时文件未改动，重读、合并后重试，不直接覆盖。非主导宿主只记录自己的作业与结论，不改写主导宿主的正式判断。尚未启用 lane 的旧项目才使用 `<memory-root>/projects/<project-bucket>/session-checkpoint.md`。
+不属于任何 lane 的会话不写 lane checkpoint：任务状态已在 GitHub/Git，结束摘要在回复中给出；用户要求 handoff 时，先请用户指定所属 lane。不写入其他 lane 的目录。checkpoint 由同一 lane 的多个 agent 共享，按 [多 Lane 多 Agent 协作](../../../docs/lane-collaboration.md) 的版本条件写入：把新内容写到临时文件，用 `scripts/codex/sot-memory.ps1 -Action Write -Path lanes/<lane>/session-checkpoint.md -SourceFile <临时文件> -ExpectedSha256 <会话启动读取时记下的哈希>` 一次完成比较、原子替换与登记；被拒绝时文件未改动，重读、合并后重试，不直接覆盖。非主导宿主只记录自己的作业与结论，不改写主导宿主的正式判断。尚未启用 lane 的旧项目才使用 `<memory-root>/projects/<project-bucket>/session-checkpoint.md`。
 
 若记忆根或索引缺失，报告未保存 checkpoint 并继续结束会话；普通结束流程不得为填补缺失而迁移旧数据。若显式配置指向旧 Mercury bucket（`.mercury/memory`），该根仅可只读，未经用户明确授权不得写入或迁移。
 
