@@ -11,6 +11,7 @@ var _failed: int = 0
 var _scene: Node
 var _manager: Node
 var _unit: Unit
+var _base_passive_icon: Texture2D
 
 
 func _initialize() -> void:
@@ -99,6 +100,14 @@ func _test_state(label: String, swapped: bool) -> void:
 	legacy.update_entries(entries, "", _unit.passive_skill_id)
 	var slots: Array = _scene._bottom_dashboard.get_composition().get_node("BottomRow/SkillShelf").get_skill_slots()
 	_check(label + "M2被动槽不显示数字角标", not slots[0].get_node("Content/HotkeyBadge").visible)
+	var icon: TextureRect = slots[0].get_node("Content/IconRect")
+	_check(label + "M2被动槽显示实际图标", icon.visible and icon.texture != null)
+	if _base_passive_icon == null and not swapped:
+		_base_passive_icon = icon.texture
+	elif swapped:
+		_check(label + "主动替换图标区别于被动", icon.texture != null and icon.texture != _base_passive_icon)
+	else:
+		_check(label + "升级被动恢复原心眼图标", icon.texture != null and icon.texture == _base_passive_icon)
 	for index: int in range(4):
 		_check(label + "编号" + str(index + 1), numbered[index]["skill_id"] == EXPECTED[index] and views[index + 1].hotkey_text == str(index + 1))
 		_check(label + "M2角标" + str(index + 1), slots[index + 1].get_node("Content/HotkeyBadge/HotkeyText").text == str(index + 1))
