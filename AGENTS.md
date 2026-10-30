@@ -37,6 +37,12 @@ These rules bind the main agent and every subagent in both Codex and Claude Code
 - A project's own roles and skills live in its project area: declared in `.mercury/local.json`, with role sources in `.mercury/local/roles/`. Mercury's installer (`tools/mercury.py apply`, run from a Mercury checkout) generates their `.claude/agents/`, `.codex/agents/` and skill entry files without the `mercury-` prefix; change the source or the manifest, never the generated files. Mercury updates never change the manifest or the sources; they only regenerate the outputs of unchanged sources when Mercury's renderer changes.
 - `.codex/rules/mercury-git-safety.rules` forbids raw `git push` and direct switching to `develop`, `main` or `master` in Codex. Perform Git writes through the controlled entry point that this project's own instructions name; never bypass a denial through another shell.
 
+## Controlled Git entry
+
+- Perform Git writes in this project through `powershell -ExecutionPolicy Bypass -File .mercury/packs/git-safe/scripts/git-safe.ps1 <action>`: `add <files>` (explicit files only), `commit -Message "<message>"`, `push <args>`, `sync` (merge `origin/<integration branch>` into the task branch without committing; resolve, stage with `add`, review, conclude with `commit`) and `abort-sync` (abandon that merge). Raw `git push`, `git merge` and similar writes are not the project's route even where a host would allow them.
+- Before `commit`, stage the intended files, inspect the staged diff, complete the required checks and review, then run `guard.ps1 mark-review` from the same directory. Changed staged content needs a fresh mark; the mark is a snapshot, not review evidence.
+- The scripts act on the Git work tree that holds them, never on the caller's current directory: call the copy inside the task worktree you are working in, and give `add` paths relative to that work tree's root. Task branches are named `<type>/<purpose>[-<lane>]-<agent>` (for example `feature/TASK-7-claude`); `develop`, `main`, `master` and the integration branch are protected. The integration branch for `sync` and `guard.ps1 pre-merge` is `params.integration_branch` in `.mercury/config.json`.
+
 ## Mercury updates (deploy pack)
 
 - `.github/workflows/mercury-update.yml` and `.github/workflows/mercury-verify.yml` are managed files: Mercury renders them from `params` in `.mercury/config.json` (`integration_branch`, `required_checks`, `update_schedule`). Do not edit them by hand; change the params and run the installer from a released Mercury commit.
@@ -178,6 +184,7 @@ KB 里积累的设计原则、用户裁决和调研，只有在代理每次动�
 
 ## Git 与交付
 
+- CI 临时安排（用户 2026-10-30）：截至 2026-10-31，已授权任务以本地等价 CI 和当前提交的独立审查作为合并依据；GitHub 额度不足导致的未执行不写成远端通过。2026-11-01 起恢复 GitHub Actions CI。执行与恢复范围见 [CI 与本地验证](docs/02-Development/ci-policy.md)。
 - 不直接提交或推送到 `develop`、`main`、`master`。
 - Ship 与设计库从目标仓任务 worktree 调用 Ship 根的 `scripts/codex/sot-publish.ps1`（KB 随 Ship 发布）。该入口通过 `SOT_DESIGNLIB_ROOT` 授权跨仓发布。不得因目标仓没有同名脚本而判定发布阻断，也不得改用原始 `git push`。
 - 只修改任务声明的文件范围，不夹带用户已有 dirty 文件。
