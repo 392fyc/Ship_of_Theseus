@@ -67,6 +67,36 @@ func _test_player_state(dashboard: Control, manager: Object) -> void:
 	_check("真实载荷显示五区和行动条", composition.visible and composition.get_node("ActionResourceStrip").visible)
 	var action_strip: Control = composition.get_node("ActionResourceStrip") as Control
 	var live_state: Dictionary = manager.get_dashboard_data()
+	var guidance_panel: Control = composition.get_node("ActionGuidance") as Control
+	var phase_label: Label = guidance_panel.get_node("GuidanceLines/PhaseText") as Label
+	var operation_label: Label = guidance_panel.get_node("GuidanceLines/OperationText") as Label
+	var guidance_rect: Rect2 = guidance_panel.get_global_rect()
+	var viewport_rect: Rect2 = root.get_visible_rect()
+	var bottom_row: Control = composition.get_node("BottomRow") as Control
+	_check("真实管理器阶段与操作提示分两行显示",
+		guidance_panel.visible and phase_label.text == live_state["phase_text"] and operation_label.text == live_state["hint_text"])
+	_check("提示处于视口内且避开行动条与底栏",
+		viewport_rect.encloses(guidance_rect)
+		and not guidance_rect.intersects(action_strip.get_global_rect())
+		and not guidance_rect.intersects(bottom_row.get_global_rect()))
+	_move_pointer(guidance_rect.get_center())
+	await process_frame
+	_check("提示区域忽略鼠标并让战场输入继续",
+		guidance_panel.mouse_filter == Control.MOUSE_FILTER_IGNORE
+		and guidance_panel.get_node("GuidanceLines").mouse_filter == Control.MOUSE_FILTER_IGNORE
+		and phase_label.mouse_filter == Control.MOUSE_FILTER_IGNORE
+		and operation_label.mouse_filter == Control.MOUSE_FILTER_IGNORE
+		and root.gui_get_hovered_control() == null
+		and scene_allows_board_pointer())
+	var rejected_state: Dictionary = live_state.duplicate(true)
+	rejected_state["feedback_text"] = "目标超出范围；已取消选择"
+	dashboard.update_state(rejected_state)
+	await process_frame
+	_check("正式 M2 在选择取消后显示拒绝原因与取消状态",
+		phase_label.text == live_state["phase_text"]
+		and operation_label.text == "拒绝：目标超出范围；已取消选择")
+	dashboard.update_state(live_state)
+	await process_frame
 	var live_resources: Dictionary = live_state["action_resources"]
 	var movement_value: Label = action_strip.get_node("MovementZone/MovementValue") as Label
 	var movement_state: Label = action_strip.get_node("MovementZone/MovementState") as Label

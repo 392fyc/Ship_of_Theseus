@@ -115,6 +115,7 @@ var _path_preview: Array[Vector2i] = []
 var _hover_cell: Vector2i = Vector2i.ZERO
 var _has_hover_cell: bool = false
 var _attack_mode: String = ATTACK_MODE_BASIC
+var _action_feedback_text: String = ""
 var _selected_skill_id: String = ""
 var _targeting_direction: Vector2i = Vector2i.ZERO
 ## 本次攻击动作里受到敌方命中判定、动作结束后可能反应（〔见切〕反击）的单位：攻击者 → 被攻击者。
@@ -252,6 +253,7 @@ func get_dashboard_data() -> Dictionary:
 		"selected_skill_id": _selected_skill_id,
 		"forecast": _combat_forecast.duplicate(true),
 		"hint_text": _get_dashboard_hint_text(),
+		"feedback_text": _action_feedback_text,
 		"class_resource_display": {
 			"class_id": info_unit.unit_id,
 			"mark_capacity": info_unit._mark_max,
@@ -303,6 +305,7 @@ func is_targeting_active() -> bool:
 func request_skill_selection(skill_id: String) -> void:
 	if input_state == InputState.ANIMATING:
 		return
+	_clear_action_feedback()
 	var unit: Unit = _get_player_dashboard_unit()
 	if unit == null:
 		return
@@ -744,6 +747,7 @@ func _unhandled_input(_event: InputEvent) -> void:
 
 
 func _handle_click(grid_pos: Vector2i) -> void:
+	_clear_action_feedback()
 	var unit: Unit = grid.get_unit_at(grid_pos)
 	match input_state:
 		InputState.IDLE:
@@ -772,7 +776,7 @@ func _handle_click(grid_pos: Vector2i) -> void:
 					_show_attack_highlights()
 					_emit_dashboard_state_changed()
 				else:
-					_cancel_targeting()
+					_reject_target_click(grid_pos)
 			elif _is_waiting_for_landing_target():
 				if grid_pos in _attack_cells:
 					_landing_anchor = grid_pos
@@ -781,7 +785,7 @@ func _handle_click(grid_pos: Vector2i) -> void:
 					_show_attack_highlights()
 					_emit_dashboard_state_changed()
 				else:
-					_cancel_targeting()
+					_reject_target_click(grid_pos)
 			elif _landing_anchor != LANDING_ANCHOR_NONE:
 				if grid_pos in _attack_cells:
 					var landing_action: GameAction = _build_skill_action(
@@ -790,21 +794,21 @@ func _handle_click(grid_pos: Vector2i) -> void:
 					if landing_action != null:
 						_execute_skill_from_input(landing_action)
 				else:
-					_cancel_targeting()
+					_reject_target_click(grid_pos)
 			elif _can_confirm_skill_target(grid_pos):
 				var skill_action: GameAction = _build_skill_action(
 					current_unit, grid_pos, unit)
 				if skill_action != null:
 					_execute_skill_from_input(skill_action)
 			else:
-				_cancel_targeting()
+				_reject_target_click(grid_pos)
 		InputState.ATTACK_TARGETING:
 			if unit != null and unit.faction != current_unit.faction \
 					and grid_pos in _attack_cells:
 				var action: GameAction = GameAction.make_attack(current_unit, unit)
 				_execute_attack_from_input(action)
 			else:
-				_cancel_targeting()
+				_reject_target_click(grid_pos)
 		InputState.SWIFT_PHASE:
 			pass
 
@@ -952,6 +956,7 @@ func _move_test_cursor(direction: Vector2i) -> void:
 
 
 func _handle_cancel_action() -> void:
+	_clear_action_feedback()
 	if _inspected_unit != null:
 		_inspected_unit = null
 		_combat_forecast = {}
@@ -1083,6 +1088,7 @@ func _clear_selected_skill() -> void:
 
 
 func _clear_targeting_buffers() -> void:
+	_action_feedback_text = ""
 	_range_display_cells = []
 	_attack_cells = []
 	_area_preview_cells = []
@@ -1146,6 +1152,7 @@ func _build_skill_entry(unit: Unit, skill_id: String) -> Dictionary:
 		"cooldown": cooldown_turns,
 		"cooldown_max": int(skill_data.get("cooldown", 0)),
 		"description": description,
+		"activation_hint": "点选即施放" if str(skill_data.get("range", {}).get("type", "")) == "self" else "",
 		"available": false,
 		"reason": "",
 		"selected": skill_id == _selected_skill_id,
@@ -1502,19 +1509,72 @@ func _get_dashboard_hint_text() -> String:
 		return "只读信息，右键或 ESC 关闭"
 	match input_state:
 		InputState.MOVE_PHASE:
-			return "选择移动格，或点自身/结束移动进入行动阶段"
+			return "选择移动格，或选技能；点自身 / 结束移动进入行动阶段"
 		InputState.ACTION_PHASE:
-			return "可攻击、用技能，或右键/ESC 撤销移动"
+			var choice: String = "选择攻击或技能" if _can_enter_attack_targeting() else "选择技能或结束回合"
+			return choice + ("；右键 / ESC 撤销移动" if not _move_committed else "")
 		InputState.SKILL_TARGETING:
+			var skill: Dictionary = _get_skill_data(_selected_skill_id)
+			var name: String = str(skill.get("name", _selected_skill_id))
 			if _is_waiting_for_line_direction():
-				return "先选择施法方向，再选择目标格"
-			return "选择合法目标，右键或 ESC 取消"
+				return "%s · 1 选方向 → 2 选%s；右键 / ESC 取消" % [name, "落点" if bool(skill.get("displacement", false)) else "目标格"]
+			if _is_waiting_for_landing_target():
+				return "%s · 1 选目标 → 2 选落点；右键 / ESC 取消" % name
+			if _landing_anchor != LANDING_ANCHOR_NONE:
+				return "%s · 2 选择目标旁的可用落点；右键 / ESC 取消" % name
+			if bool(skill.get("displacement", false)):
+				return "%s · 2 选择可站立的空格落点；右键 / ESC 取消" % name
+			return "%s · 选择%s；右键 / ESC 取消" % [name, "目标格" if _is_ground_target_skill(skill) else "目标单位"]
 		InputState.ATTACK_TARGETING:
-			return "悬停敌人查看预测，左键确认攻击"
+			return "悬停敌人查看预测，左键确认攻击；右键 / ESC 取消"
 		InputState.SWIFT_PHASE:
-			return "仅可使用迅捷技能，或直接结束回合"
+			return "选择可用的迅捷技能，或结束回合"
 		_:
 			return ""
+
+
+func _clear_action_feedback() -> void:
+	if _action_feedback_text.is_empty():
+		return
+	_action_feedback_text = ""
+	_emit_dashboard_state_changed()
+
+
+# 只解释已有判定；拒绝点击仍按原流程取消并返回来源阶段。
+func _reject_target_click(grid_pos: Vector2i) -> void:
+	var reason: String = _get_target_rejection_reason(grid_pos)
+	_cancel_targeting()
+	_action_feedback_text = reason + "；已取消选择"
+	_emit_dashboard_state_changed()
+
+
+func _get_target_rejection_reason(grid_pos: Vector2i) -> String:
+	if not grid.is_valid(grid_pos):
+		return "请选择棋盘内的格子"
+	if _is_waiting_for_line_direction():
+		return "请点击高亮方向格"
+	var skill: Dictionary = _get_skill_data(_selected_skill_id) if input_state == InputState.SKILL_TARGETING else {}
+	if _landing_anchor != LANDING_ANCHOR_NONE:
+		if absi(grid_pos.x - _landing_anchor.x) + absi(grid_pos.y - _landing_anchor.y) != 1:
+			return "落点须与目标上下左右相邻"
+	elif grid_pos not in _range_display_cells:
+		return "超出当前技能范围" if input_state == InputState.SKILL_TARGETING else "超出攻击范围"
+	if _landing_anchor != LANDING_ANCHOR_NONE or bool(skill.get("displacement", false)) or bool(skill.get("requires_empty_cell", false)):
+		var cell: Cell = grid.get_cell(grid_pos)
+		if cell == null or not cell.is_passable():
+			return "该地形无法站立"
+		if cell.occupant != null:
+			return "该格已被单位占据"
+	var target: Unit = grid.get_unit_at(grid_pos)
+	if input_state == InputState.ATTACK_TARGETING or not _is_ground_target_skill(skill):
+		if target == null:
+			return "这里没有目标单位"
+		var relation: String = _get_skill_target_relation(skill) if input_state == InputState.SKILL_TARGETING else "enemy"
+		if not _matches_target_relation(current_unit, target, relation):
+			return "请选择敌方单位" if relation == "enemy" else "请选择符合技能要求的单位"
+	if _is_waiting_for_landing_target():
+		return "目标周围没有可用落点"
+	return "该格不能作为当前目标"
 
 
 func _show_enemy_info(unit: Unit) -> void:
@@ -2758,7 +2818,7 @@ func _can_confirm_skill_target(grid_pos: Vector2i) -> bool:
 	if grid_pos not in _attack_cells:
 		return false
 	var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
-	# 位移技能（如一闪）：落点必须可落，否则不允许释放（点击无反应、不扣资源）。
+	# 位移技能（如一闪）：落点必须可落，否则取消选择并说明原因，不扣资源。
 	if bool(skill_data.get("displacement", false)):
 		return _is_displacement_landing_valid(current_unit, grid_pos)
 	if _is_ground_target_skill(skill_data):

@@ -141,6 +141,7 @@ func _apply_state() -> void:
 		_composition.apply_action_resources(views["action_resources"])
 	_composition.apply_class_resources(views["class_resources"])
 	_composition.apply_end_action(views["end_action"])
+	_composition.apply_action_guidance(views["guidance"])
 	var end_control: Control = _composition.get_node("BottomRow/EndTurnControl") as Control
 	var end_active: bool = bool(views["end_action"].visible)
 	end_control.visible = true
