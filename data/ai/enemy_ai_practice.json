@@ -1,0 +1,73 @@
+{
+  "id": "enemy_ai_practice",
+  "map_id": "test_arena",
+  "unit_hp": 999,
+  "player_units": [
+    {
+      "class_id": "kensei",
+      "position": [
+        1,
+        2
+      ]
+    },
+    {
+      "class_id": "kensei",
+      "position": [
+        1,
+        5
+      ]
+    },
+    {
+      "class_id": "myrmidon",
+      "position": [
+        2,
+        3
+      ]
+    }
+  ],
+  "enemy_units": [
+    {
+      "class_id": "goblin_melee",
+      "position": [
+        5,
+        1
+      ]
+    },
+    {
+      "class_id": "goblin_archer",
+      "position": [
+        7,
+        1
+      ]
+    },
+    {
+      "class_id": "goblin_brave",
+      "position": [
+        5,
+        3
+      ]
+    },
+    {
+      "class_id": "goblin_mage",
+      "position": [
+        6,
+        4
+      ]
+    },
+    {
+      "class_id": "goblin_shaman",
+      "position": [
+        7,
+        5
+      ]
+    },
+    {
+      "class_id": "goblin_priest",
+      "position": [
+        6,
+        6
+      ]
+    }
+  ],
+  "_note": "测试场景（TacticalScene 默认场景）调试控制台「敌人 AI 对练」的阵容（用户 2026-10-31「放个测试场景，控制一下伤害互相打不死」「测试场景之前应该存在一个，把场景什么的填入即可」）。所有单位最大生命设为 unit_hp，每轮结束回满，双方都打不死。站位是测试用的随手摆放。"
+}
