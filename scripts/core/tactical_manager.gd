@@ -90,6 +90,14 @@ signal battle_started
 signal enemy_pacing_finished
 signal unit_killed(unit: Unit)
 signal dashboard_state_changed
+## AI 驱动的单位即将执行一个动作（移动、攻击或已按当前位置重建好的技能）。批量模拟用它记录决策。
+signal ai_action_started(unit: Unit, action: GameAction)
+## 同一个动作执行完毕；executed 为 false 表示被拒绝（例如攻击机会已用掉），没有生效。
+signal ai_action_finished(unit: Unit, action: GameAction, executed: bool)
+
+## 批量模拟用（tools/sim/）：为 true 时玩家方单位也由 EnemyAI 行动，不等待输入。
+## 只在模拟脚本里实例化场景后、加入场景树前置 true；正式战斗与测试场景都保持 false。
+var ai_controls_players: bool = false
 
 enum InputState {
 	IDLE,
@@ -517,7 +525,7 @@ func _on_turn_started(unit: Unit) -> void:
 			_deselect_unit()
 		turn_manager.end_current_turn.call_deferred()
 		return
-	if unit.faction != "player":
+	if unit.faction != "player" or ai_controls_players:
 		_clear_hover_state()
 		_clear_dashboard_state()
 		_emit_dashboard_state_changed()
@@ -658,6 +666,7 @@ func _do_enemy_turn(unit: Unit) -> void:
 					continue
 				print("[AI] %s: move %s → %s" % [
 					unit.unit_name, from, action.target_pos])
+				ai_action_started.emit(unit, action)
 				GameAction.consume_normal_move(unit)
 				unit.refresh_status_icons()
 				_emit_dashboard_state_changed()
@@ -665,19 +674,24 @@ func _do_enemy_turn(unit: Unit) -> void:
 				if not battle_active or not is_instance_valid(unit) or turn_manager.current_unit != unit:
 					return
 				grid.move_unit(unit, from, action.target_pos)
+				ai_action_finished.emit(unit, action, true)
 				await _start_enemy_pacing(0.15)
 			GameAction.Type.ATTACK:
 				if not is_instance_valid(action.target_unit):
 					continue
 				print("[AI] %s: attack %s" % [
 					unit.unit_name, action.target_unit.unit_name])
-				await _execute_presented_attack(action)
+				ai_action_started.emit(unit, action)
+				var attacked: bool = await _execute_presented_attack(action)
+				ai_action_finished.emit(unit, action, attacked)
 			GameAction.Type.SKILL:
 				var cast: GameAction = _rebuild_ai_skill_action(unit, action)
 				if cast == null:
 					continue
 				print("[AI] %s: skill %s" % [unit.unit_name, str(cast.data.get("skill_name", "skill"))])
-				await _execute_presented_skill(cast)
+				ai_action_started.emit(unit, cast)
+				var cast_done: bool = await _execute_presented_skill(cast)
+				ai_action_finished.emit(unit, cast, cast_done)
 
 	if battle_active and is_instance_valid(unit) and unit.stats.is_alive() \
 			and turn_manager.current_unit == unit:
