@@ -12,9 +12,12 @@ extends SceneTree
 ##   ⑤ 嘲讽（R1.18）：敌人站位定下后，在合法目标里优先选带嘲讽的单位，多个时按原优先级（得分）。
 ##   ⑥ 浮生若梦：架势总降 25%；若即把原本会命中的攻击（含范围攻击）改为回避并给若离、必中攻击不受影响、
 ##      普通控制改为抵抗；若离在造成技能伤害时耗 1 层得 15 剑气，不造成伤害的技能不耗。
+##   ⑥b 若即对带控制的范围攻击（端到端）：回避只耗 1 层，附带的眩晕落空；没有若即时同一技能命中并眩晕。
 ##
 ## 运行：
 ##   <Godot_console.exe> --headless --path <worktree> --script res://tests/test_kensei_memory_zhaojia.gd
+
+const SplashFixture := preload("res://tests/fixtures/splash_area_skill.gd")
 
 var _pass: int = 0
 var _fail: int = 0
@@ -328,6 +331,7 @@ func _test_qiefan(tm: Node, ks: Unit, enemy: Unit) -> void:
 	hp_before = ks.stats.hp
 	tm._execute_attack_action(GameAction.make_attack(enemy, ks))
 	_check("没有若即：攻击照常命中", ks.stats.hp < hp_before)
+	_test_ruoji_area_control(tm, ks, enemy)
 	enemy.stats.dex = 0
 
 	# 若离：造成技能伤害时耗 1 层、得 15 剑气；每次技能最多 1 层。
@@ -346,6 +350,79 @@ func _test_qiefan(tm: Node, ks: Unit, enemy: Unit) -> void:
 	_cast(tm, ks, "kensei_qiefan", ks.grid_position, ks)
 	_eq("浮生若梦不造成伤害：不耗若离", ks.held_states.stacks("kensei_ruoli"), 2)
 	_leave_action_phase(tm)
+
+
+## 若即对带控制的范围攻击（端到端）：敌人用范围技能走真实施放路径。原本会命中时改为回避，
+## 只耗 1 层；附带的眩晕随之落空，不再触发「控制改为抵抗」去多耗一层（设计库 kensei_ruoji rules）。
+## 对照组：没有若即时同一技能命中并眩晕，证明夹具确实会施加控制。
+func _test_ruoji_area_control(tm: Node, ks: Unit, enemy: Unit) -> void:
+	print("\n[⑥b] 若即：带控制的范围攻击（端到端）")
+	var dl: Node = root.get_node("/root/DataLoader")
+	var skill_id: String = SplashFixture.install(dl)
+	# 夹具是剑圣技能的副本：去掉剑气与印记门槛，换上一个必定施加的眩晕，让敌人能用。
+	var fixture: Dictionary = dl.skills[skill_id]
+	fixture["qi_cost"] = 0
+	fixture["mark_cost"] = 0
+	fixture["requires_marks"] = 0
+	fixture["effects"] = [{"effect_id": "stun", "chance": 100, "duration": 1}]
+	_check("前提：眩晕是控制类", str((dl.buffs.get("stun", {}) as Dictionary).get("effect_type", "")) == "control")
+	ks.stats.lck = 0
+	# 抵抗倍率为 1 时眩晕必定施加：否则「回避后仍施加效果」的错误可能因施加自然失败而漏过。
+	_check("前提：抵抗倍率为 1", is_equal_approx(ks.get_status_resist_multiplier(), 1.0))
+	_clear_stun(ks)
+	var hp_entry: int = ks.stats.hp
+	ks.held_states.apply("kensei_ruoji", 2, {"kind": "permanent"})
+	# 若离最多 3 层，先清空才看得出这次只加了 1 层；结束时恢复，后面的若离用例接着用。
+	var ruoli_before: int = ks.held_states.stacks("kensei_ruoli")
+	var ruoli_remaining: int = ks.held_states.remaining("kensei_ruoli")
+	ks.held_states.remove("kensei_ruoli")
+	var hp_before: int = ks.stats.hp
+	enemy.reset_action_resources()
+	var act: GameAction = _enemy_skill_action(tm, enemy, skill_id, ks)
+	_check("前提：载荷是范围攻击", act != null and str(act.data.get("attack_type", "")) == "area")
+	var effects: Array = act.data.get("effects", []) if act != null else []
+	_check("前提：载荷带眩晕", effects.size() == 1
+		and str((effects[0] as Dictionary).get("effect_id", "")) == "stun")
+	_check("范围技能执行成功", act != null and bool(tm._execute_skill_action(act)))
+	_eq("改为回避：不受伤", ks.stats.hp, hp_before)
+	_check("附带的眩晕落空", ks.get_buff("stun") == null)
+	_eq("只耗 1 层若即：2 → 1", ks.held_states.stacks("kensei_ruoji"), 1)
+	_eq("若离只加 1 层", ks.held_states.stacks("kensei_ruoli"), 1)
+
+	# 对照组：没有若即时同一技能命中并眩晕。
+	ks.held_states.remove("kensei_ruoji")
+	enemy.reset_action_resources()
+	enemy.skill_cooldowns.clear()
+	act = _enemy_skill_action(tm, enemy, skill_id, ks)
+	_check("对照：范围技能执行成功", act != null and bool(tm._execute_skill_action(act)))
+	_check("对照：命中受伤", ks.stats.hp < hp_before)
+	_check("对照：被眩晕", ks.get_buff("stun") != null)
+	_clear_stun(ks)
+	# 按进入前的状态复原：生命、若离层数与持续时间（若离由若即按 gain_duration 给出）。
+	ks.stats.hp = hp_entry
+	ks.held_states.remove("kensei_ruoli")
+	var gain_duration: Dictionary = ((dl.held_states["kensei_ruoji"] as Dictionary)
+		["engine_evade_conversion"] as Dictionary).get("gain_duration", {})
+	ks.held_states.apply("kensei_ruoli", ruoli_before, gain_duration)
+	_eq("复原：若离层数与持续时间", [ks.held_states.stacks("kensei_ruoli"),
+		ks.held_states.remaining("kensei_ruoli")], [ruoli_before, ruoli_remaining])
+	dl.skills.erase(skill_id)
+
+
+## 走真实施放路径构建敌人的技能动作：载荷由 _build_skill_action 按技能数据填写。
+func _enemy_skill_action(tm: Node, enemy: Unit, skill_id: String, target: Unit) -> GameAction:
+	tm.current_unit = enemy
+	tm._selected_skill_id = skill_id
+	var act: GameAction = tm._build_skill_action(enemy, target.grid_position, target)
+	tm._selected_skill_id = ""
+	tm.current_unit = null
+	return act
+
+
+func _clear_stun(u: Unit) -> void:
+	var stun: BuffEffect = u.get_buff("stun")
+	if stun != null:
+		u.remove_buff(stun)
 
 
 # ── 工具 ─────────────────────────────────────────────
