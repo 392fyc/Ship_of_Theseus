@@ -185,8 +185,14 @@ func _test_tie_break(near: Unit, far: Unit, cfg: Dictionary) -> void:
 	a = _cand(Vector2i(4, 4), 0, far, false)
 	_check("目标剩余生命低的优先", EnemyAI._better(a, b, tie) and not EnemyAI._better(b, a, tie))
 	far.stats.hp = 50
-	_check("目标格先比 y：near (3,3) 优先于 far (5,4)",
+	# far 暂放 (2,5)：比 y 选 near (3,3)，比 x 会选 far；站位格偏向 far 一侧，
+	# 所以缺了目标格这一步、或先比 x，都会选错。
+	far.grid_position = Vector2i(2, 5)
+	a = _cand(Vector2i(2, 4), 0, far, false)
+	b = _cand(Vector2i(3, 4), 0, near, false)
+	_check("目标格先比 y：near (3,3) 优先于 far (2,5)",
 		EnemyAI._better(b, a, tie) and not EnemyAI._better(a, b, tie))
+	far.grid_position = Vector2i(5, 4)
 	var c: Dictionary = _cand(Vector2i(2, 3), 0, near, false)
 	_check("全部相同时比站位格", EnemyAI._better(c, b, tie) and not EnemyAI._better(b, c, tie))
 	var hi: Dictionary = _cand(Vector2i(4, 4), 3, far, false)
@@ -257,9 +263,15 @@ func _test_forecast(tm: Node, target: Unit, enemy: Unit) -> void:
 	ctx["precomputed_outcome"] = {"hit": true, "crit": false}
 	_eq("预告伤害 == 实际普通结算", int(p.get("damage", -1)),
 		DamageCalculator.resolve_attack(enemy, target, ctx).damage)
-	# 暴击之后还有乘区时，两边乘法顺序也一致。
+	# 暴击之后还有乘区时，两边乘法顺序也一致。暴击前伤害取 30、修正 1.4：
+	# 结算顺序 30 × 1.5 × 1.4 = 62.999… 取整 62，换序 30 × 1.4 × 1.5 = 63，能分辨顺序。
+	ctx["precomputed_outcome"] = {"hit": true, "crit": false}
+	var normal: int = DamageCalculator.resolve_attack(enemy, target, ctx).damage
+	ctx["skill_power"] = float(ctx.get("skill_power", 0.0)) + float(30 - normal)
+	_eq("前提：暴击前伤害为 30", DamageCalculator.resolve_attack(enemy, target, ctx).damage, 30)
 	ctx["final_multiplier"] = 1.4
 	ctx["precomputed_outcome"] = {"hit": true, "crit": true}
+	_eq("前提：结算暴击伤害为 62", DamageCalculator.resolve_attack(enemy, target, ctx).damage, 62)
 	_eq("带最终修正时预告暴击伤害 == 实际", int(DamageCalculator.preview_attack(
 		enemy, target, ctx).get("crit_damage", -1)),
 		DamageCalculator.resolve_attack(enemy, target, ctx).damage)
