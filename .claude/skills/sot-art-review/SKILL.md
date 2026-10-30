@@ -1,6 +1,6 @@
 ---
 name: sot-art-review
-description: SoT 美术素材审核 lane（Claude 专用）：审核 Codex 产出的 UI、人物、棋子、地形、特效素材与产线，给出保留/调整/删减/推翻重做结论，附材质或式样参考、机械证据和产线修改指导。仅用于 Ship of Theseus 相关仓库。
+description: SoT 美术素材审核 lane（Claude 专用）：审核 UI、人物、棋子、地形、特效素材与产线，给出保留/调整/删减/推翻重做结论，附材质或式样参考、机械证据和产线修改指导。仅用于 Ship of Theseus 相关仓库。
 ---
 
 # SoT 美术审核 lane
@@ -15,6 +15,8 @@ description: SoT 美术素材审核 lane（Claude 专用）：审核 Codex 产�
 - 第三方参考只给链接；下载或导入第三方图片（含导入 Penpot）前先征得用户同意，绝不进入正式素材目录。
 
 ## 开始前必读（按目标 HEAD 读取，不抄副本）
+
+生成或编辑候选时使用 `mercury-image-api`，并先读取 [视觉素材现行裁决](../../../docs/04-Assets/visual-style-decisions.md) 的“Claude 图像 API 使用范围”。沿用本次任务的素材授权与明确预算，不复制 key，不套用别的项目额度或像素化处理。自己制作的候选交独立审查者；接口成功不能作为视觉通过结论。
 
 1. Ship `AGENTS.md`；roots 按 `~/.claude/mercury-roots.local.json` 解析，不猜路径。
 2. VA-6 规格：`dev_doc/skillbar-design/bottom-dashboard-combined-visual-design-spec.md`。
