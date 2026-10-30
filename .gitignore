@@ -73,3 +73,5 @@ nul
 /docs/**/*.bak
 # handoff documents are transient; lanes fall back to <main checkout>/.handoff/ once kb_dir is retired
 /docs/handoff/
+# 本机凭据（例如 OPENAI_API_KEY），不进版本库
+.env
