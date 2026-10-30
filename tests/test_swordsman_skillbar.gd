@@ -67,8 +67,8 @@ func _run() -> void:
 	# ④ _get_skill_entries 构成（需剑圣为行动单位；印记未满）
 	sword.clear_marks()
 	var entries: Array = tm._get_skill_entries()
-	if entries.size() > 0:
-		_eq("首条目=心眼被动（最左）", bool(entries[0].get("is_passive", false)), true)
+	if entries.size() >= 5:
+		_eq("第四条目=心眼被动（招架与居合之间）", bool(entries[3].get("is_passive", false)), true)
 		var ids: Array = []
 		for e: Dictionary in entries:
 			ids.append(str(e.get("skill_id", "")))

@@ -3,6 +3,8 @@ extends Control
 
 signal skill_selected(skill_id: String)
 
+const SkillHotkeys := preload("res://scripts/ui/skill_hotkeys.gd")
+
 # ── v3：横排方形技能槽（屏幕底部居中常驻）──────────────────────
 # 由旧「竖排弹窗卡片」重写为「横排 56px 方槽平铺」，参考 playground 槽位风格：
 #   键位角标(左上) / 资源消耗(右下) / 冷却中心遮罩+回合数 / 选中金边外发光 / 不可用置灰。
@@ -227,7 +229,7 @@ func _ready() -> void:
 	_build_ui()
 
 
-func update_entries(entries: Array[Dictionary], selected_skill_id: String) -> void:
+func update_entries(entries: Array[Dictionary], selected_skill_id: String, passive_skill_id: String = "") -> void:
 	_current_entries = entries.duplicate(true)
 	for child: Node in _list.get_children():
 		if child == _empty_label:
@@ -240,14 +242,12 @@ func update_entries(entries: Array[Dictionary], selected_skill_id: String) -> vo
 		return
 
 	_empty_label.visible = false
-	# 键位 1-4 仅分配给「主动」技能（被动如心眼不占键位）。
-	var active_idx: int = 0
+	var numbered: Array[Dictionary] = SkillHotkeys.numbered_entries(_current_entries, passive_skill_id)
 	for i: int in range(_current_entries.size()):
 		var entry: Dictionary = _current_entries[i]
-		if not bool(entry.get("is_passive", false)):
-			if active_idx < 4 and not entry.has("hotkey"):
-				entry["hotkey"] = str(active_idx + 1)
-			active_idx += 1
+		var numbered_index: int = numbered.find(entry)
+		if numbered_index >= 0 and not entry.has("hotkey"):
+			entry["hotkey"] = str(numbered_index + 1)
 		_list.add_child(_build_skill_slot(entry, selected_skill_id, i))
 	_refresh_size()
 
@@ -298,7 +298,7 @@ func _build_skill_slot(entry: Dictionary, selected_skill_id: String, _index: int
 	var cooldown_turns: int = int(entry.get("cooldown", 0))
 	var available: bool = bool(entry.get("available", false))
 	var is_passive: bool = bool(entry.get("is_passive", false))
-	# 键位角标：主动技能由 update_entries 注入 1-4；被动显 "P" 标记。
+	# 键位角标：主动技能由 update_entries 按技能顺序注入 1-5；被动显 "P" 标记。
 	var hotkey: String = str(entry.get("hotkey", "")) if entry.has("hotkey") else ""
 	if is_passive:
 		hotkey = "P"

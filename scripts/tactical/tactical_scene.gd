@@ -10,6 +10,7 @@ extends Node2D
 # class_name DamageForecaster 仍在文件内声明，编辑器/真机可全局引用）。
 const DamageForecasterScript: GDScript = preload("res://scripts/ui/damage_forecaster.gd")
 const RuntimeDashboardScript: GDScript = preload("res://scripts/ui/hud/m2/runtime_dashboard.gd")
+const SkillHotkeys := preload("res://scripts/ui/skill_hotkeys.gd")
 const UnitOverheadLayoutScript: GDScript = preload("res://scripts/ui/unit_overhead_layout.gd")
 
 var _turn_order_bar: TurnOrderBar = null
@@ -83,14 +84,14 @@ var _btn_soft_reset: Button = null
 var _btn_determinism: Button = null
 var _btn_crit: Button = null
 var _btn_dummy: Button = null
-# 调试快捷键：仅·键（KEY_QUOTELEFT）切换控制台显隐（避让 1-4/鼠标中键）。
+# 调试快捷键：仅·键（KEY_QUOTELEFT）切换控制台显隐（避让 1-5/鼠标中键）。
 const DEBUG_ACTIONS: Dictionary = {
 	"debug_console_toggle": KEY_QUOTELEFT,
 }
 
 
 func _ready() -> void:
-	for slot_index: int in range(1, 5):
+	for slot_index: int in range(1, SkillHotkeys.MAX_NUMBERED_SKILLS + 1):
 		var action_name: String = "skill_slot_%d" % slot_index
 		if not InputMap.has_action(action_name):
 			InputMap.add_action(action_name)
@@ -283,7 +284,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if debug_harness_enabled and _handle_debug_input(event):
 		get_viewport().set_input_as_handled()
 		return
-	for slot_index: int in range(1, 5):
+	for slot_index: int in range(1, SkillHotkeys.MAX_NUMBERED_SKILLS + 1):
 		if event.is_action_pressed("skill_slot_%d" % slot_index):
 			_try_trigger_skill_slot(slot_index)
 			get_viewport().set_input_as_handled()
@@ -485,11 +486,8 @@ func _try_trigger_skill_slot(slot_index: int) -> void:
 	if not bool(data.get("show_actions", false)):
 		return
 	var entries: Array = data.get("skills", [])
-	# 键 1-4 仅对应「主动」技能（跳过心眼等被动条目），与技能栏键位角标 1-4 一致。
-	var active: Array = []
-	for e: Dictionary in entries:
-		if bool(e.get("active_capable", not bool(e.get("is_passive", false)))):
-			active.append(e)
+	# 与两套技能栏按同一技能顺序编号，包含被动升级后的主动形态。
+	var active: Array[Dictionary] = SkillHotkeys.numbered_entries(entries, str(data.get("passive_skill_id", "")))
 	var idx: int = slot_index - 1
 	if idx < 0 or idx >= active.size():
 		return
@@ -514,14 +512,14 @@ func _should_ignore_board_pointer() -> bool:
 
 # ── 调试 harness ─────────────────────────────────────
 # 纯加法调试增项：·键（`）呼出按钮控制台，默认仅在 debug_harness_enabled 下生效。
-# 键位避让 1-4(skill_slot) / 鼠标中键(平移)：
+# 键位避让 1-5(skill_slot) / 鼠标中键(平移)：
 #   ·键=开关控制台面板（按钮操控 软重置/确定性/暴击态/木桩行为）
 
 const DEBUG_OVERLAY_LAYER: int = 50
 const DEBUG_PANEL_POS: Vector2 = Vector2(12.0, 12.0)
 const DEBUG_PANEL_MIN_SIZE: Vector2 = Vector2(240.0, 0.0)
 const DEBUG_FONT_SIZE: int = 12
-const DEBUG_HELP_TEXT: String = "[调试 Harness]  ·键 关闭控制台｜技能 1-4 选中后点目标格执行"
+const DEBUG_HELP_TEXT: String = "[调试 Harness]  ·键 关闭控制台｜技能 1-5 选中后点目标格执行"
 const DEBUG_HINT_TEXT: String = "·键 调试控制台"
 
 

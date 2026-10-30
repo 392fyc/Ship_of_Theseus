@@ -58,10 +58,10 @@ func _check_real_scene(class_id: String, expected_prefix: String) -> void:
 		var no_metadata: Dictionary = dashboard.get_last_state()
 		no_metadata.erase("class_resource_display")
 		dashboard.update_state(no_metadata)
-		_check("缺少职业元数据时回退默认图标", ((slots[1] as Button).get_node("%IconRect") as TextureRect).texture.resource_path == "res://assets/prototype/hud_m2/skill-zhanji.png")
+		_check("缺少职业元数据时回退默认图标", ((slots[0] as Button).get_node("%IconRect") as TextureRect).texture.resource_path == "res://assets/prototype/hud_m2/skill-zhanji.png")
 		var override := GradientTexture2D.new()
 		dashboard.set_icon_textures({"myrmidon_zhanji": override})
-		var zhanji: Button = slots[1] as Button
+		var zhanji: Button = slots[0] as Button
 		_check("调用方显式图标覆盖仍优先", (zhanji.get_node("%IconRect") as TextureRect).texture == override)
 	scene.queue_free()
 	await process_frame

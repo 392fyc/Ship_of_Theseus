@@ -397,7 +397,7 @@ func update_state(state: Dictionary) -> void:
 	_update_action_resources(state, show_actions)
 
 	_update_buttons(_extract_button_state(state.get("buttons", {})), show_skills)
-	_skill_bar.update_entries(_extract_skill_entries(state.get("skills", [])), str(state.get("selected_skill_id", "")))
+	_skill_bar.update_entries(_extract_skill_entries(state.get("skills", [])), str(state.get("selected_skill_id", "")), str(state.get("passive_skill_id", "")))
 	_skill_bar.set_expanded(show_skills)
 	if show_skills and _item_popup_open:
 		_set_item_popup_visible(false)

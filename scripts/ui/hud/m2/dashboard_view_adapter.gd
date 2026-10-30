@@ -6,6 +6,7 @@ extends RefCounted
 
 const CharacterView := preload("res://scripts/ui/hud/m2/character_hud_view_data.gd")
 const SkillView := preload("res://scripts/ui/hud/m2/skill_slot_view_data.gd")
+const SkillHotkeys := preload("res://scripts/ui/skill_hotkeys.gd")
 const SlotView := preload("res://scripts/ui/hud/m2/slot_view_data.gd")
 const PotionView := preload("res://scripts/ui/hud/potion_view_data.gd")
 const ActionResourceView := preload("res://scripts/ui/hud/action_resource_view_data.gd")
@@ -126,7 +127,7 @@ func _build_skills(state: Dictionary, icon_textures: Dictionary, player_actions:
 	var views: Array[RefCounted] = []
 	if not source is Array:
 		return views
-	var hotkey_index: int = 1
+	var numbered: Array[Dictionary] = SkillHotkeys.numbered_entries(source, str(state.get("passive_skill_id", "")))
 	for entry_source: Variant in source:
 		if not entry_source is Dictionary:
 			continue
@@ -143,10 +144,10 @@ func _build_skills(state: Dictionary, icon_textures: Dictionary, player_actions:
 		view.tooltip_text = _skill_tooltip(entry)
 		if not view.is_pure_passive():
 			view.resource_cost_display = _cost_display(entry.get("resource_cost_display"))
-		# 键位位置属于原始主动技能顺序；不可用与冷却只能拒绝激活，不能令后续技能改号。
-		if player_actions and view.active_capable and hotkey_index <= 4:
-			view.hotkey_text = str(hotkey_index)
-			hotkey_index += 1
+		# 按当前可主动使用的技能顺序编号；不可用与冷却不令后续技能改号。
+		var numbered_index: int = numbered.find(entry)
+		if player_actions and numbered_index >= 0:
+			view.hotkey_text = str(numbered_index + 1)
 		var texture: Variant = icon_textures.get(view.skill_id)
 		if texture is Texture2D:
 			view.icon_texture = texture
