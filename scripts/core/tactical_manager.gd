@@ -471,6 +471,10 @@ func _on_unit_died(unit: Unit) -> void:
 	if unit.is_illusion and is_instance_valid(unit.illusion_owner) and unit.illusion_slot_id != "":
 		unit.illusion_owner.set_slot_form(unit.illusion_slot_id, unit.illusion_slot_id)
 		_emit_dashboard_state_changed()
+	# 主人死亡时，它召唤的幻象立即消失（设计库 kensei_linmo rules，用户 2026-10-30 裁决）。
+	if not unit.is_illusion:
+		for illusion: Unit in _get_illusions_of(unit):
+			illusion.vanish_illusion()
 	var was_active := (turn_manager.current_unit == unit)
 	turn_manager.remove_unit(unit)
 	if was_active:
@@ -2621,15 +2625,13 @@ func _build_segment_action_data(action_data: Dictionary, segment_index: int) -> 
 
 
 ## 〔若即〕：原本会命中的可回避攻击改为回避，消耗 1 层并获得状态定义 engine_evade_conversion 写的状态。
-## 自然未命中不消耗；必中攻击与范围攻击（attack_type = area）不受影响、不耗层数
-## （用户 2026-10-30 裁决：若即对范围攻击失效）。每个伤害段分别判定。
-## 调试「强制命中」开关会把所有攻击变成必中，此时若即不会触发。
+## 自然未命中不消耗；必中攻击不受影响、不耗层数。范围攻击同样受影响：对自身的命中判定
+## 原本会命中时改为回避（用户 2026-10-30 裁决「伤害也有效」，设计库 kensei_ruoji rules）。
+## 每个伤害段分别判定。调试「强制命中」开关会把所有攻击变成必中，此时若即不会触发。
 func _apply_evade_conversion(defender: Unit, outcome: Dictionary, action_data: Dictionary) -> void:
 	if not bool(outcome.get("hit", false)):
 		return
 	if bool(action_data.get("guaranteed_hit", false)):
-		return
-	if str(action_data.get("attack_type", "")) == "area":
 		return
 	for state_id: String in defender.held_states.held_ids():
 		var spec: Variant = (DataLoader.held_states.get(state_id, {}) as Dictionary).get(
@@ -3739,8 +3741,9 @@ func _apply_sword_qi_on_hit(attacker: Unit,
 		while attacker.gain_random_mark() != "":
 			pass
 	# 命中并造成伤害后得剑气（设计库 kensei_yijue：每段命中并造成伤害后 +10）。
+	# 「造成伤害后」指伤害结算之后的时点：命中即给，伤害为 0 也给（用户 2026-10-30 裁决）。
 	var qi_after_damage: int = int(action_data.get("qi_gain_after_damage", 0))
-	if qi_after_damage > 0 and result.damage > 0:
+	if qi_after_damage > 0:
 		attacker.gain_sword_qi(qi_after_damage,
 			"after_damage:" + str(action_data.get("skill_id", "")))
 	# 命中后得印记（如居合 mark_gain=1，命中即结算）
@@ -3751,9 +3754,10 @@ func _apply_sword_qi_on_hit(attacker: Unit,
 			print("[SwordMark] %s gained mark 「%s」 on hit, total=%d" % [
 				attacker.unit_name, gained_mark, attacker.get_mark_count()])
 	# 造成伤害后得印记（设计库 kensei_zhanji：剑气在命中时、印记在伤害结算后；致命一段照常结算）。
-	# 本函数在 take_damage 之后调用，所以本段伤害吃不到新印记的加成。伤害为 0 不算「造成伤害」[推断]。
+	# 本函数在 take_damage 之后调用，所以本段伤害吃不到新印记的加成。命中即给，伤害为 0 也给
+	# （用户 2026-10-30 裁决「命中就给」）。
 	var mark_after_damage: int = int(action_data.get("mark_gain_after_damage", 0))
-	if mark_after_damage > 0 and result.damage > 0:
+	if mark_after_damage > 0:
 		for _i: int in range(mark_after_damage):
 			var damage_mark: String = attacker.gain_random_mark()
 			if damage_mark != "":

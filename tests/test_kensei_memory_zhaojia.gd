@@ -10,7 +10,7 @@ extends SceneTree
 ##   ④ 反击：敌方攻击动作结束后、相邻、剑气 ≥ 10 → 耗 1 层与 10 剑气反击一次；层数用完见切结束、架势照常；
 ##      不相邻、剑气不足、没有层数都不反击；反击不吃架势总降。
 ##   ⑤ 嘲讽（R1.18）：敌人站位定下后，在合法目标里优先选带嘲讽的单位，多个时按原优先级（得分）。
-##   ⑥ 浮生若梦：架势总降 25%；若即把原本会命中的攻击改为回避并给若离、必中与范围攻击不受影响、
+##   ⑥ 浮生若梦：架势总降 25%；若即把原本会命中的攻击（含范围攻击）改为回避并给若离、必中攻击不受影响、
 ##      普通控制改为抵抗；若离在造成技能伤害时耗 1 层得 15 剑气，不造成伤害的技能不耗。
 ##
 ## 运行：
@@ -302,25 +302,27 @@ func _test_qiefan(tm: Node, ks: Unit, enemy: Unit) -> void:
 	_eq("消耗 1 层若即", ks.held_states.stacks("kensei_ruoji"), 1)
 	_eq("获得 1 层若离", ks.held_states.stacks("kensei_ruoli"), 1)
 	_eq("若离持续到下个自身回合结束", ks.held_states.remaining("kensei_ruoli"), 1)
-	# 必中与范围攻击不受影响（不耗层数）。
+	# 必中攻击不受影响（不耗层数）。
 	var sure: Dictionary = {"hit": true, "crit": false}
 	tm._apply_evade_conversion(ks, sure, {"guaranteed_hit": true})
 	_check("必中攻击：仍然命中，不耗层数", bool(sure.hit) and ks.held_states.stacks("kensei_ruoji") == 1)
 	var natural: Dictionary = {"hit": false, "crit": false}
 	tm._apply_evade_conversion(ks, natural, {})
 	_eq("自然未命中：不耗层数", ks.held_states.stacks("kensei_ruoji"), 1)
+	# 范围攻击同样受影响（用户 2026-10-30「伤害也有效」）。
 	var area: Dictionary = {"hit": true, "crit": false}
 	tm._apply_evade_conversion(ks, area, {"attack_type": "area"})
-	_check("范围攻击：若即失效，仍然命中", bool(area.hit))
-	_eq("范围攻击：不耗层数", ks.held_states.stacks("kensei_ruoji"), 1)
-	_eq("范围攻击：不给若离", ks.held_states.stacks("kensei_ruoli"), 1)
+	_check("范围攻击：改为回避", not bool(area.hit))
+	_eq("范围攻击：消耗最后 1 层若即", ks.held_states.stacks("kensei_ruoji"), 0)
+	_eq("范围攻击：给若离", ks.held_states.stacks("kensei_ruoli"), 2)
 
 	# 普通控制改为抵抗。
+	ks.held_states.apply("kensei_ruoji", 1, {"kind": "permanent"})
 	ks.stats.lck = 0
 	tm._apply_skill_effect_to_unit(enemy, ks, {"effect_id": "stun", "chance": 100, "duration": 1}, true)
 	_check("眩晕被抵抗", ks.get_buff("stun") == null)
 	_eq("抵抗消耗最后 1 层若即", ks.held_states.stacks("kensei_ruoji"), 0)
-	_eq("抵抗也给若离", ks.held_states.stacks("kensei_ruoli"), 2)
+	_eq("抵抗也给若离", ks.held_states.stacks("kensei_ruoli"), 3)
 	# 没有若即时照常命中。
 	enemy.reset_action_resources()
 	hp_before = ks.stats.hp
@@ -337,12 +339,12 @@ func _test_qiefan(tm: Node, ks: Unit, enemy: Unit) -> void:
 	enemy.stats.hp = 999
 	_cast(tm, ks, "kensei_yijue", enemy.grid_position, enemy)
 	_eq("连斩三段各 +10 = 30，若离 +15 = 45", ks.sword_qi, 45)
-	_eq("三段伤害也只耗 1 层若离（每次技能最多 1 层）", ks.held_states.stacks("kensei_ruoli"), 1)
+	_eq("三段伤害也只耗 1 层若离（每次技能最多 1 层）：3 → 2", ks.held_states.stacks("kensei_ruoli"), 2)
 	# 不造成伤害的技能不耗。
 	ks.reset_action_resources()
 	ks.skill_cooldowns.clear()
 	_cast(tm, ks, "kensei_qiefan", ks.grid_position, ks)
-	_eq("浮生若梦不造成伤害：不耗若离", ks.held_states.stacks("kensei_ruoli"), 1)
+	_eq("浮生若梦不造成伤害：不耗若离", ks.held_states.stacks("kensei_ruoli"), 2)
 	_leave_action_phase(tm)
 
 

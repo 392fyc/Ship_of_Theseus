@@ -80,8 +80,7 @@ func _test_zhanji_qi_runtime(tm: Object, sword: Unit) -> void:
 	enemy.stats.lck = 0
 	enemy.stats.max_hp = 9999
 	enemy.stats.hp = 9999
-	# 防御归零：剑圣斩击「造成伤害后」才得印记（设计库 kensei_zhanji），伤害为 0 不得，
-	# 所以这里要让斩击真的打出伤害；9999 HP 确保不死。
+	# 防御归零：让斩击真的打出伤害（印记命中即得，伤害为 0 也得）；9999 HP 确保不死。
 	enemy.stats.def_attr = 0
 
 	# 把剑圣移到敌人相邻格（斩击 range diamond1-1）
