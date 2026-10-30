@@ -1270,10 +1270,8 @@ func _get_skill_entries() -> Array[Dictionary]:
 	var entries: Array[Dictionary] = []
 	if unit == null:
 		return entries
-	# ── 被动技能（心眼）置于技能栏最左侧（仅剑气类单位=剑圣；不可点/无键位/无冷却）──
+	# 心眼及其替换形态放在招架与居合之间，保留原有主动技能顺序。
 	var passive_entry: Dictionary = _build_passive_entry(unit)
-	if not passive_entry.is_empty():
-		entries.append(passive_entry)
 	for skill_id: String in unit.skill_ids:
 		var slot_skill_data: Dictionary = _get_skill_data(skill_id)
 		# ── 槽位提供者（如拔刀 slot_swap_provider）不独立列槽：仅作其 provider 槽
@@ -1293,10 +1291,12 @@ func _get_skill_entries() -> Array[Dictionary]:
 		# 保留原始槽位 ID 以便取消时恢复（附加字段，UI 可忽略）
 		entry["slot_origin_id"] = skill_id
 		entries.append(entry)
+	if not passive_entry.is_empty():
+		entries.insert(mini(3, entries.size()), passive_entry)
 	return entries
 
 
-## 心眼被动条目：技能栏最左侧、不可点、无键位、无冷却（仅剑气类=剑圣）。
+## 心眼条目及回忆替换形态；主动能力由当前形态决定。
 ## 描述只放效果本体（名字由 UI 的悬停标题补「【心眼】（被动）」）。
 ##
 ## ★ 说明文字必须照 _apply_xinyan_passive / Unit._get_xinyan_stat_bonus 的**实际**口径写。

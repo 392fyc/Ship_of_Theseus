@@ -298,7 +298,7 @@ func _build_skill_slot(entry: Dictionary, selected_skill_id: String, _index: int
 	var cooldown_turns: int = int(entry.get("cooldown", 0))
 	var available: bool = bool(entry.get("available", false))
 	var is_passive: bool = bool(entry.get("is_passive", false))
-	# 键位角标：主动技能由 update_entries 注入 1-4；被动显 "P" 标记。
+	# 键位角标：主动技能由 update_entries 按技能顺序注入 1-5；被动显 "P" 标记。
 	var hotkey: String = str(entry.get("hotkey", "")) if entry.has("hotkey") else ""
 	if is_passive:
 		hotkey = "P"

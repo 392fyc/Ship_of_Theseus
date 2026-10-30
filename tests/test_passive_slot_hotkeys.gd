@@ -1,5 +1,5 @@
 extends SceneTree
-## #98：通过真实战斗场景的按键入口验证被动槽替换前、期间、结束后的编号与鼠标选择。
+## 通过真实战斗按键验证技能顺序、被动转主动、恢复与图标辨识。
 
 const Adapter := preload("res://scripts/ui/hud/m2/dashboard_view_adapter.gd")
 const Hotkeys := preload("res://scripts/ui/skill_hotkeys.gd")
@@ -52,15 +52,15 @@ func _run() -> void:
 	_unit.skill_cooldowns["kensei_zhanji"] = 1
 	_scene._refresh_dashboard()
 	var unavailable: Array = Adapter.new().build(_manager.get_dashboard_data())["skills"]
-	_check("冷却不令编号漂移", unavailable[1].hotkey_text == "1" and unavailable[4].hotkey_text == "4")
+	_check("冷却不令编号漂移", unavailable[0].hotkey_text == "1" and unavailable[4].hotkey_text == "5")
 	await _key(KEY_1)
 	_check("不可用技能不触发且不跳到下一技能", str(_manager._selected_skill_id).is_empty())
 	_unit.skill_cooldowns.clear()
 	# 主动槽换形态仍继承原编号；仅改变测试载荷，不修改技能或玩法数据。
 	var state: Dictionary = _manager.get_dashboard_data()
-	state["skills"][3]["skill_id"] = "fixture_active_slot_form"
+	state["skills"][2]["skill_id"] = "fixture_active_slot_form"
 	var views: Array = Adapter.new().build(state)["skills"]
-	_check("主动槽替换形态保留三号键", views[3].skill_id == "fixture_active_slot_form" and views[3].hotkey_text == "3")
+	_check("主动槽替换形态保留三号键", views[2].skill_id == "fixture_active_slot_form" and views[2].hotkey_text == "3")
 	_manager._on_turn_ended(_unit)
 	_check("回合结束退出空想", not _unit.held_states.has("kensei_kongxiang"))
 	await _test_state("空想结束", false)
@@ -90,32 +90,38 @@ func _test_state(label: String, swapped: bool) -> void:
 	_check(label + "载荷提供实际被动身份", state.get("passive_skill_id") == _unit.passive_skill_id)
 	var views: Array = Adapter.new().build(state)["skills"]
 	var numbered: Array[Dictionary] = Hotkeys.numbered_entries(state["skills"], state["passive_skill_id"])
-	_check(label + "恰有四个数字键", numbered.size() == 4)
-	_check(label + "被动槽不显示数字", views[0].hotkey_text.is_empty())
-	_check(label + "保留鼠标激活能力", views[0].active_capable == swapped)
+	var expected: Array[String] = EXPECTED.duplicate()
+	if swapped:
+		expected.insert(3, "kensei_kongxiangjian")
+	_check(label + "当前主动技能均有数字键", numbered.size() == expected.size())
+	_check(label + "心眼在招架与居合之间", views[2].skill_id == "kensei_zhaojia" and views[4].skill_id == "kensei_juhe")
+	_check(label + "当前形态决定数字键", views[3].hotkey_text == ("4" if swapped else ""))
+	_check(label + "保留鼠标激活能力", views[3].active_capable == swapped)
 	var legacy := LegacyBar.new()
 	root.add_child(legacy)
 	var entries: Array[Dictionary] = []
 	entries.assign(state["skills"])
 	legacy.update_entries(entries, "", _unit.passive_skill_id)
 	var slots: Array = _scene._bottom_dashboard.get_composition().get_node("BottomRow/SkillShelf").get_skill_slots()
-	_check(label + "M2被动槽不显示数字角标", not slots[0].get_node("Content/HotkeyBadge").visible)
-	var icon: TextureRect = slots[0].get_node("Content/IconRect")
+	_check(label + "M2当前形态的数字角标", slots[3].get_node("Content/HotkeyBadge").visible == swapped)
+	var icon: TextureRect = slots[3].get_node("Content/IconRect")
 	_check(label + "M2被动槽显示实际图标", icon.visible and icon.texture != null)
 	if _base_passive_icon == null and not swapped:
 		_base_passive_icon = icon.texture
 	elif swapped:
 		_check(label + "主动替换图标区别于被动", icon.texture != null and icon.texture != _base_passive_icon)
+		_check(label + "空想剑不复用斩击图标", icon.texture != slots[0].get_node("Content/IconRect").texture)
 	else:
 		_check(label + "升级被动恢复原心眼图标", icon.texture != null and icon.texture == _base_passive_icon)
-	for index: int in range(4):
-		_check(label + "编号" + str(index + 1), numbered[index]["skill_id"] == EXPECTED[index] and views[index + 1].hotkey_text == str(index + 1))
-		_check(label + "M2角标" + str(index + 1), slots[index + 1].get_node("Content/HotkeyBadge/HotkeyText").text == str(index + 1))
-		_check(label + "旧技能栏角标" + str(index + 1), legacy._list.get_child(index + 2).key_text == str(index + 1))
-	_check(label + "旧被动槽不冒充数字键", legacy._list.get_child(1).key_text == ("" if swapped else "P"))
+	for index: int in range(expected.size()):
+		var slot_index: int = index if swapped or index < 3 else index + 1
+		_check(label + "编号" + str(index + 1), numbered[index]["skill_id"] == expected[index] and views[slot_index].hotkey_text == str(index + 1))
+		_check(label + "M2角标" + str(index + 1), slots[slot_index].get_node("Content/HotkeyBadge/HotkeyText").text == str(index + 1))
+		_check(label + "旧技能栏角标" + str(index + 1), legacy._list.get_child(slot_index + 1).key_text == str(index + 1))
+	_check(label + "旧技能栏按当前形态编号", legacy._list.get_child(4).key_text == ("4" if swapped else "P"))
 	_check(label + "视图未改写源载荷", state == before)
 	legacy.free()
-	for index: int in range(4):
+	for index: int in range(expected.size()):
 		_prepare()
 		await _key(KEY_1 + index)
 		if index == 2:
@@ -126,7 +132,7 @@ func _test_state(label: String, swapped: bool) -> void:
 			_check(label + "三号键使用招架", _unit.swift_used and int(_unit.skill_cooldowns.get("kensei_zhaojia", 0)) > 0)
 			_check(label + "招架完成", _manager.input_state != _manager.InputState.ANIMATING)
 		else:
-			_check(label + "实际按键" + str(index + 1), _manager._selected_skill_id == EXPECTED[index] and _manager.input_state == _manager.InputState.SKILL_TARGETING)
+			_check(label + "实际按键" + str(index + 1), _manager._selected_skill_id == expected[index] and _manager.input_state == _manager.InputState.SKILL_TARGETING)
 			_manager.request_cancel_action()
 			_check(label + "可以取消" + str(index + 1), str(_manager._selected_skill_id).is_empty())
 
@@ -135,7 +141,7 @@ func _test_mouse_replacement() -> void:
 	_prepare()
 	await process_frame
 	var slots: Array = _scene._bottom_dashboard.get_composition().get_node("BottomRow/SkillShelf").get_skill_slots()
-	var slot: Control = slots[0]
+	var slot: Control = slots[3]
 	_check("空想剑仍为可点击条目", slot.get("_view").skill_id == "kensei_kongxiangjian" and not slot.disabled)
 	var point: Vector2 = slot.get_global_rect().get_center()
 	var motion := InputEventMouseMotion.new()

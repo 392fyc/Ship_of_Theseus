@@ -144,7 +144,7 @@ func _build_skills(state: Dictionary, icon_textures: Dictionary, player_actions:
 		view.tooltip_text = _skill_tooltip(entry)
 		if not view.is_pure_passive():
 			view.resource_cost_display = _cost_display(entry.get("resource_cost_display"))
-		# 键位位置属于原始主动技能顺序；不可用与冷却只能拒绝激活，不能令后续技能改号。
+		# 按当前可主动使用的技能顺序编号；不可用与冷却不令后续技能改号。
 		var numbered_index: int = numbered.find(entry)
 		if player_actions and numbered_index >= 0:
 			view.hotkey_text = str(numbered_index + 1)
