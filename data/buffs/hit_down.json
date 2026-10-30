@@ -1,0 +1,16 @@
+{
+  "id": "hit_down",
+  "display_name": "Hit Down",
+  "icon": "HD",
+  "duration": 1,
+  "max_duration": 1,
+  "effect_type": "stat_mod",
+  "stat_key": "HIT",
+  "value": -20,
+  "is_percentage": false,
+  "trigger": "permanent",
+  "source_unit_id": "",
+  "stackable": false,
+  "max_stacks": 1,
+  "refresh_on_reapply": true
+}

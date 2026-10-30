@@ -62,6 +62,8 @@ static func decide_actions(unit: Unit, grid: Grid,
 			continue
 		var move_cost: int = unit.stats.mov - int(move_range[move_pos])
 		for target in targets:
+			if not unit.has_basic_attack:
+				break
 			if not _in_range(move_pos, target, atk_min_range, atk_range):
 				continue
 			var cand: Dictionary = _candidate(move_pos, move_cost, target, scored[target])
@@ -86,23 +88,70 @@ static func decide_actions(unit: Unit, grid: Grid,
 			taunting = _pick_taunting_cast(unit, planner, best, skill_scored, cfg, tie_break)
 		if not taunting.is_empty():
 			best = taunting
-		var attack_pos: Vector2i = best["pos"]
-		if attack_pos != unit.grid_position:
-			actions.append(GameAction.make_move(unit, attack_pos))
-		if skill_id == "":
-			actions.append(GameAction.make_attack(unit, best["target"]))
+
+	# 3. 功能技能（增益、减益、治疗；用户 2026-10-31「可用就用」）：按技能组顺序，
+	#    第一个有合法施放方式的标准动作技能取代攻击；迅捷技能在最终站位上另外各用一次。
+	var supports: Array = []
+	if planner != null:
+		supports = planner._ai_support_skills(unit)
+	var preferred: Unit = best.get("target") if not best.is_empty() else null
+	var free_cells: Dictionary = {}
+	for move_pos: Vector2i in move_range:
+		var cell := grid.get_cell(move_pos)
+		if cell.occupant == null or cell.occupant == unit:
+			free_cells[move_pos] = unit.stats.mov - int(move_range[move_pos])
+	var main_plan: Dictionary = {}
+	for support: Dictionary in supports:
+		if str(support["action_cost"]) != "standard":
+			continue
+		main_plan = _plan_support(unit, planner, support, free_cells, preferred, scored)
+		if not main_plan.is_empty():
+			break
+
+	var final_pos: Vector2i = unit.grid_position
+	var main_action: GameAction = null
+	if not main_plan.is_empty():
+		final_pos = main_plan["pos"]
+		main_action = GameAction.make_skill(unit, main_plan["skill_id"],
+			main_plan["target_pos"], main_plan.get("target"))
+	elif not best.is_empty():
+		final_pos = best["pos"]
+		var attack_skill: String = str(best.get("skill_id", ""))
+		if attack_skill == "":
+			main_action = GameAction.make_attack(unit, best["target"])
 		else:
-			actions.append(GameAction.make_skill(unit, skill_id, best["target_pos"], best.get("target")))
-		return actions
+			main_action = GameAction.make_skill(unit, attack_skill, best["target_pos"], best.get("target"))
 
-	# 3. Can't attack anyone — move toward nearest target
-	var nearest: Unit = _find_nearest(unit.grid_position, targets)
-	if nearest:
-		var approach_pos: Vector2i = _closest_reachable_to(
-			move_range, nearest.grid_position, unit, grid)
-		if approach_pos != unit.grid_position:
-			actions.append(GameAction.make_move(unit, approach_pos))
+	# 迅捷技能：已有主动作时只在它的站位施放；没有主动作时，第一个能用的迅捷技能决定站位。
+	var swift_actions: Array[GameAction] = []
+	var pos_fixed: bool = main_action != null
+	for support: Dictionary in supports:
+		if str(support["action_cost"]) != "swift":
+			continue
+		var cells: Dictionary = {final_pos: free_cells.get(final_pos, 0)} if pos_fixed else free_cells
+		var plan: Dictionary = _plan_support(unit, planner, support, cells, preferred, scored)
+		if plan.is_empty():
+			continue
+		final_pos = plan["pos"]
+		pos_fixed = true
+		swift_actions.append(GameAction.make_skill(unit, plan["skill_id"],
+			plan["target_pos"], plan.get("target")))
 
+	if main_action == null and swift_actions.is_empty():
+		# 4. 什么都做不了：没有普攻的单位（牧师）靠近友军待命（用户 2026-10-31）；
+		#    其余单位走向最近的玩家单位。
+		if not unit.has_basic_attack:
+			final_pos = _standby_cell(unit, all_units, targets, free_cells)
+		else:
+			var nearest: Unit = _find_nearest(unit.grid_position, targets)
+			if nearest:
+				final_pos = _closest_reachable_to(move_range, nearest.grid_position, unit, grid)
+
+	if final_pos != unit.grid_position:
+		actions.append(GameAction.make_move(unit, final_pos))
+	actions.append_array(swift_actions)
+	if main_action != null:
+		actions.append(main_action)
 	return actions
 
 
@@ -258,6 +307,133 @@ static func _pick_taunting_target(chosen: Dictionary, targets: Array[Unit],
 		if best.is_empty() or _better(cand, best, tie_break):
 			best = cand
 	return best
+
+
+## 一个功能技能在 `cells`（站位 → 移动消耗）里最好的施放方式；没有合法施放方式时返回空字典。
+## 按 `support.kind` 比较（用户 2026-10-31）：
+##   debuff：优先能打到这个敌人攻击时会选的目标 `preferred`，其次按范围内目标的攻击得分之和；
+##           选单位的减益在站位定下后优先嘲讽单位（R1.18）。
+##   heal：只在有人缺血时用，按实际补回的生命之和比较。
+##   buff：选单位的单体增益给生命比例最低的友军；范围或自身增益按「还没有这些状态」的友军人数比较，
+##         人数为 0 时不用。
+## 同分时移动少的优先，再比站位格与目标格（先 y 后 x）。
+static func _plan_support(unit: Unit, planner: Object, support: Dictionary, cells: Dictionary,
+		preferred: Unit, scored: Dictionary) -> Dictionary:
+	var skill_id: String = support["skill_id"]
+	var kind: String = support["kind"]
+	var best: Dictionary = {}
+	var best_key: Array = []
+	for pos: Vector2i in cells:
+		for cast: Dictionary in planner._ai_skill_casts(unit, skill_id, pos):
+			var key: Array = _support_key(kind, support, cast, preferred, scored)
+			if key.is_empty():
+				continue
+			key.append(-int(cells[pos]))
+			if best.is_empty() or _key_better(key, best_key, pos, best["pos"],
+					cast["target_pos"], best["target_pos"]):
+				best = {"pos": pos, "skill_id": skill_id, "target_pos": cast["target_pos"],
+					"target": cast.get("target_unit")}
+				best_key = key
+	if kind == "debuff" and not best.is_empty() and best.get("target") != null:
+		var taunt_best: Dictionary = {}
+		var taunt_key: Array = []
+		for cast: Dictionary in planner._ai_skill_casts(unit, skill_id, best["pos"]):
+			var target_unit: Unit = cast.get("target_unit")
+			if target_unit == null or not target_unit.has_taunt():
+				continue
+			var key: Array = _support_key(kind, support, cast, preferred, scored)
+			if key.is_empty():
+				continue
+			if taunt_best.is_empty() or _key_better(key, taunt_key, best["pos"], best["pos"],
+					cast["target_pos"], taunt_best["target_pos"]):
+				taunt_best = {"pos": best["pos"], "skill_id": skill_id,
+					"target_pos": cast["target_pos"], "target": target_unit}
+				taunt_key = key
+		if not taunt_best.is_empty():
+			best = taunt_best
+	return best
+
+
+## 一次功能技能施放的比较键（越大越好）；不值得施放时返回空数组。
+static func _support_key(kind: String, support: Dictionary, cast: Dictionary,
+		preferred: Unit, scored: Dictionary) -> Array:
+	var hit_units: Array = cast.get("hit_units", [])
+	if hit_units.is_empty():
+		return []
+	match kind:
+		"debuff":
+			var total: float = 0.0
+			for hit_unit: Unit in hit_units:
+				total += float((scored.get(hit_unit, {}) as Dictionary).get("score", 0.0))
+			return [1 if hit_units.has(preferred) else 0, total]
+		"heal":
+			var healed: int = 0
+			for hit_unit: Unit in hit_units:
+				healed += mini(hit_unit.preview_heal(int(support["heal"])),
+					hit_unit.stats.max_hp - hit_unit.stats.hp)
+			return [healed] if healed > 0 else []
+		_:
+			var target_unit: Unit = cast.get("target_unit")
+			if bool(cast.get("single", false)) and target_unit != null \
+					and not bool(cast.get("self", false)):
+				# 单体友方增益：给生命比例最低的友军（用户 2026-10-31 护盾术）。
+				return [-float(target_unit.stats.hp) / maxf(1.0, float(target_unit.stats.max_hp))]
+			var lacking: int = 0
+			for hit_unit: Unit in hit_units:
+				if _lacks_any(hit_unit, support["effect_ids"]):
+					lacking += 1
+			return [lacking] if lacking > 0 else []
+
+
+static func _lacks_any(target: Unit, effect_ids: Array) -> bool:
+	for effect_id: Variant in effect_ids:
+		var id: String = str(effect_id)
+		if id == "shield":
+			if target.shield <= 0:
+				return true
+		elif id.begins_with("held:"):
+			if not target.held_states.has(id.trim_prefix("held:")):
+				return true
+		elif target.get_buff(id) == null:
+			return true
+	return false
+
+
+## 键逐项比较，大者优先；全部相同时移动少的已在键末尾，再比站位格与目标格（先 y 后 x）。
+static func _key_better(a: Array, b: Array, pos_a: Vector2i, pos_b: Vector2i,
+		cell_a: Vector2i, cell_b: Vector2i) -> bool:
+	for i: int in range(mini(a.size(), b.size())):
+		if absf(float(a[i]) - float(b[i])) > SCORE_EPSILON:
+			return float(a[i]) > float(b[i])
+	var cmp: int = _compare_yx(pos_a, pos_b)
+	if cmp != 0:
+		return cmp < 0
+	return _compare_yx(cell_a, cell_b) < 0
+
+
+## 没有普攻、也没有可用技能的单位（牧师）靠近友军待命（用户 2026-10-31）：
+## 走到离最近友军最近的格子；相同时离最近玩家单位远的优先，再比移动少、格子先 y 后 x。
+static func _standby_cell(unit: Unit, all_units: Array, targets: Array[Unit],
+		cells: Dictionary) -> Vector2i:
+	var allies: Array[Unit] = []
+	for u in all_units:
+		if u != unit and u.faction == unit.faction and u.stats.is_alive() and not u.is_illusion:
+			allies.append(u)
+	if allies.is_empty():
+		return unit.grid_position
+	var best_pos: Vector2i = unit.grid_position
+	var best_key: Array = []
+	for pos: Vector2i in cells:
+		var ally_dist: int = _manhattan(pos, _find_nearest(pos, allies).grid_position)
+		var enemy_dist: int = 0
+		var nearest_enemy: Unit = _find_nearest(pos, targets)
+		if nearest_enemy != null:
+			enemy_dist = _manhattan(pos, nearest_enemy.grid_position)
+		var key: Array = [-ally_dist, enemy_dist, -int(cells[pos])]
+		if best_key.is_empty() or _key_better(key, best_key, pos, best_pos, pos, best_pos):
+			best_pos = pos
+			best_key = key
+	return best_pos
 
 
 ## R1.18 的技能版：站位与技能已定，在该站位上这个技能的施放方式里，只看选中嘲讽单位的那些，

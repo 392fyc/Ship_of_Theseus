@@ -16,7 +16,7 @@
   "weapon_id": "wpn_magical_ranged_basic",
   "damage_type": "magical",
   "basic_attack_range": { "min": 1, "max": 2 },
-  "skill_ids": [],
+  "skill_ids": ["goblin_curse"],
   "ai_behavior": "SUPPORT",
   "loot_table": [
     {
@@ -31,5 +31,5 @@
       "chance": 30
     }
   ],
-  "description": "后排哥布林，普通攻击之外会施放诅咒（诅咒随下一个 PR 加入）。"
+  "description": "后排哥布林，普通攻击之外会施放诅咒。"
 }

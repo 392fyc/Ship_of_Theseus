@@ -1,0 +1,28 @@
+{
+  "id": "goblin_priest_heal",
+  "target_mode": "单位",
+  "name": "治疗",
+  "damage_type": "magical",
+  "power": 0,
+  "hit_bonus": 0,
+  "range": { "type": "diamond", "min": 0, "max": 1 },
+  "area": { "type": "single", "size": 0 },
+  "attack_type": "melee",
+  "cooldown": 0,
+  "action_cost": "standard",
+  "timing_constraint": "any",
+  "effects": [
+    {
+      "type": "heal",
+      "chance": 100,
+      "value": 20
+    }
+  ],
+  "tags": [
+    "heal",
+    "support",
+    "enemy"
+  ],
+  "description": "为自身或 1 格内的一名友军恢复 20 点生命。",
+  "_note": "用户 2026-10-31 定：治疗，1 格。治疗量 20、可治疗自身（射程 0–1）由 Claude 推定 [占位]；用户没给冷却，不设冷却。"
+}
