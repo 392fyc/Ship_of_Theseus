@@ -2801,6 +2801,10 @@ func _get_area_effect_relation(skill_data: Dictionary) -> String:
 func _get_skill_target_relation(skill_data: Dictionary) -> String:
 	if _skill_target_mode(skill_data) == TARGET_MODE_SELF:
 		return "self"
+	# 没有伤害、作用于敌方的技能（诅咒）显式写 target_relation = enemy；没写时按有无伤害判断。
+	var declared: String = str(skill_data.get("target_relation", ""))
+	if declared != "":
+		return declared
 	if _is_support_skill(skill_data):
 		return "ally"
 	return "enemy"
@@ -2881,14 +2885,16 @@ func _legacy_target_mode_from_area(skill_data: Dictionary) -> String:
 	return TARGET_MODE_UNIT
 
 
+## 没有伤害的技能：作用于敌方的（诅咒）按敌对效果施加，过正常的状态抵抗；不掷命中。
 func _apply_support_skill(user: Unit, skill_data: Dictionary,
 		target_units: Array[Unit]) -> void:
+	var is_hostile: bool = _get_skill_target_relation(skill_data) == "enemy"
 	for target_unit: Unit in target_units:
 		for effect_value: Variant in skill_data.get("effects", []):
 			if not (effect_value is Dictionary):
 				continue
 			_apply_skill_effect_to_unit(
-				user, target_unit, effect_value as Dictionary, false)
+				user, target_unit, effect_value as Dictionary, is_hostile)
 
 
 ## 持有型状态效果的层数：stacks（缺省 1）；写了 stacks_from_qi 时 = base + 使用者剑气 ÷ qi_step（向下取整），
@@ -2935,6 +2941,10 @@ func _apply_skill_effect_to_unit(user: Unit, target_unit: Unit,
 		"heal":
 			if effect_value > 0:
 				target_unit.heal(effect_value)
+		"shield":
+			# 护盾与现有护盾相加（R1.17）。
+			if effect_value > 0:
+				target_unit.gain_shield(effect_value)
 		"damage", "dot":
 			if effect_value > 0:
 				target_unit.take_damage(effect_value, "pure")
@@ -3523,9 +3533,49 @@ func _ai_attack_skill_ids(unit: Unit) -> Array[String]:
 	return out
 
 
+## 敌人 AI：本回合能用的功能技能（没有伤害），按技能组顺序。每项是
+## `{skill_id, kind, action_cost, heal, effect_ids}`：
+## kind = "debuff"（作用于敌方）、"heal"（带治疗效果）、"buff"（其余友方或自身技能）；
+## heal 是每个目标的治疗量；effect_ids 是会施加的状态 id（护盾记作 "shield"，持有型状态记作
+## "held:<id>"），用来判断目标是否已经有了。
+func _ai_support_skills(unit: Unit) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for skill_id: String in unit.skill_ids:
+		var skill_data: Dictionary = _get_skill_data(skill_id)
+		if skill_data.is_empty() or not _is_support_skill(skill_data):
+			continue
+		if not bool(GameAction.validate_skill_usage(unit, skill_data).get("ok", false)):
+			continue
+		var heal: int = 0
+		var effect_ids: Array[String] = []
+		for effect_value: Variant in skill_data.get("effects", []):
+			if not effect_value is Dictionary:
+				continue
+			var effect: Dictionary = effect_value
+			if effect.has("held_state_id"):
+				effect_ids.append("held:" + str(effect["held_state_id"]))
+				continue
+			var effect_id: String = str(effect.get("effect_id", effect.get("type", "")))
+			if effect_id == "heal":
+				heal += int(effect.get("value", 0))
+			elif effect_id != "":
+				effect_ids.append(effect_id)
+		var kind: String = "buff"
+		if _get_skill_target_relation(skill_data) == "enemy":
+			kind = "debuff"
+		elif heal > 0:
+			kind = "heal"
+		out.append({"skill_id": skill_id, "kind": kind,
+			"action_cost": str(skill_data.get("action_cost", "standard")),
+			"heal": heal, "effect_ids": effect_ids})
+	return out
+
+
 ## 敌人 AI：站在 `origin` 时这个技能的全部施放方式。每项是
-## `{target_pos, target_unit, hit_units, single}`：`target_unit` 只在先选单位的技能里有值；
-## `hit_units` 是范围内会受影响的敌方单位；`single` 表示单体（选单位、范围只有一格）。
+## `{target_pos, target_unit, hit_units, single}`：`target_unit` 只在先选单位或以自身为目标的技能里有值；
+## `hit_units` 是范围内会受影响的单位（按技能的目标关系：敌方、友方或自身）；
+## `single` 表示单体（选单位、范围只有一格，或以自身为目标的功能技能）；后者另有 `self = true`。
+## 以自身为中心的伤害技能按 AOE 处理，范围内没有敌人时不返回。
 ## 范围与方向的算法与执行时相同（`_get_skill_area_direction` 在没有选定方向时取起点指向目标格）。
 func _ai_skill_casts(unit: Unit, skill_id: String, origin: Vector2i) -> Array[Dictionary]:
 	var casts: Array[Dictionary] = []
@@ -3534,7 +3584,23 @@ func _ai_skill_casts(unit: Unit, skill_id: String, origin: Vector2i) -> Array[Di
 		return casts
 	var range_data: Dictionary = skill_data.get("range", {})
 	var area_data: Dictionary = skill_data.get("area", {})
-	var unit_mode: bool = _skill_target_mode(skill_data) == TARGET_MODE_UNIT
+	var mode: String = _skill_target_mode(skill_data)
+	var relation: String = _get_skill_target_relation(skill_data)
+	if mode == TARGET_MODE_SELF:
+		var self_units: Array[Unit] = _get_units_in_skill_area(unit, skill_data,
+			AreaCalculator.calculate_cells(grid, origin, area_data, Vector2i.ZERO))
+		if _is_support_skill(skill_data):
+			# 以自身为目标的功能技能：作用于自己（范围增益则是范围内的友军）。
+			if self_units.is_empty():
+				self_units = [unit]
+			casts.append({"target_pos": origin, "target_unit": unit,
+				"hit_units": self_units, "single": true, "self": true})
+		elif not self_units.is_empty():
+			# 以自身为中心的范围伤害：按 AOE 打分，范围内没有敌人时不施放。
+			casts.append({"target_pos": origin, "target_unit": null,
+				"hit_units": self_units, "single": false})
+		return casts
+	var unit_mode: bool = mode == TARGET_MODE_UNIT
 	var single: bool = unit_mode and str(area_data.get("type", "single")) == "single"
 	var directions: Array[Vector2i] = [Vector2i.ZERO]
 	if str(range_data.get("type", "")) == "line":
@@ -3545,7 +3611,7 @@ func _ai_skill_casts(unit: Unit, skill_id: String, origin: Vector2i) -> Array[Di
 			var target_unit: Unit = null
 			if unit_mode:
 				target_unit = grid.get_unit_at(cell_pos)
-				if not _matches_target_relation(unit, target_unit, "enemy"):
+				if not _matches_target_relation(unit, target_unit, relation):
 					continue
 			var area_direction: Vector2i = direction if direction != Vector2i.ZERO \
 				else RangeCalculator.direction_from_to(origin, cell_pos)

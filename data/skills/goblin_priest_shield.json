@@ -1,0 +1,27 @@
+{
+  "id": "goblin_priest_shield",
+  "target_mode": "单位",
+  "name": "护盾术",
+  "damage_type": "magical",
+  "power": 0,
+  "hit_bonus": 0,
+  "range": { "type": "diamond", "min": 1, "max": 2 },
+  "area": { "type": "single", "size": 0 },
+  "attack_type": "ranged",
+  "cooldown": 4,
+  "action_cost": "swift",
+  "timing_constraint": "any",
+  "effects": [
+    {
+      "type": "shield",
+      "value": 15
+    }
+  ],
+  "tags": [
+    "shield",
+    "support",
+    "enemy"
+  ],
+  "description": "为 1–2 格内的一名友军施加 15 点护盾。",
+  "_note": "用户 2026-10-31 定：单体、1–2 格、冷却 4、迅捷动作。护盾量 15 由 Claude 推定 [占位]，与现有护盾相加（R1.17）。"
+}
