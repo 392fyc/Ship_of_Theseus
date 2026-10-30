@@ -10,6 +10,7 @@ extends Node2D
 # class_name DamageForecaster 仍在文件内声明，编辑器/真机可全局引用）。
 const DamageForecasterScript: GDScript = preload("res://scripts/ui/damage_forecaster.gd")
 const RuntimeDashboardScript: GDScript = preload("res://scripts/ui/hud/m2/runtime_dashboard.gd")
+const SkillHotkeys := preload("res://scripts/ui/skill_hotkeys.gd")
 const UnitOverheadLayoutScript: GDScript = preload("res://scripts/ui/unit_overhead_layout.gd")
 
 var _turn_order_bar: TurnOrderBar = null
@@ -485,11 +486,8 @@ func _try_trigger_skill_slot(slot_index: int) -> void:
 	if not bool(data.get("show_actions", false)):
 		return
 	var entries: Array = data.get("skills", [])
-	# 键 1-4 仅对应「主动」技能（跳过心眼等被动条目），与技能栏键位角标 1-4 一致。
-	var active: Array = []
-	for e: Dictionary in entries:
-		if bool(e.get("active_capable", not bool(e.get("is_passive", false)))):
-			active.append(e)
+	# 与两套技能栏共用编号，被动槽的临时主动形态仍由鼠标点击。
+	var active: Array[Dictionary] = SkillHotkeys.numbered_entries(entries, str(data.get("passive_skill_id", "")))
 	var idx: int = slot_index - 1
 	if idx < 0 or idx >= active.size():
 		return

@@ -226,6 +226,7 @@ func get_dashboard_data() -> Dictionary:
 		"mode": "enemy" if is_enemy_info else "player",
 		"unit_name": info_unit.unit_name,
 		"unit_label": info_unit.get_short_label(),
+		"passive_skill_id": info_unit.passive_skill_id,
 		"hp": info_unit.stats.hp,
 		"hp_max": info_unit.stats.max_hp,
 		"hp_ratio": float(info_unit.stats.hp) / maxf(1.0, float(info_unit.stats.max_hp)),
