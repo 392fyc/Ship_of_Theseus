@@ -634,7 +634,8 @@ func _do_enemy_turn(unit: Unit) -> void:
 			turn_manager.end_current_turn()
 		return
 
-	var actions: Array[GameAction] = EnemyAI.decide_actions(unit, grid, units)
+	var actions: Array[GameAction] = EnemyAI.decide_actions(
+		unit, grid, units, _forecast_attack_for_ai)
 
 	if actions.is_empty():
 		print("[AI] %s: no actions (idle)" % unit.unit_name)
@@ -3485,6 +3486,13 @@ func _build_hostile_action_context(attacker: Unit, defender: Unit,
 	action_data["damage_total_modifiers"] = totals
 	_apply_debug_determinism(action_data)
 	return action_data
+
+
+## 敌人 AI 打分用的预告：与玩家悬停预告同一套上下文与公式。
+func _forecast_attack_for_ai(attacker: Unit, target: Unit) -> Dictionary:
+	var action: GameAction = GameAction.make_attack(attacker, target)
+	var ctx: Dictionary = _build_hostile_action_context(attacker, target, action.data)
+	return DamageCalculator.preview_attack(attacker, target, ctx)
 
 
 func _held_state_skill_power_bonus(attacker: Unit) -> float:
