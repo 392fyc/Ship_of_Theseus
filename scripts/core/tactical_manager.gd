@@ -3531,15 +3531,9 @@ func _forecast_attack_for_ai(attacker: Unit, target: Unit) -> Dictionary:
 ## 位移技能和先选敌人再选落点的技能不在内。顺序同技能组。
 func _ai_attack_skill_ids(unit: Unit) -> Array[String]:
 	var out: Array[String] = []
-	for skill_id: String in unit.skill_ids:
+	for skill_id: String in _ai_current_skill_ids(unit):
 		var skill_data: Dictionary = _get_skill_data(skill_id)
-		if skill_data.is_empty() or _is_support_skill(skill_data):
-			continue
-		if float(skill_data.get("power", 0)) <= 0.0 \
-				and (skill_data.get("damage_entries", []) as Array).is_empty():
-			continue
-		if bool(skill_data.get("displacement", false)) \
-				or _skill_landing_mode(skill_data) == LANDING_MODE_ADJACENT:
+		if not _ai_is_damage_skill(skill_data) or _ai_is_move_skill(skill_data):
 			continue
 		if not bool(GameAction.validate_skill_usage(unit, skill_data).get("ok", false)):
 			continue
@@ -3547,16 +3541,79 @@ func _ai_attack_skill_ids(unit: Unit) -> Array[String]:
 	return out
 
 
+## 敌人 AI：本回合能用的位移攻击技能（一闪、回斩这类消耗移动机会的技能）。
+## 它们和普通移动二选一：AI 把「位移技能 + 落点上的最佳出手」与「移动 + 出手」比较。
+func _ai_move_skill_ids(unit: Unit) -> Array[String]:
+	var out: Array[String] = []
+	for skill_id: String in _ai_current_skill_ids(unit):
+		var skill_data: Dictionary = _get_skill_data(skill_id)
+		if not _ai_is_damage_skill(skill_data) or not _ai_is_move_skill(skill_data):
+			continue
+		if not bool(GameAction.validate_skill_usage(unit, skill_data).get("ok", false)):
+			continue
+		out.append(skill_id)
+	return out
+
+
+## 敌人 AI 的资源预算用：技能的剑气与印记消耗、印记门槛、是否占用迅捷行动点（swift_limit 为 -1 时不占）。
+func _ai_skill_cost(unit: Unit, skill_id: String) -> Dictionary:
+	var skill_data: Dictionary = _get_skill_data(skill_id)
+	var qi: int = int(skill_data.get("qi_cost", 0))
+	if qi > 0:
+		qi += unit.get_harmony_extra()
+	return {"qi": qi, "qi_overdraft": unit.allows_qi_overdraft(),
+		"marks": int(skill_data.get("mark_cost", 0)),
+		"marks_needed": maxi(int(skill_data.get("requires_marks", 0)), int(skill_data.get("mark_cost", 0))),
+		"uses_swift": str(skill_data.get("action_cost", "")) == "swift" and int(skill_data.get("swift_limit", 1)) != -1}
+
+
+## 当前槽位上的技能：与技能栏同一规则（槽位提供者不单独列出、交替槽取当前形态、
+## slot_swap 换出的形态），另加被动槽在某状态期间换成的主动技能（〔空想剑〕）。
+func _ai_current_skill_ids(unit: Unit) -> Array[String]:
+	var out: Array[String] = []
+	for skill_id: String in unit.skill_ids:
+		var slot_skill_data: Dictionary = _get_skill_data(skill_id)
+		if bool(slot_skill_data.get("slot_swap_provider", false)):
+			continue
+		var form_id: String = unit.resolve_slot_form(skill_id)
+		if form_id != skill_id:
+			slot_skill_data = _get_skill_data(form_id)
+		out.append(unit.get_visible_skill_id(form_id,
+			str(slot_skill_data.get("slot_swap_trigger", "")),
+			str(slot_skill_data.get("slot_swap_target", "")),
+			_slot_swap_requires(slot_skill_data)))
+	var passive_form: String = _passive_slot_skill_id(unit)
+	if passive_form != "":
+		out.append(passive_form)
+	return out
+
+
+func _ai_is_damage_skill(skill_data: Dictionary) -> bool:
+	return not skill_data.is_empty() and not _is_support_skill(skill_data) and (
+		float(skill_data.get("power", 0)) > 0.0
+		or not (skill_data.get("damage_entries", []) as Array).is_empty())
+
+
+func _ai_is_move_skill(skill_data: Dictionary) -> bool:
+	return bool(skill_data.get("displacement", false)) \
+		or _skill_landing_mode(skill_data) == LANDING_MODE_ADJACENT
+
+
 ## 敌人 AI：本回合能用的功能技能（没有伤害），按技能组顺序。每项是
 ## `{skill_id, kind, action_cost, heal, effect_ids}`：
-## kind = "debuff"（作用于敌方）、"heal"（带治疗效果）、"buff"（其余友方或自身技能）；
+## kind = "debuff"（作用于敌方）、"heal"（带治疗效果）、"summon"（召唤）、
+## "self"（以自身为目标、不施加状态，如〔三段斩〕）、"buff"（其余友方或自身技能）；
+## 与召唤物换位（〔颠倒〕）不返回。
 ## heal 是每个目标的治疗量；effect_ids 是会施加的状态 id（护盾记作 "shield"，持有型状态记作
 ## "held:<id>"），用来判断目标是否已经有了。
 func _ai_support_skills(unit: Unit) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
-	for skill_id: String in unit.skill_ids:
+	for skill_id: String in _ai_current_skill_ids(unit):
 		var skill_data: Dictionary = _get_skill_data(skill_id)
 		if skill_data.is_empty() or not _is_support_skill(skill_data):
+			continue
+		# 与召唤物换位（〔颠倒〕）没有明确的使用时机，AI 不用。
+		if bool(skill_data.get("swap_with_summon", false)):
 			continue
 		if not bool(GameAction.validate_skill_usage(unit, skill_data).get("ok", false)):
 			continue
@@ -3579,6 +3636,11 @@ func _ai_support_skills(unit: Unit) -> Array[Dictionary]:
 			kind = "debuff"
 		elif heal > 0:
 			kind = "heal"
+		elif skill_data.has("summon"):
+			kind = "summon"
+		elif effect_ids.is_empty() and _skill_target_mode(skill_data) == TARGET_MODE_SELF:
+			# 以自身为目标、不施加状态的功能技能（〔三段斩〕：消耗印记换剑气）：可用就用。
+			kind = "self"
 		out.append({"skill_id": skill_id, "kind": kind,
 			"action_cost": str(skill_data.get("action_cost", "standard")),
 			"heal": heal, "effect_ids": effect_ids})
@@ -3600,6 +3662,16 @@ func _ai_skill_casts(unit: Unit, skill_id: String, origin: Vector2i) -> Array[Di
 	var area_data: Dictionary = skill_data.get("area", {})
 	var mode: String = _skill_target_mode(skill_data)
 	var relation: String = _get_skill_target_relation(skill_data)
+	if bool(skill_data.get("displacement", false)):
+		return _ai_displacement_casts(unit, skill_data, origin)
+	if _skill_landing_mode(skill_data) == LANDING_MODE_ADJACENT:
+		return _ai_landing_casts(unit, skill_data, origin)
+	if bool(skill_data.get("requires_empty_cell", false)):
+		for cell_pos: Vector2i in RangeCalculator.calculate_cells(grid, origin, range_data):
+			if _is_empty_passable(cell_pos):
+				casts.append({"target_pos": cell_pos, "target_unit": null,
+					"hit_units": [], "single": false})
+		return casts
 	if mode == TARGET_MODE_SELF:
 		var self_units: Array[Unit] = _get_units_in_skill_area(unit, skill_data,
 			AreaCalculator.calculate_cells(grid, origin, area_data, Vector2i.ZERO))
@@ -3638,6 +3710,42 @@ func _ai_skill_casts(unit: Unit, skill_id: String, origin: Vector2i) -> Array[Di
 	return casts
 
 
+## 位移技能（〔一闪〕）：每个方向上每个可落脚的格子各算一种，受伤的是途经格上的敌人。
+## 落点必须可通行且没有别人（与 _is_displacement_landing_valid 同条件，起点用 origin）。
+## 途经没有敌人的也返回：位移本身可以当作移动，接着在落点出手。
+func _ai_displacement_casts(unit: Unit, skill_data: Dictionary,
+		origin: Vector2i) -> Array[Dictionary]:
+	var casts: Array[Dictionary] = []
+	var range_data: Dictionary = skill_data.get("range", {})
+	for direction: Vector2i in RangeCalculator.get_line_directions(grid, origin, range_data):
+		for landing: Vector2i in RangeCalculator.calculate_cells(grid, origin, range_data, direction):
+			if landing == origin or not grid.is_valid(landing):
+				continue
+			var cell: Cell = grid.get_cell(landing)
+			if cell == null or not cell.is_passable() or (cell.occupant != null and cell.occupant != unit):
+				continue
+			var hit_units: Array[Unit] = _get_units_in_skill_area(unit, skill_data,
+				_get_displacement_path_cells(origin, landing))
+			casts.append({"target_pos": landing, "target_unit": null, "hit_units": hit_units,
+				"single": false, "landing": landing})
+	return casts
+
+
+## 先选敌人再选落点（〔回斩〕）：射程内每个敌人的每个上下左右相邻空格各算一种。
+func _ai_landing_casts(unit: Unit, skill_data: Dictionary,
+		origin: Vector2i) -> Array[Dictionary]:
+	var casts: Array[Dictionary] = []
+	var relation: String = _get_skill_target_relation(skill_data)
+	for cell_pos: Vector2i in RangeCalculator.calculate_cells(grid, origin, skill_data.get("range", {})):
+		var target_unit: Unit = grid.get_unit_at(cell_pos)
+		if not _matches_target_relation(unit, target_unit, relation):
+			continue
+		for landing: Vector2i in _get_adjacent_landing_cells(unit, cell_pos):
+			casts.append({"target_pos": cell_pos, "target_unit": target_unit,
+				"hit_units": [target_unit], "single": true, "landing": landing})
+	return casts
+
+
 ## 敌人 AI：用某个技能打某个目标的预告，与玩家悬停预告同一套上下文与公式。
 ## 预告不随攻击者站位变化，所以按当前位置构建载荷。`primary` 为 false 时按溅射目标算
 ## （乘 splash_damage_pct，与执行时 _execute_skill_action 的主目标与溅射区分一致）。
@@ -3658,17 +3766,27 @@ func _ai_forecast_skill(attacker: Unit, target: Unit, skill_id: String,
 ## 移动没有发生或目标格已不是合法的施放方式时返回 null，跳过这次技能（执行路径不再检查射程）。
 func _rebuild_ai_skill_action(unit: Unit, action: GameAction) -> GameAction:
 	var skill_id: String = str(action.data.get("skill_id", ""))
+	# 计划之后状态可能变了（位移技能给了剑气、换了槽位形态）：技能已不在当前槽位上就跳过。
+	if not _ai_current_skill_ids(unit).has(skill_id):
+		print("[AI] %s: skill %s 已不在当前槽位上，跳过" % [unit.unit_name, skill_id])
+		return null
+	var landing: Vector2i = LANDING_ANCHOR_NONE
+	if action.data.has("ai_landing"):
+		landing = _deserialize_vector2i(action.data["ai_landing"])
 	var valid: bool = false
 	for cast: Dictionary in _ai_skill_casts(unit, skill_id, unit.grid_position):
-		if cast["target_pos"] == action.target_pos and cast["target_unit"] == action.target_unit:
+		if cast["target_pos"] == action.target_pos and cast["target_unit"] == action.target_unit \
+				and cast.get("landing", LANDING_ANCHOR_NONE) == landing:
 			valid = true
 			break
 	if not valid:
 		print("[AI] %s: skill %s 的目标已不合法，跳过" % [unit.unit_name, skill_id])
 		return null
 	_targeting_direction = Vector2i.ZERO
-	return _build_skill_action(unit, action.target_pos, action.target_unit,
-		LANDING_ANCHOR_NONE, skill_id)
+	# 位移技能的落点就是目标格；先选敌人再选落点的技能单独带落点。
+	var landing_anchor: Vector2i = landing \
+		if _skill_landing_mode(_get_skill_data(skill_id)) == LANDING_MODE_ADJACENT else LANDING_ANCHOR_NONE
+	return _build_skill_action(unit, action.target_pos, action.target_unit, landing_anchor, skill_id)
 
 
 func _held_state_skill_power_bonus(attacker: Unit) -> float:
