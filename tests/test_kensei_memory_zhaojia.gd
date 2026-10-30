@@ -9,7 +9,7 @@ extends SceneTree
 ##   ③ 见切：架势（自身回合内技能伤害总降 20%、额外闪避 = 技巧 50%、嘲讽）、见切层数按剑气、再次获得设为本次层数。
 ##   ④ 反击：敌方攻击动作结束后、相邻、剑气 ≥ 10 → 耗 1 层与 10 剑气反击一次；层数用完见切结束、架势照常；
 ##      不相邻、剑气不足、没有层数都不反击；反击不吃架势总降。
-##   ⑤ 嘲讽（R1.18）：敌人在合法目标里优先选带嘲讽的单位，多个时按原优先级。
+##   ⑤ 嘲讽（R1.18）：敌人站位定下后，在合法目标里优先选带嘲讽的单位，多个时按原优先级（得分）。
 ##   ⑥ 浮生若梦：架势总降 25%；若即把原本会命中的攻击改为回避并给若离、必中与范围攻击不受影响、
 ##      普通控制改为抵抗；若离在造成技能伤害时耗 1 层得 15 剑气，不造成伤害的技能不耗。
 ##
@@ -260,13 +260,18 @@ func _test_taunt(swords: Array[Unit]) -> void:
 	a.stats.hp = 900
 	b.stats.hp = 100
 	var targets: Array[Unit] = [a, b]
-	# 原逻辑选射程内血量最低的 b；有嘲讽时改选 a。
-	var origin: Vector2i = Vector2i(3, 3)  # 到 a、b 都是 4 格
-	_eq("射程内有嘲讽单位：选它", EnemyAI._find_target_in_range(origin, targets, 1, 4), a)
-	_eq("嘲讽单位不在射程内：按原逻辑", EnemyAI._find_target_in_range(Vector2i(5, 4), targets, 1, 1), b)
-	_eq("移动后挑嘲讽目标", EnemyAI._pick_taunting_target(Vector2i(0, 7), Vector2i(1, 2), targets, 1, 1), a)
-	_eq("移动位置射程内没有嘲讽目标：返回空", EnemyAI._pick_taunting_target(
-		Vector2i(0, 7), Vector2i(5, 4), targets, 1, 1), null)
+	# 原逻辑（得分）选 b；站位定下后，射程内有嘲讽单位时改选 a，站位不变。
+	var scored: Dictionary = {a: {"score": 1.0, "kill": false}, b: {"score": 50.0, "kill": true}}
+	var tie: Array = ["kill", "move_cells", "target_hp", "cell_yx"]
+	var at_33: Dictionary = {"pos": Vector2i(3, 3), "move_cost": 2, "target": b,
+		"score": 50.0, "kill": true}  # 到 a、b 都是 4 格
+	var picked: Dictionary = EnemyAI._pick_taunting_target(at_33, targets, scored, 1, 4, tie)
+	_eq("站位射程内有嘲讽单位：改选它", picked.get("target"), a)
+	_eq("改选目标不改站位", picked.get("pos"), Vector2i(3, 3))
+	var at_54: Dictionary = {"pos": Vector2i(5, 4), "move_cost": 0, "target": b,
+		"score": 50.0, "kill": true}
+	_check("站位射程内没有嘲讽单位：沿用原选择",
+		EnemyAI._pick_taunting_target(at_54, targets, scored, 1, 1, tie).is_empty())
 	a.stats.hp = 999
 	b.stats.hp = 999
 

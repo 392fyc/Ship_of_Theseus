@@ -1,0 +1,8 @@
+{
+  "id": "target_scoring",
+  "damage_weight": 1.0,
+  "kill_bonus": 10,
+  "decoy_bonus": 6,
+  "tie_break": ["kill", "move_cells", "target_hp", "cell_yx"],
+  "_note": "敌人普通攻击选位置与目标的权重（scripts/core/enemy_ai.gd）。得分 = 命中率 × 有效伤害 × damage_weight + 击杀概率 × kill_bonus，〔影〕再加 decoy_bonus；kill_bonus 与 decoy_bonus 以“相当于多少点伤害”计。kill_bonus 为占位，decoy_bonus 为推断；结构与两项取值由用户 2026-10-30 按方案页的推荐选定。tie_break 是同分时依次比较的项：能击杀、移动消耗少、目标剩余生命低、目标所在格先 y 后 x 小；全部相同时再比站位格。"
+}

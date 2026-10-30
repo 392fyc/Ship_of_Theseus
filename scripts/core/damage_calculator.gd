@@ -136,12 +136,8 @@ static func resolve_attack(attacker: Unit, defender: Unit,
 	var final_dmg: float = base_damage * skill_multiplier * terrain_multiplier * outer_layer_multiplier(action_data)
 
 	if result.crit:
-		# R1.3 暴击倍率 = (1.5 + Σ 加算 crit_damage_bonus) × Π 乘算 crit_damage_mult，
-		# 加算先于乘算。crit_damage_mult 默认 1.0 → 无乘算修正时与引入本通道前完全一致。
-		# 例：拔刀「暴击倍率 ×1.2」是乘算 → 1.5 × 1.2 = 1.8（2026-08-03 用户裁决 F [已定]）。
-		var crit_mult: float = (1.5 + float(action_data.get("crit_damage_bonus", 0.0))) \
-			* float(action_data.get("crit_damage_mult", 1.0))
-		final_dmg *= crit_mult
+		# R1.3 暴击倍率，见 crit_multiplier。
+		final_dmg *= crit_multiplier(action_data)
 
 	final_dmg *= relic_multiplier * final_multiplier
 
@@ -217,13 +213,19 @@ static func preview_attack(attacker: Unit, defender: Unit,
 
 	# R1.8：与 resolve_attack 一致向下取整，保证 forecast == 实际伤害。
 	var dmg_int: int = maxi(0, floori(final_damage))
+	# 暴击时的伤害（倍率见 crit_multiplier），敌人 AI 用它估算击杀概率；不能暴击时等于 damage。
+	var crit_dmg_int: int = dmg_int
+	if not crit_blocked:
+		crit_dmg_int = maxi(0, floori(final_damage * crit_multiplier(action_data)))
 	# 幻象：与 resolve_attack 一致，预告显示固定的每包伤害。
 	if defender.is_illusion:
 		dmg_int = defender.illusion_damage_per_hit
+		crit_dmg_int = dmg_int
 	return {
 		"hit_percent": clampi(roundi(hit_rate * 100.0), 0, 100),
 		"crit_percent": clampi(roundi(crit_rate * 100.0), 0, 100),
 		"damage": dmg_int,
+		"crit_damage": crit_dmg_int,
 		"terrain_name": str(action_data.get("defender_terrain_name", "PLAIN")),
 		"terrain_evade_bonus": terrain_evade_bonus,
 		"terrain_def_bonus": terrain_def_bonus,
@@ -234,6 +236,14 @@ static func preview_attack(attacker: Unit, defender: Unit,
 		"damage_type": damage_type,
 		"is_heal": false,
 	}
+
+
+## R1.3 暴击倍率 = (1.5 + Σ 加算 crit_damage_bonus) × Π 乘算 crit_damage_mult，加算先于乘算。
+## crit_damage_mult 默认 1.0 → 无乘算修正时与引入本通道前完全一致。
+## 例：拔刀「暴击倍率 ×1.2」是乘算 → 1.5 × 1.2 = 1.8（2026-08-03 用户裁决 F [已定]）。
+static func crit_multiplier(action_data: Dictionary) -> float:
+	return (1.5 + float(action_data.get("crit_damage_bonus", 0.0))) \
+		* float(action_data.get("crit_damage_mult", 1.0))
 
 
 ## R1.1 普通天赋提升与总增总降两层的合计倍率。
