@@ -16,10 +16,7 @@
   "weapon_id": "wpn_physical_melee_basic",
   "damage_type": "physical",
   "basic_attack_range": { "min": 1, "max": 1 },
-  "skill_ids": [
-    "soldier_slash",
-    "soldier_shield_bash"
-  ],
+  "skill_ids": [],
   "ai_behavior": "AGGRESSIVE",
   "loot_table": [
     {
@@ -34,5 +31,5 @@
       "chance": 35
     }
   ],
-  "description": "近战哥布林，数值略低于同级玩家前排。"
+  "description": "近战哥布林，只会普通攻击。"
 }
