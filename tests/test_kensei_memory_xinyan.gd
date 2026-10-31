@@ -3,7 +3,7 @@ extends SceneTree
 ## 〔心无旁骛〕→〔心眼·澄〕；〔大梦将醒〕→〔心眼·梦〕与〔空想剑〕。
 ##
 ## 依据：设计库 762393b 的 kensei_xinyan_cheng / xinyan_che / kongxiangjian，
-## states kensei_chengxin / kongxiang / jianhen；R1.1、R1.2、R2.5、R3.2；KB 天赋设计要点 §12。
+## states kensei_chengxin / kongxiang / jianhen；R1.1、R1.2、R2.5、R3.2；KB 设计规则总表 M04。
 ## 覆盖：
 ##   ① 数据与挂载。
 ##   ② PR5 前置条件 1：心眼升级后，基础心眼的剑气暴击、剑气不足加速度、印记百分比属性全部失效；

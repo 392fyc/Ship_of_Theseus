@@ -13,15 +13,15 @@ KB 之外的权威：结构化玩法事实（技能、天赋、规则表、装�
 
 | 要知道什么 | 读哪里 |
 |---|---|
-| 现行规则：设计时必须遵守的约束 | [00-rules](00-rules/README.md) |
+| 现行规则：设计时必须遵守的约束 | [设计规则总表](00-rules/rules.md)（目录 [00-rules](00-rules/README.md)） |
 | 进度与开发约定：任务在哪里跟踪、怎么提交和发布 | [02-Development](02-Development/README.md) |
-| 决策登记：做过哪些裁决、为什么 | [03-decisions](03-decisions/README.md) |
+| 决策登记：做过哪些裁决、为什么 | [决策登记表](03-decisions/register.md)（目录 [03-decisions](03-decisions/README.md)） |
 
 ## 按任务类型
 
 | 任务 | 先读 |
 |---|---|
-| 设计或审查职业、技能、回忆、天赋、装备、遗物 | [设计规则面索引](00-rules/design-rules-index.md)，再读它路由到的分册；然后读设计库的现行规则与记录 |
+| 设计或审查职业、技能、回忆、天赋、装备、遗物 | [设计规则总表](00-rules/rules.md) 的相关节，再按 [设计规则面索引](00-rules/design-rules-index.md) 读实体指引；然后读设计库的现行规则与记录 |
 | 改战斗、技能、伤害或资源的实现 | [规则总目录](01-Game-Design/rules-catalog.md) 与 [战斗计算系统](01-Game-Design/Core-Systems/battle-calculation.md)；规则原文以设计库为准 |
 | 改敌人 AI | [敌人与 AI 系统](01-Game-Design/Core-Systems/enemy-and-ai.md) |
 | 改人物棋子或地形表现 | [04-Assets](04-Assets/README.md) 中的验收准则 |

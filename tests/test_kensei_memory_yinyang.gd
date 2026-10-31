@@ -2,7 +2,7 @@ extends SceneTree
 ## 回忆技能·居合组之一（gameplay-impl PR6f-1）：〔阴阳剑〕→〔太阳剑〕〔太阴剑〕。
 ##
 ## 依据：设计库 762393b 的 kensei_taiyangjian / kensei_taiyinjian，states kensei_taiyang / kensei_taiyin；
-## R1.1、R1.2、R1.3、R1.8、R2.5、R3.2；KB 技能设计要点（阴阳圆满的额外回合不加每关卡上限，用户 2026-10-14）。
+## R1.1、R1.2、R1.3、R1.8、R2.5、R3.2；KB 设计规则总表 S16（阴阳圆满的额外回合不加每关卡上限）。
 ## 覆盖：
 ##   ① 数据与挂载。
 ##   ② 交替槽：每场开始为太阳剑；用太阳剑后变太阴剑并得 1 层太阳；用太阴剑后变回太阳剑并得 1 层太阴；
