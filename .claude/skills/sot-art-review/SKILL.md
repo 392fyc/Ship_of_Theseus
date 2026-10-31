@@ -11,7 +11,7 @@ description: SoT 美术素材审核 lane（Claude 专用）：审核 UI、人物
 
 - 审核 Codex 已完成的素材与产线；有权调整、删减或推翻重来。修改素材时必须附材质或式样参考（已批准锚点的裁切 + 精确像素规格色块/线宽/光照说明）；改进产线时给出可执行的修改指导。
 - 自己改动或新做的素材不得自评通过：交给独立审查者（mercury-reviewer / mercury-acceptance，或 Codex、用户）。
-- 不直接提交或推送 develop/main/master；审核证据放在自己的任务工作树（用 `scripts/codex/sot-worktree.ps1 -Action Create` 在 `.worktrees/<task>/` 创建，分支按目的命名，例如 `feature/<task>-claude`，见 `docs/lane-collaboration.md` 第 6 节），经 `scripts/codex/sot-publish.ps1` 发布。
+- 不直接提交或推送 develop/main/master；审核证据放在自己的任务工作树（用 `scripts/codex/sot-worktree.ps1 -Action Create` 在 `.worktrees/<task>/` 创建，分支按目的命名，例如 `feature/<task>-claude`，见 `docs/02-Development/lane-collaboration.md` 第 6 节），经 `scripts/codex/sot-publish.ps1` 发布。
 - 第三方参考只给链接；下载或导入第三方图片（含导入 Penpot）前先征得用户同意，绝不进入正式素材目录。
 
 ## 开始前必读（按目标 HEAD 读取，不抄副本）

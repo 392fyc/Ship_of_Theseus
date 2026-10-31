@@ -40,7 +40,7 @@ do not decide for the user.
     by file;
   - prior decisions and research: the KB, whose rule catalog is for lookup
     only; structured rules follow the design library. Enter through
-    `docs/03-AI-Context/design-rules-index.md` and read the design principles it
+    `docs/00-rules/design-rules-index.md` and read the design principles it
     routes to for the entity in question (general content rules plus the
     talent, skill, equipment or relic page).
 - Check every direction against those principles. Cite the page and section

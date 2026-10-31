@@ -1,6 +1,6 @@
-# SDD ledger — plan: docs/superpowers/plans/2026-08-28-kensei-map-token-production-integration.md
+# SDD ledger — plan: docs/90-archive/superpowers/plans/kensei-map-token-production-integration-2026-08-28.md
 
-Spec authority: `docs/superpowers/specs/2026-08-28-kensei-map-token-production-integration-design.md`
+Spec authority: `docs/90-archive/superpowers/specs/kensei-map-token-production-integration-design-2026-08-28.md`
 Execution branch: `codex/va4-kensei-map-token`
 Merge base: `15b5d15d022d9b60e6487e7884b62961ed1825f5`
 Preflight HEAD: `c257e3217c192a97260eecdd82a7865a40005235`

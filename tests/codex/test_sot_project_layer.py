@@ -181,7 +181,7 @@ def test_routing_and_root_configuration_keep_authorities_distinct() -> None:
     assert "mercury_root" not in routing
     assert ".mercury/memory" not in routing
 
-    consumption = read_text(ROOT / "docs" / "mercury-harness-consumption.md").lower()
+    consumption = read_text(ROOT / "docs" / "02-Development" / "mercury-harness-consumption.md").lower()
     for required in [
         ".mercury/packs/",
         ".mercury/lock.json",

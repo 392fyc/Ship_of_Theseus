@@ -57,7 +57,7 @@ Claude 在已授权美术任务内使用 `mercury-image-api` 技能生成或编�
 
 ## 配置来源
 
-Mercury 的五个角色由 Mercury 装载为本仓库的 `.claude/agents/mercury-*.md` 与 `.codex/agents/mercury-*.toml`（同一来源生成两种格式，见 `docs/mercury-harness-consumption.md`）；在本仓库中，项目级 `mercury-*` 角色优先于用户级同名角色。SoT 领域角色与技能属于 Mercury 项目区：角色来源在 `.mercury/local/roles/`，清单在 `.mercury/local.json`；安装器生成两种宿主的角色文件与 Claude 技能入口，不手改生成物（见 `docs/mercury-harness-consumption.md`）。Ship 根 CLAUDE.md 保持项目级。本配置不包含 MCP endpoint、密钥或其他凭据。
+Mercury 的五个角色由 Mercury 装载为本仓库的 `.claude/agents/mercury-*.md` 与 `.codex/agents/mercury-*.toml`（同一来源生成两种格式，见 `docs/02-Development/mercury-harness-consumption.md`）；在本仓库中，项目级 `mercury-*` 角色优先于用户级同名角色。SoT 领域角色与技能属于 Mercury 项目区：角色来源在 `.mercury/local/roles/`，清单在 `.mercury/local.json`；安装器生成两种宿主的角色文件与 Claude 技能入口，不手改生成物（见 `docs/02-Development/mercury-harness-consumption.md`）。Ship 根 CLAUDE.md 保持项目级。本配置不包含 MCP endpoint、密钥或其他凭据。
 
 ## 领域经验与查证指针
 

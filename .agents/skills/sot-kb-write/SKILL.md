@@ -24,12 +24,12 @@ KB 承担本项目 docs 的职责：每次作业把文档和其他内容一起�
 
 ## 写入
 
-1. 在 `scripts/codex/sot-worktree.ps1 -Action Create -Repository ship` 创建的任务工作树中工作；分支、标签与 PR 规则见 `docs/lane-collaboration.md`。
+1. 在 `scripts/codex/sot-worktree.ps1 -Action Create -Repository ship` 创建的任务工作树中工作；分支、标签与 PR 规则见 `docs/02-Development/lane-collaboration.md`。
 2. 用文件编辑工具修改 `docs/` 下的 Markdown。先读后改；新建文件前先检索同名或同主题文档，避免重复入口。
 3. 不使用 Obsidian MCP 的 `vault_write`、`vault_patch`、`vault_append` 等写入工具：它们写入的是主工作树，主工作树停在受保护分支，写入会留下无人负责的未提交改动。
 4. 保持 vault 内链接有效：Obsidian wiki 链接与相对链接都以 `docs/` 为根；移动或重命名文件时同步更新引用它的文档。`docs/` 内提到 `docs/` 以外的仓库文件（代码、数据、脚本）时写代码格式的仓库相对路径，不写 Markdown 链接：Obsidian 只能打开 vault 内的文件。反过来，仓库其他位置引用 KB 时用指向 `docs/` 的相对链接。
 5. 文本文件使用 UTF-8（无 BOM）与 LF。不要用 PowerShell 的 `Set-Content` / `Out-File` 写 KB 文件。
-6. 与相关改动一起提交，经 `scripts/codex/sot-publish.ps1` 发布并开 PR；合并后按[工作树生命周期](../../../docs/worktree-lifecycle.md)退役工作树与分支。
+6. 与相关改动一起提交，经 `scripts/codex/sot-publish.ps1` 发布并开 PR；合并后按[工作树生命周期](../../../docs/02-Development/worktree-lifecycle.md)退役工作树与分支。
 
 ## 用户在 Obsidian 中的直接修改
 
@@ -47,7 +47,7 @@ KB 承担本项目 docs 的职责：每次作业把文档和其他内容一起�
 
 ## 知识放在能被找到的地方
 
-- 用户对设计的裁决写进负责该主题的原则分册（入口为 `docs/03-AI-Context/design-rules-index.md`），附日期与原话；只写 ADR 或工作记录不够。
+- 用户对设计的裁决写进负责该主题的原则分册（入口为 `docs/00-rules/design-rules-index.md`），附日期与原话；只写 ADR 或工作记录不够。
 - 研究按标题归入参考作品索引 `docs/05-Research/references.md`。
 - 新页面改变了代理的开工入口时，同一改动中更新 `design-rules-index.md` 的路由。
 

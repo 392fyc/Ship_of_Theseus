@@ -2,7 +2,7 @@
 
 ## 本地工作区入口
 
-日常 Codex 入口为游戏主仓 `Ship_of_Theseus`。主仓平级，任务工作树建在所属仓库根的 `.worktrees/<task>/`；不能从任务目录的父目录猜跨仓根。实际位置使用环境变量优先、本地 roots 配置回退，见 [工作树生命周期](docs/worktree-lifecycle.md)。
+日常 Codex 入口为游戏主仓 `Ship_of_Theseus`。主仓平级，任务工作树建在所属仓库根的 `.worktrees/<task>/`；不能从任务目录的父目录猜跨仓根。实际位置使用环境变量优先、本地 roots 配置回退，见 [工作树生命周期](docs/02-Development/worktree-lifecycle.md)。
 
 
 > **设计文档正本（canonical）在本仓库的 [`docs/`](./docs/)**：它就是 KB，同时是 Obsidian vault（用 Obsidian 打开主工作树的 `docs/` 文件夹）。KB 原为独立仓库 ShipOfTheseus-KB，2026-10-29 以当前快照并入（#90），更早的历史留在已归档的旧仓库。
@@ -81,4 +81,4 @@ headless 跑法（退出码 0 = 全过）：
 ## 协作规则
 
 - `AGENTS.md`（Codex 项目入口，Claude Code 经 `CLAUDE.md` 导入）/ `CLAUDE.md`（Claude Code 宿主差异）/ `.cursorrules`（Cursor）：各工具链的规则入口，含机制红线与 GDScript 禁则。改动机制前先看这三份。
-- 分支按目的命名 `<类型>/<目的>[-<lane>]-<agent>`，例如 `feature/zhufeng-review-gameplay-design-claude`，agent 与 lane 只作后缀（见 `docs/lane-collaboration.md` 第 6 节），在任务工作树中开发；多 lane 协作见 `docs/lane-collaboration.md`；经独立审查后用 `scripts/codex/sot-publish.ps1` 发布并走 PR，不直接提交或推送 `develop`、`main`。
+- 分支按目的命名 `<类型>/<目的>[-<lane>]-<agent>`，例如 `feature/zhufeng-review-gameplay-design-claude`，agent 与 lane 只作后缀（见 `docs/02-Development/lane-collaboration.md` 第 6 节），在任务工作树中开发；多 lane 协作见 `docs/02-Development/lane-collaboration.md`；经独立审查后用 `scripts/codex/sot-publish.ps1` 发布并走 PR，不直接提交或推送 `develop`、`main`。

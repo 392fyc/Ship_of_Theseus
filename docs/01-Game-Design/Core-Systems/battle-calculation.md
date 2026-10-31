@@ -423,7 +423,7 @@ LCK 的两个战斗触点之一(另一个是暴击回避,见 R1.3)。
 
 ---
 
-*正本:设计库规则表 + 本章。历史设计演变查 KB git 历史与 ADR(`02-Development/Decisions/`)。*
+*正本:设计库规则表 + 本章。历史设计演变查 KB git 历史与 ADR(`03-decisions/`)。*
 
 相关文档:
 - [[rules-catalog|规则总目录]]

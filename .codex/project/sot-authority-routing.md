@@ -12,7 +12,7 @@ Ship_of_Theseus 是日常 SoT 开发的 Codex 默认工作根。开始工作前�
 | 通用 Harness upstream | Mercury | 只拥有它装载的路径（`.mercury/packs/`、`.mercury/lock.json`、`mercury-*` 角色、规则、技能入口与工作流，以及 `AGENTS.md`、`CLAUDE.md` 的受管段）；SoT 不得修改或发起内容变更，由 Mercury 发起 Issue/PR，发布后单向生成消费。`.mercury/config.json` 由 SoT 维护。 |
 | 活跃记忆 | 配置的记忆根，默认游戏仓主 Git 工作树 `.sot/memory` | 按 `SOT_MEMORY_ROOT`、`[roots].memory_root`、主工作树默认路径解析；任务 worktree 不改变项目记忆身份。旧 Mercury bucket 仅可显式配置后只读访问，迁移需用户授权。 |
 
-涉及通用 Harness 所有权或任务合同的会话，在文件已安装时按需读取 `.mercury/packs/core/docs/mercury-harness-ownership.md` 与 `.mercury/packs/core/docs/mercury-task-contract.md`。消费入口与单向生成约束见 `docs/mercury-harness-consumption.md`。
+涉及通用 Harness 所有权或任务合同的会话，在文件已安装时按需读取 `.mercury/packs/core/docs/mercury-harness-ownership.md` 与 `.mercury/packs/core/docs/mercury-task-contract.md`。消费入口与单向生成约束见 `docs/02-Development/mercury-harness-consumption.md`。
 
 ## 跨仓写入记录
 
