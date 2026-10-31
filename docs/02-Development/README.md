@@ -15,4 +15,5 @@
 | [doc-drift-ledger.md](doc-drift-ledger.md) | 现行 | 文档漂移台账(Doc Drift Ledger) |
 | [lane-collaboration.md](lane-collaboration.md) | 现行 | 多 Lane 多 Agent 协作 |
 | [mercury-harness-consumption.md](mercury-harness-consumption.md) | 现行 | Mercury Harness 消费约定 |
+| [ui-action-guidance.md](ui-action-guidance.md) | 现行 | 战斗操作步骤、拒绝反馈与侧边说明卡 |
 | [worktree-lifecycle.md](worktree-lifecycle.md) | 现行 | SoT 工作区与工作树 |

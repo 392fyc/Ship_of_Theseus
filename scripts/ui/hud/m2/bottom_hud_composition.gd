@@ -34,6 +34,22 @@ func apply_class_resources(view: HudM2ClassResourceViewData) -> void:
 	_refresh_resource_layout()
 
 
+func apply_action_guidance(guidance: Dictionary) -> void:
+	var phase_text: String = str(guidance.get("phase_text", "")).strip_edges()
+	var hint_text: String = str(guidance.get("hint_text", "")).strip_edges()
+	var feedback_text: String = str(guidance.get("feedback_text", "")).strip_edges()
+	var operation_label: Label = $ActionGuidance/GuidanceLines/OperationText as Label
+	$ActionGuidance/GuidanceLines/PhaseText.text = phase_text
+	if not feedback_text.is_empty():
+		operation_label.text = "拒绝：%s" % feedback_text
+	else:
+		operation_label.text = hint_text
+	$ActionGuidance/GuidanceLines/PhaseText.visible = not phase_text.is_empty()
+	operation_label.visible = not operation_label.text.is_empty()
+	$ActionGuidance.visible = not phase_text.is_empty() or not operation_label.text.is_empty()
+	_refresh_resource_layout()
+
+
 func get_class_resource_host() -> Control:
 	return $ClassResourceHost
 
@@ -51,6 +67,8 @@ func _refresh_resource_layout() -> void:
 		obstacles.append(ResourceLayout.bounds)
 	if $MarksPanel.visible:
 		obstacles.append(ResourceLayout.marks_bounds)
+	if $ActionGuidance.visible:
+		obstacles.append(Rect2($ActionGuidance.position, $ActionGuidance.size))
 	if _action_resource_strip.visible:
 		obstacles.append(Rect2(503, 550, 274, 46))
 	_character_panel.set_inspection_obstacles(obstacles)

@@ -74,3 +74,31 @@ offset_left = 503.0
 offset_top = 550.0
 offset_right = 777.0
 offset_bottom = 590.0
+
+[node name="ActionGuidance" type="PanelContainer" parent="."]
+offset_left = 380.0
+offset_top = 478.0
+offset_right = 900.0
+offset_bottom = 516.0
+mouse_filter = 2
+theme_type_variation = &"ActionResourceStrip"
+
+[node name="GuidanceLines" type="VBoxContainer" parent="ActionGuidance"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="PhaseText" type="Label" parent="ActionGuidance/GuidanceLines"]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"HudM2MutedText"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OperationText" type="Label" parent="ActionGuidance/GuidanceLines"]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"HudM2Text"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3

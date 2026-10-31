@@ -57,6 +57,13 @@ func _test_manager_payload() -> void:
 
 func _test_missing_and_action_states() -> void:
 	var adapter := Adapter.new()
+	var guidance_source: Dictionary = _state_with_actions({})
+	guidance_source["phase_text"] = "移动阶段"
+	guidance_source["hint_text"] = "选择移动格"
+	guidance_source["feedback_text"] = "超出攻击范围"
+	var guidance: Dictionary = adapter.build(guidance_source)["guidance"]
+	_check("阶段、操作提示和拒绝原因经适配器保留",
+		guidance == {"phase_text": "移动阶段", "hint_text": "选择移动格", "feedback_text": "超出攻击范围"})
 	var missing: Dictionary = adapter.build({"visible": true, "hp": 0, "hp_max": 0, "stats": {"str": 0}, "stats_delta": {"str": 0}})
 	var character: RefCounted = missing["character"]
 	_check("零值不是缺值", character.hp != null and character.hp.current_value == 0 and character.hp.maximum_value == 0 and character.attribute_value_text("STR") == "0")
@@ -85,6 +92,11 @@ func _test_missing_and_action_states() -> void:
 
 
 func _test_skill_semantics() -> void:
+	var self_cast_state: Dictionary = _state_with_actions({"movement_remaining": 1, "movement_available": true, "standard_capacity": 1, "standard_remaining": 1, "swift_capacity": 1, "swift_remaining": 1})
+	self_cast_state["skills"] = [{"skill_id": "self_cast", "name": "自我强化", "available": true,
+		"action_cost": "swift", "activation_hint": "点选即施放"}]
+	var self_cast_view: RefCounted = Adapter.new().build(self_cast_state)["skills"][0]
+	_check("自身技能激活方式进入技能说明", self_cast_view.tooltip_text.contains("操作：点选即施放"))
 	var state: Dictionary = _state_with_actions({"movement_remaining": 1, "movement_available": true, "standard_capacity": 1, "standard_remaining": 1, "swift_capacity": 1, "swift_remaining": 1})
 	state["skills"] = [
 		{"skill_id": "passive", "name": "纯被动", "is_passive": true, "available": true, "action_cost": "swift", "description": "被动说明", "resource_cost_display": {"amount": 9, "resource_name": "错误来源"}, "qi_cost": 99},
@@ -132,7 +144,10 @@ func _test_m2_composition_receives_views() -> void:
 	var composition: Control = (load("res://scenes/tactical/hud/m2/bottom_hud_composition.tscn") as PackedScene).instantiate()
 	root.add_child(composition)
 	await process_frame
-	var views: Dictionary = Adapter.new().build(_state_with_actions({"movement_remaining": 1, "movement_available": true, "standard_capacity": 1, "standard_remaining": 1, "swift_capacity": 1, "swift_remaining": 1}))
+	var composition_state: Dictionary = _state_with_actions({"movement_remaining": 1, "movement_available": true, "standard_capacity": 1, "standard_remaining": 1, "swift_capacity": 1, "swift_remaining": 1})
+	composition_state["phase_text"] = "移动阶段"
+	composition_state["hint_text"] = "选择移动格"
+	var views: Dictionary = Adapter.new().build(composition_state)
 	composition.apply_character(views["character"])
 	composition.apply_class_resources(views["class_resources"])
 	composition.apply_skills(views["skills"])
@@ -140,8 +155,24 @@ func _test_m2_composition_receives_views() -> void:
 	composition.apply_equipment(views["weapon"], views["armor"], views["potion"])
 	composition.apply_relics(views["relics"])
 	composition.apply_end_action(views["end_action"])
+	composition.apply_action_guidance(views["guidance"])
 	await process_frame
-	_check("全部显示对象可被现有 M2 组合接收", true)
+	var guidance_panel: Control = composition.get_node("ActionGuidance") as Control
+	var phase_label: Label = guidance_panel.get_node("GuidanceLines/PhaseText") as Label
+	var operation_label: Label = guidance_panel.get_node("GuidanceLines/OperationText") as Label
+	_check("M2组合分两行显示阶段和常态操作提示",
+		guidance_panel.visible and phase_label.text == "移动阶段" and operation_label.text == "选择移动格")
+	composition_state["feedback_text"] = "目标超出范围；已取消选择"
+	var rejected_guidance: Dictionary = Adapter.new().build(composition_state)["guidance"]
+	composition.apply_action_guidance(rejected_guidance)
+	_check("M2组合显示拒绝原因、取消状态和重选提示",
+		phase_label.text == "移动阶段" and operation_label.text == "拒绝：目标超出范围；已取消选择")
+	_check("提示面板和文字忽略鼠标输入",
+		guidance_panel.mouse_filter == Control.MOUSE_FILTER_IGNORE
+		and guidance_panel.get_node("GuidanceLines").mouse_filter == Control.MOUSE_FILTER_IGNORE
+		and phase_label.mouse_filter == Control.MOUSE_FILTER_IGNORE
+		and operation_label.mouse_filter == Control.MOUSE_FILTER_IGNORE)
+	_check("全部显示对象和行动提示可被现有 M2 组合接收", true)
 	var equipment: Control = composition.get_node("BottomRow/EquipmentHudPanel") as Control
 	for path: String in ["WeaponSlot", "ArmorSlot"]:
 		var slot: Button = equipment.get_node(path) as Button

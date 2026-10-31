@@ -55,7 +55,22 @@ func build(state: Dictionary, icon_textures: Dictionary = {}) -> Dictionary:
 		"potion": _missing_potion(),
 		"relics": _reserved_relics(),
 		"end_action": _build_end_action(state, player_actions),
+		"guidance": _build_action_guidance(state),
 	}
+
+
+func _build_action_guidance(state: Dictionary) -> Dictionary:
+	return {
+		"phase_text": _display_text(state.get("phase_text", "")),
+		"hint_text": _display_text(state.get("hint_text", "")),
+		"feedback_text": _display_text(state.get("feedback_text", "")),
+	}
+
+
+func _display_text(source: Variant) -> String:
+	if not source is String and not source is StringName:
+		return ""
+	return str(source).strip_edges()
 
 
 func _build_class_resources(state: Dictionary) -> RefCounted:
@@ -236,6 +251,7 @@ func _skill_tooltip(entry: Dictionary) -> String:
 	var lines: PackedStringArray = []
 	var name: String = str(entry.get("name", "")).strip_edges()
 	var description: String = str(entry.get("description", "")).strip_edges()
+	var activation_hint: String = _display_text(entry.get("activation_hint", ""))
 	var reason: String = str(entry.get("reason", "")).strip_edges()
 	reason = str(SPENT_ACTION_REASONS.get(reason, reason))
 	var action_cost: String = str(entry.get("action_cost", ""))
@@ -245,6 +261,8 @@ func _skill_tooltip(entry: Dictionary) -> String:
 		lines.append(name)
 	if not (passive and not active_capable) and ACTION_COST_LABELS.has(action_cost):
 		lines.append("消耗：%s" % ACTION_COST_LABELS[action_cost])
+	if not activation_hint.is_empty():
+		lines.append("操作：%s" % activation_hint)
 	if action_cost == "swift" and description.begins_with("迅捷·"):
 		description = description.substr("迅捷·".length()).strip_edges()
 	if not description.is_empty():

@@ -3,10 +3,7 @@ extends "res://scripts/ui/hud/skill_slot_button.gd"
 
 const M2SkillView := preload("res://scripts/ui/hud/m2/skill_slot_view_data.gd")
 const M2Glyph := preload("res://scripts/ui/hud/m2/action_resource_glyph.gd")
-const PopupPlacement := preload("res://scripts/ui/hud/m2/popup_placement.gd")
 
-@export var inspection_clearance: float = 8.0
-var _inspection_obstacles: Array[Rect2] = []
 var _hovered: bool = false
 var _card_hovered: bool = false
 var _pointer_local := Vector2(-1, -1)
@@ -27,9 +24,9 @@ func _ready() -> void:
 	super._ready()
 	theme_changed.connect(_refresh_skin, CONNECT_DEFERRED)
 	_refresh_skin()
-	focus_entered.connect(_update_focus)
+	focus_entered.connect(_request_inspection)
 	focus_exited.connect(_update_focus)
-	mouse_entered.connect(func() -> void: _hovered = true; _update_focus())
+	mouse_entered.connect(func() -> void: _hovered = true; _request_inspection())
 	mouse_exited.connect(func() -> void: _hovered = false; _update_focus.call_deferred())
 	_inspection_panel.mouse_entered.connect(func() -> void: _card_hovered = true; _update_focus())
 	_inspection_panel.mouse_exited.connect(func() -> void: _card_hovered = false; _update_focus.call_deferred())
@@ -99,8 +96,7 @@ func get_inspection_text() -> String:
 	return _inspection_label.text
 
 
-func set_inspection_obstacles(rectangles: Array[Rect2]) -> void:
-	_inspection_obstacles = rectangles.duplicate()
+func set_inspection_obstacles(_rectangles: Array[Rect2]) -> void:
 	if is_node_ready():
 		_update_focus()
 
@@ -113,14 +109,16 @@ func _get_tooltip(_at_position: Vector2) -> String:
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		_pointer_local = get_global_transform_with_canvas().affine_inverse() * event.position
+		if Rect2(Vector2.ZERO, size).has_point(_pointer_local):
+			_request_inspection.call_deferred()
+		if has_focus() and not Rect2(Vector2.ZERO, size).has_point(_pointer_local) and not _inspection_panel.get_rect().has_point(_pointer_local):
+			release_focus()
 		_update_focus.call_deferred()
 
 
-func _pointer_in_inspection_bridge() -> bool:
-	var card: Rect2 = _inspection_panel.get_rect()
-	var left: float = maxf(0.0, card.position.x)
-	var right: float = minf(size.x, card.end.x)
-	return _inspection_panel.visible and Rect2(left, card.end.y, right - left, -card.end.y).has_point(_pointer_local)
+func _request_inspection() -> void:
+	_inspection_panel.claim()
+	_update_focus()
 
 
 func _update_focus() -> void:
@@ -128,15 +126,12 @@ func _update_focus() -> void:
 		return
 	_focus_overlay.visible = has_focus()
 	_inspection_label.text = tooltip_text if _view != null else ""
-	# 真实心眼说明需六行。保留既定宽度、字号、内边距和底边，仅向上增加卡片高度。
+	# 保留完整说明和原字号，在棋盘外的侧边向上展开。
 	var inspection_height: float = maxf(104.0, _inspection_label.get_minimum_size().y + 24.0)
 	var origin := Vector2.ZERO
 	var current: Control = self
 	while current != null and current.name != &"BottomHudComposition":
 		origin += current.position
 		current = current.get_parent_control()
-	var anchor := Rect2(origin + Vector2(size.x * 0.5 - 130.0, 8.0 - inspection_clearance), size)
-	var placed: Rect2 = PopupPlacement.place_above(anchor, Vector2(260, inspection_height), _inspection_obstacles, 8.0, Rect2(0, 0, 1280, 720))
-	_inspection_panel.size = placed.size
-	_inspection_panel.position = placed.position - origin
-	_inspection_panel.visible = is_visible_in_tree() and (has_focus() or _hovered or _card_hovered or _pointer_in_inspection_bridge()) and not _inspection_label.text.is_empty()
+	_inspection_panel.place_in_sidebar(origin, Vector2(260, inspection_height))
+	_inspection_panel.refresh_visibility(is_visible_in_tree() and (has_focus() or _hovered or _card_hovered) and not _inspection_label.text.is_empty())
