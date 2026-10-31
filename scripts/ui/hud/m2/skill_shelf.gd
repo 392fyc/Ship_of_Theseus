@@ -55,8 +55,6 @@ func _reconcile_slots(skills: Array[RefCounted]) -> void:
 			slot.skill_activated.connect(_on_skill_activated)
 			_slots.add_child(slot)
 		slot.custom_minimum_size = Vector2(slot_extent, slot_extent)
-		# 说明卡位于技能架上方的行动条之外，保留 8px 间隔。
-		slot.inspection_clearance = (size.y - slot_extent) * 0.5 + 54.0
 		slot.set_inspection_obstacles(_inspection_obstacles)
 		slot.call("apply_view", view)
 

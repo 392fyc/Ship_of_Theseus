@@ -2,12 +2,10 @@ class_name HudM2CharacterPanel
 extends Panel
 
 const CharacterViewData := preload("res://scripts/ui/hud/m2/character_hud_view_data.gd")
-const PopupPlacement := preload("res://scripts/ui/hud/m2/popup_placement.gd")
 
 var _view: CharacterViewData
 var _hovered: bool = false
 var _card_hovered: bool = false
-var _inspection_obstacles: Array[Rect2] = []
 var _pointer_local := Vector2(-1, -1)
 
 @onready var _portrait: TextureRect = %PortraitContent
@@ -19,7 +17,7 @@ var _pointer_local := Vector2(-1, -1)
 func _ready() -> void:
 	_portrait_button.mouse_entered.connect(_on_portrait_entered)
 	_portrait_button.mouse_exited.connect(_on_portrait_exited)
-	_portrait_button.focus_entered.connect(_update_inspection)
+	_portrait_button.focus_entered.connect(_request_inspection)
 	_portrait_button.focus_exited.connect(_update_inspection)
 	_portrait_button.gui_input.connect(_on_inspection_input)
 	_inspection.mouse_entered.connect(_on_card_entered)
@@ -47,8 +45,7 @@ func get_inspection_panel() -> Control:
 	return _inspection
 
 
-func set_inspection_obstacles(rectangles: Array[Rect2]) -> void:
-	_inspection_obstacles = rectangles.duplicate()
+func set_inspection_obstacles(_rectangles: Array[Rect2]) -> void:
 	if is_node_ready():
 		_layout_inspection()
 
@@ -56,6 +53,10 @@ func set_inspection_obstacles(rectangles: Array[Rect2]) -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		_pointer_local = get_global_transform_with_canvas().affine_inverse() * event.position
+		if _portrait_button.get_rect().has_point(_pointer_local):
+			_request_inspection.call_deferred()
+		elif _portrait_button.has_focus() and not _inspection.get_rect().has_point(_pointer_local) and not _pointer_in_inspection_bridge():
+			_portrait_button.release_focus()
 		_update_inspection.call_deferred()
 
 
@@ -119,6 +120,11 @@ func _meter_ratio(meter: RefCounted) -> float:
 
 func _on_portrait_entered() -> void:
 	_hovered = true
+	_request_inspection()
+
+
+func _request_inspection() -> void:
+	_inspection.claim()
 	_update_inspection()
 
 
@@ -144,7 +150,7 @@ func _on_card_exited() -> void:
 
 
 func _update_inspection() -> void:
-	_inspection.visible = is_visible_in_tree() and (_hovered or _card_hovered or _portrait_button.has_focus() or _pointer_in_inspection_bridge())
+	_inspection.refresh_visibility(is_visible_in_tree() and (_hovered or _card_hovered or _portrait_button.has_focus() or _pointer_in_inspection_bridge()))
 	%PortraitFocus.visible = is_visible_in_tree() and _portrait_button.has_focus()
 
 
@@ -160,8 +166,7 @@ func _layout_inspection() -> void:
 	var parent: Control = get_parent_control()
 	if parent != null:
 		origin += parent.position
-	var placed: Rect2 = PopupPlacement.place_above(Rect2(origin, size), _inspection.size, _inspection_obstacles, 14.0, Rect2(0, 0, 1280, 720))
-	_inspection.position = placed.position - origin
+	_inspection.place_in_sidebar(origin, _inspection.size)
 	%InspectionFrame.size = _inspection.size
 
 

@@ -179,6 +179,17 @@ func _test_player_state(dashboard: Control, manager: Object) -> void:
 	dashboard.update_state(manager.get_dashboard_data())
 	await process_frame
 	_check("同一状态刷新复用技能控件并保持焦点", (composition.get_node("BottomRow/SkillShelf").get_skill_slots() as Array)[0] == preserved_slot and preserved_slot.has_focus())
+	_move_pointer(portrait_button.get_global_rect().get_center())
+	await process_frame
+	_check("头像检视替换技能说明", character_card.visible and not preserved_slot.is_inspection_visible())
+	preserved_slot.grab_focus()
+	await process_frame
+	_check("键盘技能检视替换头像属性卡", preserved_slot.is_inspection_visible() and not character_card.visible)
+	dashboard.update_state(manager.get_dashboard_data())
+	await process_frame
+	_check("刷新不会复活被替换的头像卡", preserved_slot.is_inspection_visible() and not character_card.visible)
+	_move_pointer(Vector2(640, 320))
+	await process_frame
 	var entries: Array = manager.get_dashboard_data().get("skills", [])
 	var active_index: int = -1
 	for index: int in entries.size():

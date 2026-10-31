@@ -204,10 +204,39 @@ func _test_shelf() -> void:
 	_check("Tab实际进入纯被动", focus_slots[3].has_focus())
 	_check("Tab后说明卡可见", focus_slots[3].is_inspection_visible())
 	var inspection: Control = focus_slots[3].get_inspection_panel()
-	_check("说明卡位于行动条上方", inspection.get_global_rect().end.y <= 542.0)
+	_check("说明卡固定在棋盘左侧", inspection.get_global_rect().position.x == 16.0 and inspection.get_global_rect().end.x == 276.0 and inspection.get_global_rect().end.y == 518.0)
 	_check("说明卡不遮挡固定技能架", not inspection.get_global_rect().intersects(shelf.get_global_rect()))
+	_check("说明底板半透明而文字保持不透明", inspection.self_modulate.a > 0.7 and inspection.self_modulate.a < 0.9 and inspection.modulate.a == 1.0 and inspection.get_node("InspectionLabel").modulate.a == 1.0)
 	focus_slots[0].grab_focus()
 	_check("纯被动失焦关闭说明", not focus_slots[3].is_inspection_visible())
+	# 复现旧问题：一个槽有键盘焦点，另一个槽收到真实鼠标悬停。
+	var hover := InputEventMouseMotion.new()
+	hover.position = focus_slots[3].get_global_rect().get_center()
+	root.push_input(hover, true)
+	await process_frame
+	await process_frame
+	_check("鼠标新检视替换旧焦点卡", focus_slots[3].is_inspection_visible() and not focus_slots[0].is_inspection_visible())
+	shelf.apply_skills(focus_views)
+	await process_frame
+	var visible_cards: int = 0
+	for item: Control in focus_slots:
+		visible_cards += int(item.is_inspection_visible())
+	_check("状态刷新仍只有当前说明卡", visible_cards == 1 and focus_slots[3].is_inspection_visible())
+	focus_slots[0].grab_focus()
+	await process_frame
+	_check("鼠标静止时允许键盘换卡", focus_slots[0].is_inspection_visible() and not focus_slots[3].is_inspection_visible())
+	hover = InputEventMouseMotion.new()
+	hover.position = focus_slots[3].get_global_rect().get_center() + Vector2(1, 0)
+	root.push_input(hover, true)
+	await process_frame
+	await process_frame
+	_check("同一槽内轻移鼠标恢复该槽说明", focus_slots[3].is_inspection_visible() and not focus_slots[0].is_inspection_visible())
+	hover = InputEventMouseMotion.new()
+	hover.position = Vector2(640, 320)
+	root.push_input(hover, true)
+	await process_frame
+	await process_frame
+	_check("移回棋盘后不留下旧焦点卡", not focus_slots[0].is_inspection_visible() and not focus_slots[3].is_inspection_visible())
 	shelf.queue_free()
 	await process_frame
 
