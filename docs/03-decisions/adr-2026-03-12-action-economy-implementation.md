@@ -3,7 +3,7 @@
 - Status: Approved
 - Date: 2026-03-12
 - Context: Define the code architecture for implementing the BG3-style Action Economy system specified in GDD Section 1 (Turn System)
-- Prerequisites: ADR-005 (Attribute System), ADR-008 (Scene Naming - TacticalScene/TacticalManager)
+- Prerequisites: [ADR-005 (Attribute System)](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/03-decisions/adr-2026-02-27-attribute-system-v1.md) (deleted from the KB 2026-10-31; permanent link), ADR-008 (Scene Naming - TacticalScene/TacticalManager)
 - Task Reference: TASK-P2-BATT-001
 
 ---

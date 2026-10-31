@@ -28,7 +28,3 @@
 - 设计库 gate 使用 `SOT_GODOT_PATH` 和 `SOT_KB_PATH` 明确指定跨仓读取目标（`SOT_KB_PATH` 指向游戏仓的 `docs/`）；`SOT_DESIGNLIB_PATH` 不全局固定，以便默认读取当前设计工作树。
 - 规则目录输出使用 `SOT_RULES_CATALOG`；设计书同步来源使用 `SOT_SYNC_SRC`。工作树必须明确设置它们，不能依赖主仓同级目录回退。NAS 设计书同步原由旧 KB 仓库的 post-commit 钩子触发，现已暂停，待设计库并入后重新连接。
 - Codex 用户配置位于 `$HOME/.codex/`，当前项目配置与技能位于项目 `.codex/` 和 `.agents/skills/`。
-
-## 可选旧版工具
-
-旧任务体系的 `new-*-bundle.ps1` 已随该体系归档到 `90-archive/task-system-legacy/Scripts/`。它们是旧版共享生成器的薄包装，按当前用户目录查找 `$HOME/.agents/ship-kb-tools/`。只有本机安装了对应生成器才可调用；缺失时明确报错。它们不是当前协作流程的必需组件。

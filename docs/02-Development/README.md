@@ -15,5 +15,4 @@
 | [doc-drift-ledger.md](doc-drift-ledger.md) | 现行 | 文档漂移台账(Doc Drift Ledger) |
 | [lane-collaboration.md](lane-collaboration.md) | 现行 | 多 Lane 多 Agent 协作 |
 | [mercury-harness-consumption.md](mercury-harness-consumption.md) | 现行 | Mercury Harness 消费约定 |
-| [swordsman-engine-verification-2026-06-21.md](swordsman-engine-verification-2026-06-21.md) | 历史 | Swordsman Engine — Runtime Verification (2026-06-21)（2026-06-21 一次验证记录） |
 | [worktree-lifecycle.md](worktree-lifecycle.md) | 现行 | SoT 工作区与工作树 |

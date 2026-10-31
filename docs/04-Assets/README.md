@@ -10,7 +10,6 @@
 
 | 文档 | 状态 | 说明 |
 |---|---|---|
-| [ai-sprite-pipeline.md](ai-sprite-pipeline.md) | 历史 | AI Sprite Animation Pipeline（2026-03 的素材管线调研） |
 | [character-token-acceptance.md](character-token-acceptance.md) | 现行 | 人物棋子朝向与接地验收准则 |
 | [terrain-presentation-acceptance.md](terrain-presentation-acceptance.md) | 现行 | 地形呈现验收准则 |
 | [visual-style-decisions.md](visual-style-decisions.md) | 现行 | 视觉素材现行裁决 |

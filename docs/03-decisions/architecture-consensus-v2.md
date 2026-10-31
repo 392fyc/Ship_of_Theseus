@@ -24,7 +24,7 @@ applies_to:
 >
 > 可视化版: [architecture-consensus-v2.html](architecture-consensus-v2.html)
 
-> **术语修订 2026-07-02（ADR-010）**：L5 原名「符文 Rune」，经用户裁决（run-loop 提案第二轮 D-A）统一为**「遗物 Relic」**——Relic 为正典、Rune 判废案（仅存于历史/研究归档）。6 槽机制、经济类/流派类 archetype、build-defining 定位均不变，本文其余结论不受影响。原 Δ-2 的「旧 relic 概念待 D5 并入或弃用」由该裁决解决：同一系统、以 Relic 为名。本文以下术语已同步。
+> **术语修订 2026-07-02（ADR-010）**：L5 原名「符文 Rune」，经用户裁决（run-loop 提案第二轮 D-A）统一为**「遗物 Relic」**——Relic 为正典、Rune 判废案（只出现在已从 KB 删除的旧研究文档中，见 Git 历史）。6 槽机制、经济类/流派类 archetype、build-defining 定位均不变，本文其余结论不受影响。原 Δ-2 的「旧 relic 概念待 D5 并入或弃用」由该裁决解决：同一系统、以 Relic 为名。本文以下术语已同步。
 
 ---
 

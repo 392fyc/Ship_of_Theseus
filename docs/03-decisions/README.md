@@ -2,7 +2,7 @@
 
 决策登记：ADR 与架构共识。每份决策记录背景、裁决和理由；现行规则引用这里的决策，不复述理由。
 
-按主题找对应 ADR；状态为「历史」的只作背景。
+按主题找对应 ADR。已被推翻或过时的决策直接删除，原文在 Git 历史与固定提交的永久链接里。
 
 上级索引：[KB 入口](../README.md)
 
@@ -13,9 +13,6 @@
 | [adr-2026-02-26-buff-debuff-structure.md](adr-2026-02-26-buff-debuff-structure.md) | 现行 | ADR-002: Buff/Debuff Data Structure |
 | [adr-2026-02-26-grid-coordinate-system.md](adr-2026-02-26-grid-coordinate-system.md) | 现行 | ADR-001 - Grid Coordinate System |
 | [adr-2026-02-26-unit-cell-reference.md](adr-2026-02-26-unit-cell-reference.md) | 现行 | ADR-003 - Unit and Cell Reference Relationship |
-| [adr-2026-02-27-attribute-system-v1.md](adr-2026-02-27-attribute-system-v1.md) | 历史 | ADR-005 - Attribute System First-Round Integration Simulation（已批准；多数条款已被规则表与 ADR-006 取代，文件开头列出现状，不作实现依据） |
-| [adr-2026-02-27-damage-type-redesign.md](adr-2026-02-27-damage-type-redesign.md) | 历史 | ADR-004 - Damage Type System Redesign（只有四种伤害类型的架构仍有效；公式以规则表 R1.1 与 ADR-006 为准，文件开头列出现状） |
-| [adr-2026-03-03-multi-agent-toolchain.md](adr-2026-03-03-multi-agent-toolchain.md) | 历史 | ADR-007: Multi-Agent Toolchain Optimization（旧多代理工具链，已由 Mercury 取代） |
 | [adr-2026-03-07-sprite-layer-architecture.md](adr-2026-03-07-sprite-layer-architecture.md) | 现行 | ADR-008: Three-Layer Unit Asset Architecture and Scene Naming |
 | [adr-2026-03-12-action-economy-implementation.md](adr-2026-03-12-action-economy-implementation.md) | 现行 | ADR-009: Action Economy Implementation Architecture |
 | [adr-2026-07-02-relic-canonical-rune-deprecated.md](adr-2026-07-02-relic-canonical-rune-deprecated.md) | 现行 | ADR-010 - Relic Canonical Terminology and Rune Deprecation |

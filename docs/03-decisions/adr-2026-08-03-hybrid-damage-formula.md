@@ -3,7 +3,7 @@
 **Date**: 2026-08-03
 **Status**: Accepted
 **Decision Maker**: Human Supervisor
-**Prerequisites**: ADR-004 (Damage Type System Redesign), ADR-005 (Attribute System First-Round Integration Simulation)
+**Prerequisites**: [ADR-004 (Damage Type System Redesign)](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/03-decisions/adr-2026-02-27-damage-type-redesign.md), [ADR-005 (Attribute System First-Round Integration Simulation)](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/03-decisions/adr-2026-02-27-attribute-system-v1.md) (both deleted from the KB 2026-10-31; permanent links to the last commit that held them)
 **Rule Anchors**: R1.1 (damage chain), R1.7 (weapon parameter framework), R1.8 (formula layering and modifier algebra)
 
 ---
@@ -152,10 +152,10 @@ Downstream statements that were parked on the TBD and now have an answer:
 | `01-Game-Design/Core-Systems/battle-calculation.md` | hybrid row reads "TBD, pending ADR-006, code must not reference it" | Replaced by the formula above, written in the same form as the physical/magical rows |
 | `01-Game-Design/game-design-doc.md` | hybrid row reads "TBD (ADR-006)" | Same |
 | Godot `scripts/core/damage_calculator.gd`, `_calc_base_damage()` | stub computing `min(DEF, RES)`, guarded by a "TBD (ADR-006)" comment | Each branch floored inside the `"hybrid"` arm and then averaged. The floors must stay inside the arm: the function's shared tail floor would compute "average first, floor afterwards", which is a different formula |
-| ADR-005 §4.2 and §5 | hybrid TBD block; four open questions | Superseded by this ADR; a pointer is recorded in ADR-005's current-state notice |
+| ADR-005 §4.2 and §5 | hybrid TBD block; four open questions | Superseded by this ADR. ADR-005 was deleted from the KB on 2026-10-31; its text, including that current-state notice, stays at the [fixed commit](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/03-decisions/adr-2026-02-27-attribute-system-v1.md) |
 | Agent rule files quoting ADR-004's "hybrid takes the average weapon power" | Refers to `phys_power` / `mag_power`, fields that no longer exist | Restated as "one `weapon_might`, two branches, averaged result" |
 
-Deliberately not changed: ADR-004 and ADR-005 keep their original decision text. They are historical records; both carry a current-state notice at the top pointing here.
+ADR-004 and ADR-005 were deleted from the KB on 2026-10-31 (Ship #124): only current decisions stay in the working tree. Their original text, with the current-state notices that pointed here, stays at the fixed commit: [ADR-004](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/03-decisions/adr-2026-02-27-damage-type-redesign.md), [ADR-005](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/03-decisions/adr-2026-02-27-attribute-system-v1.md).
 
 ---
 

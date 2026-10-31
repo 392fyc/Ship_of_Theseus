@@ -56,20 +56,20 @@ Mercury `docs/04-research/mercury/articles/001-mercury-harness-overview.md`
 | 3 — tmp isolation: each lane keeps scratch files in `.tmp/lane-<lane>/` | yes | [lane-close.md](lane-close.md), `.mercury/packs/lanes/scripts/lane-close.sh` |
 | 3.1 — 14-day stale lane sweep (branch, handoff and Issue signals; report-only) | yes | [lane-sweep.md](lane-sweep.md), `.mercury/packs/lanes/scripts/lane-sweep.sh` |
 | 3.2 — `.tmp/lane-<lane>/` pruned when the lane closes | yes | [lane-close.md](lane-close.md), `.mercury/packs/lanes/scripts/lane-close.sh` |
-| 4 — only the main lane edits `DIRECTION.md` / `EXECUTION-PLAN.md`; other lanes open an Issue | yes | [lane-emergency-escalation.md](lane-emergency-escalation.md) |
+| 4 — only the main lane edits the project's current rules and progress pages (in Mercury, `docs/01-rules/` and `docs/00-progress/`); other lanes open an Issue | yes | [lane-emergency-escalation.md](lane-emergency-escalation.md) |
 | 4.1 — emergency escalation when main is idle >48h | yes | [lane-emergency-escalation.md](lane-emergency-escalation.md), `.mercury/packs/lanes/scripts/check-main-idle.sh` |
 | 5 — per-lane state: each lane has its own `session-handoff[-<lane>].md` and session files | yes | [lane-naming.md](lane-naming.md) §Operational expectation, `.mercury/packs/lanes/scripts/lane-paths.sh handoff-file --lane <lane>` |
 | 5.1 — one worktree per lane, declared as `Worktree path` (Δ9); `/mercury-lane-handoff auto` launch (Δ10); `[LANE=<name>]` marker check (Δ11); cross-repo variant (#374) | yes | [lane-naming.md](lane-naming.md) §worktree isolation, `.mercury/packs/lanes/scripts/lane-assertion.sh`, `.mercury/packs/lanes/scripts/handoff-launch.sh`, `.mercury/packs/lanes/skills/lane-handoff/SKILL.md` Step 5 |
 | 6 — `LANES.md` is the single lane registry; each lane edits only its own section, and only the owning lane closes itself | yes | [lane-close.md](lane-close.md), [lane-sweep.md](lane-sweep.md), `.mercury/packs/lanes/scripts/lane-spawn.sh`, `.mercury/packs/lanes/scripts/lane-close.sh` |
 | 7 — per-session files `sessions/S<N>(-<lane>).md`; `MEMORY.md` / `SESSION_INDEX.md` regions regenerated from them | **no**, tooling removed by #675 | the regeneration script and its guide were deleted in #675 |
 | Δ7 — hard cap on active lanes | **no**, removed by #605 | [lane-naming.md](lane-naming.md) §Δ7 (historical) |
-| 8 — lane lifecycle autonomy: each lane owns the full lifecycle of its claimed Issues as a parallel chain, not a sub-agent of another lane; the only limits are Rule 4 and explicit cross-lane coordination Issues (earlier form: the side-lane "autonomous chain") | yes | agent-view-multi-lane-adaptation-2026-05.md (Mercury `docs/04-research/mercury/agent-view-multi-lane-adaptation-2026-05.md`), agent-team-orchestration-feasibility-2026-04-26.md (Mercury `docs/04-research/mercury/agent-team-orchestration-feasibility-2026-04-26.md`); no guide yet |
+| 8 — lane lifecycle autonomy: each lane owns the full lifecycle of its claimed Issues as a parallel chain, not a sub-agent of another lane; the only limits are Rule 4 and explicit cross-lane coordination Issues (earlier form: the side-lane "autonomous chain") | yes | agent-view-multi-lane-adaptation-2026-05.md (Mercury `docs/04-research/mercury/agent-view-multi-lane-adaptation-2026-05.md`), [agent-team-orchestration-feasibility-2026-04-26.md](https://github.com/392fyc/Mercury/blob/27a5468528c4119c1250e1da2d737d111205aad0/docs/04-research/mercury/agent-team-orchestration-feasibility-2026-04-26.md); no guide yet |
 | Cross-harness lanes (Harness / Session / Peers, provenance tag) | yes | #599 ADR (Mercury `docs/04-research/mercury/issue-599-cross-harness-lane-isolation-2026-09.md`), `AGENTS.md` "Cross-lane messages" |
 
 The deltas proposed after the first protocol cut, with their evidence, are in
 [lane-protocol-v0.1-deltas.md](../lane-protocol-v0.1-deltas.md). The design
 research is in
-multi-lane-protocol-2026-04-25.md (Mercury `docs/04-research/mercury/multi-lane-protocol-2026-04-25.md`).
+multi-lane-protocol-2026-04-25.md (Mercury [multi-lane-protocol-2026-04-25.md](https://github.com/392fyc/Mercury/blob/27a5468528c4119c1250e1da2d737d111205aad0/docs/04-research/mercury/multi-lane-protocol-2026-04-25.md)).
 
 ## Changing a rule
 
