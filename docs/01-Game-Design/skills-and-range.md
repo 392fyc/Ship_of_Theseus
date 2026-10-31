@@ -42,7 +42,7 @@ Skill:
   - `ranged`:技能射程 > 1 格(即使实际攻击 1 格外目标仍算 ranged)
   - `area`:技能带 AOE 范围(即使只命中单目标仍算 area)
 - **hit_bonus**:在派生命中计算(`weapon_hit + DEX*2`,即 R1.2 命中链第一层 base_hit)之后作用;LCK 不参与命中链
-- **crit_bonus**:在 ADR-005 派生暴击计算(`weapon_crit + DEX/2`)之后作用
+- **crit_bonus**:在 R1.3 派生暴击计算(`weapon_crit + DEX/2`)之后作用
 
 ### 技能分类(设计库层)
 

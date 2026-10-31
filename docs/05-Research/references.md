@@ -1,14 +1,14 @@
 # 参考作品索引
 
-本页汇总 KB 对各参考作品已经做过的调研，供设计、调研、审查代理动手前先查。先在本页找到目标作品，读已有笔记，再在其基础上补充，不要从头再查。新调研写完后，在本页对应作品下加一条链接和一句话结论，规则见文末维护约定。入口见 [[03-AI-Context/design-rules-index|设计规则面索引]]。
+本页汇总 KB 对各参考作品已经做过的调研，供设计、调研、审查代理动手前先查。先在本页找到目标作品，读已有笔记，再在其基础上补充，不要从头再查。新调研写完后，在本页对应作品下加一条链接和一句话结论，规则见文末维护约定。入口见 [设计规则面索引](../00-rules/design-rules-index.md)。
 
 本页只记录 KB 笔记里写过的内容，没有补充任何作品机制。笔记里的游戏机制描述是写作者当时的调研结论，使用前请回到原笔记核对出处。
 
 ## 使用前须知
 
-- SoT 没有通用的追击系统，也没有反击系统。KB 现行规则写明任何单位不因受到攻击而进行反击，见 [[01-Game-Design/Core-Systems/battle-calculation|战斗结算]] 的反击系统一节和 [[01-Game-Design/Characters/class-system|职业系统]] 的反击系统一节；`01-Game-Design` 下检索不到追击规则。
+- SoT 没有通用的追击系统，也没有反击系统。KB 现行规则写明任何单位不因受到攻击而进行反击，见 [战斗结算](../01-Game-Design/Core-Systems/battle-calculation.md) 的反击系统一节和 [职业系统](../01-Game-Design/Characters/class-system.md) 的反击系统一节；`01-Game-Design` 下检索不到追击规则。
 - 因此火纹的追击、先手、后手、追击排他不能直接套用。几份较早的笔记仍按存在追击系统来写，引用其中的火纹结论时必须先过滤，详见火纹一节。
-- SoT 没有普通攻击（见 [[03-AI-Context/skill-design-principles|技能设计要点]]），无冷却的基础攻击技能承担持续出手。几篇笔记围绕“普攻权重”展开，借用其结论时对应到无冷却的基础技能。
+- SoT 没有普通攻击（见 [设计规则总表](../00-rules/rules.md) S07），无冷却的基础攻击技能承担持续出手。几篇笔记围绕“普攻权重”展开，借用其结论时对应到无冷却的基础技能。
 - 时间线靠前的调研有被后续笔记取代的情况。`S67-FINAL-SYNTHESIS.md` 的 frontmatter 声明取代：B1.2、B2.1 的错误类比部分；R2、R3、R2-v2、R3-v2（基于“永久节点图”假设）；整份 S67-SYNTHESIS（前版基于推测，未读 KB）。B3.2 的 frontmatter 声明取代 B3。引用这些文件的结论前先看取代说明。
 
 ## 用户常驻参考
@@ -19,30 +19,30 @@
 
 **KB 已有笔记**
 
-- [[05-Research/swordsman-talent-v2-research/tactical-rpg-skill-systems-survey|战棋 RPG 技能天赋系统调研]]（2026-03-15）：专题。第 2 节分析风花雪月，第 3 节分析 Engage，总结表里把追击排他和资源约束归到火纹。
-- [[05-Research/swordsman-talent-v2-research/attack-action-weight-analysis|普通攻击权重分析]]：专题。第 2.1 节分析火纹的追击排他，第 2.4 节分析 Engage 的被动层叠加。
-- [[05-Research/swordsman-talent-v2-research/action-economy-comparison|行动经济设计对比]]：把风花雪月和 Engage 的移动、攻击、反击、再行动列入对比表。
-- [[03-AI-Context/Research/architecture-stage2-2026-05-10/D3-character-growth|D3 人物成长]]：专题。比较 FE Three Houses 加性模型、FE Engage 加性加上限、XCOM 式固定步长，选定简化的 Three Houses 加性模型。
-- [[02-Development/Decisions/adr-2026-02-27-attribute-system-v1|属性系统 v1 决策]]：以 Fire Emblem Three Houses 和 Engage 为参照系，方案 A 为 FE 精简。
-- [[02-Development/Tasks/attr-system-deduction-task|属性系统推演任务]]：第 2 部分为火纹对比，列出本项目与 FE 的差异，并给出 FE8 初始属性范围。
-- [[02-Development/Decisions/adr-2026-08-03-hybrid-damage-formula|混合伤害公式决策]]：说明 ADR-005 把基础层改成 FE 式加性伤害。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B1.1-player-acceptance|B1.1 玩家接受度]]：模式 A 和模式 D 讨论火纹 Heroes 去 RNG 与主线含 RNG 的玩家分裂。
-- [[03-AI-Context/Research/mage-talent-validation-2026-05-10/01-researcher-output|法师天赋验证 研究员输出]]：风花雪月的转职分支树拓扑；Casual Mode 作为永久死亡的留存修复案例。
-- [[03-AI-Context/Research/mage-talent-validation-2026-05-10/03-critic-output|法师天赋验证 评审输出]]：CCR-2 以风花雪月的不可逆转职技能引发的焦虑，类比 SoT 的两次不可逆选择。
-- [[03-AI-Context/Research/talent-tree-system-research-2026-05-15/A2-design-survey-raw|天赋树调研 A2]]：风花雪月战技消耗武器耐久，Gambit 每战固定使用次数。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B1.3-tactics-coop-samples|B1.3 战棋合作样本]]：Fire Emblem Warriors Three Hopes 的本地双人合作形态，列为战棋邻近。
-- [[02-Development/Assets/ai-sprite-pipeline|AI 精灵管线]]：美术风格参照，与机制无关。
+- [战棋 RPG 技能天赋系统调研](swordsman-talent-v2-research/tactical-rpg-skill-systems-survey.md)（2026-03-15）：专题。第 2 节分析风花雪月，第 3 节分析 Engage，总结表里把追击排他和资源约束归到火纹。
+- [普通攻击权重分析](swordsman-talent-v2-research/attack-action-weight-analysis.md)：专题。第 2.1 节分析火纹的追击排他，第 2.4 节分析 Engage 的被动层叠加。
+- [行动经济设计对比](swordsman-talent-v2-research/action-economy-comparison.md)：把风花雪月和 Engage 的移动、攻击、反击、再行动列入对比表。
+- [D3 人物成长](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/architecture-stage2-2026-05-10/D3-character-growth.md)：专题。比较 FE Three Houses 加性模型、FE Engage 加性加上限、XCOM 式固定步长，选定简化的 Three Houses 加性模型。
+- [属性系统 v1 决策](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/03-decisions/adr-2026-02-27-attribute-system-v1.md)：以 Fire Emblem Three Houses 和 Engage 为参照系，方案 A 为 FE 精简。
+- [属性系统推演任务](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/task-system-legacy/Tasks/attr-system-deduction-task.md)：第 2 部分为火纹对比，列出本项目与 FE 的差异，并给出 FE8 初始属性范围。
+- [混合伤害公式决策](../03-decisions/adr-2026-08-03-hybrid-damage-formula.md)：说明 [ADR-005（已从 KB 删除，固定提交原文）](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/03-decisions/adr-2026-02-27-attribute-system-v1.md) 把基础层改成 FE 式加性伤害。
+- [B1.1 玩家接受度](sot-viability-2026-04-22/B1.1-player-acceptance.md)：模式 A 和模式 D 讨论火纹 Heroes 去 RNG 与主线含 RNG 的玩家分裂。
+- [法师天赋验证 研究员输出](mage-talent-validation-2026-05-10/01-researcher-output.md)：风花雪月的转职分支树拓扑；Casual Mode 作为永久死亡的留存修复案例。
+- [法师天赋验证 评审输出](mage-talent-validation-2026-05-10/03-critic-output.md)：CCR-2 以风花雪月的不可逆转职技能引发的焦虑，类比 SoT 的两次不可逆选择。
+- [天赋树调研 A2](talent-tree-system-research-2026-05-15/A2-design-survey-raw.md)：风花雪月战技消耗武器耐久，Gambit 每战固定使用次数。
+- [B1.3 战棋合作样本](sot-viability-2026-04-22/B1.3-tactics-coop-samples.md)：Fire Emblem Warriors Three Hopes 的本地双人合作形态，列为战棋邻近。
+- [AI 精灵管线](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/04-Assets/ai-sprite-pipeline.md)：美术风格参照，与机制无关。
 
 **已记录的可借鉴点与教训**
 
-- 数值体系：伤害公式采用 FE 式加性基础层，外层叠乘区。出处：adr-2026-02-27-attribute-system-v1。原因记录为乘法基础层没有基础缓冲，加性层即使攻击低于防御也能保证有伤害。
-- 人物成长：采用简化的 Three Houses 加性模型，避开 Engage 里没有理由停留在基础职业的问题。出处：D3-character-growth。D3 顶部有后续修订提示，以该文件头部说明为准。
+- 数值体系：伤害公式采用 FE 式加性基础层，外层叠乘区。出处：[ADR-005（已从 KB 删除，固定提交原文）](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/03-decisions/adr-2026-02-27-attribute-system-v1.md)。原因记录为乘法基础层没有基础缓冲，加性层即使攻击低于防御也能保证有伤害。
+- 人物成长：采用简化的 Three Houses 加性模型，避开 Engage 里没有理由停留在基础职业的问题。出处：[D3-character-growth（已从 KB 删除，固定提交原文）](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/architecture-stage2-2026-05-10/D3-character-growth.md)。D3 顶部有后续修订提示，以该文件头部说明为准。
 - 去 RNG 的玩家分裂：火纹 Heroes 去 RNG 被一部分玩家称为改进，也有玩家认为降低了张力。出处：B1.1。
 - 不可逆选择需配套重试：一次性不可逆选择要配套 respec 或 retry。出处：mage-talent-validation 01。
 - 不可逆转职技能在社区里持续产生“是否选错了”的焦虑，SoT 需提供足够的 UI 提示。出处：mage-talent-validation 03 的 CCR-2。
 - 战技类消耗：武器耐久作为战技的资源约束。出处：tactical-rpg-skill-systems-survey。
 - 被动叠加：Engage 的纹章被动在普攻时触发，让普攻成为效果触发器。出处：attack-action-weight-analysis 第 2.4 节。
-- 属性联动：用户点名火纹 if 剑圣的〔流星〕、Engage 戒指的再移动，重点是与属性联动，而不是单纯百分比加伤害。出处：[[03-AI-Context/talent-design-principles|天赋设计要点]] §1。
+- 属性联动：用户点名火纹 if 剑圣的〔流星〕、Engage 戒指的再移动，重点是与属性联动，而不是单纯百分比加伤害。规则见 [设计规则总表](../00-rules/rules.md) T22，示例见 [天赋设计指引](../00-rules/talent-design-principles.md) §1。
 
 **与 SoT 规则的差异**
 
@@ -61,14 +61,14 @@
 
 **KB 已有笔记**
 
-- [[05-Research/swordsman-talent-v2-research/tactical-rpg-skill-systems-survey|战棋 RPG 技能天赋系统调研]]：专题。第 1 节分析 XCOM 2 War of the Chosen，包含双路线技能树、AP 与 Training Center、Overwatch。
-- [[05-Research/swordsman-talent-v2-research/attack-action-weight-analysis|普通攻击权重分析]]：第 2.2 节把 XCOM 2 的行动经济稀缺作为保持普攻地位的策略。
-- [[05-Research/swordsman-talent-v2-research/action-economy-comparison|行动经济设计对比]]：记录 XCOM 2 的 AP、Overwatch 消耗所有 AP、蓝色行动不结束回合。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B1.1-player-acceptance|B1.1 玩家接受度]]：模式 B 专段，XCOM 2 高 RNG 引发玩家反弹，作为反面案例。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B1.3-tactics-coop-samples|B1.3 战棋合作样本]]：XCOM 2 原生多人 2022 年从 Steam 下架，仅有社区 Tactical Co-Op Mod。
-- [[03-AI-Context/Research/architecture-stage2-2026-05-10/D3-character-growth|D3 人物成长]]：XCOM 式固定步长成长作为备选方案之一，被判定失去 FE 的 RNG 张力。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/R3-v2-critic-failmodes|R3 v2 评审]]：引用 Midnight Suns 创意总监的观点，并指出战棋玩家身份认同不含卡牌。
-- [[03-AI-Context/Handoffs/archive-sw-talent-v1v2/sw-talent-tree-v2-design-prompt|剑士天赋树 v2 设计任务 存档]]：研究任务表把 XCOM 2 列为重点；方案 B 引入 Overwatch 待机攻击。
+- [战棋 RPG 技能天赋系统调研](swordsman-talent-v2-research/tactical-rpg-skill-systems-survey.md)：专题。第 1 节分析 XCOM 2 War of the Chosen，包含双路线技能树、AP 与 Training Center、Overwatch。
+- [普通攻击权重分析](swordsman-talent-v2-research/attack-action-weight-analysis.md)：第 2.2 节把 XCOM 2 的行动经济稀缺作为保持普攻地位的策略。
+- [行动经济设计对比](swordsman-talent-v2-research/action-economy-comparison.md)：记录 XCOM 2 的 AP、Overwatch 消耗所有 AP、蓝色行动不结束回合。
+- [B1.1 玩家接受度](sot-viability-2026-04-22/B1.1-player-acceptance.md)：模式 B 专段，XCOM 2 高 RNG 引发玩家反弹，作为反面案例。
+- [B1.3 战棋合作样本](sot-viability-2026-04-22/B1.3-tactics-coop-samples.md)：XCOM 2 原生多人 2022 年从 Steam 下架，仅有社区 Tactical Co-Op Mod。
+- [D3 人物成长](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/architecture-stage2-2026-05-10/D3-character-growth.md)：XCOM 式固定步长成长作为备选方案之一，被判定失去 FE 的 RNG 张力。
+- [R3 v2 评审](sot-viability-2026-04-22/R3-v2-critic-failmodes.md)：引用 Midnight Suns 创意总监的观点，并指出战棋玩家身份认同不含卡牌。
+- [剑士天赋树 v2 设计任务 存档](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/ai-context-legacy/Handoffs/archive-sw-talent-v1v2/sw-talent-tree-v2-design-prompt.md)：研究任务表把 XCOM 2 列为重点；方案 B 引入 Overwatch 待机攻击。
 
 **已记录的可借鉴点与教训**
 
@@ -93,12 +93,12 @@
 
 **KB 已有笔记**
 
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B3.2-lastspell-and-tactical-roguelite-samples|B3.2 Last Spell 与同类战棋 Roguelite 样本]]：专题，本作品最完整的一篇。依据用户点名 Last Spell 是最接近 SoT 的参考系而补做。包含商业规模、run 内天赋树架构、Oraculum meta 层、随机性痛点与玩家证据、合作状态。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/S67-FINAL-SYNTHESIS|S67 最终综合]]：专题。Last Spell 重新对标一节，逐维度对照并给出痛点与 SoT 解法。
-- [[05-Research/swordsman-talent-v2-research/tactical-rpg-skill-systems-survey|战棋 RPG 技能天赋系统调研]]：第 6 节，武器决定技能、AP、随机天赋升级、普攻连击。
-- [[05-Research/swordsman-talent-v2-research/attack-action-weight-analysis|普通攻击权重分析]]：第 2.3 节，普攻随精准属性 scaling。
-- [[05-Research/swordsman-talent-v2-research/action-economy-comparison|行动经济设计对比]]：行动经济对比表中的 Last Spell 一行。
-- [[03-AI-Context/Handoffs/archive-sw-talent-v1v2/sw-talent-tree-v2-design-prompt|剑士天赋树 v2 设计任务 存档]]：研究任务表中的 Last Spell 一行。
+- [B3.2 Last Spell 与同类战棋 Roguelite 样本](sot-viability-2026-04-22/B3.2-lastspell-and-tactical-roguelite-samples.md)：专题，本作品最完整的一篇。依据用户点名 Last Spell 是最接近 SoT 的参考系而补做。包含商业规模、run 内天赋树架构、Oraculum meta 层、随机性痛点与玩家证据、合作状态。
+- [S67 最终综合](sot-viability-2026-04-22/S67-FINAL-SYNTHESIS.md)：专题。Last Spell 重新对标一节，逐维度对照并给出痛点与 SoT 解法。
+- [战棋 RPG 技能天赋系统调研](swordsman-talent-v2-research/tactical-rpg-skill-systems-survey.md)：第 6 节，武器决定技能、AP、随机天赋升级、普攻连击。
+- [普通攻击权重分析](swordsman-talent-v2-research/attack-action-weight-analysis.md)：第 2.3 节，普攻随精准属性 scaling。
+- [行动经济设计对比](swordsman-talent-v2-research/action-economy-comparison.md)：行动经济对比表中的 Last Spell 一行。
+- [剑士天赋树 v2 设计任务 存档](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/ai-context-legacy/Handoffs/archive-sw-talent-v1v2/sw-talent-tree-v2-design-prompt.md)：研究任务表中的 Last Spell 一行。
 
 **已记录的可借鉴点与教训**
 
@@ -128,8 +128,8 @@
 
 没有专题调研，只有两处顺带提及，而且两处所在的文件都已被 S67-FINAL 取代。
 
-- [[03-AI-Context/Research/sot-viability-2026-04-22/R2-analyst-viability|R2 分析师可行性]]：称永铃回响是 B2.2 的正面参考，作为 A 路径高度契合的证据，但仍处 demo 阶段，无商业验证数据。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/S67-SYNTHESIS|S67 综合]]：载体 A 小型战棋方向合理，举例 Sunderfolk、Into the Breach、永铃回响。
+- [R2 分析师可行性](sot-viability-2026-04-22/R2-analyst-viability.md)：称永铃回响是 B2.2 的正面参考，作为 A 路径高度契合的证据，但仍处 demo 阶段，无商业验证数据。
+- [S67 综合](sot-viability-2026-04-22/S67-SYNTHESIS.md)：载体 A 小型战棋方向合理，举例 Sunderfolk、Into the Breach、永铃回响。
 
 **已记录的可借鉴点与教训**
 
@@ -147,84 +147,84 @@
 
 **Into the Breach**
 
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B2.1-talent-modifier-patterns|B2.1 修饰器模式]] 的 Pattern F：专题。确定性预览加小网格固定修饰器；每个机甲两个装备槽；深度来自预览信息的决策复杂性，不来自组合爆炸。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B1.1-player-acceptance|B1.1]]：被作为确定性受玩家称赞的案例。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B1.3-tactics-coop-samples|B1.3]] 与 [[03-AI-Context/Research/sot-viability-2026-04-22/R3-critic-failmodes|R3]]：单人，社区认为合作会变成一人发号施令。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B2.2-carrier-feasibility-acd|B2.2]]：单人战棋 roguelite 的标杆。
-- [[05-Research/swordsman-talent-v2-research/tactical-rpg-skill-systems-survey|战棋 RPG 技能天赋系统调研]] 第 7 节：极简行动经济、位移核心、完美信息；可借鉴攻击附带位移。
-- [[03-AI-Context/Research/talent-tree-system-research-2026-05-15/C-critic-feedback|天赋树调研 C 评审]]：飞行员技能随机化的社区批评，作为紧凑池加随机的反例。
+- [B2.1 修饰器模式](sot-viability-2026-04-22/B2.1-talent-modifier-patterns.md) 的 Pattern F：专题。确定性预览加小网格固定修饰器；每个机甲两个装备槽；深度来自预览信息的决策复杂性，不来自组合爆炸。
+- [B1.1](sot-viability-2026-04-22/B1.1-player-acceptance.md)：被作为确定性受玩家称赞的案例。
+- [B1.3](sot-viability-2026-04-22/B1.3-tactics-coop-samples.md) 与 [R3](sot-viability-2026-04-22/R3-critic-failmodes.md)：单人，社区认为合作会变成一人发号施令。
+- [B2.2](sot-viability-2026-04-22/B2.2-carrier-feasibility-acd.md)：单人战棋 roguelite 的标杆。
+- [战棋 RPG 技能天赋系统调研](swordsman-talent-v2-research/tactical-rpg-skill-systems-survey.md) 第 7 节：极简行动经济、位移核心、完美信息；可借鉴攻击附带位移。
+- [天赋树调研 C 评审](talent-tree-system-research-2026-05-15/C-critic-feedback.md)：飞行员技能随机化的社区批评，作为紧凑池加随机的反例。
 - 要点：SoT 与它同为小网格，但它是完美信息，SoT 有概率与未知敌人。缺口：无单独的战斗规则调研。
 
 **Sunderfolk**
 
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B1.3-tactics-coop-samples|B1.3]]：2 至 4 人在线合作。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B2.2-carrier-feasibility-acd|B2.2]]：合作战棋的成功样本；其职业系统偏扁平。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/R3-critic-failmodes|R3]]：峰值在线人数一年衰减约 90%，视为长尾留存的结构性弱点。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/R2-analyst-viability|R2]]：指出数据窗口仅 3.5 周。
+- [B1.3](sot-viability-2026-04-22/B1.3-tactics-coop-samples.md)：2 至 4 人在线合作。
+- [B2.2](sot-viability-2026-04-22/B2.2-carrier-feasibility-acd.md)：合作战棋的成功样本；其职业系统偏扁平。
+- [R3](sot-viability-2026-04-22/R3-critic-failmodes.md)：峰值在线人数一年衰减约 90%，视为长尾留存的结构性弱点。
+- [R2](sot-viability-2026-04-22/R2-analyst-viability.md)：指出数据窗口仅 3.5 周。
 - 缺口：玩法机制与角色专属行动权没有专门调研。
 
 **Wargroove 与 Advance Wars**
 
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B1.3-tactics-coop-samples|B1.3]]：Wargroove 1 与 2 为合作样本；Advance Wars Re-Boot Camp 无合作。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B1.1-player-acceptance|B1.1]]：Wargroove 的单一正解反弹，说明确定性不保证玩家满意。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/R3-critic-failmodes|R3]]：合作中一方空转，作为合作资源不对等的失败案例。
+- [B1.3](sot-viability-2026-04-22/B1.3-tactics-coop-samples.md)：Wargroove 1 与 2 为合作样本；Advance Wars Re-Boot Camp 无合作。
+- [B1.1](sot-viability-2026-04-22/B1.1-player-acceptance.md)：Wargroove 的单一正解反弹，说明确定性不保证玩家满意。
+- [R3](sot-viability-2026-04-22/R3-critic-failmodes.md)：合作中一方空转，作为合作资源不对等的失败案例。
 
 **Triangle Strategy**
 
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B1.1-player-acceptance|B1.1]]：Conviction 投票基于累积数值，非概率骰子。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B1.3-tactics-coop-samples|B1.3]]：纯单人。
+- [B1.1](sot-viability-2026-04-22/B1.1-player-acceptance.md)：Conviction 投票基于累积数值，非概率骰子。
+- [B1.3](sot-viability-2026-04-22/B1.3-tactics-coop-samples.md)：纯单人。
 
 **Final Fantasy Tactics 与 Tactics Ogre**
 
-- [[03-AI-Context/Research/mage-talent-validation-2026-05-10/01-researcher-output|法师天赋验证 研究员输出]]：FFT 的 Main Job 加 Sub Job 为槽位式互斥，靠槽位限制强制权衡。
-- [[03-AI-Context/Research/talent-tree-system-research-2026-05-15/A2-design-survey-raw|天赋树调研 A2]]：FFT 的 TP 为队伍共享、分段阈值；Tactics Ogre Reborn 废弃独立 TP 并入 MP。
-- [[03-AI-Context/Research/talent-tree-system-research-2026-05-15/B-design-proposals|天赋树调研 B]]：剑气多档阈值借鉴 FFT TP。
-- [[03-AI-Context/Research/talent-tree-system-research-2026-05-15/C-critic-feedback|天赋树调研 C 评审]]：以 Tactics Ogre Reborn 去 TP 为反例，质疑独立累积资源条的认知负担。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B1.1-player-acceptance|B1.1]]：战斗速度争议，随机波动被放大。
+- [法师天赋验证 研究员输出](mage-talent-validation-2026-05-10/01-researcher-output.md)：FFT 的 Main Job 加 Sub Job 为槽位式互斥，靠槽位限制强制权衡。
+- [天赋树调研 A2](talent-tree-system-research-2026-05-15/A2-design-survey-raw.md)：FFT 的 TP 为队伍共享、分段阈值；Tactics Ogre Reborn 废弃独立 TP 并入 MP。
+- [天赋树调研 B](talent-tree-system-research-2026-05-15/B-design-proposals.md)：剑气多档阈值借鉴 FFT TP。
+- [天赋树调研 C 评审](talent-tree-system-research-2026-05-15/C-critic-feedback.md)：以 Tactics Ogre Reborn 去 TP 为反例，质疑独立累积资源条的认知负担。
+- [B1.1](sot-viability-2026-04-22/B1.1-player-acceptance.md)：战斗速度争议，随机波动被放大。
 
 **Divinity Original Sin 2**
 
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B1.3-tactics-coop-samples|B1.3]]：4 人分角色合作，非格子。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/R3-critic-failmodes|R3]]：成功源于投票决策、完整叙事与大团队，不能直接类比。
+- [B1.3](sot-viability-2026-04-22/B1.3-tactics-coop-samples.md)：4 人分角色合作，非格子。
+- [R3](sot-viability-2026-04-22/R3-critic-failmodes.md)：成功源于投票决策、完整叙事与大团队，不能直接类比。
 
 **Banner Saga**
 
-- [[03-AI-Context/Research/mage-talent-validation-2026-05-10/03-critic-output|法师天赋验证 评审输出]]：战斗能力缺少专用工具导致手改 JSON 的事后总结，仅作工程与流程教训。
+- [法师天赋验证 评审输出](mage-talent-validation-2026-05-10/03-critic-output.md)：战斗能力缺少专用工具导致手改 JSON 的事后总结，仅作工程与流程教训。
 
 ### Roguelite 类
 
 **Hades 与 Hades 2**
 
-- [[03-AI-Context/Research/talent-tree-system-research-2026-05-15/A1-game-data-raw|天赋树调研 A1]]：专题，Hades 1 与 Hades 2 的游戏数据。另见 [[03-AI-Context/Research/talent-tree-system-research-2026-05-15/A2-design-survey-raw|A2]] 第 2.2 节对 Arcana Cards 的分析，以及 [[03-AI-Context/Research/talent-tree-system-research-2026-05-15/B-design-proposals|B]] 的方案一。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B1.2-talent-roguelite-decoupling|B1.2]] 模式 A：Mirror of Night 与 Arcana Cards。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B2.1-talent-modifier-patterns|B2.1]] Pattern B：Boon 池、Duo Boon、空槽位强制补呈现。
-- [[03-AI-Context/Research/architecture-stage2-2026-05-10/D1-global-meta|D1 全局 meta]] 第 6.1 与 6.2 节：Arcana 的玩家选择激活可借鉴；Mirror 的纵向成长 SoT 禁止。
-- [[03-AI-Context/Research/architecture-stage2-2026-05-10/D5-runes-system|D5 符文系统]]：Grasp 容量限制对应 SoT 6 格。
-- [[03-AI-Context/Research/architecture-stage2-2026-05-10/D4-equipment-affix|D4 装备词缀]] 第 8.5 节：Hades 的 Boon 是反向参考。
-- [[01-Game-Design/Progression/run-loop|run-loop]]：地图采用 Hades 门模式。
-- 教训：[[03-AI-Context/Research/talent-tree-system-research-2026-05-15/C-critic-feedback|C 评审]]指出 Hades 是动作游戏，选择后即刻反馈，战棋要推演多回合，三选一随机的成本更高。
+- [天赋树调研 A1](talent-tree-system-research-2026-05-15/A1-game-data-raw.md)：专题，Hades 1 与 Hades 2 的游戏数据。另见 [A2](talent-tree-system-research-2026-05-15/A2-design-survey-raw.md) 第 2.2 节对 Arcana Cards 的分析，以及 [B](talent-tree-system-research-2026-05-15/B-design-proposals.md) 的方案一。
+- [B1.2](sot-viability-2026-04-22/B1.2-talent-roguelite-decoupling.md) 模式 A：Mirror of Night 与 Arcana Cards。
+- [B2.1](sot-viability-2026-04-22/B2.1-talent-modifier-patterns.md) Pattern B：Boon 池、Duo Boon、空槽位强制补呈现。
+- [D1 全局 meta](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/architecture-stage2-2026-05-10/D1-global-meta.md) 第 6.1 与 6.2 节：Arcana 的玩家选择激活可借鉴；Mirror 的纵向成长 SoT 禁止。
+- [D5 符文系统](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/architecture-stage2-2026-05-10/D5-runes-system.md)：Grasp 容量限制对应 SoT 6 格。
+- [D4 装备词缀](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/architecture-stage2-2026-05-10/D4-equipment-affix.md) 第 8.5 节：Hades 的 Boon 是反向参考。
+- [run-loop](../01-Game-Design/Progression/run-loop.md)：地图采用 Hades 门模式。
+- 教训：[C 评审](talent-tree-system-research-2026-05-15/C-critic-feedback.md)指出 Hades 是动作游戏，选择后即刻反馈，战棋要推演多回合，三选一随机的成本更高。
 
 **Slay the Spire**
 
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B1.2-talent-roguelite-decoupling|B1.2]] 模式 B：Ascension 为难度开关，meta 与 run 几乎零耦合。
-- [[03-AI-Context/Research/sot-viability-2026-04-22/B2.1-talent-modifier-patterns|B2.1]] Pattern D：遗物海量池加数据驱动平衡。
-- [[03-AI-Context/Research/architecture-stage2-2026-05-10/D1-global-meta|D1]] 第 6.5 节：横向而非纵向成长的标杆，解锁只拓宽抽池不抬上限。
-- [[03-AI-Context/Research/talent-tree-system-research-2026-05-15/A2-design-survey-raw|A2]] 第 2.1 节，以及 B 的方案三。
+- [B1.2](sot-viability-2026-04-22/B1.2-talent-roguelite-decoupling.md) 模式 B：Ascension 为难度开关，meta 与 run 几乎零耦合。
+- [B2.1](sot-viability-2026-04-22/B2.1-talent-modifier-patterns.md) Pattern D：遗物海量池加数据驱动平衡。
+- [D1](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/architecture-stage2-2026-05-10/D1-global-meta.md) 第 6.5 节：横向而非纵向成长的标杆，解锁只拓宽抽池不抬上限。
+- [A2](talent-tree-system-research-2026-05-15/A2-design-survey-raw.md) 第 2.1 节，以及 B 的方案三。
 
 **其他只被顺带提及的作品**
 
 | 作品 | 笔记 | 要点 |
 |---|---|---|
-| Monster Train | [[03-AI-Context/Research/sot-viability-2026-04-22/B2.1-talent-modifier-patterns\|B2.1]] Pattern C；[[03-AI-Context/Research/sot-viability-2026-04-22/B1.2-talent-roguelite-decoupling\|B1.2]] 模式 C | 冠军三条升级路径，每次只呈现两个 |
-| Wildfrost | [[03-AI-Context/Research/sot-viability-2026-04-22/B2.2-carrier-feasibility-acd\|B2.2]] | 只在样本表中 |
-| Balatro | [[03-AI-Context/Research/sot-viability-2026-04-22/B3-strict-talent-tree-samples\|B3]]；B2.2 | 归为物品收集，无节点图 |
-| Darkest Dungeon 2 | [[03-AI-Context/Research/sot-viability-2026-04-22/B3.2-lastspell-and-tactical-roguelite-samples\|B3.2]] | 样本表一行 |
+| Monster Train | [B2.1](sot-viability-2026-04-22/B2.1-talent-modifier-patterns.md) Pattern C；[B1.2](sot-viability-2026-04-22/B1.2-talent-roguelite-decoupling.md) 模式 C | 冠军三条升级路径，每次只呈现两个 |
+| Wildfrost | [B2.2](sot-viability-2026-04-22/B2.2-carrier-feasibility-acd.md) | 只在样本表中 |
+| Balatro | [B3](sot-viability-2026-04-22/B3-strict-talent-tree-samples.md)；B2.2 | 归为物品收集，无节点图 |
+| Darkest Dungeon 2 | [B3.2](sot-viability-2026-04-22/B3.2-lastspell-and-tactical-roguelite-samples.md) | 样本表一行 |
 
 ## 维护约定
 
 - 新调研文件放 `05-Research/`，按主题建子目录，例如已有的 `swordsman-talent-v2-research/`。涉及某作品的整篇或成节分析，文件名带作品名更易检索。
-- 与具体任务绑定的调研放 `03-AI-Context/Research/<日期标识>/`，沿用现有目录命名。
-- 调研写完后，在本页对应作品下追加一条链接，写法是 `[[路径不带.md|显示名]]`，后面跟一句话说明该文说了什么；同时在该作品的可借鉴点、差异、缺口三栏里补充或划掉相应条目。
+- 与具体任务绑定的调研放 `05-Research/<主题>-<日期>/`，并登记到 `05-Research/README.md` 的索引。
+- 调研写完后，在本页对应作品下追加一条链接，写法是相对路径的 Markdown 链接 `[显示名](相对路径.md)`，后面跟一句话说明该文说了什么；同时在该作品的可借鉴点、差异、缺口三栏里补充或划掉相应条目。
 - 新作品先在本页新增小节；只有顺带提及的作品，加进对应分组的表格，升级为专题时再单独成节。
 - 区分专题和顺带提及，不要把顺带提及写成已研究。
 - 每条结论注明出自哪篇笔记。一篇笔记的前提与现行规则冲突时，在本页标出，不要默默沿用。

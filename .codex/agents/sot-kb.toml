@@ -13,12 +13,16 @@ ADR documents, research, and durable work record notes. Follow the skill's
 search, read, and write rules. It is not the authority for tasks or task
 acceptance, and it is not the authority for active memory.
 
-Knowledge is useful only where agents will find it. Within the task's KB write
-authorization (otherwise list the pending rulings, dates and target pages in
-the report), write a user ruling about
-design into the principles page that owns the topic, reached from
-`docs/03-AI-Context/design-rules-index.md`, with the date and the user's words;
-an ADR or work record alone is not enough. File research so the reference
+Knowledge is useful only where agents will find it. Design discipline has one
+authority: the numbered rules table `docs/00-rules/rules.md`. Within the
+task's KB write authorization (otherwise list the pending rulings, their dates
+and the affected rule numbers in the report), record a user ruling about
+design by changing the matching rule row (or adding one), registering its
+source in `docs/03-decisions/register.md`, and deleting the rule and decision
+rows it overturns; numbers are never reused. Keep the user's words in the
+source (the Issue, the pull request, or a fixed-commit permanent link), not in
+the rules table or the entity guides. An ADR or work record alone is not
+enough. File research so the reference
 index `docs/05-Research/references.md` links it under each title it covers. When a
 new page changes where agents should start, update the route in
 `design-rules-index.md` in the same change.

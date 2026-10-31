@@ -57,7 +57,7 @@ Claude 在已授权美术任务内使用 `mercury-image-api` 技能生成或编�
 
 ## 配置来源
 
-Mercury 的五个角色由 Mercury 装载为本仓库的 `.claude/agents/mercury-*.md` 与 `.codex/agents/mercury-*.toml`（同一来源生成两种格式，见 `docs/mercury-harness-consumption.md`）；在本仓库中，项目级 `mercury-*` 角色优先于用户级同名角色。SoT 领域角色与技能属于 Mercury 项目区：角色来源在 `.mercury/local/roles/`，清单在 `.mercury/local.json`；安装器生成两种宿主的角色文件与 Claude 技能入口，不手改生成物（见 `docs/mercury-harness-consumption.md`）。Ship 根 CLAUDE.md 保持项目级。本配置不包含 MCP endpoint、密钥或其他凭据。
+Mercury 的五个角色由 Mercury 装载为本仓库的 `.claude/agents/mercury-*.md` 与 `.codex/agents/mercury-*.toml`（同一来源生成两种格式，见 `docs/02-Development/mercury-harness-consumption.md`）；在本仓库中，项目级 `mercury-*` 角色优先于用户级同名角色。SoT 领域角色与技能属于 Mercury 项目区：角色来源在 `.mercury/local/roles/`，清单在 `.mercury/local.json`；安装器生成两种宿主的角色文件与 Claude 技能入口，不手改生成物（见 `docs/02-Development/mercury-harness-consumption.md`）。Ship 根 CLAUDE.md 保持项目级。本配置不包含 MCP endpoint、密钥或其他凭据。
 
 ## 领域经验与查证指针
 
@@ -84,13 +84,11 @@ Mercury 的五个角色由 Mercury 装载为本仓库的 `.claude/agents/mercury
 | 说的是 | 引擎里有没有 | 怎么查 |
 |---|---|---|
 | **角色升级**（Lv1→Lv5 成长、升级得天赋点） | **有** | `data/classes/myrmidon.json` 的转职成长说明、`data/relics/relic_mentor_tome.json`、`data/runloop/act1_config.json` |
-| **技能升级链**（回忆天赋永久把某技能换成升级版；设计库 `Talent.upgrade_skill_id` ↔ `Skill.upgrade_of`，12 张在用） | **没有，零承载** | `grep -rni upgrade scripts/` → 零命中；`data/talents/` `data/skills/` 均无该字段 |
+| **技能升级链**（回忆天赋永久把某技能换成升级版；设计库 `Talent.upgrade_skill_id` ↔ `Skill.upgrade_of`） | **有** | 回忆数据在 `data/memories/*.json`（`base_skill_id`、`upgrade_skill_id`、`form_skill_ids`）；升级关系、互斥与技能身份解析在 `scripts/units/memory_upgrades.gd`，由 `scripts/units/unit.gd` 调用 |
 
-**查后者请用 `upgrade` 而不是「升级」**：用 `upgrade` 查是干净的（零命中）；用「升级」扫 `data/` 会撞上表第一行那三个文件的假阳性，看到 3 处命中很容易误判成「引擎已经有升级概念」。
+**查后者请用 `upgrade` 或 `memories` 而不是「升级」**：用「升级」扫 `data/` 会撞上表第一行那几个文件，把角色升级和技能升级链混为一谈。
 
-引擎现有的 `slot_swap_trigger` / `slot_swap_target` / `slot_swap_provider` 是**局内动态替换**（印记满 3 → 招架换拔刀），**不是**技能升级链，两者别互相套用。
-
-（2026-08-12 实测登记。这一栏是否要补承载字段尚未裁决，届时按 lane §2.2 先入字段归属表再写代码。）
+引擎的 `slot_swap_trigger` / `slot_swap_target` / `slot_swap_provider` 是**局内动态替换**（印记满 3 → 招架换拔刀），**不是**技能升级链；两者都在 `unit.gd` 里，替换目标经回忆升级的技能身份解析。设计规则见 KB [设计规则总表](docs/00-rules/rules.md) M 节。
 
 ### DO NOT — KB
 
@@ -102,7 +100,7 @@ Mercury 的五个角色由 Mercury 装载为本仓库的 `.claude/agents/mercury
 
 ### 游戏机制 — 只给指针，不复述
 
-规则正本 = **设计库规则表**（`/api/rules`，共 23 条：R1.1–R1.10 / R2.1–R2.4 / R3.1–R3.4 / R4.1–R4.4 / R5.9）。
+系统结算规则正本 = **设计库规则表**（`/api/rules`，编号 R1.x 战斗计算 / R2.x 人物系统 / R3.x 回合系统 / R4.x 棋盘系统；条数与编号以接口为准）。设计纪律（卡面写法、设计流程等）的正本是 KB [设计规则总表](docs/00-rules/rules.md)。
 离线可读的全量索引 = KB [`01-Game-Design/rules-catalog.md`](docs/01-Game-Design/rules-catalog.md)（每条一句话 + 展开文档链接）；逐字原文 = 设计库仓库 `snapshots/rules.json`。
 按 AGENTS.md「权威路由」与「玩法事实核对」，本文件**不复述规则内容**——写战斗 / 技能 / 伤害逻辑前回查真源，不要凭本文件或凭记忆作答。
 

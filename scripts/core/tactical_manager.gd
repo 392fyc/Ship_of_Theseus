@@ -90,6 +90,14 @@ signal battle_started
 signal enemy_pacing_finished
 signal unit_killed(unit: Unit)
 signal dashboard_state_changed
+## AI 驱动的单位即将执行一个动作（移动、攻击或已按当前位置重建好的技能）。批量模拟用它记录决策。
+signal ai_action_started(unit: Unit, action: GameAction)
+## 同一个动作执行完毕；executed 为 false 表示被拒绝（例如攻击机会已用掉），没有生效。
+signal ai_action_finished(unit: Unit, action: GameAction, executed: bool)
+
+## 批量模拟用（tools/sim/）：为 true 时玩家方单位也由 EnemyAI 行动，不等待输入。
+## 只在模拟脚本里实例化场景后、加入场景树前置 true；正式战斗与测试场景都保持 false。
+var ai_controls_players: bool = false
 
 enum InputState {
 	IDLE,
@@ -520,7 +528,7 @@ func _on_turn_started(unit: Unit) -> void:
 			_deselect_unit()
 		turn_manager.end_current_turn.call_deferred()
 		return
-	if unit.faction != "player":
+	if unit.faction != "player" or ai_controls_players:
 		_clear_hover_state()
 		_clear_dashboard_state()
 		_emit_dashboard_state_changed()
@@ -643,7 +651,7 @@ func _do_enemy_turn(unit: Unit) -> void:
 		return
 
 	var actions: Array[GameAction] = EnemyAI.decide_actions(
-		unit, grid, units, _forecast_attack_for_ai)
+		unit, grid, units, _forecast_attack_for_ai, self)
 
 	if actions.is_empty():
 		print("[AI] %s: no actions (idle)" % unit.unit_name)
@@ -661,6 +669,7 @@ func _do_enemy_turn(unit: Unit) -> void:
 					continue
 				print("[AI] %s: move %s → %s" % [
 					unit.unit_name, from, action.target_pos])
+				ai_action_started.emit(unit, action)
 				GameAction.consume_normal_move(unit)
 				unit.refresh_status_icons()
 				_emit_dashboard_state_changed()
@@ -668,17 +677,24 @@ func _do_enemy_turn(unit: Unit) -> void:
 				if not battle_active or not is_instance_valid(unit) or turn_manager.current_unit != unit:
 					return
 				grid.move_unit(unit, from, action.target_pos)
+				ai_action_finished.emit(unit, action, true)
 				await _start_enemy_pacing(0.15)
 			GameAction.Type.ATTACK:
 				if not is_instance_valid(action.target_unit):
 					continue
 				print("[AI] %s: attack %s" % [
 					unit.unit_name, action.target_unit.unit_name])
-				await _execute_presented_attack(action)
+				ai_action_started.emit(unit, action)
+				var attacked: bool = await _execute_presented_attack(action)
+				ai_action_finished.emit(unit, action, attacked)
 			GameAction.Type.SKILL:
-				var skill_name := str(action.data.get("skill_name", action.data.get("skill_id", "skill")))
-				print("[AI] %s: skill %s" % [unit.unit_name, skill_name])
-				await _execute_presented_skill(action)
+				var cast: GameAction = _rebuild_ai_skill_action(unit, action)
+				if cast == null:
+					continue
+				print("[AI] %s: skill %s" % [unit.unit_name, str(cast.data.get("skill_name", "skill"))])
+				ai_action_started.emit(unit, cast)
+				var cast_done: bool = await _execute_presented_skill(cast)
+				ai_action_finished.emit(unit, cast, cast_done)
 
 	if battle_active and is_instance_valid(unit) and unit.stats.is_alive() \
 			and turn_manager.current_unit == unit:
@@ -2859,6 +2875,10 @@ func _get_area_effect_relation(skill_data: Dictionary) -> String:
 func _get_skill_target_relation(skill_data: Dictionary) -> String:
 	if _skill_target_mode(skill_data) == TARGET_MODE_SELF:
 		return "self"
+	# 没有伤害、作用于敌方的技能（诅咒）显式写 target_relation = enemy；没写时按有无伤害判断。
+	var declared: String = str(skill_data.get("target_relation", ""))
+	if declared != "":
+		return declared
 	if _is_support_skill(skill_data):
 		return "ally"
 	return "enemy"
@@ -2939,14 +2959,16 @@ func _legacy_target_mode_from_area(skill_data: Dictionary) -> String:
 	return TARGET_MODE_UNIT
 
 
+## 没有伤害的技能：作用于敌方的（诅咒）按敌对效果施加，过正常的状态抵抗；不掷命中。
 func _apply_support_skill(user: Unit, skill_data: Dictionary,
 		target_units: Array[Unit]) -> void:
+	var is_hostile: bool = _get_skill_target_relation(skill_data) == "enemy"
 	for target_unit: Unit in target_units:
 		for effect_value: Variant in skill_data.get("effects", []):
 			if not (effect_value is Dictionary):
 				continue
 			_apply_skill_effect_to_unit(
-				user, target_unit, effect_value as Dictionary, false)
+				user, target_unit, effect_value as Dictionary, is_hostile)
 
 
 ## 持有型状态效果的层数：stacks（缺省 1）；写了 stacks_from_qi 时 = base + 使用者剑气 ÷ qi_step（向下取整），
@@ -2993,6 +3015,10 @@ func _apply_skill_effect_to_unit(user: Unit, target_unit: Unit,
 		"heal":
 			if effect_value > 0:
 				target_unit.heal(effect_value)
+		"shield":
+			# 护盾与现有护盾相加（R1.17）。
+			if effect_value > 0:
+				target_unit.gain_shield(effect_value)
 		"damage", "dot":
 			if effect_value > 0:
 				target_unit.take_damage(effect_value, "pure")
@@ -3254,11 +3280,14 @@ func _is_displacement_landing_valid(user: Unit, landing: Vector2i) -> bool:
 	return true
 
 
+## `skill_id` 为空时取玩家当前选中的技能；敌人 AI 施放时显式传入。
 func _build_skill_action(user: Unit, target_pos: Vector2i,
-		target: Unit, landing: Vector2i = LANDING_ANCHOR_NONE) -> GameAction:
-	if user == null or _selected_skill_id == "":
+		target: Unit, landing: Vector2i = LANDING_ANCHOR_NONE,
+		skill_id: String = "") -> GameAction:
+	var sid: String = skill_id if skill_id != "" else _selected_skill_id
+	if user == null or sid == "":
 		return null
-	var skill_data: Dictionary = _get_skill_data(_selected_skill_id)
+	var skill_data: Dictionary = _get_skill_data(sid)
 	if skill_data.is_empty():
 		return null
 	var area_data: Dictionary = skill_data.get("area", {})
@@ -3269,7 +3298,7 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		user, skill_data, target_pos, area_direction)
 	var basic_attack_profile: Dictionary = _get_unit_basic_attack_profile(user)
 	var payload: Dictionary = {
-		"skill_name": str(skill_data.get("name", _selected_skill_id)),
+		"skill_name": str(skill_data.get("name", sid)),
 		"action_cost": str(skill_data.get("action_cost", "standard")),
 		"timing_constraint": str(skill_data.get("timing_constraint", "any")),
 		"swift_limit": int(skill_data.get("swift_limit", 1)),
@@ -3291,7 +3320,7 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 		"target_direction": _serialize_vector2i(area_direction),
 		"affected_cells": _serialize_cells(affected_cells),
 		# ── 剑圣专属字段（缺省安全，非剑圣技能此处为 0/false）──
-		"skill_id": _selected_skill_id,
+		"skill_id": sid,
 		"guaranteed_hit": bool(skill_data.get("guaranteed_hit", false)),
 		"guaranteed_crit": bool(skill_data.get("guaranteed_crit", false)),
 		"crit_damage_bonus": float(skill_data.get("crit_damage_bonus", 0.0)),
@@ -3323,7 +3352,7 @@ func _build_skill_action(user: Unit, target_pos: Vector2i,
 	if not damage_entry.is_empty():
 		_apply_damage_entry(payload, skill_data, damage_entry,
 			int(basic_attack_profile.get("weapon_hit", 0)))
-	return GameAction.make_skill(user, _selected_skill_id, target_pos, target, payload)
+	return GameAction.make_skill(user, sid, target_pos, target, payload)
 
 
 ## R1.7 武器威力不进入伤害。设计库外的旧技能、普通攻击与副手追加尚无「技能威力」，
@@ -3556,6 +3585,268 @@ func _forecast_attack_for_ai(attacker: Unit, target: Unit) -> Dictionary:
 	var action: GameAction = GameAction.make_attack(attacker, target)
 	var ctx: Dictionary = _build_hostile_action_context(attacker, target, action.data)
 	return DamageCalculator.preview_attack(attacker, target, ctx)
+
+
+## 敌人 AI：本回合能用的攻击技能（有伤害、作用于敌方、通过冷却与行动点等使用校验）。
+## 位移技能和先选敌人再选落点的技能不在内。顺序同技能组。
+func _ai_attack_skill_ids(unit: Unit) -> Array[String]:
+	var out: Array[String] = []
+	for skill_id: String in _ai_current_skill_ids(unit):
+		var skill_data: Dictionary = _get_skill_data(skill_id)
+		if not _ai_is_damage_skill(skill_data) or _ai_is_move_skill(skill_data):
+			continue
+		if not bool(GameAction.validate_skill_usage(unit, skill_data).get("ok", false)):
+			continue
+		out.append(skill_id)
+	return out
+
+
+## 敌人 AI：本回合能用的位移攻击技能（一闪、回斩这类消耗移动机会的技能）。
+## 它们和普通移动二选一：AI 把「位移技能 + 落点上的最佳出手」与「移动 + 出手」比较。
+func _ai_move_skill_ids(unit: Unit) -> Array[String]:
+	var out: Array[String] = []
+	for skill_id: String in _ai_current_skill_ids(unit):
+		var skill_data: Dictionary = _get_skill_data(skill_id)
+		if not _ai_is_damage_skill(skill_data) or not _ai_is_move_skill(skill_data):
+			continue
+		if not bool(GameAction.validate_skill_usage(unit, skill_data).get("ok", false)):
+			continue
+		out.append(skill_id)
+	return out
+
+
+## 敌人 AI 的资源预算用：技能的剑气与印记消耗、印记门槛、是否占用迅捷行动点（swift_limit 为 -1 时不占）。
+func _ai_skill_cost(unit: Unit, skill_id: String) -> Dictionary:
+	var skill_data: Dictionary = _get_skill_data(skill_id)
+	var qi: int = int(skill_data.get("qi_cost", 0))
+	if qi > 0:
+		qi += unit.get_harmony_extra()
+	return {"qi": qi, "qi_overdraft": unit.allows_qi_overdraft(),
+		"marks": int(skill_data.get("mark_cost", 0)),
+		"marks_needed": maxi(int(skill_data.get("requires_marks", 0)), int(skill_data.get("mark_cost", 0))),
+		"uses_swift": str(skill_data.get("action_cost", "")) == "swift" and int(skill_data.get("swift_limit", 1)) != -1}
+
+
+## 当前槽位上的技能：与技能栏同一规则（槽位提供者不单独列出、交替槽取当前形态、
+## slot_swap 换出的形态），另加被动槽在某状态期间换成的主动技能（〔空想剑〕）。
+func _ai_current_skill_ids(unit: Unit) -> Array[String]:
+	var out: Array[String] = []
+	for skill_id: String in unit.skill_ids:
+		var slot_skill_data: Dictionary = _get_skill_data(skill_id)
+		if bool(slot_skill_data.get("slot_swap_provider", false)):
+			continue
+		var form_id: String = unit.resolve_slot_form(skill_id)
+		if form_id != skill_id:
+			slot_skill_data = _get_skill_data(form_id)
+		out.append(unit.get_visible_skill_id(form_id,
+			str(slot_skill_data.get("slot_swap_trigger", "")),
+			str(slot_skill_data.get("slot_swap_target", "")),
+			_slot_swap_requires(slot_skill_data)))
+	var passive_form: String = _passive_slot_skill_id(unit)
+	if passive_form != "":
+		out.append(passive_form)
+	return out
+
+
+func _ai_is_damage_skill(skill_data: Dictionary) -> bool:
+	return not skill_data.is_empty() and not _is_support_skill(skill_data) and (
+		float(skill_data.get("power", 0)) > 0.0
+		or not (skill_data.get("damage_entries", []) as Array).is_empty())
+
+
+func _ai_is_move_skill(skill_data: Dictionary) -> bool:
+	return bool(skill_data.get("displacement", false)) \
+		or _skill_landing_mode(skill_data) == LANDING_MODE_ADJACENT
+
+
+## 敌人 AI：本回合能用的功能技能（没有伤害），按技能组顺序。每项是
+## `{skill_id, kind, action_cost, heal, effect_ids}`：
+## kind = "debuff"（作用于敌方）、"heal"（带治疗效果）、"summon"（召唤）、
+## "self"（以自身为目标、不施加状态，如〔三段斩〕）、"buff"（其余友方或自身技能）；
+## 与召唤物换位（〔颠倒〕）不返回。
+## heal 是每个目标的治疗量；effect_ids 是会施加的状态 id（护盾记作 "shield"，持有型状态记作
+## "held:<id>"），用来判断目标是否已经有了。
+func _ai_support_skills(unit: Unit) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for skill_id: String in _ai_current_skill_ids(unit):
+		var skill_data: Dictionary = _get_skill_data(skill_id)
+		if skill_data.is_empty() or not _is_support_skill(skill_data):
+			continue
+		# 与召唤物换位（〔颠倒〕）没有明确的使用时机，AI 不用。
+		if bool(skill_data.get("swap_with_summon", false)):
+			continue
+		if not bool(GameAction.validate_skill_usage(unit, skill_data).get("ok", false)):
+			continue
+		var heal: int = 0
+		var effect_ids: Array[String] = []
+		for effect_value: Variant in skill_data.get("effects", []):
+			if not effect_value is Dictionary:
+				continue
+			var effect: Dictionary = effect_value
+			if effect.has("held_state_id"):
+				effect_ids.append("held:" + str(effect["held_state_id"]))
+				continue
+			var effect_id: String = str(effect.get("effect_id", effect.get("type", "")))
+			if effect_id == "heal":
+				heal += int(effect.get("value", 0))
+			elif effect_id != "":
+				effect_ids.append(effect_id)
+		var kind: String = "buff"
+		if _get_skill_target_relation(skill_data) == "enemy":
+			kind = "debuff"
+		elif heal > 0:
+			kind = "heal"
+		elif skill_data.has("summon"):
+			kind = "summon"
+		elif effect_ids.is_empty() and _skill_target_mode(skill_data) == TARGET_MODE_SELF:
+			# 以自身为目标、不施加状态的功能技能（〔三段斩〕：消耗印记换剑气）：可用就用。
+			kind = "self"
+		out.append({"skill_id": skill_id, "kind": kind,
+			"action_cost": str(skill_data.get("action_cost", "standard")),
+			"heal": heal, "effect_ids": effect_ids})
+	return out
+
+
+## 敌人 AI：站在 `origin` 时这个技能的全部施放方式。每项是
+## `{target_pos, target_unit, hit_units, single}`：`target_unit` 只在先选单位或以自身为目标的技能里有值；
+## `hit_units` 是范围内会受影响的单位（按技能的目标关系：敌方、友方或自身）；
+## `single` 表示单体（选单位、范围只有一格，或以自身为目标的功能技能）；后者另有 `self = true`。
+## 以自身为中心的伤害技能按 AOE 处理，范围内没有敌人时不返回。
+## 范围与方向的算法与执行时相同（`_get_skill_area_direction` 在没有选定方向时取起点指向目标格）。
+func _ai_skill_casts(unit: Unit, skill_id: String, origin: Vector2i) -> Array[Dictionary]:
+	var casts: Array[Dictionary] = []
+	var skill_data: Dictionary = _get_skill_data(skill_id)
+	if skill_data.is_empty():
+		return casts
+	var range_data: Dictionary = skill_data.get("range", {})
+	var area_data: Dictionary = skill_data.get("area", {})
+	var mode: String = _skill_target_mode(skill_data)
+	var relation: String = _get_skill_target_relation(skill_data)
+	if bool(skill_data.get("displacement", false)):
+		return _ai_displacement_casts(unit, skill_data, origin)
+	if _skill_landing_mode(skill_data) == LANDING_MODE_ADJACENT:
+		return _ai_landing_casts(unit, skill_data, origin)
+	if bool(skill_data.get("requires_empty_cell", false)):
+		for cell_pos: Vector2i in RangeCalculator.calculate_cells(grid, origin, range_data):
+			if _is_empty_passable(cell_pos):
+				casts.append({"target_pos": cell_pos, "target_unit": null,
+					"hit_units": [], "single": false})
+		return casts
+	if mode == TARGET_MODE_SELF:
+		var self_units: Array[Unit] = _get_units_in_skill_area(unit, skill_data,
+			AreaCalculator.calculate_cells(grid, origin, area_data, Vector2i.ZERO))
+		if _is_support_skill(skill_data):
+			# 以自身为目标的功能技能：作用于自己（范围增益则是范围内的友军）。
+			if self_units.is_empty():
+				self_units = [unit]
+			casts.append({"target_pos": origin, "target_unit": unit,
+				"hit_units": self_units, "single": true, "self": true})
+		elif not self_units.is_empty():
+			# 以自身为中心的范围伤害：按 AOE 打分，范围内没有敌人时不施放。
+			casts.append({"target_pos": origin, "target_unit": null,
+				"hit_units": self_units, "single": false})
+		return casts
+	var unit_mode: bool = mode == TARGET_MODE_UNIT
+	var single: bool = unit_mode and str(area_data.get("type", "single")) == "single"
+	var directions: Array[Vector2i] = [Vector2i.ZERO]
+	if str(range_data.get("type", "")) == "line":
+		directions = RangeCalculator.get_line_directions(grid, origin, range_data)
+	for direction: Vector2i in directions:
+		for cell_pos: Vector2i in RangeCalculator.calculate_cells(
+				grid, origin, range_data, direction):
+			var target_unit: Unit = null
+			if unit_mode:
+				target_unit = grid.get_unit_at(cell_pos)
+				if not _matches_target_relation(unit, target_unit, relation):
+					continue
+			var area_direction: Vector2i = direction if direction != Vector2i.ZERO \
+				else RangeCalculator.direction_from_to(origin, cell_pos)
+			var hit_units: Array[Unit] = _get_units_in_skill_area(unit, skill_data,
+				AreaCalculator.calculate_cells(grid, cell_pos, area_data, area_direction))
+			if hit_units.is_empty():
+				continue
+			casts.append({"target_pos": cell_pos, "target_unit": target_unit,
+				"hit_units": hit_units, "single": single})
+	return casts
+
+
+## 位移技能（〔一闪〕）：每个方向上每个可落脚的格子各算一种，受伤的是途经格上的敌人。
+## 落点必须可通行且没有别人（与 _is_displacement_landing_valid 同条件，起点用 origin）。
+## 途经没有敌人的也返回：位移本身可以当作移动，接着在落点出手。
+func _ai_displacement_casts(unit: Unit, skill_data: Dictionary,
+		origin: Vector2i) -> Array[Dictionary]:
+	var casts: Array[Dictionary] = []
+	var range_data: Dictionary = skill_data.get("range", {})
+	for direction: Vector2i in RangeCalculator.get_line_directions(grid, origin, range_data):
+		for landing: Vector2i in RangeCalculator.calculate_cells(grid, origin, range_data, direction):
+			if landing == origin or not grid.is_valid(landing):
+				continue
+			var cell: Cell = grid.get_cell(landing)
+			if cell == null or not cell.is_passable() or (cell.occupant != null and cell.occupant != unit):
+				continue
+			var hit_units: Array[Unit] = _get_units_in_skill_area(unit, skill_data,
+				_get_displacement_path_cells(origin, landing))
+			casts.append({"target_pos": landing, "target_unit": null, "hit_units": hit_units,
+				"single": false, "landing": landing})
+	return casts
+
+
+## 先选敌人再选落点（〔回斩〕）：射程内每个敌人的每个上下左右相邻空格各算一种。
+func _ai_landing_casts(unit: Unit, skill_data: Dictionary,
+		origin: Vector2i) -> Array[Dictionary]:
+	var casts: Array[Dictionary] = []
+	var relation: String = _get_skill_target_relation(skill_data)
+	for cell_pos: Vector2i in RangeCalculator.calculate_cells(grid, origin, skill_data.get("range", {})):
+		var target_unit: Unit = grid.get_unit_at(cell_pos)
+		if not _matches_target_relation(unit, target_unit, relation):
+			continue
+		for landing: Vector2i in _get_adjacent_landing_cells(unit, cell_pos):
+			casts.append({"target_pos": cell_pos, "target_unit": target_unit,
+				"hit_units": [target_unit], "single": true, "landing": landing})
+	return casts
+
+
+## 敌人 AI：用某个技能打某个目标的预告，与玩家悬停预告同一套上下文与公式。
+## 预告不随攻击者站位变化，所以按当前位置构建载荷。`primary` 为 false 时按溅射目标算
+## （乘 splash_damage_pct，与执行时 _execute_skill_action 的主目标与溅射区分一致）。
+func _ai_forecast_skill(attacker: Unit, target: Unit, skill_id: String,
+		primary: bool = true) -> Dictionary:
+	var action: GameAction = _build_skill_action(attacker, target.grid_position, target,
+		LANDING_ANCHOR_NONE, skill_id)
+	if action == null:
+		return {}
+	var data: Dictionary = action.data
+	data["area_damage_multiplier"] = 1.0 if primary \
+		else float(_get_skill_data(skill_id).get("splash_damage_pct", 100)) / 100.0
+	var ctx: Dictionary = _build_hostile_action_context(attacker, target, data)
+	return DamageCalculator.preview_attack(attacker, target, ctx)
+
+
+## 敌人回合执行技能前：AI 决策时单位还没移动，范围与方向按移动后的位置重新构建。
+## 移动没有发生或目标格已不是合法的施放方式时返回 null，跳过这次技能（执行路径不再检查射程）。
+func _rebuild_ai_skill_action(unit: Unit, action: GameAction) -> GameAction:
+	var skill_id: String = str(action.data.get("skill_id", ""))
+	# 计划之后状态可能变了（位移技能给了剑气、换了槽位形态）：技能已不在当前槽位上就跳过。
+	if not _ai_current_skill_ids(unit).has(skill_id):
+		print("[AI] %s: skill %s 已不在当前槽位上，跳过" % [unit.unit_name, skill_id])
+		return null
+	var landing: Vector2i = LANDING_ANCHOR_NONE
+	if action.data.has("ai_landing"):
+		landing = _deserialize_vector2i(action.data["ai_landing"])
+	var valid: bool = false
+	for cast: Dictionary in _ai_skill_casts(unit, skill_id, unit.grid_position):
+		if cast["target_pos"] == action.target_pos and cast["target_unit"] == action.target_unit \
+				and cast.get("landing", LANDING_ANCHOR_NONE) == landing:
+			valid = true
+			break
+	if not valid:
+		print("[AI] %s: skill %s 的目标已不合法，跳过" % [unit.unit_name, skill_id])
+		return null
+	_targeting_direction = Vector2i.ZERO
+	# 位移技能的落点就是目标格；先选敌人再选落点的技能单独带落点。
+	var landing_anchor: Vector2i = landing \
+		if _skill_landing_mode(_get_skill_data(skill_id)) == LANDING_MODE_ADJACENT else LANDING_ANCHOR_NONE
+	return _build_skill_action(unit, action.target_pos, action.target_unit, landing_anchor, skill_id)
 
 
 func _held_state_skill_power_bonus(attacker: Unit) -> float:

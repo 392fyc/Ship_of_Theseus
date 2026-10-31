@@ -25,3 +25,13 @@
 - **待定问题**（world-premise §9）：单轮「达到理→流放」的兑现质感与元弧收束细节；L1/L2/L3 三层成长的叙事映射。
 - **传奇登记**：分档与人选整体 [提案] 候选池；能否招揽留敌人轮；起源级记的是这几位在原初世界里本来的样子，理够不到那里，故这一档始终作叙事引用素材、在关卡之上「在场」[已定，2026-07-29]；是否、如何在更高叙事层级登场 [待定]。
 - **船的专有名字**：留白（留白亦为设计），由用户裁决。
+
+## 目录索引
+
+| 文档 | 状态 | 说明 |
+|---|---|---|
+| [crew-and-identity.md](crew-and-identity.md) | 现行 | crew-and-identity.md — 乘员与身份 |
+| [legendary-enemies.md](legendary-enemies.md) | 现行 | 传奇敌人叙事登记 |
+| [mythic-multiverse-and-acts.md](mythic-multiverse-and-acts.md) | 现行 | mythic-multiverse-and-acts.md — 多神话多元宇宙与幕结构 |
+| [pantheons.md](pantheons.md) | 现行 | 神话世界池 |
+| [world-premise.md](world-premise.md) | 现行 | world-premise.md — 忒修斯之船 世界观基石 |

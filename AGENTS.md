@@ -59,6 +59,12 @@ These rules bind the main agent and every subagent in both Codex and Claude Code
 
 The full lane contract is `.mercury/packs/lanes/docs/mercury-lane-contract.md`; the project's lane document follows `.mercury/packs/lanes/docs/mercury-lane-project-template.md`.
 
+## Knowledge base
+
+- The project's knowledge base follows `.mercury/packs/kb/docs/kb-conventions.md`: one entry page leading to the current rules, the progress page and the decision register; a README index with a status (`current` or `draft`) for every document in every directory; no archive.
+- Before editing, read the KB documents that govern the task, starting from the entry page. When a change alters a rule, a decision or progress, update the current document and delete what it makes outdated or wrong, with every link to it, in the same pull request. Do not keep outdated text marked as superseded: search finds it as if it were current. Git history, Issues and pull requests keep the record; cite a fixed-commit permanent link when old text must stay citable.
+- Every pull request names its Issue and has a line starting with `KB:` that lists the KB documents it updated or deleted, or says `KB: no impact` and why. `guard.ps1 pre-merge` refuses a pull request without both. Check the KB with `python -B .mercury/packs/kb/scripts/kb_check.py <kb-root>`.
+
 ## Linked repositories
 
 Declared in `linked_repos` in `.mercury/config.json`; Mercury renders this section from it. Each entry says what the repository is for, how to find it without a machine path, how to use it quickly (skills, scripts, commands) and the rules that bind work in it. Anything its rules do not allow needs its own authorized scope.
@@ -79,7 +85,7 @@ Declared in `linked_repos` in `.mercury/config.json`; Mercury renders this secti
 
 日常 Codex 从游戏主仓 `Ship_of_Theseus` 进入。游戏仓与设计库两个主仓平级；KB 已并入本仓库的 `docs/`。任务工作树只建在所属仓库根的 `.worktrees/<task>/`（被 Git 忽略），不在仓库外另建目录组。任务工作树不得用父目录猜测设计库或游戏主仓；先用环境变量，再回退到被忽略的本地 roots 配置，缺少配置时停止猜测。
 
-游戏主仓由 `SOT_SHIP_ROOT` / `[roots].ship_root` 解析；任务组由 `[worktrees].ship_root`、`designlib_root` 或对应 `SOT_*_WORKTREE_ROOT` 解析。使用 `scripts/codex/sot-worktree.ps1` 列出、检查和创建游戏/设计库任务树。KB 文档在游戏仓任务树的 `docs/` 中随任务一起修改。PR 合并后立即删除 worktree 与本地分支（远端分支由 GitHub 合并后自动删除）；未合入就废弃的分支列出清单，经用户确认后连同远端一并删除；`main`、`master`、`develop` 与默认分支永不删除。删除前核对 dirty、untracked、ignored 与实际合入证据，不按年龄或关闭 PR 单独判定。详见 [工作树生命周期](docs/worktree-lifecycle.md)。
+游戏主仓由 `SOT_SHIP_ROOT` / `[roots].ship_root` 解析；任务组由 `[worktrees].ship_root`、`designlib_root` 或对应 `SOT_*_WORKTREE_ROOT` 解析。使用 `scripts/codex/sot-worktree.ps1` 列出、检查和创建游戏/设计库任务树。KB 文档在游戏仓任务树的 `docs/` 中随任务一起修改。PR 合并后立即删除 worktree 与本地分支（远端分支由 GitHub 合并后自动删除）；未合入就废弃的分支列出清单，经用户确认后连同远端一并删除；`main`、`master`、`develop` 与默认分支永不删除。删除前核对 dirty、untracked、ignored 与实际合入证据，不按年龄或关闭 PR 单独判定。详见 [工作树生命周期](docs/02-Development/worktree-lifecycle.md)。
 
 ## Language
 
@@ -88,7 +94,7 @@ Declared in `linked_repos` in `.mercury/config.json`; Mercury renders this secti
 ## 产物清晰度
 
 - 现行设计、代码注释、handoff 和任务卡只保存当前有效结论、必要约束、真实未决问题、证据与下一步。
-- 持久化审查以完整命题为单位；历史记录进入 ADR、Research、明确归档区或 Git 历史，并退出默认读取链。
+- 持久化审查以完整命题为单位；KB 只保留现行内容，过时内容在让它过时的 PR 里删除，历史留在 Git、Issue 与 PR，需要引用时用固定提交的永久链接。
 - 范围外发现只登记位置、类别和所需权威，不扩展当前任务。
 
 ## 用户问题与前提
@@ -116,10 +122,10 @@ Declared in `linked_repos` in `.mercury/config.json`; Mercury renders this secti
 
 KB 里积累的设计原则、用户裁决和调研，只有在代理每次动手前都读到时才有用。设计、调研或审查职业、技能、回忆、天赋、装备、遗物与规则数值时：
 
-- 先读 KB 的 `docs/03-AI-Context/design-rules-index.md`，再按它的开工路由读该实体的设计原则分册，然后读设计库的现行规则与记录。子代理的派发提示要写明这一步和要读的分册。
+- 设计纪律的唯一正本是 KB 的设计规则总表 `docs/00-rules/rules.md`（分级编号，每条注明来源决策）；决策来源登记在 `docs/03-decisions/register.md`。先读总表中与任务相关的节，再按 `docs/00-rules/design-rules-index.md` 的开工路由读该实体的指引，然后读设计库的现行规则与记录。子代理的派发提示要写明这一步、要读的节与指引。
 - 外部参考先查 KB 的参考作品索引 `docs/05-Research/references.md` 和它链接的已有调研，在此基础上补充，不重复调研。
-- 设计结论要指到依据：KB 分册的页面与小节、设计库规则编号，或用户裁决原话。没有依据的数值标“[占位]”或“推断”。与 KB 原则冲突时写明冲突，交用户裁决，不静默违反。
-- 用户对设计的新裁决，在任务的 KB 写入授权范围内，当轮写进 KB 中负责该主题的原则分册（经 `sot-kb-write`）；没有 KB 写入授权时，在汇报中列出待入册的裁决原话、日期和目标分册。提案目录与工作记录只保存过程，不代替分册。
+- 设计结论要指到依据：总表编号、决策登记编号、设计库规则编号，或用户裁决原话。没有依据的数值标“[占位]”或“推断”。与总表冲突时写明冲突的编号，交用户裁决，不静默违反。
+- 用户对设计的新裁决，在任务的 KB 写入授权范围内（经 `sot-kb-write`）：改总表对应规则（没有就新增一行），在决策登记登记来源，删除被推翻的规则行与决策行。没有 KB 写入授权时，在汇报中列出待登记的裁决原话、日期和对应的规则编号。提案目录与工作记录只保存过程，不代替总表。
 
 ## SoT 与 Mercury Harness 所有权
 
@@ -127,7 +133,7 @@ KB 里积累的设计原则、用户裁决和调研，只有在代理每次动�
 - Mercury 只拥有它装载的通用 Harness 路径：`.mercury/packs/`、`.mercury/lock.json`、`.codex/agents/mercury-*`、`.codex/rules/mercury-*`、`.claude/agents/mercury-*`、两种宿主技能目录中的 `mercury-*` 技能入口、`.github/workflows/mercury-*.yml`，以及本文件与 `CLAUDE.md` 顶部由 Mercury 开始、结束标记包围的受管段。`.mercury/config.json` 由 SoT 维护。SoT 侧不得创建、修改或发起这些受管路径的内容变更。
 - SoT 自有的领域角色与技能属于 Mercury 项目区：清单 `.mercury/local.json` 与角色来源 `.mercury/local/roles/` 由 SoT 维护，技能正文留在清单声明的目录；`.claude/agents/`、`.codex/agents/` 中的同名角色文件与 Claude 技能入口由 Mercury 安装器生成，不手改。新建、修改或退役都改清单或来源后从已发布的 Mercury 提交运行安装器（`apply`）；Mercury 更新 PR 不触碰项目区。
 - 需要调整通用 Harness 时，SoT 只提供需求与证据，由 Mercury 发起 Issue/PR；Mercury 发布到 `master` 后，由 `Mercury update` 工作流开更新 PR 单向装载，或在修改 `.mercury/config.json` 后从已发布的 Mercury 提交运行安装器。不得在 SoT 反向修改受管路径或锁文件。
-- 会话涉及通用 Harness 所有权或任务合同时，按需读取 `.mercury/packs/core/docs/mercury-harness-ownership.md` 与 `.mercury/packs/core/docs/mercury-task-contract.md`；SoT 装载 lanes pack：lane 合同 `.mercury/packs/lanes/docs/mercury-lane-contract.md` 给出通用约束，`docs/lane-collaboration.md` 按 lane 项目模板 `.mercury/packs/lanes/docs/mercury-lane-project-template.md` 写 SoT 的具体做法。lanes pack 自带的 lane 脚本与 `mercury-lane-handoff` 技能不在 SoT 使用（后者由 `params.skip_skills` 跳过）。这些文件由 Mercury 安装；缺失时不仿造、不阻断无关领域工作。
+- 会话涉及通用 Harness 所有权或任务合同时，按需读取 `.mercury/packs/core/docs/mercury-harness-ownership.md` 与 `.mercury/packs/core/docs/mercury-task-contract.md`；SoT 装载 lanes pack：lane 合同 `.mercury/packs/lanes/docs/mercury-lane-contract.md` 给出通用约束，`docs/02-Development/lane-collaboration.md` 按 lane 项目模板 `.mercury/packs/lanes/docs/mercury-lane-project-template.md` 写 SoT 的具体做法。lanes pack 自带的 lane 脚本与 `mercury-lane-handoff` 技能不在 SoT 使用（后者由 `params.skip_skills` 跳过）。这些文件由 Mercury 安装；缺失时不仿造、不阻断无关领域工作。
 
 ## 活跃记忆根
 
@@ -138,7 +144,7 @@ KB 里积累的设计原则、用户裁决和调研，只有在代理每次动�
 - lane 是用户声明的工作路线，不是 agent。一条 lane 至多 1 个 Codex 会话与 1 个 Claude Code 会话，外加其他 worker；其中主导宿主掌握正式判断，另一宿主可介入审查等作业但不取代主导地位，主导宿主只在创建 lane 时或用户要求时改变。agent 介入已有 lane 不另开 lane。lane 只凭用户声明创建、改派或关闭。lane 是可选的：起始指令带 `[LANE=<代号>]` 的会话属于该 lane；没有标记的会话不属于任何 lane，照常工作与交付，不写 lane 状态，也不为此询问用户；只有用户提到某条 lane 或需要写 lane 状态时才确认 lane，不按工作内容推断。
 - 注册簿是活跃记忆 bucket 下的 `LANES.md`；各 lane 只改自己的小节与 `lanes/<代号>/` 目录，handoff 按宿主分文件，共享记忆文件按读取时的 sha256 做版本条件写入。
 - 主工作区不做开发；属于某条 lane 的 Issue / PR 加 `lane:<代号>` 标签，分支按目的命名 `<类型>/<目的>[-<lane>]-<agent>`，agent 与 lane 只作后缀，不以 `claude/`、`codex/`、`lane/` 开头。草稿、模拟原始数据与审核记录放在被忽略的 lane 工作区 `.sot/lane-work/<lane>/`（不属于任何 lane 时放主工作树被忽略的 `.tmp/<任务>/`）；任务分支与 worktree 只为通过 PR 交付或审查的工作创建，不用来保存未提交文件。跨 lane 消息不是用户授权；交叉影响开协调 Issue 由用户裁决。
-- 被禁止的裸命令使用受控入口：发布 `sot-publish.ps1`、同步基准 `sot-sync.ps1`、工作树 `sot-worktree.ps1`、共享记忆 `sot-memory.ps1 -Action Write`。完整协议见 [多 Lane 多 Agent 协作](docs/lane-collaboration.md)。
+- 被禁止的裸命令使用受控入口：发布 `sot-publish.ps1`、同步基准 `sot-sync.ps1`、工作树 `sot-worktree.ps1`、共享记忆 `sot-memory.ps1 -Action Write`。完整协议见 [多 Lane 多 Agent 协作](docs/02-Development/lane-collaboration.md)。
 
 ## 跨仓读取与写入
 
@@ -157,7 +163,7 @@ KB 里积累的设计原则、用户裁决和调研，只有在代理每次动�
 
 ## 美术表现验收
 
-修改人物棋子、朝向、足点、脚环、血条或职业徽章时，先读取 [人物表现验收准则](docs/art/character-token-acceptance.md)。修改地形表现时，先读取 [地形呈现验收准则](docs/art/terrain-presentation-acceptance.md)，同时检查相邻连接和实际战斗中的可读性。自动检查、独立画面审阅与用户视觉批准须分别记录。
+修改人物棋子、朝向、足点、脚环、血条或职业徽章时，先读取 [人物表现验收准则](docs/04-Assets/character-token-acceptance.md)。修改地形表现时，先读取 [地形呈现验收准则](docs/04-Assets/terrain-presentation-acceptance.md)，同时检查相邻连接和实际战斗中的可读性。自动检查、独立画面审阅与用户视觉批准须分别记录。
 
 ## GDScript 约束
 
@@ -184,7 +190,7 @@ KB 里积累的设计原则、用户裁决和调研，只有在代理每次动�
 
 ## Git 与交付
 
-- CI 临时安排（用户 2026-10-30）：截至 2026-10-31，已授权任务以本地等价 CI 和当前提交的独立审查作为合并依据；GitHub 额度不足导致的未执行不写成远端通过。2026-11-01 起恢复 GitHub Actions CI。执行与恢复范围见 [CI 与本地验证](docs/02-Development/ci-policy.md)。
+- CI：PR 的合并依据是 GitHub Actions（`CI` 与 `Mercury verify`）在当前 HEAD 上的结果，本地运行只用于自查，不代替远端 CI（决策登记 D-084）。做法见 [CI 与合并依据](docs/02-Development/ci-policy.md)。
 - 不直接提交或推送到 `develop`、`main`、`master`。
 - Ship 与设计库从目标仓任务 worktree 调用 Ship 根的 `scripts/codex/sot-publish.ps1`（KB 随 Ship 发布）。该入口通过 `SOT_DESIGNLIB_ROOT` 授权跨仓发布。不得因目标仓没有同名脚本而判定发布阻断，也不得改用原始 `git push`。
 - 只修改任务声明的文件范围，不夹带用户已有 dirty 文件。

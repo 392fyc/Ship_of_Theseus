@@ -1,0 +1,21 @@
+{
+  "id": "goblin_brave_throw",
+  "target_mode": "单位",
+  "name": "投掷",
+  "damage_type": "physical",
+  "power": 90,
+  "hit_bonus": 0,
+  "range": { "type": "diamond", "min": 2, "max": 3 },
+  "area": { "type": "single", "size": 0 },
+  "attack_type": "ranged",
+  "cooldown": 0,
+  "action_cost": "standard",
+  "timing_constraint": "any",
+  "effects": [],
+  "tags": [
+    "ranged",
+    "enemy"
+  ],
+  "description": "向 2–3 格内的一名敌人投掷武器。",
+  "_note": "[占位] 用户 2026-10-31 定射程与范围；威力与冷却由 Claude 推定。"
+}

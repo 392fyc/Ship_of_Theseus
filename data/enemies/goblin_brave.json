@@ -1,0 +1,38 @@
+{
+  "id": "goblin_brave",
+  "name": "哥布林勇士",
+  "base_stats": {
+    "HP": 90,
+    "STR": 3,
+    "MAG": 1,
+    "DEX": 4,
+    "SPD": 5,
+    "LCK": 2,
+    "DEF": 4,
+    "RES": 2
+  },
+  "MOV": 3,
+  "attack_type": "melee",
+  "weapon_id": "wpn_physical_melee_basic",
+  "damage_type": "physical",
+  "basic_attack_range": { "min": 1, "max": 1 },
+  "skill_ids": [
+    "goblin_brave_throw"
+  ],
+  "ai_behavior": "AGGRESSIVE",
+  "loot_table": [
+    {
+      "type": "gold",
+      "amount": 8,
+      "chance": 100
+    },
+    {
+      "type": "material",
+      "id": "goblin_tooth",
+      "amount": 1,
+      "chance": 35
+    }
+  ],
+  "description": "近战与投掷两种攻击，两种都够得着时比较得分选用。",
+  "_note": "[占位] 用户 2026-10-31 定技能组；属性、射程外的数值由 Claude 参照 goblin_melee / goblin_shaman 推定。"
+}

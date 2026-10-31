@@ -1,0 +1,39 @@
+{
+  "id": "goblin_priest",
+  "name": "哥布林牧师",
+  "base_stats": {
+    "HP": 50,
+    "STR": 1,
+    "MAG": 4,
+    "DEX": 3,
+    "SPD": 4,
+    "LCK": 2,
+    "DEF": 2,
+    "RES": 5
+  },
+  "MOV": 3,
+  "attack_type": "ranged",
+  "weapon_id": "wpn_magical_ranged_basic",
+  "damage_type": "magical",
+  "basic_attack": false,
+  "skill_ids": [
+    "goblin_priest_heal",
+    "goblin_priest_shield"
+  ],
+  "ai_behavior": "SUPPORT",
+  "loot_table": [
+    {
+      "type": "gold",
+      "amount": 8,
+      "chance": 100
+    },
+    {
+      "type": "material",
+      "id": "goblin_tooth",
+      "amount": 1,
+      "chance": 35
+    }
+  ],
+  "description": "没有普通攻击，只会治疗与护盾术；没事可做时靠近友军待命。",
+  "_note": "[占位] 用户 2026-10-31 定技能组与待命方式；属性由 Claude 参照 goblin_shaman 推定。"
+}

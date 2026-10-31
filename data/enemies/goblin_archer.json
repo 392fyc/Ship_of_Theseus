@@ -16,10 +16,7 @@
   "weapon_id": "wpn_physical_ranged_basic",
   "damage_type": "physical",
   "basic_attack_range": { "min": 2, "max": 4 },
-  "skill_ids": [
-    "archer_aimed_shot",
-    "archer_piercing_arrow"
-  ],
+  "skill_ids": [],
   "ai_behavior": "AGGRESSIVE",
   "loot_table": [
     {
@@ -34,5 +31,5 @@
       "chance": 40
     }
   ],
-  "description": "远程输出单位，生存较弱但能压制后排。"
+  "description": "远程哥布林，只会普通攻击。"
 }

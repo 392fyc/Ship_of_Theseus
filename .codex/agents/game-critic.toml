@@ -32,24 +32,26 @@ judgment, not a verdict.
   rules in `.agents/skills/sot-designlib/SKILL.md`, using only records whose
   status is pending review (待审阅), pending optimization (待优化), or
   locked (锁定, reference only), never draft (草稿), pending deletion
-  (待删除), or archived (已归档); read current behavior from this repository's code and tests and prior
+  (待删除), or archived (已归档) (KB rule G02); read current behavior from this repository's code and tests and prior
   decisions from the KB. Spot-check the repository and design-library
   locations the analyst cited. Point out conflicts between the proposal and
   those facts, with source locations. Record a gap when a read fails instead
   of guessing a path.
-- Check the proposal against the project's own design principles first:
-  enter the KB through `docs/03-AI-Context/design-rules-index.md` and read the
-  principles it routes to for the entity in question. A conflict with a
-  principle or a recorded user ruling is a failure mode in its own right; cite
-  the page and section. A proposal that states conclusions without naming the
-  principle or rule they rest on is itself a finding.
+- Check the proposal against the project's own design rules first: the
+  numbered rules table `docs/00-rules/rules.md` is the single authority for
+  design discipline (decision sources in `docs/03-decisions/register.md`);
+  read the sections that apply and the entity guide that
+  `docs/00-rules/design-rules-index.md` routes to. A conflict with a level-1
+  or level-2 rule or a registered user decision is a failure mode in its own
+  right; cite the rule or decision number. A proposal that states conclusions
+  without naming the rule they rest on is itself a finding.
 - Record out-of-scope findings only as location, category, and the authority
   needed; do not expand them.
 
 ## Coverage
 
 For every assumption the analyst handed over, every counter-evidence lead
-from the researcher, and every KB principle that applies to the proposal,
+from the researcher, and every KB rule that applies to the proposal,
 mark "evidence found", "not found", or "not checked".
 This is the checkable floor of the review; the number of failure modes does
 not replace it.

@@ -68,6 +68,13 @@ const ENEMY_UNITS: Array[Dictionary] = [
 	{"class_id": "test_dummy_revive",  "pos": Vector2i(2, 5)},  # 复活木桩 死亡后回合末复活
 ]
 
+## 调试：敌人 AI 对练（用户 2026-10-31：「放个测试场景，控制一下伤害互相打不死」「测试场景之前应该存在一个，
+## 把场景什么的填入即可」）。在调试控制台打开后场景重载：双方阵容换成 data/ai/enemy_ai_practice.json 里的
+## 单位（6 种普通哥布林），所有单位最大生命设为其中的 unit_hp，每轮结束回满，敌人自动行动。
+## static：场景重载后保留开关状态。
+static var enemy_ai_practice: bool = false
+const ENEMY_AI_PRACTICE_ID := "enemy_ai_practice"
+
 var _battle_over: bool = false
 var _turn_order_scene: PackedScene = preload("res://scenes/tactical/TurnOrderBar.tscn")
 
@@ -105,6 +112,8 @@ func _ready() -> void:
 	_setup_camera()
 	if run_injected:
 		_spawn_injected_units()
+	elif debug_harness_enabled and enemy_ai_practice:
+		_spawn_enemy_ai_practice()
 	else:
 		tactical_manager.initialize_battle("test_arena")
 
@@ -594,6 +603,11 @@ func _build_debug_overlay() -> void:
 	_btn_dummy.pressed.connect(_on_debug_btn_dummy)
 	vbox.add_child(_btn_dummy)
 
+	var btn_practice: Button = _make_debug_button(
+		"敌人 AI 对练：%s" % ("开" if enemy_ai_practice else "关"))
+	btn_practice.pressed.connect(_on_debug_btn_enemy_ai_practice)
+	vbox.add_child(btn_practice)
+
 	_debug_status_label = _make_debug_label("", Color(0.82, 0.86, 0.92))
 	vbox.add_child(_debug_status_label)
 
@@ -719,6 +733,38 @@ func _on_debug_btn_crit() -> void:
 	_refresh_debug_overlay()
 
 
+func _on_debug_btn_enemy_ai_practice() -> void:
+	enemy_ai_practice = not enemy_ai_practice
+	print("[Debug] enemy AI practice = %s，重载场景" % str(enemy_ai_practice))
+	get_tree().reload_current_scene()
+
+
+## 敌人 AI 对练的阵容：读 data/ai/enemy_ai_practice.json，生成后把所有单位的最大生命设为 unit_hp，
+## 并让敌人自动行动（木桩行为切到「自动」）。
+func _spawn_enemy_ai_practice() -> void:
+	var cfg: Dictionary = (DataLoader.ai as Dictionary).get(ENEMY_AI_PRACTICE_ID, {})
+	tactical_manager.initialize_battle(str(cfg.get("map_id", "test_arena")))
+	for side: String in ["player", "enemy"]:
+		for record: Variant in cfg.get(side + "_units", []):
+			if not record is Dictionary:
+				continue
+			var pos: Array = (record as Dictionary).get("position", [0, 0])
+			tactical_manager.spawn_unit(str((record as Dictionary).get("class_id", "")),
+				Vector2i(int(pos[0]), int(pos[1])), side, &"SE")
+	var unit_hp: int = int(cfg.get("unit_hp", 0))
+	for unit: Unit in tactical_manager.units:
+		if unit_hp > 0:
+			unit.stats.max_hp = unit_hp
+		_refill_hp(unit)
+	tactical_manager.debug_dummy_behavior = TacticalManager.DummyBehavior.AUTO
+
+
+## 生命直接回满（不经过治疗，不受愈合迟滞影响），再刷新血条。
+func _refill_hp(unit: Unit) -> void:
+	unit.stats.hp = unit.stats.max_hp
+	unit.heal(0)
+
+
 func _on_debug_btn_dummy() -> void:
 	tactical_manager.debug_cycle_dummy_behavior()
 	print("[Debug] dummy behavior = %s" % tactical_manager.debug_get_status().get("dummy_behavior", ""))
@@ -735,6 +781,13 @@ func _process_test_dummies() -> void:
 		return
 	var turn_mgr: TurnManager = tactical_manager.turn_manager
 	if turn_mgr == null:
+		return
+
+	# 敌人 AI 对练：所有存活单位每轮结束回满，双方都打不死；对练阵容里没有木桩，不做复活。
+	if enemy_ai_practice:
+		for u: Unit in tactical_manager.units:
+			if u.stats.is_alive():
+				_refill_hp(u)
 		return
 
 	# 再生：遍历存活单位，regen 木桩 HP 回满（由 DataLoader 读 dummy_mode，不硬编码）

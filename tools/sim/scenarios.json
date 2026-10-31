@@ -1,0 +1,42 @@
+{
+  "id": "battle_sim_scenarios",
+  "map_id": "test_arena",
+  "time_scale": 100,
+  "max_rounds": 30,
+  "seeds": 5,
+  "max_actions_per_turn": 8,
+  "repeat_trigger_threshold": 3,
+  "max_extra_turns_per_round": 2,
+  "players": [
+    { "class_id": "kensei", "position": [1, 3], "memory_target": true },
+    { "class_id": "myrmidon", "position": [1, 4] }
+  ],
+  "memory_class": "kensei",
+  "lineups": [
+    { "id": "frontline", "name": "前排：战士 ×2 + 弓手",
+      "enemies": [
+        { "class_id": "goblin_melee", "position": [6, 2] },
+        { "class_id": "goblin_melee", "position": [6, 4] },
+        { "class_id": "goblin_archer", "position": [7, 3] } ] },
+    { "id": "mixed", "name": "混合：勇士 + 法师 + 萨满",
+      "enemies": [
+        { "class_id": "goblin_brave", "position": [6, 3] },
+        { "class_id": "goblin_mage", "position": [7, 2] },
+        { "class_id": "goblin_shaman", "position": [7, 5] } ] },
+    { "id": "support", "name": "支援：战士 + 牧师 + 萨满 + 弓手",
+      "enemies": [
+        { "class_id": "goblin_melee", "position": [6, 3] },
+        { "class_id": "goblin_priest", "position": [7, 3] },
+        { "class_id": "goblin_shaman", "position": [7, 5] },
+        { "class_id": "goblin_archer", "position": [7, 1] } ] },
+    { "id": "all", "name": "全员：6 种哥布林各一",
+      "enemies": [
+        { "class_id": "goblin_melee", "position": [5, 1] },
+        { "class_id": "goblin_archer", "position": [7, 1] },
+        { "class_id": "goblin_brave", "position": [5, 3] },
+        { "class_id": "goblin_mage", "position": [6, 4] },
+        { "class_id": "goblin_shaman", "position": [7, 5] },
+        { "class_id": "goblin_priest", "position": [6, 6] } ] }
+  ],
+  "_note": "批量战斗模拟的场景（用户 2026-10-31：双方都由 AI 行动，回忆按「基础 + 每个回忆单独」覆盖）。memory_target 的玩家单位依次兑现 memory_class 的每张回忆（另跑一次不兑现的基础配置）。time_scale 只加快演出等待，不影响结算；max_rounds 到了算僵持；repeat_trigger_threshold 是同一动作里同一来源剑气变动的次数阈值（连斩 3 段各 1 次，所以取 3）；max_extra_turns_per_round 超过就记「额外回合连锁」。"
+}

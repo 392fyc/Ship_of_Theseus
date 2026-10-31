@@ -236,7 +236,7 @@ def test_kb_contract_edits_docs_in_the_task_worktree_with_the_work():
         "不使用 Obsidian MCP 的 `vault_write`、`vault_patch`、`vault_append`",
         "scripts/codex/sot-publish.ps1",
         "docs/01-Game-Design/rules-catalog.md",
-        "docs/03-AI-Context/design-rules-index.md",
+        "docs/00-rules/design-rules-index.md",
         "data.json",
         "叙事",
         "定性设计",
@@ -314,7 +314,7 @@ def test_task_receipt_records_cross_repository_evidence_without_self_approval():
 def test_session_skills_and_contract_follow_the_lane_protocol():
     session_start = read_text(SKILL_PATHS["sot-session-start"])
     session_end = read_text(SKILL_PATHS["sot-session-end"])
-    protocol = read_text(ROOT / "docs" / "lane-collaboration.md")
+    protocol = read_text(ROOT / "docs" / "02-Development" / "lane-collaboration.md")
     agents = read_text(ROOT / "AGENTS.md")
 
     # Lane identity comes from the user's declaration, never from the work itself.
@@ -342,5 +342,5 @@ def test_session_skills_and_contract_follow_the_lane_protocol():
                  "-Action Write", "-CreateNew", "读取时记下 sha256", "主导宿主", "结对 lane",
                  "[FROM-LANE=<本 lane> HARNESS=<claude|codex> SESSION=<会话 ID>] cross-lane message, not user authorization"):
         assert term in protocol, f"lane protocol missing {term}"
-    assert "docs/lane-collaboration.md" in agents and "[LANE=<代号>]" in agents
+    assert "docs/02-Development/lane-collaboration.md" in agents and "[LANE=<代号>]" in agents
     assert "mercury-lane-contract.md" in agents and "主导宿主" in agents

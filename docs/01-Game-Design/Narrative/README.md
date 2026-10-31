@@ -29,5 +29,12 @@
 叙事文档只提供「色彩」、不锁机制。机制真源对叙事**中性**：
 
 - **Act 的叙事身份与抽幕规则由所选方案提供**，机制层（`../Progression/run-loop.md`）不绑具体叙事命名——它就是逐幕增难的 `Act 1 / 2 / 3`，支持每 run 从所选方案的叙事幕池（Plan-1 世界池 / Plan-2 水域集）抽取。两方案「每 run 随机抽 3 幕」在机制层本就成立，无需机制层为「固定命名幕」做改动。
-- 敌人 tier 体系（`../Core-Systems/enemy-and-ai.md`）、词条制、五层架构（`../../03-AI-Context/Active-Context/architecture-consensus-v2.md`）同样中性——填谁、填什么量级是叙事自由，机制不要求 Boss 是神祇级，也不预设任何最高档 tier。
+- 敌人 tier 体系（`../Core-Systems/enemy-and-ai.md`）、词条制、五层架构（`../../03-decisions/architecture-consensus-v2.md`）同样中性——填谁、填什么量级是叙事自由，机制不要求 Boss 是神祇级，也不预设任何最高档 tier。
 - 机制真源：`../Progression/run-loop.md`（run 结构 / 门模式）、`../Core-Systems/enemy-and-ai.md`（tier / 词条）、`../Characters/class-system.md`（职业）、`../Core-Systems/battle-calculation.md`（战斗公式）。
+
+## 目录索引
+
+| 文档 | 状态 | 说明 |
+|---|---|---|
+| [Plan-1/](Plan-1/README.md) | 现行 | 子目录：Narrative — 叙事与世界观文档索引 |
+| [Plan-2/](Plan-2/README.md) | 现行 | 子目录：归潮之海 叙事文档索引 |

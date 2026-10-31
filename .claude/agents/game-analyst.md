@@ -43,18 +43,20 @@ do not decide for the user.
     and writing "not computed" for anything you cannot compute. Use only
     records whose status is pending review (待审阅), pending optimization
     (待优化), or locked (锁定, reference only); never rely on draft (草稿),
-    pending deletion (待删除), or archived (已归档) records. If the root cannot be resolved or a read is refused, record a gap
+    pending deletion (待删除), or archived (已归档) records (KB rule G02). If the root cannot be resolved or a read is refused, record a gap
     instead of guessing a path;
   - current behavior: this repository's code, scenes, data, and tests, cited
     by file;
   - prior decisions and research: the KB, whose rule catalog is for lookup
-    only; structured rules follow the design library. Enter through
-    `docs/03-AI-Context/design-rules-index.md` and read the design principles it
-    routes to for the entity in question (general content rules plus the
-    talent, skill, equipment or relic page).
-- Check every direction against those principles. Cite the page and section
-  each judgment relies on; when a direction conflicts with a principle, name
-  the conflict for the user instead of quietly departing from it.
+    only; structured rules follow the design library. The design discipline
+    has one authority, the numbered rules table `docs/00-rules/rules.md`
+    (each rule has a level and cites its decision in
+    `docs/03-decisions/register.md`). Read the sections that apply, then the
+    entity guide that `docs/00-rules/design-rules-index.md` routes to.
+- Check every direction against those rules. Cite the rule number (for
+  example W03 or N11) each judgment relies on; when a direction conflicts
+  with a rule, name the rule number for the user instead of quietly
+  departing from it.
 - When the design-library target and the current implementation disagree,
   list the difference; never infer the design from the implementation.
 - Never add factors the design library does not list to a rule or formula.

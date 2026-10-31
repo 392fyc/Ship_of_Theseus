@@ -201,6 +201,9 @@ func _test_execute(tm: Node, ks: Unit, target: Unit) -> void:
 	ks.stats.dex = 0
 	target.stats.spd = 500
 	hp_before = target.stats.hp
+	# 命中下限是 1%（damage_calculator 的 clampf 下限），压到下限仍有 1% 会命中。
+	# 命中判定用全局 randf()，固定种子让这一掷确定落在未命中，前提不再看运气。
+	seed(20261031)
 	var miss_act: Object = _build(tm, ks, target, Vector2i(6, 3))
 	_check("未命中场景的动作可构建", miss_act != null)
 	if miss_act != null:

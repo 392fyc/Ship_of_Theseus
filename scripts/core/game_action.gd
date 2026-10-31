@@ -18,9 +18,11 @@ static func make_move(unit: Unit, to: Vector2i) -> GameAction:
 	return a
 
 
+## `damage_type` 留空时，由 TacticalManager._build_hostile_action_context 按职业或敌人数据的
+## damage_type 补上（普攻为魔法的单位按魔法伤害结算）。
 static func make_attack(attacker: Unit, target: Unit,
 		skill_id: String = "",
-		damage_type: String = "physical",
+		damage_type: String = "",
 		pure_atk_source: String = "phys") -> GameAction:
 	var a := GameAction.new()
 	a.type = Type.ATTACK

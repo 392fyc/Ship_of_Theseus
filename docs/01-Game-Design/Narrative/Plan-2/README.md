@@ -1,6 +1,6 @@
 # 归潮之海 叙事文档索引
 
-> 本文件夹（Plan-2）管理「归潮之海」世界观的全部叙事设定，与 Plan-1 平行、不覆盖。方案归属由文件夹表达，各文档内不标注方案编号。
+> 本文件夹（Plan-2）管理「归潮之海」世界观的全部叙事设定，与 Plan-1 平行、不覆盖。Plan-1 是主推方案，本文件夹是平行保留的备选：每份文档开头用一行「备选方案」说明标出这一点，现行叙事以 [Plan-1](../Plan-1/README.md) 为准；除这行说明外，标题与正文不再标注方案编号。
 > **归潮之海** = 收缩版世界观：一片人人都在回家的英雄时代之海，挡在归途上的怪物全是没能回成家的人；你的船替到不了家的人回家。量级死守人间层（半神以下、英雄杀得动的对象），元目标是人尺度的归乡，消除 Plan-1「约 DnD 12 级的战斗表现去演宇宙级/创世级故事」的撕裂——撕裂本在叙事量级层，机制骨架（3 幕×8 关、门循环、tier 体系）沿用不动。
 > **状态标注约定**：[已定]=用户裁决锁定 / [提案]=待采纳的可回退设计 / [待定]=留位未定 / [占位]=临时数字或待补；另 [机制事实]=引自机制真源的客观事实（区别于用户设计裁决的 [已定]）。
 > **生成过程**：三波前提面板（19 案，每案四轴对抗裁判评审）选定基座「归潮之海」（2026-07-24 用户裁决）→ 定向深化为六文档骨架（基石 + 五下游，各经独立 critic 盲审，量级纪律 6/6 通过）→ 参照 Plan-1 体例定稿。
@@ -32,4 +32,15 @@
 - 敌人 tier / 词条制 / Boss：`../../Core-Systems/enemy-and-ai.md`
 - 战斗公式 / 属性：`../../Core-Systems/battle-calculation.md`
 - 职业系统：`../../Characters/class-system.md`
-- 五层架构：`../../../03-AI-Context/Active-Context/architecture-consensus-v2.md`
+- 五层架构：`../../../03-decisions/architecture-consensus-v2.md`
+
+## 目录索引
+
+| 文档 | 状态 | 说明 |
+|---|---|---|
+| [crew-and-units.md](crew-and-units.md) | 现行 | 乘员与棋子与执名牌 crew-and-units（备选方案：用户 2026-07-28 裁决 Plan-1 主推，Plan-2 平行保留） |
+| [layers-and-principles.md](layers-and-principles.md) | 现行 | 归潮之海 五层架构映射与设计原则 layers-and-principles（备选方案：用户 2026-07-28 裁决 Plan-1 主推，Plan-2 平行保留） |
+| [legendary-and-enemies.md](legendary-and-enemies.md) | 现行 | 归潮之海 传奇敌人与守门与远方的神（备选方案：用户 2026-07-28 裁决 Plan-1 主推，Plan-2 平行保留） |
+| [mythic-structure-and-acts.md](mythic-structure-and-acts.md) | 现行 | 归潮之海 幕结构与航程与抽幕机理 mythic-structure-and-acts（备选方案：用户 2026-07-28 裁决 Plan-1 主推，Plan-2 平行保留） |
+| [run-loop-mapping.md](run-loop-mapping.md) | 现行 | run-loop 循环的叙事映射 —— 一次航程的循环叙事皮（备选方案：用户 2026-07-28 裁决 Plan-1 主推，Plan-2 平行保留） |
+| [world-premise.md](world-premise.md) | 现行 | 归潮之海 世界基石 world-premise（备选方案：用户 2026-07-28 裁决 Plan-1 主推，Plan-2 平行保留） |

@@ -22,7 +22,7 @@ def test_project_contract_keeps_only_current_conclusions() -> None:
     agents = read_text(ROOT / "AGENTS.md")
     for sentence in [
         "- 现行设计、代码注释、handoff 和任务卡只保存当前有效结论、必要约束、真实未决问题、证据与下一步。",
-        "- 持久化审查以完整命题为单位；历史记录进入 ADR、Research、明确归档区或 Git 历史，并退出默认读取链。",
+        "- 持久化审查以完整命题为单位；KB 只保留现行内容，过时内容在让它过时的 PR 里删除，历史留在 Git、Issue 与 PR，需要引用时用固定提交的永久链接。",
         "- 范围外发现只登记位置、类别和所需权威，不扩展当前任务。",
     ]:
         assert sentence in agents
@@ -181,7 +181,7 @@ def test_routing_and_root_configuration_keep_authorities_distinct() -> None:
     assert "mercury_root" not in routing
     assert ".mercury/memory" not in routing
 
-    consumption = read_text(ROOT / "docs" / "mercury-harness-consumption.md").lower()
+    consumption = read_text(ROOT / "docs" / "02-Development" / "mercury-harness-consumption.md").lower()
     for required in [
         ".mercury/packs/",
         ".mercury/lock.json",

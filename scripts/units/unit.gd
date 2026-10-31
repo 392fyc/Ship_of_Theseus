@@ -57,13 +57,14 @@ var reaction_available: bool = true
 var is_taking_turn: bool = false
 # 护盾（R1.17）：与生命分开的数值，受到伤害时先扣护盾。每场战斗从 0 开始（setup 清零）。
 var shield: int = 0
-# 是否有普通攻击（职业 JSON 的 basic_attack，缺省 true）。设计上没有普通攻击（技能设计要点 §3），
-# 用户 2026-10-28 裁决 S2：先只去掉剑士线，其他职业与敌人在敌人技能 AI 落地前保留。
+# 是否有普通攻击（职业 JSON 的 basic_attack，缺省 true）。设计上没有普通攻击（KB 设计规则总表 S07），
+# 用户 2026-10-28 裁决 S2：先只去掉剑士线，其他职业保留。敌人按用户 2026-10-31 定的技能组：
+# 技能组里的「攻击」就是普攻，没有攻击的敌人（牧师）写 basic_attack = false，AI 与执行层都读这里。
 var has_basic_attack: bool = true
 # 心眼被动条目的技能 id（职业 JSON 的 passive_skill_id）；剑士 myrmidon_xinyan，剑圣 kensei_xinyan。
 var passive_skill_id: String = ""
 # 职业原本的被动（基础〔心眼〕）。被回忆升级后 passive_skill_id 变成升级技能，基础心眼的
-# 剑气与印记属性加成随之失效（升级技能完整替换基础技能，KB 天赋设计要点 §12）。
+# 剑气与印记属性加成随之失效（升级技能完整替换基础技能，KB 设计规则总表 M04）。
 var _base_passive_skill_id: String = ""
 # 〔空想〕期间实际失去的剑气累计，每满一档得一层〔剑痕〕；不足一档的进度在空想结束时清空。
 var _qi_loss_scar_progress: int = 0
@@ -521,12 +522,7 @@ func mark_summoned_in_owner_turn() -> void:
 
 
 func heal(amount: int) -> void:
-	# 敌人词条 af_heal_resist（愈合迟滞）：受治疗量按 incoming_heal_pct 打折。
-	# 无词条单位 _affixes 为空 → final_amount == amount（零影响）。
-	var final_amount: int = amount
-	if not _affixes.is_empty():
-		final_amount = _apply_affix_heal_resist(amount)
-	stats.heal(final_amount)
+	stats.heal(preview_heal(amount))
 	_update_health_bar()
 
 
@@ -693,7 +689,8 @@ func get_effective_priority() -> int:
 
 func get_hit_value(weapon_hit: int = 90) -> int:
 	var effective_dex: int = get_effective_stat("DEX")
-	return weapon_hit + effective_dex * 2
+	# R1.2：攻击者的命中加减在基础命中上计算。命中没有基础值，只累计 stat_key = HIT 的修正（诅咒）。
+	return weapon_hit + effective_dex * 2 + get_effective_stat("HIT")
 
 
 func get_avoid_value(terrain_evade_bonus: int = 0) -> int:
@@ -1669,7 +1666,7 @@ func _apply_xinyan_passive() -> void:
 
 
 ## 基础〔心眼〕是否还在生效：被动没有被回忆升级。升级后（心眼·澄、心眼·梦）不保留基础心眼的
-## 剑气与印记属性加成（〔心眼·梦〕notes 明写；升级技能完整替换基础技能，KB 天赋设计要点 §12）。
+## 剑气与印记属性加成（〔心眼·梦〕notes 明写；升级技能完整替换基础技能，KB 设计规则总表 M04）。
 func has_base_xinyan() -> bool:
 	return passive_skill_id == _base_passive_skill_id
 
@@ -1782,6 +1779,15 @@ func expire_vanguard() -> void:
 
 
 ## af_heal_resist（愈合迟滞）：按 incoming_heal_pct 折算受治疗量。无该词条 → 原样返回。
+## 受到 `amount` 点治疗时实际的治疗量，不改状态；heal 与敌人 AI 的治疗评分共用。
+## 敌人词条 af_heal_resist（愈合迟滞）：受治疗量按 incoming_heal_pct 打折。
+## 无词条单位 _affixes 为空 → 等于 amount（零影响）。
+func preview_heal(amount: int) -> int:
+	if _affixes.is_empty():
+		return amount
+	return _apply_affix_heal_resist(amount)
+
+
 func _apply_affix_heal_resist(amount: int) -> int:
 	for affix: Dictionary in _affixes:
 		if str(affix.get("id", "")) != "af_heal_resist":
