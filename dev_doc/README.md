@@ -19,10 +19,10 @@
 | 城镇建设 | `01-Game-Design/Progression/town-building.md`（现行 KB 中已无此文件） |
 | 数据架构 | [`01-Game-Design/Technical/data-architecture.md`](../docs/01-Game-Design/Technical/data-architecture.md) |
 | 联机 | [`01-Game-Design/Technical/network.md`](../docs/01-Game-Design/Technical/network.md) |
-| 里程碑 | [`02-Development/Milestones/current-milestone.md`](../docs/02-Development/Milestones/current-milestone.md) |
-| 路线图 | [`02-Development/design-roadmap.md`](../docs/02-Development/design-roadmap.md) |
+| 里程碑（已归档） | [`90-archive/task-system-legacy/Milestones/current-milestone.md`](../docs/90-archive/task-system-legacy/Milestones/current-milestone.md) |
+| 路线图（已归档） | [`90-archive/notes-legacy/design-roadmap.md`](../docs/90-archive/notes-legacy/design-roadmap.md) |
 | 游戏设计总纲 | [`01-Game-Design/game-design-doc.md`](../docs/01-Game-Design/game-design-doc.md) |
-| 模块关系 | [`03-AI-Context/module-relations.md`](../docs/03-AI-Context/module-relations.md) |
+| 模块关系（已归档） | [`90-archive/ai-context-legacy/module-relations.md`](../docs/90-archive/ai-context-legacy/module-relations.md) |
 
 KB 在任务工作树的 `docs/` 中随任务修改，流程见 `/sot-kb-write`（禁 PowerShell 写入，BOM 问题）。
 

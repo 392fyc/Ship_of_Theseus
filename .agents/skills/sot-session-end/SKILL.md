@@ -21,7 +21,7 @@ description: "Close a Ship of Theseus Codex session by updating available active
 
 `<memory-root>/projects/<project-bucket>/lanes/<lane>/session-checkpoint.md`
 
-不属于任何 lane 的会话不写 lane checkpoint：任务状态已在 GitHub/Git，结束摘要在回复中给出；用户要求 handoff 时，先请用户指定所属 lane。不写入其他 lane 的目录。checkpoint 由同一 lane 的多个 agent 共享，按 [多 Lane 多 Agent 协作](../../../docs/lane-collaboration.md) 的版本条件写入：把新内容写到临时文件，用 `scripts/codex/sot-memory.ps1 -Action Write -Path lanes/<lane>/session-checkpoint.md -SourceFile <临时文件> -ExpectedSha256 <会话启动读取时记下的哈希>` 一次完成比较、原子替换与登记；被拒绝时文件未改动，重读、合并后重试，不直接覆盖。非主导宿主只记录自己的作业与结论，不改写主导宿主的正式判断。尚未启用 lane 的旧项目才使用 `<memory-root>/projects/<project-bucket>/session-checkpoint.md`。
+不属于任何 lane 的会话不写 lane checkpoint：任务状态已在 GitHub/Git，结束摘要在回复中给出；用户要求 handoff 时，先请用户指定所属 lane。不写入其他 lane 的目录。checkpoint 由同一 lane 的多个 agent 共享，按 [多 Lane 多 Agent 协作](../../../docs/02-Development/lane-collaboration.md) 的版本条件写入：把新内容写到临时文件，用 `scripts/codex/sot-memory.ps1 -Action Write -Path lanes/<lane>/session-checkpoint.md -SourceFile <临时文件> -ExpectedSha256 <会话启动读取时记下的哈希>` 一次完成比较、原子替换与登记；被拒绝时文件未改动，重读、合并后重试，不直接覆盖。非主导宿主只记录自己的作业与结论，不改写主导宿主的正式判断。尚未启用 lane 的旧项目才使用 `<memory-root>/projects/<project-bucket>/session-checkpoint.md`。
 
 若记忆根或索引缺失，报告未保存 checkpoint 并继续结束会话；普通结束流程不得为填补缺失而迁移旧数据。若显式配置指向旧 Mercury bucket（`.mercury/memory`），该根仅可只读，未经用户明确授权不得写入或迁移。
 
@@ -44,4 +44,4 @@ description: "Close a Ship of Theseus Codex session by updating available active
 
 检查游戏仓与设计库主工作区：`git -C <主工作区> status --porcelain`。主工作区不做开发；有未提交改动时，在本 lane 的 checkpoint 中登记路径与疑似归属并报告用户，不替其他 lane 丢弃或提交（`.sot/` 下的活跃记忆与 lane 工作区被忽略，不计入）。
 
-会话结束本身不构成删除工作树的依据。记录实际路径、HEAD、分支、PR/任务状态以及需保留的 dirty、untracked、ignored 内容；检查是否已有集成后的新提交。PR 已合并时，按 [工作树生命周期](../../../docs/worktree-lifecycle.md)「PR 合并后」一节直接清理工作树与本地分支；未合入时按「未合入就废弃」一节列出清单，等用户确认。年龄、无开放 PR 或 PR 已关闭不能单独判定可删除。
+会话结束本身不构成删除工作树的依据。记录实际路径、HEAD、分支、PR/任务状态以及需保留的 dirty、untracked、ignored 内容；检查是否已有集成后的新提交。PR 已合并时，按 [工作树生命周期](../../../docs/02-Development/worktree-lifecycle.md)「PR 合并后」一节直接清理工作树与本地分支；未合入时按「未合入就废弃」一节列出清单，等用户确认。年龄、无开放 PR 或 PR 已关闭不能单独判定可删除。

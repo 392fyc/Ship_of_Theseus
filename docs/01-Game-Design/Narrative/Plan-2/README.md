@@ -32,4 +32,15 @@
 - 敌人 tier / 词条制 / Boss：`../../Core-Systems/enemy-and-ai.md`
 - 战斗公式 / 属性：`../../Core-Systems/battle-calculation.md`
 - 职业系统：`../../Characters/class-system.md`
-- 五层架构：`../../../03-AI-Context/Active-Context/architecture-consensus-v2.md`
+- 五层架构：`../../../03-decisions/architecture-consensus-v2.md`
+
+## 目录索引
+
+| 文档 | 状态 | 说明 |
+|---|---|---|
+| [crew-and-units.md](crew-and-units.md) | 历史 | 乘员与棋子与执名牌 crew-and-units（备选方案（用户 2026-07-28 裁决：Plan-1 主推，Plan-2 存档备选）） |
+| [layers-and-principles.md](layers-and-principles.md) | 历史 | 归潮之海 五层架构映射与设计原则 layers-and-principles（备选方案（用户 2026-07-28 裁决：Plan-1 主推，Plan-2 存档备选）） |
+| [legendary-and-enemies.md](legendary-and-enemies.md) | 历史 | 归潮之海 传奇敌人与守门与远方的神（备选方案（用户 2026-07-28 裁决：Plan-1 主推，Plan-2 存档备选）） |
+| [mythic-structure-and-acts.md](mythic-structure-and-acts.md) | 历史 | 归潮之海 幕结构与航程与抽幕机理 mythic-structure-and-acts（备选方案（用户 2026-07-28 裁决：Plan-1 主推，Plan-2 存档备选）） |
+| [run-loop-mapping.md](run-loop-mapping.md) | 历史 | run-loop 循环的叙事映射 —— 一次航程的循环叙事皮（备选方案（用户 2026-07-28 裁决：Plan-1 主推，Plan-2 存档备选）） |
+| [world-premise.md](world-premise.md) | 历史 | 归潮之海 世界基石 world-premise（备选方案（用户 2026-07-28 裁决：Plan-1 主推，Plan-2 存档备选）） |

@@ -26,9 +26,9 @@
 
 ## 当前权威文件
 
-- `docs/superpowers/specs/2026-08-22-spec-kit-outer-harness-adoption.md`
-- `docs/superpowers/specs/2026-08-22-spec-kit-outer-harness-validation.md`
-- `docs/superpowers/plans/2026-08-22-spec-kit-harness-migration.md`
+- `docs/90-archive/superpowers/specs/spec-kit-outer-harness-adoption-2026-08-22.md`
+- `docs/90-archive/superpowers/specs/spec-kit-outer-harness-validation-2026-08-22.md`
+- `docs/90-archive/superpowers/plans/spec-kit-harness-migration-2026-08-22.md`
 
 本文只保留历史决策说明，不再作为实现规格。
 

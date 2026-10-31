@@ -19,7 +19,7 @@ description: "Initialize a Ship of Theseus Codex session from optional active me
 
 ## 2. 确定 lane
 
-本机以多 lane、多 agent 方式运行，协议见 [多 Lane 多 Agent 协作](../../../docs/lane-collaboration.md)。
+本机以多 lane、多 agent 方式运行，协议见 [多 Lane 多 Agent 协作](../../../docs/02-Development/lane-collaboration.md)。
 
 1. 若解析出的根目录和 `index.jsonl` 存在，进入项目 bucket（固定为 `Ship_of_Theseus`，不随仓库路径变化），再读取 bucket 下的 `LANES.md`；记忆根或 bucket 缺失时按第 3 节末尾的缺失规则处理。
 2. bucket 下没有 `LANES.md` 的旧项目尚未启用 lane：读取 bucket 根的 `session-checkpoint.md`，在启动摘要中说明，跳过本节其余步骤。
@@ -60,4 +60,4 @@ Loaded authorities: <Git/designlib/game/KB selections>
 
 ## 工作区定位
 
-日常入口是游戏主仓；从任务工作树启动时，先确认当前 HEAD/分支与任务。游戏主仓由 `SOT_SHIP_ROOT`、再由 `[roots].ship_root` 解析；其他仓与任务组也按环境变量优先、本地 roots 回退。禁止从任务工作树父目录猜跨仓位置。需要查看已有任务树时使用游戏根的 `scripts/codex/sot-worktree.ps1 -Action List`；布局与收尾规则见 [工作树生命周期](../../../docs/worktree-lifecycle.md)。
+日常入口是游戏主仓；从任务工作树启动时，先确认当前 HEAD/分支与任务。游戏主仓由 `SOT_SHIP_ROOT`、再由 `[roots].ship_root` 解析；其他仓与任务组也按环境变量优先、本地 roots 回退。禁止从任务工作树父目录猜跨仓位置。需要查看已有任务树时使用游戏根的 `scripts/codex/sot-worktree.ps1 -Action List`；布局与收尾规则见 [工作树生命周期](../../../docs/02-Development/worktree-lifecycle.md)。

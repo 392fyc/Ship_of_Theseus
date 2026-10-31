@@ -133,7 +133,7 @@
 
 ## 8. 与下游文档的接口
 
-- 五层机制真源在 03-AI-Context/Active-Context/architecture-consensus-v2.md 与 Progression/run-loop.md;本文只贴叙事皮,数值与 reset 语义以真源为准。[机制事实]
+- 五层机制真源在 03-decisions/architecture-consensus-v2.md 与 Progression/run-loop.md;本文只贴叙事皮,数值与 reset 语义以真源为准。[机制事实]
 - 杂兵神话身份、词条命名的可读性执行,以及每位守关的「认执」登记,落 legendary-and-enemies 与机制轮词条池;本文只立「可读性预算」与「主人的执就是打法」两条方向。[提案]
 - 委托失败规则、执名牌 permadeath、船长定位的乘员侧细节,落 crew-and-units;本文只引其调性后果与映射。[提案]
 - 乘员命名制度不在本文范围:保持 [待定](2026-07-24 用户裁决推迟再议);前两波提案池集体倾向匿名代号制,与 Plan-1 英杰名裁决(梅林 / 罗兰 / 阿塔兰忒 / 贞德)存在方向冲突,待基座定型后另议,登记归 crew-and-units。[待定]
