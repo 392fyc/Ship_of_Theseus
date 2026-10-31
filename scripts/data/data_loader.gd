@@ -18,7 +18,7 @@ var states:    Dictionary = {}
 # 设计库 State 注册表中「持有型」状态的引擎镜像（有层数、有持续时间，如〔架势〕〔见切〕）。
 # 与上面的条件状态分开存放：条件状态即时求值、不持有；持有型状态由 Unit.held_states 管理。
 var held_states: Dictionary = {}
-# 回忆天赋（技能升级关系），与普通天赋分开存放：两者不是同一种设计对象（KB 天赋设计要点 §12）。
+# 回忆天赋（技能升级关系），与普通天赋分开存放：两者不是同一种设计对象（KB 设计规则总表 M 节）。
 var memories: Dictionary = {}
 # 通用规则里的数值参数（例如 R1.17 护盾衰减），一条规则一个文件。
 var rules: Dictionary = {}

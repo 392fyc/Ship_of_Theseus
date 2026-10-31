@@ -108,7 +108,7 @@ Hit Rate = weapon_hit + DEX×2 - (SPD×2 + terrain_evade)  (clamp 1~100，R1.2)
 Crit Rate = weapon_crit + DEX/2 - LCK  (1.5x; pure damage does not participate in crit - R1.3)
 ```
 
-### 伤害类型双轴 - ADR-004
+### 伤害类型双轴(设计库 R1.1)
 
 **属性类型**(决定防御计算):
 

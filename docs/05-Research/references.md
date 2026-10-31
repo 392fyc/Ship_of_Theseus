@@ -8,7 +8,7 @@
 
 - SoT 没有通用的追击系统，也没有反击系统。KB 现行规则写明任何单位不因受到攻击而进行反击，见 [战斗结算](../01-Game-Design/Core-Systems/battle-calculation.md) 的反击系统一节和 [职业系统](../01-Game-Design/Characters/class-system.md) 的反击系统一节；`01-Game-Design` 下检索不到追击规则。
 - 因此火纹的追击、先手、后手、追击排他不能直接套用。几份较早的笔记仍按存在追击系统来写，引用其中的火纹结论时必须先过滤，详见火纹一节。
-- SoT 没有普通攻击（见 [技能设计要点](../00-rules/skill-design-principles.md)），无冷却的基础攻击技能承担持续出手。几篇笔记围绕“普攻权重”展开，借用其结论时对应到无冷却的基础技能。
+- SoT 没有普通攻击（见 [设计规则总表](../00-rules/rules.md) S07），无冷却的基础攻击技能承担持续出手。几篇笔记围绕“普攻权重”展开，借用其结论时对应到无冷却的基础技能。
 - 时间线靠前的调研有被后续笔记取代的情况。`S67-FINAL-SYNTHESIS.md` 的 frontmatter 声明取代：B1.2、B2.1 的错误类比部分；R2、R3、R2-v2、R3-v2（基于“永久节点图”假设）；整份 S67-SYNTHESIS（前版基于推测，未读 KB）。B3.2 的 frontmatter 声明取代 B3。引用这些文件的结论前先看取代说明。
 
 ## 用户常驻参考
@@ -25,7 +25,7 @@
 - [D3 人物成长](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/architecture-stage2-2026-05-10/D3-character-growth.md)：专题。比较 FE Three Houses 加性模型、FE Engage 加性加上限、XCOM 式固定步长，选定简化的 Three Houses 加性模型。
 - [属性系统 v1 决策](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/03-decisions/adr-2026-02-27-attribute-system-v1.md)：以 Fire Emblem Three Houses 和 Engage 为参照系，方案 A 为 FE 精简。
 - [属性系统推演任务](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/task-system-legacy/Tasks/attr-system-deduction-task.md)：第 2 部分为火纹对比，列出本项目与 FE 的差异，并给出 FE8 初始属性范围。
-- [混合伤害公式决策](../03-decisions/adr-2026-08-03-hybrid-damage-formula.md)：说明 ADR-005 把基础层改成 FE 式加性伤害。
+- [混合伤害公式决策](../03-decisions/adr-2026-08-03-hybrid-damage-formula.md)：说明 [ADR-005（已从 KB 删除，固定提交原文）](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/03-decisions/adr-2026-02-27-attribute-system-v1.md) 把基础层改成 FE 式加性伤害。
 - [B1.1 玩家接受度](sot-viability-2026-04-22/B1.1-player-acceptance.md)：模式 A 和模式 D 讨论火纹 Heroes 去 RNG 与主线含 RNG 的玩家分裂。
 - [法师天赋验证 研究员输出](mage-talent-validation-2026-05-10/01-researcher-output.md)：风花雪月的转职分支树拓扑；Casual Mode 作为永久死亡的留存修复案例。
 - [法师天赋验证 评审输出](mage-talent-validation-2026-05-10/03-critic-output.md)：CCR-2 以风花雪月的不可逆转职技能引发的焦虑，类比 SoT 的两次不可逆选择。
@@ -42,7 +42,7 @@
 - 不可逆转职技能在社区里持续产生“是否选错了”的焦虑，SoT 需提供足够的 UI 提示。出处：mage-talent-validation 03 的 CCR-2。
 - 战技类消耗：武器耐久作为战技的资源约束。出处：tactical-rpg-skill-systems-survey。
 - 被动叠加：Engage 的纹章被动在普攻时触发，让普攻成为效果触发器。出处：attack-action-weight-analysis 第 2.4 节。
-- 属性联动：用户点名火纹 if 剑圣的〔流星〕、Engage 戒指的再移动，重点是与属性联动，而不是单纯百分比加伤害。出处：[天赋设计要点](../00-rules/talent-design-principles.md) §1。
+- 属性联动：用户点名火纹 if 剑圣的〔流星〕、Engage 戒指的再移动，重点是与属性联动，而不是单纯百分比加伤害。规则见 [设计规则总表](../00-rules/rules.md) T22，示例见 [天赋设计指引](../00-rules/talent-design-principles.md) §1。
 
 **与 SoT 规则的差异**
 

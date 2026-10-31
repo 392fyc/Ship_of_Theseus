@@ -1,8 +1,8 @@
 # 03-decisions
 
-决策登记：ADR 与架构共识。每份决策记录背景、裁决和理由；现行规则引用这里的决策，不复述理由。
+决策登记：现行设计决策的登记表，以及 ADR 与架构共识。现行规则引用这里的决策，不复述理由。
 
-按主题找对应 ADR。已被推翻或过时的决策直接删除，原文在 Git 历史与固定提交的永久链接里。
+先读 [决策登记表](register.md)：它一行一条列出现行的设计决策（编号 `D-001` 起），规则总表的「来源」列引用这些编号，每行指向能找到原话或裁决全文的来源。架构与实现层面的决策再按主题找下表中的 ADR。已被推翻或过时的决策直接删除，原文在 Git 历史与固定提交的永久链接里。
 
 上级索引：[KB 入口](../README.md)
 
@@ -10,6 +10,7 @@
 
 | 文档 | 状态 | 说明 |
 |---|---|---|
+| [register.md](register.md) | 现行 | 决策登记表：现行设计决策，一行一条 |
 | [adr-2026-02-26-buff-debuff-structure.md](adr-2026-02-26-buff-debuff-structure.md) | 现行 | ADR-002: Buff/Debuff Data Structure |
 | [adr-2026-02-26-grid-coordinate-system.md](adr-2026-02-26-grid-coordinate-system.md) | 现行 | ADR-001 - Grid Coordinate System |
 | [adr-2026-02-26-unit-cell-reference.md](adr-2026-02-26-unit-cell-reference.md) | 现行 | ADR-003 - Unit and Cell Reference Relationship |

@@ -26,9 +26,9 @@
 
 ## 当前权威文件
 
-- `https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/superpowers/specs/spec-kit-outer-harness-adoption-2026-08-22.md`
-- `https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/superpowers/specs/spec-kit-outer-harness-validation-2026-08-22.md`
-- `https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/superpowers/plans/spec-kit-harness-migration-2026-08-22.md`
+- [spec-kit-outer-harness-adoption-2026-08-22.md](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/superpowers/specs/spec-kit-outer-harness-adoption-2026-08-22.md)
+- [spec-kit-outer-harness-validation-2026-08-22.md](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/superpowers/specs/spec-kit-outer-harness-validation-2026-08-22.md)
+- [spec-kit-harness-migration-2026-08-22.md](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/superpowers/plans/spec-kit-harness-migration-2026-08-22.md)
 
 本文只保留历史决策说明，不再作为实现规格。
 
