@@ -145,7 +145,7 @@
       ".codex/agents/sot-kb.toml": "13d5b2c9c1e4b07143f92c9cea6296abb388d62d953cfdb7e3e905fcc3e37dac"
     },
     "sources": {
-      ".agents/skills/sot-design-present/SKILL.md": "0765ec9135af3b7bd658466f436222e261b07b4e2ef3370be7a0a4b1b2f85440",
+      ".agents/skills/sot-design-present/SKILL.md": "62bd1fe44ff194fad2b47afa1fe776f1cc3a2a002b07a2349fe0dfa2e2813e1b",
       ".agents/skills/sot-designlib/SKILL.md": "2b055f039e292f2baa108f09996457ce9e6fc11e71fa3a0e50dc72605f167275",
       ".agents/skills/sot-kb-write/SKILL.md": "6269358588c4ee66799fa1acee2c8bf0a4e5e4ecdc10fe2babdd8ef69a103bf5",
       ".agents/skills/sot-session-end/SKILL.md": "0e4b8bdb15af1ec2f600afa5b219b5f6ca362710279761bf734c3aba5c4dc556",
