@@ -61,9 +61,9 @@ The full lane contract is `.mercury/packs/lanes/docs/mercury-lane-contract.md`; 
 
 ## Knowledge base
 
-- The project's knowledge base follows `.mercury/packs/kb/docs/kb-conventions.md`: one entry page leading to the current rules, the progress page and the decision register; a README index with a status for every document in every directory; history in the archive.
-- Before editing, read the KB documents that govern the task, starting from the entry page. When a change alters a rule, a decision or progress, update the current document and mark what it replaces (status `superseded` with its replacement) in the same pull request.
-- Every pull request names its Issue and has a line starting with `KB:` that lists the KB documents it updated, or says `KB: no impact` and why. `guard.ps1 pre-merge` refuses a pull request without both. Check the KB with `python -B .mercury/packs/kb/scripts/kb_check.py <kb-root>`.
+- The project's knowledge base follows `.mercury/packs/kb/docs/kb-conventions.md`: one entry page leading to the current rules, the progress page and the decision register; a README index with a status (`current` or `draft`) for every document in every directory; no archive.
+- Before editing, read the KB documents that govern the task, starting from the entry page. When a change alters a rule, a decision or progress, update the current document and delete what it makes outdated or wrong, with every link to it, in the same pull request. Do not keep outdated text marked as superseded: search finds it as if it were current. Git history, Issues and pull requests keep the record; cite a fixed-commit permanent link when old text must stay citable.
+- Every pull request names its Issue and has a line starting with `KB:` that lists the KB documents it updated or deleted, or says `KB: no impact` and why. `guard.ps1 pre-merge` refuses a pull request without both. Check the KB with `python -B .mercury/packs/kb/scripts/kb_check.py <kb-root>`.
 
 ## Linked repositories
 
@@ -94,7 +94,7 @@ Declared in `linked_repos` in `.mercury/config.json`; Mercury renders this secti
 ## 产物清晰度
 
 - 现行设计、代码注释、handoff 和任务卡只保存当前有效结论、必要约束、真实未决问题、证据与下一步。
-- 持久化审查以完整命题为单位；历史记录进入 ADR、Research、明确归档区或 Git 历史，并退出默认读取链。
+- 持久化审查以完整命题为单位；KB 只保留现行内容，过时内容在让它过时的 PR 里删除，历史留在 Git、Issue 与 PR，需要引用时用固定提交的永久链接。
 - 范围外发现只登记位置、类别和所需权威，不扩展当前任务。
 
 ## 用户问题与前提

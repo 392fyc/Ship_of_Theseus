@@ -453,4 +453,4 @@ EnemyTemplate 扩展（详见 06-enemy-and-ai；2026-07-03 词条制）:
 - [天赋树](../Characters/talent-tree.md) -- 天赋节点与转职触发条件 (pending)
 - [敌人与 AI](../Core-Systems/enemy-and-ai.md) -- 战斗难度与 Boss 设计
 - [职业系统](../Characters/class-system.md) -- 角色成长与构筑
-- [开发里程碑](../../90-archive/task-system-legacy/Milestones/current-milestone.md) -- Phase 5 实现运行循环
+- [开发里程碑](https://github.com/392fyc/Ship_of_Theseus/blob/30e3c5e5d57e9a74f01d19ca948c869512f66a0c/docs/90-archive/task-system-legacy/Milestones/current-milestone.md) -- Phase 5 实现运行循环
