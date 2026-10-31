@@ -5,7 +5,8 @@
     "git-safe",
     "deploy",
     "plan",
-    "lanes"
+    "lanes",
+    "kb"
   ],
   "linked_repos": [
     {
